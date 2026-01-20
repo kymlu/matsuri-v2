@@ -1,6 +1,6 @@
 import { Toggle, ToggleGroup } from "@base-ui/react";
 import React from "react";
-import { strEquals } from "../../lib/helpers/globalHelpers";
+import { strEquals } from "../../lib/helpers/globalHelper";
 
 export interface ToggleProps {
   label: string,

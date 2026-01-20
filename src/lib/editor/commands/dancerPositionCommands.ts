@@ -36,7 +36,35 @@ export function moveDancerPositions(
         dancerPositions: updateDancerPositions(
           section.formation.dancerPositions,
           dancerIds,
-          dp => ({ ...dp, x, y })
+          dp => ({ ...dp, x: x, y: y })
+        )
+      }
+    }
+  })
+  return { ...state, sections: newSections }
+}
+
+/**
+ * Move one or more dancers in a section
+ */
+export function moveDancerPositionsDelta(
+  state: Choreo,
+  sectionId: string,
+  dancerIds: string[],
+  dx: number,
+  dy: number
+): Choreo {
+  console.log("delta")
+  const newSections = state.sections.map(section => {
+    if (section.id !== sectionId) return section
+    return {
+      ...section,
+      formation: {
+        ...section.formation,
+        dancerPositions: updateDancerPositions(
+          section.formation.dancerPositions,
+          dancerIds,
+          dp => ({ ...dp, x: dp.x + dx, y: dp.y + dy })
         )
       }
     }

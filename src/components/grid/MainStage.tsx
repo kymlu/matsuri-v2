@@ -1,8 +1,40 @@
 import { Stage } from "react-konva";
-import GridLayer from "./GridLayer";
-import { useState, useCallback, useEffect, useRef } from "react";
+import GridLayer from "./layers/GridLayer";
+import { useState, useCallback, useEffect, useRef, Dispatch, SetStateAction } from "react";
+import { Choreo, StageGeometry } from "../../models/choreo";
+import FormationLayer from "./layers/FormationLayer";
+import { ChoreoSection } from "../../models/choreoSection";
+import { DancerPosition } from "../../models/dancer";
 
-export default function MainStage() {
+export default function MainStage(props: {
+  canEdit: boolean,
+  currentChoreo: Choreo,
+  currentSection: ChoreoSection,
+  updateDancerPosition?: (x: number, y: number, dancerId: string) => void,
+  updateDancerPositions?: (dx: number, dy: number) => void,
+  selectedIds: string[],
+  setSelectedIds: Dispatch<SetStateAction<string[]>>,
+}) {
+  const [dancerPositions, setDancerPositions] = useState<DancerPosition[]>([]);
+  const [stageGeometry, setStageGeometry] = useState<StageGeometry>();
+
+  useEffect(() => {
+    var newGeometry = props.currentChoreo.stageGeometry;
+    if (stageGeometry !== undefined &&
+      stageGeometry.stageWidth === newGeometry.stageWidth &&
+      stageGeometry.stageLength === newGeometry.stageLength &&
+      stageGeometry.margin.topMargin === newGeometry.margin.topMargin &&
+      stageGeometry.margin.bottomMargin === newGeometry.margin.bottomMargin &&
+      stageGeometry.margin.leftMargin === newGeometry.margin.leftMargin &&
+      stageGeometry.margin.rightMargin === newGeometry.margin.rightMargin &&
+      stageGeometry.yAxis === newGeometry.yAxis) return;
+    setStageGeometry(newGeometry);
+  }, [props.currentChoreo]);
+  
+  useEffect(() => {
+    setDancerPositions(Object.values(props.currentSection.formation.dancerPositions ?? []));
+  }, [props.currentSection.formation.dancerPositions]);
+  
   const containerRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
 
@@ -151,7 +183,15 @@ export default function MainStage() {
   };
   
   return <div ref={containerRef} className="flex items-center justify-center w-full h-full overflow-scroll">
-    <Stage
+    {stageGeometry && <Stage
+      onMouseDown={(e) => {
+        const clickedOnEmpty =
+          e.target === e.target.getStage();
+
+        if (clickedOnEmpty) {
+          props.setSelectedIds([]);
+        }
+      }}
       width={size.width}
       height={size.height}
       draggable
@@ -163,16 +203,17 @@ export default function MainStage() {
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
       onDragEnd={handleDragEnd}>
-      <GridLayer
-        stageType="stage"
-        length={10}
-        width={14}
-        margin={{
-          leftMargin: 3,
-          topMargin: 3,
-          rightMargin: 3,
-          bottomMargin: 3
-        }}/>
-    </Stage>
+      <GridLayer stageGeometry={stageGeometry}/>
+      <FormationLayer
+        canEdit={props.canEdit}
+        geometry={stageGeometry}
+        dancers={props.currentChoreo.dancers}
+        dancerPositions={dancerPositions}
+        updateDancerPosition={props.updateDancerPosition}
+        updateDancerPositions={props.updateDancerPositions}
+        selectedIds={props.selectedIds}
+        setSelectedIds={props.setSelectedIds}
+        />
+    </Stage>}
   </div>
 }

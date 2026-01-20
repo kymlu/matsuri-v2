@@ -3,9 +3,12 @@ export interface BaseModel {
   name: string,
 }
 
-export interface BasePosition {
-  sectionId: string,
+export interface Coordinates {
   x: number,
   y: number,
+}
+
+export interface BasePosition extends Coordinates{
+  sectionId: string,
   rotation: number,
 }

@@ -1,7 +1,7 @@
 import React, { useImperativeHandle } from "react";
 import classNames from "classnames";
 import { ICON } from "../../lib/consts/consts";
-import { isNullOrUndefinedOrBlank } from "../../lib/helpers/globalHelpers";
+import { isNullOrUndefinedOrBlank } from "../../lib/helpers/globalHelper";
 import { FieldWithLabel } from "./Label";
 
 export type TextInputProps = {

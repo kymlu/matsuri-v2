@@ -1,5 +1,5 @@
 import React, { useImperativeHandle } from "react";
-import { isNullOrUndefinedOrBlank } from "../../lib/helpers/globalHelpers";
+import { isNullOrUndefinedOrBlank } from "../../lib/helpers/globalHelper";
 import classNames from "classnames";
 import { FieldWithLabel } from "./Label";
 

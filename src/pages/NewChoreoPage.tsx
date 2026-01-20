@@ -3,8 +3,11 @@ import NumberInput from "../components/inputs/NumberInput";
 import { ActionButton } from "../components/basic/Button";
 import TextInput from "../components/inputs/TextInput";
 import CustomSelect from "../components/inputs/CustomSelect";
-import { isNullOrUndefinedOrBlank } from "../lib/helpers/globalHelpers";
+import { isNullOrUndefinedOrBlank } from "../lib/helpers/globalHelper";
 import { Choreo, StageType } from "../models/choreo";
+import { Dancer, DancerPosition } from "../models/dancer";
+import { colorPalette } from "../lib/consts/colors";
+import { MAX_STAGE_DIMENSION, MIN_STAGE_DIMENSION } from "../lib/consts/consts";
 
 interface FormationForm {
   name: string;
@@ -38,28 +41,49 @@ export function NewChoreoPage(props: {
 
   const handleSubmit = () => {
     console.log("Submitting form:", form);
+    var sectionId = crypto.randomUUID();
+    var dancers: Record<string, Dancer> = {};
+    var dancerPositions: Record<string, DancerPosition> = {};
+    for (var i = 0; i < form.dancerCount; i++) {
+      var id = crypto.randomUUID();
+      dancers[id] = {
+        id: id,
+        name: i.toString(),
+      }
+      dancerPositions[id] = {
+        sectionId: sectionId,
+        dancerId: id,
+        x: i % form.stageWidth,
+        y: 0,
+        color: colorPalette.primary,
+        rotation: 0,
+      }
+    }
     var choreo: Choreo = {
       id: crypto.randomUUID(),
       name: form.name,
       event: form.eventName,
       stageType: form.stageType,
-      width: form.stageWidth,
-      length: form.stageLength,
-      margins: {
-        topMargin: 2,
-        bottomMargin: 2,
-        leftMargin: 2,
-        rightMargin: 2
+      stageGeometry: {
+        stageLength: form.stageLength,
+        stageWidth: form.stageWidth,
+        margin: {
+          topMargin: 2,
+          bottomMargin: 2,
+          leftMargin: 2,
+          rightMargin: 2
+        },
+        yAxis: form.stageType === "parade" ? "bottom-up" : "top-down",
       },
-      dancers: {},
+      dancers: dancers,
       props: {},
       sections: [{
-        id: crypto.randomUUID(),
+        id: sectionId,
         name: "隊列1",
         order: 1,
         formation: {
           dancerActions: [],
-          dancerPositions: {},
+          dancerPositions: dancerPositions,
           propPositions: {}
         }}],
     };
@@ -115,8 +139,8 @@ export function NewChoreoPage(props: {
               <NumberInput
                 name="幅"
                 default={form.stageWidth}
-                min={3}
-                max={500}
+                min={MIN_STAGE_DIMENSION}
+                max={MAX_STAGE_DIMENSION}
                 step={1}
                 buttonStep={1}
                 onChange={(newValue) => {handleChange("stageWidth", Number(newValue))}}
@@ -125,8 +149,8 @@ export function NewChoreoPage(props: {
               <NumberInput
                 name="縦"
                 default={form.stageLength}
-                min={3}
-                max={500}
+                min={MIN_STAGE_DIMENSION}
+                max={MAX_STAGE_DIMENSION}
                 step={1}
                 buttonStep={1}
                 onChange={(newValue) => {handleChange("stageLength", Number(newValue))}}

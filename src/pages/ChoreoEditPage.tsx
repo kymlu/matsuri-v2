@@ -8,14 +8,17 @@ import { Choreo } from "../models/choreo";
 import { EditHistory } from "../models/history";
 import { addSection, editSectionNote, removeSection, renameSection } from "../lib/editor/commands/sectionCommands";
 import { ChoreoSection } from "../models/choreoSection";
-import { strEquals } from "../lib/helpers/globalHelpers";
+import { strEquals } from "../lib/helpers/globalHelper";
 import MainStage from "../components/grid/MainStage";
+import { moveDancerPositions, moveDancerPositionsDelta } from "../lib/editor/commands/dancerPositionCommands";
+import ObjectToolbar from "../components/editor/ObjectToolbar";
 
 export default function ChoreoEditPage(props: {
   goToHomePage: () => void,
   currentChoreo: Choreo,
 }) {
   const [currentSection, setCurrentSection] = useState<ChoreoSection>(props.currentChoreo.sections[0]);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   const [history, dispatch] = useReducer(historyReducer,
     {
@@ -29,10 +32,49 @@ export default function ChoreoEditPage(props: {
     
     if (newSection === undefined) {
       setCurrentSection(history.presentState.state.sections[0]);
-    } else if (!strEquals(newSection.id, currentSection.id) || !strEquals(newSection.name, currentSection.name)) {
+    } else {
       setCurrentSection(newSection);
     }
   }, [history.presentState]);
+
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      const isMac = navigator.platform.toUpperCase().includes("MAC");
+      const ctrlOrCmd = isMac ? e.metaKey : e.ctrlKey;
+
+      if (!ctrlOrCmd) return;
+
+      // Ignore typing in inputs / textareas
+      const target = e.target as HTMLElement;
+      if (
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable
+      ) {
+        return;
+      }
+
+      if (e.key === "z") {
+        e.preventDefault();
+        // UNDO
+        dispatch({ type: "UNDO" });
+      }
+
+      if (e.key === "y") {
+        e.preventDefault();
+        // REDO
+        dispatch({ type: "REDO" });
+      }
+
+      if (e.key === "s") {
+        e.preventDefault();
+        // SAVE
+      }
+    }
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
 
   return (
     <div className='flex flex-col justify-between w-full h-screen max-h-screen'>
@@ -40,9 +82,37 @@ export default function ChoreoEditPage(props: {
         <Header
           returnHome={props.goToHomePage}
           openSettings={() => {console.log("TODO: implement");}}
-          currentSection={currentSection}/>
-        <MainStage/>
+          currentChoreo={props.currentChoreo}/>
+        <MainStage
+          canEdit
+          currentChoreo={props.currentChoreo}
+          currentSection={currentSection}
+          updateDancerPosition={(x, y, dancerId) => {
+            dispatch({
+              type: "SET_STATE",
+              newState: moveDancerPositions(history.presentState.state, currentSection.id, [dancerId], x, y),
+              currentSectionId: currentSection.id,
+              commit: true})
+          }}
+          updateDancerPositions={(dx, dy) => {
+            dispatch({
+              type: "SET_STATE",
+              newState: moveDancerPositionsDelta(history.presentState.state, currentSection.id, selectedIds, dx, dy),
+              currentSectionId: currentSection.id,
+              commit: true})
+          }}
+          selectedIds={selectedIds}
+          setSelectedIds={setSelectedIds}
+          />
         <div className="absolute bottom-0 z-10">
+          <ObjectToolbar
+            openArrangeMenu={() => {}}
+            isArrangeVisible={true}
+            openColorMenu={() => {}}
+            isColorVisible={true}
+            swapPositions={() => {}}
+            isSwapVisible={true}
+          />
           <UndoRedoToolbar
             undo={() => {dispatch({type: "UNDO"})}}
             redo={() => {dispatch({type: "REDO"})}}
@@ -53,15 +123,20 @@ export default function ChoreoEditPage(props: {
             sections={history.presentState.state.sections}
             showAddButton
             onClickAddButton={(id: string, newName: string) => {
+              setSelectedIds([]);
               dispatch({
                 type: "SET_STATE",
                 newState: addSection(history.presentState.state, id, newName),
                 currentSectionId: id,
-                commit: true})}}
+                commit: true
+              });
+            }}
             onClickSection={(section) => {
               setCurrentSection(section);
+              setSelectedIds([]);
             }}
             onRename={(section, name) => {
+              setSelectedIds([]);
               dispatch({
                 type: "SET_STATE",
                 newState: renameSection(history.presentState.state, section.id, name),
@@ -70,6 +145,7 @@ export default function ChoreoEditPage(props: {
               });
             }}
             onAddNoteToSection={(section, note) => {
+              setSelectedIds([]);
               dispatch({
                 type: "SET_STATE",
                 newState: editSectionNote(history.presentState.state, section.id, note),
@@ -78,6 +154,7 @@ export default function ChoreoEditPage(props: {
               });
             }}
             onDeleteSection={(section) => {
+              setSelectedIds([]);
               dispatch({
                 type: "SET_STATE",
                 newState: removeSection(history.presentState.state, section.id),

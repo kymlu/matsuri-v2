@@ -17,9 +17,17 @@ function App() {
     event: "Test Event",
     stageType: "stage",
     sections: [{id: "Test Section Id", name: "Section Name", formation: {}, order: 1} as ChoreoSection], 
-    length: 10,
-    width: 10,
-    margins: {topMargin: 3, bottomMargin: 3, leftMargin: 5, rightMargin: 5},
+    stageGeometry: {
+      stageWidth: 10,
+      stageLength: 10,
+      margin: {
+        topMargin: 3,
+        bottomMargin: 3,
+        leftMargin: 5,
+        rightMargin: 5
+      },
+      yAxis: "top-down",
+    },
     dancers: {},
     props: {},
   } as Choreo);

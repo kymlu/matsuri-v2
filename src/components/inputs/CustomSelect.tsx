@@ -1,7 +1,7 @@
 import { Select } from "@base-ui/react";
 import React, { useState } from "react";
 import { useImperativeHandle } from "react";
-import { strEquals } from "../../lib/helpers/globalHelpers";
+import { strEquals } from "../../lib/helpers/globalHelper";
 import { ICON } from "../../lib/consts/consts";
 import { FieldWithLabel } from "./Label";
 

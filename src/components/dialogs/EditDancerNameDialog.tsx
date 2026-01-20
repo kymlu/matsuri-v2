@@ -1,26 +1,26 @@
 import { useEffect, useState } from "react";
-import { ChoreoSection } from "../../models/choreoSection";
 import TextInput from "../inputs/TextInput";
 import { isNullOrUndefinedOrBlank } from "../../lib/helpers/globalHelper";
 import BaseEditDialog from "./BaseEditDialog";
+import { Dancer } from "../../models/dancer";
 
-export default function EditSectionNameDialog(props: {
-  section?: ChoreoSection,
+export default function EditDancerNameDialog(props: {
+  dancer?: Dancer,
   onSubmit: (name: string) => void,
 }) {
   const [name, setName] = useState("");
 
   useEffect(() => {
-    setName(props.section?.name ?? "");
-  }, [props.section]);
+    setName(props.dancer?.name ?? "");
+  }, [props.dancer]);
 
   return <BaseEditDialog
-    title="名前変更"
+    title="踊り子名前変更"
     onSubmit={() => { props.onSubmit(name) }}
     isActionButtonDisabled={isNullOrUndefinedOrBlank(name)}
     >
     <TextInput
-      default={props.section?.name ?? ""}
+      default={props.dancer?.name ?? ""}
       onContentChange={ (newName) => { setName(newName) }}/>
   </BaseEditDialog>
 }

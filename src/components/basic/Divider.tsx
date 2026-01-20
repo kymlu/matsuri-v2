@@ -19,3 +19,10 @@ export default function Divider(props: DividerProps) {
     </div>
   )
 }
+export function VerticalDivider() {
+  return (
+    <div
+      className={"mx-2 border-l h-full border-gray-300"}
+    />
+  );
+}

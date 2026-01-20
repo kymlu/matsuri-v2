@@ -14,7 +14,9 @@ export const colorPalette = {
   browns: ["#5C4033", "#8B5E3C", "#D2B48C"],
   greys: ["#333333", "#888888", "#DDDDDD"],
 
-  palegrey: "#D4D4D4",
+  offWhite: "#F1F1F1",
+  lightGrey: "#C3C3C3",
+  paleGrey: "#D4D4D4",
   primary: "#AB1010",
 
   // Helper: return all colors flattened

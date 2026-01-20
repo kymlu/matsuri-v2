@@ -8,10 +8,16 @@ export interface ChoreoSection extends BaseModel {
   head?: number,
   note?: string,
   formation: Formation,
+  duration?: number, // seconds
 }
 
 export interface Formation {
   dancerPositions: Record<string, DancerPosition>,
   dancerActions: DancerAction[],
   propPositions: Record<string, PropPosition>,
+}
+
+export interface SelectedObjectStats {
+  dancerCount: number,
+  propCount: number,
 }

@@ -1,9 +1,9 @@
 import Header from "../components/editor/Header"
 import PositionHint from "../components/editor/PositionHint";
 import FormationSelectionToolbar from "../components/editor/FormationSelectionToolbar";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Choreo } from "../models/choreo";
-import { ChoreoSection } from "../models/choreoSection";
+import { ChoreoSection, SelectedObjectStats } from "../models/choreoSection";
 import MainStage from "../components/grid/MainStage";
 
 export default function ChoreoEditPage(props: {
@@ -11,24 +11,53 @@ export default function ChoreoEditPage(props: {
   currentChoreo: Choreo,
 }) {
   const [currentSection, setCurrentSection] = useState<ChoreoSection>(props.currentChoreo.sections[0]);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [selectedObjectStats, setSelectedObjectStats] = useState<SelectedObjectStats>({dancerCount: 0, propCount: 0});
+
+  useEffect(() => {
+    setSelectedObjectStats({
+      dancerCount: selectedIds.filter(id => props.currentChoreo.dancers[id]).length,
+      propCount: selectedIds.filter(id => props.currentChoreo.props[id]).length,
+    });
+  }, [selectedIds]);
 
   return (
     <div className='flex flex-col justify-between w-full h-screen max-h-screen'>
       <Header
         returnHome={props.goToHomePage}
         openSettings={() => {console.log("TODO: implement");}}
-        currentSection={currentSection}/>
+        currentChoreo={props.currentChoreo}/>
       <div className="flex-1">
-        <MainStage/>
+        <MainStage
+          canEdit={false}
+          currentChoreo={props.currentChoreo}
+          currentSection={currentSection}
+          selectedIds={selectedIds}
+          setSelectedIds={setSelectedIds}
+        />
+        <div className="absolute bottom-0 z-10">
+          {
+            selectedIds.length > 0 &&
+            selectedObjectStats.dancerCount === 1 &&
+            selectedObjectStats.propCount === 0 &&
+            props.currentChoreo.dancers[selectedIds[0]] !== undefined &&
+            <PositionHint
+              dancer={props.currentChoreo.dancers[selectedIds[0]]}
+              position={currentSection.formation.dancerPositions[selectedIds[0]]}
+              nextSectionName="TODO"
+              nextPosition={{dancerId: selectedIds[0], x: 5, y: 5, rotation: 0, sectionId: crypto.randomUUID(), color: ""}}
+              geometry={props.currentChoreo.stageGeometry}
+            />
+          }
+          <FormationSelectionToolbar
+            currentSectionId={currentSection.id}
+            sections={props.currentChoreo.sections}
+            onClickSection={(section) => {
+              setCurrentSection(section);
+            }}
+          />
+        </div>
       </div>
-      <FormationSelectionToolbar
-        currentSectionId={currentSection.id}
-        sections={props.currentChoreo.sections}
-        onClickSection={(section) => {
-          setCurrentSection(section);
-        }}
-      />
-      <PositionHint/>
     </div>
   )
 }

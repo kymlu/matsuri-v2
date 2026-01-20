@@ -1,5 +1,5 @@
 import { Dialog } from "@base-ui/react";
-import { strEquals } from "../../lib/helpers/globalHelpers";
+import { strEquals } from "../../lib/helpers/globalHelper";
 import { ChoreoSection } from "../../models/choreoSection";
 import Button from "../basic/Button";
 import CustomMenu from "../inputs/CustomMenu";

@@ -1,4 +1,11 @@
 export const LAST_UPDATED = "更新 1月11日 00:20"
+export const METER_PX = 25;
+
+export const MIN_STAGE_DIMENSION = 3;
+export const MAX_STAGE_DIMENSION = 500;
+
+export const MIN_STAGE_MARGIN = 2;
+export const MAX_STAGE_MARGIN = 20;
 
 export const ICON = {
   addBlack: "icons/add_black.svg",
