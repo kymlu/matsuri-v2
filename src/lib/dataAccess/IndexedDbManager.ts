@@ -19,8 +19,8 @@ export class IndexedDBManager {
       const newVersion = event.newVersion;
 
       console.log(`Upgrading database from ${oldVersion} to ${newVersion}`);
-      if (!db.objectStoreNames.contains("choreo")) { // todo: additional indexes?
-        db.createObjectStore("festival", { keyPath: "id", autoIncrement: true });
+      if (!db.objectStoreNames.contains("choreo")) {
+        db.createObjectStore("choreo", { keyPath: "id", autoIncrement: true });
       }
     };
 

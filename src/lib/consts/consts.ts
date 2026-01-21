@@ -7,6 +7,10 @@ export const MAX_STAGE_DIMENSION = 500;
 export const MIN_STAGE_MARGIN = 2;
 export const MAX_STAGE_MARGIN = 20;
 
+export enum CUSTOM_EVENT {
+  "dbInitialized" = "dbInitialized",
+}
+
 export const ICON = {
   addBlack: "icons/add_black.svg",
   alignHorizontalCenterBlack: "icons/align_horizontal_center_black.svg",
@@ -84,4 +88,4 @@ export const ICON = {
   zoomOutBlack: "icons/zoom_out_black.svg",
 }
 
-export const DB_NAME = "MatsuriDB";
+export const DB_NAME = "MatsuriTairetsuDb";

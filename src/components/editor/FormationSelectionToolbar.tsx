@@ -132,7 +132,7 @@ export default function FormationSelectionToolbar(props: {
         ({ payload }) => (
         <EditSectionNoteDialog
           section={payload as ChoreoSection}
-          onSubmit={(note) => {
+          onSubmit={(note: string) => {
             props.onAddNoteToSection?.(payload as ChoreoSection, note);
             addNoteDialog.close();
             setRenameDialogOpen(false);
