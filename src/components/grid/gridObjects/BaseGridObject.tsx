@@ -49,7 +49,7 @@ export default function BaseGridObject(props: BaseGridObjectProps) {
       rotation={props.rotation ?? 0}
       x={x}
       y={y}
-      onMouseDown={(e) => {
+      onPointerDown={(e) => {
         dragStartRef.current = {
           x: e.target.x(),
           y: e.target.y(),
@@ -70,7 +70,7 @@ export default function BaseGridObject(props: BaseGridObjectProps) {
           isDraggingRef.current = true;
         }
       }}
-      onMouseUp={(e) => {
+      onPointerUp={(e) => {
         if (!isDraggingRef.current) {
           props.onClick();
         }

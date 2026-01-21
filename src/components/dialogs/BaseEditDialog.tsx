@@ -6,15 +6,15 @@ export default function BaseEditDialog(props: {
   title: string,
   isActionButtonDisabled?: boolean,
   actionButtonText?: string,
+  full?: boolean,
   onSubmit: () => void,
   children: React.ReactNode,
 }) {
   return <CustomDialog
     hasX
-    title={props.title}>
-      <>
-        {props.children}
-      </>
+    full={props.full}
+    title={props.title}
+    footer={
       <div className="flex w-full gap-2 mt-4">
         <Dialog.Close className="w-full">
           <ActionButton
@@ -35,5 +35,10 @@ export default function BaseEditDialog(props: {
           {props.actionButtonText ?? "保存"}
         </ActionButton>
       </div>
+    }>
+      <>
+        {props.children}
+      </>
+      
     </CustomDialog>
 }

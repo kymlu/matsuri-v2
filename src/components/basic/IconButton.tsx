@@ -4,7 +4,7 @@ export default function IconButton (props: {
   src: string,
   alt: string,
   label?: string,
-  onClick: () => void,
+  onClick?: () => void,
   noBorder?: boolean,
   disabled?: boolean,
   size?: "sm" | "md" | "lg",
@@ -44,7 +44,7 @@ export default function IconButton (props: {
         className={buttonClasses}
         onClick={() => {
           if(props.disabled !== true) {
-            props.onClick();
+            props.onClick?.();
           }
         }}>
         <img

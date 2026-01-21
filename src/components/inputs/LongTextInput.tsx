@@ -57,7 +57,7 @@ export default function LongTextInput(props: TextInputProps) {
     },);
 
   return (
-    <FieldWithLabel label={props.label}>
+    <FieldWithLabel full label={props.label}>
       <div className={wrapperClasses}>
         <textarea
           disabled={props.disabled}

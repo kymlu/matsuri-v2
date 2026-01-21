@@ -6,12 +6,15 @@ import { useEffect, useState } from "react";
 
 interface GridLayerProps {
   stageGeometry: StageGeometry,
+  gridSize?: number,
 }
 
 export default function GridLayer({
   stageGeometry,
+  gridSize,
 }: GridLayerProps) {
   const [elements, setElements] = useState<any[]>([]);
+  const gridSizePx = gridSize ?? METER_PX;
 
   useEffect(() => {
     const width: number = stageGeometry.stageWidth;
@@ -19,17 +22,17 @@ export default function GridLayer({
     const margins: StageMargins = stageGeometry.margin;
     const yAxis: YAxisDirection = stageGeometry.yAxis;
 
-    const stageWidthPx = width * METER_PX;
-    const stageHeightPx = length * METER_PX;
+    const stageWidthPx = width * gridSizePx;
+    const stageHeightPx = length * gridSizePx;
     
     const totalWidthPx =
-      (margins.leftMargin + width + margins.rightMargin) * METER_PX;
+      (margins.leftMargin + width + margins.rightMargin) * gridSizePx;
     const totalHeightPx =
-      (margins.topMargin + length + margins.bottomMargin) * METER_PX;
+      (margins.topMargin + length + margins.bottomMargin) * gridSizePx;
     
-    const stageLeftPx = margins.leftMargin * METER_PX;
+    const stageLeftPx = margins.leftMargin * gridSizePx;
     const stageRightPx = stageLeftPx + stageWidthPx;
-    const stageTopPx = margins.topMargin * METER_PX;
+    const stageTopPx = margins.topMargin * gridSizePx;
     const stageBottomPx = stageTopPx + stageHeightPx;
     
     const centerX = stageLeftPx + stageWidthPx / 2;
@@ -40,7 +43,7 @@ export default function GridLayer({
     const isOddTotal = totalMeters % 2 === 1;
     
     const gridOffsetMeters = isOddTotal ? 0.5 : 0;
-    const gridOffsetPx = gridOffsetMeters * METER_PX;
+    const gridOffsetPx = gridOffsetMeters * gridSizePx;
     
     const elements = [];
 
@@ -51,6 +54,8 @@ export default function GridLayer({
         width={totalWidthPx}
         height={totalHeightPx}
         fill={colorPalette.offWhite}
+        x={0}
+        y={0}
         />
     );
 
@@ -58,17 +63,17 @@ export default function GridLayer({
     elements.push(
       <Rect
         key={"bg-white"}
-        x={margins.leftMargin * METER_PX}
-        y={margins.topMargin * METER_PX}
-        width={width * METER_PX}
-        height={length * METER_PX}
+        x={margins.leftMargin * gridSizePx}
+        y={margins.topMargin * gridSizePx}
+        width={width * gridSizePx}
+        height={length * gridSizePx}
         fill={"white"}
         />
     );
     
     // Horizontal grid lines + right labels
     for (let m = 0; m <= margins.topMargin + length + margins.bottomMargin; m++) {
-      const y = m * METER_PX;
+      const y = m * gridSizePx;
       const isMajor = m % 2 === 0;
     
       elements.push(
@@ -87,8 +92,8 @@ export default function GridLayer({
       if (y >= stageTopPx && y <= stageBottomPx) {
         const meterFromTop =
           yAxis === "top-down" ? 
-          (y - stageTopPx) / METER_PX :
-          (stageBottomPx - y) / METER_PX;
+          (y - stageTopPx) / gridSizePx :
+          (stageBottomPx - y) / gridSizePx;
     
         elements.push(
           <Text
@@ -105,12 +110,12 @@ export default function GridLayer({
     }
     
     // Vertical grid lines (across full area)
-    for (let m = 0; m <= margins.leftMargin + width + margins.rightMargin; m++) {
-      const x = m * METER_PX + gridOffsetPx;
+    for (let m = 0; m <= margins.leftMargin + width + margins.rightMargin - gridOffsetMeters; m++) {
+      const x = m * gridSizePx + gridOffsetPx;
     
       const distFromCenter = Math.abs(
         x - centerX
-      ) / METER_PX;
+      ) / gridSizePx;
     
       const isMajor = Math.round(distFromCenter) % 2 === 0;
     
@@ -160,7 +165,7 @@ export default function GridLayer({
     );
     
     for (let m = 0; m <= margins.leftMargin + width + margins.rightMargin; m++) {
-      const x = m * METER_PX + gridOffsetPx;
+      const x = m * gridSizePx + gridOffsetPx;
     
       const isCenter = x === centerX;
       // Top numbering relative to center (stage only)
@@ -170,11 +175,11 @@ export default function GridLayer({
         !isCenter
       ) {
         const meterFromCenter =
-        Math.abs(x - centerX) / METER_PX;
+        Math.abs(x - centerX) / gridSizePx;
 
         if (meterFromCenter % 2 !== 0) continue;
     
-        const radius = METER_PX*0.4;
+        const radius = gridSizePx*0.4;
         const cx = x;
         const cy = stageTopPx - 20;
     

@@ -7,18 +7,23 @@ import { colorPalette } from "../../lib/consts/colors";
 export default function Toolbar () {
   const [isArrangeVisible, setIsArrangeVisible] = useState<boolean>(false);
   const [isColorVisible, setIsColorVisible] = useState<boolean>(false);
-  const isSubmenuOpen = isArrangeVisible || isColorVisible;
+  const [isDancerManagerVisible, setIsDancerManagerVisible] = useState<boolean>(false);
+  const [isActionManagerVisible, setIsActionManagerVisible] = useState<boolean>(false);
+  const [isPropManagerVisible, setIsPropManagerVisible] = useState<boolean>(false);
+
+  const isSubmenuOpen = isArrangeVisible || isColorVisible || isDancerManagerVisible || isActionManagerVisible || isPropManagerVisible;
+  
   return <div className="flex items-center w-screen gap-2 px-2 py-4 overflow-scroll border-t-2 border-primary">
     {
       !isSubmenuOpen &&
       <>
-        <IconButton src={ICON.addBlack} label="踊り子管理" alt="Add" onClick={()=>{}}/>
+        <IconButton src={ICON.addBlack} label="踊り子管理" alt="Add" onClick={()=>{setIsDancerManagerVisible(true)}}/>
         <IconButton src={ICON.chevronBackwardBlack} label="前へ" alt="Add" onClick={()=>{}}/>
         <IconButton src={ICON.chevronForwardBlack} label="次へ" alt="Add" onClick={()=>{}}/>
         <IconButton src={ICON.addBlack} label="整理" alt="Add" onClick={()=>{setIsArrangeVisible(true)}}/>
         <IconButton src={ICON.colorsBlack} label="色" alt="Add" onClick={()=>{setIsColorVisible(true)}}/>
-        <IconButton src={ICON.categoryBlack} label="カウント" alt="Add" onClick={()=>{}}/>
-        <IconButton src={ICON.addBlack} label="踊り子管理" alt="Add" onClick={()=>{}}/>
+        <IconButton src={ICON.categoryBlack} label="カウント" alt="Add" onClick={()=>{setIsActionManagerVisible(true)}}/>
+        <IconButton src={ICON.flagBlack} label="道具" alt="Props" onClick={()=>{setIsPropManagerVisible(true)}}/>
       </>
     }
     {
@@ -27,6 +32,9 @@ export default function Toolbar () {
         <IconButton src={ICON.chevronBackwardBlack} label="戻る" alt="Close submenu" onClick={()=>{
           setIsArrangeVisible(false);
           setIsColorVisible(false);
+          setIsActionManagerVisible(false);
+          setIsDancerManagerVisible(false);
+          setIsPropManagerVisible(false);
         }}/>
         <VerticalDivider/>
         {
@@ -52,6 +60,30 @@ export default function Toolbar () {
                 <button style={{"backgroundColor": color}} className="rounded-full size-8 min-h-8 min-w-8"/>
               )
             }
+          </>
+        }
+        {
+          isDancerManagerVisible &&
+          <>
+            <IconButton src={ICON.verticalDistributeBlack} label="Add dancer etc" alt="Distribute Vertically" onClick={() => {}} />
+            <IconButton src={ICON.verticalDistributeBlack} label="縦均" alt="Distribute Vertically" onClick={() => {}} />
+            <IconButton src={ICON.verticalDistributeBlack} label="縦均" alt="Distribute Vertically" onClick={() => {}} />
+          </>
+        }
+        {
+          isPropManagerVisible &&
+          <>
+            <IconButton src={ICON.verticalDistributeBlack} label="Add prop etc" alt="Distribute Vertically" onClick={() => {}} />
+            <IconButton src={ICON.verticalDistributeBlack} label="縦均" alt="Distribute Vertically" onClick={() => {}} />
+            <IconButton src={ICON.verticalDistributeBlack} label="縦均" alt="Distribute Vertically" onClick={() => {}} />
+          </>
+        }
+        {
+          isActionManagerVisible &&
+          <>
+            <IconButton src={ICON.verticalDistributeBlack} label="Actions etc" alt="Distribute Vertically" onClick={() => {}} />
+            <IconButton src={ICON.verticalDistributeBlack} label="縦均" alt="Distribute Vertically" onClick={() => {}} />
+            <IconButton src={ICON.verticalDistributeBlack} label="縦均" alt="Distribute Vertically" onClick={() => {}} />
           </>
         }
       </>

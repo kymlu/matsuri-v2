@@ -7,11 +7,16 @@ import { historyReducer } from "../lib/editor/historyReducer";
 import { Choreo } from "../models/choreo";
 import { EditHistory } from "../models/history";
 import { addSection, editSectionNote, removeSection, renameSection } from "../lib/editor/commands/sectionCommands";
-import { ChoreoSection } from "../models/choreoSection";
+import { ChoreoSection, SelectedObjectStats } from "../models/choreoSection";
 import { strEquals } from "../lib/helpers/globalHelper";
 import MainStage from "../components/grid/MainStage";
 import { moveDancerPositions, moveDancerPositionsDelta } from "../lib/editor/commands/dancerPositionCommands";
 import ObjectToolbar from "../components/editor/ObjectToolbar";
+import { Dialog } from "@base-ui/react";
+import EditChoreoSizeDialog from "../components/dialogs/EditChoreoSizeDialog";
+import { exportToMtr } from "../lib/helpers/exportHelper";
+
+const resizeDialog = Dialog.createHandle<ChoreoSection>();
 
 export default function ChoreoEditPage(props: {
   goToHomePage: () => void,
@@ -19,7 +24,15 @@ export default function ChoreoEditPage(props: {
 }) {
   const [currentSection, setCurrentSection] = useState<ChoreoSection>(props.currentChoreo.sections[0]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [selectedObjectStats, setSelectedObjectStats] = useState<SelectedObjectStats>({dancerCount: 0, propCount: 0});
 
+  useEffect(() => {
+    setSelectedObjectStats({
+      dancerCount: selectedIds.filter(id => props.currentChoreo.dancers[id]).length,
+      propCount: selectedIds.filter(id => props.currentChoreo.props[id]).length,
+    });
+  }, [selectedIds]);
+  
   const [history, dispatch] = useReducer(historyReducer,
     {
       undoStack: [],
@@ -76,16 +89,32 @@ export default function ChoreoEditPage(props: {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
+  // dialogs
+  const [resizeDialogOpen, setResizeDialogOpen] = useState(false);
+  
+  const handleResizeDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
+    setResizeDialogOpen(isOpen);
+  };
+
   return (
     <div className='flex flex-col justify-between w-full h-screen max-h-screen'>
       <div className="relative flex-1">
         <Header
           returnHome={props.goToHomePage}
-          openSettings={() => {console.log("TODO: implement");}}
-          currentChoreo={props.currentChoreo}/>
+          hasSidebar
+          currentChoreo={props.currentChoreo}
+          onSave={() => {console.log("TODO: implement save")}}
+          editName={() => {console.log("TODO: implement")}}
+          manageSections={() => {console.log("TODO: implement Manage Sections")}}
+          editSize={() => {setResizeDialogOpen(true);}}
+          export={() => {
+            console.log("TODO: implement choice of pdf or mtr");
+            exportToMtr(history.presentState.state);
+          }}
+          />
         <MainStage
           canEdit
-          currentChoreo={props.currentChoreo}
+          currentChoreo={history.presentState.state}
           currentSection={currentSection}
           updateDancerPosition={(x, y, dancerId) => {
             dispatch({
@@ -106,12 +135,14 @@ export default function ChoreoEditPage(props: {
           />
         <div className="absolute bottom-0 z-10">
           <ObjectToolbar
-            openArrangeMenu={() => {}}
-            isArrangeVisible={true}
-            openColorMenu={() => {}}
-            isColorVisible={true}
-            swapPositions={() => {}}
-            isSwapVisible={true}
+            openArrangeMenu={() => {console.log("TODO")}}
+            isArrangeVisible={(selectedObjectStats.dancerCount + selectedObjectStats.propCount) > 1}
+            openColorMenu={() => {console.log("TODO")}}
+            isColorVisible={selectedObjectStats.dancerCount > 0 && selectedObjectStats.propCount === 0}
+            swapPositions={() => {console.log("TODO")}}
+            isSwapVisible={selectedObjectStats.dancerCount === 2 && selectedObjectStats.propCount === 0}
+            openRenameMenu={() => {console.log("TODO")}}
+            isRenameVisible={selectedObjectStats.dancerCount === 1 && selectedObjectStats.propCount === 0}
           />
           <UndoRedoToolbar
             undo={() => {dispatch({type: "UNDO"})}}
@@ -166,6 +197,18 @@ export default function ChoreoEditPage(props: {
         </div>
       </div>
       <Toolbar/>
+      <Dialog.Root
+        handle={resizeDialog}
+        open={resizeDialogOpen}
+        onOpenChange={handleResizeDialogOpen}>
+        <EditChoreoSizeDialog
+          currentChoreo={history.presentState.state}
+          onSave={() => {
+            console.log("TODO: implement save");
+            resizeDialog.close();
+            setResizeDialogOpen(false);
+          }}/>
+      </Dialog.Root>
     </div>
   )
 }

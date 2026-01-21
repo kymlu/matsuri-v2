@@ -6,11 +6,12 @@ export default function Label(props: {text: string, htmlFor: string}) {
 
 export function FieldWithLabel(props: {
   label?: string,
+  full?: boolean
   children: React.ReactNode
 }) {
   var id = React.useId();
 
-  return <div className="w-full h-full">
+  return <div className={props.full ? "w-full h-full" : ""}>
     {
       props.label &&
       <Label htmlFor={id} text={props.label}/>

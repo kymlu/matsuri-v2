@@ -25,8 +25,9 @@ export default function ChoreoEditPage(props: {
     <div className='flex flex-col justify-between w-full h-screen max-h-screen'>
       <Header
         returnHome={props.goToHomePage}
-        openSettings={() => {console.log("TODO: implement");}}
-        currentChoreo={props.currentChoreo}/>
+        currentChoreo={props.currentChoreo}
+        onDownload={() => {console.log("TODO: implement download")}}
+        />
       <div className="flex-1">
         <MainStage
           canEdit={false}

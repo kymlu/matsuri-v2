@@ -8,6 +8,8 @@ export default function ObjectToolbar (props: {
   isArrangeVisible: boolean,
   openColorMenu: () => void,
   isColorVisible: boolean,
+  openRenameMenu: () => void
+  isRenameVisible: boolean,
 }) {
   return <div className="flex flex-row gap-2 p-2">
 
@@ -30,6 +32,15 @@ export default function ObjectToolbar (props: {
       />
     }
     {
+      props.isRenameVisible &&
+      <IconButton
+        src={ICON.textFieldsAltBlack}
+        alt="Color"
+        size="sm"
+        onClick={props.openRenameMenu}
+        />
+    }
+    {
       props.isColorVisible &&
       <IconButton
         src={ICON.colorsBlack}
@@ -37,6 +48,6 @@ export default function ObjectToolbar (props: {
         size="sm"
         onClick={props.openColorMenu}
         />
-      }
+    }
   </div>
 }

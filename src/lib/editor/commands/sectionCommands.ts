@@ -40,3 +40,7 @@ export function editSectionNote(state: Choreo, sectionId: string, newNote: strin
   )
   return { ...state, sections: newSections }
 }
+
+export function reorderSections() {
+
+}
