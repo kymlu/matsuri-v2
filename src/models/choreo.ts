@@ -1,31 +1,38 @@
-import { BaseModel } from "./base";
-import { ChoreoSection } from "./choreoSection";
-import { Dancer } from "./dancer";
-import { Prop } from "./prop";
+import { BaseModelSchema } from "./base";
+import { ChoreoSectionSchema } from "./choreoSection";
+import { DancerSchema } from "./dancer";
+import { PropSchema } from "./prop";
+import * as z from "zod";
 
-export interface Choreo extends BaseModel {
-  event: string,
-  stageType: StageType,
-  stageGeometry: StageGeometry,
-  sections: ChoreoSection[],
-  dancers: Record<string, Dancer>,
-  props: Record<string, Prop>,
-}
 
-export type StageType = "stage" | "parade";
+export const StageTypeSchema = z.enum(["stage", "parade"]);
+export type StageType = z.infer<typeof StageTypeSchema>;
 
-export type StageGeometry = {
-  stageWidth: number;   // meters
-  stageLength: number;  // meters
-  margin: StageMargins;
-  yAxis: YAxisDirection;
-};
+export const YAxisDirectionSchema = z.enum(["top-down", "bottom-up"]);
+export type YAxisDirection = z.infer<typeof YAxisDirectionSchema>;
 
-export type YAxisDirection = "top-down" | "bottom-up";
+export const StageMarginsSchema = z.object({
+  topMargin: z.number(),
+  leftMargin: z.number(),
+  rightMargin: z.number(),
+  bottomMargin: z.number(),
+});
+export type StageMargins = z.infer<typeof StageMarginsSchema>;
 
-export interface StageMargins {
-  topMargin: number,
-  leftMargin: number,
-  rightMargin: number,
-  bottomMargin: number,
-}
+export const StageGeometrySchema = z.object({
+  stageWidth: z.number(),
+  stageLength: z.number(),
+  margin: StageMarginsSchema,
+  yAxis: YAxisDirectionSchema,
+});
+export type StageGeometry = z.infer<typeof StageGeometrySchema>;
+
+export const ChoreoSchema = BaseModelSchema.extend({
+  event: z.string(),
+  stageType: StageTypeSchema,
+  stageGeometry: StageGeometrySchema,
+  sections: z.array(ChoreoSectionSchema),
+  dancers: z.record(z.string().nonempty(), DancerSchema),
+  props: z.record(z.string().nonempty(), PropSchema),
+});
+export type Choreo = z.infer<typeof ChoreoSchema>;

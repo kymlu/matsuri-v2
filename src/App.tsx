@@ -11,34 +11,25 @@ type Mode = "home" | "form" | "edit" | "view";
 
 function App() {
   const [mode, setMode] = useState<Mode>("home");
-  const [currentChoreo, setCurrentChoreo] = useState<Choreo>({
-    name: "Test Name",
-    id: "Test Id",
-    event: "Test Event",
-    stageType: "stage",
-    sections: [{id: "Test Section Id", name: "Section Name", formation: {}, order: 1} as ChoreoSection], 
-    stageGeometry: {
-      stageWidth: 10,
-      stageLength: 10,
-      margin: {
-        topMargin: 3,
-        bottomMargin: 3,
-        leftMargin: 5,
-        rightMargin: 5
-      },
-      yAxis: "top-down",
-    },
-    dancers: {},
-    props: {},
-  } as Choreo);
+  const [currentChoreo, setCurrentChoreo] = useState<Choreo | undefined>();
 
   return (
     <div>
       {mode === "home" && (
         <HomePage
           goToNewChoreoPage={() => setMode("form")}
-          goToEditPage={() => setMode("edit")}
-          goToViewPage={() => setMode("view")}
+          goToEditPage={(choreo: Choreo) => {
+            setCurrentChoreo(choreo);
+            setMode("edit");
+          }}
+          goToViewPage={(choreo: Choreo) => {
+            setCurrentChoreo(choreo);
+            setMode("view");
+          }}
+          onUploadSuccess={(choreo: Choreo) => {
+            setCurrentChoreo(choreo);
+            setMode("edit");
+          }}
         />
       )}
       {mode === "form" && (
@@ -52,13 +43,13 @@ function App() {
       )}
       {mode === "edit" && (
         <ChoreoEditPage
-          currentChoreo={currentChoreo}
+          currentChoreo={currentChoreo!!}
           goToHomePage={() => setMode("home")}
         />
       )}
       {mode === "view" && (
         <ChoreoViewPage
-          currentChoreo={currentChoreo}
+          currentChoreo={currentChoreo!!}
           goToHomePage={() => setMode("home")}
         />
       )}

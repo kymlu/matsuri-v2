@@ -1,14 +1,22 @@
-export interface BaseModel {
-  id: string,
-  name: string,
-}
+import * as z from "zod";
 
-export interface Coordinates {
-  x: number,
-  y: number,
-}
+export const BaseModelSchema = z.object({
+  id: z.string().nonempty(),
+  name: z.string().nonempty(),
+});
 
-export interface BasePosition extends Coordinates{
-  sectionId: string,
-  rotation: number,
-}
+export type BaseModel = z.infer<typeof BaseModelSchema>;
+
+export const CoordinatesSchema = z.object({
+  x: z.number(),
+  y: z.number(),
+});
+
+export type Coordinates = z.infer<typeof CoordinatesSchema>;
+
+export const BasePositionSchema = CoordinatesSchema.extend({
+  sectionId: z.string().nonempty(),
+  rotation: z.int(),
+});
+
+export type BasePosition = z.infer<typeof BasePositionSchema>;

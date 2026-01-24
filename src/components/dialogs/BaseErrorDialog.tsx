@@ -2,17 +2,13 @@ import CustomDialog from "../basic/CustomDialog";
 import { ActionButton } from "../basic/Button";
 import { Dialog } from "@base-ui/react";
 
-export default function BaseEditDialog(props: {
+export default function BaseErrorDialog(props: {
   title: string,
-  isActionButtonDisabled?: boolean,
   actionButtonText?: string,
-  full?: boolean,
-  onSubmit: () => void,
   children: React.ReactNode,
 }) {
   return <CustomDialog
     hasX
-    full={props.full}
     title={props.title}
     footer={
       <div className="flex w-full gap-2 mt-4">
@@ -21,18 +17,10 @@ export default function BaseEditDialog(props: {
             asDiv
             full
             compact
-            >
-            キャンセル
+            primary>
+            {props.actionButtonText ?? "保存"}
           </ActionButton>
         </Dialog.Close>
-        <ActionButton
-          onClick={() => {props.onSubmit()}}
-          disabled={props.isActionButtonDisabled}
-          full
-          compact
-          primary>
-          {props.actionButtonText ?? "保存"}
-        </ActionButton>
       </div>
     }>
       <>

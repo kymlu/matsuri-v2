@@ -9,12 +9,12 @@ import { useEffect, useState } from "react"
 import { getAllChoreos } from "../lib/dataAccess/DataController"
 import { Choreo } from "../models/choreo"
 import { groupByKey, strCompare } from "../lib/helpers/globalHelper"
-import { DBProvider } from "../lib/dataAccess/DBProvider"
 
 export default function HomePage(props: {
   goToNewChoreoPage: () => void,
-  goToEditPage: () => void,
-  goToViewPage: () => void,
+  goToEditPage: (choreo: Choreo) => void,
+  goToViewPage: (choreo: Choreo) => void,
+  onUploadSuccess: (choreo: Choreo) => void,
 }) {
   const [savedChoreos, setSavedChoreos] = useState<Record<string, Choreo[]>>({});
 
@@ -70,7 +70,11 @@ export default function HomePage(props: {
           console.log(event.target.files);
           if (event.target.files) {
             var file = event.target.files?.[0];
-            readUploadedFile(file);
+            readUploadedFile(
+              file,
+              (choreo: Choreo) => {props.onUploadSuccess(choreo);},
+              () => {}
+            );
           }
         }}/>
     </div>
@@ -80,8 +84,8 @@ export default function HomePage(props: {
 function EventSection(props: {
   eventName: string,
   choreos: Choreo[],
-  goToViewPage: () => void,
-  goToEditPage: () => void,
+  goToViewPage: (choreo: Choreo) => void,
+  goToEditPage: (choreo: Choreo) => void,
 }) {
   return <div>
     <div className='flex flex-row items-end gap-2'>
@@ -98,13 +102,13 @@ function EventSection(props: {
             </Dialog.Trigger>
             <CustomDialog hasX title={choreo.name}>
               <div className="flex flex-col gap-2">
-                <ActionButton full onClick={props.goToViewPage}>
+                <ActionButton full onClick={() => { props.goToViewPage(choreo); }}>
                   <div className="flex flex-row items-center justify-center gap-2">
                     <Icon src={ICON.visibility} alt="view"/>
                     View
                   </div>
                 </ActionButton>
-                <ActionButton full onClick={props.goToEditPage}>
+                <ActionButton full onClick={() => { props.goToEditPage(choreo); }}>
                   <div className="flex flex-row items-center justify-center gap-2">
                     <Icon src={ICON.edit} alt="edit"/>
                     Edit
