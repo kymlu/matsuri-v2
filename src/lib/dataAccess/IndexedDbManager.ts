@@ -26,6 +26,7 @@ export class IndexedDBManager {
 
   return new Promise<void>((resolve, reject) => {
     request.onsuccess = () => {
+      console.log("Successfully initialized db")
       this.db = request.result;
       resolve();
     };

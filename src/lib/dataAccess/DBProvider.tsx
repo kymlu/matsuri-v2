@@ -1,22 +1,22 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import { IndexedDBManager } from './IndexedDbManager';
-import { CUSTOM_EVENT } from '../consts/consts';
 
 const DBContext = createContext({ dbReady: false });
 
 export const indexedDbManager: IndexedDBManager = new IndexedDBManager();
 
-export const DBProvider = ({ children }: any) => {
+export const DBProvider = ({ children }: { children: ReactNode }) => {
   const [dbReady, setDbReady] = useState(false);
-
+  const initializedRef = React.useRef(false);
+  
   useEffect(() => {
+    if (initializedRef.current) return;
+    initializedRef.current = true;
     const init = async () => {
       await indexedDbManager.init();
-    };
-    window.addEventListener(CUSTOM_EVENT.dbInitialized, (e) => {
       console.log("DB is ready");
       setDbReady(true);
-    })
+    };
     init();
   }, []);
 

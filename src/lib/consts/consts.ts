@@ -8,7 +8,6 @@ export const MIN_STAGE_MARGIN = 2;
 export const MAX_STAGE_MARGIN = 20;
 
 export enum CUSTOM_EVENT {
-  "dbInitialized" = "dbInitialized",
 }
 
 export const ICON = {

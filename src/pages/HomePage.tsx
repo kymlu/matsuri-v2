@@ -5,18 +5,35 @@ import { ICON, LAST_UPDATED } from "../lib/consts/consts"
 import { ActionButton } from "../components/basic/Button"
 import Icon from "../components/basic/Icon"
 import { readUploadedFile } from "../lib/helpers/uploadHelper"
+import { useEffect, useState } from "react"
+import { getAllChoreos } from "../lib/dataAccess/DataController"
+import { Choreo } from "../models/choreo"
+import { groupByKey, strCompare } from "../lib/helpers/globalHelper"
+import { DBProvider } from "../lib/dataAccess/DBProvider"
 
 export default function HomePage(props: {
   goToNewChoreoPage: () => void,
   goToEditPage: () => void,
   goToViewPage: () => void,
 }) {
+  const [savedChoreos, setSavedChoreos] = useState<Record<string, Choreo[]>>({});
+
   const triggerUpload = () => {
     const uploadFileElement = document.getElementById("uploadFileInput");
     if (uploadFileElement){
       uploadFileElement.click();
     }
   }
+
+  useEffect(() => {
+    getAllChoreos().then((choreos) => {
+      setSavedChoreos(
+        groupByKey(
+          choreos.sort((a, b) => strCompare<Choreo>(a, b, "event")), "event"
+        )
+      );
+    });
+  }, []);
 
   return (
     <div className='flex flex-col w-full max-w-md gap-2 mx-auto my-10'>
@@ -33,49 +50,18 @@ export default function HomePage(props: {
           }}>Upload a formation</ActionButton>
         </div>
         {
-          ["festival1", "festival2", "festival3"].map((event) => 
-            <div key={event}>
-              <div className='flex flex-row items-end gap-2'>
-                <h2 className='text-xl font-bold text-primary'>{event}</h2>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                {
-                  ["ステージ１", "ステージ２", "パレード"].map((choreo) =>
-                    <Dialog.Root key={choreo}>
-                      <Dialog.Trigger>
-                        <div className="p-2 border-2 rounded-md border-primary lg:hover:bg-gray-100">
-                          {choreo}
-                        </div>
-                      </Dialog.Trigger>
-                      <CustomDialog hasX title={choreo}>
-                        <div className="flex flex-col gap-2">
-                          <ActionButton full onClick={props.goToViewPage}>
-                            <div className="flex flex-row items-center justify-center gap-2">
-                              <Icon src={ICON.visibility} alt="view"/>
-                              View
-                            </div>
-                          </ActionButton>
-                          <ActionButton full onClick={props.goToEditPage}>
-                            <div className="flex flex-row items-center justify-center gap-2">
-                              <Icon src={ICON.edit} alt="edit"/>
-                              Edit
-                            </div>
-                          </ActionButton>
-                          <ActionButton full onClick={() => {console.log("TODO: implement")}}>
-                            <div className="flex flex-row items-center justify-center gap-2">
-                              <Icon src={ICON.edit} alt="duplicate"/>
-                              duplicate
-                            </div>
-                          </ActionButton>
-                        </div>
-                      </CustomDialog>
-                    </Dialog.Root>
-                  )
-                }
-              </div>
-            </div>
+          Object.entries(savedChoreos).map((group) =>
+            <EventSection
+              key={group[0]}
+              eventName={group[0]}
+              choreos={group[1]}
+              goToEditPage={props.goToEditPage}
+              goToViewPage={props.goToViewPage}
+            />
           )
         }
+        {/** Todo: show latest edited */}
+        {/** Todo: get saved hardcoded files */}
       </div>
       <span className='fixed opacity-50 bottom-2 left-2'>{LAST_UPDATED}</span>
 
@@ -89,4 +75,52 @@ export default function HomePage(props: {
         }}/>
     </div>
   )
+}
+
+function EventSection(props: {
+  eventName: string,
+  choreos: Choreo[],
+  goToViewPage: () => void,
+  goToEditPage: () => void,
+}) {
+  return <div>
+    <div className='flex flex-row items-end gap-2'>
+      <h2 className='text-xl font-bold text-primary'>{props.eventName.length === 0 ? "イベント不明" : props.eventName}</h2>
+    </div>
+    <div className="grid grid-cols-2 gap-2">
+      {
+        props.choreos.map((choreo) =>
+          <Dialog.Root key={choreo.id}>
+            <Dialog.Trigger>
+              <div className="p-2 border-2 rounded-md border-primary lg:hover:bg-gray-100">
+                {choreo.name}
+              </div>
+            </Dialog.Trigger>
+            <CustomDialog hasX title={choreo.name}>
+              <div className="flex flex-col gap-2">
+                <ActionButton full onClick={props.goToViewPage}>
+                  <div className="flex flex-row items-center justify-center gap-2">
+                    <Icon src={ICON.visibility} alt="view"/>
+                    View
+                  </div>
+                </ActionButton>
+                <ActionButton full onClick={props.goToEditPage}>
+                  <div className="flex flex-row items-center justify-center gap-2">
+                    <Icon src={ICON.edit} alt="edit"/>
+                    Edit
+                  </div>
+                </ActionButton>
+                <ActionButton full onClick={() => {console.log("TODO: implement")}}>
+                  <div className="flex flex-row items-center justify-center gap-2">
+                    <Icon src={ICON.edit} alt="duplicate"/>
+                    duplicate
+                  </div>
+                </ActionButton>
+              </div>
+            </CustomDialog>
+          </Dialog.Root>
+        )
+      }
+    </div>
+  </div>
 }

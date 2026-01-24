@@ -4,6 +4,7 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { DBProvider } from './lib/dataAccess/DBProvider';
+import { RequireDB } from './lib/dataAccess/RequireDb';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -11,7 +12,9 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <DBProvider>
-      <App />
+      <RequireDB>
+        <App />
+      </RequireDB>
     </DBProvider>
   </React.StrictMode>
 );
