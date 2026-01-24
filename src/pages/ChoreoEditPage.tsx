@@ -15,6 +15,7 @@ import ObjectToolbar from "../components/editor/ObjectToolbar";
 import { Dialog } from "@base-ui/react";
 import EditChoreoSizeDialog from "../components/dialogs/EditChoreoSizeDialog";
 import { exportToMtr } from "../lib/helpers/exportHelper";
+import { saveChoreo } from "../lib/dataAccess/DataController";
 
 const resizeDialog = Dialog.createHandle<ChoreoSection>();
 
@@ -82,12 +83,18 @@ export default function ChoreoEditPage(props: {
       if (e.key === "s") {
         e.preventDefault();
         // SAVE
+        onSave();
       }
     }
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
+
+  const onSave = () => {
+    console.log("Saving state to db: ", history.presentState.state);
+    saveChoreo(history.presentState.state, () => {});
+  }
 
   // dialogs
   const [resizeDialogOpen, setResizeDialogOpen] = useState(false);
@@ -103,7 +110,7 @@ export default function ChoreoEditPage(props: {
           returnHome={props.goToHomePage}
           hasSidebar
           currentChoreo={props.currentChoreo}
-          onSave={() => {console.log("TODO: implement save")}}
+          onSave={() => {onSave()}}
           editName={() => {console.log("TODO: implement")}}
           manageSections={() => {console.log("TODO: implement Manage Sections")}}
           editSize={() => {setResizeDialogOpen(true);}}

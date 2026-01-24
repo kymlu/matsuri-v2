@@ -18,15 +18,18 @@ export default function Header (props: {
   return <header className="absolute top-0 z-10 flex items-center justify-between w-screen px-2 py-4 bg-gradient-to-b from-white to-transparent ">
     <IconButton
       src={ICON.chevronBackwardBlack}
-      alt="Return home"
+      alt="Return home" // if there is a history, verify save first?
       noBorder
-      onClick={props.returnHome}/>
+      onClick={() => {
+        props.onSave?.();
+        props.returnHome();
+      }}/>
     <div className="font-semibold">{props.currentChoreo.name}</div>
     <div className="flex gap-2">
       {
         props.onSave &&
         <IconButton
-          src={ICON.fileSaveBlack}
+          src={ICON.saveBlack}
           alt="Save"
           noBorder
           onClick={() => {props.onSave?.()}}/>

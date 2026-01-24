@@ -8,6 +8,7 @@ import { Choreo, StageType } from "../models/choreo";
 import { Dancer, DancerPosition } from "../models/dancer";
 import { colorPalette } from "../lib/consts/colors";
 import { MAX_STAGE_DIMENSION, MIN_STAGE_DIMENSION } from "../lib/consts/consts";
+import { saveChoreo } from "../lib/dataAccess/DataController";
 
 interface FormationForm {
   name: string;
@@ -88,7 +89,9 @@ export function NewChoreoPage(props: {
         }}],
     };
     console.log("Creating new choreo:", choreo);
-    props.goToEditPage(choreo);
+    saveChoreo(choreo, () => {
+      props.goToEditPage(choreo);
+    });
   };
 
   const stepTitles: Record<number, string> = {

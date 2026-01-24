@@ -72,6 +72,7 @@ export const ICON = {
   musicNoteBlack: "icons/music_note_black.svg",
   noteStackBlack: "icons/note_stack_black.svg",
   redoBlack: "icons/redo_black.svg",
+  saveBlack: "icons/save_black.svg",
   settingsWhite: "icons/settings_white.svg",
   settingsBlack: "icons/settings_black.svg",
   settings: "icons/settings.svg",
