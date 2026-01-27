@@ -6,12 +6,14 @@ import { Choreo } from "../models/choreo";
 import { ChoreoSection, SelectedObjectStats } from "../models/choreoSection";
 import MainStage from "../components/grid/MainStage";
 import { AppSetting } from "../models/appSettings";
+import { strEquals } from "../lib/helpers/globalHelper";
 
 export default function ChoreoEditPage(props: {
   goToHomePage: () => void
   currentChoreo: Choreo,
 }) {
   const [currentSection, setCurrentSection] = useState<ChoreoSection>(props.currentChoreo.sections[0]);
+  const [nextSection, setNextSection] = useState<ChoreoSection | undefined>();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [selectedObjectStats, setSelectedObjectStats] = useState<SelectedObjectStats>({dancerCount: 0, propCount: 0});
   const [appSettings, setAppSettings] = useState<AppSetting>({
@@ -26,6 +28,11 @@ export default function ChoreoEditPage(props: {
       propCount: selectedIds.filter(id => props.currentChoreo.props[id]).length,
     });
   }, [selectedIds]);
+
+  useEffect(() => {
+    var currentSectionIndex = props.currentChoreo.sections.findIndex(x => strEquals(x.id, currentSection.id));
+    setNextSection(props.currentChoreo.sections[currentSectionIndex + 1]);
+  }, [currentSection])
 
   return (
     <div className='flex flex-col justify-between w-full h-screen max-h-screen'>
@@ -56,8 +63,8 @@ export default function ChoreoEditPage(props: {
             <PositionHint
               dancer={props.currentChoreo.dancers[selectedIds[0]]}
               position={currentSection.formation.dancerPositions[selectedIds[0]]}
-              nextSectionName="TODO"
-              nextPosition={{dancerId: selectedIds[0], x: 5, y: 5, rotation: 0, sectionId: crypto.randomUUID(), color: ""}}
+              nextSectionName={nextSection?.name}
+              nextPosition={nextSection?.formation.dancerPositions[selectedIds[0]]}
               geometry={props.currentChoreo.stageGeometry}
             />
           }

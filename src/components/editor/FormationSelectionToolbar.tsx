@@ -57,7 +57,9 @@ export default function FormationSelectionToolbar(props: {
                     props.onClickSection(section)
                   }
                 }}>
-                {section.name}
+                <div className="overflow-hidden max-w-32 whitespace-nowrap text-ellipsis">
+                  {section.name}
+                </div>
               </Button>
           }
           {
@@ -71,7 +73,9 @@ export default function FormationSelectionToolbar(props: {
                   fontSize="text-base"
                   fixed
                   asDiv>
-                  {section.name}
+                  <div className="overflow-hidden max-w-32 whitespace-nowrap text-ellipsis">
+                    {section.name}
+                  </div>
                 </Button>
               }>
               <div className="flex flex-col space-y-2">

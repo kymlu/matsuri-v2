@@ -20,7 +20,7 @@ export default function Header (props: {
   changeDancerSize?: (showLarge: boolean) => void,
   appSettings: AppSetting,
 }) {
-  return <header className="absolute top-0 z-10 flex items-center justify-between w-screen px-2 py-4 bg-gradient-to-b from-white to-transparent ">
+  return <header className="absolute top-0 z-10 flex items-center justify-between w-screen px-2 py-4 select-none bg-gradient-to-b from-white to-transparent ">
     <IconButton
       src={ICON.chevronBackwardBlack}
       alt="Return home" // if there is a history, verify save first?
