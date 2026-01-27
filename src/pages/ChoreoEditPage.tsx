@@ -16,6 +16,9 @@ import { Dialog } from "@base-ui/react";
 import EditChoreoSizeDialog from "../components/dialogs/EditChoreoSizeDialog";
 import { exportToMtr } from "../lib/helpers/exportHelper";
 import { saveChoreo } from "../lib/dataAccess/DataController";
+import { addDancer } from "../lib/editor/commands/dancerCommands";
+import IconButton from "../components/basic/IconButton";
+import { ICON } from "../lib/consts/consts";
 
 const resizeDialog = Dialog.createHandle<ChoreoSection>();
 
@@ -26,8 +29,11 @@ export default function ChoreoEditPage(props: {
   const [currentSection, setCurrentSection] = useState<ChoreoSection>(props.currentChoreo.sections[0]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [selectedObjectStats, setSelectedObjectStats] = useState<SelectedObjectStats>({dancerCount: 0, propCount: 0});
+  const [isAddingDancers, setIsAddingDancers] = useState<boolean>(false);
 
   useEffect(() => {
+    if (selectedIds.length > 0) setIsAddingDancers(false);
+
     setSelectedObjectStats({
       dancerCount: selectedIds.filter(id => props.currentChoreo.dancers[id]).length,
       propCount: selectedIds.filter(id => props.currentChoreo.props[id]).length,
@@ -121,6 +127,7 @@ export default function ChoreoEditPage(props: {
           />
         <MainStage
           canEdit
+          isAddingDancer={isAddingDancers}
           currentChoreo={history.presentState.state}
           currentSection={currentSection}
           updateDancerPosition={(x, y, dancerId) => {
@@ -128,18 +135,35 @@ export default function ChoreoEditPage(props: {
               type: "SET_STATE",
               newState: moveDancerPositions(history.presentState.state, currentSection.id, [dancerId], x, y),
               currentSectionId: currentSection.id,
-              commit: true})
+              commit: true});
           }}
           updateDancerPositions={(dx, dy) => {
             dispatch({
               type: "SET_STATE",
               newState: moveDancerPositionsDelta(history.presentState.state, currentSection.id, selectedIds, dx, dy),
               currentSectionId: currentSection.id,
-              commit: true})
+              commit: true});
           }}
           selectedIds={selectedIds}
           setSelectedIds={setSelectedIds}
-          />
+          addDancer={(x, y) => {
+            console.log("Adding dancer at", x, y);
+            dispatch({
+              type: "SET_STATE",
+              newState: addDancer(
+                history.presentState.state, 
+                {
+                  id: crypto.randomUUID(),
+                  name: Object.keys(history.presentState.state.dancers).length.toString()
+                },
+                x,
+                y
+              ),
+              currentSectionId: currentSection.id,
+              commit: true});
+            }
+          }
+        />
         <div className="absolute bottom-0 z-10">
           <ObjectToolbar
             openArrangeMenu={() => {console.log("TODO")}}
@@ -203,7 +227,25 @@ export default function ChoreoEditPage(props: {
           />
         </div>
       </div>
-      <Toolbar/>
+      <Toolbar
+        onAddDancer={() => {
+          setSelectedIds([]);
+          setIsAddingDancers(true);
+        }}
+      />
+      {
+        isAddingDancers &&
+        <div className="absolute items-center w-max rounded-md flex gap-2 p-2 top-20 left-1/2 translate-x-[-50%] bg-white border border-primary">
+          <span>
+            表に押下し、踊り子を追加する
+          </span>
+          <IconButton
+            src={ICON.clearBlack}
+            alt="Stop adding dancers"
+            size="sm"
+            onClick={() => {setIsAddingDancers(false);}}/>
+        </div>
+      }
       <Dialog.Root
         handle={resizeDialog}
         open={resizeDialogOpen}
