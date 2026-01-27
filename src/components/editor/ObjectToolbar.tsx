@@ -11,43 +11,48 @@ export default function ObjectToolbar (props: {
   openRenameMenu: () => void
   isRenameVisible: boolean,
 }) {
-  return <div className="flex flex-row gap-2 p-2">
-
-    {
-      props.isSwapVisible &&
-      <IconButton
-        src={ICON.switchAccessShortcut}
-        alt="Swap positions"
-        size="sm"
-        onClick={props.swapPositions}
-        />
+  const isToolbarVisible = props.isArrangeVisible || props.isSwapVisible || props.isColorVisible || props.isRenameVisible;
+  
+  return <>
+    { isToolbarVisible && 
+      <div className="flex flex-row flex-shrink gap-2 p-2">
+        {
+          props.isSwapVisible &&
+          <IconButton
+            src={ICON.switchAccessShortcut}
+            alt="Swap positions"
+            size="sm"
+            onClick={props.swapPositions}
+            />
+        }
+        {
+          props.isArrangeVisible &&
+          <IconButton
+            src={ICON.horizontalDistributeBlack}
+            alt="Arrange"
+            size="sm"
+            onClick={props.openArrangeMenu}
+          />
+        }
+        {
+          props.isRenameVisible &&
+          <IconButton
+            src={ICON.textFieldsAltBlack}
+            alt="Color"
+            size="sm"
+            onClick={props.openRenameMenu}
+            />
+        }
+        {
+          props.isColorVisible &&
+          <IconButton
+            src={ICON.colorsBlack}
+            alt="Color"
+            size="sm"
+            onClick={props.openColorMenu}
+            />
+        }
+      </div>
     }
-    {
-      props.isArrangeVisible &&
-      <IconButton
-        src={ICON.horizontalDistributeBlack}
-        alt="Arrange"
-        size="sm"
-        onClick={props.openArrangeMenu}
-      />
-    }
-    {
-      props.isRenameVisible &&
-      <IconButton
-        src={ICON.textFieldsAltBlack}
-        alt="Color"
-        size="sm"
-        onClick={props.openRenameMenu}
-        />
-    }
-    {
-      props.isColorVisible &&
-      <IconButton
-        src={ICON.colorsBlack}
-        alt="Color"
-        size="sm"
-        onClick={props.openColorMenu}
-        />
-    }
-  </div>
+  </>
 }

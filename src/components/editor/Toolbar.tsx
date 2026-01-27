@@ -4,7 +4,21 @@ import IconButton from "../basic/IconButton";
 import { VerticalDivider } from "../basic/Divider";
 import { colorPalette } from "../../lib/consts/colors";
 
-export default function Toolbar () {
+type ToolbarProps = {
+  onAddDancer: () => void,
+  onCopyPosition?: () => void, // TODO
+  onPastePosition?: () => void, // TODO
+  onChangeColor?: () => void, // TODO
+  onSwapPosition?: () => void, // TODO
+  onSelectColor?: () => void, // TODO
+  onSelectDancers?: () => void, // TODO
+  onEditName?: () => void, // TODO
+  onDeleteDancer?: () => void, // TODO
+}
+
+export default function Toolbar ({
+  onAddDancer,
+}: ToolbarProps) {
   const [isArrangeVisible, setIsArrangeVisible] = useState<boolean>(false);
   const [isColorVisible, setIsColorVisible] = useState<boolean>(false);
   const [isDancerManagerVisible, setIsDancerManagerVisible] = useState<boolean>(false);
@@ -17,7 +31,7 @@ export default function Toolbar () {
     {
       !isSubmenuOpen &&
       <>
-        <IconButton src={ICON.addBlack} label="踊り子管理" alt="Add" onClick={()=>{setIsDancerManagerVisible(true)}}/>
+        <IconButton src={ICON.personBlack} label="踊り子" alt="Dancer Management" onClick={()=>{setIsDancerManagerVisible(true)}}/>
         <IconButton src={ICON.chevronBackwardBlack} label="前へ" alt="Add" onClick={()=>{}}/>
         <IconButton src={ICON.chevronForwardBlack} label="次へ" alt="Add" onClick={()=>{}}/>
         <IconButton src={ICON.addBlack} label="整理" alt="Add" onClick={()=>{setIsArrangeVisible(true)}}/>
@@ -65,7 +79,7 @@ export default function Toolbar () {
         {
           isDancerManagerVisible &&
           <>
-            <IconButton src={ICON.verticalDistributeBlack} label="Add dancer etc" alt="Distribute Vertically" onClick={() => {}} />
+            <IconButton src={ICON.personAddBlack} label="追加" alt="Distribute Vertically" onClick={() => {onAddDancer()}} />
             <IconButton src={ICON.verticalDistributeBlack} label="縦均" alt="Distribute Vertically" onClick={() => {}} />
             <IconButton src={ICON.verticalDistributeBlack} label="縦均" alt="Distribute Vertically" onClick={() => {}} />
           </>

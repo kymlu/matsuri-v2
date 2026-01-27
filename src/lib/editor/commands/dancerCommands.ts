@@ -2,7 +2,7 @@ import { Choreo } from "../../../models/choreo"
 import { Formation } from "../../../models/choreoSection"
 import { Dancer } from "../../../models/dancer"
 
-export function addDancer(state: Choreo, dancer: Dancer): Choreo {
+export function addDancer(state: Choreo, dancer: Dancer, x: number, y: number): Choreo {
   const newDancers = { ...state.dancers, [dancer.id]: dancer }
 
   const newSections = state.sections.map(section => ({
@@ -14,8 +14,8 @@ export function addDancer(state: Choreo, dancer: Dancer): Choreo {
         [dancer.id]: {
           id: crypto.randomUUID(),
           dancerId: dancer.id,
-          x: 0,
-          y: 0
+          x: x,
+          y: y
         }
       }
     } as Formation

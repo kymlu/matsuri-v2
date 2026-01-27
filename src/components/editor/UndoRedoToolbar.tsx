@@ -7,7 +7,7 @@ export default function UndoRedoToolbar (props: {
   undoCount: number,
   redoCount: number,
 }) {
-  return <div className="flex flex-row gap-2 p-2">
+  return <div className="flex flex-row gap-2 p-2 w-fit">
     <IconButton
       src={ICON.undoBlack}
       alt="Undo"

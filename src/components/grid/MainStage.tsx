@@ -5,15 +5,19 @@ import { Choreo, StageGeometry } from "../../models/choreo";
 import FormationLayer from "./layers/FormationLayer";
 import { ChoreoSection } from "../../models/choreoSection";
 import { DancerPosition } from "../../models/dancer";
+import { pxToStageMeters, snapToGrid } from "../../lib/helpers/editorCalculationHelper";
+import { METER_PX } from "../../lib/consts/consts";
 
 export default function MainStage(props: {
   canEdit: boolean,
+  isAddingDancer?: boolean,
   currentChoreo: Choreo,
   currentSection: ChoreoSection,
   updateDancerPosition?: (x: number, y: number, dancerId: string) => void,
   updateDancerPositions?: (dx: number, dy: number) => void,
   selectedIds: string[],
   setSelectedIds: Dispatch<SetStateAction<string[]>>,
+  addDancer?: (x: number, y: number) => void,
 }) {
   const [dancerPositions, setDancerPositions] = useState<DancerPosition[]>([]);
   const [stageGeometry, setStageGeometry] = useState<StageGeometry>();
@@ -183,37 +187,59 @@ export default function MainStage(props: {
   };
   
   return <div ref={containerRef} className="flex items-center justify-center w-full h-full overflow-scroll">
-    {stageGeometry && <Stage
-      onMouseDown={(e) => {
-        const clickedOnEmpty =
-          e.target === e.target.getStage();
+    {
+      stageGeometry && 
+      <Stage
+        onPointerDown={(e) => {
+          const stagePosition = e.target.getStage();
+          const clickedOnEmpty = e.target === stagePosition;
 
-        if (clickedOnEmpty) {
-          props.setSelectedIds([]);
-        }
-      }}
-      width={size.width}
-      height={size.height}
-      draggable
-      x={stagePos.x}
-      y={stagePos.y}
-      scaleX={stageScale.x}
-      scaleY={stageScale.y}
-      onWheel={handleWheel}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
-      onDragEnd={handleDragEnd}>
-      <GridLayer stageGeometry={stageGeometry}/>
-      <FormationLayer
-        canEdit={props.canEdit}
-        geometry={stageGeometry}
-        dancers={props.currentChoreo.dancers}
-        dancerPositions={dancerPositions}
-        updateDancerPosition={props.updateDancerPosition}
-        updateDancerPositions={props.updateDancerPositions}
-        selectedIds={props.selectedIds}
-        setSelectedIds={props.setSelectedIds}
-        />
-    </Stage>}
+          if (clickedOnEmpty) {
+            props.setSelectedIds([]);
+            if (props.isAddingDancer && stagePosition) {
+              var positionM = 
+                pxToStageMeters(
+                  snapToGrid({
+                    x: (e.evt.x - stagePosition.attrs.x)/stagePosition.attrs.scaleX,
+                    y: (e.evt.y - stagePosition.attrs.y)/stagePosition.attrs.scaleY
+                  }, METER_PX/2),
+                stageGeometry,
+                METER_PX);
+              
+              if (
+                positionM.x >= -(stageGeometry.margin.leftMargin) &&
+                positionM.x <= (stageGeometry.margin.rightMargin + stageGeometry.stageWidth) &&
+                positionM.y >= -(stageGeometry.margin.topMargin) &&
+                positionM.y <= (stageGeometry.margin.bottomMargin + stageGeometry.stageLength)
+              ) {
+                props.addDancer?.(positionM.x, positionM.y);
+              }
+            }
+          }
+        }}
+        width={size.width}
+        height={size.height}
+        draggable
+        x={stagePos.x}
+        y={stagePos.y}
+        scaleX={stageScale.x}
+        scaleY={stageScale.y}
+        onWheel={handleWheel}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onDragEnd={handleDragEnd}>
+        <GridLayer stageGeometry={stageGeometry}/>
+        <FormationLayer
+          canEdit={props.canEdit}
+          geometry={stageGeometry}
+          dancers={props.currentChoreo.dancers}
+          dancerPositions={dancerPositions}
+          updateDancerPosition={props.updateDancerPosition}
+          updateDancerPositions={props.updateDancerPositions}
+          selectedIds={props.selectedIds}
+          setSelectedIds={props.setSelectedIds}
+          />
+      </Stage>
+    }
   </div>
 }
