@@ -29,7 +29,10 @@ export default function HomePage(props: {
     getAllChoreos().then((choreos) => {
       setSavedChoreos(
         groupByKey(
-          choreos.sort((a, b) => strCompare<Choreo>(a, b, "event")), "event"
+          choreos
+            .sort((a, b) => strCompare<Choreo>(a, b, "name"))
+            .sort((a, b) => strCompare<Choreo>(a, b, "event")),
+          "event"
         )
       );
     });
