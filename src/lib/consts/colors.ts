@@ -2,7 +2,7 @@ export const colorPalette = {
   // Rainbow with 2 tints each
   rainbow: {
     red: ["#D9534F", "#E48B88", "#F1B8B5"],
-    orange: ["#F0AD4E", "#F5C585", "#F9D8B3"],
+    orange: ["#F08A00", "#F5B04C", "#F9CF8A"],
     yellow: ["#F2D600", "#F7E44D", "#FBEF8A"],
     green: ["#5CB85C", "#7BC77B", "#A1D4A1"],
     blue: ["#337AB7", "#6699CC", "#99BBDD"],
