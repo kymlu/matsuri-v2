@@ -8,16 +8,25 @@ type ToolbarProps = {
   onAddDancer: () => void,
   onCopyPosition?: () => void, // TODO
   onPastePosition?: () => void, // TODO
-  onChangeColor?: () => void, // TODO
+  showSelectDancer?: boolean,
+  onSelectColor?: () => void,
+  onSelectType?: () => void,
+  showDancerColor?: boolean,
+  onChangeColor?: () => void,
   onSwapPosition?: () => void, // TODO
-  onSelectColor?: () => void, // TODO
-  onSelectDancers?: () => void, // TODO
   onEditName?: () => void, // TODO
   onDeleteDancer?: () => void, // TODO
 }
 
 export default function Toolbar ({
   onAddDancer,
+  showDancerColor,
+  showSelectDancer,
+  onChangeColor,
+  onSelectColor,
+  onSelectType,
+  onCopyPosition,
+  onPastePosition,
 }: ToolbarProps) {
   const [isArrangeVisible, setIsArrangeVisible] = useState<boolean>(false);
   const [isColorVisible, setIsColorVisible] = useState<boolean>(false);
@@ -32,10 +41,7 @@ export default function Toolbar ({
       !isSubmenuOpen &&
       <>
         <IconButton src={ICON.personBlack} label="踊り子" alt="Dancer Management" onClick={()=>{setIsDancerManagerVisible(true)}}/>
-        <IconButton src={ICON.chevronBackwardBlack} label="前へ" alt="Add" onClick={()=>{}}/>
-        <IconButton src={ICON.chevronForwardBlack} label="次へ" alt="Add" onClick={()=>{}}/>
         <IconButton src={ICON.addBlack} label="整理" alt="Add" onClick={()=>{setIsArrangeVisible(true)}}/>
-        <IconButton src={ICON.colorsBlack} label="色" alt="Add" onClick={()=>{setIsColorVisible(true)}}/>
         <IconButton src={ICON.categoryBlack} label="カウント" alt="Add" onClick={()=>{setIsActionManagerVisible(true)}}/>
         <IconButton src={ICON.flagBlack} label="道具" alt="Props" onClick={()=>{setIsPropManagerVisible(true)}}/>
       </>
@@ -67,21 +73,14 @@ export default function Toolbar ({
           </>
         }
         {
-          isColorVisible && 
-          <>
-            {
-              colorPalette.allColors().map((color) => 
-                <button style={{"backgroundColor": color}} className="rounded-full size-8 min-h-8 min-w-8"/>
-              )
-            }
-          </>
-        }
-        {
           isDancerManagerVisible &&
           <>
-            <IconButton src={ICON.personAddBlack} label="追加" alt="Distribute Vertically" onClick={() => {onAddDancer()}} />
-            <IconButton src={ICON.verticalDistributeBlack} label="縦均" alt="Distribute Vertically" onClick={() => {}} />
-            <IconButton src={ICON.verticalDistributeBlack} label="縦均" alt="Distribute Vertically" onClick={() => {}} />
+            <IconButton src={ICON.personAddBlack} label="追加" alt="Add dancer" onClick={() => {onAddDancer()}} />
+            <IconButton disabled={!showDancerColor} src={ICON.colorsBlack} label="色" alt="Change colours" onClick={() => {onChangeColor?.()}} />
+            <IconButton disabled={!showSelectDancer} src={ICON.selectAllBlack} label="全選択" alt="Select all" onClick={() => {onSelectType?.()}} />
+            <IconButton disabled={!showSelectDancer} src={ICON.selectAllBlack} label="色選択" alt="Select colour" onClick={() => {onSelectColor?.()}} />
+            <IconButton src={ICON.horizontalDistributeBlack} label="コピー" alt="Copy" onClick={() => {onCopyPosition?.()}} />
+            <IconButton src={ICON.horizontalDistributeBlack} label="ペースト" alt="Paste" onClick={() => {onPastePosition?.()}} />
           </>
         }
         {

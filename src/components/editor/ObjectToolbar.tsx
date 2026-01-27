@@ -19,7 +19,7 @@ export default function ObjectToolbar (props: {
         {
           props.isSwapVisible &&
           <IconButton
-            src={ICON.switchAccessShortcut}
+            src={ICON.swapHorizBlack}
             alt="Swap positions"
             size="sm"
             onClick={props.swapPositions}

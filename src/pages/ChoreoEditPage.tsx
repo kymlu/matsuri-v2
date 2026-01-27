@@ -280,6 +280,19 @@ export default function ChoreoEditPage(props: {
           setSelectedIds([]);
           setIsAddingDancers(true);
         }}
+        showDancerColor={selectedObjectStats.dancerCount > 0}
+        onChangeColor={() => {setEditDancerColourDialogOpen(true)}}
+        onCopyPosition={() => {console.log("TODO")}}
+        onPastePosition={() => {console.log("TODO")}}
+        showSelectDancer={selectedObjectStats.dancerCount > 0}
+        onSelectColor={() => {
+          var positions = Object.entries(currentSection.formation.dancerPositions);
+          var currentColours = new Set(positions.filter(x => selectedIds.includes(x[0])).map(x => x[1].color));
+          setSelectedIds(positions.filter(x => currentColours.has(x[1].color)).map(x => x[0]));
+        }}
+        onSelectType={() => {
+          setSelectedIds(Object.keys(currentSection.formation.dancerPositions));
+        }}
       />
       {
         isAddingDancers &&
