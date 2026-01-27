@@ -20,9 +20,11 @@ import { addDancer } from "../lib/editor/commands/dancerCommands";
 import IconButton from "../components/basic/IconButton";
 import { ICON } from "../lib/consts/consts";
 import { AppSetting } from "../models/appSettings";
-import { changeStageGeometry } from "../lib/editor/commands/choreoCommands";
+import { changeStageGeometry, editChoreoInfo } from "../lib/editor/commands/choreoCommands";
+import EditChoreoInfoDialog from "../components/dialogs/EditChoreoInfoDialog";
 
-const resizeDialog = Dialog.createHandle<ChoreoSection>();
+const resizeDialog = Dialog.createHandle<Choreo>();
+const editChoreoInfoDialog = Dialog.createHandle<string>();
 
 export default function ChoreoEditPage(props: {
   goToHomePage: () => void,
@@ -111,9 +113,14 @@ export default function ChoreoEditPage(props: {
 
   // dialogs
   const [resizeDialogOpen, setResizeDialogOpen] = useState(false);
+  const [editChoreoInfoDialogOpen, setEditChoreoInfoDialogOpen] = useState(false);
   
   const handleResizeDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setResizeDialogOpen(isOpen);
+  };
+
+  const handleEditChoreoInfoDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
+    setEditChoreoInfoDialogOpen(isOpen);
   };
 
   return (
@@ -122,9 +129,9 @@ export default function ChoreoEditPage(props: {
         <Header
           returnHome={props.goToHomePage}
           hasSidebar
-          currentChoreo={props.currentChoreo}
+          currentChoreo={history.presentState.state}
           onSave={() => {onSave()}}
-          editName={() => {console.log("TODO: implement")}}
+          editName={() => {setEditChoreoInfoDialogOpen(true)}}
           manageSections={() => {console.log("TODO: implement Manage Sections")}}
           editSize={() => {setResizeDialogOpen(true);}}
           export={() => {
@@ -287,6 +294,22 @@ export default function ChoreoEditPage(props: {
               commit: true});
             resizeDialog.close();
             setResizeDialogOpen(false);
+          }}/>
+      </Dialog.Root>
+      <Dialog.Root
+        handle={editChoreoInfoDialog}
+        open={editChoreoInfoDialogOpen}
+        onOpenChange={handleEditChoreoInfoDialogOpen}>
+        <EditChoreoInfoDialog
+          choreo={history.presentState.state}
+          onSubmit={(name, event) => {
+            dispatch({
+              type: "SET_STATE",
+              newState: editChoreoInfo(history.presentState.state, name, event),
+              currentSectionId: currentSection.id,
+              commit: true});
+            editChoreoInfoDialog.close();
+            setEditChoreoInfoDialogOpen(false);
           }}/>
       </Dialog.Root>
     </div>

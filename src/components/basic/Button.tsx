@@ -23,7 +23,7 @@ export default function Button(props: ButtonProps) {
     "px-3 py-1.5": props.compact !== true,
     "lg:hover:bg-gray-100": !props.disabled && props.primary !== true,
     "lg:hover:opacity-70": !props.disabled && props.primary,
-    "border-gray-300": props.primary !== true,
+    "border-gray-300 bg-white": props.primary !== true,
     "bg-primary text-white border-primary": props.primary,
     "lg:hover:bg-primary-light": props.primary && !props.disabled,
     "cursor-default opacity-50": props.disabled,

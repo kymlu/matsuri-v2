@@ -15,7 +15,7 @@ export default function EditSectionNameDialog(props: {
   }, [props.section]);
 
   return <BaseEditDialog
-    title="名前変更"
+    title="セクション名前変更"
     onSubmit={() => { props.onSubmit(name) }}
     isActionButtonDisabled={isNullOrUndefinedOrBlank(name)}
     >

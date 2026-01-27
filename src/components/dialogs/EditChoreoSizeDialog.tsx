@@ -5,6 +5,7 @@ import NumberInput from "../inputs/NumberInput";
 import BaseEditDialog from "./BaseEditDialog";
 import { Stage } from "react-konva";
 import GridLayer from "../grid/layers/GridLayer";
+import TextInput from "../inputs/TextInput";
 
 interface EditChoreoMetaForm {
   name: string;
@@ -98,6 +99,13 @@ export default function EditChoreoSizeDialog(props: {
               />
             }
           </Stage>
+        </div>
+        <div className="col-span-2">
+          <TextInput
+            label="舞台類分"
+            default={props.currentChoreo?.stageType === "parade" ? "パレード" : "ステージ"}
+            onContentChange={() => {console.log("todo: verify change needed")}}
+            disabled/>
         </div>
         <NumberInput
           name="幅"

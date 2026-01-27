@@ -15,7 +15,7 @@ export type CustomDialogProps = {
 export default function CustomDialog(props: CustomDialogProps) {
   return (
     <Dialog.Portal>
-      <Dialog.Backdrop className="fixed inset-0 bg-black transition-all duration-150 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 opacity-50 z-20" />
+      <Dialog.Backdrop className="fixed inset-0 bg-black transition-all duration-150 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 opacity-50 z-30" />
       <Dialog.Popup className={"fixed max-h-[95vh] overflow-hidden top-1/2 z-30 left-1/2 min-w-64 max-w-[calc(100vw-3rem)] -translate-x-1/2 -translate-y-1/2 rounded-lg bg-gray-50 p-6 text-gray-900 outline outline-1 outline-gray-200 transition-all duration-150 data-[ending-style]:scale-90 data-[ending-style]:opacity-0 data-[starting-style]:scale-90 data-[starting-style]:opacity-0 dark:outline-gray-300" 
         + (props.full ? " w-[95svw] h-[95svh]" : "")
       }>
