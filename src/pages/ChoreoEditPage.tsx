@@ -8,9 +8,9 @@ import { Choreo } from "../models/choreo";
 import { EditHistory } from "../models/history";
 import { addSection, duplicateSection, editSectionNote, removeSection, renameSection } from "../lib/editor/commands/sectionCommands";
 import { ChoreoSection, SelectedObjectStats } from "../models/choreoSection";
-import { strEquals } from "../lib/helpers/globalHelper";
+import { isNullOrUndefinedOrBlank, strEquals } from "../lib/helpers/globalHelper";
 import MainStage from "../components/grid/MainStage";
-import { moveDancerPositions, moveDancerPositionsDelta } from "../lib/editor/commands/dancerPositionCommands";
+import { changeDancerColorAll, changeDancerColorCurrent, changeDancerColorCurrentAndFuture, moveDancerPositions, moveDancerPositionsDelta } from "../lib/editor/commands/dancerPositionCommands";
 import ObjectToolbar from "../components/editor/ObjectToolbar";
 import { Dialog } from "@base-ui/react";
 import EditChoreoSizeDialog from "../components/dialogs/EditChoreoSizeDialog";
@@ -23,10 +23,12 @@ import { AppSetting } from "../models/appSettings";
 import { changeStageGeometry, editChoreoInfo } from "../lib/editor/commands/choreoCommands";
 import EditChoreoInfoDialog from "../components/dialogs/EditChoreoInfoDialog";
 import EditDancerNameDialog from "../components/dialogs/EditDancerNameDialog";
+import EditDancerColourDialog from "../components/dialogs/EditDancerColourDialog";
 
 const resizeDialog = Dialog.createHandle<Choreo>();
 const editChoreoInfoDialog = Dialog.createHandle<string>();
 const renameDancerDialog = Dialog.createHandle<string>();
+const editDancerColourDialog = Dialog.createHandle<string>();
 
 export default function ChoreoEditPage(props: {
   goToHomePage: () => void,
@@ -117,6 +119,7 @@ export default function ChoreoEditPage(props: {
   const [resizeDialogOpen, setResizeDialogOpen] = useState(false);
   const [editChoreoInfoDialogOpen, setEditChoreoInfoDialogOpen] = useState(false);
   const [renameDancerDialogOpen, setRenameDancerDialogOpen] = useState(false);
+  const [editDancerColourDialogOpen, setEditDancerColourDialogOpen] = useState(false);
   
   const handleResizeDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setResizeDialogOpen(isOpen);
@@ -128,6 +131,10 @@ export default function ChoreoEditPage(props: {
 
   const handleRenameDancerDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setRenameDancerDialogOpen(isOpen);
+  };
+  
+  const handleEditDancerColourDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
+    setEditDancerColourDialogOpen(isOpen);
   };
 
   return (
@@ -200,7 +207,7 @@ export default function ChoreoEditPage(props: {
           <ObjectToolbar
             openArrangeMenu={() => {console.log("TODO")}}
             isArrangeVisible={(selectedObjectStats.dancerCount + selectedObjectStats.propCount) > 1}
-            openColorMenu={() => {console.log("TODO")}}
+            openColorMenu={() => {setEditDancerColourDialogOpen(true)}}
             isColorVisible={selectedObjectStats.dancerCount > 0 && selectedObjectStats.propCount === 0}
             swapPositions={() => {console.log("TODO")}}
             isSwapVisible={selectedObjectStats.dancerCount === 2 && selectedObjectStats.propCount === 0}
@@ -333,6 +340,43 @@ export default function ChoreoEditPage(props: {
               commit: true});
             renameDancerDialog.close();
             setRenameDancerDialogOpen(false);
+          }}/>
+      </Dialog.Root>
+      <Dialog.Root
+        handle={editDancerColourDialog}
+        open={editDancerColourDialogOpen}
+        onOpenChange={handleEditDancerColourDialogOpen}>
+        <EditDancerColourDialog
+          dancerIds={selectedIds}
+          colours={Object.values(currentSection.formation.dancerPositions).map(x => x.color)}
+          onSubmit={(color, mode) => {
+            if (!isNullOrUndefinedOrBlank(color)) {
+              switch (mode) {
+                case "current":
+                  dispatch({
+                    type: "SET_STATE",
+                    newState: changeDancerColorCurrent(history.presentState.state, currentSection.id, selectedIds, color),
+                    currentSectionId: currentSection.id,
+                    commit: true});
+                  break;
+                case "currentAndAfter":
+                  dispatch({
+                    type: "SET_STATE",
+                    newState: changeDancerColorCurrentAndFuture(history.presentState.state, history.presentState.state.sections.findIndex(x => strEquals(x.id, currentSection.id)), selectedIds, color),
+                    currentSectionId: currentSection.id,
+                    commit: true});
+                  break;
+                case "all":
+                  dispatch({
+                    type: "SET_STATE",
+                    newState: changeDancerColorAll(history.presentState.state, selectedIds, color),
+                    currentSectionId: currentSection.id,
+                    commit: true});
+                  break;
+              }
+            }
+            editDancerColourDialog.close();
+            setEditDancerColourDialogOpen(false);
           }}/>
       </Dialog.Root>
     </div>

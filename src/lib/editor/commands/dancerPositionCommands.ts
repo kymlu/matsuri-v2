@@ -1,4 +1,5 @@
 import { Choreo } from "../../../models/choreo"
+import { strEquals } from "../../helpers/globalHelper"
 
 /**
  * Helper: update one or more dancers in a section
@@ -81,8 +82,9 @@ export function changeDancerColorCurrent(
   dancerIds: string[],
   color: string
 ): Choreo {
+  console.log("Changing dancer colors to", color, "for", dancerIds, "on section", sectionId);
   const newSections = state.sections.map(section => {
-    if (section.id !== sectionId) return section
+    if (!strEquals(section.id, sectionId)) return section
     return {
       ...section,
       formation: {
@@ -90,7 +92,7 @@ export function changeDancerColorCurrent(
         dancerPositions: updateDancerPositions(
           section.formation.dancerPositions,
           dancerIds,
-          dp => ({ ...dp, color })
+          dp => ({ ...dp, color: color })
         )
       }
     }
@@ -107,6 +109,7 @@ export function changeDancerColorCurrentAndFuture(
   dancerIds: string[],
   color: string
 ): Choreo {
+  console.log("Changing dancer colors to", color, "for", dancerIds, "on section and after", currentSectionIndex);
   const newSections = state.sections.map((section, i) => {
     if (i < currentSectionIndex) return section
     return {
@@ -132,6 +135,8 @@ export function changeDancerColorAll(
   dancerIds: string[],
   color: string
 ): Choreo {
+  console.log("Changing dancer colors to", color, "for", dancerIds, "on all sections");
+  
   const newSections = state.sections.map(section => ({
     ...section,
     formation: {

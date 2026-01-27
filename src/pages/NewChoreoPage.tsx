@@ -56,7 +56,7 @@ export function NewChoreoPage(props: {
         dancerId: id,
         x: i % form.stageWidth,
         y: 0,
-        color: colorPalette.primary,
+        color: colorPalette.rainbow.blue[0],
         rotation: 0,
       }
     }

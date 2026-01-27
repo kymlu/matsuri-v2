@@ -37,7 +37,7 @@ export default function DancerGridObject (props: {
       >
         <Circle
           radius={props.dancerDisplayType === "large" ? METER_PX * 0.45 : METER_PX * 0.2}
-          fill="black"
+          fill={props.position.color}
           strokeEnabled={props.isSelected}
           stroke={colorPalette.primary}
         />
@@ -65,7 +65,7 @@ export default function DancerGridObject (props: {
             align="center"
             text={props.dancer.name}
             fontSize={METER_PX/3}
-            fill="white"
+            fill={colorPalette.textContrast[props.position.color] ?? "white"}
           />
         }
       </BaseGridObject>

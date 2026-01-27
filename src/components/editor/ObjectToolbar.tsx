@@ -15,7 +15,7 @@ export default function ObjectToolbar (props: {
   
   return <>
     { isToolbarVisible && 
-      <div className="flex flex-row flex-shrink gap-2 p-2">
+      <div className="flex flex-row gap-2 p-2 w-fit">
         {
           props.isSwapVisible &&
           <IconButton

@@ -3,11 +3,12 @@ export const colorPalette = {
   rainbow: {
     red: ["#D9534F", "#E48B88", "#F1B8B5"],
     orange: ["#F0AD4E", "#F5C585", "#F9D8B3"],
-    yellow: ["#F7E967", "#FAF2A1", "#FEF8C3"],
+    yellow: ["#F2D600", "#F7E44D", "#FBEF8A"],
     green: ["#5CB85C", "#7BC77B", "#A1D4A1"],
     blue: ["#337AB7", "#6699CC", "#99BBDD"],
     indigo: ["#5B4B9B", "#8170B5", "#A399CC"],
     violet: ["#A366CC", "#B998D1", "#D1B2E0"],
+    pink: ["#E83E8C", "#EF7BB2", "#F5A6CB"],
   },
 
   // Neutral colors
