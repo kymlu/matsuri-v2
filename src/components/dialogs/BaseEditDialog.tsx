@@ -7,6 +7,7 @@ export default function BaseEditDialog(props: {
   isActionButtonDisabled?: boolean,
   actionButtonText?: string,
   full?: boolean,
+  onClose?: () => void,
   onSubmit: () => void,
   children: React.ReactNode,
 }) {
@@ -14,9 +15,14 @@ export default function BaseEditDialog(props: {
     hasX
     full={props.full}
     title={props.title}
+    onClose={props.onClose}
     footer={
       <div className="flex w-full gap-2 mt-4">
-        <Dialog.Close className="w-full">
+        <Dialog.Close
+          onClick={() => {
+            props.onClose?.();
+          }}
+          className="w-full">
           <ActionButton
             asDiv
             full

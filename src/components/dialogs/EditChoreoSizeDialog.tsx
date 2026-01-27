@@ -18,7 +18,7 @@ interface EditChoreoMetaForm {
 
 export default function EditChoreoSizeDialog(props: {
   currentChoreo: Choreo;
-  onSave: () => void;
+  onSave: (geometry: StageGeometry) => void;
 }) {
   var [form, setForm] = useState<EditChoreoMetaForm>({
     name: "",
@@ -39,7 +39,7 @@ export default function EditChoreoSizeDialog(props: {
       stageWidth: props.currentChoreo.stageGeometry.stageWidth,
       xMargin: props.currentChoreo.stageGeometry.margin.leftMargin,
       yMargin: props.currentChoreo.stageGeometry.margin.topMargin,
-    })
+    });
   }, [props.currentChoreo]);
 
   const handleChange = (field: keyof EditChoreoMetaForm, value: any) => {
@@ -74,7 +74,18 @@ export default function EditChoreoSizeDialog(props: {
   return <BaseEditDialog
     full
     title="設定"
-    onSubmit={() => {}}
+    onClose={() => {
+      setForm({
+        name: props.currentChoreo.name,
+        eventName: props.currentChoreo.event,
+        stageType: props.currentChoreo.stageType,
+        stageLength: props.currentChoreo.stageGeometry.stageLength,
+        stageWidth: props.currentChoreo.stageGeometry.stageWidth,
+        xMargin: props.currentChoreo.stageGeometry.margin.leftMargin,
+        yMargin: props.currentChoreo.stageGeometry.margin.topMargin,
+      });
+    }}
+    onSubmit={() => {props.onSave(stageGeometry)}}
     >
       <div className="grid h-full grid-cols-2 gap-2">
         <div ref={ref} className="flex-1 col-span-2 overflow-hidden">

@@ -9,6 +9,7 @@ export type CustomDialogProps = {
   footer?: React.ReactNode,
   hasX?: boolean,
   full?: boolean
+  onClose?: () => void,
 }
 
 export default function CustomDialog(props: CustomDialogProps) {
@@ -25,7 +26,9 @@ export default function CustomDialog(props: CustomDialogProps) {
             </Dialog.Title>
 
             {props.hasX && (
-              <Dialog.Close className="min-w-8">
+              <Dialog.Close
+                onClick={() => {props.onClose?.()}}
+                className="min-w-8">
                 <Icon src={ICON.clear} alt="Close Dialog" />
               </Dialog.Close>
             )}
