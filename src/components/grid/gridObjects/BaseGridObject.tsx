@@ -1,4 +1,4 @@
-import React, { ReactNode, useEffect, useMemo, useRef } from "react";
+import { ReactNode, useEffect, useMemo, useRef } from "react";
 import { Group } from "react-konva";
 import Konva from "konva";
 import { Shape, ShapeConfig } from "konva/lib/Shape";
@@ -21,6 +21,7 @@ export interface BaseGridObjectProps {
   isSelected: boolean;
   registerNode: (id: string, node: Konva.Node | null) => void;
   isTransformerActive?: boolean,
+  snapToGrid?: boolean,
 }
 
 export default function BaseGridObject(props: BaseGridObjectProps) {
@@ -34,7 +35,6 @@ export default function BaseGridObject(props: BaseGridObjectProps) {
   const {x, y} = useMemo(() => {
     return stageMetersToPx({x: props.position.x, y: props.position.y}, props.stageGeometry, METER_PX);
   }, [props.position, props.stageGeometry]);
-
 
   const snapSize = METER_PX/2;
 
@@ -79,11 +79,15 @@ export default function BaseGridObject(props: BaseGridObjectProps) {
         if (isDraggingRef.current && !props.isTransformerActive) {
           const node = ref.current!!;
 
-          var snappedPosition = snapToGrid({x: node.x(), y: node.y()}, snapSize);
+          var position: Coordinates = {x: node.x(), y: node.y()};
+
+          if (props.snapToGrid) {
+            position = snapToGrid({x: node.x(), y: node.y()}, snapSize)
+          }
 
           node.to({
-            x: snappedPosition.x,
-            y: snappedPosition.y,
+            x: position.x,
+            y: position.y,
             onFinish: () => {
               var snappedPositionInM = pxToStageMeters({x: node.attrs.x, y: node.attrs.y}, props.stageGeometry, METER_PX);
               props.updatePosition?.(snappedPositionInM.x, snappedPositionInM.y);

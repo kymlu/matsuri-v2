@@ -19,6 +19,7 @@ import { saveChoreo } from "../lib/dataAccess/DataController";
 import { addDancer } from "../lib/editor/commands/dancerCommands";
 import IconButton from "../components/basic/IconButton";
 import { ICON } from "../lib/consts/consts";
+import { AppSetting } from "../models/appSettings";
 
 const resizeDialog = Dialog.createHandle<ChoreoSection>();
 
@@ -30,6 +31,11 @@ export default function ChoreoEditPage(props: {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [selectedObjectStats, setSelectedObjectStats] = useState<SelectedObjectStats>({dancerCount: 0, propCount: 0});
   const [isAddingDancers, setIsAddingDancers] = useState<boolean>(false);
+  const [appSettings, setAppSettings] = useState<AppSetting>({
+    snapToGrid: true,
+    showGrid: true,
+    dancerDisplayType: "small",
+  });
 
   useEffect(() => {
     if (selectedIds.length > 0) setIsAddingDancers(false);
@@ -124,9 +130,20 @@ export default function ChoreoEditPage(props: {
             console.log("TODO: implement choice of pdf or mtr");
             exportToMtr(history.presentState.state);
           }}
+          changeShowGrid={() => {
+            setAppSettings(prev => {return {...prev, showGrid: !prev.showGrid}})
+          }}
+          changeSnap={() => {
+            setAppSettings(prev => {return {...prev, snapToGrid: !prev.snapToGrid}})
+          }}
+          changeDancerSize={(showLarge) => {
+            setAppSettings(prev => {return {...prev, dancerDisplayType: showLarge ? "large" : "small"}})
+          }}
+          appSettings={appSettings}
           />
         <MainStage
           canEdit
+          appSettings={appSettings}
           isAddingDancer={isAddingDancers}
           currentChoreo={history.presentState.state}
           currentSection={currentSection}
@@ -246,7 +263,7 @@ export default function ChoreoEditPage(props: {
         isAddingDancers &&
         <div className="absolute items-center w-max rounded-md flex gap-2 p-2 top-20 left-1/2 translate-x-[-50%] bg-white border border-primary">
           <span>
-            表に押下し、踊り子を追加する
+            グリッドを押して踊り子を追加する
           </span>
           <IconButton
             src={ICON.clearBlack}

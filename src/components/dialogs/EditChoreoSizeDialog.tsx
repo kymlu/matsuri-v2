@@ -1,11 +1,9 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { MIN_STAGE_DIMENSION, MAX_STAGE_DIMENSION, MIN_STAGE_MARGIN, MAX_STAGE_MARGIN, METER_PX } from "../../lib/consts/consts";
 import { Choreo, StageGeometry, StageType } from "../../models/choreo";
-import CustomDialog from "../basic/CustomDialog";
 import NumberInput from "../inputs/NumberInput";
-import Button, { ActionButton } from "../basic/Button";
 import BaseEditDialog from "./BaseEditDialog";
-import { KonvaNodeComponent, Stage } from "react-konva";
+import { Stage } from "react-konva";
 import GridLayer from "../grid/layers/GridLayer";
 
 interface EditChoreoMetaForm {
@@ -85,6 +83,7 @@ export default function EditChoreoSizeDialog(props: {
               stageGeometry &&
               <GridLayer
                 stageGeometry={stageGeometry}
+                showGridLines={true}
               />
             }
           </Stage>

@@ -7,11 +7,13 @@ import { useEffect, useState } from "react";
 interface GridLayerProps {
   stageGeometry: StageGeometry,
   gridSize?: number,
+  showGridLines: boolean,
 }
 
 export default function GridLayer({
   stageGeometry,
   gridSize,
+  showGridLines,
 }: GridLayerProps) {
   const [elements, setElements] = useState<any[]>([]);
   const gridSizePx = gridSize ?? METER_PX;
@@ -76,15 +78,17 @@ export default function GridLayer({
       const y = m * gridSizePx;
       const isMajor = m % 2 === 0;
     
-      elements.push(
-        <Line
-          key={`h-${m}`}
-          points={[0, y, totalWidthPx, y]}
-          stroke={colorPalette.lightGrey}
-          strokeWidth={1}
-          dash={isMajor ? [10, 6] : [4, 6]}
-        />
-      );
+      if (showGridLines) {
+        elements.push(
+          <Line
+            key={`h-${m}`}
+            points={[0, y, totalWidthPx, y]}
+            stroke={colorPalette.lightGrey}
+            strokeWidth={1}
+            dash={isMajor ? [10, 6] : [4, 6]}
+          />
+        );
+      }
     
       // Right-side meter labels
       // if stage, 0 at top of stage
@@ -110,38 +114,41 @@ export default function GridLayer({
     }
     
     // Vertical grid lines (across full area)
-    for (let m = 0; m <= margins.leftMargin + width + margins.rightMargin - gridOffsetMeters; m++) {
-      const x = m * gridSizePx + gridOffsetPx;
-    
-      const distFromCenter = Math.abs(
-        x - centerX
-      ) / gridSizePx;
-    
-      const isMajor = Math.round(distFromCenter) % 2 === 0;
-    
+    if(showGridLines){
+      for (let m = 0; m <= margins.leftMargin + width + margins.rightMargin - gridOffsetMeters; m++) {
+        const x = m * gridSizePx + gridOffsetPx;
+      
+        const distFromCenter = Math.abs(
+          x - centerX
+        ) / gridSizePx;
+      
+        const isMajor = Math.round(distFromCenter) % 2 === 0;
+      
+        elements.push(
+          <Line
+            key={`v-${m}`}
+            points={[x, 0, x, totalHeightPx]}
+            stroke={colorPalette.lightGrey}
+            strokeWidth={1}
+            dash={
+              isMajor ? [10, 6] : [4, 6]
+            }
+          />
+        );
+      }
+
+      // Center line
       elements.push(
         <Line
-          key={`v-${m}`}
-          points={[x, 0, x, totalHeightPx]}
-          stroke={colorPalette.lightGrey}
-          strokeWidth={1}
-          dash={
-            isMajor ? [10, 6] : [4, 6]
-          }
+          key="center-line"
+          points={[centerX, 0, centerX, totalHeightPx]}
+          stroke={colorPalette.primary}
+          strokeWidth={2}
+          dash={[10, 6]}
         />
       );
     }
     
-    // Center line
-    elements.push(
-      <Line
-        key="center-line"
-        points={[centerX, 0, centerX, totalHeightPx]}
-        stroke={colorPalette.primary}
-        strokeWidth={2}
-        dash={[10, 6]}
-      />
-    );
     
     // Draw main stage border
     elements.push(
@@ -205,7 +212,7 @@ export default function GridLayer({
       }
     }
     setElements(elements);
-  }, [stageGeometry]);
+  }, [stageGeometry, showGridLines]);
 
 
   return <Layer listening={false}>{elements}</Layer>;

@@ -1,5 +1,5 @@
 import { Coordinates } from "../../models/base";
-import { StageGeometry, YAxisDirection } from "../../models/choreo";
+import { StageGeometry } from "../../models/choreo";
 import { Dancer, DancerPosition } from "../../models/dancer";
 import { DancerAction } from "../../models/dancerAction";
 

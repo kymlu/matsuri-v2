@@ -7,6 +7,7 @@ import { ChoreoSection } from "../../models/choreoSection";
 import { DancerPosition } from "../../models/dancer";
 import { pxToStageMeters, snapToGrid } from "../../lib/helpers/editorCalculationHelper";
 import { METER_PX } from "../../lib/consts/consts";
+import { AppSetting } from "../../models/appSettings";
 
 export default function MainStage(props: {
   canEdit: boolean,
@@ -18,6 +19,7 @@ export default function MainStage(props: {
   selectedIds: string[],
   setSelectedIds: Dispatch<SetStateAction<string[]>>,
   addDancer?: (x: number, y: number) => void,
+  appSettings: AppSetting,
 }) {
   const [dancerPositions, setDancerPositions] = useState<DancerPosition[]>([]);
   const [stageGeometry, setStageGeometry] = useState<StageGeometry>();
@@ -197,14 +199,16 @@ export default function MainStage(props: {
           if (clickedOnEmpty) {
             props.setSelectedIds([]);
             if (props.isAddingDancer && stagePosition) {
-              var positionM = 
-                pxToStageMeters(
-                  snapToGrid({
-                    x: (e.evt.x - stagePosition.attrs.x)/stagePosition.attrs.scaleX,
-                    y: (e.evt.y - stagePosition.attrs.y)/stagePosition.attrs.scaleY
-                  }, METER_PX/2),
-                stageGeometry,
-                METER_PX);
+              var position = {
+                x: (e.evt.x - stagePosition.attrs.x)/stagePosition.attrs.scaleX,
+                y: (e.evt.y - stagePosition.attrs.y)/stagePosition.attrs.scaleY
+              }
+
+              if (props.appSettings.snapToGrid) {
+                position = snapToGrid(position, METER_PX/2)
+              }
+
+              var positionM = pxToStageMeters(position, stageGeometry, METER_PX);
               
               if (
                 positionM.x >= -(stageGeometry.margin.leftMargin) &&
@@ -228,7 +232,10 @@ export default function MainStage(props: {
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
         onDragEnd={handleDragEnd}>
-        <GridLayer stageGeometry={stageGeometry}/>
+        <GridLayer
+          stageGeometry={stageGeometry}
+          showGridLines={props.appSettings.showGrid}
+          />
         <FormationLayer
           canEdit={props.canEdit}
           geometry={stageGeometry}
@@ -238,6 +245,8 @@ export default function MainStage(props: {
           updateDancerPositions={props.updateDancerPositions}
           selectedIds={props.selectedIds}
           setSelectedIds={props.setSelectedIds}
+          snapToGrid={props.appSettings.snapToGrid}
+          dancerDisplayType={props.appSettings.dancerDisplayType}
           />
       </Stage>
     }

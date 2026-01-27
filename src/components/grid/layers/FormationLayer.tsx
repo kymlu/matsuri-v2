@@ -7,6 +7,7 @@ import { Dispatch, SetStateAction, useEffect, useRef } from "react";
 import { colorPalette } from "../../../lib/consts/colors";
 import { METER_PX } from "../../../lib/consts/consts";
 import { pxToStageMeters } from "../../../lib/helpers/editorCalculationHelper";
+import { DancerDisplayType } from "../../../models/appSettings";
 
 type FormationLayerProps = {
   canEdit: boolean,
@@ -17,6 +18,8 @@ type FormationLayerProps = {
   updateDancerPositions?: (dx: number, dy: number) => void,
   selectedIds: string[],
   setSelectedIds: Dispatch<SetStateAction<string[]>>,
+  snapToGrid?: boolean,
+  dancerDisplayType: DancerDisplayType,
 };
 
 export default function FormationLayer({
@@ -28,6 +31,8 @@ export default function FormationLayer({
   updateDancerPositions,
   selectedIds,
   setSelectedIds,
+  snapToGrid,
+  dancerDisplayType
 }: FormationLayerProps) {
 	const transformerRef = useRef<Konva.Transformer>(null);
 
@@ -82,6 +87,8 @@ export default function FormationLayer({
             isTransformerActive={selectedIds.length > 1}
             registerNode={registerNode}
             canEdit={canEdit}
+            snapToGrid={snapToGrid}
+            dancerDisplayType={dancerDisplayType}
           />
         );
       })}

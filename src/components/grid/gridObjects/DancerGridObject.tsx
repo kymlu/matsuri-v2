@@ -4,6 +4,8 @@ import { StageGeometry } from "../../../models/choreo";
 import BaseGridObject from "./BaseGridObject";
 import Konva from "konva";
 import { colorPalette } from "../../../lib/consts/colors";
+import { DancerDisplayType } from "../../../models/appSettings";
+import { METER_PX } from "../../../lib/consts/consts";
 
 export default function DancerGridObject (props: {
   dancer: Dancer,
@@ -15,6 +17,8 @@ export default function DancerGridObject (props: {
   registerNode: (id: string, node: Konva.Node | null) => void,
   isTransformerActive?: boolean,
   canEdit: boolean,
+  snapToGrid?: boolean,
+  dancerDisplayType: DancerDisplayType,
 }) {
   return <>
     {
@@ -24,27 +28,46 @@ export default function DancerGridObject (props: {
         draggable={props.canEdit}
         position={props.position}
         onClick={props.onClick}
-        updatePosition={(x, y) => {console.log(x, y); props.updatePosition?.(x, y);}}
+        updatePosition={(x, y) => {props.updatePosition?.(x, y);}}
         stageGeometry={props.stageGeometry}
         isSelected={props.isSelected}
         registerNode={props.registerNode}
         isTransformerActive={props.isTransformerActive}
+        snapToGrid={props.snapToGrid}
       >
         <Circle
-          radius={6}
+          radius={props.dancerDisplayType === "large" ? METER_PX * 0.45 : METER_PX * 0.2}
           fill="black"
           strokeEnabled={props.isSelected}
           stroke={colorPalette.primary}
         />
 
-        <Text
-          listening={false}
-          text={props.dancer.name}
-          fontSize={12}
-          fill="black"
-          offsetY={16}
-          offsetX={props.dancer.name.length * 3}
-        />
+        {
+          props.dancerDisplayType === "small" &&
+          <Text
+            listening={false}
+            text={props.dancer.name}
+            fontSize={METER_PX/2}
+            fill="black"
+            offsetY={METER_PX * 0.7}
+            offsetX={props.dancer.name.length * 3}
+          />
+        }
+        {
+          props.dancerDisplayType === "large" &&
+          <Text
+            listening={false}
+            x={-METER_PX/2}
+            y={-METER_PX/2}
+            width={METER_PX}
+            height={METER_PX}
+            verticalAlign="middle"
+            align="center"
+            text={props.dancer.name}
+            fontSize={METER_PX/3}
+            fill="white"
+          />
+        }
       </BaseGridObject>
     }
   </>

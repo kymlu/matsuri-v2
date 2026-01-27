@@ -3,6 +3,7 @@ import { ICON } from "../../lib/consts/consts";
 import IconButton from "../basic/IconButton";
 import { Choreo } from "../../models/choreo";
 import { Sidebar } from "./Sidebar";
+import { AppSetting } from "../../models/appSettings";
 
 export default function Header (props: {
   returnHome: () => void,
@@ -14,6 +15,10 @@ export default function Header (props: {
   editSize?: () => void,
   manageSections?: () => void,
   export?: () => void,
+  changeSnap?: () => void,
+  changeShowGrid?: () => void,
+  changeDancerSize?: (showLarge: boolean) => void,
+  appSettings: AppSetting,
 }) {
   return <header className="absolute top-0 z-10 flex items-center justify-between w-screen px-2 py-4 bg-gradient-to-b from-white to-transparent ">
     <IconButton
@@ -59,7 +64,11 @@ export default function Header (props: {
             editSize={props.editSize}
             manageSections={props.manageSections}
             export={props.export}
-            />
+            changeSnap={props.changeSnap}
+            changeShowGrid={props.changeShowGrid}
+            changeDancerSize={props.changeDancerSize}
+            appSettings={props.appSettings}
+          />
           {/* todo: add functions to the sidebar */}
         </Dialog.Root>
       }

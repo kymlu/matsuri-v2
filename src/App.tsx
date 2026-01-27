@@ -5,7 +5,6 @@ import { NewChoreoPage } from './pages/NewChoreoPage';
 import ChoreoEditPage from './pages/ChoreoEditPage';
 import ChoreoViewPage from './pages/ChoreoViewPage';
 import { Choreo } from './models/choreo';
-import { ChoreoSection } from './models/choreoSection';
 
 type Mode = "home" | "form" | "edit" | "view";
 

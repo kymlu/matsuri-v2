@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Choreo } from "../models/choreo";
 import { ChoreoSection, SelectedObjectStats } from "../models/choreoSection";
 import MainStage from "../components/grid/MainStage";
+import { AppSetting } from "../models/appSettings";
 
 export default function ChoreoEditPage(props: {
   goToHomePage: () => void
@@ -13,7 +14,12 @@ export default function ChoreoEditPage(props: {
   const [currentSection, setCurrentSection] = useState<ChoreoSection>(props.currentChoreo.sections[0]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [selectedObjectStats, setSelectedObjectStats] = useState<SelectedObjectStats>({dancerCount: 0, propCount: 0});
-
+  const [appSettings, setAppSettings] = useState<AppSetting>({
+    snapToGrid: true,
+    showGrid: true,
+    dancerDisplayType: "large",
+  });
+  
   useEffect(() => {
     setSelectedObjectStats({
       dancerCount: selectedIds.filter(id => props.currentChoreo.dancers[id]).length,
@@ -27,9 +33,14 @@ export default function ChoreoEditPage(props: {
         returnHome={props.goToHomePage}
         currentChoreo={props.currentChoreo}
         onDownload={() => {console.log("TODO: implement download")}}
+        changeShowGrid={() => {
+          setAppSettings(prev => {return {...prev, showGrid: !prev.showGrid}})
+        }}
+        appSettings={appSettings}
         />
       <div className="flex-1">
         <MainStage
+          appSettings={appSettings}
           canEdit={false}
           currentChoreo={props.currentChoreo}
           currentSection={currentSection}
