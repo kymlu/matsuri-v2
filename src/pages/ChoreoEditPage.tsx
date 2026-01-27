@@ -16,15 +16,17 @@ import { Dialog } from "@base-ui/react";
 import EditChoreoSizeDialog from "../components/dialogs/EditChoreoSizeDialog";
 import { exportToMtr } from "../lib/helpers/exportHelper";
 import { saveChoreo } from "../lib/dataAccess/DataController";
-import { addDancer } from "../lib/editor/commands/dancerCommands";
+import { addDancer, renameDancer } from "../lib/editor/commands/dancerCommands";
 import IconButton from "../components/basic/IconButton";
 import { ICON } from "../lib/consts/consts";
 import { AppSetting } from "../models/appSettings";
 import { changeStageGeometry, editChoreoInfo } from "../lib/editor/commands/choreoCommands";
 import EditChoreoInfoDialog from "../components/dialogs/EditChoreoInfoDialog";
+import EditDancerNameDialog from "../components/dialogs/EditDancerNameDialog";
 
 const resizeDialog = Dialog.createHandle<Choreo>();
 const editChoreoInfoDialog = Dialog.createHandle<string>();
+const renameDancerDialog = Dialog.createHandle<string>();
 
 export default function ChoreoEditPage(props: {
   goToHomePage: () => void,
@@ -114,6 +116,7 @@ export default function ChoreoEditPage(props: {
   // dialogs
   const [resizeDialogOpen, setResizeDialogOpen] = useState(false);
   const [editChoreoInfoDialogOpen, setEditChoreoInfoDialogOpen] = useState(false);
+  const [renameDancerDialogOpen, setRenameDancerDialogOpen] = useState(false);
   
   const handleResizeDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setResizeDialogOpen(isOpen);
@@ -121,6 +124,10 @@ export default function ChoreoEditPage(props: {
 
   const handleEditChoreoInfoDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setEditChoreoInfoDialogOpen(isOpen);
+  };
+
+  const handleRenameDancerDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
+    setRenameDancerDialogOpen(isOpen);
   };
 
   return (
@@ -197,7 +204,7 @@ export default function ChoreoEditPage(props: {
             isColorVisible={selectedObjectStats.dancerCount > 0 && selectedObjectStats.propCount === 0}
             swapPositions={() => {console.log("TODO")}}
             isSwapVisible={selectedObjectStats.dancerCount === 2 && selectedObjectStats.propCount === 0}
-            openRenameMenu={() => {console.log("TODO")}}
+            openRenameMenu={() => {setRenameDancerDialogOpen(true)}}
             isRenameVisible={selectedObjectStats.dancerCount === 1 && selectedObjectStats.propCount === 0}
           />
           <UndoRedoToolbar
@@ -310,6 +317,22 @@ export default function ChoreoEditPage(props: {
               commit: true});
             editChoreoInfoDialog.close();
             setEditChoreoInfoDialogOpen(false);
+          }}/>
+      </Dialog.Root>
+      <Dialog.Root
+        handle={renameDancerDialog}
+        open={renameDancerDialogOpen}
+        onOpenChange={handleRenameDancerDialogOpen}>
+        <EditDancerNameDialog
+          dancer={history.presentState.state.dancers[selectedIds[0]]}
+          onSubmit={(name) => {
+            dispatch({
+              type: "SET_STATE",
+              newState: renameDancer(history.presentState.state, selectedIds[0], name),
+              currentSectionId: currentSection.id,
+              commit: true});
+            renameDancerDialog.close();
+            setRenameDancerDialogOpen(false);
           }}/>
       </Dialog.Root>
     </div>
