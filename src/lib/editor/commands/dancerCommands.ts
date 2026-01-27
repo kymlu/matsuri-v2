@@ -1,6 +1,7 @@
 import { Choreo } from "../../../models/choreo"
 import { Formation } from "../../../models/choreoSection"
 import { Dancer } from "../../../models/dancer"
+import { colorPalette } from "../../consts/colors"
 
 export function addDancer(state: Choreo, dancer: Dancer, x: number, y: number): Choreo {
   const newDancers = { ...state.dancers, [dancer.id]: dancer }
@@ -12,10 +13,10 @@ export function addDancer(state: Choreo, dancer: Dancer, x: number, y: number): 
       dancerPositions: {
         ...section.formation.dancerPositions,
         [dancer.id]: {
-          id: crypto.randomUUID(),
           dancerId: dancer.id,
           x: x,
-          y: y
+          y: y,
+          color: colorPalette.rainbow.blue[0],
         }
       }
     } as Formation

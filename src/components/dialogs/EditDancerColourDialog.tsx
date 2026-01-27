@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import BaseEditDialog from "./BaseEditDialog";
 import { colorPalette } from "../../lib/consts/colors";
 import { strEquals } from "../../lib/helpers/globalHelper";
@@ -8,16 +8,10 @@ type colourMode = "all" | "current" | "currentAndAfter";
 
 export default function EditDancerColourDialog(props: {
   dancerIds: string[],
-  colours: string[],
   onSubmit: (colour: string, mode: colourMode) => void,
 }) {
   const [selectedColour, setSelectedColour] = useState("");
   const [mode, setMode] = useState<colourMode>("current");
-
-  useEffect(() => {
-    if (props.colours.length !== 1)
-    setSelectedColour(props.colours.length === 1 ? props.colours[0] : "");
-  }, [props.colours, props.dancerIds]);
 
   return <BaseEditDialog
     title="踊り子色変更"
@@ -25,17 +19,17 @@ export default function EditDancerColourDialog(props: {
     >
       <div className="flex gap-2 mb-2">
         <ActionButton
-          primary={mode == "current"}
+          primary={mode === "current"}
           onClick={() => setMode("current")}>
           現在
         </ActionButton>
         <ActionButton
-          primary={mode == "currentAndAfter"}
+          primary={mode === "currentAndAfter"}
           onClick={() => setMode("currentAndAfter")}>
           以後
         </ActionButton>
         <ActionButton
-          primary={mode == "all"}
+          primary={mode === "all"}
           onClick={() => setMode("all")}>
           すべて
         </ActionButton>

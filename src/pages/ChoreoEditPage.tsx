@@ -48,8 +48,8 @@ export default function ChoreoEditPage(props: {
     if (selectedIds.length > 0) setIsAddingDancers(false);
 
     setSelectedObjectStats({
-      dancerCount: selectedIds.filter(id => props.currentChoreo.dancers[id]).length,
-      propCount: selectedIds.filter(id => props.currentChoreo.props[id]).length,
+      dancerCount: selectedIds.filter(id => history.presentState.state.dancers[id]).length,
+      propCount: selectedIds.filter(id => history.presentState.state.props[id]).length,
     });
   }, [selectedIds]);
   
@@ -348,7 +348,6 @@ export default function ChoreoEditPage(props: {
         onOpenChange={handleEditDancerColourDialogOpen}>
         <EditDancerColourDialog
           dancerIds={selectedIds}
-          colours={Object.values(currentSection.formation.dancerPositions).map(x => x.color)}
           onSubmit={(color, mode) => {
             if (!isNullOrUndefinedOrBlank(color)) {
               switch (mode) {
