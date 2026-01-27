@@ -17,7 +17,15 @@ export function addSection(state: Choreo, id: string, name: string): Choreo {
           : {}
       } as ChoreoSection
     ]
-  }
+  };
+}
+
+export function duplicateSection(state: Choreo, section: ChoreoSection, index: number) {
+  console.log("Duplicating section", section.id, section.name);
+  var duplicatedSection = { ...section };
+  duplicatedSection.id = crypto.randomUUID();
+  const newSections = [ ...state.sections.slice(0, index), ...[duplicatedSection], ...state.sections.slice(index) ];
+  return { ...state, sections: newSections };
 }
 
 export function removeSection(state: Choreo, id: string): Choreo {
@@ -30,7 +38,7 @@ export function renameSection(state: Choreo, sectionId: string, newName: string)
   const newSections = state.sections.map(s =>
     s.id === sectionId ? { ...s, name: newName } : s
   )
-  return { ...state, sections: newSections }
+  return { ...state, sections: newSections };
 }
 
 export function editSectionNote(state: Choreo, sectionId: string, newNote: string): Choreo {
@@ -38,7 +46,7 @@ export function editSectionNote(state: Choreo, sectionId: string, newNote: strin
   const newSections = state.sections.map(s =>
     s.id === sectionId ? { ...s, note: newNote } : s
   )
-  return { ...state, sections: newSections }
+  return { ...state, sections: newSections };
 }
 
 export function reorderSections() {

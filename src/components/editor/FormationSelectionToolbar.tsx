@@ -23,6 +23,7 @@ export default function FormationSelectionToolbar(props: {
   onRename?: (section: ChoreoSection, name: string) => void,
   onAddNoteToSection?: (section: ChoreoSection, note: string) => void,
   onDeleteSection?: (section: ChoreoSection) => void,
+  onDuplicate?: (section: ChoreoSection, index: number) => void, // TODO
 }) {
   const [renameDialogOpen, setRenameDialogOpen] = React.useState(false);
   const [addNoteDialogOpen, setAddNoteDialogOpen] = React.useState(false);
@@ -40,9 +41,9 @@ export default function FormationSelectionToolbar(props: {
     setDeleteDialogOpen(isOpen);
   };
   
-  return <div className="flex gap-2 p-2 overflow-scroll ">
+  return <div className="flex w-screen gap-2 p-2 overflow-scroll ">
     {
-      props.sections.map((section) => 
+      props.sections.map((section, i) => 
         <React.Fragment key={section.id}>
           {
             (!strEquals(props.currentSectionId, section.id) || props.showAddButton !== true) &&
@@ -76,20 +77,23 @@ export default function FormationSelectionToolbar(props: {
               <div className="flex flex-col space-y-2">
                 <Dialog.Trigger handle={renameDialog} payload={section}>
                   <Button asDiv>
-                    Rename
+                    名前変更
                   </Button>
                 </Dialog.Trigger>
                 <Dialog.Trigger handle={addNoteDialog} payload={section}>
                   <Button asDiv>
-                    Add Note
+                    メモ追加
                   </Button>
                 </Dialog.Trigger>
+                <Button onClick={() => {props.onDuplicate?.(section, i)}}>
+                  複製
+                </Button>
                 {
                   props.sections.length > 1 &&
                   <Dialog.Trigger handle={deleteDialog} payload={section}>
                     <Button
                       asDiv>
-                      Delete
+                      削除
                     </Button>
                   </Dialog.Trigger>
                 }

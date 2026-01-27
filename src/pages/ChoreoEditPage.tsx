@@ -6,7 +6,7 @@ import { useEffect, useReducer, useState } from "react";
 import { historyReducer } from "../lib/editor/historyReducer";
 import { Choreo } from "../models/choreo";
 import { EditHistory } from "../models/history";
-import { addSection, editSectionNote, removeSection, renameSection } from "../lib/editor/commands/sectionCommands";
+import { addSection, duplicateSection, editSectionNote, removeSection, renameSection } from "../lib/editor/commands/sectionCommands";
 import { ChoreoSection, SelectedObjectStats } from "../models/choreoSection";
 import { strEquals } from "../lib/helpers/globalHelper";
 import MainStage from "../components/grid/MainStage";
@@ -211,6 +211,15 @@ export default function ChoreoEditPage(props: {
               dispatch({
                 type: "SET_STATE",
                 newState: editSectionNote(history.presentState.state, section.id, note),
+                currentSectionId: currentSection.id,
+                commit: true,
+              });
+            }}
+            onDuplicate={(section, index) => {
+              setSelectedIds([]);
+              dispatch({
+                type: "SET_STATE",
+                newState: duplicateSection(history.presentState.state, section, index),
                 currentSectionId: currentSection.id,
                 commit: true,
               });
