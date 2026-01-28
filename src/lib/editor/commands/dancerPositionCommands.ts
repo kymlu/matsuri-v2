@@ -1,4 +1,5 @@
 import { Choreo } from "../../../models/choreo"
+import { DancerPosition } from "../../../models/dancer"
 import { strEquals } from "../../helpers/globalHelper"
 
 /**
@@ -148,5 +149,40 @@ export function changeDancerColorAll(
       )
     }
   }))
+  return { ...state, sections: newSections }
+}
+
+export function pasteDancerPositions(
+  state: Choreo,
+  sectionId: string,
+  dancePositions: Record<string, DancerPosition>,
+): Choreo {
+  console.log("Pasting positions");
+
+  const newSections = state.sections.map(section => {
+    if (!strEquals(section.id, sectionId)) return section;
+
+    var newDancerPositions = { ...section.formation.dancerPositions };
+
+    Object.entries(dancePositions).forEach(position => {
+      var oldPosition = newDancerPositions[position[0]];
+      
+      if (oldPosition) {
+        newDancerPositions[position[0]] = {
+          ...position[1],
+          sectionId: sectionId,
+        }
+      }
+    })
+
+    return {
+      ...section,
+      formation: {
+        ...section.formation,
+        dancerPositions: newDancerPositions,
+      }
+    }
+  })
+
   return { ...state, sections: newSections }
 }

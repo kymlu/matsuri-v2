@@ -2,12 +2,13 @@ import { useState } from "react";
 import { ICON } from "../../lib/consts/consts";
 import IconButton from "../basic/IconButton";
 import { VerticalDivider } from "../basic/Divider";
-import { colorPalette } from "../../lib/consts/colors";
 
 type ToolbarProps = {
   onAddDancer: () => void,
-  onCopyPosition?: () => void, // TODO
-  onPastePosition?: () => void, // TODO
+  showCopyPosition?: boolean,
+  onCopyPosition?: () => void,
+  showPastePosition?: boolean,
+  onPastePosition?: () => void,
   showSelectDancer?: boolean,
   onSelectColor?: () => void,
   onSelectType?: () => void,
@@ -25,7 +26,9 @@ export default function Toolbar ({
   onChangeColor,
   onSelectColor,
   onSelectType,
+  showCopyPosition,
   onCopyPosition,
+  showPastePosition,
   onPastePosition,
 }: ToolbarProps) {
   const [isArrangeVisible, setIsArrangeVisible] = useState<boolean>(false);
@@ -77,10 +80,10 @@ export default function Toolbar ({
           <>
             <IconButton src={ICON.personAddBlack} label="追加" alt="Add dancer" onClick={() => {onAddDancer()}} />
             <IconButton disabled={!showDancerColor} src={ICON.colorsBlack} label="色" alt="Change colours" onClick={() => {onChangeColor?.()}} />
-            <IconButton disabled={!showSelectDancer} src={ICON.selectAllBlack} label="全選択" alt="Select all" onClick={() => {onSelectType?.()}} />
+            <IconButton src={ICON.selectAllBlack} label="全選択" alt="Select all" onClick={() => {onSelectType?.()}} />
             <IconButton disabled={!showSelectDancer} src={ICON.selectAllBlack} label="色選択" alt="Select colour" onClick={() => {onSelectColor?.()}} />
-            <IconButton src={ICON.horizontalDistributeBlack} label="コピー" alt="Copy" onClick={() => {onCopyPosition?.()}} />
-            <IconButton src={ICON.horizontalDistributeBlack} label="ペースト" alt="Paste" onClick={() => {onPastePosition?.()}} />
+            <IconButton src={ICON.horizontalDistributeBlack} disabled={!showCopyPosition} label="コピー" alt="Copy" onClick={() => {onCopyPosition?.()}} />
+            <IconButton src={ICON.horizontalDistributeBlack} disabled={!showPastePosition} label="ペースト" alt="Paste" onClick={() => {onPastePosition?.()}} />
           </>
         }
         {

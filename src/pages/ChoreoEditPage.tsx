@@ -2,7 +2,7 @@ import Toolbar from "../components/editor/Toolbar"
 import Header from "../components/editor/Header"
 import FormationSelectionToolbar from "../components/editor/FormationSelectionToolbar";
 import UndoRedoToolbar from "../components/editor/UndoRedoToolbar";
-import { useEffect, useReducer, useState } from "react";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { historyReducer } from "../lib/editor/historyReducer";
 import { Choreo } from "../models/choreo";
 import { EditHistory } from "../models/history";
@@ -10,7 +10,7 @@ import { addSection, duplicateSection, editSectionNote, removeSection, renameSec
 import { ChoreoSection, SelectedObjectStats } from "../models/choreoSection";
 import { isNullOrUndefinedOrBlank, strEquals } from "../lib/helpers/globalHelper";
 import MainStage from "../components/grid/MainStage";
-import { changeDancerColorAll, changeDancerColorCurrent, changeDancerColorCurrentAndFuture, moveDancerPositions, moveDancerPositionsDelta } from "../lib/editor/commands/dancerPositionCommands";
+import { changeDancerColorAll, changeDancerColorCurrent, changeDancerColorCurrentAndFuture, moveDancerPositions, moveDancerPositionsDelta, pasteDancerPositions } from "../lib/editor/commands/dancerPositionCommands";
 import ObjectToolbar from "../components/editor/ObjectToolbar";
 import { Dialog } from "@base-ui/react";
 import EditChoreoSizeDialog from "../components/dialogs/EditChoreoSizeDialog";
@@ -24,6 +24,7 @@ import { changeStageGeometry, editChoreoInfo } from "../lib/editor/commands/chor
 import EditChoreoInfoDialog from "../components/dialogs/EditChoreoInfoDialog";
 import EditDancerNameDialog from "../components/dialogs/EditDancerNameDialog";
 import EditDancerColourDialog from "../components/dialogs/EditDancerColourDialog";
+import { DancerPosition } from "../models/dancer";
 
 const resizeDialog = Dialog.createHandle<Choreo>();
 const editChoreoInfoDialog = Dialog.createHandle<string>();
@@ -60,6 +61,8 @@ export default function ChoreoEditPage(props: {
       redoStack: [],
     } as EditHistory<Choreo>);
 
+  const [copyBuffer, setCopyBuffer] = useState<Record<string, DancerPosition>>({});
+
   useEffect(() => {
     var newSection = history.presentState.state.sections.find(s => strEquals(s.id, history.presentState.currentSectionId));
     
@@ -88,32 +91,101 @@ export default function ChoreoEditPage(props: {
       }
 
       if (e.key === "z") {
-        e.preventDefault();
         // UNDO
+        e.preventDefault();
         dispatch({ type: "UNDO" });
-      }
-
-      if (e.key === "y") {
-        e.preventDefault();
+      } else if (e.key === "y") {
         // REDO
-        dispatch({ type: "REDO" });
-      }
-
-      if (e.key === "s") {
         e.preventDefault();
+        dispatch({ type: "REDO" });
+      } else if (e.key === "s") {
         // SAVE
-        onSave();
+        e.preventDefault();
+        onSaveRef.current();
+      } else if (e.key === "c") {
+        // COPY
+        e.preventDefault();
+        onCopyRef.current();
+      } else if (e.key === "v") {
+        // PASTE
+        e.preventDefault();
+        onPasteRef.current();
       }
     }
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, []);
+  }, [dispatch]);
 
-  const onSave = () => {
+  const onSave = useCallback(() => {
     console.log("Saving state to db: ", history.presentState.state);
     saveChoreo(history.presentState.state, () => {});
-  }
+  }, [history.presentState.state, saveChoreo]);
+
+  const onCopy = useCallback(() => {
+    if (selectedIds.length === 0) {
+      console.log("Emptying copy buffer");
+      setCopyBuffer({});
+      return;
+    }
+
+    const copyRecord: Record<string, DancerPosition> = {};
+
+    selectedIdsRef.current.forEach(id => {
+      const dancerPosition = currentSection.formation.dancerPositions[id];
+      if (dancerPosition) {
+        copyRecord[id] = dancerPosition;
+      }
+    });
+
+    setCopyBuffer({ ...copyRecord });
+    console.log("New copy buffer", copyRecord);
+  }, [
+    selectedIds,
+    currentSection.formation.dancerPositions,
+    setCopyBuffer,
+  ]);
+
+  const onPaste = useCallback(() => {
+    console.log("Pasting", copyBuffer, "to", currentSection.id);
+
+    dispatch({
+      type: "SET_STATE",
+      newState: pasteDancerPositions(
+        history.presentState.state,
+        currentSection.id,
+        copyBuffer
+      ),
+      currentSectionId: currentSection.id,
+      commit: true,
+    });
+  }, [
+    dispatch,
+    history.presentState.state,
+    currentSection.id,
+    copyBuffer,
+  ]);
+
+  const onSaveRef = useRef(onSave);
+  const onCopyRef = useRef(onCopy);
+  const onPasteRef = useRef(onPaste);
+  const selectedIdsRef = useRef(selectedIds);
+
+  useEffect(() => {
+    onSaveRef.current = onSave;
+  }, [onSave]);
+  
+  useEffect(() => {
+    onCopyRef.current = onCopy;
+  }, [onCopy]);
+
+  useEffect(() => {
+    onPasteRef.current = onPaste;
+  }, [onPaste]);
+
+  useEffect(() => {
+    selectedIdsRef.current = selectedIds;
+  }, [selectedIds]);
 
   // dialogs
   const [resizeDialogOpen, setResizeDialogOpen] = useState(false);
@@ -282,8 +354,10 @@ export default function ChoreoEditPage(props: {
         }}
         showDancerColor={selectedObjectStats.dancerCount > 0}
         onChangeColor={() => {setEditDancerColourDialogOpen(true)}}
-        onCopyPosition={() => {console.log("TODO")}}
-        onPastePosition={() => {console.log("TODO")}}
+        showCopyPosition={selectedIds.length > 0}
+        onCopyPosition={() => {onCopy()}}
+        showPastePosition={Object.keys(copyBuffer).length > 0}
+        onPastePosition={() => {onPaste()}}
         showSelectDancer={selectedObjectStats.dancerCount > 0}
         onSelectColor={() => {
           var positions = Object.entries(currentSection.formation.dancerPositions);

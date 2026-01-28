@@ -27,8 +27,6 @@ export default function PositionHint (props: {
       displayX = "→" + Math.abs(xFromCenter);
     }
 
-    console.log(props.geometry.yAxis, props.position.y)
-
     var displayY = props.position.y;
 
     setCurrentPositionString(`${displayY}m/${displayX}m`);
