@@ -298,7 +298,7 @@ export default function ChoreoEditPage(props: {
         isAddingDancers &&
         <div className="absolute items-center w-max rounded-md flex gap-2 p-2 top-20 left-1/2 translate-x-[-50%] bg-white border border-primary">
           <span>
-            グリッドを押して踊り子を追加する
+            グリッドを押してダンサーを追加する
           </span>
           <IconButton
             src={ICON.clearBlack}

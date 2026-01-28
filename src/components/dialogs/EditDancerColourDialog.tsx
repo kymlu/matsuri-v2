@@ -14,7 +14,7 @@ export default function EditDancerColourDialog(props: {
   const [mode, setMode] = useState<colourMode>("current");
 
   return <BaseEditDialog
-    title="踊り子色変更"
+    title="ダンサー色変更"
     onSubmit={() => { props.onSubmit(selectedColour, mode) }}
     >
       <div className="flex gap-2 mb-2">

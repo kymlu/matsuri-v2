@@ -44,13 +44,13 @@ export function Sidebar (props: {
         {
           props.editSize &&
           <>
-            <Button onClick={props.editSize}>Edit Size</Button>
+            <Button onClick={props.editSize}>舞台サイズを変更</Button>
             <Divider/>
           </>
         }
         {
           props.manageSections &&
-          <Button onClick={props.manageSections}>Manage Sections</Button>
+          <Button onClick={props.manageSections}>セクション編集</Button>
         }
         {
           props.changeSnap &&
@@ -62,11 +62,11 @@ export function Sidebar (props: {
         }
         {
           props.changeDancerSize &&
-          <CustomSwitch label="踊り子大きい" defaultChecked={props.appSettings.dancerDisplayType === "large"} onChange={props.changeDancerSize}/>
+          <CustomSwitch label="大きいダンサー" defaultChecked={props.appSettings.dancerDisplayType === "large"} onChange={props.changeDancerSize}/>
         }
         {
           props.export &&
-          <Button onClick={props.export}>Export</Button>
+          <Button onClick={props.export}>エクスポート</Button>
         }
       </div>
     </Dialog.Popup>

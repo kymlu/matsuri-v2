@@ -40,7 +40,7 @@ export default function Toolbar ({
     {
       !isSubmenuOpen &&
       <>
-        <IconButton src={ICON.personBlack} label="踊り子" alt="Dancer Management" onClick={()=>{setIsDancerManagerVisible(true)}}/>
+        <IconButton src={ICON.personBlack} label="ダンサー" alt="Dancer Management" onClick={()=>{setIsDancerManagerVisible(true)}}/>
         <IconButton src={ICON.addBlack} label="整理" alt="Add" onClick={()=>{setIsArrangeVisible(true)}}/>
         <IconButton src={ICON.categoryBlack} label="カウント" alt="Add" onClick={()=>{setIsActionManagerVisible(true)}}/>
         <IconButton src={ICON.flagBlack} label="道具" alt="Props" onClick={()=>{setIsPropManagerVisible(true)}}/>

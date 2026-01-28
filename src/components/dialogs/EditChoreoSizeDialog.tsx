@@ -74,7 +74,7 @@ export default function EditChoreoSizeDialog(props: {
 
   return <BaseEditDialog
     full
-    title="設定"
+    title="舞台サイズを変更"
     onClose={() => {
       setForm({
         name: props.currentChoreo.name,

@@ -97,7 +97,7 @@ export function NewChoreoPage(props: {
   const stepTitles: Record<number, string> = {
     1: "隊列基本情報",
     2: "舞台情報",
-    3: "踊り子情報",
+    3: "ダンサー情報",
   };
 
   const stageTypes: Record<StageType, string> = {
@@ -172,7 +172,7 @@ export function NewChoreoPage(props: {
               step={1}
               buttonStep={1}
               onChange={(newValue) => {handleChange("dancerCount", Number(newValue))}}
-              label="踊り子数"
+              label="ダンサー数"
             />
           </div>
         )}

@@ -15,7 +15,7 @@ export default function EditDancerNameDialog(props: {
   }, [props.dancer]);
 
   return <BaseEditDialog
-    title="踊り子名前変更"
+    title="ダンサー名前変更"
     onSubmit={() => { props.onSubmit(name) }}
     isActionButtonDisabled={isNullOrUndefinedOrBlank(name)}
     >
