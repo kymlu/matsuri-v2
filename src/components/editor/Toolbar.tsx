@@ -51,7 +51,7 @@ export default function Toolbar ({
       !isSubmenuOpen &&
       <>
         <IconButton src={ICON.personBlack} label="ダンサー" alt="Dancer Management" onClick={()=>{setIsDancerManagerVisible(true)}}/>
-        <IconButton src={ICON.addBlack} label="整理" alt="Add" onClick={()=>{setIsArrangeVisible(true)}}/>
+        <IconButton src={ICON.straightenBlack} label="整理" alt="Add" onClick={()=>{setIsArrangeVisible(true)}}/>
         <IconButton src={ICON.categoryBlack} label="カウント" alt="Add" onClick={()=>{setIsActionManagerVisible(true)}}/>
         <IconButton src={ICON.flagBlack} label="道具" alt="Props" onClick={()=>{setIsPropManagerVisible(true)}}/>
       </>
@@ -89,8 +89,8 @@ export default function Toolbar ({
             <IconButton disabled={!showDancerColor} src={ICON.colorsBlack} label="色" alt="Change colours" onClick={() => {onChangeColor?.()}} />
             <IconButton src={ICON.selectAllBlack} label="全選択" alt="Select all" onClick={() => {onSelectType?.()}} />
             <IconButton disabled={!showSelectDancer} src={ICON.selectAllBlack} label="色選択" alt="Select colour" onClick={() => {onSelectColor?.()}} />
-            <IconButton src={ICON.horizontalDistributeBlack} disabled={!showCopyPosition} label="コピー" alt="Copy" onClick={() => {onCopyPosition?.()}} />
-            <IconButton src={ICON.horizontalDistributeBlack} disabled={!showPastePosition} label="ペースト" alt="Paste" onClick={() => {onPastePosition?.()}} />
+            <IconButton src={ICON.contentCopyBlack} disabled={!showCopyPosition} label="コピー" alt="Copy" onClick={() => {onCopyPosition?.()}} />
+            <IconButton src={ICON.contentPasteBlack} disabled={!showPastePosition} label="ペースト" alt="Paste" onClick={() => {onPastePosition?.()}} />
           </>
         }
         {
