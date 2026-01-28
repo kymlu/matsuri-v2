@@ -3,7 +3,7 @@ import PositionHint from "../components/editor/PositionHint";
 import FormationSelectionToolbar from "../components/editor/FormationSelectionToolbar";
 import { useEffect, useState } from "react";
 import { Choreo } from "../models/choreo";
-import { ChoreoSection, SelectedObjectStats } from "../models/choreoSection";
+import { ChoreoSection, SelectedObjects } from "../models/choreoSection";
 import MainStage from "../components/grid/MainStage";
 import { AppSetting } from "../models/appSettings";
 import { strEquals } from "../lib/helpers/globalHelper";
@@ -15,7 +15,7 @@ export default function ChoreoEditPage(props: {
   const [currentSection, setCurrentSection] = useState<ChoreoSection>(props.currentChoreo.sections[0]);
   const [nextSection, setNextSection] = useState<ChoreoSection | undefined>();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [selectedObjectStats, setSelectedObjectStats] = useState<SelectedObjectStats>({dancerCount: 0, propCount: 0});
+  const [selectedObjects, setSelectedObjects] = useState<SelectedObjects>({dancers: [], props: []});
   const [appSettings, setAppSettings] = useState<AppSetting>({
     snapToGrid: true,
     showGrid: true,
@@ -23,9 +23,9 @@ export default function ChoreoEditPage(props: {
   });
   
   useEffect(() => {
-    setSelectedObjectStats({
-      dancerCount: selectedIds.filter(id => props.currentChoreo.dancers[id]).length,
-      propCount: selectedIds.filter(id => props.currentChoreo.props[id]).length,
+    setSelectedObjects({
+      dancers: Object.entries(currentSection.formation.dancerPositions).filter(x => selectedIds.includes(x[0])).map(x => x[1]),
+      props: Object.entries(currentSection.formation.propPositions).filter(x => selectedIds.includes(x[0])).map(x => x[1]),
     });
   }, [selectedIds]);
 
@@ -57,8 +57,8 @@ export default function ChoreoEditPage(props: {
         <div className="absolute bottom-0 z-10">
           {
             selectedIds.length > 0 &&
-            selectedObjectStats.dancerCount === 1 &&
-            selectedObjectStats.propCount === 0 &&
+            selectedObjects.dancers.length === 1 &&
+            selectedObjects.props.length === 0 &&
             props.currentChoreo.dancers[selectedIds[0]] !== undefined &&
             <PositionHint
               dancer={props.currentChoreo.dancers[selectedIds[0]]}

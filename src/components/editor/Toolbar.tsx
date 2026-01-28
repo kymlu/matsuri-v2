@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ICON } from "../../lib/consts/consts";
 import IconButton from "../basic/IconButton";
 import { VerticalDivider } from "../basic/Divider";
+import { Distribution, HorizontalAlignment, VerticalAlignment } from "../../models/alignment";
 
 type ToolbarProps = {
   onAddDancer: () => void,
@@ -14,6 +15,9 @@ type ToolbarProps = {
   onSelectType?: () => void,
   showDancerColor?: boolean,
   onChangeColor?: () => void,
+  onVerticalAlign?: (alignment: VerticalAlignment) => void,
+  onHorizontalAlign?: (alignment: HorizontalAlignment) => void,
+  onDistribute?: (distribution: Distribution) => void,
   onSwapPosition?: () => void, // TODO
   onEditName?: () => void, // TODO
   onDeleteDancer?: () => void, // TODO
@@ -30,6 +34,9 @@ export default function Toolbar ({
   onCopyPosition,
   showPastePosition,
   onPastePosition,
+  onVerticalAlign,
+  onHorizontalAlign,
+  onDistribute,
 }: ToolbarProps) {
   const [isArrangeVisible, setIsArrangeVisible] = useState<boolean>(false);
   const [isColorVisible, setIsColorVisible] = useState<boolean>(false);
@@ -63,16 +70,16 @@ export default function Toolbar ({
         {
           isArrangeVisible && 
           <>
-            <IconButton src={ICON.alignHorizontalLeftBlack} label="左" alt="Align Left" onClick={() => {}} />
-            <IconButton src={ICON.alignHorizontalCenterBlack} label="横中" alt="Align Horizontal Center" onClick={() => {}} />
-            <IconButton src={ICON.alignHorizontalRightBlack} label="右" alt="Align Right" onClick={() => {}} />
+            <IconButton src={ICON.alignHorizontalLeftBlack} label="左" alt="Align Left" onClick={() => {onHorizontalAlign?.("left")}} />
+            <IconButton src={ICON.alignHorizontalCenterBlack} label="横中" alt="Align Horizontal Center" onClick={() => {onHorizontalAlign?.("centre")}} />
+            <IconButton src={ICON.alignHorizontalRightBlack} label="右" alt="Align Right" onClick={() => {onHorizontalAlign?.("right")}} />
             <VerticalDivider/>
-            <IconButton src={ICON.alignVerticalTopBlack} label="上" alt="Align Top" onClick={() => {}} />
-            <IconButton src={ICON.alignVerticalCenterBlack} label="縦中" alt="Align Vertical Center" onClick={() => {}} />
-            <IconButton src={ICON.alignVerticalBottomBlack} label="下" alt="Align Bottom" onClick={() => {}} />
+            <IconButton src={ICON.alignVerticalTopBlack} label="上" alt="Align Top" onClick={() => {onVerticalAlign?.("top")}} />
+            <IconButton src={ICON.alignVerticalCenterBlack} label="縦中" alt="Align Vertical Center" onClick={() => {onVerticalAlign?.("centre")}} />
+            <IconButton src={ICON.alignVerticalBottomBlack} label="下" alt="Align Bottom" onClick={() => {onVerticalAlign?.("bottom")}} />
             <VerticalDivider/>
-            <IconButton src={ICON.verticalDistributeBlack} label="縦均" alt="Distribute Vertically" onClick={() => {}} />
-            <IconButton src={ICON.horizontalDistributeBlack} label="横均" alt="Distribute Horizontally" onClick={() => {}} />
+            <IconButton src={ICON.verticalDistributeBlack} label="縦均" alt="Distribute Vertically" onClick={() => {onDistribute?.("y")}} />
+            <IconButton src={ICON.horizontalDistributeBlack} label="横均" alt="Distribute Horizontally" onClick={() => {onDistribute?.("x")}} />
           </>
         }
         {

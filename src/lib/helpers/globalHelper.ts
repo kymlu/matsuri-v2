@@ -51,3 +51,14 @@ export function groupByKey<T extends Record<string, any>, K extends keyof T>(
     return acc;
   }, {} as Record<string, T[]>);
 }
+
+export function indexByKey<T extends Record<string, any>, K extends keyof T>(
+  items: T[],
+  key: K
+): Record<string, T> {
+  return items.reduce((acc, item) => {
+    const groupKey = item[key];
+    acc[groupKey] = item; // overwrite if duplicate key
+    return acc;
+  }, {} as Record<string, T>);
+}

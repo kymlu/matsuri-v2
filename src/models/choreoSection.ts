@@ -22,9 +22,9 @@ export const ChoreoSectionSchema = BaseModelSchema.extend({
 
 export type ChoreoSection = z.infer<typeof ChoreoSectionSchema>;
 
-export const SelectedObjectStatsSchema = z.object({
-  dancerCount: z.number().nonnegative(),
-  propCount: z.number().nonnegative(),
+export const SelectedObjectsSchema = z.object({
+  dancers: z.array(DancerPositionSchema),
+  props: z.array(PropPositionSchema),
 });
 
-export type SelectedObjectStats = z.infer<typeof SelectedObjectStatsSchema>;
+export type SelectedObjects = z.infer<typeof SelectedObjectsSchema>;

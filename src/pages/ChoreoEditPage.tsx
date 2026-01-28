@@ -7,10 +7,10 @@ import { historyReducer } from "../lib/editor/historyReducer";
 import { Choreo } from "../models/choreo";
 import { EditHistory } from "../models/history";
 import { addSection, duplicateSection, editSectionNote, removeSection, renameSection } from "../lib/editor/commands/sectionCommands";
-import { ChoreoSection, SelectedObjectStats } from "../models/choreoSection";
+import { ChoreoSection, SelectedObjects } from "../models/choreoSection";
 import { isNullOrUndefinedOrBlank, strEquals } from "../lib/helpers/globalHelper";
 import MainStage from "../components/grid/MainStage";
-import { changeDancerColorAll, changeDancerColorCurrent, changeDancerColorCurrentAndFuture, moveDancerPositions, moveDancerPositionsDelta, pasteDancerPositions } from "../lib/editor/commands/dancerPositionCommands";
+import { alignHorizontalPositions, alignVerticalPositions, changeDancerColorAll, changeDancerColorCurrent, changeDancerColorCurrentAndFuture, distributePositions, moveDancerPositions, moveDancerPositionsDelta, pasteDancerPositions } from "../lib/editor/commands/dancerPositionCommands";
 import ObjectToolbar from "../components/editor/ObjectToolbar";
 import { Dialog } from "@base-ui/react";
 import EditChoreoSizeDialog from "../components/dialogs/EditChoreoSizeDialog";
@@ -37,7 +37,7 @@ export default function ChoreoEditPage(props: {
 }) {
   const [currentSection, setCurrentSection] = useState<ChoreoSection>(props.currentChoreo.sections[0]);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [selectedObjectStats, setSelectedObjectStats] = useState<SelectedObjectStats>({dancerCount: 0, propCount: 0});
+  const [selectedObjects, setSelectedObjects] = useState<SelectedObjects>({dancers: [], props: []});
   const [isAddingDancers, setIsAddingDancers] = useState<boolean>(false);
   const [appSettings, setAppSettings] = useState<AppSetting>({
     snapToGrid: true,
@@ -48,9 +48,9 @@ export default function ChoreoEditPage(props: {
   useEffect(() => {
     if (selectedIds.length > 0) setIsAddingDancers(false);
 
-    setSelectedObjectStats({
-      dancerCount: selectedIds.filter(id => history.presentState.state.dancers[id]).length,
-      propCount: selectedIds.filter(id => history.presentState.state.props[id]).length,
+    setSelectedObjects({
+      dancers: Object.entries(currentSection.formation.dancerPositions).filter(x => selectedIds.includes(x[0])).map(x => x[1]),
+      props: Object.entries(currentSection.formation.propPositions).filter(x => selectedIds.includes(x[0])).map(x => x[1]),
     });
   }, [selectedIds]);
   
@@ -278,13 +278,13 @@ export default function ChoreoEditPage(props: {
         <div className="absolute bottom-0 z-10">
           <ObjectToolbar
             openArrangeMenu={() => {console.log("TODO")}}
-            isArrangeVisible={(selectedObjectStats.dancerCount + selectedObjectStats.propCount) > 1}
+            isArrangeVisible={(selectedObjects.dancers.length + selectedObjects.props.length) > 0}
             openColorMenu={() => {setEditDancerColourDialogOpen(true)}}
-            isColorVisible={selectedObjectStats.dancerCount > 0 && selectedObjectStats.propCount === 0}
+            isColorVisible={selectedObjects.dancers.length > 0 && selectedObjects.props.length === 0}
             swapPositions={() => {console.log("TODO")}}
-            isSwapVisible={selectedObjectStats.dancerCount === 2 && selectedObjectStats.propCount === 0}
+            isSwapVisible={selectedObjects.dancers.length === 2 && selectedObjects.props.length === 0}
             openRenameMenu={() => {setRenameDancerDialogOpen(true)}}
-            isRenameVisible={selectedObjectStats.dancerCount === 1 && selectedObjectStats.propCount === 0}
+            isRenameVisible={selectedObjects.dancers.length === 1 && selectedObjects.props.length === 0}
           />
           <UndoRedoToolbar
             undo={() => {dispatch({type: "UNDO"})}}
@@ -352,13 +352,13 @@ export default function ChoreoEditPage(props: {
           setSelectedIds([]);
           setIsAddingDancers(true);
         }}
-        showDancerColor={selectedObjectStats.dancerCount > 0}
+        showDancerColor={selectedObjects.dancers.length > 0}
         onChangeColor={() => {setEditDancerColourDialogOpen(true)}}
         showCopyPosition={selectedIds.length > 0}
         onCopyPosition={() => {onCopy()}}
         showPastePosition={Object.keys(copyBuffer).length > 0}
         onPastePosition={() => {onPaste()}}
-        showSelectDancer={selectedObjectStats.dancerCount > 0}
+        showSelectDancer={selectedObjects.dancers.length > 0}
         onSelectColor={() => {
           var positions = Object.entries(currentSection.formation.dancerPositions);
           var currentColours = new Set(positions.filter(x => selectedIds.includes(x[0])).map(x => x[1].color));
@@ -366,6 +366,30 @@ export default function ChoreoEditPage(props: {
         }}
         onSelectType={() => {
           setSelectedIds(Object.keys(currentSection.formation.dancerPositions));
+        }}
+        onDistribute={(distribution) => {
+          dispatch({
+            type: "SET_STATE",
+            newState: distributePositions(history.presentState.state, currentSection.id, selectedObjects.dancers, distribution),
+            currentSectionId: currentSection.id,
+            commit: true,
+          })
+        }}
+        onHorizontalAlign={(alignment) => {
+          dispatch({
+            type: "SET_STATE",
+            newState: alignHorizontalPositions(history.presentState.state, currentSection.id, selectedObjects.dancers, alignment),
+            currentSectionId: currentSection.id,
+            commit: true,
+          })
+        }}
+        onVerticalAlign={(alignment) => {
+          dispatch({
+            type: "SET_STATE",
+            newState: alignVerticalPositions(history.presentState.state, currentSection.id, selectedObjects.dancers, alignment),
+            currentSectionId: currentSection.id,
+            commit: true,
+          })
         }}
       />
       {
