@@ -22,7 +22,7 @@ export function Sidebar (props: {
   return <Dialog.Portal>
     <Dialog.Backdrop className="fixed inset-0 bg-black transition-all duration-150 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 opacity-20 z-20" />
     <Dialog.Popup className="fixed w-4/5 h-full bg-white overflow-hidden right-0 z-30 top-0 min-w-64 max-w-[calc(100vw-3rem)]bg-gray-50 p-6 text-gray-900 transition-all duration-150 data-[ending-style]:scale-90 data-[ending-style]:opacity-0 data-[starting-style]:scale-90 data-[starting-style]:opacity-0">
-      <div className="flex flex-col h-full min-h-0 overflow-y-auto">
+      <div className="flex flex-col h-full min-h-0 gap-2 overflow-y-auto">
         <div className="flex items-center gap-2">
           <div className="flex flex-col">
             <span className="text-lg font-bold">
@@ -40,18 +40,21 @@ export function Sidebar (props: {
             onClick={props.editName}
           />
         </div>
-        <Divider/>
         {
           props.editSize &&
           <>
             <Button onClick={props.editSize}>舞台サイズを変更</Button>
-            <Divider/>
           </>
         }
         {
           props.manageSections &&
           <Button onClick={props.manageSections}>セクション編集</Button>
         }
+        {
+          props.export &&
+          <Button onClick={props.export}>エクスポート</Button>
+        }
+        <Divider/>
         {
           props.changeSnap &&
           <CustomSwitch label="グリッドにスナップ" defaultChecked={props.appSettings.snapToGrid} onChange={props.changeSnap}/>
@@ -63,10 +66,6 @@ export function Sidebar (props: {
         {
           props.changeDancerSize &&
           <CustomSwitch label="大きいダンサー" defaultChecked={props.appSettings.dancerDisplayType === "large"} onChange={props.changeDancerSize}/>
-        }
-        {
-          props.export &&
-          <Button onClick={props.export}>エクスポート</Button>
         }
       </div>
     </Dialog.Popup>

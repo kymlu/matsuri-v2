@@ -44,6 +44,13 @@ export default function ChoreoEditPage(props: {
     showGrid: true,
     dancerDisplayType: "small",
   });
+  
+  const [history, dispatch] = useReducer(historyReducer,
+    {
+      undoStack: [],
+      presentState: {state: props.currentChoreo, currentSectionId: props.currentChoreo.sections[0].id},
+      redoStack: [],
+    } as EditHistory<Choreo>);
 
   useEffect(() => {
     if (selectedIds.length > 0) setIsAddingDancers(false);
@@ -52,14 +59,7 @@ export default function ChoreoEditPage(props: {
       dancers: Object.entries(currentSection.formation.dancerPositions).filter(x => selectedIds.includes(x[0])).map(x => x[1]),
       props: Object.entries(currentSection.formation.propPositions).filter(x => selectedIds.includes(x[0])).map(x => x[1]),
     });
-  }, [selectedIds]);
-  
-  const [history, dispatch] = useReducer(historyReducer,
-    {
-      undoStack: [],
-      presentState: {state: props.currentChoreo, currentSectionId: props.currentChoreo.sections[0].id},
-      redoStack: [],
-    } as EditHistory<Choreo>);
+  }, [selectedIds, history.presentState, currentSection]);
 
   const [copyBuffer, setCopyBuffer] = useState<Record<string, DancerPosition>>({});
 

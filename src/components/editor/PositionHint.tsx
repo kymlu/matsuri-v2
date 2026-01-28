@@ -3,6 +3,7 @@ import { Coordinates } from "../../models/base";
 import { StageGeometry } from "../../models/choreo";
 import { Dancer, DancerPosition } from "../../models/dancer";
 import { DancerAction } from "../../models/dancerAction";
+import { roundToTenth } from "../../lib/helpers/globalHelper";
 
 export default function PositionHint (props: {
   dancer: Dancer,
@@ -22,9 +23,9 @@ export default function PositionHint (props: {
     if (xFromCenter === 0) {
       displayX = "↔︎0";
     } else if (xFromCenter > 0) {
-      displayX = "←" + Math.abs(xFromCenter);
+      displayX = "←" + roundToTenth(Math.abs(xFromCenter));
     } else {
-      displayX = "→" + Math.abs(xFromCenter);
+      displayX = "→" + roundToTenth(Math.abs(xFromCenter));
     }
 
     var displayY = props.position.y;
@@ -44,9 +45,9 @@ export default function PositionHint (props: {
         var yMovement: string | null = null;
     
         if (delta.y > 0) {
-          yMovement = (props.geometry.yAxis === "bottom-up" ? "↑" : "↓") + delta.y + "m"
+          yMovement = (props.geometry.yAxis === "bottom-up" ? "↑" : "↓") + roundToTenth(delta.y) + "m"
         } else if (delta.y < 0) {
-          yMovement = (props.geometry.yAxis === "bottom-up" ? "↓" : "↑") + Math.abs(delta.y) + "m"
+          yMovement = (props.geometry.yAxis === "bottom-up" ? "↓" : "↑") + roundToTenth(Math.abs(delta.y)) + "m"
         }
     
         if (delta.x > 0) {
@@ -83,7 +84,7 @@ export default function PositionHint (props: {
       </div>
 
       {/* Count / actions */}
-      <div className="pt-2 space-y-1 border-t border-gray-200">
+      {/* <div className="pt-2 space-y-1 border-t border-gray-200">
         <div className="text-gray-500">カウント</div>
         <div className="flex justify-between pl-2">
           <span>アクション 1</span>
@@ -93,7 +94,7 @@ export default function PositionHint (props: {
           <span>アクション 2</span>
           <span className="font-medium">5</span>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 } 
