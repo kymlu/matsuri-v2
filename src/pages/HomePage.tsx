@@ -46,10 +46,18 @@ export default function HomePage(props: {
       <Divider primary/>
       <div className='flex flex-col gap-4 mx-5'>
         <div className="flex gap-4">
-          <ActionButton full onClick={props.goToNewChoreoPage}>Add a formation</ActionButton>
-          <ActionButton full onClick={() => {
-            triggerUpload();
-          }}>Upload a formation</ActionButton>
+          <ActionButton
+            full
+            onClick={props.goToNewChoreoPage}>
+            隊列表追加
+          </ActionButton>
+          <ActionButton
+            full
+            onClick={() => {
+              triggerUpload();
+            }}>
+            アップロード
+          </ActionButton>
         </div>
         {
           Object.entries(savedChoreos).map((group) =>
@@ -107,21 +115,21 @@ function EventSection(props: {
                 <ActionButton full onClick={() => { props.goToViewPage(choreo); }}>
                   <div className="flex flex-row items-center justify-center gap-2">
                     <Icon src={ICON.visibility} alt="view"/>
-                    View
+                    閲覧
                   </div>
                 </ActionButton>
                 <ActionButton full onClick={() => { props.goToEditPage(choreo); }}>
                   <div className="flex flex-row items-center justify-center gap-2">
                     <Icon src={ICON.edit} alt="edit"/>
-                    Edit
+                    編集
                   </div>
                 </ActionButton>
-                <ActionButton full onClick={() => {console.log("TODO: implement")}}>
+                {/* <ActionButton full onClick={() => {console.log("TODO: implement")}}>
                   <div className="flex flex-row items-center justify-center gap-2">
                     <Icon src={ICON.edit} alt="duplicate"/>
                     duplicate
                   </div>
-                </ActionButton>
+                </ActionButton> */}
               </div>
             </CustomDialog>
           </Dialog.Root>

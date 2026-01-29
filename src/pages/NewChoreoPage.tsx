@@ -198,7 +198,7 @@ export function NewChoreoPage(props: {
         )}
 
         {step === 3 && (
-          <div className="space-y-4">
+          <div className="flex items-center h-full space-y-4">
             <NumberInput
               default={form.dancerCount}
               min={1}
@@ -212,8 +212,7 @@ export function NewChoreoPage(props: {
         )}
       </div>
 
-
-      <div className="flex justify-between gap-4 mt-6">
+      <div className="flex justify-between gap-4 pt-6 pb-16">
         {step === 1 && (
           <ActionButton
           full
