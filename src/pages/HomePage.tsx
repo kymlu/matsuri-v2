@@ -9,7 +9,7 @@ import { useEffect, useState } from "react"
 import { getAllChoreos } from "../lib/dataAccess/DataController"
 import { Choreo } from "../models/choreo"
 import { groupByKey, strCompare } from "../lib/helpers/globalHelper"
-import { downloadLogs } from "../lib/helpers/LogHelper"
+import { downloadLogs } from "../lib/helpers/logHelper"
 
 export default function HomePage(props: {
   goToNewChoreoPage: () => void,
