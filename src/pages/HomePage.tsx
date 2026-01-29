@@ -48,7 +48,6 @@ export default function HomePage(props: {
         <div className="flex gap-4">
           <ActionButton full onClick={props.goToNewChoreoPage}>Add a formation</ActionButton>
           <ActionButton full onClick={() => {
-            console.log("Todo: complete implementation");
             triggerUpload();
           }}>Upload a formation</ActionButton>
         </div>

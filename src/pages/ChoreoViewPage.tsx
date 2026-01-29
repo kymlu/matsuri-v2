@@ -41,7 +41,7 @@ export default function ChoreoEditPage(props: {
       <Header
         returnHome={props.goToHomePage}
         currentChoreo={props.currentChoreo}
-        onDownload={() => {console.log("TODO: implement download")}}
+        // onDownload={() => {console.log("TODO: implement download")}}
         changeShowGrid={() => {
           setAppSettings(prev => {return {...prev, showGrid: !prev.showGrid}})
         }}
