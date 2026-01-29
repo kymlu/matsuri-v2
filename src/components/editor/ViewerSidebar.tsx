@@ -5,6 +5,7 @@ import { DancerAction } from "../../models/dancerAction";
 import PositionHint from "./PositionHint";
 import IconButton from "../basic/IconButton";
 import { ICON } from "../../lib/consts/consts";
+import { isNullOrUndefinedOrBlank } from "../../lib/helpers/globalHelper";
 
 export default function ViewerSidebar(props: {
   note?: string,
@@ -46,9 +47,9 @@ export default function ViewerSidebar(props: {
     }
     <div className="flex-1 min-h-0 overflow-auto">
       {
-        props.note && props.showNotes && !props.isPositionHintShown &&
+        props.showNotes && !props.isPositionHintShown &&
         <p className="break-words whitespace-pre-line text-wrap">
-          {props.note}
+          {isNullOrUndefinedOrBlank(props.note) ? "メモなし" : props.note}
         </p>
       }
       {

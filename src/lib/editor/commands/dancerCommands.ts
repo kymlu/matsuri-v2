@@ -64,7 +64,6 @@ export function renameDancer(state: Choreo, id: string, newName: string): Choreo
 
   const newDancers = { ...state.dancers, [id]: { ...dancer, name: newName } }
 
-  // Sections don't need name update in dancerPositions, unless you store it there
   return {
     ...state,
     dancers: newDancers

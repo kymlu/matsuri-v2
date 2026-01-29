@@ -9,6 +9,7 @@ import { useEffect, useState } from "react"
 import { getAllChoreos } from "../lib/dataAccess/DataController"
 import { Choreo } from "../models/choreo"
 import { groupByKey, strCompare } from "../lib/helpers/globalHelper"
+import { downloadLogs } from "../lib/helpers/LogHelper"
 
 export default function HomePage(props: {
   goToNewChoreoPage: () => void,
@@ -73,7 +74,7 @@ export default function HomePage(props: {
         {/** Todo: show latest edited */}
         {/** Todo: get saved hardcoded files */}
       </div>
-      <span className='fixed opacity-50 bottom-2 left-2'>{LAST_UPDATED}</span>
+      <span onDoubleClick={downloadLogs} className='fixed opacity-50 bottom-2 left-2'>{LAST_UPDATED}</span>
 
       <input className='hidden' type="file" id="uploadFileInput" accept=".mtr"
         onChange={(event) => {
