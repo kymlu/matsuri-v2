@@ -275,7 +275,7 @@ export default function ChoreoEditPage(props: {
             }
           }
         />
-        <div className="absolute bottom-0 z-10 flex flex-col">
+        <div className="absolute bottom-0 z-10 flex flex-col w-screen">
           <div className="absolute bottom-20">
             <ObjectToolbar
               openColorMenu={() => {setEditDancerColourDialogOpen(true)}}
