@@ -54,6 +54,6 @@ export default function IconButton (props: {
           />
       </div>
     }
-    {props.label && <div className="text-sm">{props.label}</div>}
+    {props.label && <div className="text-sm text-nowrap">{props.label}</div>}
   </div>
 }
