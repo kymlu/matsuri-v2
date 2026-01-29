@@ -7,6 +7,7 @@ import { ChoreoSection, SelectedObjects } from "../models/choreoSection";
 import MainStage from "../components/grid/MainStage";
 import { AppSetting } from "../models/appSettings";
 import { strEquals } from "../lib/helpers/globalHelper";
+import ViewerSidebar from "../components/editor/ViewerSidebar";
 
 export default function ChoreoEditPage(props: {
   goToHomePage: () => void
@@ -14,6 +15,7 @@ export default function ChoreoEditPage(props: {
 }) {
   const [currentSection, setCurrentSection] = useState<ChoreoSection>(props.currentChoreo.sections[0]);
   const [nextSection, setNextSection] = useState<ChoreoSection | undefined>();
+  const [showNotes, setShowNotes] = useState<boolean>(true);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [selectedObjects, setSelectedObjects] = useState<SelectedObjects>({dancers: [], props: []});
   const [appSettings, setAppSettings] = useState<AppSetting>({
@@ -35,7 +37,7 @@ export default function ChoreoEditPage(props: {
   }, [currentSection])
 
   return (
-    <div className='flex flex-col justify-between w-full h-screen max-h-screen'>
+    <div className='flex flex-col h-screen max-h-screen overflow-hidden'>
       <Header
         returnHome={props.goToHomePage}
         currentChoreo={props.currentChoreo}
@@ -44,8 +46,27 @@ export default function ChoreoEditPage(props: {
           setAppSettings(prev => {return {...prev, showGrid: !prev.showGrid}})
         }}
         appSettings={appSettings}
+        showNotes={showNotes}
+        onToggleNotes={() => setShowNotes(prev => !prev)}
         />
-      <div className="flex-1">
+      <div className="relative flex-1 overflow-hidden border-b-2 md:flex">
+        <ViewerSidebar
+          note={currentSection.note}
+          showNotes={showNotes}
+          dancer={props.currentChoreo.dancers[selectedIds[0]]}
+          position={currentSection.formation.dancerPositions[selectedIds[0]]}
+          nextSectionName={nextSection?.name}
+          nextPosition={nextSection?.formation.dancerPositions[selectedIds[0]]}
+          geometry={props.currentChoreo.stageGeometry}
+          isPositionHintShown={
+            selectedIds.length > 0 &&
+            selectedObjects.dancers.length === 1 &&
+            selectedObjects.props.length === 0 &&
+            props.currentChoreo.dancers[selectedIds[0]] !== undefined
+          }
+          deselectPosition={() => setSelectedIds([])}
+          hideNotes={() => setShowNotes(false)}
+        />
         <MainStage
           appSettings={appSettings}
           canEdit={false}
@@ -54,29 +75,18 @@ export default function ChoreoEditPage(props: {
           selectedIds={selectedIds}
           setSelectedIds={setSelectedIds}
         />
-        <div className="absolute bottom-0 z-10">
-          {
-            selectedIds.length > 0 &&
-            selectedObjects.dancers.length === 1 &&
-            selectedObjects.props.length === 0 &&
-            props.currentChoreo.dancers[selectedIds[0]] !== undefined &&
-            <PositionHint
-              dancer={props.currentChoreo.dancers[selectedIds[0]]}
-              position={currentSection.formation.dancerPositions[selectedIds[0]]}
-              nextSectionName={nextSection?.name}
-              nextPosition={nextSection?.formation.dancerPositions[selectedIds[0]]}
-              geometry={props.currentChoreo.stageGeometry}
-            />
-          }
-          <FormationSelectionToolbar
-            currentSectionId={currentSection.id}
-            sections={props.currentChoreo.sections}
-            onClickSection={(section) => {
-              setCurrentSection(section);
-            }}
-          />
-        </div>
       </div>
+      <footer
+        className=""
+        >
+        <FormationSelectionToolbar
+          currentSectionId={currentSection.id}
+          sections={props.currentChoreo.sections}
+          onClickSection={(section) => {
+            setCurrentSection(section);
+          }}
+        />
+      </footer>
     </div>
   )
 }

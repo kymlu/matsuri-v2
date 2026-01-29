@@ -89,9 +89,9 @@ export default function FormationSelectionToolbar(props: {
                     メモ追加
                   </Button>
                 </Dialog.Trigger>
-                <Button onClick={() => {props.onDuplicate?.(section, i)}}>
+                {/* <Button onClick={() => {props.onDuplicate?.(section, i)}}>
                   複製
-                </Button>
+                </Button> */}
                 {
                   props.sections.length > 1 &&
                   <Dialog.Trigger handle={deleteDialog} payload={section}>

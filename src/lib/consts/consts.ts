@@ -82,6 +82,8 @@ export const ICON = {
   settings: "icons/settings.svg",
   straightenBlack: "icons/straighten_black.svg",
   sortByAlphaBlack: "icons/sort_by_alpha_black.svg",
+  speakerNotesBlack: "icons/speaker_notes_black.svg",
+  speakerNotesOffBlack: "icons/speaker_notes_off_black.svg",
   stylusNoteBlack: "icons/stylus_note_black.svg",
   swapHorizBlack: "icons/swap_horiz_black.svg",
   switchAccessShortcut: "icons/switch_access_shortcut_black.svg",

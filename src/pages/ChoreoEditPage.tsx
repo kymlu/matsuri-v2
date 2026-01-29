@@ -211,30 +211,30 @@ export default function ChoreoEditPage(props: {
 
   return (
     <div className='flex flex-col justify-between w-full h-screen max-h-screen'>
+      <Header
+        returnHome={props.goToHomePage}
+        hasSidebar
+        currentChoreo={history.presentState.state}
+        onSave={() => {onSave()}}
+        editName={() => {setEditChoreoInfoDialogOpen(true)}}
+        manageSections={() => {console.log("TODO: implement Manage Sections")}}
+        editSize={() => {setResizeDialogOpen(true);}}
+        export={() => {
+          console.log("TODO: implement choice of pdf or mtr");
+          exportToMtr(history.presentState.state);
+        }}
+        changeShowGrid={() => {
+          setAppSettings(prev => {return {...prev, showGrid: !prev.showGrid}})
+        }}
+        changeSnap={() => {
+          setAppSettings(prev => {return {...prev, snapToGrid: !prev.snapToGrid}})
+        }}
+        changeDancerSize={(showLarge) => {
+          setAppSettings(prev => {return {...prev, dancerDisplayType: showLarge ? "large" : "small"}})
+        }}
+        appSettings={appSettings}
+        />
       <div className="relative flex-1">
-        <Header
-          returnHome={props.goToHomePage}
-          hasSidebar
-          currentChoreo={history.presentState.state}
-          onSave={() => {onSave()}}
-          editName={() => {setEditChoreoInfoDialogOpen(true)}}
-          manageSections={() => {console.log("TODO: implement Manage Sections")}}
-          editSize={() => {setResizeDialogOpen(true);}}
-          export={() => {
-            console.log("TODO: implement choice of pdf or mtr");
-            exportToMtr(history.presentState.state);
-          }}
-          changeShowGrid={() => {
-            setAppSettings(prev => {return {...prev, showGrid: !prev.showGrid}})
-          }}
-          changeSnap={() => {
-            setAppSettings(prev => {return {...prev, snapToGrid: !prev.snapToGrid}})
-          }}
-          changeDancerSize={(showLarge) => {
-            setAppSettings(prev => {return {...prev, dancerDisplayType: showLarge ? "large" : "small"}})
-          }}
-          appSettings={appSettings}
-          />
         <MainStage
           canEdit
           appSettings={appSettings}
@@ -277,8 +277,6 @@ export default function ChoreoEditPage(props: {
         />
         <div className="absolute bottom-0 z-10">
           <ObjectToolbar
-            openArrangeMenu={() => {console.log("TODO")}}
-            isArrangeVisible={(selectedObjects.dancers.length + selectedObjects.props.length) > 0}
             openColorMenu={() => {setEditDancerColourDialogOpen(true)}}
             isColorVisible={selectedObjects.dancers.length > 0 && selectedObjects.props.length === 0}
             swapPositions={() => {console.log("TODO")}}
@@ -391,6 +389,7 @@ export default function ChoreoEditPage(props: {
             commit: true,
           })
         }}
+        showArrange={selectedIds.length === 0}
       />
       {
         isAddingDancers &&

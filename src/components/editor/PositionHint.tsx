@@ -62,13 +62,7 @@ export default function PositionHint (props: {
   }, [props.position, props.nextPosition]);
 
   return (
-    <div className="z-10 w-56 p-3 ml-3 text-sm text-gray-800 border rounded-lg shadow-lg border-primary bg-white/90 backdrop-blur">
-      {/* Header */}
-      <div className="flex pb-1 mb-2 border-b border-gray-200">
-        <span className="text-base font-semibold">{props.dancer.name}</span>
-      </div>
-
-      {/* Position info */}
+    <div>
       <div className="mb-2 space-y-1">
         <div className="flex justify-between">
           <span className="text-gray-500">現在</span>

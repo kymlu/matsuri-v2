@@ -1,4 +1,4 @@
-import { Circle, Group, Layer, Line, Rect, Text } from "react-konva";
+import { Circle, Group, Layer, Line, Rect, Shape, Text } from "react-konva";
 import { StageGeometry, StageMargins, YAxisDirection } from "../../../models/choreo";
 import { colorPalette } from "../../../lib/consts/colors";
 import { METER_PX } from "../../../lib/consts/consts";
@@ -149,6 +149,19 @@ export default function GridLayer({
       );
     }
     
+    elements.push(
+      <Shape
+        sceneFunc={(context, shape) => {
+          context.beginPath();
+          context.moveTo(centerX, stageTopPx - gridSizePx * 0.5);
+          context.lineTo(centerX - gridSizePx * 0.75, stageTopPx - gridSizePx * 1.5);
+          context.lineTo(centerX + gridSizePx * 0.75, stageTopPx - gridSizePx * 1.5);
+          context.closePath();
+          context.fillStrokeShape(shape);
+        }}
+        fill={colorPalette.primary}
+      />
+    )
     
     // Draw main stage border
     elements.push(

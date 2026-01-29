@@ -9,6 +9,8 @@ export default function Header (props: {
   returnHome: () => void,
   hasSidebar?: boolean,
   currentChoreo: Choreo,
+  onToggleNotes?: () => void,
+  showNotes?: boolean,
   onSave?: () => void,
   onDownload?: () => void,
   editName?: () => void,
@@ -20,17 +22,28 @@ export default function Header (props: {
   changeDancerSize?: (showLarge: boolean) => void,
   appSettings: AppSetting,
 }) {
-  return <header className="absolute top-0 z-10 flex items-center justify-between w-screen px-2 py-4 select-none bg-gradient-to-b from-white to-transparent ">
-    <IconButton
-      src={ICON.chevronBackwardBlack}
-      alt="Return home" // if there is a history, verify save first?
-      noBorder
-      onClick={() => {
-        props.onSave?.();
-        props.returnHome();
-      }}/>
+  return <header className="z-10 grid grid-cols-[1fr,auto,1fr] items-center justify-between w-screen p-2 border-b-2 select-none bg-gradient-to-b from-white to-transparent ">
+    <div className="flex">
+      <IconButton
+        src={ICON.chevronBackwardBlack}
+        alt="Return home" // if there is a history, verify save first?
+        noBorder
+        onClick={() => {
+          props.onSave?.();
+          props.returnHome();
+        }}/>
+    </div>
     <div className="font-semibold">{props.currentChoreo.name}</div>
-    <div className="flex gap-2">
+    <div className="flex justify-end">
+      {
+        props.onToggleNotes &&
+        <IconButton
+          src={props.showNotes ? ICON.speakerNotesOffBlack : ICON.speakerNotesBlack}
+          alt="Show notes"
+          noBorder
+          onClick={() => {props.onToggleNotes?.()}}
+          />
+      }
       {
         props.onSave &&
         <IconButton

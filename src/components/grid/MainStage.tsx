@@ -188,7 +188,7 @@ export default function MainStage(props: {
     setStagePos({ x: stage.x(), y: stage.y() });
   };
   
-  return <div ref={containerRef} className="flex items-center justify-center w-full h-full overflow-scroll">
+  return <div ref={containerRef} className="w-full h-full overflow-scroll">
     {
       stageGeometry && 
       <Stage
@@ -197,7 +197,9 @@ export default function MainStage(props: {
           const clickedOnEmpty = e.target === stagePosition;
 
           if (clickedOnEmpty) {
-            props.setSelectedIds([]);
+            if (props.canEdit) {
+              props.setSelectedIds([]);
+            }
             if (props.isAddingDancer && stagePosition) {
               var position = {
                 x: (e.evt.x - stagePosition.attrs.x)/stagePosition.attrs.scaleX,

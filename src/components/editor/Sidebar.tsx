@@ -40,6 +40,7 @@ export function Sidebar (props: {
             onClick={props.editName}
           />
         </div>
+        <Divider/>
         {
           props.editSize &&
           <>

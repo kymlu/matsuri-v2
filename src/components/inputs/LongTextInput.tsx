@@ -62,7 +62,7 @@ export default function LongTextInput(props: TextInputProps) {
         <textarea
           disabled={props.disabled}
           name={props.name}
-          maxLength={props.maxLength ?? 20}
+          maxLength={props.maxLength}
           placeholder={props.placeholder ?? ""}
           value={value ?? ""}
           onInput={(event) => handleChange(event.currentTarget.value)}

@@ -4,35 +4,24 @@ import IconButton from "../basic/IconButton";
 export default function ObjectToolbar (props: {
   swapPositions: () => void,
   isSwapVisible: boolean,
-  openArrangeMenu: () => void,
-  isArrangeVisible: boolean,
   openColorMenu: () => void,
   isColorVisible: boolean,
   openRenameMenu: () => void
   isRenameVisible: boolean,
 }) {
-  const isToolbarVisible = props.isArrangeVisible || props.isSwapVisible || props.isColorVisible || props.isRenameVisible;
+  const isToolbarVisible = props.isSwapVisible || props.isColorVisible || props.isRenameVisible;
   
   return <>
     { isToolbarVisible && 
       <div className="flex flex-row gap-2 p-2 w-fit">
         {
-          props.isSwapVisible &&
-          <IconButton
-            src={ICON.swapHorizBlack}
-            alt="Swap positions"
-            size="sm"
-            onClick={props.swapPositions}
-            />
-        }
-        {
-          props.isArrangeVisible &&
-          <IconButton
-            src={ICON.horizontalDistributeBlack}
-            alt="Arrange"
-            size="sm"
-            onClick={props.openArrangeMenu}
-          />
+          // props.isSwapVisible &&
+          // <IconButton
+          //   src={ICON.swapHorizBlack}
+          //   alt="Swap positions"
+          //   size="sm"
+          //   onClick={props.swapPositions}
+          //   />
         }
         {
           props.isRenameVisible &&

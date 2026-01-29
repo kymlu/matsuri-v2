@@ -21,6 +21,7 @@ export default function EditDancerNameDialog(props: {
     >
     <TextInput
       default={props.dancer?.name ?? ""}
-      onContentChange={ (newName) => { setName(newName) }}/>
+      onContentChange={ (newName) => { setName(newName) }}
+      maxLength={15}/>
   </BaseEditDialog>
 }

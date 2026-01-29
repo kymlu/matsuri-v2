@@ -65,7 +65,7 @@ export default function DancerGridObject (props: {
             align="center"
             text={props.dancer.name}
             fontSize={METER_PX/3}
-            fill={colorPalette.textContrast[props.position.color] ?? "white"}
+            fill={colorPalette.getTextColor(props.position.color) ?? "white"}
           />
         }
       </BaseGridObject>
