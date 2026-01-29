@@ -47,10 +47,10 @@ export function Sidebar (props: {
             <Button onClick={props.editSize}>舞台サイズを変更</Button>
           </>
         }
-        {
+        {/* {
           props.manageSections &&
           <Button onClick={props.manageSections}>セクション編集</Button>
-        }
+        } */}
         {
           props.export &&
           <Button onClick={props.export}>エクスポート</Button>

@@ -41,7 +41,7 @@ export default function FormationSelectionToolbar(props: {
     setDeleteDialogOpen(isOpen);
   };
   
-  return <div className="flex w-screen gap-2 p-2 overflow-scroll ">
+  return <div className="flex gap-2 p-2 overflow-scroll max-w-screen ">
     {
       props.sections.map((section, i) => 
         <React.Fragment key={section.id}>

@@ -42,7 +42,7 @@ export default function ChoreoEditPage(props: {
   const [appSettings, setAppSettings] = useState<AppSetting>({
     snapToGrid: true,
     showGrid: true,
-    dancerDisplayType: "small",
+    dancerDisplayType: "large",
   });
   
   const [history, dispatch] = useReducer(historyReducer,
