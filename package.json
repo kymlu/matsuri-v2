@@ -1,6 +1,7 @@
 {
   "name": "matsuri-v2",
   "version": "0.1.0",
+  "homepage": "https://kymlu.github.io/matsuri-v2",
   "private": true,
   "dependencies": {
     "@base-ui/react": "^1.1.0",
@@ -23,10 +24,10 @@
     "zod": "^4.3.6"
   },
   "scripts": {
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build",
     "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "build": "react-scripts build"
   },
   "eslintConfig": {
     "extends": [
@@ -47,7 +48,7 @@
     ]
   },
   "devDependencies": {
-    "tailwindcss": "^3.4.19",
-    "typescript": "^5.9.3"
+    "gh-pages": "^6.3.0",
+    "tailwindcss": "^3.4.19"
   }
 }
