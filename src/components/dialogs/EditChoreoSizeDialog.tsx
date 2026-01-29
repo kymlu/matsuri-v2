@@ -3,9 +3,8 @@ import { MIN_STAGE_DIMENSION, MAX_STAGE_DIMENSION, MIN_STAGE_MARGIN, MAX_STAGE_M
 import { Choreo, StageGeometry, StageType } from "../../models/choreo";
 import NumberInput from "../inputs/NumberInput";
 import BaseEditDialog from "./BaseEditDialog";
-import { Stage } from "react-konva";
-import GridLayer from "../grid/layers/GridLayer";
 import TextInput from "../inputs/TextInput";
+import GridPreview from "../grid/GridPreview";
 
 interface EditChoreoMetaForm {
   name: string;
@@ -88,65 +87,63 @@ export default function EditChoreoSizeDialog(props: {
     }}
     onSubmit={() => {props.onSave(stageGeometry)}}
     >
-      <div className="grid h-full grid-cols-2 gap-2">
-        <div ref={ref} className="flex-1 col-span-2 overflow-hidden">
-          <Stage width={1500} height={600} scaleX={scale} scaleY={scale}>
-            {
-              stageGeometry &&
-              <GridLayer
-                stageGeometry={stageGeometry}
-                showGridLines={true}
-              />
-            }
-          </Stage>
+      <div className="flex flex-col gap-2 md:flex-row">
+        <GridPreview
+          stageLength={form.stageLength}
+          stageWidth={form.stageWidth}
+          stageType={form.stageType}
+          xMargin={form.xMargin}
+          yMargin={form.yMargin}
+        />
+        <div className="grid grid-cols-2 gap-2 md:flex md:flex-col">
+          <div className="col-span-2">
+            <TextInput
+              label="舞台類分"
+              default={props.currentChoreo?.stageType === "parade" ? "パレード" : "ステージ"}
+              onContentChange={() => {console.log("todo: verify change needed")}}
+              disabled/>
+          </div>
+          <NumberInput
+            name="幅"
+            default={form.stageWidth}
+            min={MIN_STAGE_DIMENSION}
+            max={MAX_STAGE_DIMENSION}
+            step={1}
+            buttonStep={1}
+            onChange={(newValue) => {handleChange("stageWidth", Number(newValue))}}
+            label="幅 (m)"
+          />
+          <NumberInput
+            name="縦"
+            default={form.stageLength}
+            min={MIN_STAGE_DIMENSION}
+            max={MAX_STAGE_DIMENSION}
+            step={1}
+            buttonStep={1}
+            onChange={(newValue) => {handleChange("stageLength", Number(newValue))}}
+            label="縦 (m)"
+          />
+          <NumberInput
+            name="xMargin"
+            default={form.xMargin}
+            min={MIN_STAGE_MARGIN}
+            max={MAX_STAGE_MARGIN}
+            step={1}
+            buttonStep={1}
+            onChange={(newValue) => {handleChange("xMargin", Number(newValue))}}
+            label="左右余白 (m)"
+          />
+          <NumberInput
+            name="yMargin"
+            default={form.yMargin}
+            min={MIN_STAGE_MARGIN}
+            max={MAX_STAGE_MARGIN}
+            step={1}
+            buttonStep={1}
+            onChange={(newValue) => {handleChange("yMargin", Number(newValue))}}
+            label="上下余白 (m)"
+          />
         </div>
-        <div className="col-span-2">
-          <TextInput
-            label="舞台類分"
-            default={props.currentChoreo?.stageType === "parade" ? "パレード" : "ステージ"}
-            onContentChange={() => {console.log("todo: verify change needed")}}
-            disabled/>
-        </div>
-        <NumberInput
-          name="幅"
-          default={form.stageWidth}
-          min={MIN_STAGE_DIMENSION}
-          max={MAX_STAGE_DIMENSION}
-          step={1}
-          buttonStep={1}
-          onChange={(newValue) => {handleChange("stageWidth", Number(newValue))}}
-          label="幅 (m)"
-        />
-        <NumberInput
-          name="縦"
-          default={form.stageLength}
-          min={MIN_STAGE_DIMENSION}
-          max={MAX_STAGE_DIMENSION}
-          step={1}
-          buttonStep={1}
-          onChange={(newValue) => {handleChange("stageLength", Number(newValue))}}
-          label="縦 (m)"
-        />
-        <NumberInput
-          name="xMargin"
-          default={form.xMargin}
-          min={MIN_STAGE_MARGIN}
-          max={MAX_STAGE_MARGIN}
-          step={1}
-          buttonStep={1}
-          onChange={(newValue) => {handleChange("xMargin", Number(newValue))}}
-          label="左右余白 (m)"
-        />
-        <NumberInput
-          name="yMargin"
-          default={form.yMargin}
-          min={MIN_STAGE_MARGIN}
-          max={MAX_STAGE_MARGIN}
-          step={1}
-          buttonStep={1}
-          onChange={(newValue) => {handleChange("yMargin", Number(newValue))}}
-          label="上下余白 (m)"
-        />
       </div>
   </BaseEditDialog>
 }

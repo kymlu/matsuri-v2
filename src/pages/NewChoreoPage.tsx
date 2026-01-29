@@ -7,8 +7,9 @@ import { isNullOrUndefinedOrBlank } from "../lib/helpers/globalHelper";
 import { Choreo, StageType } from "../models/choreo";
 import { Dancer, DancerPosition } from "../models/dancer";
 import { colorPalette } from "../lib/consts/colors";
-import { MAX_STAGE_DIMENSION, MIN_STAGE_DIMENSION } from "../lib/consts/consts";
+import { MAX_STAGE_DIMENSION, MAX_STAGE_MARGIN, MIN_STAGE_DIMENSION, MIN_STAGE_MARGIN } from "../lib/consts/consts";
 import { saveChoreo } from "../lib/dataAccess/DataController";
+import GridPreview from "../components/grid/GridPreview";
 
 interface FormationForm {
   name: string;
@@ -17,6 +18,8 @@ interface FormationForm {
   stageWidth: number;
   stageLength: number;
   dancerCount: number;
+  xMargin: number;
+  yMargin: number;
 }
 
 export function NewChoreoPage(props: {
@@ -31,6 +34,8 @@ export function NewChoreoPage(props: {
     stageWidth: 10,
     stageLength: 10,
     dancerCount: 5,
+    xMargin: 2,
+    yMargin: 2,
   });
 
   const nextStep = () => setStep(s => Math.min(s + 1, 3));
@@ -69,10 +74,10 @@ export function NewChoreoPage(props: {
         stageLength: form.stageLength,
         stageWidth: form.stageWidth,
         margin: {
-          topMargin: 2,
-          bottomMargin: 2,
-          leftMargin: 2,
-          rightMargin: 2
+          topMargin: form.yMargin,
+          bottomMargin: form.yMargin,
+          leftMargin: form.xMargin,
+          rightMargin: form.xMargin,
         },
         yAxis: form.stageType === "parade" ? "bottom-up" : "top-down",
       },
@@ -106,7 +111,7 @@ export function NewChoreoPage(props: {
   };
 
   return (
-    <div className="flex flex-col h-screen max-w-md p-4 mx-auto space-y-6">
+    <div className="flex flex-col h-screen p-4 mx-auto space-y-6">
       <div className="text-center">
         <h2 className="mb-2 text-xl font-semibold">
           {stepTitles[step] || ""}
@@ -114,7 +119,7 @@ export function NewChoreoPage(props: {
       </div>
       <div className="flex-1">
         {step === 1 && (
-          <div className="space-y-4">
+          <div className="flex flex-col h-full pt-10 pb-20 justify-evenly">
             <TextInput
               default={form.name}
               onContentChange={newValue => handleChange("name", newValue)}
@@ -131,34 +136,63 @@ export function NewChoreoPage(props: {
         )}
 
         {step === 2 && (
-          <div className="space-y-8">
-            <CustomSelect
-              items={stageTypes}
-              defaultValue={stageTypes[form.stageType]}
-              setValue={(newValue) => {handleChange("stageType", newValue)}}
-              label="舞台類分"
+          <div className="flex flex-col h-full gap-2 md:flex-row">
+            <GridPreview
+              stageWidth={form.stageWidth}
+              stageLength={form.stageLength}
+              stageType={form.stageType}
+              xMargin={form.xMargin}
+              yMargin={form.yMargin}
             />
-            <div className="flex gap-4">
-              <NumberInput
-                name="幅"
-                default={form.stageWidth}
-                min={MIN_STAGE_DIMENSION}
-                max={MAX_STAGE_DIMENSION}
-                step={1}
-                buttonStep={1}
-                onChange={(newValue) => {handleChange("stageWidth", Number(newValue))}}
-                label="幅 (m)"
+            <div className="md:w-1/3">
+              <CustomSelect
+                items={stageTypes}
+                defaultValue={stageTypes[form.stageType]}
+                setValue={(newValue) => {handleChange("stageType", newValue)}}
+                label="舞台類分"
               />
-              <NumberInput
-                name="縦"
-                default={form.stageLength}
-                min={MIN_STAGE_DIMENSION}
-                max={MAX_STAGE_DIMENSION}
-                step={1}
-                buttonStep={1}
-                onChange={(newValue) => {handleChange("stageLength", Number(newValue))}}
-                label="縦 (m)"
-              />
+              <div className="grid grid-cols-2 gap-4 md:flex md:flex-col">
+                <NumberInput
+                  name="幅"
+                  default={form.stageWidth}
+                  min={MIN_STAGE_DIMENSION}
+                  max={MAX_STAGE_DIMENSION}
+                  step={1}
+                  buttonStep={1}
+                  onChange={(newValue) => {handleChange("stageWidth", Number(newValue))}}
+                  label="幅 (m)"
+                />
+                <NumberInput
+                  name="縦"
+                  default={form.stageLength}
+                  min={MIN_STAGE_DIMENSION}
+                  max={MAX_STAGE_DIMENSION}
+                  step={1}
+                  buttonStep={1}
+                  onChange={(newValue) => {handleChange("stageLength", Number(newValue))}}
+                  label="縦 (m)"
+                />
+                <NumberInput
+                  name="xMargin"
+                  default={form.xMargin}
+                  min={MIN_STAGE_MARGIN}
+                  max={MAX_STAGE_MARGIN}
+                  step={1}
+                  buttonStep={1}
+                  onChange={(newValue) => {handleChange("xMargin", Number(newValue))}}
+                  label="左右余白 (m)"
+                />
+                <NumberInput
+                  name="yMargin"
+                  default={form.yMargin}
+                  min={MIN_STAGE_MARGIN}
+                  max={MAX_STAGE_MARGIN}
+                  step={1}
+                  buttonStep={1}
+                  onChange={(newValue) => {handleChange("yMargin", Number(newValue))}}
+                  label="上下余白 (m)"
+                />
+              </div>
             </div>
           </div>
         )}
