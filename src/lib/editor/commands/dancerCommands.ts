@@ -13,6 +13,7 @@ export function addDancer(state: Choreo, dancer: Dancer, x: number, y: number): 
       dancerPositions: {
         ...section.formation.dancerPositions,
         [dancer.id]: {
+          sectionId: section.id,
           dancerId: dancer.id,
           x: x,
           y: y,

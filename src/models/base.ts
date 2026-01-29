@@ -15,8 +15,8 @@ export const CoordinatesSchema = z.object({
 export type Coordinates = z.infer<typeof CoordinatesSchema>;
 
 export const BasePositionSchema = CoordinatesSchema.extend({
-  sectionId: z.string().nonempty(),
-  rotation: z.int(),
+  sectionId: z.string(),
+  rotation: z.int().optional(),
 });
 
 export type BasePosition = z.infer<typeof BasePositionSchema>;
