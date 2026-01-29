@@ -275,74 +275,81 @@ export default function ChoreoEditPage(props: {
             }
           }
         />
-        <div className="absolute bottom-0 z-10">
-          <ObjectToolbar
-            openColorMenu={() => {setEditDancerColourDialogOpen(true)}}
-            isColorVisible={selectedObjects.dancers.length > 0 && selectedObjects.props.length === 0}
-            swapPositions={() => {console.log("TODO")}}
-            isSwapVisible={selectedObjects.dancers.length === 2 && selectedObjects.props.length === 0}
-            openRenameMenu={() => {setRenameDancerDialogOpen(true)}}
-            isRenameVisible={selectedObjects.dancers.length === 1 && selectedObjects.props.length === 0}
-          />
-          <UndoRedoToolbar
-            undo={() => {dispatch({type: "UNDO"})}}
-            redo={() => {dispatch({type: "REDO"})}}
-            undoCount={history.undoStack.length}
-            redoCount={history.redoStack.length}/>
-          <FormationSelectionToolbar
-            currentSectionId={currentSection.id}
-            sections={history.presentState.state.sections}
-            showAddButton
-            onClickAddButton={(id: string, newName: string) => {
-              setSelectedIds([]);
-              dispatch({
-                type: "SET_STATE",
-                newState: addSection(history.presentState.state, id, newName),
-                currentSectionId: id,
-                commit: true
-              });
-            }}
-            onClickSection={(section) => {
-              setCurrentSection(section);
-              setSelectedIds([]);
-            }}
-            onRename={(section, name) => {
-              setSelectedIds([]);
-              dispatch({
-                type: "SET_STATE",
-                newState: renameSection(history.presentState.state, section.id, name),
-                currentSectionId: currentSection.id,
-                commit: true,
-              });
-            }}
-            onAddNoteToSection={(section, note) => {
-              setSelectedIds([]);
-              dispatch({
-                type: "SET_STATE",
-                newState: editSectionNote(history.presentState.state, section.id, note),
-                currentSectionId: currentSection.id,
-                commit: true,
-              });
-            }}
-            onDuplicate={(section, index) => {
-              setSelectedIds([]);
-              dispatch({
-                type: "SET_STATE",
-                newState: duplicateSection(history.presentState.state, section, index),
-                currentSectionId: currentSection.id,
-                commit: true,
-              });
-            }}
-            onDeleteSection={(section) => {
-              setSelectedIds([]);
-              dispatch({
-                type: "SET_STATE",
-                newState: removeSection(history.presentState.state, section.id),
-                currentSectionId: currentSection.id,
-                commit: true,
-              });
-            }}
-          />
+        <div className="absolute bottom-0 z-10 flex flex-col">
+          <div className="absolute bottom-20">
+            <ObjectToolbar
+              openColorMenu={() => {setEditDancerColourDialogOpen(true)}}
+              isColorVisible={selectedObjects.dancers.length > 0 && selectedObjects.props.length === 0}
+              swapPositions={() => {console.log("TODO")}}
+              isSwapVisible={selectedObjects.dancers.length === 2 && selectedObjects.props.length === 0}
+              openRenameMenu={() => {setRenameDancerDialogOpen(true)}}
+              isRenameVisible={selectedObjects.dancers.length === 1 && selectedObjects.props.length === 0}
+            />
+          </div>
+          <div className="absolute bottom-10">
+            <UndoRedoToolbar
+              undo={() => {dispatch({type: "UNDO"})}}
+              redo={() => {dispatch({type: "REDO"})}}
+              undoCount={history.undoStack.length}
+              redoCount={history.redoStack.length}
+            />
+          </div>
+          <div className="absolute bottom-0">
+            <FormationSelectionToolbar
+              currentSectionId={currentSection.id}
+              sections={history.presentState.state.sections}
+              showAddButton
+              onClickAddButton={(id: string, newName: string) => {
+                setSelectedIds([]);
+                dispatch({
+                  type: "SET_STATE",
+                  newState: addSection(history.presentState.state, id, newName),
+                  currentSectionId: id,
+                  commit: true
+                });
+              }}
+              onClickSection={(section) => {
+                setCurrentSection(section);
+                setSelectedIds([]);
+              }}
+              onRename={(section, name) => {
+                setSelectedIds([]);
+                dispatch({
+                  type: "SET_STATE",
+                  newState: renameSection(history.presentState.state, section.id, name),
+                  currentSectionId: currentSection.id,
+                  commit: true,
+                });
+              }}
+              onAddNoteToSection={(section, note) => {
+                setSelectedIds([]);
+                dispatch({
+                  type: "SET_STATE",
+                  newState: editSectionNote(history.presentState.state, section.id, note),
+                  currentSectionId: currentSection.id,
+                  commit: true,
+                });
+              }}
+              onDuplicate={(section, index) => {
+                setSelectedIds([]);
+                dispatch({
+                  type: "SET_STATE",
+                  newState: duplicateSection(history.presentState.state, section, index),
+                  currentSectionId: currentSection.id,
+                  commit: true,
+                });
+              }}
+              onDeleteSection={(section) => {
+                setSelectedIds([]);
+                dispatch({
+                  type: "SET_STATE",
+                  newState: removeSection(history.presentState.state, section.id),
+                  currentSectionId: currentSection.id,
+                  commit: true,
+                });
+              }}
+            />
+          </div>
         </div>
       </div>
       <Toolbar
