@@ -275,7 +275,7 @@ export default function ChoreoEditPage(props: {
             }
           }
         />
-        <div className="absolute bottom-0 z-10 flex flex-col w-screen">
+        <div className="absolute bottom-0 z-10 flex flex-col">
           <div className="absolute bottom-20">
             <ObjectToolbar
               openColorMenu={() => {setEditDancerColourDialogOpen(true)}}
@@ -294,7 +294,7 @@ export default function ChoreoEditPage(props: {
               redoCount={history.redoStack.length}
             />
           </div>
-          <div className="absolute bottom-0">
+          <div className="absolute bottom-0 w-screen">
             <FormationSelectionToolbar
               currentSectionId={currentSection.id}
               sections={history.presentState.state.sections}

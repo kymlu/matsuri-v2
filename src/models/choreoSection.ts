@@ -13,7 +13,7 @@ export const FormationSchema = z.object({
 export type Formation = z.infer<typeof FormationSchema>;
 
 export const ChoreoSectionSchema = BaseModelSchema.extend({
-  order: z.number(),
+  order: z.number().optional(),
   head: z.number().optional(),
   note: z.string().optional(),
   formation: FormationSchema,
