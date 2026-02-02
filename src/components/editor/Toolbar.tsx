@@ -21,7 +21,8 @@ type ToolbarProps = {
   onDistribute: (distribution: Distribution) => void,
   onSwapPosition?: () => void, // TODO
   onEditName?: () => void, // TODO
-  onDeleteDancer?: () => void, // TODO
+  showDeleteDancer: boolean,
+  onDeleteDancer: () => void,
 }
 
 export default function Toolbar ({
@@ -39,6 +40,8 @@ export default function Toolbar ({
   onHorizontalAlign,
   onDistribute,
   showArrange,
+  showDeleteDancer,
+  onDeleteDancer,
 }: ToolbarProps) {
   const [isArrangeVisible, setIsArrangeVisible] = useState<boolean>(false);
   const [isColorVisible, setIsColorVisible] = useState<boolean>(false);
@@ -93,6 +96,7 @@ export default function Toolbar ({
             <IconButton disabled={!showSelectDancer} src={ICON.selectAllBlack} label="色選択" alt="Select colour" onClick={() => {onSelectColor()}} />
             <IconButton src={ICON.contentCopyBlack} disabled={!showCopyPosition} label="コピー" alt="Copy" onClick={() => {onCopyPosition()}} />
             <IconButton src={ICON.contentPasteBlack} disabled={!showPastePosition} label="ペースト" alt="Paste" onClick={() => {onPastePosition()}} />
+            <IconButton src={ICON.deleteBlack} disabled={!showDeleteDancer} label="削除" alt="Delete" onClick={() => {onDeleteDancer()}} />
           </>
         }
         {

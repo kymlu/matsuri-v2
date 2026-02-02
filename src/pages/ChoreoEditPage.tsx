@@ -16,7 +16,7 @@ import { Dialog } from "@base-ui/react";
 import EditChoreoSizeDialog from "../components/dialogs/EditChoreoSizeDialog";
 import { exportToMtr } from "../lib/helpers/exportHelper";
 import { saveChoreo } from "../lib/dataAccess/DataController";
-import { addDancer, renameDancer } from "../lib/editor/commands/dancerCommands";
+import { addDancer, removeDancers, renameDancer } from "../lib/editor/commands/dancerCommands";
 import IconButton from "../components/basic/IconButton";
 import { ICON } from "../lib/consts/consts";
 import { AppSetting } from "../models/appSettings";
@@ -403,6 +403,16 @@ export default function ChoreoEditPage(props: {
           })
         }}
         showArrange={selectedIds.length === 0}
+        showDeleteDancer={selectedObjects.dancers.length > 0}
+        onDeleteDancer={() => {
+          dispatch({
+            type: "SET_STATE",
+            newState: removeDancers(history.presentState.state, selectedObjects.dancers.map(x => x.dancerId)),
+            currentSectionId: currentSection.id,
+            commit: true,
+          })
+          setSelectedIds([]);
+        }}
       />
       {
         isAddingDancers &&
