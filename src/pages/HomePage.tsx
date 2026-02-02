@@ -39,6 +39,15 @@ export default function HomePage(props: {
     });
   }, []);
 
+  const duplicateChoreo = (choreo: Choreo) => {
+    const newChoreo = {
+      ...choreo,
+      id: crypto.randomUUID(),
+      name: `${choreo.name}のコピー`,
+    }
+    props.goToEditPage(newChoreo);
+  }
+
   return (
     <div className='flex flex-col w-full max-w-md gap-2 mx-auto my-10'>
       <div className='flex items-center justify-between mx-4'>
@@ -68,6 +77,7 @@ export default function HomePage(props: {
               choreos={group[1]}
               goToEditPage={props.goToEditPage}
               goToViewPage={props.goToViewPage}
+              duplicateChoreo={duplicateChoreo}
             />
           )
         }
@@ -97,6 +107,7 @@ function EventSection(props: {
   choreos: Choreo[],
   goToViewPage: (choreo: Choreo) => void,
   goToEditPage: (choreo: Choreo) => void,
+  duplicateChoreo: (choreo: Choreo) => void,
 }) {
   return <div>
     <div className='flex flex-row items-end gap-2'>
@@ -125,12 +136,12 @@ function EventSection(props: {
                     編集
                   </div>
                 </ActionButton>
-                {/* <ActionButton full onClick={() => {console.log("TODO: implement")}}>
+                <ActionButton full onClick={() => {props.duplicateChoreo(choreo)}}>
                   <div className="flex flex-row items-center justify-center gap-2">
-                    <Icon src={ICON.edit} alt="duplicate"/>
-                    duplicate
+                    <Icon src={ICON.fileCopy} alt="duplicate"/>
+                    重複
                   </div>
-                </ActionButton> */}
+                </ActionButton>
               </div>
             </CustomDialog>
           </Dialog.Root>
