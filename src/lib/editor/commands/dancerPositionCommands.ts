@@ -86,7 +86,7 @@ export function changeDancerColorCurrent(
   dancerIds: string[],
   color: string
 ): Choreo {
-  console.log("Changing dancer colors to", color, "for", dancerIds, "on section", sectionId);
+  console.log(`Changing dancer colors to ${color} for ${dancerIds} on section ${sectionId}`);
   const newSections = state.sections.map(section => {
     if (!strEquals(section.id, sectionId)) return section
     return {
@@ -114,9 +114,10 @@ export function changeDancerColorCurrentAndFuture(
   dancerIds: string[],
   color: string
 ): Choreo {
-  console.log("Changing dancer colors to", color, "for", dancerIds, "on section and after", currentSectionIndex);
+  console.log(`Changing dancer colors to ${color} for ${dancerIds} on section and after ${currentSectionIndex}`);
   const newSections = state.sections.map((section, i) => {
-    if (i < currentSectionIndex) return section
+    if (i < currentSectionIndex) return section;
+
     return {
       ...section,
       formation: {
@@ -141,7 +142,7 @@ export function changeDancerColorAll(
   dancerIds: string[],
   color: string
 ): Choreo {
-  console.log("Changing dancer colors to", color, "for", dancerIds, "on all sections");
+  console.log(`Changing dancer colors to ${color} for ${dancerIds}on all sections`);
   
   const newSections = state.sections.map(section => ({
     ...section,
@@ -163,7 +164,7 @@ export function pasteDancerPositions(
   sectionId: string,
   dancePositions: Record<string, DancerPosition>,
 ): Choreo {
-  console.log("Pasting positions");
+  console.log(`Pasting positions to ${sectionId}`);
 
   const newSections = state.sections.map(section => {
     if (!strEquals(section.id, sectionId)) return section;
@@ -191,7 +192,7 @@ export function alignHorizontalPositions (
   dancePositions: DancerPosition[],
   type: HorizontalAlignment,
 ): Choreo {
-  console.log("Aligning to", type);
+  console.log(`Aligning to ${type}`);
 
   if (dancePositions.length === 0) return {...state};
 
@@ -249,7 +250,7 @@ export function alignVerticalPositions (
   dancePositions: DancerPosition[],
   type: VerticalAlignment
 ): Choreo {
-  console.log("Aligning to", type);
+  console.log(`Aligning to ${type}`);
 
   if (dancePositions.length === 0) return {...state};
 
@@ -305,7 +306,7 @@ export function distributePositions (
   dancePositions: DancerPosition[],
   type: Distribution
 ): Choreo {
-  console.log("Distributing", type);
+  console.log(`Distributing ${type}`);
 
   if (dancePositions.length === 0) return {...state};
 
@@ -334,5 +335,31 @@ export function distributePositions (
     }
   });
 
+  return { ...state, sections: newSections }
+}
+
+export function swapPositions(
+  state: Choreo,
+  sectionId: string,
+  dancerAId: string,
+  dancerBId: string
+) {
+  console.log(`Swapping ${dancerAId} and ${dancerBId} at ${sectionId}`);
+  const newSections = state.sections.map(section => {
+    if (section.id !== sectionId) return section
+    var dancerPositions = {...section.formation.dancerPositions};
+    var originalA = section.formation.dancerPositions[dancerAId];
+    var originalB = section.formation.dancerPositions[dancerBId];
+    dancerPositions[dancerAId] = { ... originalA, x: originalB.x, y: originalB.y };
+    dancerPositions[dancerBId] = { ... originalB, x: originalA.x, y: originalA.y };
+    return {
+      ...section,
+      formation: {
+        ...section.formation,
+        dancerPositions: dancerPositions
+      }
+    }
+  });
+  
   return { ...state, sections: newSections }
 }

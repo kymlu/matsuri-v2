@@ -12,16 +12,17 @@ export default function ObjectToolbar (props: {
   const isToolbarVisible = props.isSwapVisible || props.isColorVisible || props.isRenameVisible;
   
   return <>
-    { isToolbarVisible && 
+    {
+      isToolbarVisible && 
       <div className="flex flex-row gap-2 p-2 w-fit">
         {
-          // props.isSwapVisible &&
-          // <IconButton
-          //   src={ICON.swapHorizBlack}
-          //   alt="Swap positions"
-          //   size="sm"
-          //   onClick={props.swapPositions}
-          //   />
+          props.isSwapVisible &&
+          <IconButton
+            src={ICON.swapHorizBlack}
+            alt="Swap positions"
+            size="sm"
+            onClick={props.swapPositions}
+            />
         }
         {
           props.isRenameVisible &&

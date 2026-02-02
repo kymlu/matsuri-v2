@@ -10,7 +10,7 @@ import { addSection, duplicateSection, editSectionNote, removeSection, renameSec
 import { ChoreoSection, SelectedObjects } from "../models/choreoSection";
 import { isNullOrUndefinedOrBlank, strEquals } from "../lib/helpers/globalHelper";
 import MainStage from "../components/grid/MainStage";
-import { alignHorizontalPositions, alignVerticalPositions, changeDancerColorAll, changeDancerColorCurrent, changeDancerColorCurrentAndFuture, distributePositions, moveDancerPositions, moveDancerPositionsDelta, pasteDancerPositions } from "../lib/editor/commands/dancerPositionCommands";
+import { alignHorizontalPositions, alignVerticalPositions, changeDancerColorAll, changeDancerColorCurrent, changeDancerColorCurrentAndFuture, distributePositions, moveDancerPositions, moveDancerPositionsDelta, pasteDancerPositions, swapPositions } from "../lib/editor/commands/dancerPositionCommands";
 import ObjectToolbar from "../components/editor/ObjectToolbar";
 import { Dialog } from "@base-ui/react";
 import EditChoreoSizeDialog from "../components/dialogs/EditChoreoSizeDialog";
@@ -280,7 +280,13 @@ export default function ChoreoEditPage(props: {
             <ObjectToolbar
               openColorMenu={() => {setEditDancerColourDialogOpen(true)}}
               isColorVisible={selectedObjects.dancers.length > 0 && selectedObjects.props.length === 0}
-              swapPositions={() => {console.log("TODO")}}
+              swapPositions={() => {
+                dispatch({
+                  type: "SET_STATE",
+                  newState: swapPositions(history.presentState.state, currentSection.id, selectedIds[0], selectedIds[1]),
+                  currentSectionId: currentSection.id,
+                  commit: true});
+              }}
               isSwapVisible={selectedObjects.dancers.length === 2 && selectedObjects.props.length === 0}
               openRenameMenu={() => {setRenameDancerDialogOpen(true)}}
               isRenameVisible={selectedObjects.dancers.length === 1 && selectedObjects.props.length === 0}

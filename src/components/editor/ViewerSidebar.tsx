@@ -6,6 +6,7 @@ import PositionHint from "./PositionHint";
 import IconButton from "../basic/IconButton";
 import { ICON } from "../../lib/consts/consts";
 import { isNullOrUndefinedOrBlank } from "../../lib/helpers/globalHelper";
+import Divider from "../basic/Divider";
 
 export default function ViewerSidebar(props: {
   note?: string,
@@ -47,12 +48,6 @@ export default function ViewerSidebar(props: {
     }
     <div className="flex-1 min-h-0 overflow-auto">
       {
-        props.showNotes && !props.isPositionHintShown &&
-        <p className="break-words whitespace-pre-line text-wrap">
-          {isNullOrUndefinedOrBlank(props.note) ? "メモなし" : props.note}
-        </p>
-      }
-      {
         props.isPositionHintShown &&
         <PositionHint
           dancer={props.dancer}
@@ -62,6 +57,22 @@ export default function ViewerSidebar(props: {
           action={props.action}
           geometry={props.geometry}
         />
+      }
+      {
+        props.isPositionHintShown && props.showNotes &&
+        <Divider/>
+      }
+      {
+        props.showNotes && isNullOrUndefinedOrBlank(props.note) &&
+        <p className="text-gray-500 break-words whitespace-pre-line text-wrap">
+          メモなし
+        </p>
+      }
+      {
+        props.showNotes && !isNullOrUndefinedOrBlank(props.note) &&
+        <p className="break-words whitespace-pre-line text-wrap">
+          {props.note}
+        </p>
       }
     </div>
   </div>
