@@ -209,6 +209,14 @@ export default function ChoreoEditPage(props: {
     setEditDancerColourDialogOpen(isOpen);
   };
 
+  const onSwapPositions = () => {
+    dispatch({
+      type: "SET_STATE",
+      newState: swapPositions(history.presentState.state, currentSection.id, selectedIds[0], selectedIds[1]),
+      currentSectionId: currentSection.id,
+      commit: true});
+  };
+
   return (
     <div className='flex flex-col justify-between w-screen h-screen max-h-screen'>
       <Header
@@ -280,13 +288,7 @@ export default function ChoreoEditPage(props: {
             <ObjectToolbar
               openColorMenu={() => {setEditDancerColourDialogOpen(true)}}
               isColorVisible={selectedObjects.dancers.length > 0 && selectedObjects.props.length === 0}
-              swapPositions={() => {
-                dispatch({
-                  type: "SET_STATE",
-                  newState: swapPositions(history.presentState.state, currentSection.id, selectedIds[0], selectedIds[1]),
-                  currentSectionId: currentSection.id,
-                  commit: true});
-              }}
+              swapPositions={onSwapPositions}
               isSwapVisible={selectedObjects.dancers.length === 2 && selectedObjects.props.length === 0}
               openRenameMenu={() => {setRenameDancerDialogOpen(true)}}
               isRenameVisible={selectedObjects.dancers.length === 1 && selectedObjects.props.length === 0}
@@ -404,6 +406,8 @@ export default function ChoreoEditPage(props: {
         }}
         showArrange={selectedIds.length === 0}
         showDeleteDancer={selectedObjects.dancers.length > 0}
+        showSwapPosition={selectedObjects.dancers.length === 2 && selectedObjects.props.length === 0}
+        onSwapPosition={onSwapPositions}
         onDeleteDancer={() => {
           dispatch({
             type: "SET_STATE",
