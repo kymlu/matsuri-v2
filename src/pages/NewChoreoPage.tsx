@@ -54,7 +54,7 @@ export function NewChoreoPage(props: {
       var id = crypto.randomUUID();
       dancers[id] = {
         id: id,
-        name: i.toString(),
+        name: (i + 1).toString(),
       }
       dancerPositions[id] = {
         sectionId: sectionId,
