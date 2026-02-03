@@ -10,6 +10,7 @@ import { getAllChoreos } from "../lib/dataAccess/DataController"
 import { Choreo } from "../models/choreo"
 import { groupByKey, strCompare } from "../lib/helpers/globalHelper"
 import { downloadLogs } from "../lib/helpers/logHelper"
+import { getJpDate } from "../lib/helpers/dateHelper"
 
 export default function HomePage(props: {
   goToNewChoreoPage: () => void,
@@ -30,9 +31,16 @@ export default function HomePage(props: {
     getAllChoreos().then((choreos) => {
       setSavedChoreos(
         groupByKey(
-          choreos
-            .sort((a, b) => strCompare<Choreo>(a, b, "name"))
-            .sort((a, b) => strCompare<Choreo>(a, b, "event")),
+          choreos.sort((a, b) => {
+            const eventCmp = strCompare<Choreo>(a, b, "event");
+            if (eventCmp !== 0) return eventCmp;
+
+            const dateA = a.lastUpdated?.getTime() ?? 0;
+            const dateB = b.lastUpdated?.getTime() ?? 0;
+            if (dateA !== dateB) return dateB - dateA;
+
+            return strCompare<Choreo>(a, b, "name");
+          }),
           "event"
         )
       );
@@ -49,7 +57,7 @@ export default function HomePage(props: {
   }
 
   return (
-    <div className='flex flex-col w-full max-w-md gap-2 mx-auto my-10'>
+    <div className='flex flex-col w-full gap-2 mx-auto my-10'>
       <div className='flex items-center justify-between mx-4'>
         <h1 className='text-2xl font-bold'>祭り</h1>
       </div>
@@ -113,13 +121,21 @@ function EventSection(props: {
     <div className='flex flex-row items-end gap-2'>
       <h2 className='text-xl font-bold text-primary'>{props.eventName.length === 0 ? "イベント不明" : props.eventName}</h2>
     </div>
-    <div className="grid grid-cols-2 gap-2">
+    <div className="flex flex-col gap-2 md:grid md:grid-cols-2">
       {
         props.choreos.map((choreo) =>
           <Dialog.Root key={choreo.id}>
             <Dialog.Trigger>
-              <div className="p-2 border-2 rounded-md border-primary lg:hover:bg-gray-100">
-                {choreo.name}
+              <div className="flex flex-col justify-center h-full p-3 transition-colors border-2 rounded-md border-primary lg:hover:bg-gray-100">
+                <div className="font-medium">
+                  {choreo.name}
+                </div>
+
+                {choreo.lastUpdated && (
+                  <div className="mt-1 text-sm text-gray-500">
+                    更新日：{getJpDate(choreo.lastUpdated)}
+                  </div>
+                )}
               </div>
             </Dialog.Trigger>
             <CustomDialog hasX title={choreo.name}>

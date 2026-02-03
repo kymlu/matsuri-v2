@@ -20,7 +20,7 @@ export default function CustomDialog(props: CustomDialogProps) {
         + (props.full ? " w-[95svw] h-[95svh]" : "")
       }>
         <div className="flex flex-col h-full min-h-0">
-          <div className="flex flex-row items-center justify-between mb-4 shrink-0">
+          <div className="flex flex-row items-center justify-between gap-2 mb-4 shrink-0">
             <Dialog.Title className="text-lg font-bold">
               {props.title}
             </Dialog.Title>
