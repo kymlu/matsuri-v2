@@ -1,4 +1,4 @@
-export const LAST_UPDATED = "更新 1月30日 00:00"
+export const LAST_UPDATED = "更新 2月3日 23:30"
 export const METER_PX = 25;
 
 export const MIN_STAGE_DIMENSION = 3;
