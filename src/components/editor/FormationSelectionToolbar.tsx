@@ -4,11 +4,14 @@ import { ChoreoSection } from "../../models/choreoSection";
 import Button from "../basic/Button";
 import CustomMenu from "../inputs/CustomMenu";
 import EditSectionNameDialog from "../dialogs/EditSectionNameDialog";
-import React from "react";
+import React, { useState } from "react";
 import EditSectionNoteDialog from "../dialogs/EditSectionNoteDialog";
 import ConfirmDeletionDialog from "../dialogs/ConfirmDeletionDialog";
 import IconButton from "../basic/IconButton";
 import { ICON } from "../../lib/consts/consts";
+import { DndContext, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
+import { arrayMove, SortableContext, useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 const renameDialog = Dialog.createHandle<ChoreoSection>();
 const addNoteDialog = Dialog.createHandle<ChoreoSection>();
@@ -24,6 +27,7 @@ export default function FormationSelectionToolbar(props: {
   onAddNoteToSection?: (section: ChoreoSection, note: string) => void,
   onDeleteSection?: (section: ChoreoSection) => void,
   onDuplicate?: (section: ChoreoSection, index: number) => void, // TODO
+  onReorder?: (newSectionOrder: ChoreoSection[]) => void,
 }) {
   const [renameDialogOpen, setRenameDialogOpen] = React.useState(false);
   const [addNoteDialogOpen, setAddNoteDialogOpen] = React.useState(false);
@@ -40,73 +44,54 @@ export default function FormationSelectionToolbar(props: {
   const handleDeleteDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setDeleteDialogOpen(isOpen);
   };
+
+  const [isDragging, setIsDragging] = useState<boolean>(false);
   
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    })
+)
+
   return <div className="flex w-screen gap-2 p-2 overflow-scroll max-w-screen">
-    {
-      props.sections.map((section, i) => 
-        <React.Fragment key={section.id}>
-          {
-            (!strEquals(props.currentSectionId, section.id) || props.showAddButton !== true) &&
-              <Button
-                fixed
-                compact
-                primary={strEquals(props.currentSectionId, section.id)}
-                fontSize="text-base"
-                onClick={() => {
-                  if (!strEquals(props.currentSectionId, section.id)) {
-                    props.onClickSection(section)
-                  }
-                }}>
-                <div className="overflow-hidden max-w-32 whitespace-nowrap text-ellipsis">
-                  {section.name}
-                </div>
-              </Button>
-          }
-          {
-            strEquals(props.currentSectionId, section.id) && props.showAddButton &&
-            <CustomMenu
-              position="top"
-              trigger={
-                <Button
-                  compact
-                  primary
-                  fontSize="text-base"
-                  fixed
-                  asDiv>
-                  <div className="overflow-hidden max-w-32 whitespace-nowrap text-ellipsis">
-                    {section.name}
-                  </div>
-                </Button>
-              }>
-              <div className="flex flex-col space-y-2">
-                <Dialog.Trigger handle={renameDialog} payload={section}>
-                  <Button asDiv>
-                    名前変更
-                  </Button>
-                </Dialog.Trigger>
-                <Dialog.Trigger handle={addNoteDialog} payload={section}>
-                  <Button asDiv>
-                    メモ追加
-                  </Button>
-                </Dialog.Trigger>
-                {/* <Button onClick={() => {props.onDuplicate?.(section, i)}}>
-                  複製
-                </Button> */}
-                {
-                  props.sections.length > 1 &&
-                  <Dialog.Trigger handle={deleteDialog} payload={section}>
-                    <Button
-                      asDiv>
-                      削除
-                    </Button>
-                  </Dialog.Trigger>
-                }
-              </div>
-            </CustomMenu>
-          }
-        </React.Fragment>
-      )
-    }
+    <DndContext
+      sensors={sensors}
+      onDragMove={(event) => {
+        if (!isDragging) {
+          setIsDragging(true);
+        }
+      }}
+      onDragEnd={(event) => {
+        if (!isDragging) return;
+
+        const { active, over } = event;
+
+        if (props.onReorder && over && active.id !== over.id) {
+          const oldIndex = props.sections.findIndex((item) => strEquals(item.id, active.id.toString()));
+          const newIndex = props.sections.findIndex((item) => strEquals(item.id, over.id.toString()));
+          props.onReorder(arrayMove(props.sections, oldIndex, newIndex));
+        }
+        setIsDragging(false);
+      }}
+    >
+      <SortableContext
+        items={props.sections}>
+        {
+          props.sections.map((section) => 
+            <FormationSectionItem
+              key={section.id}
+              section={section}
+              isSelected={strEquals(props.currentSectionId, section.id)}
+              canEdit={props.showAddButton === true && !isDragging}
+              canDelete={props.sections.length > 1}
+              onClickSection={props.onClickSection}
+              />
+          )
+        }
+      </SortableContext>
+    </DndContext>
     {
       props.showAddButton &&
       <IconButton
@@ -162,5 +147,90 @@ export default function FormationSelectionToolbar(props: {
           }}/>
       )}
     </Dialog.Root>
+  </div>
+}
+
+function FormationSectionItem (props: {
+  section: ChoreoSection,
+  isSelected: boolean,
+  canEdit: boolean,
+  canDelete: boolean,
+  onClickSection: (section: ChoreoSection) => void,
+}) {
+  var {section, isSelected, canEdit, canDelete, onClickSection} = props;
+
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({id: section.id});
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return <div style={style} ref={setNodeRef} {...attributes} {...listeners}>
+    {
+      (!isSelected || !canEdit) &&
+        <Button
+          fixed
+          compact
+          primary={isSelected}
+          fontSize="text-base"
+          onClick={() => {
+            if (!isSelected) {
+              onClickSection(section)
+            }
+          }}>
+          <div className="overflow-hidden max-w-32 whitespace-nowrap text-ellipsis">
+            {section.name}
+          </div>
+        </Button>
+    }
+    {
+      isSelected && canEdit &&
+      <CustomMenu
+        position="top"
+        trigger={
+          <Button
+            compact
+            primary
+            fontSize="text-base"
+            fixed
+            asDiv>
+            <div className="overflow-hidden max-w-32 whitespace-nowrap text-ellipsis">
+              {section.name}
+            </div>
+          </Button>
+        }>
+        <div className="flex flex-col space-y-2">
+          <Dialog.Trigger handle={renameDialog} payload={section}>
+            <Button asDiv>
+              名前変更
+            </Button>
+          </Dialog.Trigger>
+          <Dialog.Trigger handle={addNoteDialog} payload={section}>
+            <Button asDiv>
+              メモ追加
+            </Button>
+          </Dialog.Trigger>
+          {/* <Button onClick={() => {props.onDuplicate?.(section, i)}}>
+            複製
+          </Button> */}
+          {
+            canDelete &&
+            <Dialog.Trigger handle={deleteDialog} payload={section}>
+              <Button
+                asDiv>
+                削除
+              </Button>
+            </Dialog.Trigger>
+          }
+        </div>
+      </CustomMenu>
+    }
   </div>
 }

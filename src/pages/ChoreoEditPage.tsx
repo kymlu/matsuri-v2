@@ -6,7 +6,7 @@ import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { historyReducer } from "../lib/editor/historyReducer";
 import { Choreo } from "../models/choreo";
 import { EditHistory } from "../models/history";
-import { addSection, duplicateSection, editSectionNote, removeSection, renameSection } from "../lib/editor/commands/sectionCommands";
+import { addSection, duplicateSection, editSectionNote, removeSection, renameSection, reorderSections } from "../lib/editor/commands/sectionCommands";
 import { ChoreoSection, SelectedObjects } from "../models/choreoSection";
 import { isNullOrUndefinedOrBlank, strEquals } from "../lib/helpers/globalHelper";
 import MainStage from "../components/grid/MainStage";
@@ -355,6 +355,15 @@ export default function ChoreoEditPage(props: {
                   currentSectionId: currentSection.id,
                   commit: true,
                 });
+              }}
+              onReorder={(sections) => {
+                setSelectedIds([]);
+                dispatch({
+                  type: "SET_STATE",
+                  newState: reorderSections(history.presentState.state, sections),
+                  currentSectionId: currentSection.id,
+                  commit: true,
+                })
               }}
             />
           </div>

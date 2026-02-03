@@ -1,5 +1,4 @@
 import Header from "../components/editor/Header"
-import PositionHint from "../components/editor/PositionHint";
 import FormationSelectionToolbar from "../components/editor/FormationSelectionToolbar";
 import { useEffect, useState } from "react";
 import { Choreo } from "../models/choreo";

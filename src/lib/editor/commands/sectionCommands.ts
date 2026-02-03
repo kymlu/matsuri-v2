@@ -50,6 +50,6 @@ export function editSectionNote(state: Choreo, sectionId: string, newNote: strin
   return { ...state, sections: newSections };
 }
 
-export function reorderSections() {
-
+export function reorderSections(state: Choreo, newSections: ChoreoSection[]): Choreo {
+  return { ...state, sections: [...newSections] };
 }
