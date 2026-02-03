@@ -20,7 +20,7 @@ export default function CustomDialog(props: CustomDialogProps) {
         + (props.full ? " w-[95svw] h-[95svh]" : "")
       }>
         <div className="flex flex-col h-full min-h-0">
-          <div className="flex flex-row items-center justify-between gap-2 mb-4 shrink-0">
+          <div className="flex flex-row items-center justify-between gap-4 mb-4 shrink-0">
             <Dialog.Title className="text-lg font-bold">
               {props.title}
             </Dialog.Title>
@@ -28,8 +28,8 @@ export default function CustomDialog(props: CustomDialogProps) {
             {props.hasX && (
               <Dialog.Close
                 onClick={() => {props.onClose?.()}}
-                className="min-w-8">
-                <Icon src={ICON.clear} alt="Close Dialog" />
+                className="min-w-6">
+                <Icon src={ICON.clear} alt="Close Dialog" size="sm"/>
               </Dialog.Close>
             )}
           </div>
