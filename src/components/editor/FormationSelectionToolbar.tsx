@@ -79,6 +79,7 @@ export default function FormationSelectionToolbar(props: {
       }}
     >
       <SortableContext
+        disabled={props.showAddButton}
         items={props.sections}>
         {
           props.sections.map((section, i) => 
@@ -189,7 +190,7 @@ function FormationSectionItem (props: {
               onClickSection(section)
             }
           }}>
-          <div className="overflow-hidden max-w-32 whitespace-nowrap text-ellipsis">
+          <div className="overflow-hidden select-none max-w-32 whitespace-nowrap text-ellipsis">
             {section.name}
           </div>
         </Button>
@@ -205,7 +206,7 @@ function FormationSectionItem (props: {
             fontSize="text-base"
             fixed
             asDiv>
-            <div className="overflow-hidden max-w-32 whitespace-nowrap text-ellipsis">
+            <div className="overflow-hidden select-none max-w-32 whitespace-nowrap text-ellipsis">
               {section.name}
             </div>
           </Button>
