@@ -4,6 +4,7 @@ import IconButton from "../basic/IconButton";
 import { Choreo } from "../../models/choreo";
 import { Sidebar } from "./Sidebar";
 import { AppSetting } from "../../models/appSettings";
+import { downloadLogs } from "../../lib/helpers/logHelper";
 
 export default function Header (props: {
   returnHome: () => void,
@@ -33,7 +34,7 @@ export default function Header (props: {
           props.returnHome();
         }}/>
     </div>
-    <div className="font-semibold">{props.currentChoreo.name}</div>
+    <div className="font-semibold" onDoubleClick={downloadLogs}>{props.currentChoreo.name}</div>
     <div className="flex justify-end">
       {
         props.onToggleNotes &&
