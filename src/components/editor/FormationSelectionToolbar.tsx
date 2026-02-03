@@ -12,6 +12,7 @@ import { ICON } from "../../lib/consts/consts";
 import { DndContext, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { arrayMove, SortableContext, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { restrictToHorizontalAxis, restrictToParentElement } from "@dnd-kit/modifiers";
 
 const renameDialog = Dialog.createHandle<ChoreoSection>();
 const addNoteDialog = Dialog.createHandle<ChoreoSection>();
@@ -58,6 +59,7 @@ export default function FormationSelectionToolbar(props: {
   return <div className="flex w-screen gap-2 p-2 overflow-scroll max-w-screen">
     <DndContext
       sensors={sensors}
+      modifiers={[restrictToHorizontalAxis, restrictToParentElement]}
       onDragMove={(event) => {
         if (!isDragging) {
           setIsDragging(true);
