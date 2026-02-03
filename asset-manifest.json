@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/matsuri-v2/static/css/main.e2413b6f.css",
-    "main.js": "/matsuri-v2/static/js/main.51410018.js",
+    "main.css": "/matsuri-v2/static/css/main.98c596cb.css",
+    "main.js": "/matsuri-v2/static/js/main.cec114de.js",
     "static/js/453.9bdb5be6.chunk.js": "/matsuri-v2/static/js/453.9bdb5be6.chunk.js",
     "index.html": "/matsuri-v2/index.html",
-    "main.e2413b6f.css.map": "/matsuri-v2/static/css/main.e2413b6f.css.map",
-    "main.51410018.js.map": "/matsuri-v2/static/js/main.51410018.js.map",
+    "main.98c596cb.css.map": "/matsuri-v2/static/css/main.98c596cb.css.map",
+    "main.cec114de.js.map": "/matsuri-v2/static/js/main.cec114de.js.map",
     "453.9bdb5be6.chunk.js.map": "/matsuri-v2/static/js/453.9bdb5be6.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.e2413b6f.css",
-    "static/js/main.51410018.js"
+    "static/css/main.98c596cb.css",
+    "static/js/main.cec114de.js"
   ]
 }
