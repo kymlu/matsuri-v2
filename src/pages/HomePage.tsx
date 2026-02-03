@@ -142,13 +142,13 @@ function EventSection(props: {
               <div className="flex flex-col gap-2">
                 <ActionButton full onClick={() => { props.goToViewPage(choreo); }}>
                   <div className="flex flex-row items-center justify-center gap-2">
-                    <Icon src={ICON.visibility} alt="view"/>
+                    <Icon src={ICON.visibilityBlack} alt="view"/>
                     閲覧
                   </div>
                 </ActionButton>
                 <ActionButton full onClick={() => { props.goToEditPage(choreo); }}>
                   <div className="flex flex-row items-center justify-center gap-2">
-                    <Icon src={ICON.edit} alt="edit"/>
+                    <Icon src={ICON.editBlack} alt="edit"/>
                     編集
                   </div>
                 </ActionButton>

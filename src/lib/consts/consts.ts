@@ -94,6 +94,7 @@ export const ICON = {
   uploadBlack: "icons/upload_black.svg",
   verticalDistributeBlack: "icons/vertical_distribute_black.svg",
   visibility: "icons/visibility.svg",
+  visibilityBlack: "icons/visibility_black.svg",
   zoomInBlack: "icons/zoom_in_black.svg",
   zoomOutBlack: "icons/zoom_out_black.svg",
 }
