@@ -26,7 +26,7 @@ export default function FormationSelectionToolbar(props: {
   onRename?: (section: ChoreoSection, name: string) => void,
   onAddNoteToSection?: (section: ChoreoSection, note: string) => void,
   onDeleteSection?: (section: ChoreoSection) => void,
-  onDuplicate?: (section: ChoreoSection, index: number) => void, // TODO
+  onDuplicate?: (section: ChoreoSection, index: number) => void,
   onReorder?: (newSectionOrder: ChoreoSection[]) => void,
 }) {
   const [renameDialogOpen, setRenameDialogOpen] = React.useState(false);
@@ -79,7 +79,7 @@ export default function FormationSelectionToolbar(props: {
       <SortableContext
         items={props.sections}>
         {
-          props.sections.map((section) => 
+          props.sections.map((section, i) => 
             <FormationSectionItem
               key={section.id}
               section={section}
@@ -87,6 +87,7 @@ export default function FormationSelectionToolbar(props: {
               canEdit={props.showAddButton === true && !isDragging}
               canDelete={props.sections.length > 1}
               onClickSection={props.onClickSection}
+              onDuplicateSection={() => props.onDuplicate?.(section, i)}
               />
           )
         }
@@ -156,6 +157,7 @@ function FormationSectionItem (props: {
   canEdit: boolean,
   canDelete: boolean,
   onClickSection: (section: ChoreoSection) => void,
+  onDuplicateSection?: () => void,
 }) {
   var {section, isSelected, canEdit, canDelete, onClickSection} = props;
 
@@ -217,9 +219,9 @@ function FormationSectionItem (props: {
               メモ追加
             </Button>
           </Dialog.Trigger>
-          {/* <Button onClick={() => {props.onDuplicate?.(section, i)}}>
+          <Button onClick={props.onDuplicateSection}>
             複製
-          </Button> */}
+          </Button>
           {
             canDelete &&
             <Dialog.Trigger handle={deleteDialog} payload={section}>

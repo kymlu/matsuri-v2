@@ -24,7 +24,9 @@ export function addSection(state: Choreo, id: string, name: string): Choreo {
 export function duplicateSection(state: Choreo, section: ChoreoSection, index: number) {
   console.log("Duplicating section", section.id, section.name);
   var duplicatedSection = { ...section };
-  duplicatedSection.id = crypto.randomUUID();
+  var newId = crypto.randomUUID();
+  duplicatedSection.id = newId;
+  Object.values(duplicatedSection.formation.dancerPositions).forEach(position => position.sectionId = newId)
   const newSections = [ ...state.sections.slice(0, index), ...[duplicatedSection], ...state.sections.slice(index) ];
   return { ...state, sections: newSections };
 }
