@@ -134,7 +134,7 @@ function EventSection(props: {
             <Dialog.Trigger>
               <div className="flex flex-col justify-between h-full p-3 transition-colors border-2 rounded-md border-primary lg:hover:bg-gray-100">
                 {/* Title */}
-                <div className="text-base font-medium leading-tight">
+                <div className="text-base font-medium leading-tight text-left">
                   {choreo.name}
                 </div>
 
