@@ -152,6 +152,7 @@ export default function GridLayer({
     // Centre triangle marker
     elements.push(
       <Shape
+        key={"triangle"}
         sceneFunc={(context, shape) => {
           context.beginPath();
           context.moveTo(centerX, stageTopPx - gridSizePx * 0.5);
