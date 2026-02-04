@@ -350,8 +350,8 @@ export function swapPositions(
     var dancerPositions = {...section.formation.dancerPositions};
     var originalA = section.formation.dancerPositions[dancerAId];
     var originalB = section.formation.dancerPositions[dancerBId];
-    dancerPositions[dancerAId] = { ... originalA, x: originalB.x, y: originalB.y };
-    dancerPositions[dancerBId] = { ... originalB, x: originalA.x, y: originalA.y };
+    dancerPositions[dancerAId] = { ...originalA, x: originalB.x, y: originalB.y };
+    dancerPositions[dancerBId] = { ...originalB, x: originalA.x, y: originalA.y };
     return {
       ...section,
       formation: {

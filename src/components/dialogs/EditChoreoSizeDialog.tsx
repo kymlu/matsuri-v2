@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { MIN_STAGE_DIMENSION, MAX_STAGE_DIMENSION, MIN_STAGE_MARGIN, MAX_STAGE_MARGIN, METER_PX } from "../../lib/consts/consts";
+import { useEffect, useMemo, useState } from "react";
+import { MIN_STAGE_DIMENSION, MAX_STAGE_DIMENSION, MIN_STAGE_MARGIN, MAX_STAGE_MARGIN } from "../../lib/consts/consts";
 import { Choreo, StageGeometry, StageType } from "../../models/choreo";
 import NumberInput from "../inputs/NumberInput";
 import BaseEditDialog from "./BaseEditDialog";
@@ -58,17 +58,6 @@ export default function EditChoreoSizeDialog(props: {
       },
       yAxis: form.stageType === "parade" ? "bottom-up" : "top-down",
     };
-  }, [form]);
-
-  const ref = useRef<HTMLDivElement>(null);
-
-  const scale = useMemo<number>(() => {
-    var boundingClient = ref.current?.getBoundingClientRect();
-    if (!boundingClient) return 1;
-    return Math.min(
-      boundingClient.width / ((form.stageWidth + form.xMargin * 2) * METER_PX), 
-      boundingClient.height / ((form.stageLength + form.yMargin * 2) * METER_PX), 
-    );
   }, [form]);
 
   return <BaseEditDialog

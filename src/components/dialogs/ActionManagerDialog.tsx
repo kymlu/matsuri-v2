@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import Button from "../basic/Button";
 import { DancerAction, DancerActionTiming } from "../../models/dancerAction";
 import { DndContext } from "@dnd-kit/core";
 import { arrayMove, SortableContext, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { restrictToParentElement, restrictToVerticalAxis } from "@dnd-kit/modifiers";
+import { restrictToParentElement } from "@dnd-kit/modifiers";
 import TextInput from "../inputs/TextInput";
 import { strEquals } from "../../lib/helpers/globalHelper";
 import Icon from "../basic/Icon";
