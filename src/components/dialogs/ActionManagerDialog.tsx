@@ -198,7 +198,7 @@ function TimingItem (props: {
   const {timing, onRenameTiming, onDeleteTiming, showDeleteButton} = props;
   
   return <div className="flex items-center">
-    <TextInput compact short default={timing.name} onContentChange={(newName) => {onRenameTiming(newName)}}/>
+    <TextInput maxLength={5} compact short default={timing.name} onContentChange={(newName) => {onRenameTiming(newName)}}/>
     <Icon size="sm" src={ICON.personBlack} alt="Dancer count"/>
     <span>{timing.dancerIds.length}</span>
     {showDeleteButton && <IconButton size="sm" noBorder src={ICON.deleteBlack} alt="Delete action" onClick={() => {onDeleteTiming()}}/>}
