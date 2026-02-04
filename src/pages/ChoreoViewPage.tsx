@@ -76,7 +76,7 @@ export default function ChoreoEditPage(props: {
         />
       </div>
       <footer
-        className="pb-4"
+        className="pb-8"
         >
         <FormationSelectionToolbar
           currentSectionId={currentSection.id}

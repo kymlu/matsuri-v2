@@ -33,23 +33,6 @@ export const colorPalette = {
 
   // Initialize the cached text contrast
   initTextContrast() {
-    const hexToRgb = (hex: string): [number, number, number] => {
-      const cleaned = hex.replace("#", "");
-      const bigint = parseInt(cleaned, 16);
-      const r = (bigint >> 16) & 255;
-      const g = (bigint >> 8) & 255;
-      const b = bigint & 255;
-      return [r, g, b];
-    };
-
-    const getLuminance = (hex: string) => {
-      const [r, g, b] = hexToRgb(hex).map((c) => c / 255);
-      const srgb = [r, g, b].map((v) =>
-        v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)
-      );
-      return 0.2126 * srgb[0] + 0.7152 * srgb[1] + 0.0722 * srgb[2];
-    };
-
     this.allColors().forEach((c) => {
       this.textContrast[c] = getLuminance(c) > 0.5 ? "#000000" : "#FFFFFF";
     });
@@ -57,8 +40,31 @@ export const colorPalette = {
 
   // Helper: get readable text color safely
   getTextColor(bg: string): string {
-    return this.textContrast[bg] || "#000000"; // default to black if missing
+    var textColour = this.textContrast[bg];
+    if (textColour) {
+      return textColour;
+    } else {
+      this.textContrast[bg] = getLuminance(bg) > 0.5 ? "#000000" : "#FFFFFF";
+      return this.textContrast[bg];
+    }
   },
+};
+
+const hexToRgb = (hex: string): [number, number, number] => {
+  const cleaned = hex.replace("#", "");
+  const bigint = parseInt(cleaned, 16);
+  const r = (bigint >> 16) & 255;
+  const g = (bigint >> 8) & 255;
+  const b = bigint & 255;
+  return [r, g, b];
+};
+
+const getLuminance = (hex: string) => {
+  const [r, g, b] = hexToRgb(hex).map((c) => c / 255);
+  const srgb = [r, g, b].map((v) =>
+    v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)
+  );
+  return 0.2126 * srgb[0] + 0.7152 * srgb[1] + 0.0722 * srgb[2];
 };
 
 colorPalette.initTextContrast();

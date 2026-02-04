@@ -54,7 +54,7 @@ export default function Toolbar ({
 
   const isSubmenuOpen = isArrangeVisible || isColorVisible || isDancerManagerVisible || isActionManagerVisible || isPropManagerVisible;
   
-  return <div className="flex items-center w-screen gap-2 px-4 pt-4 pb-6 overflow-scroll border-t-2 border-primary">
+  return <div className="flex items-center w-screen gap-2 px-4 pt-4 pb-8 overflow-scroll border-t-2 border-primary">
     {
       !isSubmenuOpen &&
       <>

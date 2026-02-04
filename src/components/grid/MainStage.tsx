@@ -8,6 +8,9 @@ import { DancerPosition } from "../../models/dancer";
 import { pxToStageMeters, snapToGrid } from "../../lib/helpers/editorCalculationHelper";
 import { METER_PX } from "../../lib/consts/consts";
 import { AppSetting } from "../../models/appSettings";
+import Konva from "konva";
+
+Konva.hitOnDragEnabled = true;
 
 export default function MainStage(props: {
   canEdit: boolean,

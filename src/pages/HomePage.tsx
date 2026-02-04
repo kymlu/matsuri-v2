@@ -6,7 +6,7 @@ import { ActionButton } from "../components/basic/Button"
 import Icon from "../components/basic/Icon"
 import { readUploadedFile } from "../lib/helpers/uploadHelper"
 import { useEffect, useState } from "react"
-import { getAllChoreos } from "../lib/dataAccess/DataController"
+import { getAllChoreos, saveChoreo } from "../lib/dataAccess/DataController"
 import { Choreo } from "../models/choreo"
 import { groupByKey, strCompare } from "../lib/helpers/globalHelper"
 import { downloadLogs } from "../lib/helpers/logHelper"
@@ -29,31 +29,37 @@ export default function HomePage(props: {
 
   useEffect(() => {
     getAllChoreos().then((choreos) => {
-      setSavedChoreos(
-        groupByKey(
-          choreos.sort((a, b) => {
-            const eventCmp = strCompare<Choreo>(a, b, "event");
-            if (eventCmp !== 0) return eventCmp;
-
-            const dateA = a.lastUpdated?.getTime() ?? 0;
-            const dateB = b.lastUpdated?.getTime() ?? 0;
-            if (dateA !== dateB) return dateB - dateA;
-
-            return strCompare<Choreo>(a, b, "name");
-          }),
-          "event"
-        )
-      );
+      setSavedChoreos(groupChoreos(choreos));
     });
   }, []);
+
+  const groupChoreos = (choreos: Choreo[]) => {
+    return groupByKey(
+      choreos.sort((a, b) => {
+        const eventCmp = strCompare<Choreo>(a, b, "event");
+        if (eventCmp !== 0) return eventCmp;
+
+        const dateA = a.lastUpdated?.getTime() ?? 0;
+        const dateB = b.lastUpdated?.getTime() ?? 0;
+        if (dateA !== dateB) return dateB - dateA;
+
+        return strCompare<Choreo>(a, b, "name");
+      }),
+      "event"
+    )
+  }
 
   const duplicateChoreo = (choreo: Choreo) => {
     const newChoreo = {
       ...choreo,
       id: crypto.randomUUID(),
       name: `${choreo.name}のコピー`,
-    }
-    props.goToEditPage(newChoreo);
+      lastUpdated: new Date(),
+    } as Choreo;
+    saveChoreo(newChoreo, () => {
+      setSavedChoreos(prev => groupChoreos([...Object.values(prev).flat(), newChoreo]));
+      
+    });
   }
 
   return (
@@ -183,19 +189,22 @@ function EventSection(props: {
                   </div>
                 </ActionButton>
 
-                <ActionButton
-                  full
-                  onClick={() => props.duplicateChoreo(choreo)}
-                >
-                  <div className="flex items-center gap-2">
-                    <Icon
-                      src={ICON.fileCopyBlack}
-                      alt="duplicate"
-                      size="sm"
-                    />
-                    <span className="text-sm font-medium">複製</span>
-                  </div>
-                </ActionButton>
+                <Dialog.Close>
+                  <ActionButton
+                    full
+                    asDiv
+                    onClick={() => props.duplicateChoreo(choreo)}
+                  >
+                    <div className="flex items-center flex-1 gap-2">
+                      <Icon
+                        src={ICON.fileCopyBlack}
+                        alt="duplicate"
+                        size="sm"
+                      />
+                      <span className="text-sm font-medium">複製</span>
+                    </div>
+                  </ActionButton>
+                </Dialog.Close>
               </div>
             </CustomDialog>
           </Dialog.Root>
