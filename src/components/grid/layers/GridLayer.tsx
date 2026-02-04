@@ -149,6 +149,7 @@ export default function GridLayer({
       );
     }
     
+    // Centre triangle marker
     elements.push(
       <Shape
         sceneFunc={(context, shape) => {
@@ -216,7 +217,7 @@ export default function GridLayer({
               width={radius * 2}
               height={radius * 2}
               offsetX={radius}
-              offsetY={radius}
+              offsetY={radius-1}
               align="center"
               verticalAlign="middle"
             />
