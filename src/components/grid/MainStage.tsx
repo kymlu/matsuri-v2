@@ -6,7 +6,7 @@ import FormationLayer from "./layers/FormationLayer";
 import { ChoreoSection } from "../../models/choreoSection";
 import { DancerPosition } from "../../models/dancer";
 import { pxToStageMeters, snapToGrid } from "../../lib/helpers/editorCalculationHelper";
-import { METER_PX } from "../../lib/consts/consts";
+import { MAX_ZOOM, METER_PX, MIN_ZOOM } from "../../lib/consts/consts";
 import { AppSetting } from "../../models/appSettings";
 import Konva from "konva";
 
@@ -79,6 +79,10 @@ export default function MainStage(props: {
     };
   };
 
+  const clampScale = (scale: number) => {
+    return Math.max(Math.min(scale, MAX_ZOOM), MIN_ZOOM);
+  }
+
   const handleWheel = (e: any) => {
     e.evt.preventDefault();
 
@@ -100,7 +104,7 @@ export default function MainStage(props: {
     }
 
     const scaleBy = 1.01;
-    const newScale = direction > 0 ? oldScale * scaleBy : oldScale / scaleBy;
+    const newScale = clampScale(direction > 0 ? oldScale * scaleBy : oldScale / scaleBy);
 
     setStageScale({ x: newScale, y: newScale });
 
@@ -161,7 +165,7 @@ export default function MainStage(props: {
         y: (newCenter.y - stagePos.y) / stageScale.x,
       };
 
-      const scale = stageScale.x * (dist / lastDist);
+      const scale = clampScale(stageScale.x * (dist / lastDist));
 
       setStageScale({ x: scale, y: scale });
 

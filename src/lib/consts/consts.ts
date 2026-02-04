@@ -7,6 +7,9 @@ export const MAX_STAGE_DIMENSION = 500;
 export const MIN_STAGE_MARGIN = 2;
 export const MAX_STAGE_MARGIN = 20;
 
+export const MIN_ZOOM = 0.3;
+export const MAX_ZOOM = 4;
+
 export enum CUSTOM_EVENT {
 }
 
