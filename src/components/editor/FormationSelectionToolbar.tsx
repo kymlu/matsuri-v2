@@ -101,8 +101,7 @@ export default function FormationSelectionToolbar(props: {
       props.showAddButton &&
       <IconButton
         size="sm"
-        src={ICON.addBlack}
-        alt="セクション追加"
+        src={ICON.add}
         onClick={() => {props.onClickAddButton?.(crypto.randomUUID(), "セクション" + (props.sections.length + 1))}}
       />
     }

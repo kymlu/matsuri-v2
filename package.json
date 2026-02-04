@@ -21,6 +21,7 @@
     "classnames": "^2.5.1",
     "cra-template-pwa-typescript": "^2.0.0",
     "konva": "^9.3.22",
+    "material-symbols": "^0.40.2",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "react-konva": "^19.0.7",

@@ -18,8 +18,7 @@ export default function ObjectToolbar (props: {
         {
           props.isSwapVisible &&
           <IconButton
-            src={ICON.swapHorizBlack}
-            alt="Swap positions"
+            src={ICON.swapHoriz}
             size="sm"
             onClick={props.swapPositions}
             />
@@ -27,8 +26,7 @@ export default function ObjectToolbar (props: {
         {
           props.isRenameVisible &&
           <IconButton
-            src={ICON.textFieldsAltBlack}
-            alt="Color"
+            src={ICON.textFieldsAlt}
             size="sm"
             onClick={props.openRenameMenu}
             />
@@ -36,8 +34,7 @@ export default function ObjectToolbar (props: {
         {
           props.isColorVisible &&
           <IconButton
-            src={ICON.colorsBlack}
-            alt="Color"
+            src={ICON.colors}
             size="sm"
             onClick={props.openColorMenu}
             />

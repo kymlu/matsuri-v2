@@ -29,7 +29,7 @@ export default function CustomDialog(props: CustomDialogProps) {
               <Dialog.Close
                 onClick={() => {props.onClose?.()}}
                 className="min-w-6">
-                <Icon src={ICON.clear} alt="Close Dialog" size="sm"/>
+                <Icon src={ICON.clear} size="sm"/>
               </Dialog.Close>
             )}
           </div>

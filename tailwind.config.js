@@ -6,6 +6,9 @@ module.exports = {
       colors: {
         primary: '#AB1010',
       },
+      fontFamily: {
+        icon: 'Material Symbols Rounded',
+      }
     },
   },
   plugins: [],

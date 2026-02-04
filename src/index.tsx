@@ -5,6 +5,7 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { DBProvider } from './lib/dataAccess/DBProvider';
 import { RequireDB } from './lib/dataAccess/RequireDb';
+import 'material-symbols/rounded.css';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement

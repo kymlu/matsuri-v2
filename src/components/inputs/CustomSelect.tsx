@@ -4,6 +4,7 @@ import { useImperativeHandle } from "react";
 import { strEquals } from "../../lib/helpers/globalHelper";
 import { ICON } from "../../lib/consts/consts";
 import { FieldWithLabel } from "./Label";
+import Icon from "../basic/Icon";
 
 export type CustomSelectProps = {
   /**
@@ -42,11 +43,11 @@ export default function CustomSelect(props: CustomSelectProps) {
             {props.isIcons ? <img className="size-8" src={value}/> : value}
           </Select.Value>
           <Select.Icon className="flex align-middle">
-            <img className="size-4" src={ICON.expandMoreBlack}/>
+            <Icon size="sm" src={ICON.expandMore}/>
           </Select.Icon>
         </Select.Trigger>
         <Select.Portal>
-          <Select.Positioner side="bottom" className="z-10 bg-white rounded-md select-none border-2 border-primary">
+          <Select.Positioner side="bottom" className="z-10 bg-white border-2 rounded-md select-none border-primary">
             <Select.Popup className="flex flex-col gap-1 p-2 max-h-[40svh] overflow-y-auto">
               { Object.entries(props.items).map(([itemValue, label]) => (
                 <Select.Item

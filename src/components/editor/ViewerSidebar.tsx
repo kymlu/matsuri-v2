@@ -33,8 +33,7 @@ export default function ViewerSidebar(props: {
         </span>
         <IconButton
           size="sm"
-          src={ICON.clearBlack}
-          alt={props.isPositionHintShown ? "Deselect dancer" : "Hide notes"}
+          src={ICON.clear}
           noBorder
           onClick={() => {
             if (props.isPositionHintShown) {

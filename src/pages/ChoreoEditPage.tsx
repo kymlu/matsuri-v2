@@ -486,8 +486,7 @@ export default function ChoreoEditPage(props: {
             グリッドを押してダンサーを追加する
           </span>
           <IconButton
-            src={ICON.clearBlack}
-            alt="Stop adding dancers"
+            src={ICON.clear}
             size="sm"
             onClick={() => {setIsAddingDancers(false);}}/>
         </div>
@@ -504,8 +503,7 @@ export default function ChoreoEditPage(props: {
             }
           </span>
           <IconButton
-            src={ICON.clearBlack}
-            alt="Stop assigning"
+            src={ICON.clear}
             size="sm"
             onClick={() => {
               setSelectedIds([]);

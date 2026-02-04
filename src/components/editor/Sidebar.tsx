@@ -34,8 +34,7 @@ export function Sidebar (props: {
           </div>
           <IconButton
             noBorder
-            src={ICON.editBlack}
-            alt="Edit name"
+            src={ICON.edit}
             size="sm"
             onClick={props.editName}
           />

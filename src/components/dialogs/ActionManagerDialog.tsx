@@ -94,7 +94,7 @@ export function ActionManagerDialog(props: {
     onSubmit={() => {props.onSubmit(actions)}}>
     <div className="space-y-4">
       <button onClick={addAction} className="flex flex-row items-center justify-center p-4 bg-white border-2 rounded-md border-primary">
-        <Icon src={ICON.addBlack} alt="Add action" size="sm"/>アクション追加
+        <Icon src={ICON.add} size="sm"/>アクション追加
       </button>
       <DndContext
         modifiers={[restrictToParentElement]}
@@ -159,7 +159,7 @@ function SortableActionSection (props: {
 
   return <div className="relative flex flex-row items-start gap-2 p-4 bg-white border-2 rounded-md border-primary" style={style} ref={setNodeRef}>
     <div {...attributes} {...listeners}>
-      <Icon src={ICON.dragHandleBlack} alt="Drag handle"/>
+      <Icon src={ICON.dragHandle}/>
     </div>
     <div className="flex-1">
       <TextInput label="アクション名" default={action.name} onContentChange={(newName) => {onRenameAction(newName)}}/>
@@ -180,11 +180,11 @@ function SortableActionSection (props: {
               />
           )
         }
-        <IconButton alt={"Add timing"} onClick={onAddTiming} src={ICON.addBlack} size="sm"/>
+        <IconButton onClick={onAddTiming} src={ICON.add} size="sm"/>
       </div>
     </div>
     <div className="absolute top-2 right-2">
-      <IconButton size="sm" noBorder src={ICON.deleteBlack} alt="Delete action" onClick={() => onDeleteAction()}/>
+      <IconButton size="sm" noBorder src={ICON.delete} onClick={() => onDeleteAction()}/>
     </div>
   </div>
 }
@@ -199,8 +199,8 @@ function TimingItem (props: {
   
   return <div className="flex items-center">
     <TextInput maxLength={5} compact short default={timing.name} onContentChange={(newName) => {onRenameTiming(newName)}}/>
-    <Icon size="sm" src={ICON.personBlack} alt="Dancer count"/>
+    <Icon size="sm" src={ICON.person}/>
     <span>{timing.dancerIds.length}</span>
-    {showDeleteButton && <IconButton size="sm" noBorder src={ICON.deleteBlack} alt="Delete action" onClick={() => {onDeleteTiming()}}/>}
+    {showDeleteButton && <IconButton size="sm" noBorder src={ICON.delete} onClick={() => {onDeleteTiming()}}/>}
   </div>
 }

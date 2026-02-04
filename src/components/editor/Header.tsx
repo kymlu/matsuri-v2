@@ -26,8 +26,7 @@ export default function Header (props: {
   return <header className="z-10 grid grid-cols-[1fr,auto,1fr] items-center justify-between w-screen p-2 border-b-2 select-none bg-gradient-to-b from-white to-transparent ">
     <div className="flex">
       <IconButton
-        src={ICON.chevronBackwardBlack}
-        alt="Return home" // if there is a history, verify save first?
+        src={ICON.chevronBackward} // if there is a history, verify save first?
         noBorder
         onClick={() => {
           props.onSave?.();
@@ -39,8 +38,7 @@ export default function Header (props: {
       {
         props.onToggleNotes &&
         <IconButton
-          src={props.showNotes ? ICON.speakerNotesOffBlack : ICON.speakerNotesBlack}
-          alt="Show notes"
+          src={props.showNotes ? ICON.speakerNotesOff : ICON.speakerNotes}
           noBorder
           onClick={() => {props.onToggleNotes?.()}}
           />
@@ -48,16 +46,14 @@ export default function Header (props: {
       {
         props.onSave &&
         <IconButton
-          src={ICON.saveBlack}
-          alt="Save"
+          src={ICON.save}
           noBorder
           onClick={() => {props.onSave?.()}}/>
       }
       {
         props.onDownload &&
         <IconButton
-          src={ICON.downloadBlack}
-          alt="Download"
+          src={ICON.download}
           noBorder
           onClick={() => {props.onDownload?.()}}/>
       }
@@ -66,8 +62,7 @@ export default function Header (props: {
         <Dialog.Root>
           <Dialog.Trigger>
             <IconButton
-              src={ICON.settingsBlack}
-              alt="Settings"
+              src={ICON.settings}
               noBorder
               asDiv/>
           </Dialog.Trigger>

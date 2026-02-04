@@ -150,8 +150,7 @@ function EventSection(props: {
 
                   <div className="flex items-center gap-1 text-gray-700">
                     <Icon
-                      src={ICON.personBlack}
-                      alt="member count"
+                      src={ICON.person}
                       size="sm"
                     />
                     <span>{Object.keys(choreo.dancers).length}</span>
@@ -167,9 +166,8 @@ function EventSection(props: {
                 >
                   <div className="flex items-center gap-2">
                     <Icon
-                      src={ICON.visibilityBlack}
+                      src={ICON.visibility}
                       size="sm"
-                      alt="view"
                     />
                     <span className="text-sm font-medium">閲覧</span>
                   </div>
@@ -181,8 +179,7 @@ function EventSection(props: {
                 >
                   <div className="flex items-center gap-2">
                     <Icon
-                      src={ICON.editBlack}
-                      alt="edit"
+                      src={ICON.edit}
                       size="sm"
                     />
                     <span className="text-sm font-medium">編集</span>
@@ -197,8 +194,7 @@ function EventSection(props: {
                   >
                     <div className="flex items-center flex-1 gap-2">
                       <Icon
-                        src={ICON.fileCopyBlack}
-                        alt="duplicate"
+                        src={ICON.fileCopy}
                         size="sm"
                       />
                       <span className="text-sm font-medium">複製</span>

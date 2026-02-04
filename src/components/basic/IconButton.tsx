@@ -1,13 +1,14 @@
 import classNames from "classnames"
+import Icon from "./Icon";
 
 export default function IconButton (props: {
   src: string,
-  alt: string,
   label?: string,
   onClick?: () => void,
   noBorder?: boolean,
   disabled?: boolean,
   size?: "sm" | "md" | "lg",
+  colour?: "primary",
   asDiv?: boolean,
 }) {
   var buttonClasses = classNames("flex justify-center bg-white items-center rounded-full p-1 border-primary", {
@@ -32,11 +33,7 @@ export default function IconButton (props: {
         className={buttonClasses}
         disabled={props.disabled}
         onClick={props.onClick}>
-        <img
-          src={props.src}
-          alt={props.alt}
-          className={iconClasses}
-          />
+        <Icon src={props.src} size={props.size} colour={props.colour}/>
       </button>
     }
     {
@@ -48,11 +45,7 @@ export default function IconButton (props: {
             props.onClick?.();
           }
         }}>
-        <img
-          src={props.src}
-          alt={props.alt}
-          className={iconClasses}
-          />
+        <Icon src={props.src} size={props.size} colour={props.colour}/>
       </div>
     }
     {props.label && <div className="text-sm text-nowrap">{props.label}</div>}
