@@ -24,6 +24,10 @@ type ToolbarProps = {
   onEditName?: () => void, // TODO
   showDeleteDancer: boolean,
   onDeleteDancer: () => void,
+  onOpenActionManager: () => void,
+  onAssignActions: () => void,
+  isAssigningActionsEnabled: boolean,
+  isAssigningActions: boolean,
 }
 
 export default function Toolbar ({
@@ -45,6 +49,10 @@ export default function Toolbar ({
   onDeleteDancer,
   showSwapPosition,
   onSwapPosition,
+  onOpenActionManager,
+  onAssignActions,
+  isAssigningActionsEnabled,
+  isAssigningActions,
 }: ToolbarProps) {
   const [isArrangeVisible, setIsArrangeVisible] = useState<boolean>(false);
   const [isColorVisible, setIsColorVisible] = useState<boolean>(false);
@@ -60,14 +68,14 @@ export default function Toolbar ({
       <>
         <IconButton src={ICON.personBlack} label="ダンサー" alt="Dancer Management" onClick={()=>{setIsDancerManagerVisible(true)}}/>
         <IconButton src={ICON.straightenBlack} disabled={showArrange} label="整理" alt="Add" onClick={()=>{setIsArrangeVisible(true)}}/>
-        {/* <IconButton src={ICON.categoryBlack} label="カウント" alt="Add" onClick={()=>{setIsActionManagerVisible(true)}}/>
-        <IconButton src={ICON.flagBlack} label="道具" alt="Props" onClick={()=>{setIsPropManagerVisible(true)}}/> */}
+        <IconButton src={ICON.categoryBlack} label="カウント" alt="Add count" onClick={()=>{setIsActionManagerVisible(true)}}/>
+        {/* <IconButton src={ICON.flagBlack} label="道具" alt="Props" onClick={()=>{setIsPropManagerVisible(true)}}/> */}
       </>
     }
     {
       isSubmenuOpen && 
       <>
-        <IconButton src={ICON.chevronBackwardBlack} label="戻る" alt="Close submenu" onClick={()=>{
+        <IconButton disabled={isAssigningActions} src={ICON.chevronBackwardBlack} label="戻る" alt="Close submenu" onClick={()=>{
           setIsArrangeVisible(false);
           setIsColorVisible(false);
           setIsActionManagerVisible(false);
@@ -114,9 +122,8 @@ export default function Toolbar ({
         {
           isActionManagerVisible &&
           <>
-            <IconButton src={ICON.verticalDistributeBlack} label="Actions etc" alt="Distribute Vertically" onClick={() => {}} />
-            <IconButton src={ICON.verticalDistributeBlack} label="縦均" alt="Distribute Vertically" onClick={() => {}} />
-            <IconButton src={ICON.verticalDistributeBlack} label="縦均" alt="Distribute Vertically" onClick={() => {}} />
+            <IconButton disabled={isAssigningActions} src={ICON.categoryBlack} label="管理" alt="Distribute Vertically" onClick={() => {onOpenActionManager()}} />
+            <IconButton disabled={!isAssigningActionsEnabled} src={isAssigningActions ? ICON.clearBlack : ICON.categoryBlack} label="割り当て" alt="Distribute Vertically" onClick={() => {onAssignActions()}} />
           </>
         }
       </>

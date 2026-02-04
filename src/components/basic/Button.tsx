@@ -4,6 +4,7 @@ import className from "classnames";
 type ButtonProps = {
   children: React.ReactNode
   primary?: boolean,
+  grey?: boolean,
   disabled?: boolean,
   full?: boolean,
   fixed?: boolean,
@@ -23,8 +24,9 @@ export default function Button(props: ButtonProps) {
     "px-3 py-1.5": props.compact !== true,
     "lg:hover:bg-gray-100": !props.disabled && props.primary !== true,
     "lg:hover:opacity-70": !props.disabled && props.primary,
-    "border-gray-300 bg-white": props.primary !== true,
+    "border-gray-300 bg-white": props.primary !== true && props.grey !== true,
     "bg-primary text-white border-primary": props.primary,
+    "bg-gray-600 text-white border-gray-600": props.grey,
     "lg:hover:bg-primary-light": props.primary && !props.disabled,
     "cursor-default opacity-50": props.disabled,
     "cursor-pointer": !props.disabled,

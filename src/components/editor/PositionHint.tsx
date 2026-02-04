@@ -4,13 +4,14 @@ import { StageGeometry } from "../../models/choreo";
 import { Dancer, DancerPosition } from "../../models/dancer";
 import { DancerAction } from "../../models/dancerAction";
 import { roundToTenth } from "../../lib/helpers/globalHelper";
+import Divider from "../basic/Divider";
 
 export default function PositionHint (props: {
   dancer: Dancer,
   position: DancerPosition,
   nextSectionName?: string,
   nextPosition?: DancerPosition,
-  action?: DancerAction,
+  actions?: DancerAction[],
   geometry: StageGeometry,
 }) {
 
@@ -76,19 +77,25 @@ export default function PositionHint (props: {
           </div>
         }
       </div>
-
-      {/* Count / actions */}
-      {/* <div className="pt-2 space-y-1 border-t border-gray-200">
-        <div className="text-gray-500">カウント</div>
-        <div className="flex justify-between pl-2">
-          <span>アクション 1</span>
-          <span className="font-medium">2と</span>
-        </div>
-        <div className="flex justify-between pl-2">
-          <span>アクション 2</span>
-          <span className="font-medium">5</span>
-        </div>
-      </div> */}
+      {
+        props.actions && props.actions.length > 0 &&
+        <>
+          <Divider/>
+          <div className="space-y-1 border-gray-200">
+            <div className="text-gray-500">カウント</div>
+            {
+              props.actions.map(action => {
+                var assignedTiming = action.timings.find(t => t.dancerIds.includes(props.dancer.id));
+                
+                return <div className="flex justify-between pl-2">
+                  <span>{action.name}</span>
+                  <span className="font-medium">{assignedTiming?.name ?? "---"}</span>
+                </div>
+              })
+            }
+          </div>
+        </>
+      }
     </div>
   );
 } 

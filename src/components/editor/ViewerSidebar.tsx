@@ -15,7 +15,7 @@ export default function ViewerSidebar(props: {
   position: DancerPosition,
   nextSectionName?: string,
   nextPosition?: DancerPosition,
-  action?: DancerAction,
+  actions?: DancerAction[],
   geometry: StageGeometry,
   isPositionHintShown: boolean,
   hideNotes: () => void,
@@ -46,6 +46,7 @@ export default function ViewerSidebar(props: {
         />
       </div>
     }
+    {/* todo: add buttons to highlight which dancers are at which count */}
     <div className="flex-1 min-h-0 overflow-auto">
       {
         props.isPositionHintShown &&
@@ -54,7 +55,7 @@ export default function ViewerSidebar(props: {
           position={props.position}
           nextSectionName={props.nextSectionName}
           nextPosition={props.nextPosition}
-          action={props.action}
+          actions={props.actions}
           geometry={props.geometry}
         />
       }

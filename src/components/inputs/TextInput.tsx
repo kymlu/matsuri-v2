@@ -40,7 +40,7 @@ export default function TextInput(props: TextInputProps) {
   }
 
   var inputClasses = classNames(
-    "w-full col-start-1 text-lg row-start-1 pl-2 text-black p-3 border-gray-300 rounded-md focus-within:border-primary focus:outline-none",
+    "col-start-1 text-lg row-start-1 pl-2 text-black p-3 border-gray-300 rounded-md focus-within:border-primary focus:outline-none",
     {
       "border-2": props.hasOutline !== false,
       "pr-6": props.clearable,
@@ -49,6 +49,8 @@ export default function TextInput(props: TextInputProps) {
       "h-6": props.short,
       "text-center": props.centered,
       "bg-gray-200": props.disabled,
+      "w-full": !props.compact,
+      "w-32": props.compact,
       "border-primary bg-primary-lighter placeholder:text-primary-darker": (props.required && isNullOrUndefinedOrBlank(value)) || props.hasError,
     },);
 

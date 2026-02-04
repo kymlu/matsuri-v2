@@ -14,6 +14,8 @@ Konva.hitOnDragEnabled = true;
 
 export default function MainStage(props: {
   canEdit: boolean,
+  canToggleSelection: boolean,
+  canSelectDancers: boolean,
   isAddingDancer?: boolean,
   currentChoreo: Choreo,
   currentSection: ChoreoSection,
@@ -247,6 +249,8 @@ export default function MainStage(props: {
           />
         <FormationLayer
           canEdit={props.canEdit}
+          canSelectDancers={props.canSelectDancers}
+          canToggleSelection={props.canToggleSelection}
           geometry={stageGeometry}
           dancers={props.currentChoreo.dancers}
           dancerPositions={dancerPositions}

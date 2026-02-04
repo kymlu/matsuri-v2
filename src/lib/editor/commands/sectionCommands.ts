@@ -1,5 +1,6 @@
 import { Choreo } from "../../../models/choreo"
 import { ChoreoSection } from "../../../models/choreoSection"
+import { DancerAction } from "../../../models/dancerAction";
 
 export function addSection(state: Choreo, id: string, name: string): Choreo {
   const previousSection = {...state.sections[state.sections.length - 1]};
@@ -53,5 +54,33 @@ export function editSectionNote(state: Choreo, sectionId: string, newNote: strin
 }
 
 export function reorderSections(state: Choreo, newSections: ChoreoSection[]): Choreo {
+  console.log("Reordering sections");
   return { ...state, sections: [...newSections] };
+}
+
+export function editDancerActions(state: Choreo, sectionId: string, newActions: DancerAction[]): Choreo {
+  console.log("Editing dancer actions", sectionId, newActions);
+  const newSections = state.sections.map(s =>
+    s.id === sectionId ? { ...s, formation: {...s.formation, dancerActions: newActions} } : s
+  )
+  return { ...state, sections: newSections };
+}
+
+export function assignDancersToTiming(state: Choreo, sectionId: string, actionId: string, timingId: string, dancerIds: string[]): Choreo {
+  console.log(`Assigning dancer to timing`, `sectionId=${sectionId}`, `actionId=${actionId}`, `timingId=${timingId}`,`dancerIds=${JSON.stringify(dancerIds)}`);
+  var dancerIdSet = new Set(dancerIds);
+  const newSections = state.sections.map(s => 
+    s.id === sectionId ? {
+      ...s,
+      formation: {
+        ...s.formation,
+        dancerActions: [...s.formation.dancerActions.map(a => 
+          a.id === actionId ? {
+            ...a,
+            timings: [...a.timings.map(t => 
+              t.id === timingId ? {...t, dancerIds: [...dancerIds]} : {...t, dancerIds: [...t.dancerIds.filter(d => !dancerIdSet.has(d))]
+            })]} as DancerAction : a
+      )]} } : s
+  ) as ChoreoSection[];
+  return { ...state, sections: newSections };
 }

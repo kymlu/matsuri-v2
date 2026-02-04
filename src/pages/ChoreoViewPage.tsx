@@ -50,6 +50,7 @@ export default function ChoreoEditPage(props: {
         />
       <div className="relative flex-1 overflow-hidden border-b-2 md:flex">
         <ViewerSidebar
+          actions={currentSection.formation.dancerActions}
           note={currentSection.note}
           showNotes={showNotes}
           dancer={props.currentChoreo.dancers[selectedIds[0]]}
@@ -69,6 +70,8 @@ export default function ChoreoEditPage(props: {
         <MainStage
           appSettings={appSettings}
           canEdit={false}
+          canSelectDancers
+          canToggleSelection={false}
           currentChoreo={props.currentChoreo}
           currentSection={currentSection}
           selectedIds={selectedIds}

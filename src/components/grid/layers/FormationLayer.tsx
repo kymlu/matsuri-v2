@@ -11,6 +11,8 @@ import { DancerDisplayType } from "../../../models/appSettings";
 
 type FormationLayerProps = {
   canEdit: boolean,
+  canSelectDancers: boolean,
+  canToggleSelection: boolean,
   dancers: Record<string, Dancer>,
   dancerPositions: DancerPosition[],
   geometry: StageGeometry,
@@ -24,6 +26,8 @@ type FormationLayerProps = {
 
 export default function FormationLayer({
   canEdit,
+  canSelectDancers,
+  canToggleSelection,
   dancers,
   dancerPositions,
   geometry,
@@ -49,15 +53,17 @@ export default function FormationLayer({
   };
 
   const toggleSelect = (id: string, isAdditive: boolean = true) => {
-    setSelectedIds((prev) => {
-      if (canEdit && isAdditive) {
-        return prev.includes(id)
-          ? prev.filter((x) => x !== id)
-          : [...prev, id];
-      } else {
-        return [id];
-      }
-    });
+    if(canSelectDancers) {
+      setSelectedIds((prev) => {
+        if (canToggleSelection && isAdditive) {
+          return prev.includes(id)
+            ? prev.filter((x) => x !== id)
+            : [...prev, id];
+        } else {
+          return [id];
+        }
+      });
+    }
   }
     
   useEffect(() => {

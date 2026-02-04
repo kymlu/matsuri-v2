@@ -40,6 +40,7 @@ export const ICON = {
   curtainsBlack: "icons/curtains_black.svg",
   deleteBlack: "icons/delete_black.svg",
   downloadBlack: "icons/download_black.svg",
+  dragHandleBlack: "icons/drag_handle_black.svg",
   edit: "icons/edit.svg",
   editBlack: "icons/edit_black.svg",
   editOffBlack: "icons/edit_off_black.svg",

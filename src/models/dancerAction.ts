@@ -1,15 +1,14 @@
 import * as z from "zod";
+import { BaseModelSchema } from "./base";
 
-export const DancerActionTimingsSchema = z.object({
-  timing: z.string().nonempty(),
+export const DancerActionTimingSchema = BaseModelSchema.extend({
   dancerIds: z.array(z.string().nonempty()),
 });
 
-export type DancerActionTimings = z.infer<typeof DancerActionTimingsSchema>;
+export type DancerActionTiming = z.infer<typeof DancerActionTimingSchema>;
 
-export const DancerActionSchema = z.object({
-  name: z.string().nonempty(),
-  timings: z.record(z.string().nonempty(), DancerActionTimingsSchema),
+export const DancerActionSchema = BaseModelSchema.extend({
+  timings: z.array(DancerActionTimingSchema),
 });
 
 export type DancerAction = z.infer<typeof DancerActionSchema>;
