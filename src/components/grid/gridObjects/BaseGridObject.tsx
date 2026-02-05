@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useMemo, useRef } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import { Group } from "react-konva";
 import Konva from "konva";
 import { Shape, ShapeConfig } from "konva/lib/Shape";
@@ -26,14 +26,17 @@ export interface BaseGridObjectProps {
 
 export default function BaseGridObject(props: BaseGridObjectProps) {
   const ref = useRef<Konva.Group>(null);
+  const [startingX, setStartingX] = useState<number>(props.position.x);
+  const [startingY, setStartingY] = useState<number>(props.position.y);
 
   useEffect(() => {
     props.registerNode(props.id, ref.current);
     return () => props.registerNode(props.id, null);
   }, [props.id, props.registerNode]);
 
-  const {x, y} = useMemo(() => {
-    return stageMetersToPx({x: props.position.x, y: props.position.y}, props.stageGeometry, METER_PX);
+  useEffect(() => {
+    var newPosition = stageMetersToPx({x: props.position.x, y: props.position.y}, props.stageGeometry, METER_PX);
+    ref.current?.to({x: newPosition.x, y: newPosition.y, duration: 1, easing: Konva.Easings.EaseInOut})
   }, [props.position, props.stageGeometry]);
 
   const snapSize = METER_PX/2;
@@ -47,8 +50,8 @@ export default function BaseGridObject(props: BaseGridObjectProps) {
       ref={ref}
       draggable={props.draggable && !props.isTransformerActive}
       rotation={props.rotation ?? 0}
-      x={x}
-      y={y}
+      x={startingX}
+      y={startingY}
       onPointerDown={(e) => {
         dragStartRef.current = {
           x: e.target.x(),

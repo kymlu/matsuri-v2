@@ -42,6 +42,8 @@ export default function ViewerSidebar(props: {
           onClick={() => {
             if (props.isPositionHintShown) {
               props.deselectPosition();
+            } else if (props.selectedTiming) {
+              props.onSelectTiming();
             } else {
               props.hideNotes();
             }
