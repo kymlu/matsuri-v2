@@ -78,6 +78,7 @@ export default function ViewerSidebar(props: {
                     action.timings.map(timing => 
                       <Button
                         key={timing.id}
+                        disabled={timing.dancerIds.length === 0}
                         primary={strEquals(props.selectedTiming, timing.id)}
                         compact
                         onClick={() => props.onSelectTiming(strEquals(props.selectedTiming, timing.id) ? undefined : timing)}
