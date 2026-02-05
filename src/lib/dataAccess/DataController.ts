@@ -10,6 +10,7 @@ export async function getChoreoById(id: string): Promise<Choreo | null> {
 }
 
 export async function saveChoreo(choreo: Choreo, thenFn: () => void): Promise<void> {
-  choreo.lastUpdated = new Date();
+  choreo.lastUpdated = new Date().toISOString();
+  console.log(new Date().toISOString())
   await upsertItem("choreo", choreo).then(() => thenFn());
 }

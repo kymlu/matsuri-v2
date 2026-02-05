@@ -34,6 +34,6 @@ export const ChoreoSchema = BaseModelSchema.extend({
   sections: z.array(ChoreoSectionSchema),
   dancers: z.record(z.string().nonempty(), DancerSchema),
   props: z.record(z.string().nonempty(), PropSchema),
-  lastUpdated: z.date().optional(),
+  lastUpdated: z.string().optional(),
 });
 export type Choreo = z.infer<typeof ChoreoSchema>;

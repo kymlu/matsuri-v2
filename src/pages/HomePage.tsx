@@ -7,11 +7,13 @@ import Icon from "../components/basic/Icon"
 import { readUploadedFile } from "../lib/helpers/uploadHelper"
 import { useEffect, useState } from "react"
 import { getAllChoreos, saveChoreo } from "../lib/dataAccess/DataController"
-import { Choreo } from "../models/choreo"
-import { groupByKey, strCompare } from "../lib/helpers/globalHelper"
+import { Choreo, ChoreoSchema } from "../models/choreo"
+import { groupByKey, strCompare, strEquals } from "../lib/helpers/globalHelper"
 import { downloadLogs } from "../lib/helpers/logHelper"
 import { getDate } from "../lib/helpers/dateHelper"
 import IconButton from "../components/basic/IconButton"
+import SampleChoreo from "../lib/samples/SampleFormation.json"
+import z from "zod"
 
 export default function HomePage(props: {
   goToNewChoreoPage: () => void,
@@ -30,6 +32,9 @@ export default function HomePage(props: {
 
   useEffect(() => {
     getAllChoreos().then((choreos) => {
+      if(!choreos.find(c => strEquals(c.id, SampleChoreo.id))) {
+        choreos.push(z.parse(ChoreoSchema, SampleChoreo));
+      }
       setSavedChoreos(groupChoreos(choreos));
     });
   }, []);
@@ -40,8 +45,8 @@ export default function HomePage(props: {
         const eventCmp = strCompare<Choreo>(a, b, "event");
         if (eventCmp !== 0) return eventCmp;
 
-        const dateA = a.lastUpdated?.getTime() ?? 0;
-        const dateB = b.lastUpdated?.getTime() ?? 0;
+        const dateA = a.lastUpdated ? new Date(a.lastUpdated)?.getTime() : 0;
+        const dateB = b.lastUpdated ? new Date(b.lastUpdated)?.getTime() : 0;
         if (dateA !== dateB) return dateB - dateA;
 
         return strCompare<Choreo>(a, b, "name");
@@ -55,11 +60,10 @@ export default function HomePage(props: {
       ...choreo,
       id: crypto.randomUUID(),
       name: `${choreo.name}のコピー`,
-      lastUpdated: new Date(),
+      lastUpdated: new Date().toISOString(),
     } as Choreo;
     saveChoreo(newChoreo, () => {
       setSavedChoreos(prev => groupChoreos([...Object.values(prev).flat(), newChoreo]));
-      
     });
   }
 
@@ -150,7 +154,7 @@ function EventSection(props: {
                   <div className="flex items-center justify-between text-sm text-gray-500">
                     {choreo.lastUpdated ? (
                       <div className="flex items-center gap-1">
-                        <Icon colour="grey" size="sm" src={ICON.history}/>{getDate(choreo.lastUpdated)}
+                        <Icon colour="grey" size="sm" src={ICON.history}/>{getDate(new Date(choreo.lastUpdated))}
                       </div>
                     ) : (
                       <div />

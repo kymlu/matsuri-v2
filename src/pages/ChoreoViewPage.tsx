@@ -97,6 +97,10 @@ export default function ChoreoViewPage(props: {
           currentSectionId={currentSection.id}
           sections={props.currentChoreo.sections}
           onClickSection={(section) => {
+            if (selectedTimingId) {
+              setSelectedTimingId(undefined);
+              setSelectedIds([]);
+            }
             setCurrentSection(section);
           }}
         />
