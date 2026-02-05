@@ -85,7 +85,9 @@ export default function ViewerSidebar(props: {
                         compact
                         onClick={() => props.onSelectTiming(strEquals(props.selectedTiming, timing.id) ? undefined : timing)}
                         >
-                        {timing.name}
+                        <div className="min-w-6 w-max">
+                          {timing.name}
+                        </div>
                       </Button>
                     )
                   }
