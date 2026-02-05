@@ -176,7 +176,7 @@ function EventSection(props: {
                     full />
 
                   <IconLabelButton
-                    icon={ICON.visibility}
+                    icon={ICON.edit}
                     label="編集"
                     onClick={() => props.goToEditPage(choreo)}
                     full />
