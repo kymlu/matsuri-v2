@@ -73,6 +73,42 @@ export default function GridLayer({
         />
     );
     
+    // Vertical grid lines (across full area)
+    if(showGridLines){
+      for (let m = 0; m <= margins.leftMargin + width + margins.rightMargin - gridOffsetMeters; m++) {
+        const x = m * gridSizePx + gridOffsetPx;
+      
+        const distFromCenter = Math.abs(
+          x - centerX
+        ) / gridSizePx;
+      
+        const isMajor = Math.round(distFromCenter) % 2 === 0;
+      
+        elements.push(
+          <Line
+            key={`v-${m}`}
+            points={[x, 0, x, totalHeightPx]}
+            stroke={colorPalette.lightGrey}
+            strokeWidth={1}
+            dash={
+              isMajor ? [10, 6] : [4, 6]
+            }
+          />
+        );
+      }
+
+      // Center line
+      elements.push(
+        <Line
+          key="center-line"
+          points={[centerX, 0, centerX, totalHeightPx]}
+          stroke={colorPalette.primary}
+          strokeWidth={2}
+          dash={[10, 6]}
+        />
+      );
+    }
+    
     // Horizontal grid lines + right labels
     for (let m = 0; m <= margins.topMargin + length + margins.bottomMargin; m++) {
       const y = m * gridSizePx;
@@ -111,42 +147,6 @@ export default function GridLayer({
           />
         );
       }
-    }
-    
-    // Vertical grid lines (across full area)
-    if(showGridLines){
-      for (let m = 0; m <= margins.leftMargin + width + margins.rightMargin - gridOffsetMeters; m++) {
-        const x = m * gridSizePx + gridOffsetPx;
-      
-        const distFromCenter = Math.abs(
-          x - centerX
-        ) / gridSizePx;
-      
-        const isMajor = Math.round(distFromCenter) % 2 === 0;
-      
-        elements.push(
-          <Line
-            key={`v-${m}`}
-            points={[x, 0, x, totalHeightPx]}
-            stroke={colorPalette.lightGrey}
-            strokeWidth={1}
-            dash={
-              isMajor ? [10, 6] : [4, 6]
-            }
-          />
-        );
-      }
-
-      // Center line
-      elements.push(
-        <Line
-          key="center-line"
-          points={[centerX, 0, centerX, totalHeightPx]}
-          stroke={colorPalette.primary}
-          strokeWidth={2}
-          dash={[10, 6]}
-        />
-      );
     }
     
     // Centre triangle marker
