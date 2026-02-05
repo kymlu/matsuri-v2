@@ -95,7 +95,7 @@ export function IconLabelButton(props: {
     full={full}
     >
     <div className="flex items-center justify-center gap-2">
-      <Icon src={icon} size={iconSize ?? "sm"}/>
+      <Icon colour={primary ? "white" : "black"} src={icon} size={iconSize ?? "sm"}/>
       {label}
     </div>
   </Button>
