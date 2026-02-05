@@ -6,6 +6,7 @@ import { Distribution, HorizontalAlignment, VerticalAlignment } from "../../mode
 
 type ToolbarProps = {
   onAddDancer: () => void,
+  isAddingDancer: boolean,
   showCopyPosition: boolean,
   onCopyPosition: () => void,
   showPastePosition: boolean,
@@ -32,6 +33,7 @@ type ToolbarProps = {
 
 export default function Toolbar ({
   onAddDancer,
+  isAddingDancer,
   showDancerColor,
   showSelectDancer,
   onChangeColor,
@@ -75,7 +77,7 @@ export default function Toolbar ({
     {
       isSubmenuOpen && 
       <>
-        <IconButton disabled={isAssigningActions} src={ICON.chevronBackward} label="戻る" onClick={()=>{
+        <IconButton disabled={isAssigningActions || isAddingDancer} src={ICON.chevronBackward} label="戻る" onClick={()=>{
           setIsArrangeVisible(false);
           setIsColorVisible(false);
           setIsActionManagerVisible(false);
@@ -101,14 +103,14 @@ export default function Toolbar ({
         {
           isDancerManagerVisible &&
           <>
-            <IconButton src={ICON.person} label="追加" onClick={() => {onAddDancer()}} />
-            <IconButton disabled={!showDancerColor} src={ICON.colors} label="色" onClick={() => {onChangeColor()}} />
-            <IconButton src={ICON.selectAll} label="全選択" onClick={() => {onSelectType()}} />
+            <IconButton src={isAddingDancer ? ICON.clear : ICON.person} label="追加" onClick={() => {onAddDancer()}} />
+            <IconButton disabled={!showDancerColor || isAddingDancer} src={ICON.colors} label="色" onClick={() => {onChangeColor()}} />
+            <IconButton disabled={isAddingDancer} src={ICON.selectAll} label="全選択" onClick={() => {onSelectType()}} />
             <IconButton disabled={!showSelectDancer} src={ICON.selectAll} label="色選択" onClick={() => {onSelectColor()}} />
-            <IconButton src={ICON.contentCopy} disabled={!showCopyPosition} label="コピー" onClick={() => {onCopyPosition()}} />
-            <IconButton src={ICON.contentPaste} disabled={!showPastePosition} label="ペースト" onClick={() => {onPastePosition()}} />
-            <IconButton src={ICON.swapHoriz} disabled={!showSwapPosition} label="位置交換" onClick={() => {onSwapPosition()}} />
-            <IconButton src={ICON.delete} disabled={!showDeleteDancer} label="削除" onClick={() => {onDeleteDancer()}} />
+            <IconButton src={ICON.contentCopy} disabled={!showCopyPosition || isAddingDancer} label="コピー" onClick={() => {onCopyPosition()}} />
+            <IconButton src={ICON.contentPaste} disabled={!showPastePosition || isAddingDancer} label="ペースト" onClick={() => {onPastePosition()}} />
+            <IconButton src={ICON.swapHoriz} disabled={!showSwapPosition || isAddingDancer} label="位置交換" onClick={() => {onSwapPosition()}} />
+            <IconButton src={ICON.delete} disabled={!showDeleteDancer || isAddingDancer} label="削除" onClick={() => {onDeleteDancer()}} />
           </>
         }
         {
@@ -122,8 +124,16 @@ export default function Toolbar ({
         {
           isActionManagerVisible &&
           <>
-            <IconButton disabled={isAssigningActions} src={ICON.category} label="管理" onClick={() => {onOpenActionManager()}} />
-            <IconButton disabled={!isAssigningActionsEnabled} src={isAssigningActions ? ICON.clear : ICON.category} label="割り当て" onClick={() => {onAssignActions()}} />
+            <IconButton
+              disabled={isAssigningActions}
+              src={ICON.category}
+              label="管理"
+              onClick={() => {onOpenActionManager()}} />
+            <IconButton
+              disabled={!isAssigningActionsEnabled}
+              src={isAssigningActions ? ICON.clear : ICON.category}
+              label="割り当て"
+              onClick={() => {onAssignActions()}} />
           </>
         }
       </>

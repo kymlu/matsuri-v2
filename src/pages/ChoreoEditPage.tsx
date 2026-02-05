@@ -415,8 +415,9 @@ export default function ChoreoEditPage(props: {
       <Toolbar
         onAddDancer={() => {
           setSelectedIds([]);
-          setIsAddingDancers(true);
+          setIsAddingDancers(prev => !prev);
         }}
+        isAddingDancer={isAddingDancers}
         showDancerColor={selectedObjects.dancers.length > 0}
         onChangeColor={() => {setEditDancerColourDialogOpen(true)}}
         showCopyPosition={selectedIds.length > 0}
