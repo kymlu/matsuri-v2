@@ -1,12 +1,14 @@
 import classNames from "classnames";
 import { StageGeometry } from "../../models/choreo";
 import { Dancer, DancerPosition } from "../../models/dancer";
-import { DancerAction } from "../../models/dancerAction";
+import { DancerAction, DancerActionTiming } from "../../models/dancerAction";
 import PositionHint from "./PositionHint";
 import IconButton from "../basic/IconButton";
 import { ICON } from "../../lib/consts/consts";
-import { isNullOrUndefinedOrBlank } from "../../lib/helpers/globalHelper";
+import { isNullOrUndefinedOrBlank, strEquals } from "../../lib/helpers/globalHelper";
 import Divider from "../basic/Divider";
+import Button from "../basic/Button";
+import React from "react";
 
 export default function ViewerSidebar(props: {
   note?: string,
@@ -15,6 +17,8 @@ export default function ViewerSidebar(props: {
   position: DancerPosition,
   nextSectionName?: string,
   nextPosition?: DancerPosition,
+  selectedTiming?: string,
+  onSelectTiming: (timing?: DancerActionTiming) => void,
   actions?: DancerAction[],
   geometry: StageGeometry,
   isPositionHintShown: boolean,
@@ -60,6 +64,36 @@ export default function ViewerSidebar(props: {
       }
       {
         props.isPositionHintShown && props.showNotes &&
+        <Divider/>
+      }
+      {
+        props.actions && props.actions.length > 0 && !props.isPositionHintShown && 
+        <div className="grid grid-cols-[1fr,3fr] items-start gap-2">
+          {
+            props.actions.map(action => 
+              <React.Fragment key={action.id}>
+                {action.name}
+                <div className="flex flex-wrap gap-1">
+                  {
+                    action.timings.map(timing => 
+                      <Button
+                        key={timing.id}
+                        primary={strEquals(props.selectedTiming, timing.id)}
+                        compact
+                        onClick={() => props.onSelectTiming(strEquals(props.selectedTiming, timing.id) ? undefined : timing)}
+                        >
+                        {timing.name}
+                      </Button>
+                    )
+                  }
+                </div>
+              </React.Fragment>
+            )
+          }
+        </div>
+      }
+      {
+        props.actions && props.actions.length > 0 && !props.isPositionHintShown && props.showNotes &&
         <Divider/>
       }
       {

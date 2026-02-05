@@ -8,7 +8,7 @@ import { AppSetting } from "../models/appSettings";
 import { strEquals } from "../lib/helpers/globalHelper";
 import ViewerSidebar from "../components/editor/ViewerSidebar";
 
-export default function ChoreoEditPage(props: {
+export default function ChoreoViewPage(props: {
   goToHomePage: () => void
   currentChoreo: Choreo,
 }) {
@@ -16,6 +16,7 @@ export default function ChoreoEditPage(props: {
   const [nextSection, setNextSection] = useState<ChoreoSection | undefined>();
   const [showNotes, setShowNotes] = useState<boolean>(true);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [selectedTimingId, setSelectedTimingId] = useState<string | undefined>();
   const [selectedObjects, setSelectedObjects] = useState<SelectedObjects>({dancers: [], props: []});
   const [appSettings, setAppSettings] = useState<AppSetting>({
     snapToGrid: true,
@@ -60,17 +61,28 @@ export default function ChoreoEditPage(props: {
           geometry={props.currentChoreo.stageGeometry}
           isPositionHintShown={
             selectedIds.length > 0 &&
+            selectedTimingId === undefined &&
             selectedObjects.dancers.length === 1 &&
             selectedObjects.props.length === 0 &&
             props.currentChoreo.dancers[selectedIds[0]] !== undefined
           }
           deselectPosition={() => setSelectedIds([])}
           hideNotes={() => setShowNotes(false)}
+          onSelectTiming={(timing) => {
+            if (timing) {
+              setSelectedIds(timing.dancerIds);
+              setSelectedTimingId(timing.id);
+            } else {
+              setSelectedIds([]);
+              setSelectedTimingId(undefined);
+            }
+          }}
+          selectedTiming={selectedTimingId}
         />
         <MainStage
           appSettings={appSettings}
           canEdit={false}
-          canSelectDancers
+          canSelectDancers={selectedTimingId === undefined}
           canToggleSelection={false}
           currentChoreo={props.currentChoreo}
           currentSection={currentSection}
