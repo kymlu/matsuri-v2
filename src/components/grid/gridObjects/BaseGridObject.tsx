@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { ReactNode, useEffect, useRef } from "react";
 import { Group } from "react-konva";
 import Konva from "konva";
 import { Shape, ShapeConfig } from "konva/lib/Shape";
@@ -26,8 +26,6 @@ export interface BaseGridObjectProps {
 
 export default function BaseGridObject(props: BaseGridObjectProps) {
   const ref = useRef<Konva.Group>(null);
-  const [startingX, setStartingX] = useState<number>(props.position.x);
-  const [startingY, setStartingY] = useState<number>(props.position.y);
 
   useEffect(() => {
     props.registerNode(props.id, ref.current);
@@ -50,8 +48,8 @@ export default function BaseGridObject(props: BaseGridObjectProps) {
       ref={ref}
       draggable={props.draggable && !props.isTransformerActive}
       rotation={props.rotation ?? 0}
-      x={startingX}
-      y={startingY}
+      x={0}
+      y={0}
       onPointerDown={(e) => {
         dragStartRef.current = {
           x: e.target.x(),
