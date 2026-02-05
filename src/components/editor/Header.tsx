@@ -23,7 +23,7 @@ export default function Header (props: {
   changeDancerSize?: (showLarge: boolean) => void,
   appSettings: AppSetting,
 }) {
-  return <header className="z-10 grid grid-cols-[1fr,auto,1fr] items-center justify-between w-screen p-2 border-b-2 select-none bg-gradient-to-b from-white to-transparent ">
+  return <header className="z-10 grid grid-cols-[1fr,auto,1fr] items-center justify-between w-screen border-b-2 select-none bg-gradient-to-b from-white to-transparent ">
     <div className="flex">
       <IconButton
         src={ICON.chevronBackward} // if there is a history, verify save first?
