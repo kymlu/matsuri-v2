@@ -13,6 +13,6 @@ export function changeStageGeometry(state: Choreo, newGeometry: StageGeometry): 
   console.log("Changing stage geometry", newGeometry);
   return {
     ...state,
-    stageGeometry: {...newGeometry},
+    stageGeometry: {...newGeometry}, // TODO: handle dancers that would fall outside of this range
   }
 }

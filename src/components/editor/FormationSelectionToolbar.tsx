@@ -1,22 +1,14 @@
-import { Dialog } from "@base-ui/react";
-import { strEquals } from "../../lib/helpers/globalHelper";
+import { isNullOrUndefinedOrBlank, strEquals } from "../../lib/helpers/globalHelper";
 import { ChoreoSection } from "../../models/choreoSection";
 import Button from "../basic/Button";
-import CustomMenu from "../inputs/CustomMenu";
-import EditSectionNameDialog from "../dialogs/EditSectionNameDialog";
-import React, { useState } from "react";
-import EditSectionNoteDialog from "../dialogs/EditSectionNoteDialog";
-import ConfirmDeletionDialog from "../dialogs/ConfirmDeletionDialog";
+import { useState } from "react";
 import IconButton from "../basic/IconButton";
 import { ICON } from "../../lib/consts/consts";
 import { DndContext, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { arrayMove, SortableContext, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { restrictToHorizontalAxis, restrictToParentElement } from "@dnd-kit/modifiers";
-
-const renameDialog = Dialog.createHandle<ChoreoSection>();
-const addNoteDialog = Dialog.createHandle<ChoreoSection>();
-const deleteDialog = Dialog.createHandle<ChoreoSection>();
+import Icon from "../basic/Icon";
 
 export default function FormationSelectionToolbar(props: {
   currentSectionId: string,
@@ -24,27 +16,8 @@ export default function FormationSelectionToolbar(props: {
   showAddButton?: boolean,
   onClickAddButton?: (id: string, newName: string) => void,
   onClickSection: (section: ChoreoSection) => void,
-  onRename?: (section: ChoreoSection, name: string) => void,
-  onAddNoteToSection?: (section: ChoreoSection, note: string) => void,
-  onDeleteSection?: (section: ChoreoSection) => void,
-  onDuplicate?: (section: ChoreoSection, index: number) => void,
   onReorder?: (newSectionOrder: ChoreoSection[]) => void,
 }) {
-  const [renameDialogOpen, setRenameDialogOpen] = React.useState(false);
-  const [addNoteDialogOpen, setAddNoteDialogOpen] = React.useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
-  
-  const handleRenameDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
-    setRenameDialogOpen(isOpen);
-  };
-
-  const handleAddNoteDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
-    setAddNoteDialogOpen(isOpen);
-  };
-  
-  const handleDeleteDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
-    setDeleteDialogOpen(isOpen);
-  };
 
   const [isDragging, setIsDragging] = useState<boolean>(false);
   
@@ -53,6 +26,7 @@ export default function FormationSelectionToolbar(props: {
       activationConstraint: {
         distance: 5,
         delay: 100,
+        tolerance: 50,
       },
     })
 )
@@ -88,10 +62,7 @@ export default function FormationSelectionToolbar(props: {
               key={section.id}
               section={section}
               isSelected={strEquals(props.currentSectionId, section.id)}
-              canEdit={props.showAddButton === true && !isDragging}
-              canDelete={props.sections.length > 1}
               onClickSection={props.onClickSection}
-              onDuplicateSection={() => props.onDuplicate?.(section, i)}
               />
           )
         }
@@ -105,64 +76,15 @@ export default function FormationSelectionToolbar(props: {
         onClick={() => {props.onClickAddButton?.(crypto.randomUUID(), "セクション" + (props.sections.length + 1))}}
       />
     }
-    <Dialog.Root
-      handle={renameDialog}
-      open={renameDialogOpen}
-      onOpenChange={handleRenameDialogOpen}
-      >
-      {({ payload }) => (
-        <EditSectionNameDialog
-          section={payload as ChoreoSection}
-          onSubmit={(name) => {
-            props.onRename?.(payload as ChoreoSection, name);
-            renameDialog.close();
-            setRenameDialogOpen(false);
-          }}/>
-      )}
-    </Dialog.Root>
-    <Dialog.Root
-      handle={addNoteDialog}
-      open={addNoteDialogOpen}
-      onOpenChange={handleAddNoteDialogOpen}
-      >
-      {
-        ({ payload }) => (
-        <EditSectionNoteDialog
-          section={payload as ChoreoSection}
-          onSubmit={(note: string) => {
-            props.onAddNoteToSection?.(payload as ChoreoSection, note);
-            addNoteDialog.close();
-            setRenameDialogOpen(false);
-          }}/>
-      )}
-    </Dialog.Root>
-    <Dialog.Root
-      handle={deleteDialog}
-      open={deleteDialogOpen}
-      onOpenChange={handleDeleteDialogOpen}
-      >
-      {({ payload }) => (
-        <ConfirmDeletionDialog
-          section={payload as ChoreoSection}
-          onSubmit={() => {
-            props.onDeleteSection?.(payload as ChoreoSection);
-            deleteDialog.close();
-            setDeleteDialogOpen(false);
-          }}/>
-      )}
-    </Dialog.Root>
   </div>
 }
 
 function FormationSectionItem (props: {
   section: ChoreoSection,
   isSelected: boolean,
-  canEdit: boolean,
-  canDelete: boolean,
   onClickSection: (section: ChoreoSection) => void,
-  onDuplicateSection?: () => void,
 }) {
-  var {section, isSelected, canEdit, canDelete, onClickSection} = props;
+  var {section, isSelected, onClickSection} = props;
 
   const {
     attributes,
@@ -178,64 +100,24 @@ function FormationSectionItem (props: {
   };
 
   return <div style={style} ref={setNodeRef} {...attributes} {...listeners}>
-    {
-      (!isSelected || !canEdit) &&
-        <Button
-          fixed
-          compact
-          primary={isSelected}
-          fontSize="text-base"
-          onClick={() => {
-            if (!isSelected) {
-              onClickSection(section)
-            }
-          }}>
-          <div className="truncate max-w-32">
-            {section.name}
-          </div>
-        </Button>
-    }
-    {
-      isSelected && canEdit &&
-      <CustomMenu
-        position="top"
-        trigger={
-          <Button
-            compact
-            primary
-            fontSize="text-base"
-            fixed
-            asDiv>
-            <div className="truncate max-w-32">
-              {section.name}
-            </div>
-          </Button>
-        }>
-        <div className="flex flex-col space-y-2">
-          <Dialog.Trigger handle={renameDialog} payload={section}>
-            <Button asDiv>
-              名前変更
-            </Button>
-          </Dialog.Trigger>
-          <Dialog.Trigger handle={addNoteDialog} payload={section}>
-            <Button asDiv>
-              メモ追加
-            </Button>
-          </Dialog.Trigger>
-          <Button onClick={props.onDuplicateSection}>
-            複製
-          </Button>
-          {
-            canDelete &&
-            <Dialog.Trigger handle={deleteDialog} payload={section}>
-              <Button
-                asDiv>
-                削除
-              </Button>
-            </Dialog.Trigger>
-          }
-        </div>
-      </CustomMenu>
-    }
+    <Button
+      compact
+      primary={isSelected}
+      fontSize="text-base"
+      onClick={() => {
+        if (!isSelected) {
+          onClickSection(section)
+        }
+      }}>
+      <div className="flex flex-row items-center justify-center gap-1 min-w-24 w-max">
+        <span className="truncate">
+          {section.name}
+        </span>
+        {
+          !isNullOrUndefinedOrBlank(section.note) && 
+          <Icon colour={ isSelected? "white" : "black" } src={ICON.speakerNotes} size="xs"/>
+        }
+      </div>
+    </Button>
   </div>
 }

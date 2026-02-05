@@ -14,6 +14,7 @@ export enum CUSTOM_EVENT {
 }
 
 export const ICON = {
+  123: "123",
   add: "add",
   alignHorizontalCenter: "align_horizontal_center",
   alignHorizontalLeft: "align_horizontal_left",
@@ -57,6 +58,7 @@ export const ICON = {
   formatAlignRight: "format_align_right",
   formatBold: "format_bold",
   groups2: "groups_2",
+  gridOn: "grid_on",
   height: "height",
   help: "help",
   history: "history",

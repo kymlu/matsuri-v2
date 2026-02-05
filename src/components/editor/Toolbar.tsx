@@ -29,6 +29,11 @@ type ToolbarProps = {
   onAssignActions: () => void,
   isAssigningActionsEnabled: boolean,
   isAssigningActions: boolean,
+  onRenameSection: () => void,
+  onAddNoteToSection: () => void,
+  canDeleteSection: boolean,
+  onDeleteSection: () => void,
+  onDuplicateSection: () => void,
 }
 
 export default function Toolbar ({
@@ -55,14 +60,20 @@ export default function Toolbar ({
   onAssignActions,
   isAssigningActionsEnabled,
   isAssigningActions,
+  onRenameSection,
+  onAddNoteToSection,
+  canDeleteSection,
+  onDeleteSection,
+  onDuplicateSection,
 }: ToolbarProps) {
   const [isArrangeVisible, setIsArrangeVisible] = useState<boolean>(false);
   const [isColorVisible, setIsColorVisible] = useState<boolean>(false);
   const [isDancerManagerVisible, setIsDancerManagerVisible] = useState<boolean>(false);
   const [isActionManagerVisible, setIsActionManagerVisible] = useState<boolean>(false);
   const [isPropManagerVisible, setIsPropManagerVisible] = useState<boolean>(false);
+  const [isSectionManagerVisible, setIsSectionManagerVisible] = useState<boolean>(false);
 
-  const isSubmenuOpen = isArrangeVisible || isColorVisible || isDancerManagerVisible || isActionManagerVisible || isPropManagerVisible;
+  const isSubmenuOpen = isArrangeVisible || isColorVisible || isDancerManagerVisible || isActionManagerVisible || isPropManagerVisible || isSectionManagerVisible;
   
   return <div className="flex items-center w-screen gap-2 px-4 pt-4 pb-8 overflow-scroll border-t-2 border-primary">
     {
@@ -70,7 +81,8 @@ export default function Toolbar ({
       <>
         <IconButton src={ICON.person} label="ダンサー" onClick={()=>{setIsDancerManagerVisible(true)}}/>
         <IconButton src={ICON.straighten} disabled={showArrange} label="整理" onClick={()=>{setIsArrangeVisible(true)}}/>
-        <IconButton src={ICON.category} label="カウント" onClick={()=>{setIsActionManagerVisible(true)}}/>
+        <IconButton src={ICON[123]} label="カウント" onClick={()=>{setIsActionManagerVisible(true)}}/>
+        <IconButton src={ICON.gridOn} label="セクション" onClick={()=>{setIsSectionManagerVisible(true)}}/>
         {/* <IconButton src={ICON.flagBlack} label="道具" alt="Props" onClick={()=>{setIsPropManagerVisible(true)}}/> */}
       </>
     }
@@ -83,6 +95,7 @@ export default function Toolbar ({
           setIsActionManagerVisible(false);
           setIsDancerManagerVisible(false);
           setIsPropManagerVisible(false);
+          setIsSectionManagerVisible(false);
         }}/>
         <VerticalDivider/>
         {
@@ -119,6 +132,30 @@ export default function Toolbar ({
             <IconButton src={ICON.verticalDistribute} label="Add prop etc" onClick={() => {}} />
             <IconButton src={ICON.verticalDistribute} label="縦均" onClick={() => {}} />
             <IconButton src={ICON.verticalDistribute} label="縦均" onClick={() => {}} />
+          </>
+        }
+        {
+          isSectionManagerVisible &&
+          <>
+            <IconButton
+              src={ICON.textFieldsAlt}
+              label="名前変更"
+              onClick={() => {onRenameSection()}} />
+            <IconButton
+              src={ICON.speakerNotes}
+              label="メモ"
+              onClick={() => {onAddNoteToSection()}} />
+            <IconButton
+              src={ICON.contentCopy}
+              label="複製"
+              onClick={() => {onDuplicateSection()}} />
+            {
+              canDeleteSection &&
+              <IconButton
+                src={ICON.delete}
+                onClick={() => {onDeleteSection()}}
+                label="削除" />
+            }
           </>
         }
         {

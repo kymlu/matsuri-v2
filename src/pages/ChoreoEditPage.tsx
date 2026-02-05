@@ -28,12 +28,18 @@ import { DancerPosition } from "../models/dancer";
 import { ActionManagerDialog } from "../components/dialogs/ActionManagerDialog";
 import { DancerAction, DancerActionTiming } from "../models/dancerAction";
 import ActionSelectionToolbar from "../components/editor/ActionSelectionToolbar";
+import ConfirmDeletionDialog from "../components/dialogs/ConfirmDeletionDialog";
+import EditSectionNameDialog from "../components/dialogs/EditSectionNameDialog";
+import EditSectionNoteDialog from "../components/dialogs/EditSectionNoteDialog";
 
 const resizeDialog = Dialog.createHandle<Choreo>();
 const editChoreoInfoDialog = Dialog.createHandle<string>();
 const renameDancerDialog = Dialog.createHandle<string>();
 const editDancerColourDialog = Dialog.createHandle<string>();
 const editDancerActionsDialog = Dialog.createHandle<string>();
+const renameSectionDialog = Dialog.createHandle<ChoreoSection>();
+const addNoteToSectionDialog = Dialog.createHandle<ChoreoSection>();
+const deleteSectionDialog = Dialog.createHandle<ChoreoSection>();
 
 export default function ChoreoEditPage(props: {
   goToHomePage: () => void,
@@ -210,6 +216,21 @@ export default function ChoreoEditPage(props: {
   const [renameDancerDialogOpen, setRenameDancerDialogOpen] = useState(false);
   const [editDancerColourDialogOpen, setEditDancerColourDialogOpen] = useState(false);
   const [editDancerActionsDialogOpen, setEditDancerActionsDialogOpen] = useState(false);
+  const [renameSectionDialogOpen, setRenameSectionDialogOpen] = useState(false);
+  const [addNoteToSectionDialogOpen, setAddNoteToSectionDialogOpen] = useState(false);
+  const [deleteSectionDialogOpen, setDeleteSectionDialogOpen] = useState(false);
+  
+  const handleRenameSectionDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
+    setRenameSectionDialogOpen(isOpen);
+  };
+
+  const handleAddNoteToSectionDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
+    setAddNoteToSectionDialogOpen(isOpen);
+  };
+  
+  const handleDeleteSectionDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
+    setDeleteSectionDialogOpen(isOpen);
+  };
   
   const handleResizeDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setResizeDialogOpen(isOpen);
@@ -349,42 +370,6 @@ export default function ChoreoEditPage(props: {
                   setCurrentSection(section);
                   setSelectedIds([]);
                 }}
-                onRename={(section, name) => {
-                  setSelectedIds([]);
-                  dispatch({
-                    type: "SET_STATE",
-                    newState: renameSection(history.presentState.state, section.id, name),
-                    currentSectionId: currentSection.id,
-                    commit: true,
-                  });
-                }}
-                onAddNoteToSection={(section, note) => {
-                  setSelectedIds([]);
-                  dispatch({
-                    type: "SET_STATE",
-                    newState: editSectionNote(history.presentState.state, section.id, note),
-                    currentSectionId: currentSection.id,
-                    commit: true,
-                  });
-                }}
-                onDuplicate={(section, index) => {
-                  setSelectedIds([]);
-                  dispatch({
-                    type: "SET_STATE",
-                    newState: duplicateSection(history.presentState.state, section, index),
-                    currentSectionId: currentSection.id,
-                    commit: true,
-                  });
-                }}
-                onDeleteSection={(section) => {
-                  setSelectedIds([]);
-                  dispatch({
-                    type: "SET_STATE",
-                    newState: removeSection(history.presentState.state, section.id),
-                    currentSectionId: currentSection.id,
-                    commit: true,
-                  });
-                }}
                 onReorder={(sections) => {
                   setSelectedIds([]);
                   dispatch({
@@ -479,6 +464,28 @@ export default function ChoreoEditPage(props: {
         }}
         isAssigningActionsEnabled={currentSection.formation.dancerActions.length > 0}
         isAssigningActions={isAssigningActions}
+        onRenameSection={() => {
+          setSelectedIds([]);
+          setRenameSectionDialogOpen(true);
+        }}
+        onAddNoteToSection={() => {
+          setSelectedIds([]);
+          setAddNoteToSectionDialogOpen(true);
+        }}
+        onDuplicateSection={() => {
+          setSelectedIds([]);
+          dispatch({
+            type: "SET_STATE",
+            newState: duplicateSection(history.presentState.state, currentSection, history.presentState.state.sections.findIndex(x => strEquals(x.id, currentSection.id))),
+            currentSectionId: currentSection.id,
+            commit: true,
+          });
+        }}
+        canDeleteSection={history.presentState.state.sections.length > 1}
+        onDeleteSection={() => {
+          setSelectedIds([]);
+          setDeleteSectionDialogOpen(true)
+        }}
       />
       {
         isAddingDancers &&
@@ -617,6 +624,60 @@ export default function ChoreoEditPage(props: {
           }}
           />
       </Dialog.Root>
+    <Dialog.Root
+      handle={renameSectionDialog}
+      open={renameSectionDialogOpen}
+      onOpenChange={handleRenameSectionDialogOpen}
+      >
+      <EditSectionNameDialog
+        section={currentSection}
+        onSubmit={(name) => {
+          dispatch({
+            type: "SET_STATE",
+            newState: renameSection(history.presentState.state, currentSection.id, name),
+            currentSectionId: currentSection.id,
+            commit: true,
+          });
+          renameSectionDialog.close();
+          setRenameSectionDialogOpen(false);
+        }}/>
+    </Dialog.Root>
+    <Dialog.Root
+      handle={addNoteToSectionDialog}
+      open={addNoteToSectionDialogOpen}
+      onOpenChange={handleAddNoteToSectionDialogOpen}
+      >
+      <EditSectionNoteDialog
+        section={currentSection}
+        onSubmit={(note: string) => {
+          dispatch({
+            type: "SET_STATE",
+            newState: editSectionNote(history.presentState.state, currentSection.id, note),
+            currentSectionId: currentSection.id,
+            commit: true,
+          });
+          addNoteToSectionDialog.close();
+          setRenameSectionDialogOpen(false);
+        }}/>
+    </Dialog.Root>
+    <Dialog.Root
+      handle={deleteSectionDialog}
+      open={deleteSectionDialogOpen}
+      onOpenChange={handleDeleteSectionDialogOpen}
+      >
+      <ConfirmDeletionDialog
+        section={currentSection}
+        onSubmit={() => {
+          dispatch({
+            type: "SET_STATE",
+            newState: removeSection(history.presentState.state, currentSection.id),
+            currentSectionId: currentSection.id,
+            commit: true,
+          });
+          deleteSectionDialog.close();
+          setDeleteSectionDialogOpen(false);
+        }}/>
+    </Dialog.Root>
     </div>
   )
 }
