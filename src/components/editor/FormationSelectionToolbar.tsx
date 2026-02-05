@@ -190,7 +190,7 @@ function FormationSectionItem (props: {
               onClickSection(section)
             }
           }}>
-          <div className="overflow-hidden max-w-32 whitespace-nowrap text-ellipsis">
+          <div className="truncate max-w-32">
             {section.name}
           </div>
         </Button>
@@ -206,7 +206,7 @@ function FormationSectionItem (props: {
             fontSize="text-base"
             fixed
             asDiv>
-            <div className="overflow-hidden max-w-32 whitespace-nowrap text-ellipsis">
+            <div className="truncate max-w-32">
               {section.name}
             </div>
           </Button>

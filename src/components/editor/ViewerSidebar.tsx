@@ -28,7 +28,7 @@ export default function ViewerSidebar(props: {
   return <div className={contentClasses}>
     {
       <div className="flex items-center self-end justify-between w-full mb-2">
-        <span className="text-base font-semibold text-nowrap whitespace-nowrap text-ellipsis">
+        <span className="text-base font-semibold truncate">
           {props.isPositionHintShown ? props.dancer.name : "メモ"}
         </span>
         <IconButton

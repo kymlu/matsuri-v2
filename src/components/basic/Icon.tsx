@@ -2,7 +2,7 @@ import classNames from "classnames";
 
 export default function Icon (props: {
   src: string,
-  colour?: "primary",
+  colour?: "primary" | "black" | "grey",
   size?: "sm" | "md" | "lg",
 }) {
   var iconClasses = classNames("font-icon", {
@@ -10,6 +10,8 @@ export default function Icon (props: {
     "text-4xl": props.size === undefined || props.size === "md",
     "text-2xl": props.size === "sm",
     "text-primary": props.colour === "primary",
+    "text-black": props.colour === "black" || props.colour === undefined,
+    "text-gray-600": props.colour === "grey",
   });
 
   return <span className={iconClasses}>

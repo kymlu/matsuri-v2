@@ -1,5 +1,6 @@
 import React from 'react';
 import className from "classnames";
+import Icon from './Icon';
 
 type ButtonProps = {
   children: React.ReactNode
@@ -73,4 +74,29 @@ export function ActionButton(props: ButtonProps) {
     type={props.type}
     asDiv={props.asDiv}
   />
+}
+
+export function IconLabelButton(props: {
+  onClick: () => void,
+  icon: string,
+  label: string,
+  primary?: boolean,
+  asDiv?: boolean,
+  disabled?: boolean,
+  full?: boolean,
+  iconSize?: "sm" | "md" | "lg",
+}) {
+  const {onClick, icon, label, primary, asDiv, disabled, full, iconSize} = props;
+  return <Button
+    onClick={onClick}
+    primary={primary}
+    asDiv={asDiv}
+    disabled={disabled}
+    full={full}
+    >
+    <div className="flex items-center justify-center gap-2">
+      <Icon src={icon} size={iconSize ?? "sm"}/>
+      {label}
+    </div>
+  </Button>
 }

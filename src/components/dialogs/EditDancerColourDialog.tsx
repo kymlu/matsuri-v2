@@ -17,7 +17,7 @@ export default function EditDancerColourDialog(props: {
     title="ダンサー色変更"
     onSubmit={() => { props.onSubmit(selectedColour, mode) }}
     >
-      <div className="flex gap-2 mb-2">
+      <div className="flex flex-col gap-2 mb-2 md:flex-row">
         <ActionButton
           primary={mode === "current"}
           onClick={() => setMode("current")}>
@@ -34,7 +34,7 @@ export default function EditDancerColourDialog(props: {
           すべて
         </ActionButton>
       </div>
-      <div className="grid grid-cols-6 gap-2">
+      <div className="grid grid-cols-6 gap-2 w-max">
         {
           colorPalette.allColors().map((color) => 
             <button

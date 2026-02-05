@@ -11,6 +11,7 @@ import { ICON } from "../../lib/consts/consts";
 import IconButton from "../basic/IconButton";
 import BaseEditDialog from "./BaseEditDialog";
 import { ChoreoSection } from "../../models/choreoSection";
+import { IconLabelButton } from "../basic/Button";
 
 export function ActionManagerDialog(props: {
   section: ChoreoSection,
@@ -92,9 +93,13 @@ export function ActionManagerDialog(props: {
     actionButtonText="保存"
     onSubmit={() => {props.onSubmit(actions)}}>
     <div className="space-y-4">
-      <button onClick={addAction} className="flex flex-row items-center justify-center p-4 bg-white border-2 rounded-md border-primary">
-        <Icon src={ICON.add} size="sm"/>アクション追加
-      </button>
+      <IconLabelButton
+        icon={ICON.add}
+        full
+        onClick={addAction}
+        primary
+        label="アクション追加"
+        />
       <DndContext
         modifiers={[restrictToParentElement]}
         onDragEnd={(event) => {

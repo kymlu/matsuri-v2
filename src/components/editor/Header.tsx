@@ -33,7 +33,11 @@ export default function Header (props: {
           props.returnHome();
         }}/>
     </div>
-    <div className="font-semibold" onDoubleClick={downloadLogs}>{props.currentChoreo.name}</div>
+    <div
+      className="font-semibold truncate"
+      onDoubleClick={downloadLogs}>
+      {props.currentChoreo.name}
+    </div>
     <div className="flex justify-end">
       {
         props.onToggleNotes &&

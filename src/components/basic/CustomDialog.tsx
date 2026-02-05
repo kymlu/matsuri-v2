@@ -21,7 +21,7 @@ export default function CustomDialog(props: CustomDialogProps) {
       }>
         <div className="flex flex-col h-full min-h-0">
           <div className="flex flex-row items-center justify-between gap-4 mb-4 shrink-0">
-            <Dialog.Title className="text-lg font-bold">
+            <Dialog.Title className="text-lg font-bold break-words text-wrap">
               {props.title}
             </Dialog.Title>
 

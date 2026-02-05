@@ -43,7 +43,7 @@ function ActionSection (props: {
           setIsExpanded(true);
         }
       }}>
-      <div className="overflow-hidden max-w-32 whitespace-nowrap text-ellipsis">
+      <div className="truncate max-w-32">
         {action.name}
       </div>
     </Button>
@@ -56,7 +56,7 @@ function ActionSection (props: {
         fontSize="text-base"
         onClick={() => {onSelectTiming(timing)}}
         fixed>
-        <div className="overflow-hidden max-w-32 whitespace-nowrap text-ellipsis">
+        <div className="truncate max-w-32">
           {timing.name}
         </div>
       </Button>)

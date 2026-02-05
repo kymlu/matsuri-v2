@@ -2,7 +2,7 @@ import { Dialog } from "@base-ui/react"
 import CustomDialog from "../components/basic/CustomDialog"
 import Divider from "../components/basic/Divider"
 import { ICON, LAST_UPDATED } from "../lib/consts/consts"
-import { ActionButton } from "../components/basic/Button"
+import { IconLabelButton } from "../components/basic/Button"
 import Icon from "../components/basic/Icon"
 import { readUploadedFile } from "../lib/helpers/uploadHelper"
 import { useEffect, useState } from "react"
@@ -10,7 +10,8 @@ import { getAllChoreos, saveChoreo } from "../lib/dataAccess/DataController"
 import { Choreo } from "../models/choreo"
 import { groupByKey, strCompare } from "../lib/helpers/globalHelper"
 import { downloadLogs } from "../lib/helpers/logHelper"
-import { getJpDate } from "../lib/helpers/dateHelper"
+import { getDate } from "../lib/helpers/dateHelper"
+import IconButton from "../components/basic/IconButton"
 
 export default function HomePage(props: {
   goToNewChoreoPage: () => void,
@@ -69,19 +70,19 @@ export default function HomePage(props: {
       </div>
       <Divider primary/>
       <div className='flex flex-col gap-4 mx-5'>
-        <div className="flex gap-4">
-          <ActionButton
+        <div className="flex gap-2">
+          <IconLabelButton
             full
-            onClick={props.goToNewChoreoPage}>
-            隊列表追加
-          </ActionButton>
-          <ActionButton
+            label="隊列表追加"
+            icon={ICON.add}
+            onClick={props.goToNewChoreoPage}
+            />
+          <IconLabelButton
             full
-            onClick={() => {
-              triggerUpload();
-            }}>
-            アップロード
-          </ActionButton>
+            label="アップロード"
+            icon={ICON.upload}
+            onClick={triggerUpload}
+            />
         </div>
         {
           Object.entries(savedChoreos).map((group) =>
@@ -95,8 +96,6 @@ export default function HomePage(props: {
             />
           )
         }
-        {/** Todo: show latest edited */}
-        {/** Todo: get saved hardcoded files */}
       </div>
       <span onDoubleClick={downloadLogs} className='fixed opacity-50 bottom-2 left-2'>{LAST_UPDATED}</span>
 
@@ -123,89 +122,79 @@ function EventSection(props: {
   goToEditPage: (choreo: Choreo) => void,
   duplicateChoreo: (choreo: Choreo) => void,
 }) {
-  return <div>
-    <div className='flex flex-row items-end gap-2'>
+  const [isExpanded, setIsExpanded] = useState<boolean>(true);
+  return <div className="space-y-2">
+    <div className='flex flex-row items-center'>
+      <IconButton
+        src={isExpanded ? ICON.arrowDropDown : ICON.arrowRight}
+        size="sm"
+        colour="primary"
+        noBorder
+        onClick={() => setIsExpanded(prev => !prev)} />
       <h2 className='text-xl font-bold text-primary'>{props.eventName.length === 0 ? "イベント不明" : props.eventName}</h2>
     </div>
-    <div className="flex flex-col gap-2 md:grid md:grid-cols-2">
-      {
-        props.choreos.map((choreo) =>
-          <Dialog.Root key={choreo.id}>
-            <Dialog.Trigger>
-              <div className="flex flex-col justify-between h-full p-3 transition-colors border-2 rounded-md border-primary lg:hover:bg-gray-100">
-                {/* Title */}
-                <div className="text-base font-medium leading-tight text-left">
-                  {choreo.name}
-                </div>
-
-                {/* Meta row */}
-                <div className="flex items-center justify-between mt-2 text-sm text-gray-500">
-                  {choreo.lastUpdated ? (
-                    <div>
-                      更新日：{getJpDate(choreo.lastUpdated)}
-                    </div>
-                  ) : (
-                    <div />
-                  )}
-
-                  <div className="flex items-center gap-1 text-gray-700">
-                    <Icon
-                      src={ICON.person}
-                      size="sm"
-                    />
-                    <span>{Object.keys(choreo.dancers).length}</span>
+    {
+      isExpanded && 
+      <div className="flex flex-col gap-2 px-8 md:grid md:grid-cols-2">
+        {
+          props.choreos.map((choreo) =>
+            <Dialog.Root key={choreo.id}>
+              <Dialog.Trigger>
+                <div className="flex flex-col justify-between h-full p-3 transition-colors border-2 rounded-md border-primary lg:hover:bg-gray-100">
+                  {/* Title */}
+                  <div className="text-lg font-medium text-left break-words text-wrap">
+                    {choreo.name}
                   </div>
-                </div>
-              </div>
-            </Dialog.Trigger>
-            <CustomDialog hasX title={choreo.name}>
-              <div className="flex flex-col gap-2">
-                <ActionButton
-                  full
-                  onClick={() => props.goToViewPage(choreo)}
-                >
-                  <div className="flex items-center gap-2">
-                    <Icon
-                      src={ICON.visibility}
-                      size="sm"
-                    />
-                    <span className="text-sm font-medium">閲覧</span>
-                  </div>
-                </ActionButton>
 
-                <ActionButton
-                  full
-                  onClick={() => props.goToEditPage(choreo)}
-                >
-                  <div className="flex items-center gap-2">
-                    <Icon
-                      src={ICON.edit}
-                      size="sm"
-                    />
-                    <span className="text-sm font-medium">編集</span>
-                  </div>
-                </ActionButton>
+                  {/* Meta row */}
+                  <div className="flex items-center justify-between text-sm text-gray-500">
+                    {choreo.lastUpdated ? (
+                      <div className="flex items-center gap-1">
+                        <Icon colour="grey" size="sm" src={ICON.history}/>{getDate(choreo.lastUpdated)}
+                      </div>
+                    ) : (
+                      <div />
+                    )}
 
-                <Dialog.Close>
-                  <ActionButton
-                    full
-                    asDiv
-                    onClick={() => props.duplicateChoreo(choreo)}
-                  >
-                    <div className="flex items-center flex-1 gap-2">
+                    <div className="flex items-center gap-1">
                       <Icon
-                        src={ICON.fileCopy}
+                        src={ICON.person}
+                        colour="grey"
                         size="sm"
                       />
-                      <span className="text-sm font-medium">複製</span>
+                      <span>{Object.keys(choreo.dancers).length}</span>
                     </div>
-                  </ActionButton>
-                </Dialog.Close>
-              </div>
-            </CustomDialog>
-          </Dialog.Root>
-        )
-      }
-    </div>
+                  </div>
+                </div>
+              </Dialog.Trigger>
+              <CustomDialog hasX title={choreo.name}>
+                <div className="flex flex-col gap-2">
+                  <IconLabelButton
+                    icon={ICON.visibility}
+                    label="閲覧"
+                    onClick={() => props.goToViewPage(choreo)}
+                    full />
+
+                  <IconLabelButton
+                    icon={ICON.visibility}
+                    label="編集"
+                    onClick={() => props.goToEditPage(choreo)}
+                    full />
+
+                  <Dialog.Close>
+                    <IconLabelButton
+                      icon={ICON.fileCopy}
+                      label="複製"
+                      asDiv
+                      onClick={() => props.duplicateChoreo(choreo)}
+                      full />
+                  </Dialog.Close>
+                </div>
+              </CustomDialog>
+            </Dialog.Root>
+          )
+        }
+      </div>
+    }
   </div>
 }
