@@ -117,6 +117,10 @@ function FormationSectionItem (props: {
           !isNullOrUndefinedOrBlank(section.note) && 
           <Icon colour={ isSelected? "white" : "black" } src={ICON.speakerNotes} size="xs"/>
         }
+        {
+          section.formation.dancerActions.length > 0 && 
+          <Icon colour={ isSelected? "white" : "black" } src={ICON[123]} size="sm"/>
+        }
       </div>
     </Button>
   </div>

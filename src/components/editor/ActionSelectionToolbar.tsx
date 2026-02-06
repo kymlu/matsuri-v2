@@ -2,6 +2,8 @@ import { useState } from "react";
 import { DancerAction, DancerActionTiming } from "../../models/dancerAction"
 import Button from "../basic/Button";
 import { strEquals } from "../../lib/helpers/globalHelper";
+import Icon from "../basic/Icon";
+import { ICON } from "../../lib/consts/consts";
 
 export default function ActionSelectionToolbar(props: {
   actions: DancerAction[],
@@ -31,7 +33,6 @@ function ActionSection (props: {
 
   return <div className="flex gap-2">
     <Button
-      fixed
       compact
       grey
       fontSize="text-base"
@@ -43,8 +44,11 @@ function ActionSection (props: {
           setIsExpanded(true);
         }
       }}>
-      <div className="truncate max-w-32">
-        {action.name}
+      <div className="flex flex-row items-center justify-center gap-1 min-w-24 w-max">
+        <span className="truncate">
+          {action.name}
+        </span>
+        <Icon colour="white" src={isExpanded ? ICON.chevronBackward : ICON.chevronForward} size="xs"/>
       </div>
     </Button>
     {
