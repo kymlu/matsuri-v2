@@ -16,6 +16,7 @@ import SampleStage from "../lib/samples/SampleStageFormation.json"
 import SampleParade from "../lib/samples/SampleParadeFormation.json"
 import z from "zod"
 import { exportToMtr } from "../lib/helpers/exportHelper"
+import EditChoreoInfoDialog from "../components/dialogs/EditChoreoInfoDialog"
 
 export default function HomePage(props: {
   goToNewChoreoPage: () => void,
@@ -24,6 +25,12 @@ export default function HomePage(props: {
   onUploadSuccess: (choreo: Choreo) => void,
 }) {
   const [savedChoreos, setSavedChoreos] = useState<Record<string, Choreo[]>>({});
+  const [editingChoreo, setEditingChoreo] = useState<Choreo | undefined>();
+  const [editChoreoInfoDialogOpen, setEditChoreoInfoDialogOpen] = useState(false);
+  const editChoreoInfoDialog = Dialog.createHandle<Choreo>();
+  const handleEditChoreoInfoDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
+    setEditChoreoInfoDialogOpen(isOpen);
+  };
 
   const triggerUpload = () => {
     const uploadFileElement = document.getElementById("uploadFileInput");
@@ -33,6 +40,10 @@ export default function HomePage(props: {
   }
 
   useEffect(() => {
+    loadChoreos();
+  }, []);
+
+  const loadChoreos = () => {
     getAllChoreos().then((choreos) => {
       if(!choreos.find(c => strEquals(c.id, SampleStage.id))) {
         choreos.push(z.parse(ChoreoSchema, SampleStage));
@@ -42,7 +53,7 @@ export default function HomePage(props: {
       }
       setSavedChoreos(groupChoreos(choreos));
     });
-  }, []);
+  }
 
   const groupChoreos = (choreos: Choreo[]) => {
     return groupByKey(
@@ -102,6 +113,10 @@ export default function HomePage(props: {
               goToEditPage={props.goToEditPage}
               goToViewPage={props.goToViewPage}
               duplicateChoreo={duplicateChoreo}
+              onEditName={(choreo) => {
+                setEditingChoreo(choreo);
+                setEditChoreoInfoDialogOpen(true);
+              }}
             />
           )
         }
@@ -120,6 +135,24 @@ export default function HomePage(props: {
             );
           }
         }}/>
+        <Dialog.Root
+          handle={editChoreoInfoDialog}
+          open={editChoreoInfoDialogOpen}
+          onOpenChange={handleEditChoreoInfoDialogOpen}>
+            
+          <EditChoreoInfoDialog
+            choreo={editingChoreo}
+            onSubmit={(name, event) => {
+              if (editingChoreo) {
+                saveChoreo({...editingChoreo, name, event}, () => {
+                  editChoreoInfoDialog.close();
+                  setEditChoreoInfoDialogOpen(false);
+                  setEditingChoreo(undefined);
+                  loadChoreos();
+                });
+              }
+            }}/>
+        </Dialog.Root>
     </div>
   )
 }
@@ -130,6 +163,7 @@ function EventSection(props: {
   goToViewPage: (choreo: Choreo) => void,
   goToEditPage: (choreo: Choreo) => void,
   duplicateChoreo: (choreo: Choreo) => void,
+  onEditName: (choreo: Choreo) => void,
 }) {
   const [isExpanded, setIsExpanded] = useState<boolean>(true);
   return <div className="space-y-2">
@@ -199,6 +233,16 @@ function EventSection(props: {
                       onClick={() => props.duplicateChoreo(choreo)}
                       full />
                   </Dialog.Close>
+
+                  <Dialog.Close>
+                    <IconLabelButton
+                      icon={ICON.textFieldsAlt}
+                      label="名前編集"
+                      asDiv
+                      onClick={() => props.onEditName(choreo)}
+                      full />
+                  </Dialog.Close>
+                  
                   <Dialog.Close>
                     <IconLabelButton
                       icon={ICON.fileExport}
