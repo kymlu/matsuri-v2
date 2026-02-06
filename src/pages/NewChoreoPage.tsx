@@ -111,7 +111,7 @@ export function NewChoreoPage(props: {
   };
 
   return (
-    <div className="flex flex-col h-screen p-4 mx-auto space-y-6">
+    <div className="flex flex-col h-[100svh] p-4 mx-auto space-y-6">
       <div className="text-center">
         <h2 className="mb-2 text-xl font-semibold">
           {stepTitles[step] || ""}

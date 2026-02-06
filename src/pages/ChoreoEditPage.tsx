@@ -261,7 +261,7 @@ export default function ChoreoEditPage(props: {
   };
 
   return (
-    <div className='flex flex-col justify-between w-screen h-screen max-h-screen'>
+    <div className='flex flex-col justify-between w-screen h-[100svh] max-h-[100svh]'>
       <Header
         returnHome={props.goToHomePage}
         hasSidebar

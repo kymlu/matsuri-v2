@@ -37,7 +37,7 @@ export default function ChoreoViewPage(props: {
   }, [currentSection])
 
   return (
-    <div className='flex flex-col h-screen max-h-screen overflow-hidden'>
+    <div className='flex flex-col h-[100svh] max-h-[100svh] overflow-hidden'>
       <Header
         returnHome={props.goToHomePage}
         currentChoreo={props.currentChoreo}
