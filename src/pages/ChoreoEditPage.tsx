@@ -66,8 +66,7 @@ export default function ChoreoEditPage(props: {
     } as EditHistory<Choreo>);
 
   useEffect(() => {
-    if (selectedIds.length > 0 && isAddingDancers) setIsAddingDancers(false);
-
+    // assigning actions
     if (isAssigningActions && currentAction && currentTiming && currentTiming.dancerIds.length !== selectedIds.length) {
       dispatch({
         type: "SET_STATE",
@@ -77,12 +76,33 @@ export default function ChoreoEditPage(props: {
       });
       setCurrentTiming({...currentTiming, dancerIds: selectedIds})
     }
+  }, [selectedIds, history.presentState, currentSection]);
+
+  useEffect(() => {
+    // undo/redo timing
+    if (currentAction && currentTiming) {
+      var newTiming = currentSection.formation.dancerActions.find(x => strEquals(currentAction.id, x.id))?.timings.find(x => strEquals(currentTiming.id, x.id));
+      if (newTiming && newTiming.dancerIds.length !== selectedIds.length) {
+        setCurrentTiming(newTiming);
+        setSelectedIds(newTiming.dancerIds);
+      }
+    }
+  }, [currentSection]);
+
+  useEffect(() => {
+    if (selectedIds.length > 0 && isAddingDancers) setIsAddingDancers(false);
+    if (currentSection.formation.dancerActions.length === 0 && isAssigningActions) {
+      setIsAssigningActions(false);
+      setCurrentAction(undefined);
+      setCurrentTiming(undefined);
+      setSelectedIds([]);
+    };
 
     setSelectedObjects({
       dancers: Object.entries(currentSection.formation.dancerPositions).filter(x => selectedIds.includes(x[0])).map(x => x[1]),
       props: Object.entries(currentSection.formation.propPositions).filter(x => selectedIds.includes(x[0])).map(x => x[1]),
     });
-  }, [selectedIds, history.presentState, currentSection]);
+  }, [selectedIds]);
 
   const [copyBuffer, setCopyBuffer] = useState<Record<string, DancerPosition>>({});
 
@@ -264,7 +284,7 @@ export default function ChoreoEditPage(props: {
   const [movementUpdateGroup, setMovementUpdateGroup] = useState<Record<string, Coordinates>>({});
   
   useEffect(() => {
-    console.log(movementUpdateGroup)
+    if (Object.keys(movementUpdateGroup).length === 0) return;
     if (selectedIds.some(id => isNullOrUndefined(movementUpdateGroup[id]))) return;
     dispatch({
       type: "SET_STATE",
@@ -310,6 +330,7 @@ export default function ChoreoEditPage(props: {
           currentChoreo={history.presentState.state}
           currentSection={currentSection}
           updateDancerPosition={(x, y, dancerId) => {
+            console.log("update")
             setMovementUpdateGroup(prev => ({...prev, [dancerId]: {x, y}}));
           }}
           selectedIds={selectedIds}
