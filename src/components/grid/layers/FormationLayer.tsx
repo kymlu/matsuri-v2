@@ -17,7 +17,6 @@ type FormationLayerProps = {
   dancerPositions: DancerPosition[],
   geometry: StageGeometry,
   updateDancerPosition?: (x: number, y: number, dancerId: string) => void,
-  updateDancerPositions?: (dx: number, dy: number) => void,
   selectedIds: string[],
   setSelectedIds: Dispatch<SetStateAction<string[]>>,
   snapToGrid?: boolean,
@@ -32,7 +31,6 @@ export default function FormationLayer({
   dancerPositions,
   geometry,
   updateDancerPosition,
-  updateDancerPositions,
   selectedIds,
   setSelectedIds,
   snapToGrid,
@@ -112,7 +110,7 @@ export default function FormationLayer({
           enabledAnchors={["bottom-right"]}
           // rotateEnabled={isSinglePropSelected}
           borderStrokeWidth={2}
-          borderEnabled={false}
+          borderEnabled={selectedIds.length > 1}
           borderStroke={colorPalette.primary}
           anchorStrokeWidth={2}
           anchorStroke={colorPalette.primary}
@@ -121,65 +119,6 @@ export default function FormationLayer({
             225, 240, 255, 270, 285, 300, 315, 330, 345, 360,
           ]}
           rotationSnapTolerance={10}
-          onMouseDown={(e) => {
-            console.log("mouse down transformer")
-            transformerDragStartRef.current = {
-              x: e.evt.clientX,
-              y: e.evt.clientY,
-            };
-            isTransformerDraggingRef.current = false;
-          }}
-          onDragMove={(e) => {
-            const start = transformerDragStartRef.current;
-            if (!start) return;
-
-            const dx = e.target.x() - start.x;
-            const dy = e.target.y() - start.y;
-
-            if (Math.hypot(dx, dy) > 0.01) {
-              isTransformerDraggingRef.current = true;
-            }
-          }}
-          onDragEnd={(e) => {
-            if (!transformerDragStartRef.current) return;
-    
-            const dx =
-              e.evt.clientX - transformerDragStartRef.current.x;
-            const dy =
-              e.evt.clientY - transformerDragStartRef.current.y;
-    
-            if (Math.hypot(dx, dy) > 4) {
-              isTransformerDraggingRef.current = true;
-            }
-    
-            if (isTransformerDraggingRef.current) {
-              const node = transformerRef.current!!;
-              console.log(node);
-    
-              const rawPx = {
-                x: node.x(),
-                y: node.y(),
-              };
-
-              const snapPx = METER_PX/2;
-
-              const snappedPx = {
-                x: Math.round(rawPx.x / snapPx) * snapPx,
-                y: Math.round(rawPx.y / snapPx) * snapPx,
-              };
-
-              const dxPx = snappedPx.x - transformerDragStartRef.current.x;
-              const dyPx = snappedPx.y - transformerDragStartRef.current.y;    
-              node.to({
-                x: snappedPx.x,
-                y: snappedPx.y,
-                onFinish: () => {
-                  var snappedDeltaInM = pxToStageMeters({x: dxPx, y: dyPx}, geometry, METER_PX);
-                  updateDancerPositions?.(snappedDeltaInM.x, snappedDeltaInM.y);
-                }
-              });
-            }
-          }}
           onTransformEnd={(event) => {
             // if(isSinglePropSelected) {
             // 	updatePropRotation(event.target.attrs.id,

@@ -35,6 +35,8 @@ export default function BaseGridObject(props: BaseGridObjectProps) {
 
   useEffect(() => {
     var newPosition = stageMetersToPx({x: props.position.x, y: props.position.y}, props.stageGeometry, METER_PX);
+    if (newPosition.x === ref.current?.x() && newPosition.y === ref.current?.y()) return;
+    
     setIsAnimating(true);
     ref.current?.to({
       x: newPosition.x,
@@ -55,7 +57,7 @@ export default function BaseGridObject(props: BaseGridObjectProps) {
     <Group
       id={props.id} 
       ref={ref}
-      draggable={props.draggable && !props.isTransformerActive && !isAnimating}
+      draggable={props.draggable && !isAnimating}
       rotation={props.rotation ?? 0}
       x={0}
       y={0}
@@ -67,6 +69,10 @@ export default function BaseGridObject(props: BaseGridObjectProps) {
         isDraggingRef.current = false;
       }}
       onDragMove={(e) => {
+        if (!props.isSelected) {
+          props.onClick(false);
+        }
+        if (isDraggingRef.current) return;
         const start = dragStartRef.current;
         if (!start) return;
 
@@ -86,7 +92,7 @@ export default function BaseGridObject(props: BaseGridObjectProps) {
         }
       }}
       onDragEnd={(e) => {
-        if (isDraggingRef.current && !props.isTransformerActive) {
+        if (isDraggingRef.current) {
           const node = ref.current!!;
 
           var position: Coordinates = {x: node.x(), y: node.y()};
@@ -109,19 +115,6 @@ export default function BaseGridObject(props: BaseGridObjectProps) {
           }
         }
       }}
-      // onDragEnd={e => {
-      //   const node = e.target;
-
-      //   var snappedPosition = snapToGrid({x: node.x(), y: node.y()}, snapSize);
-        
-      //   node.to({
-      //     x: snappedPosition.x,
-      //     y: snappedPosition.y,
-      //     onFinish: () => {
-      //       props.updatePosition?.(node.attrs.x, node.attrs.y)
-      //     }
-      //   });
-      // }}
       >
       {props.children}
     </Group>

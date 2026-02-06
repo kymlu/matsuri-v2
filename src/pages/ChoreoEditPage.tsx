@@ -8,9 +8,9 @@ import { Choreo } from "../models/choreo";
 import { EditHistory } from "../models/history";
 import { addSection, assignDancersToTiming, duplicateSection, editDancerActions, editSectionNote, removeSection, renameSection, reorderSections } from "../lib/editor/commands/sectionCommands";
 import { ChoreoSection, SelectedObjects } from "../models/choreoSection";
-import { isNullOrUndefinedOrBlank, strEquals } from "../lib/helpers/globalHelper";
+import { isNullOrUndefined, isNullOrUndefinedOrBlank, strEquals } from "../lib/helpers/globalHelper";
 import MainStage from "../components/grid/MainStage";
-import { alignHorizontalPositions, alignVerticalPositions, changeDancerColorAll, changeDancerColorCurrent, changeDancerColorCurrentAndFuture, distributePositions, moveDancerPositions, moveDancerPositionsDelta, pasteDancerPositions, swapPositions } from "../lib/editor/commands/dancerPositionCommands";
+import { alignHorizontalPositions, alignVerticalPositions, changeDancerColorAll, changeDancerColorCurrent, changeDancerColorCurrentAndFuture, distributePositions, moveDancerPositions, pasteDancerPositions, swapPositions } from "../lib/editor/commands/dancerPositionCommands";
 import ObjectToolbar from "../components/editor/ObjectToolbar";
 import { Dialog } from "@base-ui/react";
 import EditChoreoSizeDialog from "../components/dialogs/EditChoreoSizeDialog";
@@ -31,6 +31,7 @@ import ActionSelectionToolbar from "../components/editor/ActionSelectionToolbar"
 import ConfirmDeletionDialog from "../components/dialogs/ConfirmDeletionDialog";
 import EditSectionNameDialog from "../components/dialogs/EditSectionNameDialog";
 import EditSectionNoteDialog from "../components/dialogs/EditSectionNoteDialog";
+import { Coordinates } from "../models/base";
 
 const resizeDialog = Dialog.createHandle<Choreo>();
 const editChoreoInfoDialog = Dialog.createHandle<string>();
@@ -57,7 +58,6 @@ export default function ChoreoEditPage(props: {
     showGrid: true,
     dancerDisplayType: "large",
   });
-  
   const [history, dispatch] = useReducer(historyReducer,
     {
       undoStack: [],
@@ -260,6 +260,20 @@ export default function ChoreoEditPage(props: {
       commit: true});
   };
 
+
+  const [movementUpdateGroup, setMovementUpdateGroup] = useState<Record<string, Coordinates>>({});
+  
+  useEffect(() => {
+    console.log(movementUpdateGroup)
+    if (selectedIds.some(id => isNullOrUndefined(movementUpdateGroup[id]))) return;
+    dispatch({
+      type: "SET_STATE",
+      newState: moveDancerPositions(history.presentState.state, currentSection.id, movementUpdateGroup),
+      currentSectionId: currentSection.id,
+      commit: true});
+    setMovementUpdateGroup({});
+  }, [movementUpdateGroup]);
+
   return (
     <div className='flex flex-col justify-between w-screen h-[100svh] max-h-[100svh]'>
       <Header
@@ -295,18 +309,7 @@ export default function ChoreoEditPage(props: {
           currentChoreo={history.presentState.state}
           currentSection={currentSection}
           updateDancerPosition={(x, y, dancerId) => {
-            dispatch({
-              type: "SET_STATE",
-              newState: moveDancerPositions(history.presentState.state, currentSection.id, [dancerId], x, y),
-              currentSectionId: currentSection.id,
-              commit: true});
-          }}
-          updateDancerPositions={(dx, dy) => {
-            dispatch({
-              type: "SET_STATE",
-              newState: moveDancerPositionsDelta(history.presentState.state, currentSection.id, selectedIds, dx, dy),
-              currentSectionId: currentSection.id,
-              commit: true});
+            setMovementUpdateGroup(prev => ({...prev, [dancerId]: {x, y}}));
           }}
           selectedIds={selectedIds}
           setSelectedIds={setSelectedIds}

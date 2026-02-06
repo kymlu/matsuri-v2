@@ -1,4 +1,5 @@
 import { Distribution, HorizontalAlignment, VerticalAlignment } from "../../../models/alignment"
+import { Coordinates } from "../../../models/base"
 import { Choreo } from "../../../models/choreo"
 import { DancerPosition } from "../../../models/dancer"
 import { indexByKey, roundToTenth, strEquals } from "../../helpers/globalHelper"
@@ -26,9 +27,7 @@ function updateDancerPositions(
 export function moveDancerPositions(
   state: Choreo,
   sectionId: string,
-  dancerIds: string[],
-  x: number,
-  y: number
+  positions: Record<string, Coordinates>,
 ): Choreo {
   const newSections = state.sections.map(section => {
     if (section.id !== sectionId) return section
@@ -38,42 +37,13 @@ export function moveDancerPositions(
         ...section.formation,
         dancerPositions: updateDancerPositions(
           section.formation.dancerPositions,
-          dancerIds,
-          dp => ({ ...dp, x: x, y: y })
+          Object.keys(positions),
+          dp => ({ ...dp, x: positions[dp.dancerId].x, y: positions[dp.dancerId].y })
         )
       }
     }
   });
   
-  return { ...state, sections: newSections }
-}
-
-/**
- * Move one or more dancers in a section
- */
-export function moveDancerPositionsDelta(
-  state: Choreo,
-  sectionId: string,
-  dancerIds: string[],
-  dx: number,
-  dy: number
-): Choreo {
-  console.log("delta")
-  const newSections = state.sections.map(section => {
-    if (section.id !== sectionId) return section
-    return {
-      ...section,
-      formation: {
-        ...section.formation,
-        dancerPositions: updateDancerPositions(
-          section.formation.dancerPositions,
-          dancerIds,
-          dp => ({ ...dp, x: dp.x + dx, y: dp.y + dy })
-        )
-      }
-    }
-  });
-
   return { ...state, sections: newSections }
 }
 

@@ -20,7 +20,6 @@ export default function MainStage(props: {
   currentChoreo: Choreo,
   currentSection: ChoreoSection,
   updateDancerPosition?: (x: number, y: number, dancerId: string) => void,
-  updateDancerPositions?: (dx: number, dy: number) => void,
   selectedIds: string[],
   setSelectedIds: Dispatch<SetStateAction<string[]>>,
   addDancer?: (x: number, y: number) => void,
@@ -255,7 +254,6 @@ export default function MainStage(props: {
           dancers={props.currentChoreo.dancers}
           dancerPositions={dancerPositions}
           updateDancerPosition={props.updateDancerPosition}
-          updateDancerPositions={props.updateDancerPositions}
           selectedIds={props.selectedIds}
           setSelectedIds={props.setSelectedIds}
           snapToGrid={props.appSettings.snapToGrid}
