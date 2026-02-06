@@ -82,6 +82,7 @@ export default function ChoreoViewPage(props: {
         <MainStage
           appSettings={appSettings}
           canEdit={false}
+          hideTransformerBorder
           canSelectDancers={selectedTimingId === undefined}
           canToggleSelection={false}
           currentChoreo={props.currentChoreo}
