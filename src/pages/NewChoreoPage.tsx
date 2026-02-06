@@ -212,7 +212,7 @@ export function NewChoreoPage(props: {
         )}
       </div>
 
-      <div className="flex justify-between gap-4 pt-6 pb-16">
+      <div className="flex justify-between gap-4 pt-6 pb-8">
         {step === 1 && (
           <ActionButton
           full
