@@ -24,7 +24,7 @@ export default function FormationSelectionToolbar(props: {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 5,
+        distance: 10,
         delay: 100,
         tolerance: 50,
       },
