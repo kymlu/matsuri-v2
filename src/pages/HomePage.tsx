@@ -15,6 +15,7 @@ import IconButton from "../components/basic/IconButton"
 import SampleStage from "../lib/samples/SampleStageFormation.json"
 import SampleParade from "../lib/samples/SampleParadeFormation.json"
 import z from "zod"
+import { exportToMtr } from "../lib/helpers/exportHelper"
 
 export default function HomePage(props: {
   goToNewChoreoPage: () => void,
@@ -176,6 +177,7 @@ function EventSection(props: {
                 </div>
               </Dialog.Trigger>
               <CustomDialog hasX title={choreo.name}>
+                {/* TODO: add rename, export functions */}
                 <div className="flex flex-col gap-2">
                   <IconLabelButton
                     icon={ICON.visibility}
@@ -195,6 +197,14 @@ function EventSection(props: {
                       label="複製"
                       asDiv
                       onClick={() => props.duplicateChoreo(choreo)}
+                      full />
+                  </Dialog.Close>
+                  <Dialog.Close>
+                    <IconLabelButton
+                      icon={ICON.fileExport}
+                      label="エクスポート"
+                      asDiv
+                      onClick={() => exportToMtr(choreo)}
                       full />
                   </Dialog.Close>
                 </div>
