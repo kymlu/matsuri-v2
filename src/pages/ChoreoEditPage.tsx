@@ -682,7 +682,7 @@ export default function ChoreoEditPage(props: {
             commit: true,
           });
           addNoteToSectionDialog.close();
-          setRenameSectionDialogOpen(false);
+          setAddNoteToSectionDialogOpen(false);
         }}/>
     </Dialog.Root>
     <Dialog.Root
