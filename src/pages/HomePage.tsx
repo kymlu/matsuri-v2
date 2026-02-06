@@ -12,7 +12,8 @@ import { groupByKey, strCompare, strEquals } from "../lib/helpers/globalHelper"
 import { downloadLogs } from "../lib/helpers/logHelper"
 import { getDate } from "../lib/helpers/dateHelper"
 import IconButton from "../components/basic/IconButton"
-import SampleChoreo from "../lib/samples/SampleFormation.json"
+import SampleStage from "../lib/samples/SampleStageFormation.json"
+import SampleParade from "../lib/samples/SampleParadeFormation.json"
 import z from "zod"
 
 export default function HomePage(props: {
@@ -32,8 +33,11 @@ export default function HomePage(props: {
 
   useEffect(() => {
     getAllChoreos().then((choreos) => {
-      if(!choreos.find(c => strEquals(c.id, SampleChoreo.id))) {
-        choreos.push(z.parse(ChoreoSchema, SampleChoreo));
+      if(!choreos.find(c => strEquals(c.id, SampleStage.id))) {
+        choreos.push(z.parse(ChoreoSchema, SampleStage));
+      }
+      if(!choreos.find(c => strEquals(c.id, SampleParade.id))) {
+        choreos.push(z.parse(ChoreoSchema, SampleParade));
       }
       setSavedChoreos(groupChoreos(choreos));
     });
