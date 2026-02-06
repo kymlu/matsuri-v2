@@ -3,8 +3,8 @@ import { MIN_STAGE_DIMENSION, MAX_STAGE_DIMENSION, MIN_STAGE_MARGIN, MAX_STAGE_M
 import { Choreo, StageGeometry, StageType } from "../../models/choreo";
 import NumberInput from "../inputs/NumberInput";
 import BaseEditDialog from "./BaseEditDialog";
-import TextInput from "../inputs/TextInput";
 import GridPreview from "../grid/GridPreview";
+import Button from "../basic/Button";
 
 interface EditChoreoMetaForm {
   name: string;
@@ -85,13 +85,20 @@ export default function EditChoreoSizeDialog(props: {
           yMargin={form.yMargin}
         />
         <div className="grid grid-cols-2 gap-2 md:flex md:flex-col">
-          <div className="col-span-2">
-            <TextInput
-              label="舞台類分"
-              default={props.currentChoreo?.stageType === "parade" ? "パレード" : "ステージ"}
-              onContentChange={() => {console.log("todo: verify change needed")}}
-              disabled/>
-          </div>
+          <Button
+            full
+            primary={form.stageType === 'parade'}
+            onClick={() => handleChange("stageType", "parade")}
+          >
+            パレード
+          </Button>
+          <Button
+            full
+            primary={form.stageType === 'stage'}
+            onClick={() => handleChange("stageType", "stage")}
+          >
+            ステージ
+          </Button>
           <NumberInput
             name="幅"
             default={form.stageWidth}
