@@ -31,7 +31,6 @@ export default function EditChoreoSizeDialog(props: {
   });
 
   useEffect(() => {
-    console.log(props.currentChoreo.stageType)
     setForm({
       name: props.currentChoreo.name,
       eventName: props.currentChoreo.event,
@@ -86,7 +85,6 @@ export default function EditChoreoSizeDialog(props: {
           yMargin={form.yMargin}
         />
         <div className="grid grid-cols-2 gap-2 md:flex md:flex-col">
-          <div>{form.stageType}</div>
           <Button
             full
             primary={form.stageType === 'parade'}
