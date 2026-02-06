@@ -25,7 +25,7 @@ export default function ViewerSidebar(props: {
   hideNotes: () => void,
   deselectPosition: () => void,
 }) {
-  var contentClasses = classNames("min-h-0 flex flex-col fixed inset-x-0 bottom-20 h-1/4 max-h-[40%] bg-white p-4 z-20 border-t-2 md:border-t-0 md:static md:bottom-8 md:h-full md:w-1/3 md:max-w-[33vw] md:max-h-full md:border-r-2", {
+  var contentClasses = classNames("min-h-0 flex flex-col fixed inset-x-0 bottom-20 h-max max-h-[40%] bg-white p-4 z-20 border-t-2 md:border-t-0 md:static md:bottom-8 md:h-full md:w-1/3 md:max-w-[33vw] md:max-h-full md:border-r-2", {
     "hidden": !props.isPositionHintShown && !props.showNotes
   });
   
