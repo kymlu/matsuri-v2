@@ -58,9 +58,8 @@ function ActionSection (props: {
         compact
         primary={strEquals(timing.id, selectedTimingId)}
         fontSize="text-base"
-        onClick={() => {onSelectTiming(timing)}}
-        fixed>
-        <div className="truncate max-w-32">
+        onClick={() => {onSelectTiming(timing)}}>
+        <div className="truncate min-w-16">
           {timing.name}
         </div>
       </Button>)
