@@ -78,6 +78,7 @@ export const ICON = {
   person: "person",
   personAdd: "person_add",
   redo: "redo",
+  resize: "resize",
   save: "save",
   selectAll: "select_all",
   settings: "settings",

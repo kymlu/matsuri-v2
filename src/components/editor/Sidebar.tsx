@@ -1,6 +1,6 @@
 import { Dialog } from "@base-ui/react";
 import Divider from "../basic/Divider";
-import Button from "../basic/Button";
+import { IconLabelButton } from "../basic/Button";
 import { AppSetting } from "../../models/appSettings";
 import CustomSwitch from "../inputs/CustomSwitch";
 import IconButton from "../basic/IconButton";
@@ -45,7 +45,10 @@ export function Sidebar (props: {
         {
           props.editSize &&
           <>
-            <Button onClick={props.editSize}>舞台サイズを変更</Button>
+            <IconLabelButton
+              onClick={props.editSize}
+              label="舞台サイズを変更"
+              full icon={ICON.resize}/>
           </>
         }
         {/* {
@@ -54,7 +57,12 @@ export function Sidebar (props: {
         } */}
         {
           props.export &&
-          <Button onClick={props.export}>エクスポート</Button>
+          <>
+            <IconLabelButton
+              onClick={props.export}
+              label="エクスポート"
+              full icon={ICON.fileExport}/>
+          </>
         }
         <Divider/>
         {
