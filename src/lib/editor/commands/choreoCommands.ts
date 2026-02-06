@@ -1,4 +1,4 @@
-import { Choreo, StageGeometry } from "../../../models/choreo";
+import { Choreo, StageGeometry, StageType } from "../../../models/choreo";
 
 export function editChoreoInfo(state: Choreo, newName: string, newEvent: string): Choreo {
   console.log("Editing choreo info", newName, newEvent);
@@ -9,10 +9,11 @@ export function editChoreoInfo(state: Choreo, newName: string, newEvent: string)
   }
 }
 
-export function changeStageGeometry(state: Choreo, newGeometry: StageGeometry): Choreo {
+export function changeStageGeometryAndType(state: Choreo, newGeometry: StageGeometry, stageType: StageType): Choreo {
   console.log("Changing stage geometry", newGeometry);
   return {
     ...state,
+    stageType: stageType,
     stageGeometry: {...newGeometry}, // TODO: handle dancers that would fall outside of this range
   }
 }

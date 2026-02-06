@@ -18,7 +18,7 @@ interface EditChoreoMetaForm {
 
 export default function EditChoreoSizeDialog(props: {
   currentChoreo: Choreo;
-  onSave: (geometry: StageGeometry) => void;
+  onSave: (geometry: StageGeometry, stageType: StageType) => void;
 }) {
   var [form, setForm] = useState<EditChoreoMetaForm>({
     name: "",
@@ -31,6 +31,7 @@ export default function EditChoreoSizeDialog(props: {
   });
 
   useEffect(() => {
+    console.log(props.currentChoreo.stageType)
     setForm({
       name: props.currentChoreo.name,
       eventName: props.currentChoreo.event,
@@ -74,7 +75,7 @@ export default function EditChoreoSizeDialog(props: {
         yMargin: props.currentChoreo.stageGeometry.margin.topMargin,
       });
     }}
-    onSubmit={() => {props.onSave(stageGeometry)}}
+    onSubmit={() => {props.onSave(stageGeometry, form.stageType)}}
     >
       <div className="flex flex-col gap-2 md:flex-row">
         <GridPreview
@@ -85,6 +86,7 @@ export default function EditChoreoSizeDialog(props: {
           yMargin={form.yMargin}
         />
         <div className="grid grid-cols-2 gap-2 md:flex md:flex-col">
+          <div>{form.stageType}</div>
           <Button
             full
             primary={form.stageType === 'parade'}

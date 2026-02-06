@@ -20,7 +20,7 @@ import { addDancer, removeDancers, renameDancer } from "../lib/editor/commands/d
 import IconButton from "../components/basic/IconButton";
 import { ICON } from "../lib/consts/consts";
 import { AppSetting } from "../models/appSettings";
-import { changeStageGeometry, editChoreoInfo } from "../lib/editor/commands/choreoCommands";
+import { changeStageGeometryAndType, editChoreoInfo } from "../lib/editor/commands/choreoCommands";
 import EditChoreoInfoDialog from "../components/dialogs/EditChoreoInfoDialog";
 import EditDancerNameDialog from "../components/dialogs/EditDancerNameDialog";
 import EditDancerColourDialog from "../components/dialogs/EditDancerColourDialog";
@@ -554,10 +554,10 @@ export default function ChoreoEditPage(props: {
         onOpenChange={handleResizeDialogOpen}>
         <EditChoreoSizeDialog
           currentChoreo={history.presentState.state}
-          onSave={(geometry) => {
+          onSave={(geometry, stageType) => {
             dispatch({
               type: "SET_STATE",
-              newState: changeStageGeometry(history.presentState.state, geometry),
+              newState: changeStageGeometryAndType(history.presentState.state, geometry, stageType),
               currentSectionId: currentSection.id,
               commit: true});
             resizeDialog.close();
