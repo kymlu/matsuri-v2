@@ -2,7 +2,7 @@ export const LAST_UPDATED = "更新 2月5日"
 export const METER_PX = 25;
 
 export const MIN_STAGE_DIMENSION = 3;
-export const MAX_STAGE_DIMENSION = 500;
+export const MAX_STAGE_DIMENSION = 200;
 
 export const MIN_STAGE_MARGIN = 2;
 export const MAX_STAGE_MARGIN = 20;
