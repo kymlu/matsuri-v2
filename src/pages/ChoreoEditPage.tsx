@@ -306,6 +306,7 @@ export default function ChoreoEditPage(props: {
           canToggleSelection
           appSettings={appSettings}
           isAddingDancer={isAddingDancers}
+          hideTransformerBorder={isAssigningActions}
           currentChoreo={history.presentState.state}
           currentSection={currentSection}
           updateDancerPosition={(x, y, dancerId) => {

@@ -17,6 +17,7 @@ export default function MainStage(props: {
   canToggleSelection: boolean,
   canSelectDancers: boolean,
   isAddingDancer?: boolean,
+  hideTransformerBorder?: boolean,
   currentChoreo: Choreo,
   currentSection: ChoreoSection,
   updateDancerPosition?: (x: number, y: number, dancerId: string) => void,
@@ -248,6 +249,7 @@ export default function MainStage(props: {
           />
         <FormationLayer
           canEdit={props.canEdit}
+          hideTransformerBorder={props.hideTransformerBorder}
           canSelectDancers={props.canSelectDancers}
           canToggleSelection={props.canToggleSelection}
           geometry={stageGeometry}

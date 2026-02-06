@@ -5,14 +5,13 @@ import DancerGridObject from "../gridObjects/DancerGridObject";
 import Konva from "konva";
 import { Dispatch, SetStateAction, useEffect, useRef } from "react";
 import { colorPalette } from "../../../lib/consts/colors";
-import { METER_PX } from "../../../lib/consts/consts";
-import { pxToStageMeters } from "../../../lib/helpers/editorCalculationHelper";
 import { DancerDisplayType } from "../../../models/appSettings";
 
 type FormationLayerProps = {
   canEdit: boolean,
   canSelectDancers: boolean,
   canToggleSelection: boolean,
+  hideTransformerBorder?: boolean,
   dancers: Record<string, Dancer>,
   dancerPositions: DancerPosition[],
   geometry: StageGeometry,
@@ -34,12 +33,11 @@ export default function FormationLayer({
   selectedIds,
   setSelectedIds,
   snapToGrid,
+  hideTransformerBorder,
   dancerDisplayType
 }: FormationLayerProps) {
 	const transformerRef = useRef<Konva.Transformer>(null);
 
-  const transformerDragStartRef = useRef<{ x: number; y: number } | null>(null);
-  const isTransformerDraggingRef = useRef(false);
   const nodeMap = useRef<Map<string, Konva.Node>>(new Map());
 
   const registerNode = (id: string, node: Konva.Node | null) => {
@@ -110,7 +108,7 @@ export default function FormationLayer({
           enabledAnchors={["bottom-right"]}
           // rotateEnabled={isSinglePropSelected}
           borderStrokeWidth={2}
-          borderEnabled={selectedIds.length > 1}
+          borderEnabled={selectedIds.length > 1 && !hideTransformerBorder}
           borderStroke={colorPalette.primary}
           anchorStrokeWidth={2}
           anchorStroke={colorPalette.primary}

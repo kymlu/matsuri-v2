@@ -59,8 +59,16 @@ function ActionSection (props: {
         primary={strEquals(timing.id, selectedTimingId)}
         fontSize="text-base"
         onClick={() => {onSelectTiming(timing)}}>
-        <div className="truncate min-w-16">
-          {timing.name}
+        <div className="flex items-center justify-center gap-1 truncate min-w-16">
+          <span className="truncate">
+            {timing.name}
+          </span>
+          <div className="flex items-center justify-center">
+            <span>{"("}</span>
+            <Icon colour={strEquals(timing.id, selectedTimingId) ? "white" : "grey"} src={ICON.person} size="xs"/>
+            {timing.dancerIds.length}
+            <span>{")"}</span>
+          </div>
         </div>
       </Button>)
     }
