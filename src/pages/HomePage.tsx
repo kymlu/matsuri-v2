@@ -6,7 +6,7 @@ import { IconLabelButton } from "../components/basic/Button"
 import Icon from "../components/basic/Icon"
 import { readUploadedFile } from "../lib/helpers/uploadHelper"
 import { useEffect, useState } from "react"
-import { getAllChoreos, saveChoreo } from "../lib/dataAccess/DataController"
+import { deleteChoreo, getAllChoreos, saveChoreo } from "../lib/dataAccess/DataController"
 import { Choreo, ChoreoSchema } from "../models/choreo"
 import { groupByKey, strCompare, strEquals } from "../lib/helpers/globalHelper"
 import { downloadLogs } from "../lib/helpers/logHelper"
@@ -17,6 +17,7 @@ import SampleParade from "../lib/samples/SampleParadeFormation.json"
 import z from "zod"
 import { exportToMtr } from "../lib/helpers/exportHelper"
 import EditChoreoInfoDialog from "../components/dialogs/EditChoreoInfoDialog"
+import BaseEditDialog from "../components/dialogs/BaseEditDialog"
 
 export default function HomePage(props: {
   goToNewChoreoPage: () => void,
@@ -25,11 +26,18 @@ export default function HomePage(props: {
   onUploadSuccess: (choreo: Choreo) => void,
 }) {
   const [savedChoreos, setSavedChoreos] = useState<Record<string, Choreo[]>>({});
+  
   const [editingChoreo, setEditingChoreo] = useState<Choreo | undefined>();
   const [editChoreoInfoDialogOpen, setEditChoreoInfoDialogOpen] = useState(false);
   const editChoreoInfoDialog = Dialog.createHandle<Choreo>();
   const handleEditChoreoInfoDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setEditChoreoInfoDialogOpen(isOpen);
+  };
+
+  const [deleteChoreoDialogOpen, setDeleteChoreoDialogOpen] = useState(false);
+  const deleteChoreoDialog = Dialog.createHandle<Choreo>();
+  const handleDeleteChoreoDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
+    setDeleteChoreoDialogOpen(isOpen);
   };
 
   const triggerUpload = () => {
@@ -117,6 +125,10 @@ export default function HomePage(props: {
                 setEditingChoreo(choreo);
                 setEditChoreoInfoDialogOpen(true);
               }}
+              onDelete={(choreo) => {
+                setEditingChoreo(choreo);
+                setDeleteChoreoDialogOpen(true);
+              }}
             />
           )
         }
@@ -153,6 +165,26 @@ export default function HomePage(props: {
               }
             }}/>
         </Dialog.Root>
+        <Dialog.Root
+          handle={deleteChoreoDialog}
+          open={deleteChoreoDialogOpen}
+          onOpenChange={handleDeleteChoreoDialogOpen}>
+            
+          <BaseEditDialog
+            title={`本当に${editingChoreo?.name}を削除しますか？`}
+            onSubmit={() => {
+              if (editingChoreo) {
+                deleteChoreo(editingChoreo.id, () => {
+                  deleteChoreoDialog.close();
+                  setDeleteChoreoDialogOpen(false);
+                  setEditingChoreo(undefined);
+                  loadChoreos();
+                });
+              }
+            }}>
+            この操作は取り消せません。
+          </BaseEditDialog>
+        </Dialog.Root>
     </div>
   )
 }
@@ -164,6 +196,7 @@ function EventSection(props: {
   goToEditPage: (choreo: Choreo) => void,
   duplicateChoreo: (choreo: Choreo) => void,
   onEditName: (choreo: Choreo) => void,
+  onDelete: (choreo: Choreo) => void,
 }) {
   const [isExpanded, setIsExpanded] = useState<boolean>(true);
   return <div className="space-y-2">
@@ -249,6 +282,15 @@ function EventSection(props: {
                       label="エクスポート"
                       asDiv
                       onClick={() => exportToMtr(choreo)}
+                      full />
+                  </Dialog.Close>
+
+                  <Dialog.Close>
+                    <IconLabelButton
+                      icon={ICON.delete}
+                      label="削除"
+                      asDiv
+                      onClick={() => props.onDelete(choreo)}
                       full />
                   </Dialog.Close>
                 </div>

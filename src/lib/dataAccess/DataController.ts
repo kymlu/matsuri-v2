@@ -1,5 +1,5 @@
 import { Choreo } from "../../models/choreo";
-import { getAll, getById, upsertItem } from "./DataRepository";
+import { getAll, getById, removeItem, upsertItem } from "./DataRepository";
 
 export async function getAllChoreos(): Promise<Choreo[]> {
   return await getAll("choreo");
@@ -13,4 +13,8 @@ export async function saveChoreo(choreo: Choreo, thenFn: () => void): Promise<vo
   choreo.lastUpdated = new Date().toISOString();
   console.log(new Date().toISOString())
   await upsertItem("choreo", choreo).then(() => thenFn());
+}
+
+export async function deleteChoreo(choreoId: string, thenFn: () => void): Promise<void> {
+  await removeItem("choreo", choreoId).then(() => thenFn());
 }
