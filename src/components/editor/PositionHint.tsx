@@ -52,9 +52,9 @@ export default function PositionHint (props: {
         }
     
         if (delta.x > 0) {
-          xMovement = `→${delta.x}m`;
+          xMovement = `→${roundToTenth(delta.x)}m`;
         } else if (delta.x < 0) {
-          xMovement = `←${Math.abs(delta.x)}m`;
+          xMovement = `←${roundToTenth(Math.abs(delta.x))}m`;
         }
 
         setDeltaString([yMovement, xMovement].filter(x => x !== null).join("/"))
