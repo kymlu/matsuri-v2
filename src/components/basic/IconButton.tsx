@@ -20,6 +20,10 @@ export default function IconButton (props: {
     "min-w-8 min-h-8 size-8 max-w-8 max-h-8": props.size === "sm",
   });
 
+  var labelClasses = classNames("text-sm text-nowrap", {
+    "opacity-30": props.disabled
+  })
+
   return <div className="flex flex-col items-center justify-center">
     {
       props.asDiv !== true &&
@@ -42,6 +46,6 @@ export default function IconButton (props: {
         <Icon src={props.src} size={props.size} colour={props.colour}/>
       </div>
     }
-    {props.label && <div className="text-sm text-nowrap">{props.label}</div>}
+    {props.label && <div className={labelClasses}>{props.label}</div>}
   </div>
 }
