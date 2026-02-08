@@ -9,6 +9,8 @@ import { pxToStageMeters, snapToGrid } from "../../lib/helpers/editorCalculation
 import { MAX_ZOOM, METER_PX, MIN_ZOOM } from "../../lib/consts/consts";
 import { AppSetting } from "../../models/appSettings";
 import Konva from "konva";
+import { PropPosition } from "../../models/prop";
+import { StageEntities } from "../../models/history";
 
 Konva.hitOnDragEnabled = true;
 
@@ -16,17 +18,23 @@ export default function MainStage(props: {
   canEdit: boolean,
   canToggleSelection: boolean,
   canSelectDancers: boolean,
+  canSelectProps: boolean,
   isAddingDancer?: boolean,
+  isAddingProp?: boolean,
   hideTransformerBorder?: boolean,
   currentChoreo: Choreo,
   currentSection: ChoreoSection,
   updateDancerPosition?: (x: number, y: number, dancerId: string) => void,
-  selectedIds: string[],
-  setSelectedIds: Dispatch<SetStateAction<string[]>>,
+  updatePropPosition?: (x: number, y: number, propId: string) => void,
+  updatePropSizeAndRotate?: (width: number, length: number, rotation: number, x: number, y: number, propId: string) => void
+  selectedIds: StageEntities<string[]>,
+  setSelectedIds: Dispatch<SetStateAction<StageEntities<string[]>>>,
   addDancer?: (x: number, y: number) => void,
+  addProp?: (x: number, y: number) => void,
   appSettings: AppSetting,
 }) {
   const [dancerPositions, setDancerPositions] = useState<DancerPosition[]>([]);
+  const [propPositions, setPropPositions] = useState<PropPosition[]>([]);
   const [stageGeometry, setStageGeometry] = useState<StageGeometry>();
 
   useEffect(() => {
@@ -45,6 +53,10 @@ export default function MainStage(props: {
   useEffect(() => {
     setDancerPositions(Object.values(props.currentSection.formation.dancerPositions ?? []));
   }, [props.currentSection.formation.dancerPositions]);
+
+  useEffect(() => {
+    setPropPositions(Object.values(props.currentSection.formation.propPositions ?? []));
+  }, [props.currentSection.formation.propPositions]);
   
   const containerRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
@@ -207,9 +219,9 @@ export default function MainStage(props: {
 
           if (clickedOnEmpty) {
             if (props.canEdit) {
-              props.setSelectedIds([]);
+              props.setSelectedIds({props: [], dancers: []});
             }
-            if (props.isAddingDancer && stagePosition) {
+            if ((props.isAddingDancer || props.isAddingProp) && stagePosition) {
               var position = {
                 x: (e.evt.x - stagePosition.attrs.x)/stagePosition.attrs.scaleX,
                 y: (e.evt.y - stagePosition.attrs.y)/stagePosition.attrs.scaleY
@@ -227,7 +239,11 @@ export default function MainStage(props: {
                 positionM.y >= -(stageGeometry.margin.topMargin) &&
                 positionM.y <= (stageGeometry.margin.bottomMargin + stageGeometry.stageLength)
               ) {
-                props.addDancer?.(positionM.x, positionM.y);
+                if (props.isAddingDancer) {
+                  props.addDancer?.(positionM.x, positionM.y);
+                } else if (props.isAddingProp) {
+                  props.addProp?.(positionM.x, positionM.y);
+                }
               }
             }
           }
@@ -251,11 +267,16 @@ export default function MainStage(props: {
           canEdit={props.canEdit}
           hideTransformerBorder={props.hideTransformerBorder}
           canSelectDancers={props.canSelectDancers}
+          canSelectProps={props.canSelectProps}
           canToggleSelection={props.canToggleSelection}
           geometry={stageGeometry}
           dancers={props.currentChoreo.dancers}
           dancerPositions={dancerPositions}
+          props={props.currentChoreo.props}
+          propPositions={propPositions}
           updateDancerPosition={props.updateDancerPosition}
+          updatePropPosition={props.updatePropPosition}
+          updatePropSizeAndRotate={props.updatePropSizeAndRotate}
           selectedIds={props.selectedIds}
           setSelectedIds={props.setSelectedIds}
           snapToGrid={props.appSettings.snapToGrid}

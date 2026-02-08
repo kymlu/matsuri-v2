@@ -3,15 +3,18 @@ export type HistoryEntry<T> = {
   currentSectionId?: string;
 };
 
-
 export type EditHistory<T> = {
   undoStack: HistoryEntry<T>[];
   presentState: HistoryEntry<T>;
   redoStack: HistoryEntry<T>[];
 };
 
-
 export type EditAction<T> =
   | { type: "SET_STATE"; newState: T; currentSectionId: string; commit?: boolean }
   | { type: "UNDO" }
   | { type: "REDO" };
+
+export type StageEntities<TProp, TDancer = TProp> = {
+  props: TProp;
+  dancers: TDancer;
+}

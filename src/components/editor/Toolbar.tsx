@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ICON } from "../../lib/consts/consts";
 import IconButton from "../basic/IconButton";
 import { VerticalDivider } from "../basic/Divider";
@@ -7,6 +7,8 @@ import { Distribution, HorizontalAlignment, VerticalAlignment } from "../../mode
 type ToolbarProps = {
   onAddDancer: () => void,
   isAddingDancer: boolean,
+  onAddProp: () => void,
+  isAddingProp: boolean,
   showCopyPosition: boolean,
   onCopyPosition: () => void,
   showPastePosition: boolean,
@@ -14,17 +16,21 @@ type ToolbarProps = {
   showSelectDancer: boolean,
   onSelectColor: () => void,
   onSelectType: () => void,
-  showDancerColor: boolean,
+  showChangeColour: boolean,
   onChangeColor: () => void,
   showArrange: boolean,
   onVerticalAlign: (alignment: VerticalAlignment) => void,
   onHorizontalAlign: (alignment: HorizontalAlignment) => void,
+  showDistribute: boolean,
   onDistribute: (distribution: Distribution) => void,
   showSwapPosition: boolean,
   onSwapPosition: () => void,
-  onEditName?: () => void, // TODO
-  showDeleteDancer: boolean,
-  onDeleteDancer: () => void,
+  onRenameDancer: () => void
+  showRenameDancer: boolean,
+  onRenameProp: () => void
+  showRenameProp: boolean,
+  showDeleteObjects: boolean,
+  onDeleteObjects: () => void,
   onOpenActionManager: () => void,
   onAssignActions: () => void,
   isAssigningActionsEnabled: boolean,
@@ -39,7 +45,9 @@ type ToolbarProps = {
 export default function Toolbar ({
   onAddDancer,
   isAddingDancer,
-  showDancerColor,
+  onAddProp,
+  isAddingProp,
+  showChangeColour,
   showSelectDancer,
   onChangeColor,
   onSelectColor,
@@ -50,54 +58,95 @@ export default function Toolbar ({
   onPastePosition,
   onVerticalAlign,
   onHorizontalAlign,
+  showDistribute,
   onDistribute,
   showArrange,
-  showDeleteDancer,
-  onDeleteDancer,
+  showDeleteObjects,
+  onDeleteObjects,
   showSwapPosition,
   onSwapPosition,
   onOpenActionManager,
   onAssignActions,
   isAssigningActionsEnabled,
   isAssigningActions,
+  showRenameDancer,
+  onRenameDancer,
+  showRenameProp,
+  onRenameProp,
   onRenameSection,
   onAddNoteToSection,
   canDeleteSection,
   onDeleteSection,
   onDuplicateSection,
 }: ToolbarProps) {
+  const [isAddManagerVisible, setIsAddManagerVisible] = useState<boolean>(false);
   const [isArrangeVisible, setIsArrangeVisible] = useState<boolean>(false);
-  const [isColorVisible, setIsColorVisible] = useState<boolean>(false);
-  const [isDancerManagerVisible, setIsDancerManagerVisible] = useState<boolean>(false);
   const [isActionManagerVisible, setIsActionManagerVisible] = useState<boolean>(false);
-  const [isPropManagerVisible, setIsPropManagerVisible] = useState<boolean>(false);
   const [isSectionManagerVisible, setIsSectionManagerVisible] = useState<boolean>(false);
 
-  const isSubmenuOpen = isArrangeVisible || isColorVisible || isDancerManagerVisible || isActionManagerVisible || isPropManagerVisible || isSectionManagerVisible;
-  
+  const isSubmenuOpen = isAddManagerVisible || isArrangeVisible || isActionManagerVisible || isSectionManagerVisible;
+  const areSelectionActionsActivated = showRenameDancer || showArrange || showDeleteObjects;
+
+  useEffect(() => {
+    if (showArrange && isArrangeVisible) {
+      setIsArrangeVisible(false);
+    }
+  }, [showArrange]);
+
+   useEffect(() => {
+    if (areSelectionActionsActivated && isAddManagerVisible) {
+      setIsAddManagerVisible(false);
+    }
+   }, [areSelectionActionsActivated]);
+
   return <div className="flex items-center w-screen gap-2 px-4 pt-4 pb-8 overflow-scroll border-t-2 border-primary">
     {
       !isSubmenuOpen &&
       <>
-        <IconButton src={ICON.person} label="ダンサー" onClick={()=>{setIsDancerManagerVisible(true)}}/>
-        <IconButton src={ICON.straighten} disabled={showArrange} label="整理" onClick={()=>{setIsArrangeVisible(true)}}/>
-        <IconButton src={ICON[123]} label="カウント" onClick={()=>{setIsActionManagerVisible(true)}}/>
-        <IconButton src={ICON.gridOn} label="セクション" onClick={()=>{setIsSectionManagerVisible(true)}}/>
-        {/* <IconButton src={ICON.flagBlack} label="道具" alt="Props" onClick={()=>{setIsPropManagerVisible(true)}}/> */}
+        {
+          !areSelectionActionsActivated && <>
+            <IconButton src={ICON.add} label="追加" onClick={()=>{setIsAddManagerVisible(true)}}/>
+            <IconButton src={ICON.gridOn} label="セクション" onClick={()=>{setIsSectionManagerVisible(true)}}/>
+            <IconButton src={ICON[123]} label="カウント" onClick={()=>{setIsActionManagerVisible(true)}}/>
+          </>
+        }
+        {showRenameDancer && <IconButton src={ICON.textFieldsAlt} label="名前変更" onClick={() => {onRenameDancer()}} />}
+        {showRenameProp && <IconButton src={ICON.textFieldsAlt} label="名前変更" onClick={() => {onRenameProp()}} />}
+        {showArrange && <IconButton src={ICON.straighten} label="整理" onClick={()=>{setIsArrangeVisible(true)}}/>}
+        {showChangeColour && <IconButton src={ICON.colors} label="色" onClick={() => {onChangeColor()}} />}
+        {showCopyPosition && <IconButton src={ICON.contentCopy} label="コピー" onClick={() => {onCopyPosition()}} />}
+        {showPastePosition && <IconButton src={ICON.contentPaste} label="ペースト" onClick={() => {onPastePosition()}} />}
+        {showSwapPosition && <IconButton src={ICON.swapHoriz} label="位置交換" onClick={() => {onSwapPosition()}} />}
+        {showDeleteObjects && <IconButton src={ICON.delete} label="削除" onClick={()=>{onDeleteObjects()}}/>}
+        <IconButton src={ICON.selectAll} label="全選択" onClick={() => {onSelectType()}} />
+        {showSelectDancer && <IconButton src={ICON.selectAll} label="色選択" onClick={() => {onSelectColor()}} />}
       </>
     }
     {
       isSubmenuOpen && 
       <>
-        <IconButton disabled={isAssigningActions || isAddingDancer} src={ICON.chevronBackward} label="戻る" onClick={()=>{
+        <IconButton disabled={isAssigningActions || isAddingDancer || isAddingProp} src={ICON.chevronBackward} label="戻る" onClick={()=>{
           setIsArrangeVisible(false);
-          setIsColorVisible(false);
+          setIsAddManagerVisible(false);
           setIsActionManagerVisible(false);
-          setIsDancerManagerVisible(false);
-          setIsPropManagerVisible(false);
           setIsSectionManagerVisible(false);
         }}/>
         <VerticalDivider/>
+        {
+          isAddManagerVisible && 
+          <>
+            <IconButton
+              src={isAddingDancer ? ICON.clear : ICON.person}
+              disabled={isAddingProp}
+              label="ダンサー追加"
+              onClick={() => {onAddDancer()}} />
+            <IconButton
+              src={isAddingProp ? ICON.clear : ICON.flag}
+              disabled={isAddingDancer}
+              label="道具追加"
+              onClick={() => {onAddProp()}} />
+          </>
+        }
         {
           isArrangeVisible && 
           <>
@@ -108,30 +157,13 @@ export default function Toolbar ({
             <IconButton src={ICON.alignVerticalTop} label="上" onClick={() => {onVerticalAlign("top")}} />
             <IconButton src={ICON.alignVerticalCenter} label="縦中" onClick={() => {onVerticalAlign("centre")}} />
             <IconButton src={ICON.alignVerticalBottom} label="下" onClick={() => {onVerticalAlign("bottom")}} />
-            <VerticalDivider/>
-            <IconButton src={ICON.verticalDistribute} label="縦均" onClick={() => {onDistribute("y")}} />
-            <IconButton src={ICON.horizontalDistribute} label="横均" onClick={() => {onDistribute("x")}} />
-          </>
-        }
-        {
-          isDancerManagerVisible &&
-          <>
-            <IconButton src={isAddingDancer ? ICON.clear : ICON.person} label="追加" onClick={() => {onAddDancer()}} />
-            <IconButton disabled={!showDancerColor || isAddingDancer} src={ICON.colors} label="色" onClick={() => {onChangeColor()}} />
-            <IconButton disabled={isAddingDancer} src={ICON.selectAll} label="全選択" onClick={() => {onSelectType()}} />
-            <IconButton disabled={!showSelectDancer} src={ICON.selectAll} label="色選択" onClick={() => {onSelectColor()}} />
-            <IconButton src={ICON.contentCopy} disabled={!showCopyPosition || isAddingDancer} label="コピー" onClick={() => {onCopyPosition()}} />
-            <IconButton src={ICON.contentPaste} disabled={!showPastePosition || isAddingDancer} label="ペースト" onClick={() => {onPastePosition()}} />
-            <IconButton src={ICON.swapHoriz} disabled={!showSwapPosition || isAddingDancer} label="位置交換" onClick={() => {onSwapPosition()}} />
-            <IconButton src={ICON.delete} disabled={!showDeleteDancer || isAddingDancer} label="削除" onClick={() => {onDeleteDancer()}} />
-          </>
-        }
-        {
-          isPropManagerVisible &&
-          <>
-            <IconButton src={ICON.verticalDistribute} label="Add prop etc" onClick={() => {}} />
-            <IconButton src={ICON.verticalDistribute} label="縦均" onClick={() => {}} />
-            <IconButton src={ICON.verticalDistribute} label="縦均" onClick={() => {}} />
+            {
+              showDistribute && <>
+                <VerticalDivider/>
+                <IconButton src={ICON.verticalDistribute} label="縦均" onClick={() => {onDistribute("y")}} />
+                <IconButton src={ICON.horizontalDistribute} label="横均" onClick={() => {onDistribute("x")}} />
+              </>
+            }
           </>
         }
         {
@@ -164,7 +196,7 @@ export default function Toolbar ({
             <IconButton
               disabled={isAssigningActions}
               src={ICON.category}
-              label="管理"
+              label="管理" // todo: show how many actions?
               onClick={() => {onOpenActionManager()}} />
             <IconButton
               disabled={!isAssigningActionsEnabled}

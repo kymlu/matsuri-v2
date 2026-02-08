@@ -21,10 +21,3 @@ export const ChoreoSectionSchema = BaseModelSchema.extend({
 });
 
 export type ChoreoSection = z.infer<typeof ChoreoSectionSchema>;
-
-export const SelectedObjectsSchema = z.object({
-  dancers: z.array(DancerPositionSchema),
-  props: z.array(PropPositionSchema),
-});
-
-export type SelectedObjects = z.infer<typeof SelectedObjectsSchema>;

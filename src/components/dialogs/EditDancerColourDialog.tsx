@@ -4,36 +4,43 @@ import { colorPalette } from "../../lib/consts/colors";
 import { strEquals } from "../../lib/helpers/globalHelper";
 import { ActionButton } from "../basic/Button";
 
-type colourMode = "all" | "current" | "currentAndAfter";
+export type colourMode = "all" | "current" | "currentAndAfter";
 
 export default function EditDancerColourDialog(props: {
-  dancerIds: string[],
+  propOnly: boolean,
   onSubmit: (colour: string, mode: colourMode) => void,
 }) {
+  const {propOnly, onSubmit} = props;
   const [selectedColour, setSelectedColour] = useState("");
   const [mode, setMode] = useState<colourMode>("current");
 
   return <BaseEditDialog
-    title="ダンサー色変更"
-    onSubmit={() => { props.onSubmit(selectedColour, mode) }}
+    title="色"
+    onSubmit={() => { onSubmit(selectedColour, mode) }}
     >
-      <div className="flex flex-col gap-2 mb-2 md:flex-row">
-        <ActionButton
-          primary={mode === "current"}
-          onClick={() => setMode("current")}>
-          現在
-        </ActionButton>
-        <ActionButton
-          primary={mode === "currentAndAfter"}
-          onClick={() => setMode("currentAndAfter")}>
-          以後
-        </ActionButton>
-        <ActionButton
-          primary={mode === "all"}
-          onClick={() => setMode("all")}>
-          すべて
-        </ActionButton>
-      </div>
+      {
+        !propOnly &&
+        <div>
+          ダンサーの色変更範囲
+          <div className="flex flex-col gap-2 mb-2 md:flex-row">
+            <ActionButton
+              primary={mode === "current"}
+              onClick={() => setMode("current")}>
+              現在
+            </ActionButton>
+            <ActionButton
+              primary={mode === "currentAndAfter"}
+              onClick={() => setMode("currentAndAfter")}>
+              以後
+            </ActionButton>
+            <ActionButton
+              primary={mode === "all"}
+              onClick={() => setMode("all")}>
+              すべて
+            </ActionButton>
+          </div>
+        </div>
+      }
       <div className="grid grid-cols-6 gap-2 w-max">
         {
           colorPalette.allColors().map((color) => 

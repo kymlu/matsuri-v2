@@ -2,11 +2,14 @@ import Header from "../components/editor/Header"
 import FormationSelectionToolbar from "../components/editor/FormationSelectionToolbar";
 import { useEffect, useState } from "react";
 import { Choreo } from "../models/choreo";
-import { ChoreoSection, SelectedObjects } from "../models/choreoSection";
+import { ChoreoSection } from "../models/choreoSection";
 import MainStage from "../components/grid/MainStage";
 import { AppSetting } from "../models/appSettings";
 import { strEquals } from "../lib/helpers/globalHelper";
 import ViewerSidebar from "../components/editor/ViewerSidebar";
+import { StageEntities } from "../models/history";
+import { DancerPosition } from "../models/dancer";
+import { PropPosition } from "../models/prop";
 
 export default function ChoreoViewPage(props: {
   goToHomePage: () => void
@@ -15,9 +18,9 @@ export default function ChoreoViewPage(props: {
   const [currentSection, setCurrentSection] = useState<ChoreoSection>(props.currentChoreo.sections[0]);
   const [nextSection, setNextSection] = useState<ChoreoSection | undefined>();
   const [showNotes, setShowNotes] = useState<boolean>(true);
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [selectedIds, setSelectedIds] = useState<StageEntities<string[]>>({props: [], dancers: []});
   const [selectedTimingId, setSelectedTimingId] = useState<string | undefined>();
-  const [selectedObjects, setSelectedObjects] = useState<SelectedObjects>({dancers: [], props: []});
+  const [selectedObjects, setSelectedObjects] = useState<StageEntities<PropPosition[], DancerPosition[]>>({dancers: [], props: []});
   const [appSettings, setAppSettings] = useState<AppSetting>({
     snapToGrid: true,
     showGrid: true,
@@ -26,8 +29,8 @@ export default function ChoreoViewPage(props: {
   
   useEffect(() => {
     setSelectedObjects({
-      dancers: Object.entries(currentSection.formation.dancerPositions).filter(x => selectedIds.includes(x[0])).map(x => x[1]),
-      props: Object.entries(currentSection.formation.propPositions).filter(x => selectedIds.includes(x[0])).map(x => x[1]),
+      dancers: Object.entries(currentSection.formation.dancerPositions).filter(x => selectedIds.dancers.includes(x[0])).map(x => x[1]),
+      props: Object.entries(currentSection.formation.propPositions).filter(x => selectedIds.props.includes(x[0])).map(x => x[1]),
     });
   }, [selectedIds]);
 
@@ -35,6 +38,8 @@ export default function ChoreoViewPage(props: {
     var currentSectionIndex = props.currentChoreo.sections.findIndex(x => strEquals(x.id, currentSection.id));
     setNextSection(props.currentChoreo.sections[currentSectionIndex + 1]);
   }, [currentSection])
+
+  const resetSelectedIds = () => setSelectedIds({props: [], dancers: []});
 
   return (
     <div className='flex flex-col h-[100svh] max-h-[100svh] overflow-hidden'>
@@ -54,26 +59,26 @@ export default function ChoreoViewPage(props: {
           actions={currentSection.formation.dancerActions}
           note={currentSection.note}
           showNotes={showNotes}
-          dancer={props.currentChoreo.dancers[selectedIds[0]]}
-          position={currentSection.formation.dancerPositions[selectedIds[0]]}
+          dancer={props.currentChoreo.dancers[selectedIds.dancers[0]]}
+          position={currentSection.formation.dancerPositions[selectedIds.dancers[0]]}
           nextSectionName={nextSection?.name}
-          nextPosition={nextSection?.formation.dancerPositions[selectedIds[0]]}
+          nextPosition={nextSection?.formation.dancerPositions[selectedIds.dancers[0]]}
           geometry={props.currentChoreo.stageGeometry}
           isPositionHintShown={
-            selectedIds.length > 0 &&
+            selectedIds.dancers.length === 1 &&
             selectedTimingId === undefined &&
             selectedObjects.dancers.length === 1 &&
             selectedObjects.props.length === 0 &&
-            props.currentChoreo.dancers[selectedIds[0]] !== undefined
+            props.currentChoreo.dancers[selectedIds.dancers[0]] !== undefined
           }
-          deselectPosition={() => setSelectedIds([])}
+          deselectPosition={resetSelectedIds}
           hideNotes={() => setShowNotes(false)}
           onSelectTiming={(timing) => {
             if (timing) {
-              setSelectedIds(timing.dancerIds);
+              setSelectedIds({props: [], dancers: timing.dancerIds});
               setSelectedTimingId(timing.id);
             } else {
-              setSelectedIds([]);
+              resetSelectedIds();
               setSelectedTimingId(undefined);
             }
           }}
@@ -82,6 +87,7 @@ export default function ChoreoViewPage(props: {
         <MainStage
           appSettings={appSettings}
           canEdit={false}
+          canSelectProps={false}
           hideTransformerBorder
           canSelectDancers={selectedTimingId === undefined}
           canToggleSelection={false}
@@ -100,7 +106,7 @@ export default function ChoreoViewPage(props: {
           onClickSection={(section) => {
             if (selectedTimingId) {
               setSelectedTimingId(undefined);
-              setSelectedIds([]);
+              resetSelectedIds();
             }
             setCurrentSection(section);
           }}

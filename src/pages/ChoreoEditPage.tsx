@@ -5,18 +5,15 @@ import UndoRedoToolbar from "../components/editor/UndoRedoToolbar";
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { historyReducer } from "../lib/editor/historyReducer";
 import { Choreo } from "../models/choreo";
-import { EditHistory } from "../models/history";
+import { EditHistory, StageEntities } from "../models/history";
 import { addSection, assignDancersToTiming, duplicateSection, editDancerActions, editSectionNote, removeSection, renameSection, reorderSections } from "../lib/editor/commands/sectionCommands";
-import { ChoreoSection, SelectedObjects } from "../models/choreoSection";
-import { isNullOrUndefined, isNullOrUndefinedOrBlank, strEquals } from "../lib/helpers/globalHelper";
+import { ChoreoSection } from "../models/choreoSection";
+import { isNullOrUndefinedOrBlank, strEquals } from "../lib/helpers/globalHelper";
 import MainStage from "../components/grid/MainStage";
-import { alignHorizontalPositions, alignVerticalPositions, changeDancerColorAll, changeDancerColorCurrent, changeDancerColorCurrentAndFuture, distributePositions, moveDancerPositions, pasteDancerPositions, swapPositions } from "../lib/editor/commands/dancerPositionCommands";
-import ObjectToolbar from "../components/editor/ObjectToolbar";
 import { Dialog } from "@base-ui/react";
 import EditChoreoSizeDialog from "../components/dialogs/EditChoreoSizeDialog";
 import { exportToMtr } from "../lib/helpers/exportHelper";
 import { saveChoreo } from "../lib/dataAccess/DataController";
-import { addDancer, removeDancers, renameDancer } from "../lib/editor/commands/dancerCommands";
 import IconButton from "../components/basic/IconButton";
 import { ICON } from "../lib/consts/consts";
 import { AppSetting } from "../models/appSettings";
@@ -32,10 +29,15 @@ import ConfirmDeletionDialog from "../components/dialogs/ConfirmDeletionDialog";
 import EditSectionNameDialog from "../components/dialogs/EditSectionNameDialog";
 import EditSectionNoteDialog from "../components/dialogs/EditSectionNoteDialog";
 import { Coordinates } from "../models/base";
+import { colorPalette } from "../lib/consts/colors";
+import { addDancer, addProp, alignHorizontalPositions, alignVerticalPositions, changeObjectColours, distributePositions, moveObjectPositions, pastePositions, removeObjects, renameDancer, renameProp, swapPositions, updatePropSizeAndRotate } from "../lib/editor/commands/objectCommands";
+import { PropPosition } from "../models/prop";
+import EditPropNameDialog from "../components/dialogs/EditPropNameDialog";
 
 const resizeDialog = Dialog.createHandle<Choreo>();
 const editChoreoInfoDialog = Dialog.createHandle<string>();
 const renameDancerDialog = Dialog.createHandle<string>();
+const renamePropDialog = Dialog.createHandle<string>();
 const editDancerColourDialog = Dialog.createHandle<string>();
 const editDancerActionsDialog = Dialog.createHandle<string>();
 const renameSectionDialog = Dialog.createHandle<ChoreoSection>();
@@ -49,9 +51,10 @@ export default function ChoreoEditPage(props: {
   const [currentSection, setCurrentSection] = useState<ChoreoSection>(props.currentChoreo.sections[0]);
   const [currentAction, setCurrentAction] = useState<DancerAction | undefined>();
   const [currentTiming, setCurrentTiming] = useState<DancerActionTiming | undefined>();
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [selectedObjects, setSelectedObjects] = useState<SelectedObjects>({dancers: [], props: []});
+  const [selectedIds, setSelectedIds] = useState<StageEntities<string[]>>({props: [], dancers: []});
+  const [selectedObjects, setSelectedObjects] = useState<StageEntities<PropPosition[], DancerPosition[]>>({dancers: [], props: []});
   const [isAddingDancers, setIsAddingDancers] = useState<boolean>(false);
+  const [isAddingProps, setIsAddingProps] = useState<boolean>(false);
   const [isAssigningActions, setIsAssigningActions] = useState<boolean>(false);
   const [appSettings, setAppSettings] = useState<AppSetting>({
     snapToGrid: true,
@@ -65,16 +68,18 @@ export default function ChoreoEditPage(props: {
       redoStack: [],
     } as EditHistory<Choreo>);
 
+  const resetSelectedIds = () => setSelectedIds({props: [], dancers: []});
+
   useEffect(() => {
     // assigning actions
-    if (isAssigningActions && currentAction && currentTiming && currentTiming.dancerIds.length !== selectedIds.length) {
+    if (isAssigningActions && currentAction && currentTiming && currentTiming.dancerIds.length !== selectedIds.dancers.length) {
       dispatch({
         type: "SET_STATE",
-        newState: assignDancersToTiming(history.presentState.state, currentSection.id, currentAction.id, currentTiming.id, selectedIds),
+        newState: assignDancersToTiming(history.presentState.state, currentSection.id, currentAction.id, currentTiming.id, selectedIds.dancers),
         currentSectionId: currentSection.id,
         commit: true,
       });
-      setCurrentTiming({...currentTiming, dancerIds: selectedIds})
+      setCurrentTiming({...currentTiming, dancerIds: selectedIds.dancers})
     }
   }, [selectedIds, history.presentState, currentSection]);
 
@@ -82,29 +87,32 @@ export default function ChoreoEditPage(props: {
     // undo/redo timing
     if (currentAction && currentTiming) {
       var newTiming = currentSection.formation.dancerActions.find(x => strEquals(currentAction.id, x.id))?.timings.find(x => strEquals(currentTiming.id, x.id));
-      if (newTiming && newTiming.dancerIds.length !== selectedIds.length) {
+      if (newTiming && newTiming.dancerIds.length !== selectedIds.dancers.length) {
         setCurrentTiming(newTiming);
-        setSelectedIds(newTiming.dancerIds);
+        setSelectedIds({dancers: [...newTiming.dancerIds], props: []});
       }
     }
   }, [currentSection]);
 
   useEffect(() => {
-    if (selectedIds.length > 0 && isAddingDancers) setIsAddingDancers(false);
+    if ((selectedIds.dancers.length + selectedIds.props.length) > 0) {
+      if (isAddingDancers) setIsAddingDancers(false);
+      if (isAddingProps) setIsAddingProps(false);
+    }
     if (currentSection.formation.dancerActions.length === 0 && isAssigningActions) {
       setIsAssigningActions(false);
       setCurrentAction(undefined);
       setCurrentTiming(undefined);
-      setSelectedIds([]);
+      resetSelectedIds();
     };
 
     setSelectedObjects({
-      dancers: Object.entries(currentSection.formation.dancerPositions).filter(x => selectedIds.includes(x[0])).map(x => x[1]),
-      props: Object.entries(currentSection.formation.propPositions).filter(x => selectedIds.includes(x[0])).map(x => x[1]),
+      dancers: Object.entries(currentSection.formation.dancerPositions).filter(x => selectedIds.dancers.includes(x[0])).map(x => x[1]),
+      props: Object.entries(currentSection.formation.propPositions).filter(x => selectedIds.props.includes(x[0])).map(x => x[1]),
     });
   }, [selectedIds]);
 
-  const [copyBuffer, setCopyBuffer] = useState<Record<string, DancerPosition>>({});
+  const [copyBuffer, setCopyBuffer] = useState<StageEntities<Record<string, PropPosition>, Record<string, DancerPosition>>>({props: {}, dancers: {}});
 
   useEffect(() => {
     var newSection = history.presentState.state.sections.find(s => strEquals(s.id, history.presentState.currentSectionId));
@@ -166,23 +174,30 @@ export default function ChoreoEditPage(props: {
   }, [history.presentState.state, saveChoreo]);
 
   const onCopy = useCallback(() => {
-    if (selectedIds.length === 0) {
+    if ((selectedIds.dancers.length + selectedIds.props.length) === 0) {
       console.log("Emptying copy buffer");
-      setCopyBuffer({});
+      setCopyBuffer({props: {}, dancers: {}});
       return;
     }
 
-    const copyRecord: Record<string, DancerPosition> = {};
+    const copyRecordDancer: Record<string, DancerPosition> = {};
+    const copyRecordProp: Record<string, PropPosition> = {};
 
-    selectedIdsRef.current.forEach(id => {
+    selectedIdsRef.current.dancers.forEach(id => {
       const dancerPosition = currentSection.formation.dancerPositions[id];
       if (dancerPosition) {
-        copyRecord[id] = dancerPosition;
+        copyRecordDancer[id] = dancerPosition;
+      }
+    });
+    selectedIdsRef.current.props.forEach(id => {
+      const propPosition = currentSection.formation.propPositions[id];
+      if (propPosition) {
+        copyRecordProp[id] = propPosition;
       }
     });
 
-    setCopyBuffer({ ...copyRecord });
-    console.log("New copy buffer", copyRecord);
+    setCopyBuffer({ props: copyRecordProp, dancers: copyRecordDancer });
+    console.log("Successfully copied", copyRecordDancer, copyRecordProp);
   }, [
     selectedIds,
     currentSection.formation.dancerPositions,
@@ -194,7 +209,7 @@ export default function ChoreoEditPage(props: {
 
     dispatch({
       type: "SET_STATE",
-      newState: pasteDancerPositions(
+      newState: pastePositions(
         history.presentState.state,
         currentSection.id,
         copyBuffer
@@ -234,6 +249,7 @@ export default function ChoreoEditPage(props: {
   const [resizeDialogOpen, setResizeDialogOpen] = useState(false);
   const [editChoreoInfoDialogOpen, setEditChoreoInfoDialogOpen] = useState(false);
   const [renameDancerDialogOpen, setRenameDancerDialogOpen] = useState(false);
+  const [renamePropDialogOpen, setRenamePropDialogOpen] = useState(false);
   const [editDancerColourDialogOpen, setEditDancerColourDialogOpen] = useState(false);
   const [editDancerActionsDialogOpen, setEditDancerActionsDialogOpen] = useState(false);
   const [renameSectionDialogOpen, setRenameSectionDialogOpen] = useState(false);
@@ -263,6 +279,10 @@ export default function ChoreoEditPage(props: {
   const handleRenameDancerDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setRenameDancerDialogOpen(isOpen);
   };
+
+  const handleRenamePropDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
+    setRenamePropDialogOpen(isOpen);
+  };
   
   const handleEditDancerColourDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setEditDancerColourDialogOpen(isOpen);
@@ -275,23 +295,24 @@ export default function ChoreoEditPage(props: {
   const onSwapPositions = () => {
     dispatch({
       type: "SET_STATE",
-      newState: swapPositions(history.presentState.state, currentSection.id, selectedIds[0], selectedIds[1]),
+      newState: swapPositions(history.presentState.state, currentSection.id, selectedIds.dancers[0], selectedIds.dancers[1]),
       currentSectionId: currentSection.id,
       commit: true});
   };
 
-
-  const [movementUpdateGroup, setMovementUpdateGroup] = useState<Record<string, Coordinates>>({});
+  const [movementUpdateGroup, setMovementUpdateGroup] = useState<StageEntities<Record<string, Coordinates>>>({props: {}, dancers: {}});
   
   useEffect(() => {
-    if (Object.keys(movementUpdateGroup).length === 0) return;
-    if (selectedIds.some(id => isNullOrUndefined(movementUpdateGroup[id]))) return;
+    console.log(selectedIds, movementUpdateGroup);
+    if (Object.keys(movementUpdateGroup.dancers).length === 0 && Object.keys(movementUpdateGroup.props).length === 0) return;
+    if ((selectedIds.dancers.length > 0 && selectedIds.dancers.some(id => !movementUpdateGroup.dancers[id])) ||
+      (selectedIds.props.length > 0 && selectedIds.props.some(id => !movementUpdateGroup.props[id]))) return;
     dispatch({
       type: "SET_STATE",
-      newState: moveDancerPositions(history.presentState.state, currentSection.id, movementUpdateGroup),
+      newState: moveObjectPositions(history.presentState.state, currentSection.id, movementUpdateGroup),
       currentSectionId: currentSection.id,
       commit: true});
-    setMovementUpdateGroup({});
+    setMovementUpdateGroup({props: {}, dancers: {}});
   }, [movementUpdateGroup]);
 
   return (
@@ -323,15 +344,31 @@ export default function ChoreoEditPage(props: {
         <MainStage
           canEdit={!isAssigningActions}
           canSelectDancers={!isAssigningActions || currentTiming !== undefined}
+          canSelectProps={!isAssigningActions}
           canToggleSelection
           appSettings={appSettings}
           isAddingDancer={isAddingDancers}
+          isAddingProp={isAddingProps}
           hideTransformerBorder={isAssigningActions}
           currentChoreo={history.presentState.state}
           currentSection={currentSection}
           updateDancerPosition={(x, y, dancerId) => {
-            console.log("update")
-            setMovementUpdateGroup(prev => ({...prev, [dancerId]: {x, y}}));
+            setMovementUpdateGroup(prev => ({...prev, "dancers": {...prev.dancers, [dancerId]: {x, y}}}));
+          }}
+          updatePropPosition={(x, y, propId) => {
+            setMovementUpdateGroup(prev => ({...prev, "props": {...prev.props, [propId]: {x, y}}}));
+          }}
+          updatePropSizeAndRotate={(width, length, rotation, x, y, propId) => {
+            console.log(width, length, rotation, x, y, propId);
+            dispatch({
+              type: "SET_STATE",
+              newState: updatePropSizeAndRotate(
+                history.presentState.state,
+                currentSection.id,
+                width, length, rotation, x, y, propId
+              ),
+              currentSectionId: currentSection.id,
+              commit: true});
           }}
           selectedIds={selectedIds}
           setSelectedIds={setSelectedIds}
@@ -352,21 +389,28 @@ export default function ChoreoEditPage(props: {
               commit: true});
             }
           }
+          addProp={(x, y) => {
+            console.log("Adding prop at", x, y);
+            dispatch({
+              type: "SET_STATE",
+              newState: addProp(
+                history.presentState.state, 
+                {
+                  id: crypto.randomUUID(),
+                  name: Object.keys(history.presentState.state.props).length.toString(),
+                  length: 1,
+                  width: 4,
+                  color: colorPalette.rainbow.blue[0],
+                },
+                x - 2,
+                y - 0.5
+              ),
+              currentSectionId: currentSection.id,
+              commit: true});
+            }
+          }
         />
         <div className="absolute bottom-0 z-10 flex flex-col">
-          {
-            !isAssigningActions &&
-            <div className="absolute bottom-20">
-              <ObjectToolbar
-                openColorMenu={() => {setEditDancerColourDialogOpen(true)}}
-                isColorVisible={selectedObjects.dancers.length > 0 && selectedObjects.props.length === 0}
-                swapPositions={onSwapPositions}
-                isSwapVisible={selectedObjects.dancers.length === 2 && selectedObjects.props.length === 0}
-                openRenameMenu={() => {setRenameDancerDialogOpen(true)}}
-                isRenameVisible={selectedObjects.dancers.length === 1 && selectedObjects.props.length === 0}
-              />
-            </div>
-          }
           <div className="absolute bottom-10">
             <UndoRedoToolbar
               undo={() => {dispatch({type: "UNDO"})}}
@@ -383,7 +427,7 @@ export default function ChoreoEditPage(props: {
                 sections={history.presentState.state.sections}
                 showAddButton
                 onClickAddButton={(id: string, newName: string) => {
-                  setSelectedIds([]);
+                  resetSelectedIds();
                   dispatch({
                     type: "SET_STATE",
                     newState: addSection(history.presentState.state, id, newName),
@@ -393,10 +437,10 @@ export default function ChoreoEditPage(props: {
                 }}
                 onClickSection={(section) => {
                   setCurrentSection(section);
-                  setSelectedIds([]);
+                  resetSelectedIds();
                 }}
                 onReorder={(sections) => {
-                  setSelectedIds([]);
+                  resetSelectedIds();
                   dispatch({
                     type: "SET_STATE",
                     newState: reorderSections(history.presentState.state, sections),
@@ -413,8 +457,8 @@ export default function ChoreoEditPage(props: {
                 onSelectTiming={(action, timing) => {
                   setCurrentAction(action);
                   setCurrentTiming(timing);
-                  if (timing) setSelectedIds(timing.dancerIds);
-                  else setSelectedIds([]);
+                  if (timing) setSelectedIds({props: [], dancers: timing.dancerIds});
+                  else resetSelectedIds();
                 }}
                 selectedTimingId={currentTiming?.id}
                 />
@@ -424,29 +468,35 @@ export default function ChoreoEditPage(props: {
       </div>
       <Toolbar
         onAddDancer={() => {
-          setSelectedIds([]);
+          resetSelectedIds();
           setIsAddingDancers(prev => !prev);
         }}
         isAddingDancer={isAddingDancers}
-        showDancerColor={selectedObjects.dancers.length > 0}
+        onAddProp={() => {
+          resetSelectedIds();
+          setIsAddingProps(prev => !prev);
+        }}
+        isAddingProp={isAddingProps}
+        showChangeColour={selectedObjects.dancers.length > 0 || selectedObjects.props.length > 0}
         onChangeColor={() => {setEditDancerColourDialogOpen(true)}}
-        showCopyPosition={selectedIds.length > 0}
+        showCopyPosition={selectedIds.dancers.length > 0 || selectedIds.props.length > 0}
         onCopyPosition={() => {onCopy()}}
-        showPastePosition={Object.keys(copyBuffer).length > 0}
+        showPastePosition={Object.keys(copyBuffer.dancers).length > 0 || Object.keys(copyBuffer.props).length > 0}
         onPastePosition={() => {onPaste()}}
         showSelectDancer={selectedObjects.dancers.length > 0}
         onSelectColor={() => {
           var positions = Object.entries(currentSection.formation.dancerPositions);
-          var currentColours = new Set(positions.filter(x => selectedIds.includes(x[0])).map(x => x[1].color));
-          setSelectedIds(positions.filter(x => currentColours.has(x[1].color)).map(x => x[0]));
+          var currentColours = new Set(positions.filter(x => selectedIds.dancers.includes(x[0])).map(x => x[1].color));
+          setSelectedIds(prev => ({...prev, dancers: positions.filter(x => currentColours.has(x[1].color)).map(x => x[0])}));
         }}
         onSelectType={() => {
-          setSelectedIds(Object.keys(currentSection.formation.dancerPositions));
+          setSelectedIds({props: [], dancers: Object.keys(history.presentState.state.dancers)});
         }}
+        showDistribute={(selectedIds.dancers.length + selectedIds.props.length) >= 3}
         onDistribute={(distribution) => {
           dispatch({
             type: "SET_STATE",
-            newState: distributePositions(history.presentState.state, currentSection.id, selectedObjects.dancers, distribution),
+            newState: distributePositions(history.presentState.state, currentSection.id, selectedObjects, distribution),
             currentSectionId: currentSection.id,
             commit: true,
           })
@@ -454,7 +504,7 @@ export default function ChoreoEditPage(props: {
         onHorizontalAlign={(alignment) => {
           dispatch({
             type: "SET_STATE",
-            newState: alignHorizontalPositions(history.presentState.state, currentSection.id, selectedObjects.dancers, alignment),
+            newState: alignHorizontalPositions(history.presentState.state, currentSection.id, selectedObjects, alignment),
             currentSectionId: currentSection.id,
             commit: true,
           })
@@ -462,43 +512,47 @@ export default function ChoreoEditPage(props: {
         onVerticalAlign={(alignment) => {
           dispatch({
             type: "SET_STATE",
-            newState: alignVerticalPositions(history.presentState.state, currentSection.id, selectedObjects.dancers, alignment),
-            currentSectionId: currentSection.id,
-            commit: true,
-          })
-        }}
-        showArrange={selectedIds.length === 0}
-        showDeleteDancer={selectedObjects.dancers.length > 0}
-        showSwapPosition={selectedObjects.dancers.length === 2 && selectedObjects.props.length === 0}
-        onSwapPosition={onSwapPositions}
-        onDeleteDancer={() => {
-          dispatch({
-            type: "SET_STATE",
-            newState: removeDancers(history.presentState.state, selectedObjects.dancers.map(x => x.dancerId)),
+            newState: alignVerticalPositions(history.presentState.state, currentSection.id, selectedObjects, alignment),
             currentSectionId: currentSection.id,
             commit: true,
           });
-          setSelectedIds([]);
+        }}
+        showArrange={selectedIds.dancers.length > 0 || selectedIds.props.length > 0}
+        showSwapPosition={selectedObjects.dancers.length === 2 && selectedObjects.props.length === 0}
+        onSwapPosition={onSwapPositions}
+        showDeleteObjects={selectedIds.dancers.length > 0 || selectedIds.props.length > 0}
+        onDeleteObjects={() => {
+          dispatch({
+            type: "SET_STATE",
+            newState: removeObjects(history.presentState.state, selectedIds),
+            currentSectionId: currentSection.id,
+            commit: true,
+          });
+          resetSelectedIds();
         }}
         onOpenActionManager={() => setEditDancerActionsDialogOpen(true)}
         onAssignActions={() => {
-          setSelectedIds([]);
+          resetSelectedIds();
           setCurrentAction(undefined);
           setCurrentTiming(undefined);
           setIsAssigningActions(prev => !prev);
         }}
         isAssigningActionsEnabled={currentSection.formation.dancerActions.length > 0}
         isAssigningActions={isAssigningActions}
+        onRenameDancer={() => {setRenameDancerDialogOpen(true)}}
+        showRenameDancer={selectedObjects.dancers.length === 1 && selectedObjects.props.length === 0}
+        onRenameProp={() => {setRenamePropDialogOpen(true)}}
+        showRenameProp={selectedObjects.props.length === 1 && selectedObjects.dancers.length === 0}
         onRenameSection={() => {
-          setSelectedIds([]);
+          resetSelectedIds();
           setRenameSectionDialogOpen(true);
         }}
         onAddNoteToSection={() => {
-          setSelectedIds([]);
+          resetSelectedIds();
           setAddNoteToSectionDialogOpen(true);
         }}
         onDuplicateSection={() => {
-          setSelectedIds([]);
+          resetSelectedIds();
           dispatch({
             type: "SET_STATE",
             newState: duplicateSection(history.presentState.state, currentSection, history.presentState.state.sections.findIndex(x => strEquals(x.id, currentSection.id))),
@@ -508,7 +562,7 @@ export default function ChoreoEditPage(props: {
         }}
         canDeleteSection={history.presentState.state.sections.length > 1}
         onDeleteSection={() => {
-          setSelectedIds([]);
+          resetSelectedIds();
           setDeleteSectionDialogOpen(true)
         }}
       />
@@ -516,12 +570,24 @@ export default function ChoreoEditPage(props: {
         isAddingDancers &&
         <div className="absolute items-center w-max rounded-md flex gap-2 p-2 top-20 left-1/2 translate-x-[-50%] bg-white border-2 border-primary">
           <span>
-            グリッドを押してダンサーを追加する
+            グリッドを押して<b>ダンサー</b>を追加する
           </span>
           <IconButton
             src={ICON.clear}
             size="sm"
             onClick={() => {setIsAddingDancers(false);}}/>
+        </div>
+      }
+      {
+        isAddingProps &&
+        <div className="absolute items-center w-max rounded-md flex gap-2 p-2 top-20 left-1/2 translate-x-[-50%] bg-white border-2 border-primary">
+          <span>
+            グリッドを押して<b>道具</b>を追加する
+          </span>
+          <IconButton
+            src={ICON.clear}
+            size="sm"
+            onClick={() => {setIsAddingProps(false);}}/>
         </div>
       }
       {
@@ -539,7 +605,7 @@ export default function ChoreoEditPage(props: {
             src={ICON.clear}
             size="sm"
             onClick={() => {
-              setSelectedIds([]);
+              resetSelectedIds();
               setCurrentAction(undefined);
               setCurrentTiming(undefined);
               if (currentAction === undefined || currentTiming === undefined) {
@@ -585,11 +651,11 @@ export default function ChoreoEditPage(props: {
         open={renameDancerDialogOpen}
         onOpenChange={handleRenameDancerDialogOpen}>
         <EditDancerNameDialog
-          dancer={history.presentState.state.dancers[selectedIds[0]]}
+          dancer={history.presentState.state.dancers[selectedIds.dancers[0]]}
           onSubmit={(name) => {
             dispatch({
               type: "SET_STATE",
-              newState: renameDancer(history.presentState.state, selectedIds[0], name),
+              newState: renameDancer(history.presentState.state, selectedIds.dancers[0], name),
               currentSectionId: currentSection.id,
               commit: true});
             renameDancerDialog.close();
@@ -601,32 +667,14 @@ export default function ChoreoEditPage(props: {
         open={editDancerColourDialogOpen}
         onOpenChange={handleEditDancerColourDialogOpen}>
         <EditDancerColourDialog
-          dancerIds={selectedIds}
+          propOnly={selectedIds.dancers.length === 0 && selectedIds.props.length > 0}
           onSubmit={(color, mode) => {
             if (!isNullOrUndefinedOrBlank(color)) {
-              switch (mode) {
-                case "current":
-                  dispatch({
-                    type: "SET_STATE",
-                    newState: changeDancerColorCurrent(history.presentState.state, currentSection.id, selectedIds, color),
-                    currentSectionId: currentSection.id,
-                    commit: true});
-                  break;
-                case "currentAndAfter":
-                  dispatch({
-                    type: "SET_STATE",
-                    newState: changeDancerColorCurrentAndFuture(history.presentState.state, history.presentState.state.sections.findIndex(x => strEquals(x.id, currentSection.id)), selectedIds, color),
-                    currentSectionId: currentSection.id,
-                    commit: true});
-                  break;
-                case "all":
-                  dispatch({
-                    type: "SET_STATE",
-                    newState: changeDancerColorAll(history.presentState.state, selectedIds, color),
-                    currentSectionId: currentSection.id,
-                    commit: true});
-                  break;
-              }
+              dispatch({
+                type: "SET_STATE",
+                newState: changeObjectColours(history.presentState.state, history.presentState.state.sections.findIndex(x => strEquals(x.id, currentSection.id)), mode, selectedIds, color),
+                currentSectionId: currentSection.id,
+                commit: true});
             }
             editDancerColourDialog.close();
             setEditDancerColourDialogOpen(false);
@@ -649,60 +697,94 @@ export default function ChoreoEditPage(props: {
           }}
           />
       </Dialog.Root>
-    <Dialog.Root
-      handle={renameSectionDialog}
-      open={renameSectionDialogOpen}
-      onOpenChange={handleRenameSectionDialogOpen}
-      >
-      <EditSectionNameDialog
-        section={currentSection}
-        onSubmit={(name) => {
-          dispatch({
-            type: "SET_STATE",
-            newState: renameSection(history.presentState.state, currentSection.id, name),
-            currentSectionId: currentSection.id,
-            commit: true,
-          });
-          renameSectionDialog.close();
-          setRenameSectionDialogOpen(false);
-        }}/>
-    </Dialog.Root>
-    <Dialog.Root
-      handle={addNoteToSectionDialog}
-      open={addNoteToSectionDialogOpen}
-      onOpenChange={handleAddNoteToSectionDialogOpen}
-      >
-      <EditSectionNoteDialog
-        section={currentSection}
-        onSubmit={(note: string) => {
-          dispatch({
-            type: "SET_STATE",
-            newState: editSectionNote(history.presentState.state, currentSection.id, note),
-            currentSectionId: currentSection.id,
-            commit: true,
-          });
-          addNoteToSectionDialog.close();
-          setAddNoteToSectionDialogOpen(false);
-        }}/>
-    </Dialog.Root>
-    <Dialog.Root
-      handle={deleteSectionDialog}
-      open={deleteSectionDialogOpen}
-      onOpenChange={handleDeleteSectionDialogOpen}
-      >
-      <ConfirmDeletionDialog
-        section={currentSection}
-        onSubmit={() => {
-          dispatch({
-            type: "SET_STATE",
-            newState: removeSection(history.presentState.state, currentSection.id),
-            currentSectionId: currentSection.id,
-            commit: true,
-          });
-          deleteSectionDialog.close();
-          setDeleteSectionDialogOpen(false);
-        }}/>
-    </Dialog.Root>
+      <Dialog.Root
+        handle={renameDancerDialog}
+        open={renameDancerDialogOpen}
+        onOpenChange={handleRenameDancerDialogOpen}>
+        <EditDancerNameDialog
+          dancer={history.presentState.state.dancers[selectedIds.dancers[0]]}
+          onSubmit={(name) => {
+            dispatch({
+              type: "SET_STATE",
+              newState: renameDancer(history.presentState.state, selectedIds.dancers[0], name),
+              currentSectionId: currentSection.id,
+              commit: true});
+            renameDancerDialog.close();
+            setRenameDancerDialogOpen(false);
+          }}/>
+      </Dialog.Root>
+      <Dialog.Root
+        handle={renamePropDialog}
+        open={renamePropDialogOpen}
+        onOpenChange={handleRenamePropDialogOpen}
+        >
+        <EditPropNameDialog
+          prop={history.presentState.state.props[selectedIds.props[0]]}
+          onSubmit={(name) => {
+            dispatch({
+              type: "SET_STATE",
+              newState: renameProp(history.presentState.state, selectedIds.props[0], name),
+              currentSectionId: currentSection.id,
+              commit: true,
+            });
+            renamePropDialog.close();
+            setRenamePropDialogOpen(false);
+          }}/>
+      </Dialog.Root>
+      <Dialog.Root
+        handle={renameSectionDialog}
+        open={renameSectionDialogOpen}
+        onOpenChange={handleRenameSectionDialogOpen}
+        >
+        <EditSectionNameDialog
+          section={currentSection}
+          onSubmit={(name) => {
+            dispatch({
+              type: "SET_STATE",
+              newState: renameSection(history.presentState.state, currentSection.id, name),
+              currentSectionId: currentSection.id,
+              commit: true,
+            });
+            renameSectionDialog.close();
+            setRenameSectionDialogOpen(false);
+          }}/>
+      </Dialog.Root>
+      <Dialog.Root
+        handle={addNoteToSectionDialog}
+        open={addNoteToSectionDialogOpen}
+        onOpenChange={handleAddNoteToSectionDialogOpen}
+        >
+        <EditSectionNoteDialog
+          section={currentSection}
+          onSubmit={(note: string) => {
+            dispatch({
+              type: "SET_STATE",
+              newState: editSectionNote(history.presentState.state, currentSection.id, note),
+              currentSectionId: currentSection.id,
+              commit: true,
+            });
+            addNoteToSectionDialog.close();
+            setAddNoteToSectionDialogOpen(false);
+          }}/>
+      </Dialog.Root>
+      <Dialog.Root
+        handle={deleteSectionDialog}
+        open={deleteSectionDialogOpen}
+        onOpenChange={handleDeleteSectionDialogOpen}
+        >
+        <ConfirmDeletionDialog
+          section={currentSection}
+          onSubmit={() => {
+            dispatch({
+              type: "SET_STATE",
+              newState: removeSection(history.presentState.state, currentSection.id),
+              currentSectionId: currentSection.id,
+              commit: true,
+            });
+            deleteSectionDialog.close();
+            setDeleteSectionDialogOpen(false);
+          }}/>
+      </Dialog.Root>
     </div>
   )
 }
