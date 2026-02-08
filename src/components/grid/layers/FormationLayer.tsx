@@ -122,6 +122,7 @@ export default function FormationLayer({
             canEdit={canEdit}
             snapToGrid={snapToGrid}
             canSelect={canSelectProps}
+            animate
           />
         );
       })}
@@ -140,6 +141,7 @@ export default function FormationLayer({
             canEdit={canEdit}
             snapToGrid={snapToGrid}
             dancerDisplayType={dancerDisplayType}
+            animate
           />
         );
       })}

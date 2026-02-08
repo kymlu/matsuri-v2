@@ -11,13 +11,14 @@ type PropGridObjectProps = {
   position: PropPosition;
   stageGeometry: StageGeometry;
   updatePosition?: (x: number, y: number) => void;
-  onClick: (isAdditive?: boolean) => void;
+  onClick?: (isAdditive?: boolean) => void;
   isSelected: boolean;
-  registerNode: (id: string, node: Konva.Node | null) => void;
+  registerNode?: (id: string, node: Konva.Node | null) => void;
   isTransformerActive?: boolean;
   canEdit: boolean;
   snapToGrid?: boolean;
   canSelect: boolean;
+  animate: boolean,
 };
 
 export default function PropGridObject({
@@ -32,6 +33,7 @@ export default function PropGridObject({
   canEdit,
   snapToGrid,
   canSelect,
+  animate
 }: PropGridObjectProps) {
   return <>
     {
@@ -40,7 +42,7 @@ export default function PropGridObject({
         id={prop.id}
         draggable={canEdit}
         position={position}
-        onClick={() => {if (canSelect) onClick()}}
+        onClick={() => {if (canSelect) onClick?.()}}
         updatePosition={(x, y) => {updatePosition?.(x, y);}}
         stageGeometry={stageGeometry}
         isSelected={isSelected}
@@ -48,6 +50,7 @@ export default function PropGridObject({
         isTransformerActive={isTransformerActive}
         snapToGrid={snapToGrid}
         rotation={position.rotation}
+        animate={animate}
       >
         <Rect
           width={prop.width * METER_PX}

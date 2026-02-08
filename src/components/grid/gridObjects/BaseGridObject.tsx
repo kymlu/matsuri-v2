@@ -14,14 +14,15 @@ export interface BaseGridObjectProps {
   rotation?: number,
   position: Coordinates,
   updatePosition?: (x: number, y: number) => void,
-  onClick: (isAdditive?: boolean) => void,
+  onClick?: (isAdditive?: boolean) => void,
   draggable?: boolean,
   onTransform?: (item: Shape<ShapeConfig> | Stage) => void,
   stageGeometry: StageGeometry,
   isSelected: boolean;
-  registerNode: (id: string, node: Konva.Node | null) => void;
+  registerNode?: (id: string, node: Konva.Node | null) => void;
   isTransformerActive?: boolean,
   snapToGrid?: boolean,
+  animate: boolean,
 }
 
 export default function BaseGridObject({
@@ -38,13 +39,14 @@ export default function BaseGridObject({
   registerNode,
   isTransformerActive,
   snapToGrid,
+  animate
 }: BaseGridObjectProps) {
   const ref = useRef<Konva.Group>(null);
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
 
   useEffect(() => {
-    registerNode(id, ref.current);
-    return () => registerNode(id, null);
+    registerNode?.(id, ref.current);
+    return () => registerNode?.(id, null);
   }, [id, registerNode]);
 
   useEffect(() => {
@@ -56,7 +58,7 @@ export default function BaseGridObject({
       x: newPosition.x,
       y: newPosition.y,
       rotation: rotation ?? 0,
-      duration: 1,
+      duration: animate ? 1 : 0,
       easing: Konva.Easings.EaseInOut,
       onFinish: () => {setIsAnimating(false)}
     });
@@ -84,7 +86,7 @@ export default function BaseGridObject({
       }}
       onDragMove={(e) => {
         if (!isSelected) {
-          onClick(false);
+          onClick?.(false);
         }
         if (isDraggingRef.current) return;
         const start = dragStartRef.current;
@@ -102,7 +104,7 @@ export default function BaseGridObject({
       }}
       onPointerUp={(e) => {
         if (!isDraggingRef.current) {
-          onClick();
+          onClick?.();
         }
       }}
       onDragEnd={(e) => {
@@ -125,7 +127,7 @@ export default function BaseGridObject({
           });
 
           if (!isSelected) {
-            onClick(false);
+            onClick?.(false);
           }
         }
       }}

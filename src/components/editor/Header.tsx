@@ -20,6 +20,7 @@ type HeaderProps = {
   exportChoreo?: () => void;
   changeSnap?: () => void;
   changeShowGrid?: () => void;
+  changeShowPrevious?: () => void;
   changeDancerSize?: (showLarge: boolean) => void;
   appSettings: AppSetting;
 };
@@ -38,6 +39,7 @@ export default function Header({
   exportChoreo,
   changeSnap,
   changeShowGrid,
+  changeShowPrevious,
   changeDancerSize,
   appSettings,
 }: HeaderProps) {
@@ -99,6 +101,7 @@ export default function Header({
             changeShowGrid={changeShowGrid}
             changeDancerSize={changeDancerSize}
             appSettings={appSettings}
+            changeShowPrevious={changeShowPrevious}
           />
           {/* todo: add functions to the sidebar */}
         </Dialog.Root>

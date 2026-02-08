@@ -59,14 +59,27 @@ export default function ChoreoEditPage(props: {
   const [appSettings, setAppSettings] = useState<AppSetting>({
     snapToGrid: true,
     showGrid: true,
+    showPreviousSection: false,
     dancerDisplayType: "large",
   });
+  
   const [history, dispatch] = useReducer(historyReducer,
     {
       undoStack: [],
       presentState: {state: props.currentChoreo, currentSectionId: props.currentChoreo.sections[0].id},
       redoStack: [],
     } as EditHistory<Choreo>);
+
+
+  const [prevSection, setPrevSection] = useState<ChoreoSection | undefined>();
+  useEffect(() => {
+    if (appSettings.showPreviousSection) {
+      var currentSectionIndex = props.currentChoreo.sections.findIndex(x => strEquals(x.id, currentSection.id));
+      setPrevSection(props.currentChoreo.sections[currentSectionIndex - 1]);
+    } else {
+      setPrevSection(undefined);
+    }
+  }, [currentSection, appSettings]);
 
   const resetSelectedIds = () => setSelectedIds({props: [], dancers: []});
 
@@ -332,6 +345,9 @@ export default function ChoreoEditPage(props: {
         changeShowGrid={() => {
           setAppSettings(prev => {return {...prev, showGrid: !prev.showGrid}})
         }}
+        changeShowPrevious={() => {
+          setAppSettings(prev => {return {...prev, showPreviousSection: !prev.showPreviousSection}})
+        }}
         changeSnap={() => {
           setAppSettings(prev => {return {...prev, snapToGrid: !prev.snapToGrid}})
         }}
@@ -372,6 +388,7 @@ export default function ChoreoEditPage(props: {
           }}
           selectedIds={selectedIds}
           setSelectedIds={setSelectedIds}
+          previousSection={prevSection}
           addDancer={(x, y) => {
             console.log("Adding dancer at", x, y);
             dispatch({

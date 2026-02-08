@@ -12,13 +12,14 @@ type DancerGridObjectProps = {
   position: DancerPosition;
   stageGeometry: StageGeometry;
   updatePosition?: (x: number, y: number) => void;
-  onClick: (isAdditive?: boolean) => void;
+  onClick?: (isAdditive?: boolean) => void;
   isSelected: boolean;
-  registerNode: (id: string, node: Konva.Node | null) => void;
+  registerNode?: (id: string, node: Konva.Node | null) => void;
   isTransformerActive?: boolean;
   canEdit: boolean;
   snapToGrid?: boolean;
   dancerDisplayType: DancerDisplayType;
+  animate: boolean;
 };
 
 export default function DancerGridObject({
@@ -33,6 +34,7 @@ export default function DancerGridObject({
   canEdit,
   snapToGrid,
   dancerDisplayType,
+  animate
 }: DancerGridObjectProps) {
   return <>
     {
@@ -48,6 +50,7 @@ export default function DancerGridObject({
         registerNode={registerNode}
         isTransformerActive={isTransformerActive}
         snapToGrid={snapToGrid}
+        animate={animate}
       >
         <Circle
           radius={dancerDisplayType === "large" ? METER_PX * 0.45 : METER_PX * 0.2}

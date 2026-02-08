@@ -11,6 +11,7 @@ import { AppSetting } from "../../models/appSettings";
 import Konva from "konva";
 import { PropPosition } from "../../models/prop";
 import { StageEntities } from "../../models/history";
+import GhostLayer from "./layers/GhostLayer";
 
 Konva.hitOnDragEnabled = true;
 
@@ -32,13 +33,13 @@ type MainStageProps = {
   addDancer?: (x: number, y: number) => void,
   addProp?: (x: number, y: number) => void,
   appSettings: AppSetting,
-  showGhost?: boolean,
+  previousSection?: ChoreoSection,
 }
 
 export default function MainStage({
   canEdit, canToggleSelection, canSelectDancers, canSelectProps, isAddingDancer, isAddingProp,
   hideTransformerBorder, currentChoreo, currentSection, updateDancerPosition, updatePropPosition,
-  updatePropSizeAndRotate, selectedIds, setSelectedIds, addDancer, addProp, appSettings, showGhost,
+  updatePropSizeAndRotate, selectedIds, setSelectedIds, addDancer, addProp, appSettings, previousSection
 }: MainStageProps) {
   const [dancerPositions, setDancerPositions] = useState<DancerPosition[]>([]);
   const [propPositions, setPropPositions] = useState<PropPosition[]>([]);
@@ -270,6 +271,17 @@ export default function MainStage({
           stageGeometry={stageGeometry}
           showGridLines={appSettings.showGrid}
           />
+        {
+          appSettings.showPreviousSection &&
+          <GhostLayer
+            dancers={currentChoreo.dancers}
+            dancerPositions={previousSection ? Object.values(previousSection?.formation.dancerPositions) : undefined}
+            props={currentChoreo.props}
+            propPositions={previousSection ? Object.values(previousSection?.formation.propPositions) : undefined}
+            geometry={stageGeometry}
+            dancerDisplayType={appSettings.dancerDisplayType}
+          />
+        }
         <FormationLayer
           canEdit={canEdit}
           hideTransformerBorder={hideTransformerBorder}

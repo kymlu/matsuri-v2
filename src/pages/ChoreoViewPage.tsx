@@ -24,6 +24,7 @@ export default function ChoreoViewPage(props: {
   const [appSettings, setAppSettings] = useState<AppSetting>({
     snapToGrid: true,
     showGrid: true,
+    showPreviousSection: false,
     dancerDisplayType: "large",
   });
   
@@ -37,7 +38,7 @@ export default function ChoreoViewPage(props: {
   useEffect(() => {
     var currentSectionIndex = props.currentChoreo.sections.findIndex(x => strEquals(x.id, currentSection.id));
     setNextSection(props.currentChoreo.sections[currentSectionIndex + 1]);
-  }, [currentSection])
+  }, [currentSection]);
 
   const resetSelectedIds = () => setSelectedIds({props: [], dancers: []});
 

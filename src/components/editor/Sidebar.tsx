@@ -15,6 +15,7 @@ type SidebarProps = {
   manageSections?: () => void;
   changeSnap?: () => void;
   changeShowGrid?: () => void;
+  changeShowPrevious?: () => void;
   changeDancerSize?: (showLarge: boolean) => void;
   exportChoreo?: () => void;
   appSettings: AppSetting;
@@ -29,6 +30,7 @@ export function Sidebar({
   changeSnap,
   changeShowGrid,
   changeDancerSize,
+  changeShowPrevious,
   exportChoreo, // avoid keyword confusion
   appSettings,
 }: SidebarProps) {
@@ -85,6 +87,10 @@ export function Sidebar({
         {
           changeShowGrid &&
           <CustomSwitch label="グリッド表示" defaultChecked={appSettings.showGrid} onChange={changeShowGrid}/>
+        }
+        {
+          changeShowPrevious &&
+          <CustomSwitch label="前のセクションを見る" defaultChecked={appSettings.showPreviousSection} onChange={changeShowPrevious}/>
         }
         {
           changeDancerSize &&
