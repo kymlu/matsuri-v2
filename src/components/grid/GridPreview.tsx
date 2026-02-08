@@ -4,13 +4,15 @@ import { METER_PX } from "../../lib/consts/consts";
 import GridLayer from "./layers/GridLayer";
 import { StageGeometry, StageType } from "../../models/choreo";
 
-export default function GridPreview (props: {
+type GridPreviewProps = {
   stageLength: number,
   stageWidth: number,
   xMargin: number,
   yMargin: number,
   stageType: StageType,
-}) {
+}
+
+export default function GridPreview (props: GridPreviewProps) {
   const stageGeometry = useMemo<StageGeometry>(() => {
     return {
       stageLength: props.stageLength,

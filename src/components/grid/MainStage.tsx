@@ -14,7 +14,7 @@ import { StageEntities } from "../../models/history";
 
 Konva.hitOnDragEnabled = true;
 
-export default function MainStage(props: {
+type MainStageProps = {
   canEdit: boolean,
   canToggleSelection: boolean,
   canSelectDancers: boolean,
@@ -32,13 +32,20 @@ export default function MainStage(props: {
   addDancer?: (x: number, y: number) => void,
   addProp?: (x: number, y: number) => void,
   appSettings: AppSetting,
-}) {
+  showGhost?: boolean,
+}
+
+export default function MainStage({
+  canEdit, canToggleSelection, canSelectDancers, canSelectProps, isAddingDancer, isAddingProp,
+  hideTransformerBorder, currentChoreo, currentSection, updateDancerPosition, updatePropPosition,
+  updatePropSizeAndRotate, selectedIds, setSelectedIds, addDancer, addProp, appSettings, showGhost,
+}: MainStageProps) {
   const [dancerPositions, setDancerPositions] = useState<DancerPosition[]>([]);
   const [propPositions, setPropPositions] = useState<PropPosition[]>([]);
   const [stageGeometry, setStageGeometry] = useState<StageGeometry>();
 
   useEffect(() => {
-    var newGeometry = props.currentChoreo.stageGeometry;
+    var newGeometry = currentChoreo.stageGeometry;
     if (stageGeometry !== undefined &&
       stageGeometry.stageWidth === newGeometry.stageWidth &&
       stageGeometry.stageLength === newGeometry.stageLength &&
@@ -48,15 +55,15 @@ export default function MainStage(props: {
       stageGeometry.margin.rightMargin === newGeometry.margin.rightMargin &&
       stageGeometry.yAxis === newGeometry.yAxis) return;
     setStageGeometry(newGeometry);
-  }, [props.currentChoreo]);
+  }, [currentChoreo]);
   
   useEffect(() => {
-    setDancerPositions(Object.values(props.currentSection.formation.dancerPositions ?? []));
-  }, [props.currentSection.formation.dancerPositions]);
+    setDancerPositions(Object.values(currentSection.formation.dancerPositions ?? []));
+  }, [currentSection.formation.dancerPositions]);
 
   useEffect(() => {
-    setPropPositions(Object.values(props.currentSection.formation.propPositions ?? []));
-  }, [props.currentSection.formation.propPositions]);
+    setPropPositions(Object.values(currentSection.formation.propPositions ?? []));
+  }, [currentSection.formation.propPositions]);
   
   const containerRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
@@ -218,16 +225,16 @@ export default function MainStage(props: {
           const clickedOnEmpty = e.target === stagePosition;
 
           if (clickedOnEmpty) {
-            if (props.canEdit) {
-              props.setSelectedIds({props: [], dancers: []});
+            if (canEdit) {
+              setSelectedIds({props: [], dancers: []});
             }
-            if ((props.isAddingDancer || props.isAddingProp) && stagePosition) {
+            if ((isAddingDancer || isAddingProp) && stagePosition) {
               var position = {
                 x: (e.evt.x - stagePosition.attrs.x)/stagePosition.attrs.scaleX,
                 y: (e.evt.y - stagePosition.attrs.y)/stagePosition.attrs.scaleY
               }
 
-              if (props.appSettings.snapToGrid) {
+              if (appSettings.snapToGrid) {
                 position = snapCoordsToGrid(position, METER_PX/2)
               }
 
@@ -239,10 +246,10 @@ export default function MainStage(props: {
                 positionM.y >= -(stageGeometry.margin.topMargin) &&
                 positionM.y <= (stageGeometry.margin.bottomMargin + stageGeometry.stageLength)
               ) {
-                if (props.isAddingDancer) {
-                  props.addDancer?.(positionM.x, positionM.y);
-                } else if (props.isAddingProp) {
-                  props.addProp?.(positionM.x, positionM.y);
+                if (isAddingDancer) {
+                  addDancer?.(positionM.x, positionM.y);
+                } else if (isAddingProp) {
+                  addProp?.(positionM.x, positionM.y);
                 }
               }
             }
@@ -261,26 +268,26 @@ export default function MainStage(props: {
         onDragEnd={handleDragEnd}>
         <GridLayer
           stageGeometry={stageGeometry}
-          showGridLines={props.appSettings.showGrid}
+          showGridLines={appSettings.showGrid}
           />
         <FormationLayer
-          canEdit={props.canEdit}
-          hideTransformerBorder={props.hideTransformerBorder}
-          canSelectDancers={props.canSelectDancers}
-          canSelectProps={props.canSelectProps}
-          canToggleSelection={props.canToggleSelection}
+          canEdit={canEdit}
+          hideTransformerBorder={hideTransformerBorder}
+          canSelectDancers={canSelectDancers}
+          canSelectProps={canSelectProps}
+          canToggleSelection={canToggleSelection}
           geometry={stageGeometry}
-          dancers={props.currentChoreo.dancers}
+          dancers={currentChoreo.dancers}
           dancerPositions={dancerPositions}
-          props={props.currentChoreo.props}
+          props={currentChoreo.props}
           propPositions={propPositions}
-          updateDancerPosition={props.updateDancerPosition}
-          updatePropPosition={props.updatePropPosition}
-          updatePropSizeAndRotate={props.updatePropSizeAndRotate}
-          selectedIds={props.selectedIds}
-          setSelectedIds={props.setSelectedIds}
-          snapToGrid={props.appSettings.snapToGrid}
-          dancerDisplayType={props.appSettings.dancerDisplayType}
+          updateDancerPosition={updateDancerPosition}
+          updatePropPosition={updatePropPosition}
+          updatePropSizeAndRotate={updatePropSizeAndRotate}
+          selectedIds={selectedIds}
+          setSelectedIds={setSelectedIds}
+          snapToGrid={appSettings.snapToGrid}
+          dancerDisplayType={appSettings.dancerDisplayType}
           />
       </Stage>
     }
