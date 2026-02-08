@@ -58,7 +58,7 @@ export default function BaseGridObject(props: BaseGridObjectProps) {
       id={props.id} 
       ref={ref}
       draggable={props.draggable && !isAnimating}
-      rotation={props.rotation ?? 0}
+      rotation={0}
       x={0}
       y={0}
       onPointerDown={(e) => {
