@@ -223,7 +223,7 @@ function EventSection(props: {
                   </div>
 
                   {/* Meta row */}
-                  <div className="flex items-center justify-between text-sm text-gray-500">
+                  <div className="items-center justify-between text-sm text-gray-500 md:flex">
                     {choreo.lastUpdated ? (
                       <div className="flex items-center gap-1">
                         <Icon colour="grey" size="sm" src={ICON.history}/>{getDate(new Date(choreo.lastUpdated))}
@@ -232,13 +232,24 @@ function EventSection(props: {
                       <div />
                     )}
 
-                    <div className="flex items-center gap-1">
-                      <Icon
-                        src={ICON.person}
-                        colour="grey"
-                        size="sm"
-                      />
-                      <span>{Object.keys(choreo.dancers).length}</span>
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1">
+                        <Icon
+                          src={ICON.resize}
+                          colour="grey"
+                          size="sm"
+                        />
+                        <span>幅{choreo.stageGeometry.stageWidth}m 縦{choreo.stageGeometry.stageLength}m</span>
+                      </div>
+
+                      <div className="flex items-center gap-1">
+                        <Icon
+                          src={ICON.person}
+                          colour="grey"
+                          size="sm"
+                        />
+                        <span>{Object.keys(choreo.dancers).length}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
