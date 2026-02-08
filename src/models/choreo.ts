@@ -4,7 +4,6 @@ import { DancerSchema } from "./dancer";
 import { PropSchema } from "./prop";
 import * as z from "zod";
 
-
 export const StageTypeSchema = z.enum(["stage", "parade"]);
 export type StageType = z.infer<typeof StageTypeSchema>;
 

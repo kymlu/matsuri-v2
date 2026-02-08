@@ -15,6 +15,7 @@ export function addDancer(state: Choreo, dancer: Dancer, x: number, y: number): 
         [dancer.id]: {
           sectionId: section.id,
           dancerId: dancer.id,
+          type: "dancer",
           x: x,
           y: y,
           color: colorPalette.rainbow.blue[0],

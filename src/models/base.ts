@@ -14,8 +14,12 @@ export const CoordinatesSchema = z.object({
 
 export type Coordinates = z.infer<typeof CoordinatesSchema>;
 
+export const ObjectTypeSchema = z.enum(["dancer", "prop"]);
+export type ObjectType = z.infer<typeof ObjectTypeSchema>;
+
 export const BasePositionSchema = CoordinatesSchema.extend({
   sectionId: z.string(),
+  type: ObjectTypeSchema,
   rotation: z.int().optional(),
 });
 

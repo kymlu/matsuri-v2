@@ -62,6 +62,7 @@ export function NewChoreoPage(props: {
         x: i % (form.stageWidth + 1),
         y: Math.floor(i / (form.stageWidth + 1)),
         color: colorPalette.rainbow.blue[0],
+        type: "dancer",
         rotation: 0,
       }
     }
