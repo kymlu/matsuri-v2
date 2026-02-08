@@ -1,7 +1,7 @@
 import classNames from "classnames"
 import Icon from "./Icon";
 
-export default function IconButton (props: {
+type IconButtonProps = {
   src: string,
   label?: string,
   onClick?: () => void,
@@ -10,42 +10,46 @@ export default function IconButton (props: {
   size?: "sm" | "md" | "lg",
   colour?: "primary",
   asDiv?: boolean,
-}) {
+}
+
+export default function IconButton ({
+  src, label, onClick, noBorder, disabled, size, colour, asDiv
+}: IconButtonProps) {
   var buttonClasses = classNames("flex justify-center bg-white items-center rounded-full p-1 border-primary", {
-    "border-0": props.noBorder,
-    "border-2": props.noBorder !== true,
-    "opacity-30": props.disabled,
-    "min-w-16 min-h-16 size-16 max-w-16 max-h-16": props.size === "lg",
-    "min-w-12 min-h-12 size-12 max-w-12 max-h-12": props.size === undefined || props.size === "md",
-    "min-w-8 min-h-8 size-8 max-w-8 max-h-8": props.size === "sm",
+    "border-0": noBorder,
+    "border-2": noBorder !== true,
+    "opacity-30": disabled,
+    "min-w-16 min-h-16 size-16 max-w-16 max-h-16": size === "lg",
+    "min-w-12 min-h-12 size-12 max-w-12 max-h-12": size === undefined || size === "md",
+    "min-w-8 min-h-8 size-8 max-w-8 max-h-8": size === "sm",
   });
 
   var labelClasses = classNames("text-sm text-nowrap", {
-    "opacity-30": props.disabled
+    "opacity-30": disabled
   })
 
   return <div className="flex flex-col items-center justify-center">
     {
-      props.asDiv !== true &&
+      asDiv !== true &&
       <button
         className={buttonClasses}
-        disabled={props.disabled}
-        onClick={props.onClick}>
-        <Icon src={props.src} size={props.size} colour={props.colour}/>
+        disabled={disabled}
+        onClick={onClick}>
+        <Icon src={src} size={size} colour={colour}/>
       </button>
     }
     {
-      props.asDiv &&
+      asDiv &&
       <div
         className={buttonClasses}
         onClick={() => {
-          if(props.disabled !== true) {
-            props.onClick?.();
+          if(disabled !== true) {
+            onClick?.();
           }
         }}>
-        <Icon src={props.src} size={props.size} colour={props.colour}/>
+        <Icon src={src} size={size} colour={colour}/>
       </div>
     }
-    {props.label && <div className={labelClasses}>{props.label}</div>}
+    {label && <div className={labelClasses}>{label}</div>}
   </div>
 }

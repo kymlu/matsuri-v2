@@ -6,63 +6,81 @@ import { Sidebar } from "./Sidebar";
 import { AppSetting } from "../../models/appSettings";
 import { downloadLogs } from "../../lib/helpers/logHelper";
 
-export default function Header (props: {
-  returnHome: () => void,
-  hasSidebar?: boolean,
-  currentChoreo: Choreo,
-  onToggleNotes?: () => void,
-  showNotes?: boolean,
-  onSave?: () => void,
-  onDownload?: () => void,
-  editName?: () => void,
-  editSize?: () => void,
-  manageSections?: () => void,
-  export?: () => void,
-  changeSnap?: () => void,
-  changeShowGrid?: () => void,
-  changeDancerSize?: (showLarge: boolean) => void,
-  appSettings: AppSetting,
-}) {
+type HeaderProps = {
+  returnHome: () => void;
+  hasSidebar?: boolean;
+  currentChoreo: Choreo;
+  onToggleNotes?: () => void;
+  showNotes?: boolean;
+  onSave?: () => void;
+  onDownload?: () => void;
+  editName?: () => void;
+  editSize?: () => void;
+  manageSections?: () => void;
+  exportChoreo?: () => void;
+  changeSnap?: () => void;
+  changeShowGrid?: () => void;
+  changeDancerSize?: (showLarge: boolean) => void;
+  appSettings: AppSetting;
+};
+
+export default function Header({
+  returnHome,
+  hasSidebar = false,
+  currentChoreo,
+  onToggleNotes,
+  showNotes = false,
+  onSave,
+  onDownload,
+  editName,
+  editSize,
+  manageSections,
+  exportChoreo,
+  changeSnap,
+  changeShowGrid,
+  changeDancerSize,
+  appSettings,
+}: HeaderProps) {
   return <header className="z-10 grid grid-cols-[1fr,auto,1fr] items-center justify-between w-screen border-b-2 select-none bg-gradient-to-b from-white to-transparent ">
     <div className="flex">
       <IconButton
         src={ICON.chevronBackward} // if there is a history, verify save first?
         noBorder
         onClick={() => {
-          props.onSave?.();
-          props.returnHome();
+          onSave?.();
+          returnHome();
         }}/>
     </div>
     <div
       className="font-semibold truncate"
       onDoubleClick={downloadLogs}>
-      {props.currentChoreo.name}
+      {currentChoreo.name}
     </div>
     <div className="flex justify-end">
       {
-        props.onToggleNotes &&
+        onToggleNotes &&
         <IconButton
-          src={props.showNotes ? ICON.speakerNotesOff : ICON.speakerNotes}
+          src={showNotes ? ICON.speakerNotesOff : ICON.speakerNotes}
           noBorder
-          onClick={() => {props.onToggleNotes?.()}}
+          onClick={() => {onToggleNotes?.()}}
           />
       }
       {
-        props.onSave &&
+        onSave &&
         <IconButton
           src={ICON.save}
           noBorder
-          onClick={() => {props.onSave?.()}}/>
+          onClick={() => {onSave?.()}}/>
       }
       {
-        props.onDownload &&
+        onDownload &&
         <IconButton
           src={ICON.download}
           noBorder
-          onClick={() => {props.onDownload?.()}}/>
+          onClick={() => {onDownload?.()}}/>
       }
       {
-        props.hasSidebar &&
+        hasSidebar &&
         <Dialog.Root>
           <Dialog.Trigger>
             <IconButton
@@ -71,16 +89,16 @@ export default function Header (props: {
               asDiv/>
           </Dialog.Trigger>
           <Sidebar
-            choreoName={props.currentChoreo.name}
-            choreoEvent={props.currentChoreo.event}
-            editName={props.editName}
-            editSize={props.editSize}
-            manageSections={props.manageSections}
-            export={props.export}
-            changeSnap={props.changeSnap}
-            changeShowGrid={props.changeShowGrid}
-            changeDancerSize={props.changeDancerSize}
-            appSettings={props.appSettings}
+            choreoName={currentChoreo.name}
+            choreoEvent={currentChoreo.event}
+            editName={editName}
+            editSize={editSize}
+            manageSections={manageSections}
+            exportChoreo={exportChoreo}
+            changeSnap={changeSnap}
+            changeShowGrid={changeShowGrid}
+            changeDancerSize={changeDancerSize}
+            appSettings={appSettings}
           />
           {/* todo: add functions to the sidebar */}
         </Dialog.Root>

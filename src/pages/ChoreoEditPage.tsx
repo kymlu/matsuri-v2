@@ -325,7 +325,7 @@ export default function ChoreoEditPage(props: {
         editName={() => {setEditChoreoInfoDialogOpen(true)}}
         manageSections={() => {console.log("TODO: implement Manage Sections")}}
         editSize={() => {setResizeDialogOpen(true);}}
-        export={() => {
+        exportChoreo={() => {
           console.log("TODO: implement choice of pdf or mtr");
           exportToMtr(history.presentState.state);
         }}

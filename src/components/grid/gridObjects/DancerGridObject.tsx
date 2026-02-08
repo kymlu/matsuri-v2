@@ -7,54 +7,68 @@ import { colorPalette } from "../../../lib/consts/colors";
 import { DancerDisplayType } from "../../../models/appSettings";
 import { METER_PX } from "../../../lib/consts/consts";
 
-export default function DancerGridObject (props: {
-  dancer: Dancer,
-  position: DancerPosition,
-  stageGeometry: StageGeometry,
-  updatePosition?: (x: number, y: number) => void,
-  onClick: (isAdditive?: boolean) => void,
-  isSelected: boolean,
-  registerNode: (id: string, node: Konva.Node | null) => void,
-  isTransformerActive?: boolean,
-  canEdit: boolean,
-  snapToGrid?: boolean,
-  dancerDisplayType: DancerDisplayType,
-}) {
+type DancerGridObjectProps = {
+  dancer: Dancer;
+  position: DancerPosition;
+  stageGeometry: StageGeometry;
+  updatePosition?: (x: number, y: number) => void;
+  onClick: (isAdditive?: boolean) => void;
+  isSelected: boolean;
+  registerNode: (id: string, node: Konva.Node | null) => void;
+  isTransformerActive?: boolean;
+  canEdit: boolean;
+  snapToGrid?: boolean;
+  dancerDisplayType: DancerDisplayType;
+};
+
+export default function DancerGridObject({
+  dancer,
+  position,
+  stageGeometry,
+  updatePosition,
+  onClick,
+  isSelected,
+  registerNode,
+  isTransformerActive,
+  canEdit,
+  snapToGrid,
+  dancerDisplayType,
+}: DancerGridObjectProps) {
   return <>
     {
-      props.dancer &&
+      dancer &&
       <BaseGridObject
-        id={props.dancer.id}
-        draggable={props.canEdit}
-        position={props.position}
-        onClick={props.onClick}
-        updatePosition={(x, y) => {props.updatePosition?.(x, y);}}
-        stageGeometry={props.stageGeometry}
-        isSelected={props.isSelected}
-        registerNode={props.registerNode}
-        isTransformerActive={props.isTransformerActive}
-        snapToGrid={props.snapToGrid}
+        id={dancer.id}
+        draggable={canEdit}
+        position={position}
+        onClick={onClick}
+        updatePosition={(x, y) => {updatePosition?.(x, y);}}
+        stageGeometry={stageGeometry}
+        isSelected={isSelected}
+        registerNode={registerNode}
+        isTransformerActive={isTransformerActive}
+        snapToGrid={snapToGrid}
       >
         <Circle
-          radius={props.dancerDisplayType === "large" ? METER_PX * 0.45 : METER_PX * 0.2}
-          fill={props.position.color}
-          strokeEnabled={props.isSelected}
+          radius={dancerDisplayType === "large" ? METER_PX * 0.45 : METER_PX * 0.2}
+          fill={position.color}
+          strokeEnabled={isSelected}
           stroke={colorPalette.primary}
         />
 
         {
-          props.dancerDisplayType === "small" &&
+          dancerDisplayType === "small" &&
           <Text
             listening={false}
-            text={props.dancer.name}
+            text={dancer.name}
             fontSize={METER_PX/2}
             fill="black"
             offsetY={METER_PX * 0.7}
-            offsetX={props.dancer.name.length * 3}
+            offsetX={dancer.name.length * 3}
           />
         }
         {
-          props.dancerDisplayType === "large" &&
+          dancerDisplayType === "large" &&
           <Text
             listening={false}
             x={-METER_PX/2}
@@ -63,10 +77,10 @@ export default function DancerGridObject (props: {
             height={METER_PX}
             verticalAlign="middle"
             align="center"
-            text={props.dancer.name}
+            text={dancer.name}
             fontSize={METER_PX/2.5}
             fontStyle="bold"
-            fill={colorPalette.getTextColor(props.position.color) ?? "white"}
+            fill={colorPalette.getTextColor(position.color) ?? "white"}
           />
         }
       </BaseGridObject>

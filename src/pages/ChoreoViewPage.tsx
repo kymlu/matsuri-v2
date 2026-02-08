@@ -61,7 +61,6 @@ export default function ChoreoViewPage(props: {
           showNotes={showNotes}
           dancer={props.currentChoreo.dancers[selectedIds.dancers[0]]}
           position={currentSection.formation.dancerPositions[selectedIds.dancers[0]]}
-          nextSectionName={nextSection?.name}
           nextPosition={nextSection?.formation.dancerPositions[selectedIds.dancers[0]]}
           geometry={props.currentChoreo.stageGeometry}
           isPositionHintShown={

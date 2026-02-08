@@ -4,23 +4,27 @@ import TextInput from "../inputs/TextInput";
 import { isNullOrUndefinedOrBlank } from "../../lib/helpers/globalHelper";
 import BaseEditDialog from "./BaseEditDialog";
 
-export default function EditSectionNameDialog(props: {
+type EditSectionNameDialogProps = {
   section?: ChoreoSection,
   onSubmit: (name: string) => void,
-}) {
+}
+
+export default function EditSectionNameDialog({
+  section, onSubmit
+}: EditSectionNameDialogProps) {
   const [name, setName] = useState("");
 
   useEffect(() => {
-    setName(props.section?.name ?? "");
-  }, [props.section]);
+    setName(section?.name ?? "");
+  }, [section]);
 
   return <BaseEditDialog
     title="セクション名前変更"
-    onSubmit={() => { props.onSubmit(name) }}
+    onSubmit={() => { onSubmit(name) }}
     isActionButtonDisabled={isNullOrUndefinedOrBlank(name)}
     >
     <TextInput
-      default={props.section?.name ?? ""}
+      defaultValue={section?.name ?? ""}
       onContentChange={ (newName) => { setName(newName) }}/>
   </BaseEditDialog>
 }

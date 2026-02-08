@@ -1,8 +1,8 @@
+import Button from "../basic/Button";
 import CustomDialog from "../basic/CustomDialog";
-import { ActionButton } from "../basic/Button";
 import { Dialog } from "@base-ui/react";
 
-export default function BaseEditDialog(props: {
+type BaseEditDialogProps = {
   title: string,
   isActionButtonDisabled?: boolean,
   actionButtonText?: string,
@@ -10,39 +10,43 @@ export default function BaseEditDialog(props: {
   onClose?: () => void,
   onSubmit: () => void,
   children: React.ReactNode,
-}) {
+}
+
+export default function BaseEditDialog({
+  title, isActionButtonDisabled, actionButtonText, full, onClose, onSubmit, children
+}: BaseEditDialogProps) {
   return <CustomDialog
     hasX
-    full={props.full}
-    title={props.title}
-    onClose={props.onClose}
+    full={full}
+    title={title}
+    onClose={onClose}
     footer={
       <div className="flex w-full gap-2 mt-4">
         <Dialog.Close
           onClick={() => {
-            props.onClose?.();
+            onClose?.();
           }}
           className="w-full">
-          <ActionButton
+          <Button
             asDiv
             full
             compact
             >
             キャンセル
-          </ActionButton>
+          </Button>
         </Dialog.Close>
-        <ActionButton
-          onClick={() => {props.onSubmit()}}
-          disabled={props.isActionButtonDisabled}
+        <Button
+          onClick={() => {onSubmit()}}
+          disabled={isActionButtonDisabled}
           full
           compact
           primary>
-          {props.actionButtonText ?? "保存"}
-        </ActionButton>
+          {actionButtonText ?? "保存"}
+        </Button>
       </div>
     }>
       <>
-        {props.children}
+        {children}
       </>
       
     </CustomDialog>

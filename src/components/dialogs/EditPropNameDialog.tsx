@@ -4,23 +4,27 @@ import { isNullOrUndefinedOrBlank } from "../../lib/helpers/globalHelper";
 import BaseEditDialog from "./BaseEditDialog";
 import { Prop } from "../../models/prop";
 
-export default function EditPropNameDialog(props: {
+type EditPropNameDialogProps = {
   prop?: Prop,
   onSubmit: (name: string) => void,
-}) {
+}
+
+export default function EditPropNameDialog({
+  prop, onSubmit
+}: EditPropNameDialogProps) {
   const [name, setName] = useState("");
 
   useEffect(() => {
-    setName(props.prop?.name ?? "");
-  }, [props.prop]);
+    setName(prop?.name ?? "");
+  }, [prop]);
 
   return <BaseEditDialog
     title="道具名"
-    onSubmit={() => { props.onSubmit(name) }}
+    onSubmit={() => { onSubmit(name) }}
     isActionButtonDisabled={isNullOrUndefinedOrBlank(name)}
     >
     <TextInput
-      default={props.prop?.name ?? ""}
+      defaultValue={prop?.name ?? ""}
       onContentChange={ (newName) => { setName(newName) }}
       maxLength={15}/>
   </BaseEditDialog>

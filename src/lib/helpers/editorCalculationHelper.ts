@@ -42,7 +42,7 @@ export function pxToStageMeters(
   };
 }
 
-export function snapToGrid(
+export function snapCoordsToGrid(
   pos: Coordinates,
   snapSize: number = 0.5,
 ): Coordinates {

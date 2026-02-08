@@ -8,29 +8,31 @@ export type CustomSliderProps = {
   max: number,
   step: number,
   defaultValue: number,
-  setValue: (newValue: number) => void,
+  setSliderValue: (newValue: number) => void,
   ref?: React.Ref<any>,
   label?: string,
 }
 
-export default function CustomSlider(props: CustomSliderProps) {
-  const [value, setValue] = useState<number>(props.defaultValue);
+export default function CustomSlider({
+  min, max, step, defaultValue, setSliderValue, ref, label
+}: CustomSliderProps) {
+  const [value, setValue] = useState<number>(defaultValue);
 
-  useImperativeHandle(props.ref, () => ({
+  useImperativeHandle(ref, () => ({
     changeValue: (newValue: number) => {
       setValue(newValue);
     }
   }));
 
   return (
-    <FieldWithLabel label={props.label}>
+    <FieldWithLabel label={label}>
       <Slider.Root
-        min={props.min}
-        max={props.max}
-        step={props.step}
+        min={min}
+        max={max}
+        step={step}
         value={value}
         onValueChange={(newValue) => {
-          props.setValue(newValue);
+          setSliderValue(newValue);
           setValue(newValue);
         }}>
         <Slider.Control className="flex items-center w-full py-3 select-none touch-none">

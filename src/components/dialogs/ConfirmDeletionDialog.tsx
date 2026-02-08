@@ -1,16 +1,16 @@
 import { ChoreoSection } from "../../models/choreoSection";
 import BaseEditDialog from "./BaseEditDialog";
 
-export default function ConfirmDeletionDialog(props: {
+type ConfirmDeletionDialogProps = {
   section?: ChoreoSection,
   onSubmit: () => void,
-}) {
-  const onSubmit = () => {
-    props.onSubmit();
-  }
+}
 
+export default function ConfirmDeletionDialog({
+  section, onSubmit
+}: ConfirmDeletionDialogProps) {
   return <BaseEditDialog
-    title={props.section?.name + "を削除？"}
+    title={section?.name + "を削除？"}
     onSubmit={onSubmit}
     actionButtonText="OK"
     >

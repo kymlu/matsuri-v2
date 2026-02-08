@@ -5,7 +5,7 @@ import { Choreo, StageGeometry } from "../../models/choreo";
 import FormationLayer from "./layers/FormationLayer";
 import { ChoreoSection } from "../../models/choreoSection";
 import { DancerPosition } from "../../models/dancer";
-import { pxToStageMeters, snapToGrid } from "../../lib/helpers/editorCalculationHelper";
+import { pxToStageMeters, snapCoordsToGrid } from "../../lib/helpers/editorCalculationHelper";
 import { MAX_ZOOM, METER_PX, MIN_ZOOM } from "../../lib/consts/consts";
 import { AppSetting } from "../../models/appSettings";
 import Konva from "konva";
@@ -228,7 +228,7 @@ export default function MainStage(props: {
               }
 
               if (props.appSettings.snapToGrid) {
-                position = snapToGrid(position, METER_PX/2)
+                position = snapCoordsToGrid(position, METER_PX/2)
               }
 
               var positionM = pxToStageMeters(position, stageGeometry, METER_PX);

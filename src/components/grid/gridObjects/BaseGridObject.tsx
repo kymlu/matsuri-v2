@@ -4,7 +4,7 @@ import Konva from "konva";
 import { Shape, ShapeConfig } from "konva/lib/Shape";
 import { Stage } from "konva/lib/Stage";
 import { METER_PX } from "../../../lib/consts/consts";
-import { pxToStageMeters, snapToGrid, stageMetersToPx } from "../../../lib/helpers/editorCalculationHelper";
+import { pxToStageMeters, snapCoordsToGrid, stageMetersToPx } from "../../../lib/helpers/editorCalculationHelper";
 import { StageGeometry } from "../../../models/choreo";
 import { Coordinates } from "../../../models/base";
 
@@ -24,29 +24,43 @@ export interface BaseGridObjectProps {
   snapToGrid?: boolean,
 }
 
-export default function BaseGridObject(props: BaseGridObjectProps) {
+export default function BaseGridObject({
+  id,
+  children,
+  rotation,
+  position,
+  updatePosition,
+  onClick,
+  draggable,
+  onTransform,
+  stageGeometry,
+  isSelected,
+  registerNode,
+  isTransformerActive,
+  snapToGrid,
+}: BaseGridObjectProps) {
   const ref = useRef<Konva.Group>(null);
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
 
   useEffect(() => {
-    props.registerNode(props.id, ref.current);
-    return () => props.registerNode(props.id, null);
-  }, [props.id, props.registerNode]);
+    registerNode(id, ref.current);
+    return () => registerNode(id, null);
+  }, [id, registerNode]);
 
   useEffect(() => {
-    var newPosition = stageMetersToPx({x: props.position.x, y: props.position.y}, props.stageGeometry, METER_PX);
+    var newPosition = stageMetersToPx({x: position.x, y: position.y}, stageGeometry, METER_PX);
     if (newPosition.x === ref.current?.x() && newPosition.y === ref.current?.y()) return;
-    
+
     setIsAnimating(true);
     ref.current?.to({
       x: newPosition.x,
       y: newPosition.y,
-      rotation: props.rotation ?? 0,
+      rotation: rotation ?? 0,
       duration: 1,
       easing: Konva.Easings.EaseInOut,
       onFinish: () => {setIsAnimating(false)}
     });
-  }, [props.position, props.stageGeometry, props.rotation]);
+  }, [position, stageGeometry, rotation]);
 
   const snapSize = METER_PX/2;
 
@@ -55,9 +69,9 @@ export default function BaseGridObject(props: BaseGridObjectProps) {
   
   return (
     <Group
-      id={props.id} 
+      id={id} 
       ref={ref}
-      draggable={props.draggable && !isAnimating}
+      draggable={draggable && !isAnimating}
       rotation={0}
       x={0}
       y={0}
@@ -69,15 +83,15 @@ export default function BaseGridObject(props: BaseGridObjectProps) {
         isDraggingRef.current = false;
       }}
       onDragMove={(e) => {
-        if (!props.isSelected) {
-          props.onClick(false);
+        if (!isSelected) {
+          onClick(false);
         }
         if (isDraggingRef.current) return;
         const start = dragStartRef.current;
         if (!start) return;
 
-        e.target.x(Math.min(METER_PX * (props.stageGeometry.stageWidth + props.stageGeometry.margin.leftMargin + props.stageGeometry.margin.rightMargin), Math.max(e.target.x(), 0)));
-        e.target.y(Math.min(METER_PX * (props.stageGeometry.stageLength + props.stageGeometry.margin.topMargin + props.stageGeometry.margin.bottomMargin), Math.max(e.target.y(), 0)));
+        e.target.x(Math.min(METER_PX * (stageGeometry.stageWidth + stageGeometry.margin.leftMargin + stageGeometry.margin.rightMargin), Math.max(e.target.x(), 0)));
+        e.target.y(Math.min(METER_PX * (stageGeometry.stageLength + stageGeometry.margin.topMargin + stageGeometry.margin.bottomMargin), Math.max(e.target.y(), 0)));
 
         const dx = e.target.x() - start.x;
         const dy = e.target.y() - start.y;
@@ -88,7 +102,7 @@ export default function BaseGridObject(props: BaseGridObjectProps) {
       }}
       onPointerUp={(e) => {
         if (!isDraggingRef.current) {
-          props.onClick();
+          onClick();
         }
       }}
       onDragEnd={(e) => {
@@ -97,26 +111,26 @@ export default function BaseGridObject(props: BaseGridObjectProps) {
 
           var position: Coordinates = {x: node.x(), y: node.y()};
 
-          if (props.snapToGrid) {
-            position = snapToGrid({x: node.x(), y: node.y()}, snapSize)
+          if (snapToGrid) {
+            position = snapCoordsToGrid({x: node.x(), y: node.y()}, snapSize)
           }
 
           node.to({
             x: position.x,
             y: position.y,
             onFinish: () => {
-              var snappedPositionInM = pxToStageMeters({x: node.attrs.x, y: node.attrs.y}, props.stageGeometry, METER_PX);
-              props.updatePosition?.(snappedPositionInM.x, snappedPositionInM.y);
+              var snappedPositionInM = pxToStageMeters({x: node.attrs.x, y: node.attrs.y}, stageGeometry, METER_PX);
+              updatePosition?.(snappedPositionInM.x, snappedPositionInM.y);
             }
           });
 
-          if (!props.isSelected) {
-            props.onClick(false);
+          if (!isSelected) {
+            onClick(false);
           }
         }
       }}
       >
-      {props.children}
+      {children}
     </Group>
   )
 }

@@ -1,22 +1,28 @@
 import classNames from "classnames";
 
-export default function Icon (props: {
-  src: string,
-  colour?: "primary" | "black" | "grey" | "white",
-  size?: "xs" | "sm" | "md" | "lg",
-}) {
+type IconProps = {
+  src: string;
+  colour?: "primary" | "black" | "grey" | "white";
+  size?: "xs" | "sm" | "md" | "lg";
+};
+
+export default function Icon({
+  src,
+  colour = "black",
+  size = "md",
+}: IconProps) {
   var iconClasses = classNames("font-icon", {
-    "text-6xl": props.size === "lg",
-    "text-4xl": props.size === undefined || props.size === "md",
-    "text-2xl": props.size === "sm",
-    "text-lg": props.size === "xs",
-    "text-white": props.colour === "white",
-    "text-primary": props.colour === "primary",
-    "text-black": props.colour === "black" || props.colour === undefined,
-    "text-gray-600": props.colour === "grey",
+    "text-6xl": size === "lg",
+    "text-4xl": size === undefined || size === "md",
+    "text-2xl": size === "sm",
+    "text-lg": size === "xs",
+    "text-white": colour === "white",
+    "text-primary": colour === "primary",
+    "text-black": colour === "black" || colour === undefined,
+    "text-gray-600": colour === "grey",
   });
 
   return <span className={iconClasses + " leading-none"}>
-    {props.src}
+    {src}
   </span>
 }

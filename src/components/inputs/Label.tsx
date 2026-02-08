@@ -1,21 +1,32 @@
 import React from "react";
 
-export default function Label(props: {text: string, htmlFor: string}) {
-  return <label htmlFor={props.htmlFor} className="block text-lg font-medium">{props.text}</label>
+type LabelProps = {
+  text: string,
+  htmlFor: string
 }
 
-export function FieldWithLabel(props: {
+export default function Label({
+  text, htmlFor
+}: LabelProps) {
+  return <label htmlFor={htmlFor} className="block text-lg font-medium">{text}</label>
+}
+
+type FieldWithLabelProps = {
   label?: string,
   full?: boolean
   children: React.ReactNode
-}) {
+}
+
+export function FieldWithLabel({
+  label, full, children
+}: FieldWithLabelProps) {
   var id = React.useId();
 
-  return <div className={props.full ? "w-full h-full" : ""}>
+  return <div className={full ? "w-full h-full" : ""}>
     {
-      props.label &&
-      <Label htmlFor={id} text={props.label}/>
+      label &&
+      <Label htmlFor={id} text={label}/>
     }
-    {props.children}
+    {children}
   </div>
 }

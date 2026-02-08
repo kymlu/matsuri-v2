@@ -10,33 +10,44 @@ export type CustomMenuProps = {
   disabled?: boolean
 }
 
-export default function CustomMenu (props: CustomMenuProps) {
+export default function CustomMenu({
+  trigger,
+  position,
+  full,
+  children,
+  disabled,
+}: CustomMenuProps) {
   const triggerClassNames = classNames("lg:hover:opacity-80", {
-    "w-full h-full": props.full,
+    "w-full h-full": full,
   });
 
   return (
     <Menu.Root>
-      <Menu.Trigger disabled={props.disabled} className={triggerClassNames} onClick={(e) => {e.stopPropagation()}}>
-        {props.trigger}
+      <Menu.Trigger disabled={disabled} className={triggerClassNames} onClick={(e) => {e.stopPropagation()}}>
+        {trigger}
         </Menu.Trigger>
-      <MenuContents position={props.position} children={props.children} />
+      <MenuContents position={position} children={children} />
     </Menu.Root>
   )
 }
 
-export function MenuContents (props: {
+type MenuContentsProps = {
   position?: 'top' | 'bottom' | 'left' | 'right' | 'inline-end' | 'inline-start';
   children: React.ReactNode;
-}) {
+};
+
+export function MenuContents({
+  position,
+  children,
+}: MenuContentsProps) {
   return <Menu.Portal>
     <Menu.Backdrop />
-    <Menu.Positioner side={props.position ?? "bottom"} className="z-20">
+    <Menu.Positioner side={position ?? "bottom"} className="z-20">
       <Menu.Popup className="p-2 bg-white border border-solid rounded-md border-primary max-h-[50svh] overflow-y-auto">
         <Menu.Arrow className="data-[side=bottom]:top-[-8px] data-[side=left]:right-[-13px] data-[side=left]:rotate-90 data-[side=right]:left-[-13px] data-[side=right]:-rotate-90 data-[side=top]:bottom-[-8px] data-[side=top]:rotate-180">
           <ArrowSvg/>
         </Menu.Arrow>
-        {props.children}
+        {children}
       </Menu.Popup>
     </Menu.Positioner>
   </Menu.Portal>

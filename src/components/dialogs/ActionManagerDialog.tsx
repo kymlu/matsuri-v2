@@ -13,15 +13,19 @@ import BaseEditDialog from "./BaseEditDialog";
 import { ChoreoSection } from "../../models/choreoSection";
 import { IconLabelButton } from "../basic/Button";
 
-export function ActionManagerDialog(props: {
+type ActionManagerDialogProps = {
   section: ChoreoSection,
   onSubmit: (actions: DancerAction[]) => void,
-}) {
+}
+
+export function ActionManagerDialog({
+  section, onSubmit
+}: ActionManagerDialogProps) {
   const [actions, setActions] = useState<DancerAction[]>([]);
 
   useEffect(() => {
-    setActions([...props.section.formation.dancerActions]);
-  }, [props.section]);
+    setActions([...section.formation.dancerActions]);
+  }, [section]);
 
   const addAction = () => {
     setActions(prev => [...prev, {
@@ -87,11 +91,11 @@ export function ActionManagerDialog(props: {
   }, [actions]);
 
   return <BaseEditDialog
-    title={`カウント管理 - ${props.section.name}`}
+    title={`カウント管理 - ${section.name}`}
     full
     isActionButtonDisabled={!canSubmit}
     actionButtonText="保存"
-    onSubmit={() => {props.onSubmit(actions)}}>
+    onSubmit={() => {onSubmit(actions)}}>
     <div className="space-y-4">
       <IconLabelButton
         icon={ICON.add}
@@ -139,15 +143,18 @@ export function ActionManagerDialog(props: {
   </BaseEditDialog>
 }
 
-function SortableActionSection (props: {
+type SortableActionSectionProps = {
   action: DancerAction,
   onRenameAction: (name: string) => void,
   onDeleteAction: () => void,
   onAddTiming: () => void,
   onRenameTiming: (newTimings: DancerActionTiming[]) => void,
   onDeleteTiming: (newTimings: DancerActionTiming[]) => void,
-}) {
-  const {action, onRenameAction, onDeleteAction, onAddTiming, onRenameTiming, onDeleteTiming} = props;
+}
+
+function SortableActionSection ({
+  action, onRenameAction, onDeleteAction, onAddTiming, onRenameTiming, onDeleteTiming
+}: SortableActionSectionProps) {
   const {
     attributes,
     listeners,
@@ -166,7 +173,7 @@ function SortableActionSection (props: {
       <Icon src={ICON.dragHandle}/>
     </div>
     <div className="flex-1">
-      <TextInput label="アクション名" default={action.name} onContentChange={(newName) => {onRenameAction(newName)}}/>
+      <TextInput label="アクション名" defaultValue={action.name} onContentChange={(newName) => {onRenameAction(newName)}}/>
       <span className="font-bold">カウント（重複不可）</span>
       <div className="flex flex-wrap gap-2">
         {
@@ -193,16 +200,18 @@ function SortableActionSection (props: {
   </div>
 }
 
-function TimingItem (props: {
+type TimingItemProps = {
   timing: DancerActionTiming,
   onRenameTiming: (name: string) => void,
   onDeleteTiming: () => void,
   showDeleteButton: boolean,
-}) {
-  const {timing, onRenameTiming, onDeleteTiming, showDeleteButton} = props;
-  
+}
+
+function TimingItem ({
+  timing, onRenameTiming, onDeleteTiming, showDeleteButton}: TimingItemProps
+) {
   return <div className="flex items-center">
-    <TextInput maxLength={5} compact short default={timing.name} onContentChange={(newName) => {onRenameTiming(newName)}}/>
+    <TextInput maxLength={5} compact short defaultValue={timing.name} onContentChange={(newName) => {onRenameTiming(newName)}}/>
     <Icon size="sm" src={ICON.person}/>
     <span>{timing.dancerIds.length}</span>
     {showDeleteButton && <IconButton size="sm" noBorder src={ICON.delete} onClick={() => {onDeleteTiming()}}/>}

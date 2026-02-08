@@ -5,74 +5,96 @@ import { VerticalDivider } from "../basic/Divider";
 import { Distribution, HorizontalAlignment, VerticalAlignment } from "../../models/alignment";
 
 type ToolbarProps = {
-  onAddDancer: () => void,
-  isAddingDancer: boolean,
-  onAddProp: () => void,
-  isAddingProp: boolean,
-  showCopyPosition: boolean,
-  onCopyPosition: () => void,
-  showPastePosition: boolean,
-  onPastePosition: () => void,
-  showSelectDancer: boolean,
-  onSelectColor: () => void,
-  onSelectType: () => void,
-  showChangeColour: boolean,
-  onChangeColor: () => void,
-  showArrange: boolean,
-  onVerticalAlign: (alignment: VerticalAlignment) => void,
-  onHorizontalAlign: (alignment: HorizontalAlignment) => void,
-  showDistribute: boolean,
-  onDistribute: (distribution: Distribution) => void,
-  showSwapPosition: boolean,
-  onSwapPosition: () => void,
-  onRenameDancer: () => void
-  showRenameDancer: boolean,
-  onRenameProp: () => void
-  showRenameProp: boolean,
-  showDeleteObjects: boolean,
-  onDeleteObjects: () => void,
-  onOpenActionManager: () => void,
-  onAssignActions: () => void,
-  isAssigningActionsEnabled: boolean,
-  isAssigningActions: boolean,
-  onRenameSection: () => void,
-  onAddNoteToSection: () => void,
-  canDeleteSection: boolean,
-  onDeleteSection: () => void,
-  onDuplicateSection: () => void,
-}
+  // add
+  onAddDancer: () => void;
+  isAddingDancer: boolean;
+  onAddProp: () => void;
+  isAddingProp: boolean;
 
-export default function Toolbar ({
+  // selection / attributes
+  showSelectDancer: boolean;
+  onSelectColor: () => void;
+  onSelectType: () => void;
+  showChangeColour: boolean;
+  onChangeColor: () => void;
+
+  // copy / paste / swap
+  showCopyPosition: boolean;
+  onCopyPosition: () => void;
+  showPastePosition: boolean;
+  onPastePosition: () => void;
+  showSwapPosition: boolean;
+  onSwapPosition: () => void;
+
+  // arrange
+  showArrange: boolean;
+  onVerticalAlign: (alignment: VerticalAlignment) => void;
+  onHorizontalAlign: (alignment: HorizontalAlignment) => void;
+  showDistribute: boolean;
+  onDistribute: (distribution: Distribution) => void;
+
+  // rename
+  showRenameDancer: boolean;
+  onRenameDancer: () => void;
+  showRenameProp: boolean;
+  onRenameProp: () => void;
+
+  // delete
+  showDeleteObjects: boolean;
+  onDeleteObjects: () => void;
+
+  // actions
+  onOpenActionManager: () => void;
+  onAssignActions: () => void;
+  isAssigningActionsEnabled: boolean;
+  isAssigningActions: boolean;
+
+  // section
+  onRenameSection: () => void;
+  onAddNoteToSection: () => void;
+  canDeleteSection: boolean;
+  onDeleteSection: () => void;
+  onDuplicateSection: () => void;
+};
+
+export default function Toolbar({
   onAddDancer,
   isAddingDancer,
   onAddProp,
   isAddingProp,
-  showChangeColour,
+
   showSelectDancer,
-  onChangeColor,
   onSelectColor,
   onSelectType,
+  showChangeColour,
+  onChangeColor,
+
   showCopyPosition,
   onCopyPosition,
   showPastePosition,
   onPastePosition,
+  showSwapPosition,
+  onSwapPosition,
+
+  showArrange,
   onVerticalAlign,
   onHorizontalAlign,
   showDistribute,
   onDistribute,
-  showArrange,
-  showDeleteObjects,
-  onDeleteObjects,
-  showSwapPosition,
-  onSwapPosition,
-  onOpenActionManager,
-  onAssignActions,
-  isAssigningActionsEnabled,
-  isAssigningActions,
+
   showRenameDancer,
   onRenameDancer,
   showRenameProp,
   onRenameProp,
+
+  showDeleteObjects,
+  onDeleteObjects,
+
+  onOpenActionManager,
+  onAssignActions,
+  isAssigningActionsEnabled,
+  isAssigningActions,
+
   onRenameSection,
   onAddNoteToSection,
   canDeleteSection,

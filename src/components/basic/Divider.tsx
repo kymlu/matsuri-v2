@@ -5,12 +5,14 @@ export type DividerProps = {
   primary?: boolean,
 }
 
-export default function Divider(props: DividerProps) {
+export default function Divider({
+  compact, primary
+}: DividerProps) {
   var classes = classNames("border-none h-0.5", {
-    "my-3": !props.compact,
-    "h-0.5": props.compact,
-    "bg-primary": props.primary,
-    "bg-gray-200": !props.primary,
+    "my-3": !compact,
+    "h-0.5": compact,
+    "bg-primary": primary,
+    "bg-gray-200": !primary,
   })
 
   return (

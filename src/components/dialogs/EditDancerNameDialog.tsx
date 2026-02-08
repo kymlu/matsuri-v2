@@ -4,23 +4,27 @@ import { isNullOrUndefinedOrBlank } from "../../lib/helpers/globalHelper";
 import BaseEditDialog from "./BaseEditDialog";
 import { Dancer } from "../../models/dancer";
 
-export default function EditDancerNameDialog(props: {
+type EditDancerNameDialogProps = {
   dancer?: Dancer,
   onSubmit: (name: string) => void,
-}) {
+}
+
+export default function EditDancerNameDialog({
+  dancer, onSubmit
+}: EditDancerNameDialogProps) {
   const [name, setName] = useState("");
 
   useEffect(() => {
-    setName(props.dancer?.name ?? "");
-  }, [props.dancer]);
+    setName(dancer?.name ?? "");
+  }, [dancer]);
 
   return <BaseEditDialog
     title="ダンサー名"
-    onSubmit={() => { props.onSubmit(name) }}
+    onSubmit={() => { onSubmit(name) }}
     isActionButtonDisabled={isNullOrUndefinedOrBlank(name)}
     >
     <TextInput
-      default={props.dancer?.name ?? ""}
+      defaultValue={dancer?.name ?? ""}
       onContentChange={ (newName) => { setName(newName) }}
       maxLength={15}/>
   </BaseEditDialog>

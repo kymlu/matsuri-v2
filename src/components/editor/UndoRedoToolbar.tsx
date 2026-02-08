@@ -1,24 +1,31 @@
 import { ICON } from "../../lib/consts/consts";
 import IconButton from "../basic/IconButton";
 
-export default function UndoRedoToolbar (props: {
-  undo: () => void,
-  redo: () => void,
-  undoCount: number,
-  redoCount: number,
-}) {
+type UndoRedoToolbarProps = {
+  undo: () => void;
+  redo: () => void;
+  undoCount: number;
+  redoCount: number;
+};
+
+export default function UndoRedoToolbar({
+  undo,
+  redo,
+  undoCount,
+  redoCount,
+}: UndoRedoToolbarProps) {
   return <div className="flex flex-row gap-2 p-2 w-fit">
     <IconButton
       src={ICON.undo}
       size="sm"
-      onClick={props.undo}
-      disabled={props.undoCount === 0}
+      onClick={undo}
+      disabled={undoCount === 0}
       />
     <IconButton
       src={ICON.redo}
       size="sm"
-      onClick={props.redo}
-      disabled={props.redoCount === 0}
+      onClick={redo}
+      disabled={redoCount === 0}
       />
   </div>
 }

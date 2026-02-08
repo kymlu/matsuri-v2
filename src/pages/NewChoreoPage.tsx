@@ -1,6 +1,5 @@
 import { useState } from "react";
 import NumberInput from "../components/inputs/NumberInput";
-import { ActionButton } from "../components/basic/Button";
 import TextInput from "../components/inputs/TextInput";
 import CustomSelect from "../components/inputs/CustomSelect";
 import { isNullOrUndefinedOrBlank } from "../lib/helpers/globalHelper";
@@ -10,6 +9,7 @@ import { colorPalette } from "../lib/consts/colors";
 import { MAX_STAGE_DIMENSION, MAX_STAGE_MARGIN, MIN_STAGE_DIMENSION, MIN_STAGE_MARGIN } from "../lib/consts/consts";
 import { saveChoreo } from "../lib/dataAccess/DataController";
 import GridPreview from "../components/grid/GridPreview";
+import Button from "../components/basic/Button";
 
 interface FormationForm {
   name: string;
@@ -122,13 +122,13 @@ export function NewChoreoPage(props: {
         {step === 1 && (
           <div className="flex flex-col h-full pt-10 pb-20 justify-evenly">
             <TextInput
-              default={form.name}
+              defaultValue={form.name}
               onContentChange={newValue => handleChange("name", newValue)}
               placeholder="名前を入力してください"
               label="隊列名前"
             />
             <TextInput
-              default={form.eventName}
+              defaultValue={form.eventName}
               onContentChange={newValue => handleChange("eventName", newValue)}
               placeholder="イベント名を入力してください"
               label="イベント（任意）"
@@ -149,46 +149,46 @@ export function NewChoreoPage(props: {
               <CustomSelect
                 items={stageTypes}
                 defaultValue={stageTypes[form.stageType]}
-                setValue={(newValue) => {handleChange("stageType", newValue)}}
+                setSelectValue={(newValue) => {handleChange("stageType", newValue)}}
                 label="舞台類分"
               />
               <div className="grid grid-cols-2 gap-4 md:flex md:flex-col">
                 <NumberInput
                   name="幅"
-                  default={form.stageWidth}
+                  defaultValue={form.stageWidth}
                   min={MIN_STAGE_DIMENSION}
                   max={MAX_STAGE_DIMENSION}
-                  step={1}
+                  baseStep={1}
                   buttonStep={1}
                   onChange={(newValue) => {handleChange("stageWidth", Number(newValue))}}
                   label="幅 (m)"
                 />
                 <NumberInput
                   name="縦"
-                  default={form.stageLength}
+                  defaultValue={form.stageLength}
                   min={MIN_STAGE_DIMENSION}
                   max={MAX_STAGE_DIMENSION}
-                  step={1}
+                  baseStep={1}
                   buttonStep={1}
                   onChange={(newValue) => {handleChange("stageLength", Number(newValue))}}
                   label="縦 (m)"
                 />
                 <NumberInput
                   name="xMargin"
-                  default={form.xMargin}
+                  defaultValue={form.xMargin}
                   min={MIN_STAGE_MARGIN}
                   max={MAX_STAGE_MARGIN}
-                  step={1}
+                  baseStep={1}
                   buttonStep={1}
                   onChange={(newValue) => {handleChange("xMargin", Number(newValue))}}
                   label="左右余白 (m)"
                 />
                 <NumberInput
                   name="yMargin"
-                  default={form.yMargin}
+                  defaultValue={form.yMargin}
                   min={MIN_STAGE_MARGIN}
                   max={MAX_STAGE_MARGIN}
-                  step={1}
+                  baseStep={1}
                   buttonStep={1}
                   onChange={(newValue) => {handleChange("yMargin", Number(newValue))}}
                   label="上下余白 (m)"
@@ -201,10 +201,10 @@ export function NewChoreoPage(props: {
         {step === 3 && (
           <div className="flex items-center justify-center h-full">
             <NumberInput
-              default={form.dancerCount}
+              defaultValue={form.dancerCount}
               min={1}
               max={150}
-              step={1}
+              baseStep={1}
               buttonStep={1}
               onChange={(newValue) => {handleChange("dancerCount", Number(newValue))}}
               label="ダンサー数"
@@ -215,39 +215,39 @@ export function NewChoreoPage(props: {
 
       <div className="flex justify-between gap-4 pt-6 pb-8">
         {step === 1 && (
-          <ActionButton
+          <Button
           full
             onClick={props.goToHomePage}
           >
             戻る
-          </ActionButton>
+          </Button>
         )}
         {step > 1 && (
-          <ActionButton
+          <Button
             full
             onClick={prevStep}
           >
             戻る
-          </ActionButton>
+          </Button>
         )}
         {step < 3 && (
-          <ActionButton
+          <Button
             primary
             full
             onClick={nextStep}
             disabled={step === 1 && isNullOrUndefinedOrBlank(form.name)}
           >
             次へ
-          </ActionButton>
+          </Button>
         )}
         {step === 3 && (
-          <ActionButton
+          <Button
             primary
             full
             onClick={handleSubmit}
           >
             隊列作成開始
-          </ActionButton>
+          </Button>
         )}
       </div>
     </div>

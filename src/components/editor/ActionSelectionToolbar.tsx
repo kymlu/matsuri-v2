@@ -5,12 +5,15 @@ import { strEquals } from "../../lib/helpers/globalHelper";
 import Icon from "../basic/Icon";
 import { ICON } from "../../lib/consts/consts";
 
-export default function ActionSelectionToolbar(props: {
+type ActionSelectionToolbarProps = {
   actions: DancerAction[],
   selectedTimingId?: string,
   onSelectTiming: (action?: DancerAction, timing?: DancerActionTiming) => void,
-}){
-  var {actions, selectedTimingId, onSelectTiming} = props;
+}
+
+export default function ActionSelectionToolbar({
+  actions, selectedTimingId, onSelectTiming
+}: ActionSelectionToolbarProps){
   return <div className="flex w-screen gap-2 p-2 overflow-scroll max-w-screen">
     {
       actions.map(action => <ActionSection
@@ -23,13 +26,16 @@ export default function ActionSelectionToolbar(props: {
   </div>
 }
 
-function ActionSection (props: {
+type ActionSectionProps = {
   action: DancerAction,
   onSelectTiming: (timing?: DancerActionTiming) => void,
   selectedTimingId?: string,
-}) {
+}
+
+function ActionSection ({
+  action, onSelectTiming, selectedTimingId
+}: ActionSectionProps) {
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
-  var {action, onSelectTiming, selectedTimingId} = props;
 
   return <div className="flex gap-2">
     <Button

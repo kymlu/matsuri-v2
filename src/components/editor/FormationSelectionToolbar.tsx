@@ -10,14 +10,18 @@ import { CSS } from "@dnd-kit/utilities";
 import { restrictToHorizontalAxis, restrictToParentElement } from "@dnd-kit/modifiers";
 import Icon from "../basic/Icon";
 
-export default function FormationSelectionToolbar(props: {
+type FormationSelectionToolbarProps = {
   currentSectionId: string,
   sections: ChoreoSection[],
   showAddButton?: boolean,
   onClickAddButton?: (id: string, newName: string) => void,
   onClickSection: (section: ChoreoSection) => void,
   onReorder?: (newSectionOrder: ChoreoSection[]) => void,
-}) {
+}
+
+export default function FormationSelectionToolbar({
+  currentSectionId, sections, showAddButton, onClickAddButton, onClickSection, onReorder
+}: FormationSelectionToolbarProps) {
 
   const [isDragging, setIsDragging] = useState<boolean>(false);
   
@@ -45,35 +49,35 @@ export default function FormationSelectionToolbar(props: {
 
         const { active, over } = event;
 
-        if (props.onReorder && over && active.id !== over.id) {
-          const oldIndex = props.sections.findIndex((item) => strEquals(item.id, active.id.toString()));
-          const newIndex = props.sections.findIndex((item) => strEquals(item.id, over.id.toString()));
-          props.onReorder(arrayMove(props.sections, oldIndex, newIndex));
+        if (onReorder && over && active.id !== over.id) {
+          const oldIndex = sections.findIndex((item) => strEquals(item.id, active.id.toString()));
+          const newIndex = sections.findIndex((item) => strEquals(item.id, over.id.toString()));
+          onReorder(arrayMove(sections, oldIndex, newIndex));
         }
         setIsDragging(false);
       }}
     >
       <SortableContext
-        disabled={!props.showAddButton}
-        items={props.sections}>
+        disabled={!showAddButton}
+        items={sections}>
         {
-          props.sections.map((section, i) => 
+          sections.map((section, i) => 
             <FormationSectionItem
               key={section.id}
               section={section}
-              isSelected={strEquals(props.currentSectionId, section.id)}
-              onClickSection={props.onClickSection}
+              isSelected={strEquals(currentSectionId, section.id)}
+              onClickSection={onClickSection}
               />
           )
         }
       </SortableContext>
     </DndContext>
     {
-      props.showAddButton &&
+      showAddButton &&
       <IconButton
         size="sm"
         src={ICON.add}
-        onClick={() => {props.onClickAddButton?.(crypto.randomUUID(), "セクション" + (props.sections.length + 1))}}
+        onClick={() => {onClickAddButton?.(crypto.randomUUID(), "セクション" + (sections.length + 1))}}
       />
     }
   </div>

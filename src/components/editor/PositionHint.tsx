@@ -6,21 +6,28 @@ import { DancerAction } from "../../models/dancerAction";
 import { roundToTenth } from "../../lib/helpers/globalHelper";
 import Divider from "../basic/Divider";
 
-export default function PositionHint (props: {
-  dancer: Dancer,
-  position: DancerPosition,
-  nextSectionName?: string,
-  nextPosition?: DancerPosition,
-  actions?: DancerAction[],
-  geometry: StageGeometry,
-}) {
+type PositionHintProps = {
+  dancer: Dancer;
+  position: DancerPosition;
+  nextPosition?: DancerPosition;
+  actions?: DancerAction[];
+  geometry: StageGeometry;
+};
+
+export default function PositionHint({
+  dancer,
+  position,
+  nextPosition,
+  actions,
+  geometry,
+}: PositionHintProps) {
 
   const [deltaString, setDeltaString] = useState<string>("");
   const [currentPositionString, setCurrentPositionString] = useState<string>("");
 
   useEffect(() => {
     var displayX = "";
-    var xFromCenter = props.geometry.stageWidth / 2 - props.position.x;
+    var xFromCenter = geometry.stageWidth / 2 - position.x;
     if (xFromCenter === 0) {
       displayX = "↔︎0";
     } else if (xFromCenter > 0) {
@@ -29,13 +36,13 @@ export default function PositionHint (props: {
       displayX = "→" + roundToTenth(Math.abs(xFromCenter));
     }
 
-    var displayY = props.position.y;
+    var displayY = position.y;
 
     setCurrentPositionString(`${displayY}m/${displayX}m`);
     
-    const delta: Coordinates | null = props.nextPosition ? {
-      x: props.nextPosition.x - props.position.x,
-      y: props.nextPosition.y - props.position.y,
+    const delta: Coordinates | null = nextPosition ? {
+      x: nextPosition.x - position.x,
+      y: nextPosition.y - position.y,
     } : null;
 
     if (delta) {
@@ -46,9 +53,9 @@ export default function PositionHint (props: {
         var yMovement: string | null = null;
     
         if (delta.y > 0) {
-          yMovement = (props.geometry.yAxis === "bottom-up" ? "↑" : "↓") + roundToTenth(delta.y) + "m"
+          yMovement = (geometry.yAxis === "bottom-up" ? "↑" : "↓") + roundToTenth(delta.y) + "m"
         } else if (delta.y < 0) {
-          yMovement = (props.geometry.yAxis === "bottom-up" ? "↓" : "↑") + roundToTenth(Math.abs(delta.y)) + "m"
+          yMovement = (geometry.yAxis === "bottom-up" ? "↓" : "↑") + roundToTenth(Math.abs(delta.y)) + "m"
         }
     
         if (delta.x > 0) {
@@ -60,7 +67,7 @@ export default function PositionHint (props: {
         setDeltaString([yMovement, xMovement].filter(x => x !== null).join("/"))
       }
     }
-  }, [props.position, props.nextPosition]);
+  }, [position, nextPosition]);
 
   return (
     <div>
@@ -70,7 +77,7 @@ export default function PositionHint (props: {
           <span className="font-medium">{currentPositionString}</span>
         </div>
         {
-          props.nextPosition &&
+          nextPosition &&
           <div className="flex justify-between">
             <span className="text-gray-500 shrink">次への移動</span>
             <span className="font-medium text-nowrap">{deltaString}</span>
@@ -78,14 +85,14 @@ export default function PositionHint (props: {
         }
       </div>
       {
-        props.actions && props.actions.length > 0 &&
+        actions && actions.length > 0 &&
         <>
           <Divider/>
           <div className="space-y-1 border-gray-200">
             <div className="text-gray-500">カウント</div>
             {
-              props.actions.map(action => {
-                var assignedTiming = action.timings.find(t => t.dancerIds.includes(props.dancer.id));
+              actions.map(action => {
+                var assignedTiming = action.timings.find(t => t.dancerIds.includes(dancer.id));
                 
                 return <div className="flex justify-between pl-2">
                   <span>{action.name}</span>

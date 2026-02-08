@@ -17,76 +17,83 @@ type ButtonProps = {
   asDiv?: boolean,
 }
 
-export default function Button(props: ButtonProps) {
-  const classes = className("border-2 rounded-md " + (props.fontSize ?? "text-base"), {
-    "w-full": props.full,
-    "w-32 max-w-32 min-w-32": props.fixed,
-    "py-0.5 px-1": props.compact,
-    "px-3 py-1.5": props.compact !== true,
-    "lg:hover:bg-gray-100": !props.disabled && props.primary !== true && props.grey !== true,
-    "lg:hover:opacity-70": !props.disabled && (props.primary || props.grey),
-    "border-gray-300 bg-white": props.primary !== true && props.grey !== true,
-    "bg-primary text-white border-primary": props.primary,
-    "bg-gray-600 text-white border-gray-600": props.grey,
-    "lg:hover:bg-primary-light": props.primary && !props.disabled,
-    "cursor-default opacity-50": props.disabled,
-    "cursor-pointer": !props.disabled,
-    "h-full items-center flex justify-center": props.asDiv,
+export default function Button({
+  children,
+  primary,
+  grey,
+  disabled,
+  full,
+  fixed,
+  compact,
+  label,
+  onClick,
+  type,
+  fontSize,
+  asDiv
+}: ButtonProps) {
+  const classes = className("border-2 rounded-md " + (fontSize ?? "text-base"), {
+    "w-full": full,
+    "w-32 max-w-32 min-w-32": fixed,
+    "py-0.5 px-1": compact,
+    "px-3 py-1.5": compact !== true,
+    "lg:hover:bg-gray-100": !disabled && primary !== true && grey !== true,
+    "lg:hover:opacity-70": !disabled && (primary || grey),
+    "border-gray-300 bg-white": primary !== true && grey !== true,
+    "bg-primary text-white border-primary": primary,
+    "bg-gray-600 text-white border-gray-600": grey,
+    "lg:hover:bg-primary-light": primary && !disabled,
+    "cursor-default opacity-50": disabled,
+    "cursor-pointer": !disabled,
+    "h-full items-center flex justify-center": asDiv,
   });
 
   return <>
       {
-        props.asDiv !== true && <button 
-          type={props.type ?? "button"}
-          button-name={props.label}
-          disabled={props.disabled ?? false}
+        asDiv !== true && <button 
+          type={type ?? "button"}
+          button-name={label}
+          disabled={disabled ?? false}
           className={classes}
-          onClick={props.onClick}>
-          {props.children}
+          onClick={onClick}>
+          {children}
         </button>
       }
       {
-        props.asDiv && 
+        asDiv && 
         <div
           className={classes}
           onClick={(e) => {
-            if (props.disabled !== true) {
-              props.onClick?.(e);
+            if (disabled !== true) {
+              onClick?.(e);
             }
           }}>
-          {props.children}
+          {children}
         </div>
       }
     </>
 }
 
-export function ActionButton(props: ButtonProps) {
-  return <Button
-    children={props.children}
-    primary={props.primary}
-    fontSize={props.fontSize ?? 'text-lg'}
-    disabled={props.disabled}
-    full={props.full}
-    fixed={props.fixed}
-    compact={props.compact}
-    label={props.label}
-    onClick={props.onClick}
-    type={props.type}
-    asDiv={props.asDiv}
-  />
-}
+type IconLabelButtonProps = {
+  onClick: () => void;
+  icon: string;
+  label: string;
+  primary?: boolean;
+  asDiv?: boolean;
+  disabled?: boolean;
+  full?: boolean;
+  iconSize?: "sm" | "md" | "lg";
+};
 
-export function IconLabelButton(props: {
-  onClick: () => void,
-  icon: string,
-  label: string,
-  primary?: boolean,
-  asDiv?: boolean,
-  disabled?: boolean,
-  full?: boolean,
-  iconSize?: "sm" | "md" | "lg",
-}) {
-  const {onClick, icon, label, primary, asDiv, disabled, full, iconSize} = props;
+export function IconLabelButton({
+  onClick,
+  icon,
+  label,
+  primary = false,
+  asDiv = false,
+  disabled = false,
+  full = false,
+  iconSize = "sm",
+}: IconLabelButtonProps) {
   return <Button
     onClick={onClick}
     primary={primary}
@@ -95,7 +102,7 @@ export function IconLabelButton(props: {
     full={full}
     >
     <div className="flex items-center justify-center gap-2">
-      <Icon colour={primary ? "white" : "black"} src={icon} size={iconSize ?? "sm"}/>
+      <Icon colour={primary ? "white" : "black"} src={icon} size={iconSize}/>
       {label}
     </div>
   </Button>

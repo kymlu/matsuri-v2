@@ -16,10 +16,14 @@ interface EditChoreoMetaForm {
   yMargin: number;
 }
 
-export default function EditChoreoSizeDialog(props: {
+type EditChoreoSizeDialogProps = {
   currentChoreo: Choreo;
   onSave: (geometry: StageGeometry, stageType: StageType) => void;
-}) {
+}
+
+export default function EditChoreoSizeDialog({
+  currentChoreo, onSave
+}: EditChoreoSizeDialogProps) {
   var [form, setForm] = useState<EditChoreoMetaForm>({
     name: "",
     eventName: "",
@@ -32,15 +36,15 @@ export default function EditChoreoSizeDialog(props: {
 
   useEffect(() => {
     setForm({
-      name: props.currentChoreo.name,
-      eventName: props.currentChoreo.event,
-      stageType: props.currentChoreo.stageType,
-      stageLength: props.currentChoreo.stageGeometry.stageLength,
-      stageWidth: props.currentChoreo.stageGeometry.stageWidth,
-      xMargin: props.currentChoreo.stageGeometry.margin.leftMargin,
-      yMargin: props.currentChoreo.stageGeometry.margin.topMargin,
+      name: currentChoreo.name,
+      eventName: currentChoreo.event,
+      stageType: currentChoreo.stageType,
+      stageLength: currentChoreo.stageGeometry.stageLength,
+      stageWidth: currentChoreo.stageGeometry.stageWidth,
+      xMargin: currentChoreo.stageGeometry.margin.leftMargin,
+      yMargin: currentChoreo.stageGeometry.margin.topMargin,
     });
-  }, [props.currentChoreo]);
+  }, [currentChoreo]);
 
   const handleChange = (field: keyof EditChoreoMetaForm, value: any) => {
     setForm({ ...form, [field]: value });
@@ -65,16 +69,16 @@ export default function EditChoreoSizeDialog(props: {
     title="舞台サイズを変更"
     onClose={() => {
       setForm({
-        name: props.currentChoreo.name,
-        eventName: props.currentChoreo.event,
-        stageType: props.currentChoreo.stageType,
-        stageLength: props.currentChoreo.stageGeometry.stageLength,
-        stageWidth: props.currentChoreo.stageGeometry.stageWidth,
-        xMargin: props.currentChoreo.stageGeometry.margin.leftMargin,
-        yMargin: props.currentChoreo.stageGeometry.margin.topMargin,
+        name: currentChoreo.name,
+        eventName: currentChoreo.event,
+        stageType: currentChoreo.stageType,
+        stageLength: currentChoreo.stageGeometry.stageLength,
+        stageWidth: currentChoreo.stageGeometry.stageWidth,
+        xMargin: currentChoreo.stageGeometry.margin.leftMargin,
+        yMargin: currentChoreo.stageGeometry.margin.topMargin,
       });
     }}
-    onSubmit={() => {props.onSave(stageGeometry, form.stageType)}}
+    onSubmit={() => {onSave(stageGeometry, form.stageType)}}
     >
       <div className="flex flex-col gap-2 md:flex-row">
         <GridPreview
@@ -101,40 +105,40 @@ export default function EditChoreoSizeDialog(props: {
           </Button>
           <NumberInput
             name="幅"
-            default={form.stageWidth}
+            defaultValue={form.stageWidth}
             min={MIN_STAGE_DIMENSION}
             max={MAX_STAGE_DIMENSION}
-            step={1}
+            baseStep={1}
             buttonStep={1}
             onChange={(newValue) => {handleChange("stageWidth", Number(newValue))}}
             label="幅 (m)"
           />
           <NumberInput
             name="縦"
-            default={form.stageLength}
+            defaultValue={form.stageLength}
             min={MIN_STAGE_DIMENSION}
             max={MAX_STAGE_DIMENSION}
-            step={1}
+            baseStep={1}
             buttonStep={1}
             onChange={(newValue) => {handleChange("stageLength", Number(newValue))}}
             label="縦 (m)"
           />
           <NumberInput
             name="xMargin"
-            default={form.xMargin}
+            defaultValue={form.xMargin}
             min={MIN_STAGE_MARGIN}
             max={MAX_STAGE_MARGIN}
-            step={1}
+            baseStep={1}
             buttonStep={1}
             onChange={(newValue) => {handleChange("xMargin", Number(newValue))}}
             label="左右余白 (m)"
           />
           <NumberInput
             name="yMargin"
-            default={form.yMargin}
+            defaultValue={form.yMargin}
             min={MIN_STAGE_MARGIN}
             max={MAX_STAGE_MARGIN}
-            step={1}
+            baseStep={1}
             buttonStep={1}
             onChange={(newValue) => {handleChange("yMargin", Number(newValue))}}
             label="上下余白 (m)"
