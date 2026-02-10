@@ -1,7 +1,6 @@
 import { useState } from "react";
 import NumberInput from "../components/inputs/NumberInput";
 import TextInput from "../components/inputs/TextInput";
-import CustomSelect from "../components/inputs/CustomSelect";
 import { isNullOrUndefinedOrBlank } from "../lib/helpers/globalHelper";
 import { Choreo, StageType } from "../models/choreo";
 import { Dancer, DancerPosition } from "../models/dancer";
@@ -86,7 +85,7 @@ export function NewChoreoPage(props: {
       props: {},
       sections: [{
         id: sectionId,
-        name: "隊列1",
+        name: "セクション1",
         order: 1,
         formation: {
           dancerActions: [],
@@ -105,14 +104,9 @@ export function NewChoreoPage(props: {
     2: "舞台情報",
     3: "ダンサー情報",
   };
-
-  const stageTypes: Record<StageType, string> = {
-    "parade": "パレード",
-    "stage": "ステージ",
-  };
-
+  
   return (
-    <div className="flex flex-col h-[100svh] p-4 mx-auto space-y-6">
+    <div className="flex flex-col h-[100svh] p-4 mx-auto space-y-2">
       <div className="text-center">
         <h2 className="mb-2 text-xl font-semibold">
           {stepTitles[step] || ""}
@@ -146,13 +140,21 @@ export function NewChoreoPage(props: {
               yMargin={form.yMargin}
             />
             <div className="md:w-1/3">
-              <CustomSelect
-                items={stageTypes}
-                defaultValue={stageTypes[form.stageType]}
-                setSelectValue={(newValue) => {handleChange("stageType", newValue)}}
-                label="舞台類分"
-              />
-              <div className="grid grid-cols-2 gap-4 md:flex md:flex-col">
+              <div className="grid grid-cols-2 gap-2 md:flex md:flex-col">
+                <Button
+                  full
+                  primary={form.stageType === 'parade'}
+                  onClick={() => handleChange("stageType", "parade")}
+                >
+                  パレード
+                </Button>
+                <Button
+                  full
+                  primary={form.stageType === 'stage'}
+                  onClick={() => handleChange("stageType", "stage")}
+                >
+                  ステージ
+                </Button>
                 <NumberInput
                   name="幅"
                   defaultValue={form.stageWidth}
@@ -213,7 +215,7 @@ export function NewChoreoPage(props: {
         )}
       </div>
 
-      <div className="flex justify-between gap-4 pt-6 pb-8">
+      <div className="flex justify-between gap-4 pb-8">
         {step === 1 && (
           <Button
           full
