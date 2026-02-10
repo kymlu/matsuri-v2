@@ -240,7 +240,7 @@ export default function MainStage({
             if ((isAddingDancer || isAddingProp) && stagePosition) {
               var position = {
                 x: (e.evt.x - stagePosition.attrs.x)/stagePosition.attrs.scaleX,
-                y: (e.evt.y - stagePosition.attrs.y)/stagePosition.attrs.scaleY
+                y: (e.evt.y - stagePosition.attrs.y - stageGeometry.margin.topMargin * METER_PX) / stagePosition.attrs.scaleY
               }
 
               if (appSettings.snapToGrid) {

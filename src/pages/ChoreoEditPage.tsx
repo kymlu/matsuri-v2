@@ -15,7 +15,7 @@ import EditChoreoSizeDialog from "../components/dialogs/EditChoreoSizeDialog";
 import { exportToMtr } from "../lib/helpers/exportHelper";
 import { saveChoreo } from "../lib/dataAccess/DataController";
 import IconButton from "../components/basic/IconButton";
-import { ICON } from "../lib/consts/consts";
+import { DEFAULT_PROP_LENGTH, DEFAULT_PROP_WIDTH, ICON } from "../lib/consts/consts";
 import { AppSetting } from "../models/appSettings";
 import { changeStageGeometryAndType, editChoreoInfo } from "../lib/editor/commands/choreoCommands";
 import EditChoreoInfoDialog from "../components/dialogs/EditChoreoInfoDialog";
@@ -322,7 +322,6 @@ export default function ChoreoEditPage(props: {
   const [movementUpdateGroup, setMovementUpdateGroup] = useState<StageEntities<Record<string, Coordinates>>>({props: {}, dancers: {}});
   
   useEffect(() => {
-    console.log(selectedIds, movementUpdateGroup);
     if (Object.keys(movementUpdateGroup.dancers).length === 0 && Object.keys(movementUpdateGroup.props).length === 0) return;
     if ((selectedIds.dancers.length > 0 && selectedIds.dancers.some(id => !movementUpdateGroup.dancers[id])) ||
       (selectedIds.props.length > 0 && selectedIds.props.some(id => !movementUpdateGroup.props[id]))) return;
@@ -421,8 +420,8 @@ export default function ChoreoEditPage(props: {
                 {
                   id: crypto.randomUUID(),
                   name: Object.keys(history.presentState.state.props).length.toString(),
-                  length: 1,
-                  width: 4,
+                  length: DEFAULT_PROP_LENGTH,
+                  width: DEFAULT_PROP_WIDTH,
                   color: colorPalette.rainbow.blue[0],
                 },
                 x - 2,

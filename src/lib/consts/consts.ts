@@ -5,6 +5,9 @@ export const PROP_SNAP_SIZE = 0.25;
 export const MIN_STAGE_DIMENSION = 3;
 export const MAX_STAGE_DIMENSION = 200;
 
+export const DEFAULT_PROP_WIDTH = 4;
+export const DEFAULT_PROP_LENGTH = 1;
+
 export const MIN_STAGE_MARGIN = 2;
 export const MAX_STAGE_MARGIN = 20;
 
