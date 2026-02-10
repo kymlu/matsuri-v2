@@ -45,6 +45,9 @@ export default function MainStage({
   const [propPositions, setPropPositions] = useState<PropPosition[]>([]);
   const [stageGeometry, setStageGeometry] = useState<StageGeometry>();
 
+  const [clickedOnEmpty, setClickedOnEmpty] = useState<boolean>(false);
+  const [isDraggingOnEmpty, setIsDraggingOnEmpty] = useState<boolean | undefined>(undefined);
+
   useEffect(() => {
     var newGeometry = currentChoreo.stageGeometry;
     if (stageGeometry !== undefined &&
@@ -222,13 +225,18 @@ export default function MainStage({
       stageGeometry && 
       <Stage
         onPointerDown={(e) => {
-          const stagePosition = e.target.getStage();
-          const clickedOnEmpty = e.target === stagePosition;
-
-          if (clickedOnEmpty) {
+          setClickedOnEmpty(e.target === e.target.getStage());
+        }}
+        onDragStart={(e) => {
+          setIsDraggingOnEmpty(clickedOnEmpty);
+        }}
+        onPointerUp={(e) => {
+          if (clickedOnEmpty && isDraggingOnEmpty === undefined) {
             if (canEdit) {
               setSelectedIds({props: [], dancers: []});
             }
+            const stagePosition = e.target.getStage();
+            
             if ((isAddingDancer || isAddingProp) && stagePosition) {
               var position = {
                 x: (e.evt.x - stagePosition.attrs.x)/stagePosition.attrs.scaleX,
@@ -254,7 +262,7 @@ export default function MainStage({
                 }
               }
             }
-          }
+          } else if (isDraggingOnEmpty !== undefined) setIsDraggingOnEmpty(undefined);
         }}
         width={size.width}
         height={size.height}
