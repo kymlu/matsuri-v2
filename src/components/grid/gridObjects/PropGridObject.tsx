@@ -57,6 +57,7 @@ export default function PropGridObject({
           height={prop.length * METER_PX}
           fill={prop.color}
           strokeEnabled={isSelected}
+          strokeWidth={2.5}
           stroke={colorPalette.primary}/>
         <Text
           y={(prop.length / 2) * METER_PX}

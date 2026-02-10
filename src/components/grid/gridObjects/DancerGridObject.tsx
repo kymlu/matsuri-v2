@@ -56,6 +56,7 @@ export default function DancerGridObject({
           radius={dancerDisplayType === "large" ? METER_PX * 0.45 : METER_PX * 0.2}
           fill={position.color}
           strokeEnabled={isSelected}
+          strokeWidth={2.5}
           stroke={colorPalette.primary}
         />
 
