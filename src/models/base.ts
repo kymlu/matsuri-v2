@@ -20,7 +20,7 @@ export type ObjectType = z.infer<typeof ObjectTypeSchema>;
 export const BasePositionSchema = CoordinatesSchema.extend({
   sectionId: z.string(),
   type: ObjectTypeSchema,
-  rotation: z.int().optional(),
+  rotation: z.number().optional(),
 });
 
 export type BasePosition = z.infer<typeof BasePositionSchema>;
