@@ -10,14 +10,18 @@ import { isNullOrUndefinedOrBlank } from "../../lib/helpers/globalHelper";
 type SidebarProps = {
   choreoName: string;
   choreoEvent?: string;
+
   editName?: () => void;
   editSize?: () => void;
+  manageDancers?: () => void;
   manageSections?: () => void;
+  exportChoreo?: () => void;
+  
   changeSnap?: () => void;
   changeShowGrid?: () => void;
   changeShowPrevious?: () => void;
   changeDancerSize?: (showLarge: boolean) => void;
-  exportChoreo?: () => void;
+  
   appSettings: AppSetting;
 };
 
@@ -26,6 +30,7 @@ export function Sidebar({
   choreoEvent,
   editName,
   editSize,
+  manageDancers,
   manageSections,
   changeSnap,
   changeShowGrid,
@@ -64,6 +69,15 @@ export function Sidebar({
               onClick={editSize}
               label="舞台サイズを変更"
               full icon={ICON.resize}/>
+          </>
+        }
+        {
+          manageDancers &&
+          <>
+            <IconLabelButton
+              onClick={manageDancers}
+              label="ダンサー管理"
+              full icon={ICON.person}/>
           </>
         }
         {/* {

@@ -16,6 +16,7 @@ type HeaderProps = {
   onDownload?: () => void;
   editName?: () => void;
   editSize?: () => void;
+  manageDancers?: () => void;
   manageSections?: () => void;
   exportChoreo?: () => void;
   changeSnap?: () => void;
@@ -35,6 +36,7 @@ export default function Header({
   onDownload,
   editName,
   editSize,
+  manageDancers,
   manageSections,
   exportChoreo,
   changeSnap,
@@ -95,6 +97,7 @@ export default function Header({
             choreoEvent={currentChoreo.event}
             editName={editName}
             editSize={editSize}
+            manageDancers={manageDancers}
             manageSections={manageSections}
             exportChoreo={exportChoreo}
             changeSnap={changeSnap}

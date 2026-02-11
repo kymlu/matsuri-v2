@@ -56,7 +56,7 @@ export default function TextInput({
       "bg-gray-200": disabled,
       "w-full": !compact,
       "w-32": compact,
-      "border-primary bg-primary-lighter placeholder:text-primary-darker": (required && isNullOrUndefinedOrBlank(value)) || hasError,
+      "border-primary bg-primary bg-opacity-30 placeholder:text-primary": (required && isNullOrUndefinedOrBlank(value)) || hasError,
     },);
 
   var wrapperClasses = classNames(

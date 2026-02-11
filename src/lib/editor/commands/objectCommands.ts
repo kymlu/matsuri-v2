@@ -49,6 +49,38 @@ export function renameDancer(state: Choreo, id: string, newName: string): Choreo
   }
 }
 
+export function renameAndDeleteDancers(state: Choreo, renamedDancers: Record<string, Dancer>, deletedDancerIds: Set<string>): Choreo {
+  const newSections = state.sections.map(section => {
+    const newDancerPositions = Object.fromEntries(
+      Object.entries(section.formation.dancerPositions).filter(
+        ([id]) => !deletedDancerIds.has(id)
+      )
+    );
+    const newDancerActions = section.formation.dancerActions.map(action => ({
+      ...action,
+      timings: action.timings.map(timing => ({
+        ...timing,
+        dancerIds: timing.dancerIds.filter(id => !deletedDancerIds.has(id)),
+      })),
+    }));
+
+    return {
+      ...section,
+      formation: {
+        ...section.formation,
+        dancerPositions: newDancerPositions,
+        dancerActions: newDancerActions,
+      }
+    }
+  });
+
+  return {
+    ...state,
+    dancers: renamedDancers,
+    sections: newSections,
+  }
+}
+
 export function addProp(state: Choreo, prop: Prop, x: number, y: number): Choreo {
   const newProps = { ...state.props, [prop.id]: prop }
 
@@ -105,16 +137,23 @@ export function removeObjects(state: Choreo, ids: StageEntities<string[]>): Chor
         ([id]) => !dancerIds.has(id)
       )
     );
+    const newDancerActions = section.formation.dancerActions.map(action => ({
+      ...action,
+      timings: action.timings.map(timing => ({
+        ...timing,
+        dancerIds: timing.dancerIds.filter(id => !dancerIds.has(id)),
+      })),
+    }));
     const newPropPositions = Object.fromEntries(
       Object.entries(section.formation.propPositions).filter(
         ([id]) => !propIds.has(id)
       )
     );
-    // Todo: remove dancer from action
     return {
       ...section,
       formation: {
         ...section.formation,
+        dancerActions: newDancerActions,
         dancerPositions: newDancerPositions,
         propPositions: newPropPositions,
       }

@@ -8,7 +8,7 @@ import { Choreo } from "../models/choreo";
 import { EditHistory, StageEntities } from "../models/history";
 import { addSection, assignDancersToTiming, duplicateSection, editDancerActions, editSectionNote, removeSection, renameSection, reorderSections } from "../lib/editor/commands/sectionCommands";
 import { ChoreoSection } from "../models/choreoSection";
-import { isNullOrUndefinedOrBlank, strEquals } from "../lib/helpers/globalHelper";
+import { indexByKey, isNullOrUndefinedOrBlank, strEquals } from "../lib/helpers/globalHelper";
 import MainStage from "../components/grid/MainStage";
 import { Dialog } from "@base-ui/react";
 import EditChoreoSizeDialog from "../components/dialogs/EditChoreoSizeDialog";
@@ -30,9 +30,10 @@ import EditSectionNameDialog from "../components/dialogs/EditSectionNameDialog";
 import EditSectionNoteDialog from "../components/dialogs/EditSectionNoteDialog";
 import { Coordinates } from "../models/base";
 import { colorPalette } from "../lib/consts/colors";
-import { addDancer, addProp, alignHorizontalPositions, alignVerticalPositions, changeObjectColours, distributePositions, moveObjectPositions, pastePositions, removeObjects, renameDancer, renameProp, swapPositions, updatePropSizeAndRotate } from "../lib/editor/commands/objectCommands";
+import { addDancer, addProp, alignHorizontalPositions, alignVerticalPositions, changeObjectColours, distributePositions, moveObjectPositions, pastePositions, removeObjects, renameAndDeleteDancers, renameDancer, renameProp, swapPositions, updatePropSizeAndRotate } from "../lib/editor/commands/objectCommands";
 import { PropPosition } from "../models/prop";
 import EditPropNameDialog from "../components/dialogs/EditPropNameDialog";
+import { DancerManagerDialog } from "../components/dialogs/DancerManagerDialog";
 
 const resizeDialog = Dialog.createHandle<Choreo>();
 const editChoreoInfoDialog = Dialog.createHandle<string>();
@@ -40,6 +41,7 @@ const renameDancerDialog = Dialog.createHandle<string>();
 const renamePropDialog = Dialog.createHandle<string>();
 const editDancerColourDialog = Dialog.createHandle<string>();
 const editDancerActionsDialog = Dialog.createHandle<string>();
+const dancerManagerDialog = Dialog.createHandle<string>();
 const renameSectionDialog = Dialog.createHandle<ChoreoSection>();
 const addNoteToSectionDialog = Dialog.createHandle<ChoreoSection>();
 const deleteSectionDialog = Dialog.createHandle<ChoreoSection>();
@@ -271,6 +273,7 @@ export default function ChoreoEditPage(props: {
   const [renamePropDialogOpen, setRenamePropDialogOpen] = useState(false);
   const [editDancerColourDialogOpen, setEditDancerColourDialogOpen] = useState(false);
   const [editDancerActionsDialogOpen, setEditDancerActionsDialogOpen] = useState(false);
+  const [dancerManagerDialogOpen, setDancerManagerDialogOpen] = useState(false);
   const [renameSectionDialogOpen, setRenameSectionDialogOpen] = useState(false);
   const [addNoteToSectionDialogOpen, setAddNoteToSectionDialogOpen] = useState(false);
   const [deleteSectionDialogOpen, setDeleteSectionDialogOpen] = useState(false);
@@ -311,6 +314,10 @@ export default function ChoreoEditPage(props: {
     setEditDancerActionsDialogOpen(isOpen);
   };
 
+  const handleDancerManagerDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
+    setDancerManagerDialogOpen(isOpen);
+  };
+
   const onSwapPositions = () => {
     dispatch({
       type: "SET_STATE",
@@ -341,8 +348,9 @@ export default function ChoreoEditPage(props: {
         currentChoreo={history.presentState.state}
         onSave={() => {onSave()}}
         editName={() => {setEditChoreoInfoDialogOpen(true)}}
-        manageSections={() => {console.log("TODO: implement Manage Sections")}}
         editSize={() => {setResizeDialogOpen(true);}}
+        manageDancers={() => {setDancerManagerDialogOpen(true);}}
+        manageSections={() => {console.log("TODO: implement Manage Sections")}}
         exportChoreo={() => {
           console.log("TODO: implement choice of pdf or mtr");
           exportToMtr(history.presentState.state);
@@ -716,6 +724,23 @@ export default function ChoreoEditPage(props: {
               commit: true});
             editDancerActionsDialog.close();
             setEditDancerActionsDialogOpen(false);
+          }}
+          />
+      </Dialog.Root>
+      <Dialog.Root
+        handle={dancerManagerDialog}
+        open={dancerManagerDialogOpen}
+        onOpenChange={handleDancerManagerDialogOpen}>
+        <DancerManagerDialog
+          dancers={history.presentState.state.dancers}
+          onSubmit={(dancers, deletedDancerIds) => {
+            dispatch({
+              type: "SET_STATE",
+              newState: renameAndDeleteDancers(history.presentState.state, indexByKey(dancers, "id"), new Set(deletedDancerIds)),
+              currentSectionId: currentSection.id,
+              commit: true});
+            dancerManagerDialog.close();
+            setDancerManagerDialogOpen(false);
           }}
           />
       </Dialog.Root>
