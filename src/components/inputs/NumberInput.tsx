@@ -2,6 +2,8 @@ import { NumberField } from "@base-ui/react";
 import classNames from "classnames";
 import React, { useImperativeHandle } from "react";
 import { FieldWithLabel } from "./Label";
+import Icon from "../basic/Icon";
+import { ICON } from "../../lib/consts/consts";
 
 export interface NumberInputProps {
   name?: string,
@@ -57,50 +59,16 @@ export default function NumberInput ({
         >
         <div className={wrapperClasses}>
           <NumberField.Group className="grid grid-cols-[1fr,2fr,1fr] w-full bg-white data-[disabled]:bg-gray-200 border-2 rounded-md border-gray-300 focus-within:border-primary">
-            <NumberField.Decrement className={"flex items-center justify-center select-none rounded-l-md min-w-4 bg-clip-padding" + ((value ?? 1) > (min ?? 0) ? " [&:not([data-disabled])]:lg:hover:bg-gray-100 [&:not([data-disabled])]:active:bg-gray-100 text-gray-900": " text-gray-400")}>
-              <MinusIcon />
+            <NumberField.Decrement className={"flex items-center justify-center select-none rounded-l-md min-w-4 bg-clip-padding" + ((value ?? 1) > (min ?? 0) ? " opacity-100" : " opacity-30")}>
+              <Icon src={ICON.remove} colour="black" size="sm"/>
             </NumberField.Decrement>
             <NumberField.Input className="p-3 text-lg text-center text-gray-900 min-w-10 tabular-nums focus:z-1 focus:outline-none focus:-outline-offset-1" />
-            <NumberField.Increment className={"flex items-center justify-center select-none rounded-r-md min-w-4 bg-clip-padding" + ((value ?? 1) < (max ?? 100000000) ? " [&:not([data-disabled])]:lg:hover:bg-gray-100 [&:not([data-disabled])]:active:bg-gray-100 text-gray-900": " text-gray-400")}>
-              <PlusIcon />
+            <NumberField.Increment className={"flex items-center justify-center select-none rounded-r-md min-w-4 bg-clip-padding" + ((value ?? 1) < (max ?? 100000000) ? " opacity-100" : " opacity-30")}>
+              <Icon src={ICON.add} colour="black" size="sm"/>
             </NumberField.Increment>
           </NumberField.Group>
         </div>
       </NumberField.Root>
     </FieldWithLabel>
   )
-}
-
-function PlusIcon(props: React.ComponentProps<'svg'>) {
-  return (
-    <svg
-      width="10"
-      height="10"
-      viewBox="0 0 10 10"
-      fill="none"
-      stroke="currentcolor"
-      strokeWidth="1.6"
-      xmlns="http://www.w3.org/2000/svg"
-      {...props}
-    >
-      <path d="M0 5H5M10 5H5M5 5V0M5 5V10" />
-    </svg>
-  );
-}
-
-function MinusIcon(props: React.ComponentProps<'svg'>) {
-  return (
-    <svg
-      width="10"
-      height="10"
-      viewBox="0 0 10 10"
-      fill="none"
-      stroke="currentcolor"
-      strokeWidth="1.6"
-      xmlns="http://www.w3.org/2000/svg"
-      {...props}
-    >
-      <path d="M0 5H10" />
-    </svg>
-  );
 }
