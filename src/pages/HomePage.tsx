@@ -93,9 +93,7 @@ export default function HomePage(props: {
 
   return (
     <div className='flex flex-col w-full gap-2 mx-auto my-10'>
-      <div className='flex items-center justify-between mx-4'>
-        <h1 className='text-2xl font-bold'>祭り</h1>
-      </div>
+      <h1 className='mx-4 text-2xl font-bold'>祭り</h1>
       <Divider primary/>
       <div className='flex flex-col gap-4 mx-5'>
         <div className="flex gap-2">
