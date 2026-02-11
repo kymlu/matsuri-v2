@@ -6,33 +6,33 @@ export const readUploadedFile = (
   onComplete: (choreo: Choreo) => void,
   onError: (message: string) => void
 ) => {
-    const reader = new FileReader();
+  const reader = new FileReader();
   
-    reader.addEventListener(
-      "load",
-      (event) => {
-        if (event.target?.result) {
-          try {
-            const uploadResult = JSON.parse(event.target.result.toString());
-            const parsedResult = z.parse(ChoreoSchema, uploadResult);
-            onComplete(parsedResult);
-          } catch (e) {
-            if (e instanceof Error) {
-              console.log("Error parsing data:", e.message);
-              onError("Error parsing data:" + e.message);
-            } else {
-              console.error('An unknown error occurred:', e);
-              onError("Unknown error occurred");
-            }
+  reader.addEventListener(
+    "load",
+    (event) => {
+      if (event.target?.result) {
+        try {
+          const uploadResult = JSON.parse(event.target.result.toString());
+          const parsedResult = z.parse(ChoreoSchema, uploadResult);
+          onComplete(parsedResult);
+        } catch (e) {
+          if (e instanceof Error) {
+            console.log("Error parsing data:", e.message);
+            onError("Error parsing data:" + e.message);
+          } else {
+            console.error('An unknown error occurred:', e);
+            onError("Unknown error occurred");
           }
         }
-      },
-      false,
-    );
+      }
+    },
+    false,
+  );
 
-    try {
-      reader.readAsText(file);
-    } catch {
-      console.error("No file was read.");
-    }
+  try {
+    reader.readAsText(file);
+  } catch {
+    console.error("No file was read.");
   }
+}

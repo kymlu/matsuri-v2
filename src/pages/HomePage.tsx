@@ -18,6 +18,8 @@ import z from "zod"
 import { exportToMtr } from "../lib/helpers/exportHelper"
 import EditChoreoInfoDialog from "../components/dialogs/EditChoreoInfoDialog"
 import BaseEditDialog from "../components/dialogs/BaseEditDialog"
+import ConfirmUploadDialog from "../components/dialogs/ConfirmUploadDialog"
+import BaseErrorDialog from "../components/dialogs/BaseErrorDialog"
 
 export default function HomePage(props: {
   goToNewChoreoPage: () => void,
@@ -29,15 +31,29 @@ export default function HomePage(props: {
   
   const [editingChoreo, setEditingChoreo] = useState<Choreo | undefined>();
   const [editChoreoInfoDialogOpen, setEditChoreoInfoDialogOpen] = useState(false);
-  const editChoreoInfoDialog = Dialog.createHandle<Choreo>();
+  const editChoreoInfoDialog = Dialog.createHandle<{}>();
   const handleEditChoreoInfoDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setEditChoreoInfoDialogOpen(isOpen);
   };
 
   const [deleteChoreoDialogOpen, setDeleteChoreoDialogOpen] = useState(false);
-  const deleteChoreoDialog = Dialog.createHandle<Choreo>();
+  const deleteChoreoDialog = Dialog.createHandle<{}>();
   const handleDeleteChoreoDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setDeleteChoreoDialogOpen(isOpen);
+  };
+
+  const [uploadFailedDialogOpen, setUploadFailedDialogOpen] = useState(false);
+  const uploadFailedDialog = Dialog.createHandle<{}>();
+  const handleUploadFailedDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
+    setUploadFailedDialogOpen(isOpen);
+  };
+
+  const [uploadedChoreo, setUploadedChoreo] = useState<Choreo | undefined>();
+  const [duplicateChoreoId, setDuplicateChoreoId] = useState<string | undefined>();
+  const [uploadChoreoDialogOpen, setUploadChoreoDialogOpen] = useState(false);
+  const uploadChoreoDialog = Dialog.createHandle<{}>();
+  const handleUploadChoreoDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
+    setUploadChoreoDialogOpen(isOpen);
   };
 
   const triggerUpload = () => {
@@ -135,13 +151,25 @@ export default function HomePage(props: {
 
       <input className='hidden' type="file" id="uploadFileInput" accept=".mtr"
         onChange={(event) => {
-          console.log(event.target.files);
           if (event.target.files) {
             var file = event.target.files?.[0];
             readUploadedFile(
               file,
-              (choreo: Choreo) => {props.onUploadSuccess(choreo);},
-              () => {}
+              (choreo: Choreo) => {
+                const existingChoreos = Object.values(savedChoreos).flat();
+                const duplicateChoreo = existingChoreos.find(c => strEquals(c.name, choreo.name) && strEquals(c.event, choreo.event));
+                if (duplicateChoreo) {
+                  setDuplicateChoreoId(duplicateChoreo.id);
+                  setUploadChoreoDialogOpen(true);
+                  setUploadedChoreo(choreo);
+                } else {
+                  choreo.id = crypto.randomUUID();
+                  props.onUploadSuccess(choreo);
+                }
+              },
+              () => {
+                setUploadFailedDialogOpen(true);
+              }
             );
           }
         }}/>
@@ -182,6 +210,48 @@ export default function HomePage(props: {
             }}>
             この操作は取り消せません。
           </BaseEditDialog>
+        </Dialog.Root>
+        <Dialog.Root
+          handle={uploadFailedDialog}
+          open={uploadFailedDialogOpen}
+          onOpenChange={handleUploadFailedDialogOpen}>
+            
+          <BaseErrorDialog
+            title="アップロード失敗"
+            onClose={() => {setUploadFailedDialogOpen(false)}}>
+            ファイルに問題があります。別のファイルをお試しください。
+          </BaseErrorDialog>
+        </Dialog.Root>
+        <Dialog.Root
+          handle={uploadChoreoDialog}
+          open={uploadChoreoDialogOpen}
+          onOpenChange={handleUploadChoreoDialogOpen}
+        >
+          <ConfirmUploadDialog
+            choreoName={uploadedChoreo?.name}
+            event={uploadedChoreo?.event}
+            onCancel={() => {
+              setUploadChoreoDialogOpen(false);
+              setUploadedChoreo(undefined);
+            }}
+            onCopy={() => {
+              setUploadedChoreo(undefined);
+              props.onUploadSuccess({
+                ...uploadedChoreo!,
+                id: crypto.randomUUID(),
+                name: `${uploadedChoreo!.name} - コピー`
+              });
+            }}
+            onOverwrite={() => {
+              setUploadChoreoDialogOpen(false);
+              props.onUploadSuccess({
+                ...uploadedChoreo!,
+                id: duplicateChoreoId ?? crypto.randomUUID()
+              });
+              setUploadChoreoDialogOpen(false);
+              setUploadedChoreo(undefined);
+            }}
+          />
         </Dialog.Root>
     </div>
   )
