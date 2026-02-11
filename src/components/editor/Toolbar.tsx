@@ -140,8 +140,8 @@ export default function Toolbar({
         {showPastePosition && <IconButton src={ICON.contentPaste} label="ペースト" onClick={() => {onPastePosition()}} />}
         {showSwapPosition && <IconButton src={ICON.swapHoriz} label="位置交換" onClick={() => {onSwapPosition()}} />}
         {showDeleteObjects && <IconButton src={ICON.delete} label="削除" onClick={()=>{onDeleteObjects()}}/>}
-        <IconButton src={ICON.selectAll} label="全選択" onClick={() => {onSelectType()}} />
-        {showSelectDancer && <IconButton src={ICON.selectAll} label="色選択" onClick={() => {onSelectColor()}} />}
+        <IconButton src={ICON.selectAll} label="全員選択" onClick={() => {onSelectType()}} />
+        {showSelectDancer && <IconButton src={ICON.selectAll} label="同色選択" onClick={() => {onSelectColor()}} />}
       </>
     }
     {
@@ -160,12 +160,12 @@ export default function Toolbar({
             <IconButton
               src={isAddingDancer ? ICON.clear : ICON.person}
               disabled={isAddingProp}
-              label="ダンサー追加"
+              label="ダンサー"
               onClick={() => {onAddDancer()}} />
             <IconButton
               src={isAddingProp ? ICON.clear : ICON.flag}
               disabled={isAddingDancer}
-              label="道具追加"
+              label="道具"
               onClick={() => {onAddProp()}} />
           </>
         }
@@ -223,7 +223,7 @@ export default function Toolbar({
             <IconButton
               disabled={!isAssigningActionsEnabled}
               src={isAssigningActions ? ICON.clear : ICON.category}
-              label="割り当て"
+              label="割当"
               onClick={() => {onAssignActions()}} />
           </>
         }
