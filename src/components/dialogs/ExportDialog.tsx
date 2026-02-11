@@ -37,8 +37,8 @@ export default function ExportDialog({
     return record;
   }, [choreo]);
 
-  useEffect(() => {
-    setExportName(choreo.name)
+  const defaultName = useMemo(() => {
+    return `${isNullOrUndefinedOrBlank(choreo.event) ? "" : `${choreo.event} - `}${choreo.name}`;
   }, [choreo]);
 
   return <>
@@ -68,7 +68,7 @@ export default function ExportDialog({
             label="ファイル名"
             rightLabel=".pdf"
             hasError={isExportNameValid}
-            defaultValue={choreo.name}
+            defaultValue={defaultName}
             restrictFn={(s) => !testInvalidCharacters(s)}
             onContentChange={(name) => {
               setExportName(name);
