@@ -32,7 +32,7 @@ export function NewChoreoPage(props: {
     stageType: "stage",
     stageWidth: 10,
     stageLength: 10,
-    dancerCount: 5,
+    dancerCount: 10,
     xMargin: 2,
     yMargin: 2,
   });
