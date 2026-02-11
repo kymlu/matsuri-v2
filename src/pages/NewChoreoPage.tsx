@@ -127,6 +127,7 @@ export function NewChoreoPage(props: {
               onContentChange={newValue => handleChange("eventName", newValue)}
               placeholder="イベント名を入力してください"
               label="イベント（任意）"
+              restrictFn={(s) => !testInvalidCharacters(s)}
             />
           </div>
         )}

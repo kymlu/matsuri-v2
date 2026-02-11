@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import TextInput from "../inputs/TextInput";
-import { isNullOrUndefinedOrBlank } from "../../lib/helpers/globalHelper";
+import { isNullOrUndefinedOrBlank, testInvalidCharacters } from "../../lib/helpers/globalHelper";
 import BaseEditDialog from "./BaseEditDialog";
 import { Choreo } from "../../models/choreo";
 
@@ -28,11 +28,15 @@ export default function EditChoreoInfoDialog({
     <TextInput
       label="名前"
       defaultValue={choreo?.name ?? ""}
-      onContentChange={ (newName) => { setName(newName) }}/>
+      onContentChange={ (newName) => { setName(newName) }}
+      restrictFn={(s) => !testInvalidCharacters(s)}
+      />
 
     <TextInput
       label="イベント（任意）"
       defaultValue={choreo?.event ?? ""}
-      onContentChange={ (newEvent) => { setEvent(newEvent) }}/>
+      onContentChange={ (newEvent) => { setEvent(newEvent) }}
+      restrictFn={(s) => !testInvalidCharacters(s)}
+      />
   </BaseEditDialog>
 }
