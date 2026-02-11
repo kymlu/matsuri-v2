@@ -94,7 +94,7 @@ export default function PositionHint({
               actions.map(action => {
                 var assignedTiming = action.timings.find(t => t.dancerIds.includes(dancer.id));
                 
-                return <div className="flex justify-between pl-2">
+                return <div key={action.id} className="flex justify-between pl-2">
                   <span>{action.name}</span>
                   <span className="font-medium">{assignedTiming?.name ?? "---"}</span>
                 </div>

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import NumberInput from "../components/inputs/NumberInput";
 import TextInput from "../components/inputs/TextInput";
-import { isNullOrUndefinedOrBlank } from "../lib/helpers/globalHelper";
+import { isNullOrUndefinedOrBlank, testInvalidCharacters } from "../lib/helpers/globalHelper";
 import { Choreo, StageType } from "../models/choreo";
 import { Dancer, DancerPosition } from "../models/dancer";
 import { colorPalette } from "../lib/consts/colors";
@@ -120,6 +120,7 @@ export function NewChoreoPage(props: {
               onContentChange={newValue => handleChange("name", newValue)}
               placeholder="名前を入力してください"
               label="隊列名前"
+              restrictFn={(s) => !testInvalidCharacters(s)}
             />
             <TextInput
               defaultValue={form.eventName}

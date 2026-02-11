@@ -23,13 +23,15 @@ export type TextInputProps = {
   showLength?: boolean,
   hasOutline?: boolean,
   label?: string,
+  rightLabel?: string,
+  restrictFn?: (s: string) => boolean,
 }
 
 export default function TextInput({
   name, defaultValue, onContentChange, placeholder,
   clearable, compact, tall, short, centered, required,
   hasError, errorMsg, disabled, ref, maxLength,
-  showLength, hasOutline, label
+  showLength, hasOutline, label, rightLabel, restrictFn
 }: TextInputProps) {
   const [value, setValue] = React.useState<string>(defaultValue ?? "");
 
@@ -40,8 +42,10 @@ export default function TextInput({
   }));
 
   const handleChange = (newValue: string) => {
-    setValue(newValue);
-    onContentChange(newValue);
+    if (!restrictFn || restrictFn(newValue)) {
+      setValue(newValue);
+      onContentChange(newValue);
+    }
   }
 
   var inputClasses = classNames(
@@ -68,15 +72,20 @@ export default function TextInput({
   return (
     <FieldWithLabel label={label}>
       <div className={wrapperClasses}>
-        <input
-          disabled={disabled}
-          type="text"
-          name={name}
-          maxLength={maxLength ?? 20}
-          placeholder={placeholder ?? ""}
-          value={value ?? ""}
-          onInput={(event) => handleChange(event.currentTarget.value)}
-          className={inputClasses}/>
+        <div className="flex items-center gap-2">
+          <input
+            disabled={disabled}
+            type="text"
+            name={name}
+            maxLength={maxLength ?? 20}
+            placeholder={placeholder ?? ""}
+            value={value ?? ""}
+            onInput={(event) => handleChange(event.currentTarget.value)}
+            className={inputClasses}/>
+          {
+            rightLabel && <span>{rightLabel}</span>
+          }
+        </div>
 
         {
           clearable && !isNullOrUndefinedOrBlank(value) && 

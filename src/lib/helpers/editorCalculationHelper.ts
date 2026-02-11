@@ -12,7 +12,7 @@ export function stageMetersToPx(
   const yStageMeters =
     geo.yAxis === "top-down"
       ? pos.y
-      : geo.stageLength - pos.y - (height ?? 0);
+      : (geo.stageLength - pos.y - (height ?? 0));
 
   const yPx =
     (geo.margin.topMargin + yStageMeters) * meterPx;

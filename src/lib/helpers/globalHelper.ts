@@ -62,3 +62,11 @@ export function indexByKey<T extends Record<string, any>, K extends keyof T>(
     return acc;
   }, {} as Record<string, T>);
 }
+
+export function testFilename(fileName: string) {
+  return RegExp(/[<>:"/\\|?*\u0000-\u001F]|[. ]$/g).test(fileName);
+}
+
+export function testInvalidCharacters(text: string) {
+  return RegExp(/[<>:"/\\|?*]$/g).test(text);
+}

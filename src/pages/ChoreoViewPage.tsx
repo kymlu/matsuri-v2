@@ -10,6 +10,8 @@ import ViewerSidebar from "../components/editor/ViewerSidebar";
 import { StageEntities } from "../models/history";
 import { DancerPosition } from "../models/dancer";
 import { PropPosition } from "../models/prop";
+import ExportDialog from "../components/dialogs/ExportDialog";
+import { Dialog } from "@base-ui/react";
 
 export default function ChoreoViewPage(props: {
   goToHomePage: () => void
@@ -42,12 +44,18 @@ export default function ChoreoViewPage(props: {
 
   const resetSelectedIds = () => setSelectedIds({props: [], dancers: []});
 
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
+  const exportDialog = Dialog.createHandle<{}>();
+  const handleExportDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
+    setExportDialogOpen(isOpen);
+  };
+
   return (
     <div className='flex flex-col h-[100svh] max-h-[100svh] overflow-hidden'>
       <Header
         returnHome={props.goToHomePage}
         currentChoreo={props.currentChoreo}
-        // onDownload={() => {console.log("TODO: implement download")}}
+        onDownload={() => {setExportDialogOpen(true)}}
         changeShowGrid={() => {
           setAppSettings(prev => {return {...prev, showGrid: !prev.showGrid}})
         }}
@@ -112,6 +120,21 @@ export default function ChoreoViewPage(props: {
           }}
         />
       </footer>
+      
+      <Dialog.Root
+        handle={exportDialog}
+        open={exportDialogOpen}
+        onOpenChange={handleExportDialogOpen}
+      >
+        {
+          exportDialogOpen &&
+          <ExportDialog
+            choreo={props.currentChoreo}
+            selectedId={selectedIds.dancers.length === 1 ? selectedIds.dancers[0] : ""}
+            onClose={() => setExportDialogOpen(false)}
+          />
+        }
+      </Dialog.Root>
     </div>
   )
 }

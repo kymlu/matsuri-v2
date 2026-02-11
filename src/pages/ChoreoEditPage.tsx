@@ -34,6 +34,7 @@ import { addDancer, addProp, alignHorizontalPositions, alignVerticalPositions, c
 import { PropPosition } from "../models/prop";
 import EditPropNameDialog from "../components/dialogs/EditPropNameDialog";
 import { DancerManagerDialog } from "../components/dialogs/DancerManagerDialog";
+import ExportDialog from "../components/dialogs/ExportDialog";
 
 const resizeDialog = Dialog.createHandle<Choreo>();
 const editChoreoInfoDialog = Dialog.createHandle<string>();
@@ -317,6 +318,12 @@ export default function ChoreoEditPage(props: {
   const handleDancerManagerDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setDancerManagerDialogOpen(isOpen);
   };
+  
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
+  const exportDialog = Dialog.createHandle<{}>();
+  const handleExportDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
+    setExportDialogOpen(isOpen);
+  };
 
   const onSwapPositions = () => {
     dispatch({
@@ -349,6 +356,7 @@ export default function ChoreoEditPage(props: {
         onSave={() => {onSave()}}
         editName={() => {setEditChoreoInfoDialogOpen(true)}}
         editSize={() => {setResizeDialogOpen(true);}}
+        onDownload={() => setExportDialogOpen(true)}
         manageDancers={() => {setDancerManagerDialogOpen(true);}}
         manageSections={() => {console.log("TODO: implement Manage Sections")}}
         exportChoreo={() => {
@@ -831,6 +839,20 @@ export default function ChoreoEditPage(props: {
             deleteSectionDialog.close();
             setDeleteSectionDialogOpen(false);
           }}/>
+      </Dialog.Root>
+      <Dialog.Root
+        handle={exportDialog}
+        open={exportDialogOpen}
+        onOpenChange={handleExportDialogOpen}
+      >
+        {
+          exportDialogOpen &&
+          <ExportDialog
+            choreo={history.presentState.state}
+            selectedId={selectedIds.dancers.length === 1 ? selectedIds.dancers[0] : ""}
+            onClose={() => setExportDialogOpen(false)}
+          />
+        }
       </Dialog.Root>
     </div>
   )

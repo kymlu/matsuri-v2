@@ -49,17 +49,19 @@ export default function CustomSelect({
           </Select.Icon>
         </Select.Trigger>
         <Select.Portal>
-          <Select.Positioner side="bottom" className="z-10 bg-white border-2 rounded-md select-none border-primary">
-            <Select.Popup className="flex flex-col gap-1 p-2 max-h-[40svh] overflow-y-auto">
-              { Object.entries(items).map(([itemValue, label]) => (
-                <Select.Item
-                  key={itemValue}
-                  value={label}
-                  className="flex p-2 cursor-pointer data-[highlighted]:bg-gray-200"
-                >
-                  {isIcons ? <img className="size-8" src={label}/> : label}
-                </Select.Item>
-              ))}
+          <Select.Positioner side="bottom" className="z-50 bg-white border-2 rounded-md select-none border-primary">
+            <Select.Popup>
+              <div className="flex flex-col gap-1 p-2 max-h-[40svh] overflow-y-auto">
+                { Object.entries(items).map(([itemValue, label]) => (
+                  <Select.Item
+                    key={itemValue}
+                    value={label}
+                    className="flex p-2 cursor-pointer data-[highlighted]:bg-gray-200"
+                  >
+                    {isIcons ? <img className="size-8" src={label}/> : label}
+                  </Select.Item>
+                ))}
+              </div>
             </Select.Popup>
           </Select.Positioner>
         </Select.Portal>
