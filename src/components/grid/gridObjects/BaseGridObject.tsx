@@ -13,6 +13,7 @@ export interface BaseGridObjectProps {
   children: ReactNode
   rotation?: number,
   position: Coordinates,
+  height?: number,
   updatePosition?: (x: number, y: number) => void,
   onClick?: (isAdditive?: boolean) => void,
   draggable?: boolean,
@@ -30,6 +31,7 @@ export default function BaseGridObject({
   children,
   rotation,
   position,
+  height,
   updatePosition,
   onClick,
   draggable,
@@ -50,7 +52,7 @@ export default function BaseGridObject({
   }, [id, registerNode]);
 
   useEffect(() => {
-    var newPosition = stageMetersToPx({x: position.x, y: position.y}, stageGeometry, METER_PX);
+    var newPosition = stageMetersToPx({x: position.x, y: position.y}, stageGeometry, METER_PX, height);
     if (newPosition.x === ref.current?.x() && newPosition.y === ref.current?.y()) return;
 
     setIsAnimating(true);
@@ -121,7 +123,7 @@ export default function BaseGridObject({
             x: position.x,
             y: position.y,
             onFinish: () => {
-              var snappedPositionInM = pxToStageMeters({x: node.attrs.x, y: node.attrs.y}, stageGeometry, METER_PX);
+              var snappedPositionInM = pxToStageMeters({x: node.attrs.x, y: node.attrs.y}, stageGeometry, METER_PX, height);
               updatePosition?.(snappedPositionInM.x, snappedPositionInM.y);
             }
           });

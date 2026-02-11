@@ -173,7 +173,11 @@ export default function FormationLayer({
 
               var width = Math.max(Math.round(prop.width * group.scaleX() / PROP_SNAP_SIZE) * PROP_SNAP_SIZE, 0.5);
               var length = Math.max(Math.round(prop.length * group.scaleY() / PROP_SNAP_SIZE) * PROP_SNAP_SIZE, 0.5);
-              var newCoords = pxToStageMeters({x: event.target.attrs.x, y: event.target.attrs.y}, geometry, METER_PX);
+              var newCoords = pxToStageMeters(
+                {x: event.target.attrs.x, y: event.target.attrs.y},
+                geometry,
+                METER_PX,
+                props[selectedIds.props[0]].length);
 
             	updatePropSizeAndRotate?.(
                 width, length,
