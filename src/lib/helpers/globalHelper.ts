@@ -64,7 +64,7 @@ export function indexByKey<T extends Record<string, any>, K extends keyof T>(
 }
 
 export function testFilename(fileName: string) {
-  return RegExp(/[<>:"/\\|?*\u0000-\u001F]|[. ]$/g).test(fileName);
+  return RegExp(/[<>:"/\\|?*]|[. ]$/g).test(fileName);
 }
 
 export function testInvalidCharacters(text: string) {
