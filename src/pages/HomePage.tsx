@@ -1,6 +1,5 @@
 import { Dialog } from "@base-ui/react"
 import CustomDialog from "../components/basic/CustomDialog"
-import Divider from "../components/basic/Divider"
 import { ICON, LAST_UPDATED } from "../lib/consts/consts"
 import { IconLabelButton } from "../components/basic/Button"
 import Icon from "../components/basic/Icon"
@@ -108,7 +107,7 @@ export default function HomePage(props: {
   }
 
   return (
-    <div className='grid grid-rows-[auto,auto,1fr] overflow-hide w-full gap-2 mx-auto py-10 h-[100svh]'>
+    <div className='grid grid-rows-[auto,auto,1fr] overflow-hide w-full gap-2 mx-auto p-10 h-[100svh]'>
       <h1 className='mx-4 text-2xl font-bold text-center'>隊列表作成</h1>
       <div className="flex gap-2 mb-2">
         <IconLabelButton
