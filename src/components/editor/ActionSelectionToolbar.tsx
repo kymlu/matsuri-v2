@@ -16,8 +16,9 @@ export default function ActionSelectionToolbar({
 }: ActionSelectionToolbarProps){
   return <div className="flex w-screen gap-2 p-2 overflow-scroll max-w-screen">
     {
-      actions.map(action => <ActionSection
+      actions.map((action, index) => <ActionSection
         key={action.id}
+        index={index}
         selectedTimingId={selectedTimingId}
         onSelectTiming={(timing) => {onSelectTiming(timing ? action : undefined, timing)}}
         action={action}
@@ -28,14 +29,15 @@ export default function ActionSelectionToolbar({
 
 type ActionSectionProps = {
   action: DancerAction,
+  index: number,
   onSelectTiming: (timing?: DancerActionTiming) => void,
   selectedTimingId?: string,
 }
 
 function ActionSection ({
-  action, onSelectTiming, selectedTimingId
+  action, index, onSelectTiming, selectedTimingId
 }: ActionSectionProps) {
-  const [isExpanded, setIsExpanded] = useState<boolean>(false);
+  const [isExpanded, setIsExpanded] = useState<boolean>(index === 0);
 
   return <div className="flex gap-2">
     <Button
