@@ -89,7 +89,7 @@ export function Sidebar({
           <>
             <IconLabelButton
               onClick={exportChoreo}
-              label="エクスポート"
+              label="隊列ファイルダウンロード"
               full icon={ICON.fileExport}/>
           </>
         }

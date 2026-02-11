@@ -19,13 +19,21 @@ import EditChoreoInfoDialog from "../components/dialogs/EditChoreoInfoDialog"
 import BaseEditDialog from "../components/dialogs/BaseEditDialog"
 import ConfirmUploadDialog from "../components/dialogs/ConfirmUploadDialog"
 import BaseErrorDialog from "../components/dialogs/BaseErrorDialog"
+import ExportDialog from "../components/dialogs/ExportDialog"
 
-export default function HomePage(props: {
+type HomePageProps = {
   goToNewChoreoPage: () => void,
   goToEditPage: (choreo: Choreo) => void,
   goToViewPage: (choreo: Choreo) => void,
   onUploadSuccess: (choreo: Choreo) => void,
-}) {
+}
+
+export default function HomePage({
+  goToNewChoreoPage,
+  goToEditPage,
+  goToViewPage,
+  onUploadSuccess,
+}: HomePageProps) {
   const [savedChoreos, setSavedChoreos] = useState<Record<string, Choreo[]>>({});
   
   const [editingChoreo, setEditingChoreo] = useState<Choreo | undefined>();
@@ -45,6 +53,13 @@ export default function HomePage(props: {
   const uploadFailedDialog = Dialog.createHandle<{}>();
   const handleUploadFailedDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setUploadFailedDialogOpen(isOpen);
+  };
+
+  const [exportingChoreo, setExportingChoreo] = useState<Choreo | undefined>();
+  const [pdfExportDialogOpen, setPdfExportDialogOpen] = useState(false);
+  const pdfExportDialog = Dialog.createHandle<{}>();
+  const handlePdfExportDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
+    setPdfExportDialogOpen(isOpen);
   };
 
   const [uploadedChoreo, setUploadedChoreo] = useState<Choreo | undefined>();
@@ -114,7 +129,7 @@ export default function HomePage(props: {
           full
           label="新規作成"
           icon={ICON.add}
-          onClick={props.goToNewChoreoPage}
+          onClick={goToNewChoreoPage}
           />
         <IconLabelButton
           full
@@ -130,8 +145,8 @@ export default function HomePage(props: {
               key={group[0]}
               eventName={group[0]}
               choreos={group[1]}
-              goToEditPage={props.goToEditPage}
-              goToViewPage={props.goToViewPage}
+              goToEditPage={goToEditPage}
+              goToViewPage={goToViewPage}
               duplicateChoreo={duplicateChoreo}
               onEditName={(choreo) => {
                 setEditingChoreo(choreo);
@@ -140,6 +155,10 @@ export default function HomePage(props: {
               onDelete={(choreo) => {
                 setEditingChoreo(choreo);
                 setDeleteChoreoDialogOpen(true);
+              }}
+              onPdfExport={(choreo) => {
+                setExportingChoreo(choreo);
+                setPdfExportDialogOpen(true);
               }}
             />
           )
@@ -162,7 +181,7 @@ export default function HomePage(props: {
                   setUploadedChoreo(choreo);
                 } else {
                   choreo.id = crypto.randomUUID();
-                  props.onUploadSuccess(choreo);
+                  onUploadSuccess(choreo);
                 }
               },
               () => {
@@ -188,6 +207,23 @@ export default function HomePage(props: {
                 });
               }
             }}/>
+        </Dialog.Root>
+        <Dialog.Root
+          handle={pdfExportDialog}
+          open={pdfExportDialogOpen}
+          onOpenChange={handlePdfExportDialogOpen}>
+            
+          {
+            exportingChoreo &&
+            <ExportDialog
+              choreo={exportingChoreo!}
+              selectedId=""
+              onClose={() => {
+                setPdfExportDialogOpen(false);
+                setExportingChoreo(undefined);
+              }}
+              />
+          }
         </Dialog.Root>
         <Dialog.Root
           handle={deleteChoreoDialog}
@@ -234,7 +270,7 @@ export default function HomePage(props: {
             }}
             onCopy={() => {
               setUploadedChoreo(undefined);
-              props.onUploadSuccess({
+              onUploadSuccess({
                 ...uploadedChoreo!,
                 id: crypto.randomUUID(),
                 name: `${uploadedChoreo!.name} - コピー`
@@ -242,7 +278,7 @@ export default function HomePage(props: {
             }}
             onOverwrite={() => {
               setUploadChoreoDialogOpen(false);
-              props.onUploadSuccess({
+              onUploadSuccess({
                 ...uploadedChoreo!,
                 id: duplicateChoreoId ?? crypto.randomUUID()
               });
@@ -255,7 +291,7 @@ export default function HomePage(props: {
   )
 }
 
-function EventSection(props: {
+type EventSectionProps = {
   eventName: string,
   choreos: Choreo[],
   goToViewPage: (choreo: Choreo) => void,
@@ -263,8 +299,15 @@ function EventSection(props: {
   duplicateChoreo: (choreo: Choreo) => void,
   onEditName: (choreo: Choreo) => void,
   onDelete: (choreo: Choreo) => void,
-}) {
+  onPdfExport: (choreo: Choreo) => void,
+}
+
+function EventSection({
+  eventName,choreos, goToEditPage, goToViewPage,
+  duplicateChoreo, onEditName, onDelete, onPdfExport
+}: EventSectionProps) {
   const [isExpanded, setIsExpanded] = useState<boolean>(true);
+  
   return <div className="space-y-2">
     <button onClick={() => setIsExpanded(prev => !prev)} className='flex flex-row items-center w-full'>
       <IconButton
@@ -274,13 +317,13 @@ function EventSection(props: {
         noBorder
         asDiv
         onClick={() => setIsExpanded(prev => !prev)} />
-      <h2 className='text-xl font-bold text-primary'>{props.eventName.length === 0 ? "イベント不明" : props.eventName}</h2>
+      <h2 className='text-xl font-bold text-primary'>{eventName.length === 0 ? "イベント不明" : eventName}</h2>
     </button>
     {
       isExpanded && 
       <div className="flex flex-col gap-2 px-8 md:grid md:grid-cols-2">
         {
-          props.choreos.map((choreo) =>
+          choreos.map((choreo) =>
             <Dialog.Root key={choreo.id}>
               <Dialog.Trigger>
                 <div className="flex flex-col justify-between h-full p-3 transition-colors border-2 rounded-md border-primary lg:hover:bg-gray-100">
@@ -327,13 +370,13 @@ function EventSection(props: {
                   <IconLabelButton
                     icon={ICON.visibility}
                     label="閲覧"
-                    onClick={() => props.goToViewPage(choreo)}
+                    onClick={() => goToViewPage(choreo)}
                     full />
 
                   <IconLabelButton
                     icon={ICON.edit}
                     label="編集"
-                    onClick={() => props.goToEditPage(choreo)}
+                    onClick={() => goToEditPage(choreo)}
                     full />
 
                   <Dialog.Close>
@@ -341,7 +384,7 @@ function EventSection(props: {
                       icon={ICON.fileCopy}
                       label="複製"
                       asDiv
-                      onClick={() => props.duplicateChoreo(choreo)}
+                      onClick={() => duplicateChoreo(choreo)}
                       full />
                   </Dialog.Close>
 
@@ -350,14 +393,23 @@ function EventSection(props: {
                       icon={ICON.textFieldsAlt}
                       label="名前編集"
                       asDiv
-                      onClick={() => props.onEditName(choreo)}
+                      onClick={() => onEditName(choreo)}
                       full />
                   </Dialog.Close>
                   
                   <Dialog.Close>
                     <IconLabelButton
+                      icon={ICON.download}
+                      label="pdfエクスポート"
+                      asDiv
+                      onClick={() => onPdfExport(choreo)}
+                      full />
+                  </Dialog.Close>
+
+                  <Dialog.Close>
+                    <IconLabelButton
                       icon={ICON.fileExport}
-                      label="エクスポート"
+                      label="隊列表ファイルダウンロード"
                       asDiv
                       onClick={() => exportToMtr(choreo)}
                       full />
@@ -368,7 +420,7 @@ function EventSection(props: {
                       icon={ICON.delete}
                       label="削除"
                       asDiv
-                      onClick={() => props.onDelete(choreo)}
+                      onClick={() => onDelete(choreo)}
                       full />
                   </Dialog.Close>
                 </div>

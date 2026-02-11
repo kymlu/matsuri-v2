@@ -74,15 +74,19 @@ export default function ExportDialog({
               setExportName(name);
             }}/>
         </div>
+
+        {
+          Object.values(choreo.dancers).length > 0 &&
+          <CustomSelect
+            label="中心人物"
+            items={dancerList}
+            defaultValue={choreo.dancers[selectedId]?.name ?? "未設定"}
+            setSelectValue={(newValue) => {
+              setFollowingId(newValue);
+            }}
+            />
+        }
         
-        <CustomSelect
-          label="中心人物"
-          items={dancerList}
-          defaultValue={choreo.dancers[selectedId]?.name ?? "未設定"}
-          setSelectValue={(newValue) => {
-            setFollowingId(newValue);
-          }}
-          />
       </BaseEditDialog>
     }
     {
