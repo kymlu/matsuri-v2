@@ -70,13 +70,6 @@ export default function Header({
           />
       }
       {
-        onSave &&
-        <IconButton
-          src={ICON.save}
-          noBorder
-          onClick={() => {onSave?.()}}/>
-      }
-      {
         onDownload &&
         <IconButton
           src={ICON.download}

@@ -2,13 +2,13 @@ import Toolbar from "../components/editor/Toolbar"
 import Header from "../components/editor/Header"
 import FormationSelectionToolbar from "../components/editor/FormationSelectionToolbar";
 import UndoRedoToolbar from "../components/editor/UndoRedoToolbar";
-import { useCallback, useEffect, useReducer, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { historyReducer } from "../lib/editor/historyReducer";
 import { Choreo } from "../models/choreo";
 import { EditHistory, StageEntities } from "../models/history";
 import { addSection, assignDancersToTiming, duplicateSection, editDancerActions, editSectionNote, removeSection, renameSection, reorderSections } from "../lib/editor/commands/sectionCommands";
 import { ChoreoSection } from "../models/choreoSection";
-import { indexByKey, isNullOrUndefinedOrBlank, strEquals } from "../lib/helpers/globalHelper";
+import { debounce, indexByKey, isNullOrUndefinedOrBlank, strEquals } from "../lib/helpers/globalHelper";
 import MainStage from "../components/grid/MainStage";
 import { Dialog } from "@base-ui/react";
 import EditChoreoSizeDialog from "../components/dialogs/EditChoreoSizeDialog";
@@ -65,13 +65,25 @@ export default function ChoreoEditPage(props: {
     showPreviousSection: false,
     dancerDisplayType: "large",
   });
-  
+
   const [history, dispatch] = useReducer(historyReducer,
     {
       undoStack: [],
       presentState: {state: props.currentChoreo, currentSectionId: props.currentChoreo.sections[0].id},
       redoStack: [],
     } as EditHistory<Choreo>);
+
+  const debouncedSave = useMemo(
+    () =>
+      debounce(async () => {
+        onSaveRef.current();
+      }, 1000),
+    []
+  )
+
+  useEffect(() => {
+    debouncedSave()
+  }, [history.presentState.state])
 
 
   const [prevSection, setPrevSection] = useState<ChoreoSection | undefined>();
@@ -193,7 +205,7 @@ export default function ChoreoEditPage(props: {
   const onSave = useCallback(() => {
     console.log("Saving state to db: ", history.presentState.state);
     saveChoreo(history.presentState.state, () => {});
-  }, [history.presentState.state, saveChoreo]);
+  }, [history.presentState.state]);
 
   const onCopy = useCallback(() => {
     if ((selectedIds.dancers.length + selectedIds.props.length) === 0) {
