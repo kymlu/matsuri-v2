@@ -218,7 +218,7 @@ export default function GridLayer({
               width={radius * 2}
               height={radius * 2}
               offsetX={radius}
-              offsetY={radius-1}
+              offsetY={radius}
               align="center"
               verticalAlign="middle"
             />
