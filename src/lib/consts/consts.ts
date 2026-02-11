@@ -1,4 +1,4 @@
-export const LAST_UPDATED = "更新 2月8日"
+export const LAST_UPDATED = "更新 2月11日"
 export const METER_PX = 25;
 export const PROP_SNAP_SIZE = 0.25;
 
