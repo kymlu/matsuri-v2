@@ -64,7 +64,7 @@ export default function PropGridObject({
           width={prop.width * METER_PX}
           height={prop.length}
           text={prop.name}
-          fontSize={METER_PX/2}
+          fontSize={METER_PX/3}
           fontStyle="bold"
           fill={colorPalette.getTextColor(prop.color) ?? "white"}
           verticalAlign="middle"

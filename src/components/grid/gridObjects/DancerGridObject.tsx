@@ -82,7 +82,7 @@ export default function DancerGridObject({
             verticalAlign="middle"
             align="center"
             text={dancer.name}
-            fontSize={METER_PX/2.5}
+            fontSize={METER_PX/3}
             fontStyle="bold"
             fill={colorPalette.getTextColor(position.color) ?? "white"}
           />
