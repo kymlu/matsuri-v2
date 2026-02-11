@@ -1,16 +1,16 @@
 {
   "files": {
-    "main.css": "/matsuri-v2/static/css/main.837f25eb.css",
-    "main.js": "/matsuri-v2/static/js/main.e586cd73.js",
+    "main.css": "/matsuri-v2/static/css/main.d851ca13.css",
+    "main.js": "/matsuri-v2/static/js/main.b9455473.js",
     "static/js/453.9bdb5be6.chunk.js": "/matsuri-v2/static/js/453.9bdb5be6.chunk.js",
     "static/media/material-symbols-rounded.woff2": "/matsuri-v2/static/media/material-symbols-rounded.b34fe04a1db64c49b366.woff2",
     "index.html": "/matsuri-v2/index.html",
-    "main.837f25eb.css.map": "/matsuri-v2/static/css/main.837f25eb.css.map",
-    "main.e586cd73.js.map": "/matsuri-v2/static/js/main.e586cd73.js.map",
+    "main.d851ca13.css.map": "/matsuri-v2/static/css/main.d851ca13.css.map",
+    "main.b9455473.js.map": "/matsuri-v2/static/js/main.b9455473.js.map",
     "453.9bdb5be6.chunk.js.map": "/matsuri-v2/static/js/453.9bdb5be6.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.837f25eb.css",
-    "static/js/main.e586cd73.js"
+    "static/css/main.d851ca13.css",
+    "static/js/main.b9455473.js"
   ]
 }
