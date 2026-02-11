@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useMemo, useState } from "react"
 import TextInput from "../inputs/TextInput"
 import BaseEditDialog from "./BaseEditDialog"
 import { Dancer } from "../../models/dancer"
