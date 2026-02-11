@@ -115,7 +115,7 @@ export default function HomePage(props: {
         <div className="flex gap-2">
           <IconLabelButton
             full
-            label="隊列表追加"
+            label="新規作成"
             icon={ICON.add}
             onClick={props.goToNewChoreoPage}
             />
