@@ -108,24 +108,23 @@ export default function HomePage(props: {
   }
 
   return (
-    <div className='flex flex-col w-full gap-2 mx-auto my-10'>
-      <h1 className='mx-4 text-2xl font-bold'>祭り</h1>
-      <Divider primary/>
-      <div className='flex flex-col gap-4 mx-5'>
-        <div className="flex gap-2">
-          <IconLabelButton
-            full
-            label="新規作成"
-            icon={ICON.add}
-            onClick={props.goToNewChoreoPage}
-            />
-          <IconLabelButton
-            full
-            label="アップロード"
-            icon={ICON.upload}
-            onClick={triggerUpload}
-            />
-        </div>
+    <div className='grid grid-rows-[auto,auto,1fr] overflow-hide w-full gap-2 mx-auto py-10 h-[100svh]'>
+      <h1 className='mx-4 text-2xl font-bold text-center'>隊列表作成</h1>
+      <div className="flex gap-2 mb-2">
+        <IconLabelButton
+          full
+          label="新規作成"
+          icon={ICON.add}
+          onClick={props.goToNewChoreoPage}
+          />
+        <IconLabelButton
+          full
+          label="アップロード"
+          icon={ICON.upload}
+          onClick={triggerUpload}
+          />
+      </div>
+      <div className="h-full space-y-4 overflow-scroll">
         {
           Object.entries(savedChoreos).map((group) =>
             <EventSection
@@ -268,15 +267,16 @@ function EventSection(props: {
 }) {
   const [isExpanded, setIsExpanded] = useState<boolean>(true);
   return <div className="space-y-2">
-    <div className='flex flex-row items-center'>
+    <button onClick={() => setIsExpanded(prev => !prev)} className='flex flex-row items-center w-full'>
       <IconButton
         src={isExpanded ? ICON.arrowDropDown : ICON.arrowRight}
         size="sm"
         colour="primary"
         noBorder
+        asDiv
         onClick={() => setIsExpanded(prev => !prev)} />
       <h2 className='text-xl font-bold text-primary'>{props.eventName.length === 0 ? "イベント不明" : props.eventName}</h2>
-    </div>
+    </button>
     {
       isExpanded && 
       <div className="flex flex-col gap-2 px-8 md:grid md:grid-cols-2">
