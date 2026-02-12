@@ -4,8 +4,10 @@ import BaseEditDialog from "./BaseEditDialog";
 import { strCompare, strEquals } from "../../lib/helpers/globalHelper";
 import TextInput from "../inputs/TextInput";
 import IconButton from "../basic/IconButton";
-import { ICON, MAX_PROP_DIMENSION, MIN_PROP_DIMENSION, MIN_STAGE_DIMENSION } from "../../lib/consts/consts";
+import { ICON, MAX_PROP_DIMENSION, MIN_PROP_DIMENSION } from "../../lib/consts/consts";
 import NumberInput from "../inputs/NumberInput";
+import CustomMenu from "../inputs/CustomMenu";
+import { colorPalette } from "../../lib/consts/colors";
 
 type PropManagerDialogProps = {
   props: Record<string, Prop>,
@@ -43,16 +45,41 @@ export function PropManagerDialog({
   }, [propNames]);
 
   return <BaseEditDialog
-      title="ダンサー管理"
+      title="道具管理"
       full
       isActionButtonDisabled={propNames[""] === null || propNames[""] > 0}
       actionButtonText="保存"
       onSubmit={() => {onSubmit(propList, deletedPropIds)}}>
       <div className="max-h-full grid grid-rows-[1fr,auto]">
-        <div className="justify-center max-h-full overflow-scroll grid grid-cols-[1fr,1fr,1fr,auto] gap-2">
+        <div className="justify-center max-h-full overflow-scroll grid grid-cols-[auto,1fr,1fr,1fr,auto] gap-2">
           {
             propList.map((prop, i) => 
               <React.Fragment key={prop.id}>
+                <CustomMenu
+                  trigger={
+                    <div
+                      className="rounded-full size-8 min-h-8 min-w-8 max-h-8 max-w-8"
+                      style={{backgroundColor: prop.color}}/>
+                }>
+                  <div className="grid grid-cols-6 gap-2">
+                    {
+                      colorPalette.allColors().map((color) => 
+                        <button
+                          key={color}
+                          onClick={() => {
+                            setPropList(prev => {
+                              prev[i].color = color;
+                              return [...prev];
+                            });
+                          }}
+                          style={{"backgroundColor": color}}
+                          className={"rounded-full size-8 min-h-8 min-w-8 max-h-8 max-w-8 " + 
+                            (strEquals(color, prop.color) ? "border-2 border-primary" : "")
+                          }/>
+                      )
+                    }
+                  </div>
+                </CustomMenu>
                 <TextInput
                   label="道具名"
                   required
