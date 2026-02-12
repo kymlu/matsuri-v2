@@ -1,4 +1,4 @@
-export const LAST_UPDATED = "更新 2月11日"
+export const LAST_UPDATED = "更新 2月12日"
 export const METER_PX = 25;
 export const PROP_SNAP_SIZE = 0.25;
 
@@ -7,6 +7,8 @@ export const MAX_STAGE_DIMENSION = 200;
 
 export const DEFAULT_PROP_WIDTH = 4;
 export const DEFAULT_PROP_LENGTH = 1;
+export const MIN_PROP_DIMENSION = 0.5;
+export const MAX_PROP_DIMENSION = 20;
 
 export const MIN_STAGE_MARGIN = 2;
 export const MAX_STAGE_MARGIN = 20;

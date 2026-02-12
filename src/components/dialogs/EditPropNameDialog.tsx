@@ -24,6 +24,7 @@ export default function EditPropNameDialog({
     isActionButtonDisabled={isNullOrUndefinedOrBlank(name)}
     >
     <TextInput
+      required
       defaultValue={prop?.name ?? ""}
       onContentChange={ (newName) => { setName(newName) }}
       maxLength={15}/>

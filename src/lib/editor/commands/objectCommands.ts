@@ -81,6 +81,30 @@ export function renameAndDeleteDancers(state: Choreo, renamedDancers: Record<str
   }
 }
 
+export function editAndDeleteProps(state: Choreo, editedProps: Record<string, Prop>, deletedPropIds: Set<string>): Choreo {
+  const newSections = state.sections.map(section => {
+    const newPropPositions = Object.fromEntries(
+      Object.entries(section.formation.propPositions).filter(
+        ([id]) => !deletedPropIds.has(id)
+      )
+    );
+
+    return {
+      ...section,
+      formation: {
+        ...section.formation,
+        propPositions: newPropPositions,
+      }
+    }
+  });
+
+  return {
+    ...state,
+    props: editedProps,
+    sections: newSections,
+  }
+}
+
 export function addProp(state: Choreo, prop: Prop, x: number, y: number): Choreo {
   const newProps = { ...state.props, [prop.id]: prop }
 

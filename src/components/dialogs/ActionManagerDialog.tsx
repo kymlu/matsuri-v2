@@ -173,9 +173,9 @@ function SortableActionSection ({
       <Icon src={ICON.dragHandle}/>
     </div>
     <div className="flex-1">
-      <TextInput label="アクション名" defaultValue={action.name} onContentChange={(newName) => {onRenameAction(newName)}}/>
+      <TextInput required label="アクション名" defaultValue={action.name} onContentChange={(newName) => {onRenameAction(newName)}}/>
       <span className="font-bold">カウント（重複不可）</span>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-4">
         {
           action.timings.map((timing, i) => 
             <TimingItem
@@ -211,7 +211,7 @@ function TimingItem ({
   timing, onRenameTiming, onDeleteTiming, showDeleteButton}: TimingItemProps
 ) {
   return <div className="flex items-center">
-    <TextInput maxLength={5} compact short defaultValue={timing.name} onContentChange={(newName) => {onRenameTiming(newName)}}/>
+    <TextInput required maxLength={5} compact short defaultValue={timing.name} onContentChange={(newName) => {onRenameTiming(newName)}}/>
     <Icon size="sm" src={ICON.person}/>
     <span>{timing.dancerIds.length}</span>
     {showDeleteButton && <IconButton size="sm" noBorder src={ICON.delete} onClick={() => {onDeleteTiming()}}/>}

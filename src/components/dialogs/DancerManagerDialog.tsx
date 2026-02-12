@@ -52,6 +52,8 @@ export function DancerManagerDialog({
             dancerList.map((dancer, i) => 
               <div className="flex flex-row items-center" key={dancer.id}>
                 <TextInput
+                  label="ダンサー名"
+                  required
                   defaultValue={dancer.name}
                   hasError={dancerNames[dancer.name] > 1}
                   onContentChange={(newName) => {

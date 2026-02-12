@@ -24,6 +24,7 @@ export default function EditSectionNameDialog({
     isActionButtonDisabled={isNullOrUndefinedOrBlank(name)}
     >
     <TextInput
+      required
       defaultValue={section?.name ?? ""}
       onContentChange={ (newName) => { setName(newName) }}/>
   </BaseEditDialog>

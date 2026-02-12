@@ -30,11 +30,12 @@ import EditSectionNameDialog from "../components/dialogs/EditSectionNameDialog";
 import EditSectionNoteDialog from "../components/dialogs/EditSectionNoteDialog";
 import { Coordinates } from "../models/base";
 import { colorPalette } from "../lib/consts/colors";
-import { addDancer, addProp, alignHorizontalPositions, alignVerticalPositions, changeObjectColours, distributePositions, moveObjectPositions, pastePositions, removeObjects, renameAndDeleteDancers, renameDancer, renameProp, swapPositions, updatePropSizeAndRotate } from "../lib/editor/commands/objectCommands";
+import { addDancer, addProp, alignHorizontalPositions, alignVerticalPositions, changeObjectColours, distributePositions, editAndDeleteProps, moveObjectPositions, pastePositions, removeObjects, renameAndDeleteDancers, renameDancer, renameProp, swapPositions, updatePropSizeAndRotate } from "../lib/editor/commands/objectCommands";
 import { PropPosition } from "../models/prop";
 import EditPropNameDialog from "../components/dialogs/EditPropNameDialog";
 import { DancerManagerDialog } from "../components/dialogs/DancerManagerDialog";
 import ExportDialog from "../components/dialogs/ExportDialog";
+import { PropManagerDialog } from "../components/dialogs/PropManagerDialog";
 
 const resizeDialog = Dialog.createHandle<Choreo>();
 const editChoreoInfoDialog = Dialog.createHandle<string>();
@@ -43,6 +44,7 @@ const renamePropDialog = Dialog.createHandle<string>();
 const editDancerColourDialog = Dialog.createHandle<string>();
 const editDancerActionsDialog = Dialog.createHandle<string>();
 const dancerManagerDialog = Dialog.createHandle<string>();
+const propManagerDialog = Dialog.createHandle<string>();
 const renameSectionDialog = Dialog.createHandle<ChoreoSection>();
 const addNoteToSectionDialog = Dialog.createHandle<ChoreoSection>();
 const deleteSectionDialog = Dialog.createHandle<ChoreoSection>();
@@ -287,6 +289,7 @@ export default function ChoreoEditPage(props: {
   const [editDancerColourDialogOpen, setEditDancerColourDialogOpen] = useState(false);
   const [editDancerActionsDialogOpen, setEditDancerActionsDialogOpen] = useState(false);
   const [dancerManagerDialogOpen, setDancerManagerDialogOpen] = useState(false);
+  const [propManagerDialogOpen, setPropManagerDialogOpen] = useState(false);
   const [renameSectionDialogOpen, setRenameSectionDialogOpen] = useState(false);
   const [addNoteToSectionDialogOpen, setAddNoteToSectionDialogOpen] = useState(false);
   const [deleteSectionDialogOpen, setDeleteSectionDialogOpen] = useState(false);
@@ -330,6 +333,10 @@ export default function ChoreoEditPage(props: {
   const handleDancerManagerDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setDancerManagerDialogOpen(isOpen);
   };
+
+  const handlePropManagerDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
+    setPropManagerDialogOpen(isOpen);
+  };
   
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
   const exportDialog = Dialog.createHandle<{}>();
@@ -369,7 +376,10 @@ export default function ChoreoEditPage(props: {
         editName={() => {setEditChoreoInfoDialogOpen(true)}}
         editSize={() => {setResizeDialogOpen(true);}}
         onDownload={() => setExportDialogOpen(true)}
+        showManageDancers={Object.keys(history.presentState.state.dancers).length > 0}
         manageDancers={() => {setDancerManagerDialogOpen(true);}}
+        showManageProps={Object.keys(history.presentState.state.props).length > 0}
+        manageProps={() => {setPropManagerDialogOpen(true);}}
         manageSections={() => {console.log("TODO: implement Manage Sections")}}
         exportChoreo={() => {
           console.log("TODO: implement choice of pdf or mtr");
@@ -761,6 +771,23 @@ export default function ChoreoEditPage(props: {
               commit: true});
             dancerManagerDialog.close();
             setDancerManagerDialogOpen(false);
+          }}
+          />
+      </Dialog.Root>
+      <Dialog.Root
+        handle={propManagerDialog}
+        open={propManagerDialogOpen}
+        onOpenChange={handlePropManagerDialogOpen}>
+        <PropManagerDialog
+          props={history.presentState.state.props}
+          onSubmit={(props, deletedPropIds) => {
+            dispatch({
+              type: "SET_STATE",
+              newState: editAndDeleteProps(history.presentState.state, indexByKey(props, "id"), new Set(deletedPropIds)),
+              currentSectionId: currentSection.id,
+              commit: true});
+            propManagerDialog.close();
+            setPropManagerDialogOpen(false);
           }}
           />
       </Dialog.Root>

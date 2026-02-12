@@ -24,6 +24,7 @@ export default function EditDancerNameDialog({
     isActionButtonDisabled={isNullOrUndefinedOrBlank(name)}
     >
     <TextInput
+      required
       defaultValue={dancer?.name ?? ""}
       onContentChange={ (newName) => { setName(newName) }}
       maxLength={15}/>

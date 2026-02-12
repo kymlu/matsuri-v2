@@ -59,8 +59,8 @@ export default function TextInput({
       "text-center": centered,
       "bg-gray-200": disabled,
       "w-full": !compact,
-      "w-32": compact,
-      "border-primary bg-primary bg-opacity-30 placeholder:text-primary": (required && isNullOrUndefinedOrBlank(value)) || hasError,
+      "min-w-32": compact,
+      "border-primary bg-primary bg-opacity-20 placeholder:text-primary": (required && isNullOrUndefinedOrBlank(value)) || hasError,
     },);
 
   var wrapperClasses = classNames(

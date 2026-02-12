@@ -10,7 +10,7 @@ import { Prop, PropPosition } from "../../../models/prop";
 import PropGridObject from "../gridObjects/PropGridObject";
 import { StageEntities } from "../../../models/history";
 import { pxToStageMeters } from "../../../lib/helpers/editorCalculationHelper";
-import { METER_PX, PROP_SNAP_SIZE } from "../../../lib/consts/consts";
+import { MAX_PROP_DIMENSION, METER_PX, MIN_PROP_DIMENSION, PROP_SNAP_SIZE } from "../../../lib/consts/consts";
 
 type FormationLayerProps = {
   canEdit: boolean,
@@ -171,8 +171,8 @@ export default function FormationLayer({
               
               const group = event.target as Konva.Group;
 
-              var width = Math.max(Math.round(prop.width * group.scaleX() / PROP_SNAP_SIZE) * PROP_SNAP_SIZE, 0.5);
-              var length = Math.max(Math.round(prop.length * group.scaleY() / PROP_SNAP_SIZE) * PROP_SNAP_SIZE, 0.5);
+              var width = Math.min(Math.max(Math.round(prop.width * group.scaleX() / PROP_SNAP_SIZE) * PROP_SNAP_SIZE, MIN_PROP_DIMENSION), MAX_PROP_DIMENSION);
+              var length = Math.min(Math.max(Math.round(prop.length * group.scaleY() / PROP_SNAP_SIZE) * PROP_SNAP_SIZE, MIN_PROP_DIMENSION), MAX_PROP_DIMENSION);
               var newCoords = pxToStageMeters(
                 {x: event.target.attrs.x, y: event.target.attrs.y},
                 geometry,

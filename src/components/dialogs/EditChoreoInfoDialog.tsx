@@ -27,6 +27,7 @@ export default function EditChoreoInfoDialog({
     >
     <TextInput
       label="名前"
+      required
       defaultValue={choreo?.name ?? ""}
       onContentChange={ (newName) => { setName(newName) }}
       restrictFn={(s) => !testInvalidCharacters(s)}

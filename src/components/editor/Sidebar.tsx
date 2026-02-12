@@ -13,7 +13,10 @@ type SidebarProps = {
 
   editName?: () => void;
   editSize?: () => void;
+  showManageDancers?: boolean;
   manageDancers?: () => void;
+  showManageProps?: boolean;
+  manageProps?: () => void;
   manageSections?: () => void;
   exportChoreo?: () => void;
   
@@ -30,7 +33,10 @@ export function Sidebar({
   choreoEvent,
   editName,
   editSize,
+  showManageDancers,
   manageDancers,
+  showManageProps,
+  manageProps,
   manageSections,
   changeSnap,
   changeShowGrid,
@@ -72,12 +78,21 @@ export function Sidebar({
           </>
         }
         {
-          manageDancers &&
+          showManageDancers && manageDancers &&
           <>
             <IconLabelButton
               onClick={manageDancers}
               label="ダンサー管理"
               full icon={ICON.person}/>
+          </>
+        }
+        {
+          showManageProps && manageProps &&
+          <>
+            <IconLabelButton
+              onClick={manageProps}
+              label="道具管理"
+              full icon={ICON.flag}/>
           </>
         }
         {/* {

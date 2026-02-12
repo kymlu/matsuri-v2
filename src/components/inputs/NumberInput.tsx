@@ -31,9 +31,9 @@ export default function NumberInput ({
     }
   }));
   
-  const wrapperClasses = classNames("flex flex-row items-center justify-between w-full",
+  const wrapperClasses = classNames("flex flex-row items-center justify-between w-full mb-2",
     {
-      "mb-2": compact,
+      "mb-0": compact,
     })
   
   return (
