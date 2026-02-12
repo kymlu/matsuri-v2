@@ -166,33 +166,33 @@ export default function FormationLayer({
           ]}
           rotationSnapTolerance={10}
           onTransformEnd={(event) => {
-              const prop = {...props[selectedIds.props[0]]};
-              if (!prop) return;
-              
-              const group = event.target as Konva.Group;
+            const prop = {...props[selectedIds.props[0]]};
+            if (!prop) return;
+            
+            const group = event.target as Konva.Group;
+            if (!group) return;
 
-              var width = Math.min(Math.max(Math.round(prop.width * group.scaleX() / PROP_SNAP_SIZE) * PROP_SNAP_SIZE, MIN_PROP_DIMENSION), MAX_PROP_DIMENSION);
-              var length = Math.min(Math.max(Math.round(prop.length * group.scaleY() / PROP_SNAP_SIZE) * PROP_SNAP_SIZE, MIN_PROP_DIMENSION), MAX_PROP_DIMENSION);
-              var newCoords = pxToStageMeters(
-                {x: event.target.attrs.x, y: event.target.attrs.y},
-                geometry,
-                METER_PX,
-                props[selectedIds.props[0]].length);
+            var width = Math.min(Math.max(Math.round(prop.width * group.scaleX() / PROP_SNAP_SIZE) * PROP_SNAP_SIZE, MIN_PROP_DIMENSION), MAX_PROP_DIMENSION);
+            var length = Math.min(Math.max(Math.round(prop.length * group.scaleY() / PROP_SNAP_SIZE) * PROP_SNAP_SIZE, MIN_PROP_DIMENSION), MAX_PROP_DIMENSION);
+            var newCoords = pxToStageMeters(
+              {x: event.target.attrs.x, y: event.target.attrs.y},
+              geometry,
+              METER_PX,
+              props[selectedIds.props[0]].length);
 
-            	updatePropSizeAndRotate?.(
-                width, length,
-                event.target.attrs.rotation,
-                newCoords.x, newCoords.y,
-                selectedIds.props[0]);
-              
-              group.scale({ x: 1, y: 1 });
+            updatePropSizeAndRotate?.(
+              width, length,
+              event.target.attrs.rotation,
+              newCoords.x, newCoords.y,
+              selectedIds.props[0]);
+            
+            group.scale({ x: 1, y: 1 });
 
-              requestAnimationFrame(() => {
-            		refreshTransformer();
-            	});
-            }
+            requestAnimationFrame(() => {
+              refreshTransformer();
+            });
           }
-        />
+        }/>
       )}
     </Layer>
   );
