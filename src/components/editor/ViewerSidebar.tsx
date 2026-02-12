@@ -39,7 +39,7 @@ export default function ViewerSidebar({
   hideNotes,
   deselectPosition,
 }: ViewerSidebarProps) {
-  var contentClasses = classNames("min-h-0 flex flex-col fixed inset-x-0 bottom-20 h-[33%] max-h-[33%] bg-white p-4 z-20 border-t-2 md:border-t-0 md:static md:bottom-8 md:h-full md:w-1/3 md:max-w-[33vw] md:max-h-full md:border-r-2", {
+  var contentClasses = classNames("min-h-0 flex flex-col fixed inset-x-0 bottom-20 h-[33%] max-h-[33%] bg-white p-4 z-20 border-t-2 md:border-t-0 md:static md:bottom-8 md:h-full md:w-2/5 md:max-w-[33vw] md:max-h-full md:border-r-2", {
     "hidden": !isPositionHintShown && !showNotes
   });
   
@@ -83,11 +83,13 @@ export default function ViewerSidebar({
       }
       {
         actions && actions.length > 0 && !isPositionHintShown && 
-        <div className="grid grid-cols-[1fr,3fr] items-start gap-2">
+        <div className="grid grid-cols-[2fr,5fr] items-start gap-2">
           {
             actions.map(action => 
               <React.Fragment key={action.id}>
-                {action.name}
+                <span className="mt-1">
+                  {action.name}
+                </span>
                 <div className="flex flex-wrap gap-1">
                   {
                     action.timings.map(timing => 
