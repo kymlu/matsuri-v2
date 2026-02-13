@@ -122,7 +122,7 @@ export default function HomePage({
   }
 
   return (
-    <div className='grid grid-rows-[auto,auto,1fr] overflow-hide w-full gap-2 mx-auto p-10 h-[100svh]'>
+    <div className='grid grid-rows-[auto,auto,1fr] overflow-hide w-full gap-2 mx-auto py-10 px-6 h-[100svh]'>
       <h1 className='mx-4 text-2xl font-bold text-center'>隊列表作成</h1>
       <div className="flex gap-2 mb-2">
         <IconLabelButton
