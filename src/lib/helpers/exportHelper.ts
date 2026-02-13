@@ -9,7 +9,7 @@ export function exportToMtr (
   choreo: Choreo,
   filename?: string,
 ) {
-  const blob = new Blob([JSON.stringify(choreo)], { type: "application/json" });
+  const blob = new Blob([JSON.stringify(choreo)], { type: "application/octet-stream" });
   const url = URL.createObjectURL(blob);
 
   const link = document.createElement("a");
