@@ -400,7 +400,7 @@ function EventSection({
                   <Dialog.Close>
                     <IconLabelButton
                       icon={ICON.download}
-                      label="pdfエクスポート"
+                      label="PDFをダウンロード"
                       asDiv
                       onClick={() => onPdfExport(choreo)}
                       full />
@@ -409,7 +409,7 @@ function EventSection({
                   <Dialog.Close>
                     <IconLabelButton
                       icon={ICON.fileExport}
-                      label="隊列表ファイルダウンロード"
+                      label="隊列表を書き出し (.mtr)"
                       asDiv
                       onClick={() => exportToMtr(choreo)}
                       full />

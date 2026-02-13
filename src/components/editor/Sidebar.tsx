@@ -104,7 +104,7 @@ export function Sidebar({
           <>
             <IconLabelButton
               onClick={exportChoreo}
-              label="隊列ファイルダウンロード"
+              label="隊列表を書き出し (.mtr)"
               full icon={ICON.fileExport}/>
           </>
         }

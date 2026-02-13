@@ -95,8 +95,8 @@ export default function ExportDialog({
     }
     {
       step === "export" &&
-      <CustomDialog title="PDF出力中">
-        <b>{choreo.name}</b>のPDFを生成しています。<br></br>完了までしばらくお待ちください。<br></br>進行状況：{progress}%
+      <CustomDialog title="PDF生成中">
+        <b>{choreo.name}</b>のPDFを生成しています。<br/>完了までしばらくお待ちください。<br/>進行状況：{progress}%
       </CustomDialog>
     }
   </>
