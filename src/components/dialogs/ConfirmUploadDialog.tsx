@@ -16,7 +16,7 @@ export default function ConfirmUploadDialog({
   return <CustomDialog
       title="ファイルの重複"
       footer={
-      <div className="flex w-full gap-2 mt-4">
+      <div className="flex flex-col w-full gap-2 mt-4 md:flex-row">
         <Dialog.Close
           onClick={onCancel}
           className="w-full">
