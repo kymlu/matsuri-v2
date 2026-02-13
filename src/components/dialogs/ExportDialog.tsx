@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import TextInput from "../inputs/TextInput"
 import BaseEditDialog from "./BaseEditDialog"
 import { Dancer } from "../../models/dancer"
@@ -40,6 +40,10 @@ export default function ExportDialog({
   const defaultName = useMemo(() => {
     return `${isNullOrUndefinedOrBlank(choreo.event) ? "" : `${choreo.event} - `}${choreo.name}`;
   }, [choreo]);
+
+  useEffect(() => {
+    setExportName(defaultName);
+  }, [defaultName]);
 
   return <>
     {
