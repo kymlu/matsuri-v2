@@ -100,7 +100,7 @@ export default function BaseGridObject({
         const dx = e.target.x() - start.x;
         const dy = e.target.y() - start.y;
 
-        if (Math.hypot(dx, dy) > 0.01) {
+        if (Math.hypot(dx, dy) > 0.01 && !isDraggingRef.current) {
           isDraggingRef.current = true;
         }
       }}
