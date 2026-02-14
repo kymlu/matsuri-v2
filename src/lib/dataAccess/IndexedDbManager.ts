@@ -107,6 +107,28 @@ export class IndexedDBManager {
       }
     });
   }
+  
+  async upsertList(storeName: TableName, list: Array<any>) {
+    console.log(`upsertList ${storeName} called`);
+    return new Promise<number>((resolve, reject) => {
+      try {
+        const tx = this._getTransaction(storeName);
+        const store = tx.objectStore(storeName);
+        list.forEach(item => store.put(item));
+        tx.oncomplete = () => {
+          console.log(`resolved upsertList ${storeName}: ${list.length}`);
+          resolve(list.length);
+        };
+        tx.onerror = () => {
+          console.error(`error on upsertList ${storeName}: ${tx.error}`);
+          reject(tx.error);
+        };
+      } catch (error) {
+        console.error(`exception on upsertList ${storeName}: ${error}`);
+        reject(error);
+      }
+    });
+  }
 
   async removeItem(storeName: TableName, itemId: string) {
     if (isNullOrUndefinedOrBlank(itemId)) return Promise.resolve(0);

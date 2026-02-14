@@ -33,6 +33,15 @@ export async function upsertItem<T extends TableName>(
   });
 }
 
+export async function upsertList<T extends TableName>(
+  storeName: T,
+  list: TableTypeMap[T][]
+): Promise<void> {
+  indexedDbManager.upsertList(storeName, list).catch((error) => {
+    console.error(`Error upserting list in store ${storeName}:`, error)
+  });
+}
+
 export async function removeItem<T extends TableName>(
   storeName: T,
   itemId: string

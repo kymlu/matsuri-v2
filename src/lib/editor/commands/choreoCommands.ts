@@ -1,11 +1,10 @@
 import { Choreo, StageGeometry, StageType } from "../../../models/choreo";
 
-export function editChoreoInfo(state: Choreo, newName: string, newEvent: string): Choreo {
-  console.log("Editing choreo info", newName, newEvent);
+export function renameChoreo(state: Choreo, newName: string): Choreo {
+  console.log("Editing choreo info", newName);
   return {
     ...state,
     name: newName,
-    event: newEvent,
   }
 }
 

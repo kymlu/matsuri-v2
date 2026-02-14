@@ -1,11 +1,11 @@
-import { Dialog } from "@base-ui/react"
+import { Dialog, Menu } from "@base-ui/react"
 import CustomDialog from "../components/basic/CustomDialog"
 import { ICON, LAST_UPDATED } from "../lib/consts/consts"
 import { IconLabelButton } from "../components/basic/Button"
 import Icon from "../components/basic/Icon"
 import { readUploadedFile } from "../lib/helpers/uploadHelper"
 import { useEffect, useState } from "react"
-import { deleteChoreo, getAllChoreos, saveChoreo } from "../lib/dataAccess/DataController"
+import { deleteChoreo, getAllChoreos, saveChoreo, saveChoreos } from "../lib/dataAccess/DataController"
 import { Choreo, ChoreoSchema } from "../models/choreo"
 import { groupByKey, strCompare, strEquals } from "../lib/helpers/globalHelper"
 import { downloadLogs } from "../lib/helpers/logHelper"
@@ -15,23 +15,23 @@ import SampleStage from "../lib/samples/SampleStageFormation.json"
 import SampleParade from "../lib/samples/SampleParadeFormation.json"
 import z from "zod"
 import { exportToMtr } from "../lib/helpers/exportHelper"
-import EditChoreoInfoDialog from "../components/dialogs/EditChoreoInfoDialog"
 import BaseEditDialog from "../components/dialogs/BaseEditDialog"
 import ConfirmUploadDialog from "../components/dialogs/ConfirmUploadDialog"
 import BaseErrorDialog from "../components/dialogs/BaseErrorDialog"
 import ExportDialog from "../components/dialogs/ExportDialog"
 import React from "react"
+import CustomMenu from "../components/inputs/CustomMenu"
+import Divider from "../components/basic/Divider"
+import EditNameDialog from "../components/dialogs/EditNameDialog"
 
 type HomePageProps = {
-  goToNewChoreoPage: () => void,
-  goToEditPage: (choreo: Choreo) => void,
+  goToNewChoreoPage: (eventName?: string) => void,
   goToViewPage: (choreo: Choreo) => void,
   onUploadSuccess: (choreo: Choreo) => void,
 }
 
 export default function HomePage({
   goToNewChoreoPage,
-  goToEditPage,
   goToViewPage,
   onUploadSuccess,
 }: HomePageProps) {
@@ -43,6 +43,13 @@ export default function HomePage({
   const handleEditChoreoInfoDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setEditChoreoInfoDialogOpen(isOpen);
   };
+
+  const [editingEventName, setEditingEventName] = useState<string | undefined>();
+  const [editEventNameDialogOpen, setEventNameDialogOpen] = useState(false);
+  const editEventNameDialog = Dialog.createHandle<{}>();
+  const handleEventNameDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
+    setEventNameDialogOpen(isOpen);
+  }
 
   const [deleteChoreoDialogOpen, setDeleteChoreoDialogOpen] = useState(false);
   const deleteChoreoDialog = Dialog.createHandle<{}>();
@@ -132,7 +139,7 @@ export default function HomePage({
           primary
           label="新規作成"
           icon={ICON.add}
-          onClick={goToNewChoreoPage}
+          onClick={() => goToNewChoreoPage()}
           />
         <IconLabelButton
           full
@@ -143,24 +150,29 @@ export default function HomePage({
       </div>
       <div className="h-full space-y-4 overflow-scroll">
         {
-          Object.entries(savedChoreos).map((group) =>
+          Object.entries(savedChoreos).map(([eventName, choreos]) =>
             <EventSection
-              key={group[0]}
-              eventName={group[0]}
-              choreos={group[1]}
+              key={eventName}
+              eventName={eventName}
+              choreos={choreos}
               goToViewPage={goToViewPage}
               duplicateChoreo={duplicateChoreo}
-              onEditName={(choreo) => {
+              editChoreoName={(choreo) => {
                 setEditingChoreo(choreo);
                 setEditChoreoInfoDialogOpen(true);
               }}
-              onDelete={(choreo) => {
+              deleteChoreo={(choreo) => {
                 setEditingChoreo(choreo);
                 setDeleteChoreoDialogOpen(true);
               }}
               onPdfExport={(choreo) => {
                 setExportingChoreo(choreo);
                 setPdfExportDialogOpen(true);
+              }}
+              addEvent={() => {goToNewChoreoPage(eventName)}}
+              editEventName={() => {
+                setEditingEventName(eventName);
+                setEventNameDialogOpen(true);
               }}
             />
           )
@@ -206,18 +218,40 @@ export default function HomePage({
           handle={editChoreoInfoDialog}
           open={editChoreoInfoDialogOpen}
           onOpenChange={handleEditChoreoInfoDialogOpen}>
-            
-          <EditChoreoInfoDialog
-            choreo={editingChoreo}
-            onSubmit={(name, event) => {
+          <EditNameDialog
+            name={editingChoreo?.name}
+            type="隊列表"
+            onClose={() => {setEditingChoreo(undefined)}}
+            onSubmit={(name: string) => {
               if (editingChoreo) {
-                saveChoreo({...editingChoreo, name, event}, () => {
+                saveChoreo({...editingChoreo, name}, () => {
                   editChoreoInfoDialog.close();
                   setEditChoreoInfoDialogOpen(false);
                   setEditingChoreo(undefined);
                   loadChoreos();
                 });
               }
+            }}
+          />
+        </Dialog.Root>
+        <Dialog.Root
+          handle={editEventNameDialog}
+          open={editEventNameDialogOpen}
+          onOpenChange={handleEventNameDialogOpen}>
+            
+          <EditNameDialog
+            name={editingEventName}
+            required={false}
+            type="イベント"
+            onClose={() => {setEditingEventName(undefined)}}
+            onSubmit={(name) => {
+              saveChoreos(
+                savedChoreos[editingEventName ?? ""].map(c => {return {...c, event: name}}),
+                () => {
+                  setEventNameDialogOpen(false);
+                  loadChoreos();
+                }
+              );
             }}/>
         </Dialog.Root>
         <Dialog.Root
@@ -307,16 +341,18 @@ export default function HomePage({
 type EventSectionProps = {
   eventName: string,
   choreos: Choreo[],
+  addEvent: () => void,
+  editEventName: () => void,
   goToViewPage: (choreo: Choreo) => void,
   duplicateChoreo: (choreo: Choreo) => void,
-  onEditName: (choreo: Choreo) => void,
-  onDelete: (choreo: Choreo) => void,
+  editChoreoName: (choreo: Choreo) => void,
+  deleteChoreo: (choreo: Choreo) => void,
   onPdfExport: (choreo: Choreo) => void,
 }
 
 function EventSection({
-  eventName,choreos, goToViewPage,
-  duplicateChoreo, onEditName, onDelete, onPdfExport
+  eventName,choreos, goToViewPage, addEvent, editEventName,
+  duplicateChoreo, editChoreoName, deleteChoreo, onPdfExport
 }: EventSectionProps) {
   const [isExpanded, setIsExpanded] = useState<boolean>(true);
   const optionsDialog = Dialog.createHandle<Choreo>();
@@ -327,16 +363,34 @@ function EventSection({
     setOptionsDialogOpen(isOpen);
   };
   
-  return <div className="space-y-2">
-    <button onClick={() => setIsExpanded(prev => !prev)} className='flex flex-row items-center w-full'>
-      <IconButton
-        src={isExpanded ? ICON.arrowDropDown : ICON.arrowRight}
-        size="sm"
-        colour="primary"
-        noBorder
-        asDiv />
-      <h2 className='text-xl font-bold text-primary'>{eventName.length === 0 ? "イベント不明" : eventName}</h2>
-    </button>
+  return <div className="pr-4 space-y-2">
+    <div className="flex flex-row justify-between w-full">
+      <button onClick={() => setIsExpanded(prev => !prev)} className='flex flex-row items-center w-full'>
+        <IconButton
+          src={isExpanded ? ICON.arrowDropDown : ICON.arrowRight}
+          size="sm"
+          colour="primary"
+          noBorder
+          asDiv />
+        <h2 className='text-xl font-bold text-primary'>{eventName.length === 0 ? "イベント不明" : eventName}</h2>
+      </button>
+      <CustomMenu trigger={
+        <IconButton
+          src={ICON.moreVert}
+          asDiv
+          noBorder
+          size="sm"
+        />
+      }>
+        <Menu.Item>
+          <IconLabelButton full noBorder icon={ICON.add} label="追加" onClick={addEvent}/>
+        </Menu.Item>
+        <Divider compact/>
+        <Menu.Item>
+          <IconLabelButton full noBorder icon={ICON.edit} label="名前変更" onClick={editEventName}/>
+        </Menu.Item>
+      </CustomMenu>
+    </div>
     {
       isExpanded && 
       <div className="flex flex-col gap-2 px-8 md:grid md:grid-cols-2">
@@ -420,7 +474,7 @@ function EventSection({
                     icon={ICON.textFieldsAlt}
                     label="名前編集"
                     asDiv
-                    onClick={() => onEditName(selectedChoreo)}
+                    onClick={() => editChoreoName(selectedChoreo)}
                     full />
                 </Dialog.Close>
 
@@ -448,7 +502,7 @@ function EventSection({
                     icon={ICON.delete}
                     label="削除"
                     asDiv
-                    onClick={() => onDelete(selectedChoreo)}
+                    onClick={() => deleteChoreo(selectedChoreo)}
                     full />
                 </Dialog.Close>
               </div>

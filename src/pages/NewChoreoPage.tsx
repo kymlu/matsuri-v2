@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import NumberInput from "../components/inputs/NumberInput";
 import TextInput from "../components/inputs/TextInput";
 import { isNullOrUndefinedOrBlank, testInvalidCharacters } from "../lib/helpers/globalHelper";
@@ -21,10 +21,15 @@ interface FormationForm {
   yMargin: number;
 }
 
-export function NewChoreoPage(props: {
+type NewChoreoPageProps = {
   goToHomePage: () => void,
   goToEditPage: (choreo: Choreo) => void,
-}) {
+  eventName?: string,
+}
+
+export function NewChoreoPage({
+  goToEditPage, goToHomePage, eventName
+}: NewChoreoPageProps) {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState<FormationForm>({
     name: "",
@@ -36,6 +41,10 @@ export function NewChoreoPage(props: {
     xMargin: 2,
     yMargin: 2,
   });
+
+  useEffect(() => {
+    setForm(prev => ({...prev, eventName: eventName ?? ""}));
+  }, [eventName]);
 
   const nextStep = () => setStep(s => Math.min(s + 1, 3));
   const prevStep = () => setStep(s => Math.max(s - 1, 1));
@@ -95,7 +104,7 @@ export function NewChoreoPage(props: {
     };
     console.log("Creating new choreo:", choreo);
     saveChoreo(choreo, () => {
-      props.goToEditPage(choreo);
+      goToEditPage(choreo);
     });
   };
 
@@ -123,7 +132,7 @@ export function NewChoreoPage(props: {
               restrictFn={(s) => !testInvalidCharacters(s)}
             />
             <TextInput
-              defaultValue={form.eventName}
+              defaultValue={eventName}
               onContentChange={newValue => handleChange("eventName", newValue)}
               placeholder="イベント名を入力してください"
               label="イベント（任意）"
@@ -220,8 +229,8 @@ export function NewChoreoPage(props: {
       <div className="flex justify-between gap-4 pb-8">
         {step === 1 && (
           <Button
-          full
-            onClick={props.goToHomePage}
+            full
+            onClick={goToHomePage}
           >
             戻る
           </Button>

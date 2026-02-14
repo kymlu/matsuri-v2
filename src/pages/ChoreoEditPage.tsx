@@ -17,25 +17,23 @@ import { saveChoreo } from "../lib/dataAccess/DataController";
 import IconButton from "../components/basic/IconButton";
 import { DEFAULT_PROP_LENGTH, DEFAULT_PROP_WIDTH, ICON } from "../lib/consts/consts";
 import { AppSetting } from "../models/appSettings";
-import { changeStageGeometryAndType, editChoreoInfo } from "../lib/editor/commands/choreoCommands";
+import { changeStageGeometryAndType, renameChoreo } from "../lib/editor/commands/choreoCommands";
 import EditChoreoInfoDialog from "../components/dialogs/EditChoreoInfoDialog";
-import EditDancerNameDialog from "../components/dialogs/EditDancerNameDialog";
 import EditDancerColourDialog from "../components/dialogs/EditDancerColourDialog";
 import { DancerPosition } from "../models/dancer";
 import { ActionManagerDialog } from "../components/dialogs/ActionManagerDialog";
 import { DancerAction, DancerActionTiming } from "../models/dancerAction";
 import ActionSelectionToolbar from "../components/editor/ActionSelectionToolbar";
 import ConfirmDeletionDialog from "../components/dialogs/ConfirmDeletionDialog";
-import EditSectionNameDialog from "../components/dialogs/EditSectionNameDialog";
 import EditSectionNoteDialog from "../components/dialogs/EditSectionNoteDialog";
 import { Coordinates } from "../models/base";
 import { colorPalette } from "../lib/consts/colors";
 import { addDancer, addProp, alignHorizontalPositions, alignVerticalPositions, changeObjectColours, distributePositions, editAndDeleteProps, moveObjectPositions, pastePositions, removeObjects, renameAndDeleteDancers, renameDancer, renameProp, swapPositions, updatePropSizeAndRotate } from "../lib/editor/commands/objectCommands";
 import { PropPosition } from "../models/prop";
-import EditPropNameDialog from "../components/dialogs/EditPropNameDialog";
 import { DancerManagerDialog } from "../components/dialogs/DancerManagerDialog";
 import ExportDialog from "../components/dialogs/ExportDialog";
 import { PropManagerDialog } from "../components/dialogs/PropManagerDialog";
+import EditNameDialog from "../components/dialogs/EditNameDialog";
 
 const resizeDialog = Dialog.createHandle<Choreo>();
 const editChoreoInfoDialog = Dialog.createHandle<string>();
@@ -697,10 +695,10 @@ export default function ChoreoEditPage(props: {
         onOpenChange={handleEditChoreoInfoDialogOpen}>
         <EditChoreoInfoDialog
           choreo={history.presentState.state}
-          onSubmit={(name, event) => {
+          onSubmit={(name) => {
             dispatch({
               type: "SET_STATE",
-              newState: editChoreoInfo(history.presentState.state, name, event),
+              newState: renameChoreo(history.presentState.state, name),
               currentSectionId: currentSection.id,
               commit: true});
             editChoreoInfoDialog.close();
@@ -711,8 +709,9 @@ export default function ChoreoEditPage(props: {
         handle={renameDancerDialog}
         open={renameDancerDialogOpen}
         onOpenChange={handleRenameDancerDialogOpen}>
-        <EditDancerNameDialog
-          dancer={history.presentState.state.dancers[selectedIds.dancers[0]]}
+        <EditNameDialog
+          name={history.presentState.state.dancers[selectedIds.dancers[0]]?.name}
+          type="ダンサー"
           onSubmit={(name) => {
             dispatch({
               type: "SET_STATE",
@@ -793,28 +792,13 @@ export default function ChoreoEditPage(props: {
           />
       </Dialog.Root>
       <Dialog.Root
-        handle={renameDancerDialog}
-        open={renameDancerDialogOpen}
-        onOpenChange={handleRenameDancerDialogOpen}>
-        <EditDancerNameDialog
-          dancer={history.presentState.state.dancers[selectedIds.dancers[0]]}
-          onSubmit={(name) => {
-            dispatch({
-              type: "SET_STATE",
-              newState: renameDancer(history.presentState.state, selectedIds.dancers[0], name),
-              currentSectionId: currentSection.id,
-              commit: true});
-            renameDancerDialog.close();
-            setRenameDancerDialogOpen(false);
-          }}/>
-      </Dialog.Root>
-      <Dialog.Root
         handle={renamePropDialog}
         open={renamePropDialogOpen}
         onOpenChange={handleRenamePropDialogOpen}
         >
-        <EditPropNameDialog
-          prop={history.presentState.state.props[selectedIds.props[0]]}
+        <EditNameDialog
+          name={history.presentState.state.props[selectedIds.props[0]]?.name}
+          type="道具"
           onSubmit={(name) => {
             dispatch({
               type: "SET_STATE",
@@ -831,8 +815,9 @@ export default function ChoreoEditPage(props: {
         open={renameSectionDialogOpen}
         onOpenChange={handleRenameSectionDialogOpen}
         >
-        <EditSectionNameDialog
-          section={currentSection}
+        <EditNameDialog
+          name={currentSection?.name}
+          type="セクション"
           onSubmit={(name) => {
             dispatch({
               type: "SET_STATE",
