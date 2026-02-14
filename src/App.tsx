@@ -44,12 +44,17 @@ function App() {
         <ChoreoEditPage
           currentChoreo={currentChoreo!!}
           goToHomePage={() => setMode("home")}
+          goToViewPage={(choreo) => {
+            setCurrentChoreo(choreo);
+            setMode("view");
+          }}
         />
       )}
       {mode === "view" && (
         <ChoreoViewPage
           currentChoreo={currentChoreo!!}
           goToHomePage={() => setMode("home")}
+          goToEditPage={() => setMode("edit")}
         />
       )}
     </div>

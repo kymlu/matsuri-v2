@@ -30,6 +30,8 @@ type HeaderProps = {
   changeShowPrevious?: () => void;
   changeDancerSize?: (showLarge: boolean) => void;
   appSettings: AppSetting;
+  goToEdit?: () => void;
+  goToView?: () => void;
 };
 
 export default function Header({
@@ -53,11 +55,13 @@ export default function Header({
   changeShowPrevious,
   changeDancerSize,
   appSettings,
+  goToEdit,
+  goToView,
 }: HeaderProps) {
   return <header className="z-10 grid grid-cols-[1fr,auto,1fr] items-center justify-between w-screen border-b-2 select-none bg-gradient-to-b from-white to-transparent ">
     <div className="flex">
       <IconButton
-        src={ICON.chevronBackward} // if there is a history, verify save first?
+        src={ICON.home}
         noBorder
         onClick={() => {
           onSave?.();
@@ -70,6 +74,17 @@ export default function Header({
       {currentChoreo.name}
     </div>
     <div className="flex justify-end">
+      <IconButton
+        colour="primary"
+        src={goToEdit ? ICON.edit : ICON.visibility}
+        noBorder
+        onClick={() => {
+          if (goToEdit) {
+            goToEdit();
+          } else if (goToView) {
+            goToView();
+          } }}
+        />
       {
         onToggleNotes &&
         <IconButton

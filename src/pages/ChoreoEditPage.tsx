@@ -52,6 +52,7 @@ const deleteSectionDialog = Dialog.createHandle<ChoreoSection>();
 export default function ChoreoEditPage(props: {
   goToHomePage: () => void,
   currentChoreo: Choreo,
+  goToViewPage: (newChoreo: Choreo) => void,
 }) {
   const [currentSection, setCurrentSection] = useState<ChoreoSection>(props.currentChoreo.sections[0]);
   const [currentAction, setCurrentAction] = useState<DancerAction | undefined>();
@@ -397,6 +398,7 @@ export default function ChoreoEditPage(props: {
           setAppSettings(prev => {return {...prev, dancerDisplayType: showLarge ? "large" : "small"}})
         }}
         appSettings={appSettings}
+        goToView={() => {props.goToViewPage(history.presentState.state)}}
         />
       <div className="relative flex-1">
         <MainStage

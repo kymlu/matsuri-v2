@@ -20,6 +20,7 @@ import BaseEditDialog from "../components/dialogs/BaseEditDialog"
 import ConfirmUploadDialog from "../components/dialogs/ConfirmUploadDialog"
 import BaseErrorDialog from "../components/dialogs/BaseErrorDialog"
 import ExportDialog from "../components/dialogs/ExportDialog"
+import React from "react"
 
 type HomePageProps = {
   goToNewChoreoPage: () => void,
@@ -128,6 +129,7 @@ export default function HomePage({
       <div className="flex gap-2 mb-2">
         <IconLabelButton
           full
+          primary
           label="新規作成"
           icon={ICON.add}
           onClick={goToNewChoreoPage}
@@ -146,7 +148,6 @@ export default function HomePage({
               key={group[0]}
               eventName={group[0]}
               choreos={group[1]}
-              goToEditPage={goToEditPage}
               goToViewPage={goToViewPage}
               duplicateChoreo={duplicateChoreo}
               onEditName={(choreo) => {
@@ -307,7 +308,6 @@ type EventSectionProps = {
   eventName: string,
   choreos: Choreo[],
   goToViewPage: (choreo: Choreo) => void,
-  goToEditPage: (choreo: Choreo) => void,
   duplicateChoreo: (choreo: Choreo) => void,
   onEditName: (choreo: Choreo) => void,
   onDelete: (choreo: Choreo) => void,
@@ -315,10 +315,17 @@ type EventSectionProps = {
 }
 
 function EventSection({
-  eventName,choreos, goToEditPage, goToViewPage,
+  eventName,choreos, goToViewPage,
   duplicateChoreo, onEditName, onDelete, onPdfExport
 }: EventSectionProps) {
   const [isExpanded, setIsExpanded] = useState<boolean>(true);
+  const optionsDialog = Dialog.createHandle<Choreo>();
+  const [optionsDialogOpen, setOptionsDialogOpen] = React.useState(false);
+  const [selectedChoreo, setSelectedChoreo] = useState<Choreo | undefined>();
+
+  const handleOptionsDialogOpenChange = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
+    setOptionsDialogOpen(isOpen);
+  };
   
   return <div className="space-y-2">
     <button onClick={() => setIsExpanded(prev => !prev)} className='flex flex-row items-center w-full'>
@@ -335,111 +342,119 @@ function EventSection({
       <div className="flex flex-col gap-2 px-8 md:grid md:grid-cols-2">
         {
           choreos.map((choreo) =>
-            <Dialog.Root key={choreo.id}>
-              <Dialog.Trigger>
-                <div className="flex flex-col justify-between h-full p-3 transition-colors border-2 rounded-md border-primary lg:hover:bg-gray-100">
-                  {/* Title */}
-                  <div className="text-lg font-medium text-left break-words text-wrap">
+            <React.Fragment key={choreo.id}>
+              <div
+                onClick={() => {goToViewPage(choreo)}}
+                className="flex flex-col justify-between h-full p-3 transition-colors border-2 rounded-md cursor-pointer border-primary lg:hover:bg-gray-100">
+                {/* Title */}
+                <div className="flex flex-row items-start justify-between gap-2">
+                  <span className="text-lg font-medium text-left break-words text-wrap">
                     {choreo.name}
-                  </div>
+                  </span>
+                  <Dialog.Trigger id={choreo.id} payload={choreo} handle={optionsDialog} onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedChoreo(choreo);
+                    setOptionsDialogOpen(true);
+                  }}>
+                    <IconButton
+                      src={ICON.moreVert}
+                      size="sm"
+                      noBorder
+                      asDiv
+                    />
+                  </Dialog.Trigger>
+                </div>
+                {/* Meta row */}
+                <div className="items-center justify-between text-sm text-gray-500 md:flex">
+                  {choreo.lastUpdated ? (
+                    <div className="flex items-center gap-1">
+                      <Icon colour="grey" size="sm" src={ICON.history}/>{getDate(new Date(choreo.lastUpdated))}
+                    </div>
+                  ) : (
+                    <div />
+                  )}
 
-                  {/* Meta row */}
-                  <div className="items-center justify-between text-sm text-gray-500 md:flex">
-                    {choreo.lastUpdated ? (
-                      <div className="flex items-center gap-1">
-                        <Icon colour="grey" size="sm" src={ICON.history}/>{getDate(new Date(choreo.lastUpdated))}
-                      </div>
-                    ) : (
-                      <div />
-                    )}
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
+                      <Icon
+                        src={ICON.resize}
+                        colour="grey"
+                        size="sm"
+                      />
+                      <span>幅{choreo.stageGeometry.stageWidth}m 縦{choreo.stageGeometry.stageLength}m</span>
+                    </div>
 
-                    <div className="flex items-center gap-2">
-                      <div className="flex items-center gap-1">
-                        <Icon
-                          src={ICON.resize}
-                          colour="grey"
-                          size="sm"
-                        />
-                        <span>幅{choreo.stageGeometry.stageWidth}m 縦{choreo.stageGeometry.stageLength}m</span>
-                      </div>
-
-                      <div className="flex items-center gap-1">
-                        <Icon
-                          src={ICON.person}
-                          colour="grey"
-                          size="sm"
-                        />
-                        <span>{Object.keys(choreo.dancers).length}</span>
-                      </div>
+                    <div className="flex items-center gap-1">
+                      <Icon
+                        src={ICON.person}
+                        colour="grey"
+                        size="sm"
+                      />
+                      <span>{Object.keys(choreo.dancers).length}</span>
                     </div>
                   </div>
                 </div>
-              </Dialog.Trigger>
-              <CustomDialog hasX title={choreo.name}>
-                {/* TODO: add rename, export functions */}
-                <div className="flex flex-col gap-2">
-                  <IconLabelButton
-                    icon={ICON.visibility}
-                    label="閲覧"
-                    onClick={() => goToViewPage(choreo)}
-                    full />
-
-                  <IconLabelButton
-                    icon={ICON.edit}
-                    label="編集"
-                    onClick={() => goToEditPage(choreo)}
-                    full />
-
-                  <Dialog.Close>
-                    <IconLabelButton
-                      icon={ICON.fileCopy}
-                      label="複製"
-                      asDiv
-                      onClick={() => duplicateChoreo(choreo)}
-                      full />
-                  </Dialog.Close>
-
-                  <Dialog.Close>
-                    <IconLabelButton
-                      icon={ICON.textFieldsAlt}
-                      label="名前編集"
-                      asDiv
-                      onClick={() => onEditName(choreo)}
-                      full />
-                  </Dialog.Close>
-
-                  <Dialog.Close>
-                    <IconLabelButton
-                      icon={ICON.fileExport}
-                      label="共有用エクスポート"
-                      asDiv
-                      onClick={() => exportToMtr(choreo)}
-                      full />
-                  </Dialog.Close>
-                  
-                  <Dialog.Close>
-                    <IconLabelButton
-                      icon={ICON.pictureAsPdf}
-                      label="PDFをダウンロード"
-                      asDiv
-                      onClick={() => onPdfExport(choreo)}
-                      full />
-                  </Dialog.Close>
-
-                  <Dialog.Close>
-                    <IconLabelButton
-                      primaryText
-                      icon={ICON.delete}
-                      label="削除"
-                      asDiv
-                      onClick={() => onDelete(choreo)}
-                      full />
-                  </Dialog.Close>
-                </div>
-              </CustomDialog>
-            </Dialog.Root>
+              </div> 
+            </React.Fragment>
           )
         }
+        <Dialog.Root
+          open={optionsDialogOpen}
+          onOpenChange={handleOptionsDialogOpenChange}
+          handle={optionsDialog}>
+          {
+            selectedChoreo &&
+            <CustomDialog hasX title={selectedChoreo.name}>
+              <div className="flex flex-col gap-2">
+                <Dialog.Close>
+                  <IconLabelButton
+                    icon={ICON.fileCopy}
+                    label="複製"
+                    asDiv
+                    onClick={() => duplicateChoreo(selectedChoreo)}
+                    full />
+                </Dialog.Close>
+
+                <Dialog.Close>
+                  <IconLabelButton
+                    icon={ICON.textFieldsAlt}
+                    label="名前編集"
+                    asDiv
+                    onClick={() => onEditName(selectedChoreo)}
+                    full />
+                </Dialog.Close>
+
+                <Dialog.Close>
+                  <IconLabelButton
+                    icon={ICON.fileExport}
+                    label="共有用エクスポート"
+                    asDiv
+                    onClick={() => exportToMtr(selectedChoreo)}
+                    full />
+                </Dialog.Close>
+                
+                <Dialog.Close>
+                  <IconLabelButton
+                    icon={ICON.pictureAsPdf}
+                    label="PDFをダウンロード"
+                    asDiv
+                    onClick={() => onPdfExport(selectedChoreo)}
+                    full />
+                </Dialog.Close>
+
+                <Dialog.Close>
+                  <IconLabelButton
+                    primaryText
+                    icon={ICON.delete}
+                    label="削除"
+                    asDiv
+                    onClick={() => onDelete(selectedChoreo)}
+                    full />
+                </Dialog.Close>
+              </div>
+            </CustomDialog>
+          }
+        </Dialog.Root>
       </div>
     }
   </div>

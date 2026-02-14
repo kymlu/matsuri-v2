@@ -17,6 +17,7 @@ import { exportToMtr } from "../lib/helpers/exportHelper";
 export default function ChoreoViewPage(props: {
   goToHomePage: () => void
   currentChoreo: Choreo,
+  goToEditPage: () => void,
 }) {
   const [currentSection, setCurrentSection] = useState<ChoreoSection>(props.currentChoreo.sections[0]);
   const [nextSection, setNextSection] = useState<ChoreoSection | undefined>();
@@ -64,6 +65,7 @@ export default function ChoreoViewPage(props: {
         appSettings={appSettings}
         showNotes={showNotes}
         onToggleNotes={() => setShowNotes(prev => !prev)}
+        goToEdit={props.goToEditPage}
         />
       <div className="relative flex-1 overflow-hidden border-b-2 md:flex">
         <ViewerSidebar
