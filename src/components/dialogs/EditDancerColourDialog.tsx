@@ -52,7 +52,7 @@ export default function EditDancerColourDialog({
               onClick={() => {setSelectedColour(color)}}
               style={{"backgroundColor": color}}
               className={"rounded-full size-8 min-h-8 min-w-8 max-h-8 max-w-8 " + 
-                (strEquals(color, selectedColour) ? "border-2 border-primary" : "")
+                (strEquals(color, selectedColour) ? "border-4 border-primary" : "")
               }/>
           )
         }
