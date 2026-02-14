@@ -428,6 +428,7 @@ function EventSection({
 
                   <Dialog.Close>
                     <IconLabelButton
+                      primaryText
                       icon={ICON.delete}
                       label="削除"
                       asDiv

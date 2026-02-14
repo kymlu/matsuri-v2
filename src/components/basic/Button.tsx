@@ -5,6 +5,7 @@ import Icon from './Icon';
 type ButtonProps = {
   children: React.ReactNode
   primary?: boolean,
+  primaryText?: boolean,
   grey?: boolean,
   noBorder?: boolean,
   disabled?: boolean,
@@ -21,6 +22,7 @@ type ButtonProps = {
 export default function Button({
   children,
   primary,
+  primaryText,
   grey,
   noBorder,
   disabled,
@@ -48,6 +50,7 @@ export default function Button({
     "cursor-default opacity-50": disabled,
     "cursor-pointer": !disabled,
     "h-full items-center flex justify-center": asDiv,
+    "text-primary": primaryText
   });
 
   return <>
@@ -80,6 +83,7 @@ type IconLabelButtonProps = {
   onClick: () => void;
   icon: string;
   label: string;
+  primaryText?: boolean,
   primary?: boolean;
   asDiv?: boolean;
   noBorder?: boolean,
@@ -93,6 +97,7 @@ export function IconLabelButton({
   icon,
   label,
   noBorder,
+  primaryText,
   primary = false,
   asDiv = false,
   disabled = false,
@@ -101,6 +106,7 @@ export function IconLabelButton({
 }: IconLabelButtonProps) {
   return <Button
     onClick={onClick}
+    primaryText={primaryText}
     primary={primary}
     asDiv={asDiv}
     disabled={disabled}
@@ -108,7 +114,7 @@ export function IconLabelButton({
     full={full}
     >
     <div className="flex items-center justify-center gap-2">
-      <Icon colour={primary ? "white" : "black"} src={icon} size={iconSize}/>
+      <Icon colour={primaryText ? "primary" : primary ? "white" : "black"} src={icon} size={iconSize}/>
       {label}
     </div>
   </Button>
