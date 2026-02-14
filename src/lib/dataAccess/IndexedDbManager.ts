@@ -48,12 +48,11 @@ export class IndexedDBManager {
   }
 
   async getAll(storeName: TableName) {
-    console.log(`getAll ${storeName} called`);
     return new Promise((resolve, reject) => {
       try {
         const request = this._getStore(storeName, "readonly").getAll();
         request.onsuccess = () => {
-          console.log(`resolved getAll ${storeName}: ${request.result.length}`);
+          console.log(`successfully completed getAll ${storeName}: ${request.result.length}`);
           resolve(request.result || null);
         };
         request.onerror = () => {
@@ -68,13 +67,12 @@ export class IndexedDBManager {
   }
 
   async getById(storeName: TableName, id: string) {
-    console.log(`getByFormationId ${storeName} called on ${id}`);
     return new Promise((resolve, reject) => {
       try {
         const index = this._getStore(storeName, "readonly").index("formationId");
         const request = index.get(id);
         request.onsuccess = () => {
-          console.log(`resolved getByFormationId ${storeName}: ${request.result.length}`);
+          console.log(`successfully completed getByFormationId ${storeName}: ${request.result.length}`);
           resolve(request.result || null);
         };
         request.onerror = () => {
@@ -89,12 +87,11 @@ export class IndexedDBManager {
   }
 
   async upsertItem(storeName: TableName, item: any) {
-    console.log(`upsertItem ${storeName} called`);
     return new Promise<number>((resolve, reject) => {
       try {
         const request = this._getStore(storeName).put(item);
         request.onsuccess = () => {
-          console.log(`resolved upsertItem ${storeName}: ${request.result as number}`);
+          console.log(`successfully completed upsertItem ${storeName}: ${request.result as number}`);
           resolve(request.result as number);
         };
         request.onerror = () => {
@@ -109,14 +106,13 @@ export class IndexedDBManager {
   }
   
   async upsertList(storeName: TableName, list: Array<any>) {
-    console.log(`upsertList ${storeName} called`);
     return new Promise<number>((resolve, reject) => {
       try {
         const tx = this._getTransaction(storeName);
         const store = tx.objectStore(storeName);
         list.forEach(item => store.put(item));
         tx.oncomplete = () => {
-          console.log(`resolved upsertList ${storeName}: ${list.length}`);
+          console.log(`successfully completed upsertList ${storeName}: ${list.length}`);
           resolve(list.length);
         };
         tx.onerror = () => {
@@ -137,7 +133,7 @@ export class IndexedDBManager {
       try {
         const request = this._getStore(storeName).delete(itemId);
         request.onsuccess = () => {
-          console.log(`resolved removeItem ${storeName}: ${request.result}`);
+          console.log(`successfully completed removeItem ${storeName}: ${request.result}`);
           resolve(request.result);
         };
         request.onerror = () => {
@@ -152,12 +148,11 @@ export class IndexedDBManager {
   }
 
   async deleteAll(storeName: TableName) {
-    console.log(`deleteAll ${storeName} called`);
     return new Promise<any>((resolve, reject) => {
       try {
         const request = this._getStore(storeName).clear();
         request.onsuccess = () => {
-          console.log(`resolved deleteAll ${storeName}`);
+          console.log(`successfully completed deleteAll ${storeName}`);
           resolve(request.result);
         };
         request.onerror = () => {

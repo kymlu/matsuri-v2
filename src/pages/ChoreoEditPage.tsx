@@ -210,7 +210,6 @@ export default function ChoreoEditPage(props: {
 
   const onCopy = useCallback(() => {
     if ((selectedIds.dancers.length + selectedIds.props.length) === 0) {
-      console.log("Emptying copy buffer");
       setCopyBuffer({props: {}, dancers: {}});
       return;
     }
@@ -232,7 +231,6 @@ export default function ChoreoEditPage(props: {
     });
 
     setCopyBuffer({ props: copyRecordProp, dancers: copyRecordDancer });
-    console.log("Successfully copied", copyRecordDancer, copyRecordProp);
   }, [
     selectedIds,
     currentSection.formation.dancerPositions,
@@ -240,8 +238,6 @@ export default function ChoreoEditPage(props: {
   ]);
 
   const onPaste = useCallback(() => {
-    console.log("Pasting", copyBuffer, "to", currentSection.id);
-
     dispatch({
       type: "SET_STATE",
       newState: pastePositions(
@@ -417,7 +413,6 @@ export default function ChoreoEditPage(props: {
             setMovementUpdateGroup(prev => ({...prev, "props": {...prev.props, [propId]: {x, y}}}));
           }}
           updatePropSizeAndRotate={(width, length, rotation, x, y, propId) => {
-            console.log(width, length, rotation, x, y, propId);
             dispatch({
               type: "SET_STATE",
               newState: updatePropSizeAndRotate(
@@ -432,7 +427,6 @@ export default function ChoreoEditPage(props: {
           setSelectedIds={setSelectedIds}
           previousSection={prevSection}
           addDancer={(x, y) => {
-            console.log("Adding dancer at", x, y);
             dispatch({
               type: "SET_STATE",
               newState: addDancer(
@@ -449,7 +443,6 @@ export default function ChoreoEditPage(props: {
             }
           }
           addProp={(x, y) => {
-            console.log("Adding prop at", x, y);
             dispatch({
               type: "SET_STATE",
               newState: addProp(

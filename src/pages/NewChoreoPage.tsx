@@ -54,7 +54,6 @@ export function NewChoreoPage({
   };
 
   const handleSubmit = () => {
-    console.log("Submitting form:", form);
     var sectionId = crypto.randomUUID();
     var dancers: Record<string, Dancer> = {};
     var dancerPositions: Record<string, DancerPosition> = {};

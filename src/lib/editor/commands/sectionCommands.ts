@@ -5,7 +5,6 @@ import { DancerAction } from "../../../models/dancerAction";
 export function addSection(state: Choreo, id: string, name: string): Choreo {
   const previousSection = {...state.sections[state.sections.length - 1]};
   Object.values(previousSection.formation.dancerPositions).forEach(x => x.sectionId = id);
-  console.log("Adding section");
 
   return {
     ...state,
@@ -23,7 +22,6 @@ export function addSection(state: Choreo, id: string, name: string): Choreo {
 }
 
 export function duplicateSection(state: Choreo, section: ChoreoSection, index: number) {
-  console.log("Duplicating section", section.id, section.name);
   var duplicatedSection = { ...section };
   var newId = crypto.randomUUID();
   duplicatedSection.id = newId;
@@ -33,12 +31,10 @@ export function duplicateSection(state: Choreo, section: ChoreoSection, index: n
 }
 
 export function removeSection(state: Choreo, id: string): Choreo {
-  console.log("Removing the section", id);
   return { ...state, sections: state.sections.filter(s => s.id !== id) }
 }
 
 export function renameSection(state: Choreo, sectionId: string, newName: string): Choreo {
-  console.log("Rename section", sectionId, newName);
   const newSections = state.sections.map(s =>
     s.id === sectionId ? { ...s, name: newName } : s
   )
@@ -46,7 +42,6 @@ export function renameSection(state: Choreo, sectionId: string, newName: string)
 }
 
 export function editSectionNote(state: Choreo, sectionId: string, newNote: string): Choreo {
-  console.log("Edit section note", sectionId, newNote);
   const newSections = state.sections.map(s =>
     s.id === sectionId ? { ...s, note: newNote } : s
   )
@@ -54,12 +49,10 @@ export function editSectionNote(state: Choreo, sectionId: string, newNote: strin
 }
 
 export function reorderSections(state: Choreo, newSections: ChoreoSection[]): Choreo {
-  console.log("Reordering sections");
   return { ...state, sections: [...newSections] };
 }
 
 export function editDancerActions(state: Choreo, sectionId: string, newActions: DancerAction[]): Choreo {
-  console.log("Editing dancer actions", sectionId, newActions);
   const newSections = state.sections.map(s =>
     s.id === sectionId ? { ...s, formation: {...s.formation, dancerActions: newActions} } : s
   )
@@ -67,7 +60,6 @@ export function editDancerActions(state: Choreo, sectionId: string, newActions: 
 }
 
 export function assignDancersToTiming(state: Choreo, sectionId: string, actionId: string, timingId: string, dancerIds: string[]): Choreo {
-  console.log(`Assigning dancer to timing`, `sectionId=${sectionId}`, `actionId=${actionId}`, `timingId=${timingId}`,`dancerIds=${JSON.stringify(dancerIds)}`);
   var dancerIdSet = new Set(dancerIds);
   const newSections = state.sections.map(s => 
     s.id === sectionId ? {

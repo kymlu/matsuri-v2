@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import './App.css';
 import HomePage from './pages/HomePage';
 import { NewChoreoPage } from './pages/NewChoreoPage';
@@ -12,6 +12,10 @@ function App() {
   const [mode, setMode] = useState<Mode>("home");
   const [selectedEvent, setSelectedEventName] = useState<string | undefined>();
   const [currentChoreo, setCurrentChoreo] = useState<Choreo | undefined>();
+
+  useEffect(() => {
+    console.log("Changing mode:", mode);
+  }, [mode]);
 
   return (
     <div>

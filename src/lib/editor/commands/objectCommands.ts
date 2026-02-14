@@ -235,7 +235,6 @@ export function moveObjectPositions(
   sectionId: string,
   positions: StageEntities<Record<string, Coordinates>>,
 ): Choreo {
-  console.log("Moving objects", positions);
   const newSections = state.sections.map(section => {
     if (section.id !== sectionId) return section
     return {
@@ -268,7 +267,6 @@ export function updatePropSizeAndRotate(
   x: number,
   y: number,
   propId: string) {
-  console.log("Rotations and scaling prop", propId, width, length, rotation);
   const newSections = state.sections.map(section => {
     if (section.id !== sectionId) return section
     return {
@@ -298,8 +296,6 @@ export function changeObjectColours(
   ids: StageEntities<string[]>,
   color: string,
 ) {
-  console.log(`Changing colors to ${color} for ${ids} on ${mode} starting at section ${sectionIndex}`);
-
   // update dancers
   const shouldUpdate = (i: number) => {
     switch (mode) {
@@ -346,8 +342,6 @@ export function pastePositions(
   sectionId: string,
   positions: StageEntities<Record<string, PropPosition>, Record<string, DancerPosition>>,
 ): Choreo {
-  console.log(`Pasting positions to ${sectionId}`);
-
   const newSections = state.sections.map(section => {
     if (!strEquals(section.id, sectionId)) return section;
 
@@ -379,8 +373,6 @@ export function alignHorizontalPositions (
   positions: StageEntities<PropPosition[], DancerPosition[]>,
   type: HorizontalAlignment,
 ): Choreo {
-  console.log(`Aligning to ${type}`);
-
   if (positions.dancers.length === 0 && positions.props.length === 0) return {...state};
 
   var newValue: number = 0;
@@ -453,8 +445,6 @@ export function alignVerticalPositions (
   positions: StageEntities<PropPosition[], DancerPosition[]>,
   type: VerticalAlignment,
 ): Choreo {
-  console.log(`Aligning to ${type}`);
-
   if (positions.dancers.length === 0 && positions.props.length === 0) return {...state};
 
   var newValue: number = 0;
@@ -529,8 +519,6 @@ export function distributePositions (
   positions: StageEntities<PropPosition[], DancerPosition[]>,
   type: Distribution
 ): Choreo {
-  console.log(`Distributing ${type}`);
-
   if (positions.dancers.length === 0 && positions.props.length === 0) return {...state};
 
   var sortedItems = [...positions.dancers, ...positions.props].sort((a, b) => {return a[type] - b[type]});
@@ -576,7 +564,6 @@ export function swapPositions(
   dancerAId: string,
   dancerBId: string
 ) {
-  console.log(`Swapping ${dancerAId} and ${dancerBId} at ${sectionId}`);
   const newSections = state.sections.map(section => {
     if (section.id !== sectionId) return section
     var dancerPositions = {...section.formation.dancerPositions};
