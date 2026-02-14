@@ -52,12 +52,19 @@ export default function DancerGridObject({
         snapToGrid={snapToGrid}
         animate={animate}
       >
+        {
+          isSelected && 
+          <Circle
+            radius={METER_PX * (dancerDisplayType === "large" ?  0.45 : 0.25)}
+            fill={colorPalette.white}
+            strokeEnabled
+            strokeWidth={2.5}
+            stroke={colorPalette.primary}
+          />
+        }
         <Circle
-          radius={dancerDisplayType === "large" ? METER_PX * 0.45 : METER_PX * 0.2}
+          radius={METER_PX * (dancerDisplayType === "large" ? (isSelected ? 0.35 : 0.45) : (isSelected ? 0.1 : 0.2))}
           fill={position.color}
-          strokeEnabled={isSelected}
-          strokeWidth={2.5}
-          stroke={colorPalette.primary}
         />
 
         {

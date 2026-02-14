@@ -56,10 +56,18 @@ export default function PropGridObject({
         <Rect
           width={prop.width * METER_PX}
           height={prop.length * METER_PX}
-          fill={prop.color}
           strokeEnabled={isSelected}
           strokeWidth={2.5}
-          stroke={colorPalette.primary}/>
+          stroke={colorPalette.primary}
+        />
+        
+        <Rect
+          x={isSelected ? METER_PX * 0.1 : 0}
+          y={isSelected ? METER_PX * 0.1 : 0}
+          width={(prop.width * METER_PX) - (isSelected ? METER_PX * 0.2 : 0)}
+          height={(prop.length * METER_PX) - (isSelected ? METER_PX * 0.2 : 0)}
+          fill={prop.color}/>
+
         <Text
           y={(prop.length / 2) * METER_PX}
           width={prop.width * METER_PX}

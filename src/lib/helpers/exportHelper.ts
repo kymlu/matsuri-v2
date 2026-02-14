@@ -265,21 +265,22 @@ export async function exportToPdf (
       var dancer = choreo.dancers[p.dancerId];
       if (dancer) {
         const isFollowing = strEquals(followingId, dancer.id);
-        
-        if (isFollowing) {
-          pdf.setLineWidth(2);
-          pdf.setDrawColor(colorPalette.primary);
-        } else {
-          pdf.setLineWidth(0.8);
-          pdf.setDrawColor(p.color);
-        }
   
         const positionInPx = stageMetersToPx(p, stage, gridSizePx);
         const x =  positionInPx.x;
         const y = positionInPx.y
+        
+        if (isFollowing) {
+          pdf.setLineWidth(1.5);
+          pdf.setDrawColor(colorPalette.primary);
+          pdf.setFillColor(colorPalette.white);
+          pdf.circle(x, y + titleBuffer, gridSizePx * 0.4, "FD");
+        }
 
+        pdf.setLineWidth(0.8);
+        pdf.setDrawColor(p.color);
         pdf.setFillColor(p.color);
-        pdf.circle(x, y + titleBuffer, gridSizePx * 0.4, "FD");
+        pdf.circle(x, y + titleBuffer, gridSizePx * (isFollowing ? 0.3 : 0.4), "FD");
   
         pdf.setTextColor(colorPalette.getTextColor(p.color));
         var displayName = dancer.name ?? "";

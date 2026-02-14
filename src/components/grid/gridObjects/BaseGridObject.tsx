@@ -110,7 +110,7 @@ export default function BaseGridObject({
         }
       }}
       onPointerUp={(e) => {
-        if (!isDraggingRef.current) {
+        if (dragStartRef && !isDraggingRef.current) {
           onClick?.();
         }
       }}
@@ -132,10 +132,6 @@ export default function BaseGridObject({
               updatePosition?.(snappedPositionInM.x, snappedPositionInM.y);
             }
           });
-
-          if (!isSelected) {
-            onClick?.(false);
-          }
         }
       }}
       >
