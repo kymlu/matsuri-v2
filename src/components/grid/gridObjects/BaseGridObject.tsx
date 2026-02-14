@@ -90,15 +90,20 @@ export default function BaseGridObject({
         if (!isSelected) {
           onClick?.(false);
         }
-
-        const start = dragStartRef.current;
-        if (!start) return;
+        
+        if (!dragStartRef.current) {
+          dragStartRef.current = {
+            x: e.target.x(),
+            y: e.target.y(),
+          };
+          isDraggingRef.current = false;
+        }
 
         e.target.x(Math.min(METER_PX * (stageGeometry.stageWidth + stageGeometry.margin.leftMargin + stageGeometry.margin.rightMargin), Math.max(e.target.x(), 0)));
         e.target.y(Math.min(METER_PX * (stageGeometry.stageLength + stageGeometry.margin.topMargin + stageGeometry.margin.bottomMargin), Math.max(e.target.y(), 0)));
 
-        const dx = e.target.x() - start.x;
-        const dy = e.target.y() - start.y;
+        const dx = e.target.x() - dragStartRef.current.x;
+        const dy = e.target.y() - dragStartRef.current.y;
 
         if (Math.hypot(dx, dy) > 0.01 && !isDraggingRef.current) {
           isDraggingRef.current = true;
