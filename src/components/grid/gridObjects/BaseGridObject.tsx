@@ -90,7 +90,7 @@ export default function BaseGridObject({
         if (!isSelected) {
           onClick?.(false);
         }
-        if (isDraggingRef.current) return;
+
         const start = dragStartRef.current;
         if (!start) return;
 
