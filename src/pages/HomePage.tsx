@@ -49,6 +49,7 @@ export default function HomePage({
     setDeleteChoreoDialogOpen(isOpen);
   };
 
+  const [uploadErrorMessage, setUploadErrorMessage] = useState<string>("");
   const [uploadFailedDialogOpen, setUploadFailedDialogOpen] = useState(false);
   const uploadFailedDialog = Dialog.createHandle<{}>();
   const handleUploadFailedDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
@@ -166,9 +167,18 @@ export default function HomePage({
       </div>
       <span onDoubleClick={downloadLogs} className='fixed opacity-50 bottom-2 left-2'>{LAST_UPDATED}</span>
 
-      <input className='hidden' type="file" id="uploadFileInput" accept=".mtr"
+      <input
+        className='hidden'
+        type="file"
+        id="uploadFileInput"
+        accept=".mtr, application/zip"
         onChange={(event) => {
-          if (event.target.files) {
+          if (!event.target.files || event.target.files.length === 0) {
+            console.log("No files were selected to upload.");              
+          } else if (event.target.files.length > 1) {
+            setUploadErrorMessage("ファイルは1つだけアップロードしてください。");
+            setUploadFailedDialogOpen(true);
+          } else {
             var file = event.target.files?.[0];
             readUploadedFile(
               file,
@@ -184,7 +194,8 @@ export default function HomePage({
                   onUploadSuccess(choreo);
                 }
               },
-              () => {
+              (e) => {
+                setUploadErrorMessage(e);
                 setUploadFailedDialogOpen(true);
               }
             );
@@ -253,7 +264,8 @@ export default function HomePage({
           <BaseErrorDialog
             title="アップロード失敗"
             onClose={() => {setUploadFailedDialogOpen(false)}}>
-            ファイルに問題があります。別のファイルをお試しください。
+            <p>{uploadErrorMessage}</p>
+            <p>別のファイルをお試しください。</p>
           </BaseErrorDialog>
         </Dialog.Root>
         <Dialog.Root
@@ -395,22 +407,22 @@ function EventSection({
                       onClick={() => onEditName(choreo)}
                       full />
                   </Dialog.Close>
-                  
-                  <Dialog.Close>
-                    <IconLabelButton
-                      icon={ICON.download}
-                      label="PDFをダウンロード"
-                      asDiv
-                      onClick={() => onPdfExport(choreo)}
-                      full />
-                  </Dialog.Close>
 
                   <Dialog.Close>
                     <IconLabelButton
                       icon={ICON.fileExport}
-                      label="隊列表を書き出し (.mtr)"
+                      label="共有用エクスポート"
                       asDiv
                       onClick={() => exportToMtr(choreo)}
+                      full />
+                  </Dialog.Close>
+                  
+                  <Dialog.Close>
+                    <IconLabelButton
+                      icon={ICON.pictureAsPdf}
+                      label="PDFをダウンロード"
+                      asDiv
+                      onClick={() => onPdfExport(choreo)}
                       full />
                   </Dialog.Close>
 

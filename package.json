@@ -21,6 +21,7 @@
     "classnames": "^2.5.1",
     "cra-template-pwa-typescript": "^2.0.0",
     "jspdf": "^4.1.0",
+    "jszip": "^3.10.1",
     "konva": "^9.3.22",
     "material-symbols": "^0.40.2",
     "react": "^19.2.3",

@@ -4,17 +4,29 @@ import { colorPalette } from "../consts/colors";
 import { isNullOrUndefinedOrBlank, roundToTenth, strEquals } from "./globalHelper";
 import { stageMetersToPx } from "./editorCalculationHelper";
 import { Coordinates } from "../../models/base";
+import JSZip from "jszip";
 
-export function exportToMtr (
-  choreo: Choreo,
-  filename?: string,
+export async function exportToMtr (
+  choreo: Choreo
 ) {
-  const blob = new Blob([JSON.stringify(choreo)], { type: "application/octet-stream" });
+  const zip = JSZip();
+  zip.file(`${choreo.name}.mtr`, JSON.stringify(choreo));
+  zip.file(
+    "README.txt",
+    "このZIPには本アプリ用のデータが含まれています。\nZIPファイル、または中の .mtr ファイルを本アプリで読み込んでください。\n\n一部のアプリでは .mtr ファイルを送信できない場合があります。\nその場合は、このZIPファイルをそのまま共有してください。"
+  );
+  
+  const blob = await zip.generateAsync({
+    type: "blob",
+    compression: "DEFLATE",
+    compressionOptions: { level: 6 },
+  });
+
   const url = URL.createObjectURL(blob);
 
   const link = document.createElement("a");
   link.href = url;
-  link.download = (filename ?? choreo.name) + ".mtr";
+  link.download = choreo.name;
 
   link.click();
 
@@ -380,7 +392,6 @@ export async function exportToPdf (
     updateProgress(Math.round(((i + 1) / choreo.sections.length) * 100));
 
     if (i < choreo.sections.length - 1) {
-      console.log("add page")
       pdf.addPage();
     }
   }

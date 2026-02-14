@@ -18,7 +18,6 @@ type SidebarProps = {
   showManageProps?: boolean;
   manageProps?: () => void;
   manageSections?: () => void;
-  exportChoreo?: () => void;
   
   changeSnap?: () => void;
   changeShowGrid?: () => void;
@@ -42,7 +41,6 @@ export function Sidebar({
   changeShowGrid,
   changeDancerSize,
   changeShowPrevious,
-  exportChoreo, // avoid keyword confusion
   appSettings,
 }: SidebarProps) {
   return <Dialog.Portal>
@@ -99,15 +97,6 @@ export function Sidebar({
           manageSections &&
           <Button onClick={manageSections}>セクション編集</Button>
         } */}
-        {
-          exportChoreo &&
-          <>
-            <IconLabelButton
-              onClick={exportChoreo}
-              label="隊列表を書き出し (.mtr)"
-              full icon={ICON.fileExport}/>
-          </>
-        }
         <Divider/>
         {
           changeSnap &&

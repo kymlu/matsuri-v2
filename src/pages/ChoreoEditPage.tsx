@@ -382,7 +382,6 @@ export default function ChoreoEditPage(props: {
         manageProps={() => {setPropManagerDialogOpen(true);}}
         manageSections={() => {console.log("TODO: implement Manage Sections")}}
         exportChoreo={() => {
-          console.log("TODO: implement choice of pdf or mtr");
           exportToMtr(history.presentState.state);
         }}
         changeShowGrid={() => {

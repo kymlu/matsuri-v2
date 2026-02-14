@@ -6,6 +6,7 @@ type ButtonProps = {
   children: React.ReactNode
   primary?: boolean,
   grey?: boolean,
+  noBorder?: boolean,
   disabled?: boolean,
   full?: boolean,
   fixed?: boolean,
@@ -21,6 +22,7 @@ export default function Button({
   children,
   primary,
   grey,
+  noBorder,
   disabled,
   full,
   fixed,
@@ -31,10 +33,11 @@ export default function Button({
   fontSize,
   asDiv
 }: ButtonProps) {
-  const classes = className("border-2 rounded-md " + (fontSize ?? "text-base"), {
+  const classes = className("rounded-md " + (fontSize ?? "text-base"), {
     "w-full": full,
     "w-32 max-w-32 min-w-32": fixed,
     "py-0.5 px-1": compact,
+    "border-2": noBorder !== true,
     "px-3 py-1.5": compact !== true,
     "lg:hover:bg-gray-100": !disabled && primary !== true && grey !== true,
     "lg:hover:opacity-70": !disabled && (primary || grey),
@@ -79,6 +82,7 @@ type IconLabelButtonProps = {
   label: string;
   primary?: boolean;
   asDiv?: boolean;
+  noBorder?: boolean,
   disabled?: boolean;
   full?: boolean;
   iconSize?: "sm" | "md" | "lg";
@@ -88,6 +92,7 @@ export function IconLabelButton({
   onClick,
   icon,
   label,
+  noBorder,
   primary = false,
   asDiv = false,
   disabled = false,
@@ -99,6 +104,7 @@ export function IconLabelButton({
     primary={primary}
     asDiv={asDiv}
     disabled={disabled}
+    noBorder={noBorder}
     full={full}
     >
     <div className="flex items-center justify-center gap-2">

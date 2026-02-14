@@ -83,6 +83,7 @@ export const ICON = {
   noteStack: "note_stack",
   person: "person",
   personAdd: "person_add",
+  pictureAsPdf: "picture_as_pdf",
   redo: "redo",
   remove: "remove",
   resize: "resize",

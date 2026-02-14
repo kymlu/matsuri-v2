@@ -12,6 +12,7 @@ import { DancerPosition } from "../models/dancer";
 import { PropPosition } from "../models/prop";
 import ExportDialog from "../components/dialogs/ExportDialog";
 import { Dialog } from "@base-ui/react";
+import { exportToMtr } from "../lib/helpers/exportHelper";
 
 export default function ChoreoViewPage(props: {
   goToHomePage: () => void
@@ -56,6 +57,7 @@ export default function ChoreoViewPage(props: {
         returnHome={props.goToHomePage}
         currentChoreo={props.currentChoreo}
         onDownload={() => {setExportDialogOpen(true)}}
+        exportChoreo={() => exportToMtr(props.currentChoreo)}
         changeShowGrid={() => {
           setAppSettings(prev => {return {...prev, showGrid: !prev.showGrid}})
         }}

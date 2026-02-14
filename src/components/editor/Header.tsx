@@ -1,10 +1,13 @@
-import { Dialog } from "@base-ui/react";
+import { Dialog, Menu } from "@base-ui/react";
 import { ICON } from "../../lib/consts/consts";
 import IconButton from "../basic/IconButton";
 import { Choreo } from "../../models/choreo";
 import { Sidebar } from "./Sidebar";
 import { AppSetting } from "../../models/appSettings";
 import { downloadLogs } from "../../lib/helpers/logHelper";
+import CustomMenu from "../inputs/CustomMenu";
+import { IconLabelButton } from "../basic/Button";
+import Divider from "../basic/Divider";
 
 type HeaderProps = {
   returnHome: () => void;
@@ -21,7 +24,7 @@ type HeaderProps = {
   showManageProps?: boolean;
   manageProps?: () => void;
   manageSections?: () => void;
-  exportChoreo?: () => void;
+  exportChoreo: () => void;
   changeSnap?: () => void;
   changeShowGrid?: () => void;
   changeShowPrevious?: () => void;
@@ -77,10 +80,22 @@ export default function Header({
       }
       {
         onDownload &&
-        <IconButton
-          src={ICON.download}
-          noBorder
-          onClick={() => {onDownload?.()}}/>
+        <CustomMenu trigger={
+          <IconButton
+            src={ICON.download}
+            noBorder
+            asDiv/>
+        }>
+          <div className="space-y-2">
+            <Menu.Item>
+              <IconLabelButton full noBorder icon={ICON.fileExport} label="共有用" onClick={exportChoreo}/>
+            </Menu.Item>
+            <Divider compact/>
+            <Menu.Item>
+              <IconLabelButton full noBorder icon={ICON.pictureAsPdf} label="PDF" onClick={onDownload}/>
+            </Menu.Item>
+          </div>
+        </CustomMenu>
       }
       {
         hasSidebar &&
@@ -101,7 +116,6 @@ export default function Header({
             showManageProps={showManageProps}
             manageProps={manageProps}
             manageSections={manageSections}
-            exportChoreo={exportChoreo}
             changeSnap={changeSnap}
             changeShowGrid={changeShowGrid}
             changeDancerSize={changeDancerSize}

@@ -17,7 +17,7 @@ export default function BaseErrorDialog({
     onClose={onClose}
     title={title}
     footer={
-      <div className="flex w-full gap-2 mt-4">
+      <div className="flex w-full gap-2 mt-6">
         <Dialog.Close onClick={onClose} className="w-full">
           <Button
             asDiv
