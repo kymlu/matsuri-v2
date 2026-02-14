@@ -35,43 +35,45 @@ export default function FormationSelectionToolbar({
     })
 )
 
-  return <div className="flex w-screen gap-2 p-2 overflow-scroll max-w-screen">
-    <DndContext
-      sensors={sensors}
-      modifiers={[restrictToHorizontalAxis, restrictToParentElement]}
-      onDragMove={(event) => {
-        if (!isDragging) {
-          setIsDragging(true);
-        }
-      }}
-      onDragEnd={(event) => {
-        if (!isDragging) return;
+  return <div className="grid grid-cols-[1fr,auto] w-full max-w-full gap-2 p-2 overflow-scroll max-w-screen">
+    <div className="flex gap-2 overflow-scroll">
+      <DndContext
+        sensors={sensors}
+        modifiers={[restrictToHorizontalAxis, restrictToParentElement]}
+        onDragMove={(event) => {
+          if (!isDragging) {
+            setIsDragging(true);
+          }
+        }}
+        onDragEnd={(event) => {
+          if (!isDragging) return;
 
-        const { active, over } = event;
+          const { active, over } = event;
 
-        if (onReorder && over && active.id !== over.id) {
-          const oldIndex = sections.findIndex((item) => strEquals(item.id, active.id.toString()));
-          const newIndex = sections.findIndex((item) => strEquals(item.id, over.id.toString()));
-          onReorder(arrayMove(sections, oldIndex, newIndex));
-        }
-        setIsDragging(false);
-      }}
-    >
-      <SortableContext
-        disabled={!showAddButton}
-        items={sections}>
-        {
-          sections.map((section, i) => 
-            <FormationSectionItem
-              key={section.id}
-              section={section}
-              isSelected={strEquals(currentSectionId, section.id)}
-              onClickSection={onClickSection}
-              />
-          )
-        }
-      </SortableContext>
-    </DndContext>
+          if (onReorder && over && active.id !== over.id) {
+            const oldIndex = sections.findIndex((item) => strEquals(item.id, active.id.toString()));
+            const newIndex = sections.findIndex((item) => strEquals(item.id, over.id.toString()));
+            onReorder(arrayMove(sections, oldIndex, newIndex));
+          }
+          setIsDragging(false);
+        }}
+      >
+        <SortableContext
+          disabled={!showAddButton}
+          items={sections}>
+          {
+            sections.map((section, i) => 
+              <FormationSectionItem
+                key={section.id}
+                section={section}
+                isSelected={strEquals(currentSectionId, section.id)}
+                onClickSection={onClickSection}
+                />
+            )
+          }
+        </SortableContext>
+      </DndContext>
+    </div>
     {
       showAddButton &&
       <IconButton
