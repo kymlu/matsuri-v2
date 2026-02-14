@@ -551,6 +551,7 @@ export default function ChoreoEditPage(props: {
         onSelectType={() => {
           setSelectedIds({props: [], dancers: Object.keys(history.presentState.state.dancers)});
         }}
+        onDeselect={resetSelectedIds}
         showDistribute={(selectedIds.dancers.length + selectedIds.props.length) >= 3}
         onDistribute={(distribution) => {
           dispatch({

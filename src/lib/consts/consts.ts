@@ -45,6 +45,7 @@ export const ICON = {
   contentPaste: "content_paste",
   curtains: "curtains",
   delete: "delete",
+  deselect: "deselect",
   download: "download",
   dragHandle: "drag_handle",
   edit: "edit",

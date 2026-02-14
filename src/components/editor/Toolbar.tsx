@@ -15,6 +15,9 @@ type ToolbarProps = {
   showSelectDancer: boolean;
   onSelectColor: () => void;
   onSelectType: () => void;
+  onDeselect: () => void;
+
+  // colour
   showChangeColour: boolean;
   onChangeColor: () => void;
 
@@ -66,6 +69,8 @@ export default function Toolbar({
   showSelectDancer,
   onSelectColor,
   onSelectType,
+  onDeselect,
+
   showChangeColour,
   onChangeColor,
 
@@ -130,6 +135,13 @@ export default function Toolbar({
             <IconButton src={ICON.add} label="追加" onClick={()=>{setIsAddManagerVisible(true)}}/>
             <IconButton src={ICON.gridOn} label="セクション" onClick={()=>{setIsSectionManagerVisible(true)}}/>
             <IconButton src={ICON[123]} label="カウント" onClick={()=>{setIsActionManagerVisible(true)}}/>
+          </>
+        }
+        {
+          areSelectionActionsActivated && 
+          <>
+            <IconButton src={ICON.deselect} label="選択解除" onClick={() => {onDeselect()}} />
+            <VerticalDivider/>
           </>
         }
         {showRenameDancer && <IconButton src={ICON.textFieldsAlt} label="名前変更" onClick={() => {onRenameDancer()}} />}
