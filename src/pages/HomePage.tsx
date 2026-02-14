@@ -315,8 +315,7 @@ function EventSection({
         size="sm"
         colour="primary"
         noBorder
-        asDiv
-        onClick={() => setIsExpanded(prev => !prev)} />
+        asDiv />
       <h2 className='text-xl font-bold text-primary'>{eventName.length === 0 ? "イベント不明" : eventName}</h2>
     </button>
     {
