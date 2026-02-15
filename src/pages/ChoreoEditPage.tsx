@@ -52,7 +52,6 @@ export default function ChoreoEditPage(props: {
   currentChoreo: Choreo,
   goToViewPage: (newChoreo: Choreo) => void,
 }) {
-  const [hasInitialized, setHasInitialized] = useState<boolean>(false);
   const [currentSection, setCurrentSection] = useState<ChoreoSection>(props.currentChoreo.sections[0]);
   const [currentAction, setCurrentAction] = useState<DancerAction | undefined>();
   const [currentTiming, setCurrentTiming] = useState<DancerActionTiming | undefined>();
@@ -67,6 +66,8 @@ export default function ChoreoEditPage(props: {
     showPreviousSection: false,
     dancerDisplayType: "large",
   });
+  const isDirty = useRef(false);
+  const hasInitialized = useRef(false);
 
   const [history, dispatch] = useReducer(historyReducer,
     {
@@ -84,10 +85,15 @@ export default function ChoreoEditPage(props: {
   );
 
   useEffect(() => {
-    if (hasInitialized) {
+    hasInitialized.current = false;
+  }, [props.currentChoreo]);
+
+  useEffect(() => {
+    if (hasInitialized.current) {
+      isDirty.current = true;
       debouncedSave()
     } else {
-      setHasInitialized(true);
+      hasInitialized.current = true;
     }
   }, [history.presentState.state]);
 
@@ -209,8 +215,10 @@ export default function ChoreoEditPage(props: {
   }, [dispatch]);
 
   const onSave = useCallback(() => {
-    console.log("Saving state to db: ", history.presentState.state);
-    saveChoreo(history.presentState.state, () => {}, true);
+    if (isDirty.current) {
+      console.log("Saving state to db: ", history.presentState.state);
+      saveChoreo(history.presentState.state, () => { isDirty.current = false }, true);
+    }
   }, [history.presentState.state]);
 
   const onCopy = useCallback(() => {
