@@ -29,10 +29,6 @@ function App() {
             setCurrentChoreo(choreo);
             setMode("view");
           }}
-          onUploadSuccess={(choreo: Choreo) => {
-            setCurrentChoreo(choreo);
-            setMode("edit");
-          }}
         />
       )}
       {mode === "form" && (

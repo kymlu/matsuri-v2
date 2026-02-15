@@ -104,7 +104,7 @@ export function NewChoreoPage({
     console.log("Creating new choreo:", choreo);
     saveChoreo(choreo, () => {
       goToEditPage(choreo);
-    });
+    }, true);
   };
 
   const stepTitles: Record<number, string> = {

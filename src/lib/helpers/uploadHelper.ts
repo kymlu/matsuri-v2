@@ -12,16 +12,18 @@ function parseChoreo(text: string): Choreo {
   try {
     const json = JSON.parse(text);
     return ChoreoSchema.parse(json);
-  } catch {
+  } catch(e) {
+    console.log(e);
     throw new Error("ファイルに問題があります。")
   }
 }
 
-export const readUploadedFile = (
+export async function readUploadedFile (
   file: File,
-  onComplete: (choreo: Choreo) => void,
+  onCompleteOne: (newChoreo: Choreo) => void,
+  onCompleteBatch: (newChoreos: Choreo[], errorMessage?: string) => void,
   onError: (message: string) => void
-) => {
+) {
   const reader = new FileReader();
   const ext = getExtension(file);
 
@@ -35,20 +37,44 @@ export const readUploadedFile = (
 
         const zip = await JSZip.loadAsync(buffer);
 
-        const mtrFiles = Object.values(zip.files).filter(
-          f => !f.dir && f.name.toLowerCase().endsWith(".mtr")
-        );
+        const mtrFiles = Object.values(zip.files).filter(f => {
+          if (f.dir) return false;
+
+          const name = f.name.toLowerCase();
+          const baseName = name.split("/").pop() ?? "";
+
+          return (
+            name.endsWith(".mtr") &&
+            !name.startsWith("__macosx/") &&
+            !baseName.startsWith("._")
+          );
+        });
 
         if (mtrFiles.length === 0) {
           throw new Error("ZIPに .mtr ファイルが含まれていません。");
+        } else if (mtrFiles.length === 1) {
+          onCompleteOne(parseChoreo(await mtrFiles[0].async("text")));
+        } else {
+          const successfulChoreos: Choreo[] = [];
+          const failedChoreos: string[] = [];
+        
+          for (let i = 0; i < mtrFiles.length; i++) {
+            const f = mtrFiles[i];
+            try {
+              successfulChoreos.push(parseChoreo(await f.async("text")));
+            } catch {
+              failedChoreos.push(f.name.split("/").pop() ?? "");
+            }
+          }
+  
+          onCompleteBatch(
+            successfulChoreos,
+            failedChoreos.length > 0 ?
+              "以下のファイルに問題がありました：\n" + failedChoreos.map(c => "・" + c).join("\n") :
+              undefined
+          );
         }
 
-        if (mtrFiles.length > 1) {
-          throw new Error(".mtr ファイル、または .mtr ファイルを1つだけ含む ZIP ファイルに対応しています。");
-        }
-
-        const text = await mtrFiles[0].async("text");
-        onComplete(parseChoreo(text));
       } catch (e) {
         onError((e as Error).message)
       }
@@ -61,7 +87,7 @@ export const readUploadedFile = (
         if (typeof text !== "string") {
           throw new Error(".mtr の読み込みに失敗しました。");
         }
-        onComplete(parseChoreo(text));
+        onCompleteOne(parseChoreo(text));
       } catch (e) {
         onError((e as Error).message);
       }

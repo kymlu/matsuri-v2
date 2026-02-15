@@ -12,7 +12,7 @@ import { debounce, indexByKey, isNullOrUndefinedOrBlank, strEquals } from "../li
 import MainStage from "../components/grid/MainStage";
 import { Dialog } from "@base-ui/react";
 import EditChoreoSizeDialog from "../components/dialogs/EditChoreoSizeDialog";
-import { exportToMtr } from "../lib/helpers/exportHelper";
+import { exportChoreo } from "../lib/helpers/exportHelper";
 import { saveChoreo } from "../lib/dataAccess/DataController";
 import IconButton from "../components/basic/IconButton";
 import { DEFAULT_PROP_LENGTH, DEFAULT_PROP_WIDTH, ICON } from "../lib/consts/consts";
@@ -52,6 +52,7 @@ export default function ChoreoEditPage(props: {
   currentChoreo: Choreo,
   goToViewPage: (newChoreo: Choreo) => void,
 }) {
+  const [hasInitialized, setHasInitialized] = useState<boolean>(false);
   const [currentSection, setCurrentSection] = useState<ChoreoSection>(props.currentChoreo.sections[0]);
   const [currentAction, setCurrentAction] = useState<DancerAction | undefined>();
   const [currentTiming, setCurrentTiming] = useState<DancerActionTiming | undefined>();
@@ -80,11 +81,15 @@ export default function ChoreoEditPage(props: {
         onSaveRef.current();
       }, 1000),
     []
-  )
+  );
 
   useEffect(() => {
-    debouncedSave()
-  }, [history.presentState.state])
+    if (hasInitialized) {
+      debouncedSave()
+    } else {
+      setHasInitialized(true);
+    }
+  }, [history.presentState.state]);
 
 
   const [prevSection, setPrevSection] = useState<ChoreoSection | undefined>();
@@ -205,7 +210,7 @@ export default function ChoreoEditPage(props: {
 
   const onSave = useCallback(() => {
     console.log("Saving state to db: ", history.presentState.state);
-    saveChoreo(history.presentState.state, () => {});
+    saveChoreo(history.presentState.state, () => {}, true);
   }, [history.presentState.state]);
 
   const onCopy = useCallback(() => {
@@ -377,7 +382,7 @@ export default function ChoreoEditPage(props: {
         manageProps={() => {setPropManagerDialogOpen(true);}}
         manageSections={() => {console.log("TODO: implement Manage Sections")}}
         exportChoreo={() => {
-          exportToMtr(history.presentState.state);
+          exportChoreo(history.presentState.state);
         }}
         changeShowGrid={() => {
           setAppSettings(prev => {return {...prev, showGrid: !prev.showGrid}})

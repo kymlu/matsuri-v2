@@ -1,36 +1,63 @@
 import jsPDF from "jspdf";
 import { Choreo } from "../../models/choreo";
 import { colorPalette } from "../consts/colors";
-import { isNullOrUndefinedOrBlank, roundToTenth, strEquals } from "./globalHelper";
+import { getSafeFileName, isNullOrUndefinedOrBlank, roundToTenth, strEquals } from "./globalHelper";
 import { stageMetersToPx } from "./editorCalculationHelper";
 import { Coordinates } from "../../models/base";
 import JSZip from "jszip";
 
-export async function exportToMtr (
-  choreo: Choreo
-) {
-  const zip = JSZip();
-  zip.file(`${choreo.name}.mtr`, JSON.stringify(choreo));
-  zip.file(
-    "README.txt",
-    "このZIPには本アプリ用のデータが含まれています。\nZIPファイル、または中の .mtr ファイルを本アプリで読み込んでください。\n\n一部のアプリでは .mtr ファイルを送信できない場合があります。\nその場合は、このZIPファイルをそのまま共有してください。"
-  );
-  
-  const blob = await zip.generateAsync({
-    type: "blob",
-    compression: "DEFLATE",
-    compressionOptions: { level: 6 },
-  });
+const README_TEXT =
+  "このZIPには本アプリ用のデータが含まれています。\n" +
+  "ZIPファイル、または中の .mtr ファイルを本アプリで読み込んでください。\n\n" +
+  "一部のアプリでは .mtr ファイルを送信できない場合があります。\n" +
+  "その場合は、このZIPファイルをそのまま共有してください。";
 
+const ZIP_OPTIONS = {
+  type: "blob" as const,
+  compression: "DEFLATE" as const,
+  compressionOptions: { level: 6 },
+};
+
+async function downloadZip(zip: JSZip, fileName: string) {
+  const blob = await zip.generateAsync(ZIP_OPTIONS);
   const url = URL.createObjectURL(blob);
 
   const link = document.createElement("a");
   link.href = url;
-  link.download = choreo.name;
-
+  link.download = `${getSafeFileName(fileName)}.zip`;
   link.click();
 
   URL.revokeObjectURL(url);
+}
+
+export async function exportChoreo(choreo: Choreo) {
+  const zip = new JSZip();
+
+  zip.file(
+    `${getSafeFileName(choreo.name)}.mtr`,
+    JSON.stringify(choreo)
+  );
+  zip.file("README.txt", README_TEXT);
+
+  await downloadZip(zip, choreo.name);
+}
+
+export async function exportEvent(
+  choreoList: Choreo[],
+  eventName = "隊列表"
+) {
+  const zip = new JSZip();
+
+  choreoList.forEach(choreo => {
+    zip.file(
+      `${getSafeFileName(choreo.name)}.mtr`,
+      JSON.stringify(choreo)
+    );
+  });
+
+  zip.file("README.txt", README_TEXT);
+
+  await downloadZip(zip, isNullOrUndefinedOrBlank(eventName) ? "隊列表" : eventName);
 }
 
 export async function exportToPdf (

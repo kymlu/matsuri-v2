@@ -67,6 +67,10 @@ export function testFilename(fileName: string) {
   return RegExp(/[<>:"/\\|?*]|[. ]$/g).test(fileName);
 }
 
+export function getSafeFileName(fileName: string) {
+  return fileName.replace(/[\\/:*?"<>|]/g, "_");
+}
+
 export function testInvalidCharacters(text: string) {
   return RegExp(/[<>:"/\\|?*]$/g).test(text);
 }

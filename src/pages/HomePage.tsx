@@ -14,7 +14,7 @@ import IconButton from "../components/basic/IconButton"
 import SampleStage from "../lib/samples/SampleStageFormation.json"
 import SampleParade from "../lib/samples/SampleParadeFormation.json"
 import z from "zod"
-import { exportToMtr } from "../lib/helpers/exportHelper"
+import { exportEvent, exportChoreo } from "../lib/helpers/exportHelper"
 import BaseEditDialog from "../components/dialogs/BaseEditDialog"
 import ConfirmUploadDialog from "../components/dialogs/ConfirmUploadDialog"
 import BaseErrorDialog from "../components/dialogs/BaseErrorDialog"
@@ -27,13 +27,11 @@ import EditNameDialog from "../components/dialogs/EditNameDialog"
 type HomePageProps = {
   goToNewChoreoPage: (eventName?: string) => void,
   goToViewPage: (choreo: Choreo) => void,
-  onUploadSuccess: (choreo: Choreo) => void,
 }
 
 export default function HomePage({
   goToNewChoreoPage,
   goToViewPage,
-  onUploadSuccess,
 }: HomePageProps) {
   const [savedChoreos, setSavedChoreos] = useState<Record<string, Choreo[]>>({});
   
@@ -62,6 +60,12 @@ export default function HomePage({
   const uploadFailedDialog = Dialog.createHandle<{}>();
   const handleUploadFailedDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setUploadFailedDialogOpen(isOpen);
+  };
+  
+  const [uploadSucceededDialogOpen, setUploadSucceededDialogOpen] = useState(false);
+  const uploadSucceededDialog = Dialog.createHandle<{}>();
+  const handleUploadSucceededDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
+    setUploadSucceededDialogOpen(isOpen);
   };
 
   const [exportingChoreo, setExportingChoreo] = useState<Choreo | undefined>();
@@ -188,28 +192,46 @@ export default function HomePage({
         onChange={(event) => {
           if (!event.target.files || event.target.files.length === 0) {
             console.log("No files were selected to upload.");              
-          } else if (event.target.files.length > 1) {
-            setUploadErrorMessage("ファイルは1つだけアップロードしてください。");
-            setUploadFailedDialogOpen(true);
           } else {
             var file = event.target.files?.[0];
             readUploadedFile(
               file,
-              (choreo: Choreo) => {
+              (newChoreo: Choreo) => {
                 const existingChoreos = Object.values(savedChoreos).flat();
-                const duplicateChoreo = existingChoreos.find(c => strEquals(c.name, choreo.name) && strEquals(c.event, choreo.event));
+                const duplicateChoreo = existingChoreos.find(c => strEquals(c.name, newChoreo.name) && strEquals(c.event, newChoreo.event));
                 if (duplicateChoreo) {
                   setDuplicateChoreoId(duplicateChoreo.id);
                   setUploadChoreoDialogOpen(true);
-                  setUploadedChoreo(choreo);
+                  setUploadedChoreo(newChoreo);
                 } else {
-                  choreo.id = crypto.randomUUID();
-                  onUploadSuccess(choreo);
+                  newChoreo.id = crypto.randomUUID();
+                  saveChoreo(newChoreo, () => {goToViewPage(newChoreo)});
                 }
+              },
+              (newChoreos: Choreo[], errorMessage?: string) => {
+                if (newChoreos.length > 0) {
+                  saveChoreos(
+                    [...newChoreos.map((c) => ({...c, id: crypto.randomUUID()}))],
+                    () => {
+                      loadChoreos();
+                      if (errorMessage) {
+                        setUploadErrorMessage(errorMessage);
+                        setUploadFailedDialogOpen(true);
+                      } else {
+                        setUploadSucceededDialogOpen(true);
+                      }
+                    }
+                  );
+                } else {
+                  setUploadErrorMessage(errorMessage ?? "アップロードできませんでした。");
+                  setUploadFailedDialogOpen(true);
+                }
+                event.target.value = "";
               },
               (e) => {
                 setUploadErrorMessage(e);
                 setUploadFailedDialogOpen(true);
+                event.target.value = "";
               }
             );
           }
@@ -278,6 +300,7 @@ export default function HomePage({
             
           <BaseEditDialog
             title={`本当に${editingChoreo?.name}を削除しますか？`}
+            actionButtonText="OK"
             onSubmit={() => {
               if (editingChoreo) {
                 deleteChoreo(editingChoreo.id, () => {
@@ -299,8 +322,19 @@ export default function HomePage({
           <BaseErrorDialog
             title="アップロード失敗"
             onClose={() => {setUploadFailedDialogOpen(false)}}>
-            <p>{uploadErrorMessage}</p>
+            <p className="break-words whitespace-pre-line text-wrap">{uploadErrorMessage}</p>
             <p>別のファイルをお試しください。</p>
+          </BaseErrorDialog>
+        </Dialog.Root>
+        <Dialog.Root
+          handle={uploadSucceededDialog}
+          open={uploadSucceededDialogOpen}
+          onOpenChange={handleUploadSucceededDialogOpen}>
+            
+          <BaseErrorDialog
+            title="アップロード成功"
+            onClose={() => {setUploadSucceededDialogOpen(false)}}>
+            <p>全てのファイルをアップロードできました。</p>
           </BaseErrorDialog>
         </Dialog.Root>
         <Dialog.Root
@@ -316,21 +350,24 @@ export default function HomePage({
               setUploadedChoreo(undefined);
             }}
             onCopy={() => {
-              setUploadedChoreo(undefined);
-              onUploadSuccess({
+              const newChoreo = {
                 ...uploadedChoreo!,
                 id: crypto.randomUUID(),
                 name: `${uploadedChoreo!.name} - コピー`
-              });
+              };
+              saveChoreo(newChoreo, () => {goToViewPage(newChoreo)});
+              setUploadedChoreo(undefined);
+              setUploadChoreoDialogOpen(false);
             }}
             onOverwrite={() => {
               setUploadChoreoDialogOpen(false);
-              onUploadSuccess({
+              const newChoreo = {
                 ...uploadedChoreo!,
-                id: duplicateChoreoId ?? crypto.randomUUID()
-              });
-              setUploadChoreoDialogOpen(false);
+                id: duplicateChoreoId ?? crypto.randomUUID(),
+              };
+              saveChoreo(newChoreo, () => {goToViewPage(newChoreo)});
               setUploadedChoreo(undefined);
+              setUploadChoreoDialogOpen(false);
             }}
           />
         </Dialog.Root>
@@ -388,6 +425,10 @@ function EventSection({
         <Divider compact/>
         <Menu.Item>
           <IconLabelButton full noBorder icon={ICON.edit} label="名前変更" onClick={editEventName}/>
+        </Menu.Item>
+        <Divider compact/>
+        <Menu.Item>
+          <IconLabelButton full noBorder icon={ICON.download} label="共有" onClick={() => exportEvent(choreos, eventName)}/>
         </Menu.Item>
       </CustomMenu>
     </div>
@@ -483,7 +524,7 @@ function EventSection({
                     icon={ICON.fileExport}
                     label="共有用エクスポート"
                     asDiv
-                    onClick={() => exportToMtr(selectedChoreo)}
+                    onClick={() => exportChoreo(selectedChoreo)}
                     full />
                 </Dialog.Close>
                 
