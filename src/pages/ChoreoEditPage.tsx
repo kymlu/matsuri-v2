@@ -158,7 +158,7 @@ export default function ChoreoEditPage(props: {
     });
   }, [selectedIds]);
 
-  const [copyBuffer, setCopyBuffer] = useState<StageEntities<Record<string, PropPosition>, Record<string, DancerPosition>>>({props: {}, dancers: {}});
+  const copyBuffer = useRef<StageEntities<Record<string, PropPosition>, Record<string, DancerPosition>>>({props: {}, dancers: {}});
 
   useEffect(() => {
     var newSection = history.presentState.state.sections.find(s => strEquals(s.id, history.presentState.currentSectionId));
@@ -223,7 +223,7 @@ export default function ChoreoEditPage(props: {
 
   const onCopy = useCallback(() => {
     if ((selectedIds.dancers.length + selectedIds.props.length) === 0) {
-      setCopyBuffer({props: {}, dancers: {}});
+      copyBuffer.current = ({props: {}, dancers: {}});
       return;
     }
 
@@ -243,11 +243,10 @@ export default function ChoreoEditPage(props: {
       }
     });
 
-    setCopyBuffer({ props: copyRecordProp, dancers: copyRecordDancer });
+    copyBuffer.current = ({ props: copyRecordProp, dancers: copyRecordDancer });
   }, [
     selectedIds,
     currentSection.formation.dancerPositions,
-    setCopyBuffer,
   ]);
 
   const onPaste = useCallback(() => {
@@ -256,7 +255,7 @@ export default function ChoreoEditPage(props: {
       newState: pastePositions(
         history.presentState.state,
         currentSection.id,
-        copyBuffer
+        copyBuffer.current
       ),
       currentSectionId: currentSection.id,
       commit: true,
@@ -546,7 +545,7 @@ export default function ChoreoEditPage(props: {
         onChangeColor={() => {setEditDancerColourDialogOpen(true)}}
         showCopyPosition={selectedIds.dancers.length > 0 || selectedIds.props.length > 0}
         onCopyPosition={() => {onCopy()}}
-        showPastePosition={Object.keys(copyBuffer.dancers).length > 0 || Object.keys(copyBuffer.props).length > 0}
+        showPastePosition={Object.keys(copyBuffer.current.dancers).length > 0 || Object.keys(copyBuffer.current.props).length > 0}
         onPastePosition={() => {onPaste()}}
         showSelectDancer={selectedObjects.dancers.length > 0}
         onSelectColor={() => {
