@@ -468,7 +468,7 @@ export default function ChoreoEditPage(props: {
           }
         />
         <div className="absolute bottom-0 z-10 flex flex-col">
-          <div className="absolute bottom-10">
+          <div className="absolute bottom-12">
             <UndoRedoToolbar
               undo={() => {dispatch({type: "UNDO"})}}
               redo={() => {dispatch({type: "REDO"})}}

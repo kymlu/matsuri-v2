@@ -107,7 +107,6 @@ function FormationSectionItem (props: {
 
   return <div style={style} ref={setNodeRef} {...attributes} {...listeners}>
     <Button
-      compact
       primary={isSelected}
       fontSize="text-base"
       onClick={() => {
