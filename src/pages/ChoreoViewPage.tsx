@@ -21,7 +21,6 @@ export default function ChoreoViewPage(props: {
 }) {
   const [currentSection, setCurrentSection] = useState<ChoreoSection>(props.currentChoreo.sections[0]);
   const [nextSection, setNextSection] = useState<ChoreoSection | undefined>();
-  const [showNotes, setShowNotes] = useState<boolean>(true);
   const [selectedIds, setSelectedIds] = useState<StageEntities<string[]>>({props: [], dancers: []});
   const [selectedTimingId, setSelectedTimingId] = useState<string | undefined>();
   const [selectedObjects, setSelectedObjects] = useState<StageEntities<PropPosition[], DancerPosition[]>>({dancers: [], props: []});
@@ -63,15 +62,12 @@ export default function ChoreoViewPage(props: {
           setAppSettings(prev => {return {...prev, showGrid: !prev.showGrid}})
         }}
         appSettings={appSettings}
-        showNotes={showNotes}
-        onToggleNotes={() => setShowNotes(prev => !prev)}
         goToEdit={props.goToEditPage}
         />
       <div className="relative flex-1 overflow-hidden border-b-2 md:flex">
         <ViewerSidebar
           actions={currentSection.formation.dancerActions}
           note={currentSection.note}
-          showNotes={showNotes}
           dancer={props.currentChoreo.dancers[selectedIds.dancers[0]]}
           position={currentSection.formation.dancerPositions[selectedIds.dancers[0]]}
           nextPosition={nextSection?.formation.dancerPositions[selectedIds.dancers[0]]}
@@ -84,7 +80,6 @@ export default function ChoreoViewPage(props: {
             props.currentChoreo.dancers[selectedIds.dancers[0]] !== undefined
           }
           deselectPosition={resetSelectedIds}
-          hideNotes={() => setShowNotes(false)}
           onSelectTiming={(timing) => {
             if (timing) {
               setSelectedIds({props: [], dancers: timing.dancerIds});
@@ -95,6 +90,19 @@ export default function ChoreoViewPage(props: {
             }
           }}
           selectedTiming={selectedTimingId}
+          formationSelectionToolbar={
+            <FormationSelectionToolbar
+              currentSectionId={currentSection.id}
+              sections={props.currentChoreo.sections}
+              onClickSection={(section) => {
+                if (selectedTimingId) {
+                  setSelectedTimingId(undefined);
+                  resetSelectedIds();
+                }
+                setCurrentSection(section);
+              }}
+            />
+          }
         />
         <MainStage
           appSettings={appSettings}
@@ -109,21 +117,6 @@ export default function ChoreoViewPage(props: {
           setSelectedIds={setSelectedIds}
         />
       </div>
-      <footer
-        className="pb-8"
-        >
-        <FormationSelectionToolbar
-          currentSectionId={currentSection.id}
-          sections={props.currentChoreo.sections}
-          onClickSection={(section) => {
-            if (selectedTimingId) {
-              setSelectedTimingId(undefined);
-              resetSelectedIds();
-            }
-            setCurrentSection(section);
-          }}
-        />
-      </footer>
       
       <Dialog.Root
         handle={exportDialog}

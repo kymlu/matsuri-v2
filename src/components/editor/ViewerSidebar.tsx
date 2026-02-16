@@ -1,4 +1,3 @@
-import classNames from "classnames";
 import { StageGeometry } from "../../models/choreo";
 import { Dancer, DancerPosition } from "../../models/dancer";
 import { DancerAction, DancerActionTiming } from "../../models/dancerAction";
@@ -8,11 +7,11 @@ import { ICON } from "../../lib/consts/consts";
 import { isNullOrUndefinedOrBlank, strEquals } from "../../lib/helpers/globalHelper";
 import Divider from "../basic/Divider";
 import Button from "../basic/Button";
-import React from "react";
+import React, { ReactNode } from "react";
+import BottomDrawer from "../inputs/BottomDrawer";
 
 type ViewerSidebarProps = {
   note?: string;
-  showNotes: boolean;
   dancer: Dancer;
   position: DancerPosition;
   nextPosition?: DancerPosition;
@@ -21,13 +20,12 @@ type ViewerSidebarProps = {
   actions?: DancerAction[];
   geometry: StageGeometry;
   isPositionHintShown: boolean;
-  hideNotes: () => void;
   deselectPosition: () => void;
+  formationSelectionToolbar: ReactNode,
 };
 
 export default function ViewerSidebar({
   note,
-  showNotes,
   dancer,
   position,
   nextPosition,
@@ -36,36 +34,32 @@ export default function ViewerSidebar({
   actions,
   geometry,
   isPositionHintShown,
-  hideNotes,
   deselectPosition,
+  formationSelectionToolbar,
 }: ViewerSidebarProps) {
-  var contentClasses = classNames("min-h-0 flex flex-col fixed inset-x-0 bottom-20 h-[33%] max-h-[33%] bg-white p-4 z-20 border-t-2 md:border-t-0 md:static md:bottom-8 md:h-full md:w-2/5 md:max-w-[33vw] md:max-h-full md:border-r-2", {
-    "hidden": !isPositionHintShown && !showNotes
-  });
-  
-  return <div className={contentClasses}>
-    {
+  return <BottomDrawer
+    header={
       <div className="flex items-center self-end justify-between w-full mb-2">
-        <span className="text-base font-semibold truncate">
+        <span className="h-8 text-base font-semibold truncate">
           {isPositionHintShown ? dancer.name : "メモ"}
         </span>
-        <IconButton
-          size="sm"
-          src={ICON.clear}
-          noBorder
-          onClick={() => {
-            if (isPositionHintShown) {
-              deselectPosition();
-            } else if (selectedTiming) {
-              onSelectTiming();
-            } else {
-              hideNotes();
-            }
-          }}
-        />
+        {
+          (isPositionHintShown || selectedTiming) && <IconButton
+            size="sm"
+            src={ICON.clear}
+            noBorder
+            onClick={() => {
+              if (isPositionHintShown) {
+                deselectPosition();
+              } else if (selectedTiming) {
+                onSelectTiming();
+              }
+            }}
+          />
+        }
       </div>
     }
-    {/* todo: add buttons to highlight which dancers are at which count */}
+    footer={formationSelectionToolbar}>
     <div className="flex-1 min-h-0 overflow-auto">
       {
         isPositionHintShown &&
@@ -78,7 +72,7 @@ export default function ViewerSidebar({
         />
       }
       {
-        isPositionHintShown && showNotes &&
+        isPositionHintShown &&
         <Divider/>
       }
       {
@@ -113,21 +107,21 @@ export default function ViewerSidebar({
         </div>
       }
       {
-        actions && actions.length > 0 && !isPositionHintShown && showNotes &&
+        actions && actions.length > 0 && !isPositionHintShown &&
         <Divider/>
       }
       {
-        showNotes && isNullOrUndefinedOrBlank(note) &&
+        isNullOrUndefinedOrBlank(note) &&
         <p className="italic text-gray-500 break-words whitespace-pre-line text-wrap">
           メモなし
         </p>
       }
       {
-        showNotes && !isNullOrUndefinedOrBlank(note) &&
+        !isNullOrUndefinedOrBlank(note) &&
         <p className="break-words whitespace-pre-line text-wrap">
           {note}
         </p>
       }
     </div>
-  </div>
+  </BottomDrawer>
 }

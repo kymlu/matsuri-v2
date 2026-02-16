@@ -13,8 +13,6 @@ type HeaderProps = {
   returnHome: () => void;
   hasSidebar?: boolean;
   currentChoreo: Choreo;
-  onToggleNotes?: () => void;
-  showNotes?: boolean;
   onSave?: () => void;
   onDownload?: () => void;
   editName?: () => void;
@@ -38,8 +36,6 @@ export default function Header({
   returnHome,
   hasSidebar = false,
   currentChoreo,
-  onToggleNotes,
-  showNotes = false,
   onSave,
   onDownload,
   editName,
@@ -85,14 +81,6 @@ export default function Header({
             goToView();
           } }}
         />
-      {
-        onToggleNotes &&
-        <IconButton
-          src={showNotes ? ICON.speakerNotesOff : ICON.speakerNotes}
-          noBorder
-          onClick={() => {onToggleNotes?.()}}
-          />
-      }
       {
         onDownload &&
         <CustomMenu trigger={

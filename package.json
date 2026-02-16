@@ -4,7 +4,7 @@
   "homepage": "https://kymlu.github.io/matsuri-v2",
   "private": true,
   "dependencies": {
-    "@base-ui/react": "^1.1.0",
+    "@base-ui/react": "^1.2.0",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/modifiers": "^9.0.0",
     "@dnd-kit/react": "^0.2.3",
