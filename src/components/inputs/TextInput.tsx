@@ -3,12 +3,15 @@ import classNames from "classnames";
 import { ICON } from "../../lib/consts/consts";
 import { isNullOrUndefinedOrBlank } from "../../lib/helpers/globalHelper";
 import { FieldWithLabel } from "./Label";
+import IconButton from "../basic/IconButton";
+import Icon from "../basic/Icon";
 
 export type TextInputProps = {
   name?: string,
   defaultValue?: string,
   onContentChange: (newContent: string) => void,
   placeholder?: string,
+  search?: boolean,
   clearable?: boolean,
   compact?: boolean,
   tall?: boolean,
@@ -29,8 +32,8 @@ export type TextInputProps = {
 
 export default function TextInput({
   name, defaultValue, onContentChange, placeholder,
-  clearable, compact, tall, short, centered, required,
-  hasError, errorMsg, disabled, ref, maxLength,
+  search, clearable, compact, tall, short, centered,
+  required, hasError, errorMsg, disabled, ref, maxLength,
   showLength, hasOutline, label, rightLabel, restrictFn
 }: TextInputProps) {
   const [value, setValue] = React.useState<string>(defaultValue ?? "");
@@ -49,11 +52,13 @@ export default function TextInput({
   }
 
   var inputClasses = classNames(
-    "col-start-1 text-lg row-start-1 pl-2 text-black p-3 border-gray-300 rounded-md focus-within:border-primary focus:outline-none",
+    "col-start-1 text-lg row-start-1 text-black p-3 border-gray-300 rounded-md focus-within:border-primary focus:outline-none",
     {
       "border-2": hasOutline !== false,
       "pr-6": clearable,
       "pr-2": !clearable,
+      "pl-10": search,
+      "pl-2": !search,
       "h-10": tall,
       "h-6": short,
       "text-center": centered,
@@ -72,7 +77,7 @@ export default function TextInput({
   return (
     <FieldWithLabel label={label}>
       <div className={wrapperClasses}>
-        <div className="flex items-center gap-2">
+        <div className="relative flex items-center gap-2">
           <input
             disabled={disabled}
             type="text"
@@ -85,17 +90,27 @@ export default function TextInput({
           {
             rightLabel && <span>{rightLabel}</span>
           }
+          {
+            search &&
+            <div className="absolute flex items-center justify-center size-8 left-2">
+              <Icon
+                src={ICON.search}
+                colour="grey"
+                size="sm"/>
+            </div>
+          }
+          {
+            clearable && !isNullOrUndefinedOrBlank(value) && 
+            <div className="absolute right-2">
+              <IconButton
+                src={ICON.clear}
+                colour="primary"
+                size="sm"
+                noBorder
+                onClick={() => {handleChange("")}}/>
+            </div>
+          }
         </div>
-
-        {
-          clearable && !isNullOrUndefinedOrBlank(value) && 
-          <button className="col-start-1 row-start-1 pr-2 ml-auto text-end" onClick={() => {handleChange("")}}>
-            <img
-              className="size-4"
-              src={ICON.clear}
-              alt="Clear text"/>
-          </button>
-        }
 
         {
           showLength &&

@@ -91,6 +91,7 @@ export const ICON = {
   remove: "remove",
   resize: "resize",
   save: "save",
+  search: "search",
   selectAll: "select_all",
   settings: "settings",
   straighten: "straighten",

@@ -4,10 +4,10 @@ import { ICON, LAST_UPDATED } from "../lib/consts/consts"
 import { IconLabelButton } from "../components/basic/Button"
 import Icon from "../components/basic/Icon"
 import { readUploadedFile } from "../lib/helpers/uploadHelper"
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { deleteChoreo, getAllChoreos, saveChoreo, saveChoreos } from "../lib/dataAccess/DataController"
 import { Choreo, ChoreoSchema } from "../models/choreo"
-import { groupByKey, strCompare, strEquals } from "../lib/helpers/globalHelper"
+import { groupByKey, isNullOrUndefinedOrBlank, strCompare, strEquals } from "../lib/helpers/globalHelper"
 import { downloadLogs } from "../lib/helpers/logHelper"
 import { getDate } from "../lib/helpers/dateHelper"
 import IconButton from "../components/basic/IconButton"
@@ -23,6 +23,7 @@ import React from "react"
 import CustomMenu from "../components/inputs/CustomMenu"
 import Divider from "../components/basic/Divider"
 import EditNameDialog from "../components/dialogs/EditNameDialog"
+import TextInput from "../components/inputs/TextInput"
 
 type HomePageProps = {
   goToNewChoreoPage: (eventName?: string) => void,
@@ -33,7 +34,44 @@ export default function HomePage({
   goToNewChoreoPage,
   goToViewPage,
 }: HomePageProps) {
-  const [savedChoreos, setSavedChoreos] = useState<Record<string, Choreo[]>>({});
+  const [savedChoreos, setSavedChoreos] = useState<Choreo[]>([]);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+
+  useEffect(() => {
+    loadChoreos();
+  }, []);
+
+  const loadChoreos = () => {
+    getAllChoreos().then((choreos) => {
+      if(!choreos.find(c => strEquals(c.id, SampleStage.id))) {
+        choreos.push(z.parse(ChoreoSchema, SampleStage));
+      }
+      if(!choreos.find(c => strEquals(c.id, SampleParade.id))) {
+        choreos.push(z.parse(ChoreoSchema, SampleParade));
+      }
+      setSavedChoreos(choreos);
+    });
+  }
+
+  const groupChoreos = (choreos: Choreo[]) => {
+    return groupByKey(
+      choreos.sort((a, b) => {
+        const eventCmp = strCompare<Choreo>(a, b, "event");
+        if (eventCmp !== 0) return eventCmp;
+
+        const dateA = a.lastUpdated ? new Date(a.lastUpdated)?.getTime() : 0;
+        const dateB = b.lastUpdated ? new Date(b.lastUpdated)?.getTime() : 0;
+        if (dateA !== dateB) return dateB - dateA;
+
+        return strCompare<Choreo>(a, b, "name");
+      }),
+      "event"
+    )
+  }
+
+  const filteredChoreos = useMemo(() => 
+    groupChoreos(savedChoreos.filter(c => c.name.toLowerCase().includes(searchTerm) || c.event.toLowerCase().includes(searchTerm)))
+  , [savedChoreos, searchTerm]);
   
   const [editingChoreo, setEditingChoreo] = useState<Choreo | undefined>();
   const [editChoreoInfoDialogOpen, setEditChoreoInfoDialogOpen] = useState(false);
@@ -90,38 +128,6 @@ export default function HomePage({
     }
   }
 
-  useEffect(() => {
-    loadChoreos();
-  }, []);
-
-  const loadChoreos = () => {
-    getAllChoreos().then((choreos) => {
-      if(!choreos.find(c => strEquals(c.id, SampleStage.id))) {
-        choreos.push(z.parse(ChoreoSchema, SampleStage));
-      }
-      if(!choreos.find(c => strEquals(c.id, SampleParade.id))) {
-        choreos.push(z.parse(ChoreoSchema, SampleParade));
-      }
-      setSavedChoreos(groupChoreos(choreos));
-    });
-  }
-
-  const groupChoreos = (choreos: Choreo[]) => {
-    return groupByKey(
-      choreos.sort((a, b) => {
-        const eventCmp = strCompare<Choreo>(a, b, "event");
-        if (eventCmp !== 0) return eventCmp;
-
-        const dateA = a.lastUpdated ? new Date(a.lastUpdated)?.getTime() : 0;
-        const dateB = b.lastUpdated ? new Date(b.lastUpdated)?.getTime() : 0;
-        if (dateA !== dateB) return dateB - dateA;
-
-        return strCompare<Choreo>(a, b, "name");
-      }),
-      "event"
-    )
-  }
-
   const duplicateChoreo = (choreo: Choreo) => {
     const newChoreo = {
       ...choreo,
@@ -130,12 +136,12 @@ export default function HomePage({
       lastUpdated: new Date().toISOString(),
     } as Choreo;
     saveChoreo(newChoreo, () => {
-      setSavedChoreos(prev => groupChoreos([...Object.values(prev).flat(), newChoreo]));
+      setSavedChoreos(prev => [...prev, newChoreo]);
     });
   }
 
   return (
-    <div className='grid grid-rows-[auto,auto,1fr] overflow-hide w-full gap-2 mx-auto py-10 px-6 h-[100svh]'>
+    <div className='grid grid-rows-[auto,auto,auto,1fr] overflow-hide w-full gap-2 mx-auto py-10 px-6 h-[100svh]'>
       <h1 className='mx-4 text-2xl font-bold text-center'>隊列表作成</h1>
       <div className="flex gap-2 mb-2">
         <IconLabelButton
@@ -152,13 +158,25 @@ export default function HomePage({
           onClick={triggerUpload}
           />
       </div>
+      <TextInput
+        defaultValue={searchTerm}
+        placeholder="隊列、イベントを探す"
+        onContentChange={(newSearchTerm) => setSearchTerm(newSearchTerm)}
+        search
+        maxLength={100}
+        clearable/>
       <div className="h-full space-y-4 overflow-scroll">
         {
-          Object.entries(savedChoreos).map(([eventName, choreos]) =>
+          Object.entries(filteredChoreos).length === 0 &&
+          <div className="mt-4 text-center">隊列表はありません</div>
+        }
+        {
+          Object.entries(filteredChoreos).map(([eventName, choreos]) =>
             <EventSection
               key={eventName}
               eventName={eventName}
               choreos={choreos}
+              searchTerm={searchTerm}
               goToViewPage={goToViewPage}
               duplicateChoreo={duplicateChoreo}
               editChoreoName={(choreo) => {
@@ -268,7 +286,7 @@ export default function HomePage({
             onClose={() => {setEditingEventName(undefined)}}
             onSubmit={(name) => {
               saveChoreos(
-                savedChoreos[editingEventName ?? ""].map(c => {return {...c, event: name}}),
+                savedChoreos.filter(c => strEquals(c.event, editingEventName ?? "")).map(c => {return {...c, event: name}}),
                 () => {
                   setEventNameDialogOpen(false);
                   loadChoreos();
@@ -378,6 +396,7 @@ export default function HomePage({
 type EventSectionProps = {
   eventName: string,
   choreos: Choreo[],
+  searchTerm: string,
   addEvent: () => void,
   editEventName: () => void,
   goToViewPage: (choreo: Choreo) => void,
@@ -388,7 +407,7 @@ type EventSectionProps = {
 }
 
 function EventSection({
-  eventName,choreos, goToViewPage, addEvent, editEventName,
+  eventName, choreos, searchTerm, goToViewPage, addEvent, editEventName,
   duplicateChoreo, editChoreoName, deleteChoreo, onPdfExport
 }: EventSectionProps) {
   const [isExpanded, setIsExpanded] = useState<boolean>(true);
@@ -438,58 +457,63 @@ function EventSection({
         {
           choreos.map((choreo) =>
             <React.Fragment key={choreo.id}>
-              <div
-                onClick={() => {goToViewPage(choreo)}}
-                className="flex flex-col justify-between h-full p-3 transition-colors border-2 rounded-md cursor-pointer border-primary lg:hover:bg-gray-100">
-                {/* Title */}
-                <div className="flex flex-row items-start justify-between gap-2">
-                  <span className="text-lg font-medium text-left break-words text-wrap">
-                    {choreo.name}
-                  </span>
-                  <Dialog.Trigger id={choreo.id} payload={choreo} handle={optionsDialog} onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedChoreo(choreo);
-                    setOptionsDialogOpen(true);
-                  }}>
-                    <IconButton
-                      src={ICON.moreVert}
-                      size="sm"
-                      noBorder
-                      asDiv
-                    />
-                  </Dialog.Trigger>
-                </div>
-                {/* Meta row */}
-                <div className="items-center justify-between text-sm text-gray-500 md:flex">
-                  {choreo.lastUpdated ? (
-                    <div className="flex items-center gap-1">
-                      <Icon colour="grey" size="sm" src={ICON.history}/>{getDate(new Date(choreo.lastUpdated))}
-                    </div>
-                  ) : (
-                    <div />
-                  )}
-
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1">
-                      <Icon
-                        src={ICON.resize}
-                        colour="grey"
+              {
+                (isNullOrUndefinedOrBlank(searchTerm) ||
+                choreo.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                choreo.event.toLowerCase().includes(searchTerm.toLowerCase())) &&
+                <div
+                  onClick={() => {goToViewPage(choreo)}}
+                  className="flex flex-col justify-between h-full p-3 transition-colors border-2 rounded-md cursor-pointer border-primary lg:hover:bg-gray-100">
+                  {/* Title */}
+                  <div className="flex flex-row items-start justify-between gap-2">
+                    <span className="text-lg font-medium text-left break-words text-wrap">
+                      {choreo.name}
+                    </span>
+                    <Dialog.Trigger id={choreo.id} payload={choreo} handle={optionsDialog} onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedChoreo(choreo);
+                      setOptionsDialogOpen(true);
+                    }}>
+                      <IconButton
+                        src={ICON.moreVert}
                         size="sm"
+                        noBorder
+                        asDiv
                       />
-                      <span>幅{choreo.stageGeometry.stageWidth}m 縦{choreo.stageGeometry.stageLength}m</span>
-                    </div>
+                    </Dialog.Trigger>
+                  </div>
+                  {/* Meta row */}
+                  <div className="items-center justify-between text-sm text-gray-500 md:flex">
+                    {choreo.lastUpdated ? (
+                      <div className="flex items-center gap-1">
+                        <Icon colour="grey" size="sm" src={ICON.history}/>{getDate(new Date(choreo.lastUpdated))}
+                      </div>
+                    ) : (
+                      <div />
+                    )}
 
-                    <div className="flex items-center gap-1">
-                      <Icon
-                        src={ICON.person}
-                        colour="grey"
-                        size="sm"
-                      />
-                      <span>{Object.keys(choreo.dancers).length}</span>
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1">
+                        <Icon
+                          src={ICON.resize}
+                          colour="grey"
+                          size="sm"
+                        />
+                        <span>幅{choreo.stageGeometry.stageWidth}m 縦{choreo.stageGeometry.stageLength}m</span>
+                      </div>
+
+                      <div className="flex items-center gap-1">
+                        <Icon
+                          src={ICON.person}
+                          colour="grey"
+                          size="sm"
+                        />
+                        <span>{Object.keys(choreo.dancers).length}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div> 
+              }
             </React.Fragment>
           )
         }
