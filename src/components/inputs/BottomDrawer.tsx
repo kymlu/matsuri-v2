@@ -41,7 +41,8 @@ export default function BottomDrawer ({
               {children}
             </Drawer.Content>
           </Drawer.Popup>
-          <div className="z-50 pb-6 bg-white pointer-events-auto">
+          <div className="z-50 pb-6 bg-white pointer-events-auto"
+            onTouchStart={(e) => e.stopPropagation()}>
             {footer}
           </div>
         </Drawer.Viewport>
