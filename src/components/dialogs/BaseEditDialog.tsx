@@ -30,18 +30,20 @@ export default function BaseEditDialog({
           <Button
             asDiv
             full
-            compact
             >
-            キャンセル
+            <span className="text-nowrap">
+              キャンセル
+            </span>
           </Button>
         </Dialog.Close>
         <Button
           onClick={() => {onSubmit()}}
           disabled={isActionButtonDisabled}
           full
-          compact
           primary>
-          {actionButtonText ?? "保存"}
+          <span className="text-nowrap">
+            {actionButtonText ?? "保存"}
+          </span>
         </Button>
       </div>
     }>

@@ -20,14 +20,14 @@ export default function ConfirmUploadDialog({
         <Dialog.Close
           onClick={onCancel}
           className="w-full">
-          <Button asDiv full compact>
+          <Button asDiv full>
             キャンセル
           </Button>
         </Dialog.Close>
         <Dialog.Close
           onClick={onOverwrite}
           className="w-full">
-          <Button asDiv full compact primary>
+          <Button asDiv full primary>
             上書き
           </Button>
         </Dialog.Close>
@@ -35,7 +35,7 @@ export default function ConfirmUploadDialog({
         <Dialog.Close
           onClick={onCopy}
           className="w-full">
-          <Button asDiv full compact primary>
+          <Button asDiv full primary>
             コピーを作成
           </Button>
         </Dialog.Close>

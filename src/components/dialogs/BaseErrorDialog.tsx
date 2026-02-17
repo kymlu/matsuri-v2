@@ -22,9 +22,10 @@ export default function BaseErrorDialog({
           <Button
             asDiv
             full
-            compact
             primary>
-            {actionButtonText ?? "OK"}
+            <span className="text-nowrap">
+              {actionButtonText ?? "OK"}
+            </span>
           </Button>
         </Dialog.Close>
       </div>
