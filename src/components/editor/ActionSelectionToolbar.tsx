@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { DancerAction, DancerActionTiming } from "../../models/dancerAction"
 import Button from "../basic/Button";
 import { strEquals } from "../../lib/helpers/globalHelper";
@@ -38,9 +38,11 @@ function ActionSection ({
   action, index, onSelectTiming, selectedTimingId
 }: ActionSectionProps) {
   const [isExpanded, setIsExpanded] = useState<boolean>(index === 0);
+  const ref = useRef<HTMLButtonElement | null>(null);
 
   return <div className="flex gap-2">
     <Button
+      buttonref={ref}
       compact
       grey
       fontSize="text-base"
@@ -49,6 +51,7 @@ function ActionSection ({
           setIsExpanded(false);
           onSelectTiming(undefined);
         } else {
+          ref.current?.scrollIntoView({"behavior": "smooth", "inline": "center"});
           setIsExpanded(true);
         }
       }}>
