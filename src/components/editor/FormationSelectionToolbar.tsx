@@ -14,7 +14,7 @@ type FormationSelectionToolbarProps = {
   currentSectionId: string,
   sections: ChoreoSection[],
   showAddButton?: boolean,
-  onClickAddButton?: (id: string, newName: string) => void,
+  onClickAddButton?: (id: string) => void,
   onClickSection: (section: ChoreoSection) => void,
   onReorder?: (newSectionOrder: ChoreoSection[]) => void,
 }
@@ -79,7 +79,7 @@ export default function FormationSelectionToolbar({
       <IconButton
         size="sm"
         src={ICON.add}
-        onClick={() => {onClickAddButton?.(crypto.randomUUID(), "セクション" + (sections.length + 1))}}
+        onClick={() => {onClickAddButton?.(crypto.randomUUID())}}
       />
     }
   </div>

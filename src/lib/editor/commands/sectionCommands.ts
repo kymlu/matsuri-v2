@@ -2,7 +2,7 @@ import { Choreo } from "../../../models/choreo"
 import { ChoreoSection } from "../../../models/choreoSection"
 import { DancerAction } from "../../../models/dancerAction";
 
-export function addSection(state: Choreo, id: string, name: string): Choreo {
+export function addSection(state: Choreo, id: string): Choreo {
   const previousSection = {...state.sections[state.sections.length - 1]};
   Object.values(previousSection.formation.dancerPositions).forEach(x => x.sectionId = id);
 
@@ -12,7 +12,7 @@ export function addSection(state: Choreo, id: string, name: string): Choreo {
       ...state.sections,
       {
         id: id,
-        name,
+        name: `${previousSection.name} (1)`,
         formation: previousSection
           ? { ...previousSection.formation }
           : {}

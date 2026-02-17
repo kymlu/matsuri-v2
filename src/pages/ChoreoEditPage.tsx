@@ -490,11 +490,11 @@ export default function ChoreoEditPage(props: {
                 currentSectionId={currentSection.id}
                 sections={history.presentState.state.sections}
                 showAddButton
-                onClickAddButton={(id: string, newName: string) => {
+                onClickAddButton={(id: string) => {
                   resetSelectedIds();
                   dispatch({
                     type: "SET_STATE",
-                    newState: addSection(history.presentState.state, id, newName),
+                    newState: addSection(history.presentState.state, id),
                     currentSectionId: id,
                     commit: true
                   });
