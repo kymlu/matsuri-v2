@@ -144,7 +144,7 @@ export default function HomePage({
     <div className='grid grid-rows-[auto,auto,auto,1fr] overflow-hide w-full gap-2 mx-auto py-10 px-6 h-[100svh]'>
       <Dialog.Root>
         <Dialog.Trigger>
-          <h1 className='mx-4 text-2xl font-bold text-center'>隊列表作成</h1>
+          <h1 className='mx-4 mb-2 text-2xl font-bold text-center'>隊列表作成</h1>
         </Dialog.Trigger>
         <CustomDialog title="サイト情報" hasX>
           <div className="flex flex-col">
@@ -462,7 +462,7 @@ function EventSection({
     </div>
     {
       isExpanded && 
-      <div className="flex flex-col gap-2 px-8 md:grid md:grid-cols-2">
+      <div className="flex flex-col gap-2 pl-8 md:grid md:grid-cols-2">
         {
           choreos.map((choreo) =>
             <React.Fragment key={choreo.id}>
@@ -472,7 +472,7 @@ function EventSection({
                 choreo.event.toLowerCase().includes(searchTerm.toLowerCase())) &&
                 <div
                   onClick={() => {goToViewPage(choreo)}}
-                  className="flex flex-col justify-between h-full p-3 transition-colors border-2 rounded-md cursor-pointer border-primary lg:hover:bg-gray-100">
+                  className="flex flex-col justify-between h-full p-2 transition-colors border-2 rounded-md cursor-pointer border-primary lg:hover:bg-gray-100">
                   {/* Title */}
                   <div className="flex flex-row items-start justify-between gap-2">
                     <span className="text-lg font-medium text-left break-words text-wrap">
