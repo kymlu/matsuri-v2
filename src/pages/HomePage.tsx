@@ -1,7 +1,7 @@
 import { Dialog, Menu } from "@base-ui/react"
 import CustomDialog from "../components/basic/CustomDialog"
 import { ICON, LAST_UPDATED } from "../lib/consts/consts"
-import { IconLabelButton } from "../components/basic/Button"
+import Button, { IconLabelButton } from "../components/basic/Button"
 import Icon from "../components/basic/Icon"
 import { readUploadedFile } from "../lib/helpers/uploadHelper"
 import { useEffect, useMemo, useState } from "react"
@@ -142,7 +142,17 @@ export default function HomePage({
 
   return (
     <div className='grid grid-rows-[auto,auto,auto,1fr] overflow-hide w-full gap-2 mx-auto py-10 px-6 h-[100svh]'>
-      <h1 className='mx-4 text-2xl font-bold text-center'>隊列表作成</h1>
+      <Dialog.Root>
+        <Dialog.Trigger>
+          <h1 className='mx-4 text-2xl font-bold text-center'>隊列表作成</h1>
+        </Dialog.Trigger>
+        <CustomDialog title="サイト情報" hasX>
+          <div className="flex flex-col">
+            <span>{LAST_UPDATED}</span>
+            <Button onClick={downloadLogs}>ログをダウンロード</Button>
+          </div>
+        </CustomDialog>
+      </Dialog.Root>
       <div className="flex gap-2 mb-2">
         <IconLabelButton
           full
@@ -200,7 +210,6 @@ export default function HomePage({
           )
         }
       </div>
-      <span onDoubleClick={downloadLogs} className='fixed opacity-50 bottom-2 left-2'>{LAST_UPDATED}</span>
 
       <input
         className='hidden'
