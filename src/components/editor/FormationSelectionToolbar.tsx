@@ -1,7 +1,7 @@
 import { isNullOrUndefinedOrBlank, strEquals } from "../../lib/helpers/globalHelper";
 import { ChoreoSection } from "../../models/choreoSection";
 import Button from "../basic/Button";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import IconButton from "../basic/IconButton";
 import { ICON } from "../../lib/consts/consts";
 import { DndContext, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
@@ -104,14 +104,17 @@ function FormationSectionItem (props: {
     transform: CSS.Transform.toString(transform),
     transition,
   };
+  const ref = useRef<HTMLButtonElement | null>(null);
 
   return <div style={style} ref={setNodeRef} {...attributes} {...listeners}>
     <Button
       primary={isSelected}
       fontSize="text-base"
+      buttonref={ref}
       onClick={() => {
         if (!isSelected) {
-          onClickSection(section)
+          ref?.current?.scrollIntoView({"behavior": "smooth", "inline": "center"})
+          onClickSection(section);
         }
       }}>
       <div className="flex flex-row items-center justify-center gap-1 min-w-24 w-max">

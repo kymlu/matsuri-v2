@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { RefObject } from 'react';
 import className from "classnames";
 import Icon from './Icon';
 
@@ -17,6 +17,8 @@ type ButtonProps = {
   type?: "submit" | "reset" | "button" | undefined,
   fontSize?: "text-lg" | "text-base" | "text-sm",
   asDiv?: boolean,
+  buttonref?: RefObject<HTMLButtonElement | null>
+  divref?: RefObject<HTMLDivElement | null>
 }
 
 export default function Button({
@@ -33,7 +35,9 @@ export default function Button({
   onClick,
   type,
   fontSize,
-  asDiv
+  asDiv,
+  buttonref,
+  divref
 }: ButtonProps) {
   const classes = className("rounded-md " + (fontSize ?? "text-base"), {
     "w-full": full,
@@ -56,6 +60,7 @@ export default function Button({
   return <>
       {
         asDiv !== true && <button 
+          ref={buttonref}
           type={type ?? "button"}
           button-name={label}
           disabled={disabled ?? false}
@@ -67,6 +72,7 @@ export default function Button({
       {
         asDiv && 
         <div
+          ref={divref}
           className={classes}
           onClick={(e) => {
             if (disabled !== true) {
