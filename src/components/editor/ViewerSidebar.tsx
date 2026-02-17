@@ -60,7 +60,7 @@ export default function ViewerSidebar({
       </div>
     }
     footer={formationSelectionToolbar}>
-    <div className="flex-1 min-h-0 overflow-auto">
+    <div>
       {
         isPositionHintShown &&
         <PositionHint
