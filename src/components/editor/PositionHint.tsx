@@ -36,7 +36,7 @@ export default function PositionHint({
       displayX = "→" + roundToTenth(Math.abs(xFromCenter));
     }
 
-    var displayY = position.y;
+    var displayY = roundToTenth(position.y);
 
     setCurrentPositionString(`${displayY}m/${displayX}m`);
     
