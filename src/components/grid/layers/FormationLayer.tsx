@@ -27,7 +27,7 @@ type FormationLayerProps = {
   updatePropPosition?: (x: number, y: number, propId: string) => void,
   updatePropSizeAndRotate?: (width: number, length: number, rotation: number, x: number, y: number, propId: string) => void
   selectedIds: StageEntities<string[]>,
-  setSelectedIds: Dispatch<SetStateAction<StageEntities<string[]>>>,
+  setSelectedIds: (action: SetStateAction<StageEntities<string[]>>) => void,
   snapToGrid?: boolean,
   dancerDisplayType: DancerDisplayType,
 };

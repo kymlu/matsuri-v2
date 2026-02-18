@@ -109,12 +109,15 @@ export default function ChoreoViewPage(props: {
           canEdit={false}
           canSelectProps={false}
           hideTransformerBorder
-          canSelectDancers={selectedTimingId === undefined}
+          canSelectDancers
           canToggleSelection={false}
           currentChoreo={props.currentChoreo}
           currentSection={currentSection}
           selectedIds={selectedIds}
-          setSelectedIds={setSelectedIds}
+          setSelectedIds={(action) => {
+            setSelectedIds(action);
+            setSelectedTimingId(undefined);
+          }}
         />
       </div>
       

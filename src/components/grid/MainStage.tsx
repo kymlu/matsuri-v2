@@ -29,7 +29,7 @@ type MainStageProps = {
   updatePropPosition?: (x: number, y: number, propId: string) => void,
   updatePropSizeAndRotate?: (width: number, length: number, rotation: number, x: number, y: number, propId: string) => void
   selectedIds: StageEntities<string[]>,
-  setSelectedIds: Dispatch<SetStateAction<StageEntities<string[]>>>,
+  setSelectedIds: (action: SetStateAction<StageEntities<string[]>>) => void,
   addDancer?: (x: number, y: number) => void,
   addProp?: (x: number, y: number) => void,
   appSettings: AppSetting,
