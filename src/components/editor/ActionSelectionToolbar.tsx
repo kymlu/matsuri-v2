@@ -76,7 +76,7 @@ function ActionSection ({
           </span>
           <div className="flex items-center justify-center">
             <span>{"("}</span>
-            <Icon colour={strEquals(timing.id, selectedTimingId) ? "white" : "grey"} src={ICON.person} size="xs"/>
+            <Icon colour={strEquals(timing.id, selectedTimingId) ? "white" : "grey"} src={ICON.group} size="xs"/>
             {timing.dancerIds.length}
             <span>{")"}</span>
           </div>

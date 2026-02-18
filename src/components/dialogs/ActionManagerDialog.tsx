@@ -212,7 +212,7 @@ function TimingItem ({
 ) {
   return <div className="flex items-center">
     <TextInput required maxLength={5} compact short defaultValue={timing.name} onContentChange={(newName) => {onRenameTiming(newName)}}/>
-    <Icon size="sm" src={ICON.person}/>
+    <Icon size="sm" src={ICON.group}/>
     <span>{timing.dancerIds.length}</span>
     {showDeleteButton && <IconButton colour="primary" size="sm" noBorder src={ICON.delete} onClick={() => {onDeleteTiming()}}/>}
   </div>

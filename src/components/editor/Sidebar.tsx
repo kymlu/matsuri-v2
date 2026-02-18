@@ -81,7 +81,7 @@ export function Sidebar({
             <IconLabelButton
               onClick={manageDancers}
               label="ダンサー管理"
-              full icon={ICON.person}/>
+              full icon={ICON.group}/>
           </>
         }
         {

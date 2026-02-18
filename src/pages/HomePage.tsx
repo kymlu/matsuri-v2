@@ -515,7 +515,7 @@ function EventSection({
 
                       <div className="flex items-center gap-1">
                         <Icon
-                          src={ICON.person}
+                          src={ICON.group}
                           colour="grey"
                           size="sm"
                         />
