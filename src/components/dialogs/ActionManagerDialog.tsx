@@ -187,7 +187,7 @@ function SortableActionSection ({
                 onRenameTiming(newTimings);
               }}
               onDeleteTiming={() => {onDeleteTiming([...action.timings.slice(0, i), ...action.timings.slice(i + 1)])}}
-              showDeleteButton={action.timings.length > 2}
+              showDeleteButton={action.timings.length > 1}
               />
           )
         }
