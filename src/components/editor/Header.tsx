@@ -54,7 +54,7 @@ export default function Header({
   goToEdit,
   goToView,
 }: HeaderProps) {
-  return <header className="z-10 grid grid-cols-[1fr,auto,1fr] items-center justify-between w-screen border-b-2 select-none bg-gradient-to-b from-white to-transparent ">
+  return <header className="z-10 flex items-center justify-between w-screen p-2 border-b-2 select-none bg-gradient-to-b from-white to-transparent ">
     <div className="flex">
       <IconButton
         src={ICON.home}
@@ -65,11 +65,11 @@ export default function Header({
         }}/>
     </div>
     <div
-      className="font-semibold truncate"
+      className="font-bold truncate"
       onDoubleClick={downloadLogs}>
       {currentChoreo.name}
     </div>
-    <div className="flex justify-end">
+    <div className="flex justify-end gap-2">
       <IconButton
         colour="primary"
         src={goToEdit ? ICON.edit : ICON.visibility}

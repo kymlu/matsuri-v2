@@ -40,7 +40,7 @@ export default function ViewerSidebar({
   return <BottomDrawer
     header={
       <div className="flex items-center self-end justify-between w-full mb-2">
-        <span className="h-8 text-base font-semibold truncate">
+        <span className="h-8 text-base font-bold truncate">
           {isPositionHintShown ? dancer.name : "メモ"}
         </span>
         {
@@ -60,7 +60,7 @@ export default function ViewerSidebar({
       </div>
     }
     footer={formationSelectionToolbar}>
-    <div>
+    <>
       {
         isPositionHintShown &&
         <PositionHint
@@ -122,6 +122,6 @@ export default function ViewerSidebar({
           {note}
         </p>
       }
-    </div>
+    </>
   </BottomDrawer>
 }

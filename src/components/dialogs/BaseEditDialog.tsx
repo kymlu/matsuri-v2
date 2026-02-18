@@ -31,7 +31,7 @@ export default function BaseEditDialog({
             asDiv
             full
             >
-            <span className="text-nowrap">
+            <span className="font-semibold text-nowrap">
               キャンセル
             </span>
           </Button>
@@ -41,7 +41,7 @@ export default function BaseEditDialog({
           disabled={isActionButtonDisabled}
           full
           primary>
-          <span className="text-nowrap">
+          <span className="font-semibold text-nowrap">
             {actionButtonText ?? "保存"}
           </span>
         </Button>

@@ -17,8 +17,8 @@ export const colorPalette = {
 
   white: "#FFFFFF",
   black: "#000000",
-  offWhite: "#F1F1F1",
-  lightGrey: "#C3C3C3",
+  offWhite: "#F2F2F2",
+  lightGrey: "#CDCDCD",
   paleGrey: "#D4D4D4",
   primary: "#AB1010",
 

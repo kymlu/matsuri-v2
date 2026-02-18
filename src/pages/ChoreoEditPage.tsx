@@ -633,7 +633,7 @@ export default function ChoreoEditPage(props: {
       />
       {
         isAddingDancers &&
-        <div className="absolute items-center w-max rounded-md flex gap-2 p-2 top-20 left-1/2 translate-x-[-50%] bg-white border-2 border-primary">
+        <div className="absolute items-center w-max rounded-md flex gap-2 p-2 top-20 left-1/2 translate-x-[-50%] bg-white border border-primary">
           <span>
             グリッドを押して<b>ダンサー</b>を追加する
           </span>
@@ -645,7 +645,7 @@ export default function ChoreoEditPage(props: {
       }
       {
         isAddingProps &&
-        <div className="absolute items-center w-max rounded-md flex gap-2 p-2 top-20 left-1/2 translate-x-[-50%] bg-white border-2 border-primary">
+        <div className="absolute items-center w-max rounded-md flex gap-2 p-2 top-20 left-1/2 translate-x-[-50%] bg-white border border-primary">
           <span>
             グリッドを押して<b>道具</b>を追加する
           </span>
@@ -657,7 +657,7 @@ export default function ChoreoEditPage(props: {
       }
       {
         isAssigningActions &&
-        <div className="absolute items-center w-max max-w-full rounded-md flex gap-2 p-2 top-20 left-1/2 translate-x-[-50%] bg-white border-2 border-primary">
+        <div className="absolute items-center w-max max-w-full rounded-md flex gap-2 p-2 top-20 left-1/2 translate-x-[-50%] bg-white border border-primary">
           <span className="text-center">
             {
               currentAction && currentTiming && `「${currentAction.name}-${currentTiming.name}」を割り当てるダンサーをタップ`

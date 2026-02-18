@@ -23,7 +23,7 @@ export default function BaseErrorDialog({
             asDiv
             full
             primary>
-            <span className="text-nowrap">
+            <span className="font-semibold text-nowrap">
               {actionButtonText ?? "OK"}
             </span>
           </Button>

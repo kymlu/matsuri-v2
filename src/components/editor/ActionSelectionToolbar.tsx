@@ -56,7 +56,7 @@ function ActionSection ({
         }
       }}>
       <div className="flex flex-row items-center justify-center gap-1 min-w-24 w-max">
-        <span className="truncate">
+        <span className="font-semibold truncate">
           {action.name}
         </span>
         <Icon colour="white" src={isExpanded ? ICON.chevronBackward : ICON.chevronForward} size="xs"/>

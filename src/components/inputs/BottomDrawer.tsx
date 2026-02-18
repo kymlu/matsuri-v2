@@ -38,7 +38,7 @@ export default function BottomDrawer ({
             </div>
             <Drawer.Content className="h-full px-4 pb-6">
               {header}
-              <div className="max-h-full overflow-scroll">
+              <div className="max-h-[calc(75svh-84px)] overflow-scroll">
                 {children}
               </div>
             </Drawer.Content>

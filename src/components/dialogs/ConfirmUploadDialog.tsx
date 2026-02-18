@@ -28,7 +28,9 @@ export default function ConfirmUploadDialog({
           onClick={onOverwrite}
           className="w-full">
           <Button asDiv full primary>
-            上書き
+            <span className="font-semibold">
+              上書き
+            </span>
           </Button>
         </Dialog.Close>
 
@@ -36,7 +38,9 @@ export default function ConfirmUploadDialog({
           onClick={onCopy}
           className="w-full">
           <Button asDiv full primary>
-            コピーを作成
+            <span className="font-semibold">
+              コピーを作成
+            </span>
           </Button>
         </Dialog.Close>
       </div>

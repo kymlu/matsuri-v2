@@ -114,9 +114,9 @@ export function NewChoreoPage({
   };
   
   return (
-    <div className="flex flex-col h-[100svh] p-4 mx-auto space-y-2">
+    <div className="flex flex-col h-[100svh] p-4 mx-auto space-y-2 bg-gray-100">
       <div className="text-center">
-        <h2 className="mb-2 text-xl font-semibold">
+        <h2 className="mb-2 text-xl font-bold">
           {stepTitles[step] || ""}
         </h2>
       </div>
@@ -226,22 +226,15 @@ export function NewChoreoPage({
       </div>
 
       <div className="flex justify-between gap-4 pb-8">
-        {step === 1 && (
-          <Button
+        { <Button
             full
-            onClick={goToHomePage}
+            onClick={step === 1 ? goToHomePage : prevStep}
           >
-            戻る
+            <span className="font-semibold">
+              戻る
+            </span>
           </Button>
-        )}
-        {step > 1 && (
-          <Button
-            full
-            onClick={prevStep}
-          >
-            戻る
-          </Button>
-        )}
+        }
         {step < 3 && (
           <Button
             primary
@@ -249,7 +242,9 @@ export function NewChoreoPage({
             onClick={nextStep}
             disabled={step === 1 && isNullOrUndefinedOrBlank(form.name)}
           >
+          <span className="font-semibold">
             次へ
+          </span>
           </Button>
         )}
         {step === 3 && (
@@ -258,7 +253,9 @@ export function NewChoreoPage({
             full
             onClick={handleSubmit}
           >
+          <span className="font-semibold">
             隊列作成開始
+          </span>
           </Button>
         )}
       </div>

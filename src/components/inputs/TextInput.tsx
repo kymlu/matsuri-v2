@@ -24,7 +24,6 @@ export type TextInputProps = {
   ref?: React.Ref<any>,
   maxLength?: number,
   showLength?: boolean,
-  hasOutline?: boolean,
   label?: string,
   rightLabel?: string,
   restrictFn?: (s: string) => boolean,
@@ -34,7 +33,7 @@ export default function TextInput({
   name, defaultValue, onContentChange, placeholder,
   search, clearable, compact, tall, short, centered,
   required, hasError, errorMsg, disabled, ref, maxLength,
-  showLength, hasOutline, label, rightLabel, restrictFn
+  showLength, label, rightLabel, restrictFn
 }: TextInputProps) {
   const [value, setValue] = React.useState<string>(defaultValue ?? "");
 
@@ -52,9 +51,8 @@ export default function TextInput({
   }
 
   var inputClasses = classNames(
-    "col-start-1 text-lg row-start-1 text-black p-3 border-gray-300 rounded-md focus-within:border-primary focus:outline-none",
+    "col-start-1 border row-start-1 text-black p-3 border-gray-300 rounded-md focus-within:border-primary focus:outline-none",
     {
-      "border-2": hasOutline !== false,
       "pr-6": clearable,
       "pr-2": !clearable,
       "pl-10": search,

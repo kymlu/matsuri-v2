@@ -40,7 +40,7 @@ export default function CustomSelect({
           setSelectValue?.(value);
           setValue(newValue ?? "");
         }}>
-        <Select.Trigger disabled={disabled} className={"flex flex-row items-center text-lg justify-between w-full p-3 rounded-md border-gray-300 border-2 data-[popup-open]:border-primary " + (disabled ? "bg-gray-200 cursor-default" : "bg-white cursor-pointer")}>
+        <Select.Trigger disabled={disabled} className={"flex flex-row items-center text-lg justify-between w-full p-3 rounded-md border-gray-300 border data-[popup-open]:border-primary " + (disabled ? "bg-gray-200 cursor-default" : "bg-white cursor-pointer")}>
           <Select.Value>
             {isIcons ? <img className="size-8" src={value}/> : value}
           </Select.Value>
@@ -49,7 +49,7 @@ export default function CustomSelect({
           </Select.Icon>
         </Select.Trigger>
         <Select.Portal>
-          <Select.Positioner side="bottom" className="z-50 bg-white border-2 rounded-md select-none border-primary">
+          <Select.Positioner side="bottom" className="z-50 bg-white border rounded-md select-none border-primary">
             <Select.Popup>
               <div className="flex flex-col gap-1 p-2 max-h-[40svh] overflow-y-auto">
                 { Object.entries(items).map(([itemValue, label]) => (

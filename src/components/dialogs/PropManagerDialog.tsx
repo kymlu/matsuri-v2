@@ -74,7 +74,7 @@ export function PropManagerDialog({
                           }}
                           style={{"backgroundColor": color}}
                           className={"rounded-full size-8 min-h-8 min-w-8 max-h-8 max-w-8 " + 
-                            (strEquals(color, prop.color) ? "border-2 border-primary" : "")
+                            (strEquals(color, prop.color) ? "border border-primary" : "")
                           }/>
                       )
                     }

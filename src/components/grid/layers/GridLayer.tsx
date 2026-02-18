@@ -155,9 +155,9 @@ export default function GridLayer({
         key={"triangle"}
         sceneFunc={(context, shape) => {
           context.beginPath();
-          context.moveTo(centerX, stageTopPx - gridSizePx * 0.5);
-          context.lineTo(centerX - gridSizePx * 0.75, stageTopPx - gridSizePx * 1.5);
-          context.lineTo(centerX + gridSizePx * 0.75, stageTopPx - gridSizePx * 1.5);
+          context.moveTo(centerX, stageTopPx - gridSizePx * 0.3);
+          context.lineTo(centerX - gridSizePx * 0.5, stageTopPx - gridSizePx * 1.2);
+          context.lineTo(centerX + gridSizePx * 0.5, stageTopPx - gridSizePx * 1.2);
           context.closePath();
           context.fillStrokeShape(shape);
         }}

@@ -118,7 +118,7 @@ function FormationSectionItem (props: {
         }
       }}>
       <div className="flex flex-row items-center justify-center gap-1 min-w-24 w-max">
-        <span className="truncate">
+        <span className={"truncate" + (isSelected ? " font-semibold" : " font-medium")}>
           {section.name}
         </span>
         {

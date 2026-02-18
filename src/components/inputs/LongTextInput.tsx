@@ -21,7 +21,6 @@ export type TextInputProps = {
   ref?: React.Ref<any>,
   maxLength?: number,
   showLength?: boolean,
-  hasOutline?: boolean,
   label?: string,
 }
 
@@ -42,7 +41,6 @@ export default function LongTextInput({
   ref,
   maxLength,
   showLength,
-  hasOutline,
   label,
 }: TextInputProps) {
   const [value, setValue] = React.useState<string>(defaultValue ?? "");
@@ -59,9 +57,8 @@ export default function LongTextInput({
   }
 
   var inputClasses = classNames(
-    "w-full h-full col-start-1 text-lg row-start-1 pl-2 text-black p-3 border-gray-300 rounded-md focus-within:border-primary focus:outline-none",
+    "w-full h-full col-start-1 row-start-1 pl-2 text-black p-3 border-gray-300 rounded-md border-grey-300 border focus-within:border-primary focus:outline-none",
     {
-      "border-2": hasOutline !== false,
       "pr-6": clearable,
       "pr-2": !clearable,
       "text-center": centered,

@@ -29,17 +29,23 @@ export default function EditDancerColourDialog({
             <Button
               primary={mode === "current"}
               onClick={() => setMode("current")}>
-              現在
+              <span className="font-semibold">
+                現在
+              </span>
             </Button>
             <Button
               primary={mode === "currentAndAfter"}
               onClick={() => setMode("currentAndAfter")}>
-              以後
+              <span className="font-semibold">
+                以後
+              </span>
             </Button>
             <Button
               primary={mode === "all"}
               onClick={() => setMode("all")}>
-              すべて
+              <span className="font-semibold">
+                すべて
+              </span>
             </Button>
           </div>
         </div>

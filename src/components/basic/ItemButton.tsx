@@ -14,7 +14,7 @@ export interface ItemButtonProps {
 export default function ItemButton ({
   text, icon, isDisabled, filled, fixed, compact, onClick
 }: ItemButtonProps) {
-  const classes = className("border-primary border-2 rounded-md w-fit", {
+  const classes = className("border-primary border rounded-md w-fit", {
     "bg-gray-200": isDisabled,
     "w-32 max-w-32 min-w-32": fixed,
     "bg-primary text-white border-primary": filled,

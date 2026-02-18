@@ -168,13 +168,13 @@ function SortableActionSection ({
     transition,
   };
 
-  return <div className="relative flex flex-row items-start gap-2 p-4 bg-white border-2 rounded-md border-primary" style={style} ref={setNodeRef}>
+  return <div className="relative flex flex-row items-start gap-2 p-4 bg-white rounded-md" style={style} ref={setNodeRef}>
     <div {...attributes} {...listeners}>
       <Icon src={ICON.dragHandle}/>
     </div>
     <div className="flex-1">
       <TextInput required label="アクション名" defaultValue={action.name} onContentChange={(newName) => {onRenameAction(newName)}}/>
-      <span className="font-bold">カウント（重複不可）</span>
+      <span className="font-semibold">カウント（重複不可）</span>
       <div className="flex flex-wrap gap-4">
         {
           action.timings.map((timing, i) => 

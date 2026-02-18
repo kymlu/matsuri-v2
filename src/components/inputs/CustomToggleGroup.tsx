@@ -23,7 +23,7 @@ export default function CustomToggleGroup({
       <ToggleGroup
         defaultValue={[defaultValue]} 
         onValueChange={(value) => onChange?.(value[0])}
-        className="flex flex-row border-2 border-solid rounded-md border-primary">
+        className="flex flex-row border border-solid rounded-md border-primary">
           {
             options.map(option => 
               <Toggle

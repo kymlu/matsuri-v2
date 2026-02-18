@@ -43,7 +43,7 @@ export default function Button({
     "w-full": full,
     "w-32 max-w-32 min-w-32": fixed,
     "py-0.5 px-1": compact,
-    "border-2": noBorder !== true,
+    "border": noBorder !== true,
     "px-3 py-1.5": compact !== true,
     "lg:hover:bg-gray-100": !disabled && primary !== true && grey !== true,
     "lg:hover:opacity-70": !disabled && (primary || grey),
@@ -121,7 +121,9 @@ export function IconLabelButton({
     >
     <div className="flex items-center justify-center gap-2">
       <Icon colour={primaryText ? "primary" : primary ? "white" : "black"} src={icon} size={iconSize}/>
-      {label}
+      <div className='font-semibold'>
+        {label}
+      </div>
     </div>
   </Button>
 }
