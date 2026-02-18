@@ -339,7 +339,7 @@ export async function exportToPdf (
         displayX = "→" + roundToTenth(Math.abs(xFromCenter));
       }
   
-      var displayY = position.y;
+      var displayY = roundToTenth(position.y);
 
       pdf.setFontSize(14);
       pdf.text(followingDancer.name, memoLeft, memoY, {maxWidth: memoWidth});
