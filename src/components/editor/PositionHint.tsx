@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { Coordinates } from "../../models/base";
 import { StageGeometry } from "../../models/choreo";
 import { Dancer, DancerPosition } from "../../models/dancer";
@@ -22,82 +22,75 @@ export default function PositionHint({
   geometry,
 }: PositionHintProps) {
 
-  const [deltaString, setDeltaString] = useState<string>("");
-  const [currentPositionString, setCurrentPositionString] = useState<string>("");
+  const [currentX, setCurrentX] = useState<number>(0);
+  const [currentY, setCurrentY] = useState<number>(0);
+  const [deltaX, setDeltaX] = useState<number | undefined>();
+  const [deltaY, setDeltaY] = useState<number | undefined>();
 
   useEffect(() => {
-    var displayX = "";
-    var xFromCenter = geometry.stageWidth / 2 - position.x;
-    if (xFromCenter === 0) {
-      displayX = "↔︎0";
-    } else if (xFromCenter > 0) {
-      displayX = "←" + roundToTenth(Math.abs(xFromCenter));
-    } else {
-      displayX = "→" + roundToTenth(Math.abs(xFromCenter));
-    }
-
-    var displayY = roundToTenth(position.y);
-
-    setCurrentPositionString(`${displayY}m/${displayX}m`);
-    
-    const delta: Coordinates | null = nextPosition ? {
-      x: nextPosition.x - position.x,
-      y: nextPosition.y - position.y,
-    } : null;
-
-    if (delta) {
-      if (delta.x === 0 && delta.y === 0) {
-        setDeltaString("なし");
-      } else {
-        var xMovement: string | null = null;
-        var yMovement: string | null = null;
-    
-        if (delta.y > 0) {
-          yMovement = (geometry.yAxis === "bottom-up" ? "↑" : "↓") + roundToTenth(delta.y) + "m"
-        } else if (delta.y < 0) {
-          yMovement = (geometry.yAxis === "bottom-up" ? "↓" : "↑") + roundToTenth(Math.abs(delta.y)) + "m"
-        }
-    
-        if (delta.x > 0) {
-          xMovement = `→${roundToTenth(delta.x)}m`;
-        } else if (delta.x < 0) {
-          xMovement = `←${roundToTenth(Math.abs(delta.x))}m`;
-        }
-
-        setDeltaString([yMovement, xMovement].filter(x => x !== null).join("/"))
-      }
-    }
+    setCurrentX(roundToTenth(geometry.stageWidth / 2 - position.x));
+    setCurrentY(roundToTenth(position.y));
+    setDeltaX(nextPosition ? roundToTenth(nextPosition.x - position.x) : undefined);
+    setDeltaY(nextPosition ? roundToTenth(nextPosition.y - position.y) : undefined);
   }, [position, nextPosition]);
 
   return (
     <div>
       <div className="mb-2 space-y-1">
-        <div className="flex justify-between">
-          <span className="text-gray-500">現在</span>
-          <span className="font-medium">{currentPositionString}</span>
+        <div className="flex w-full gap-2">
+          <InfoBox title="現在の位置">
+            <span className="font-bold">{currentY}m</span>
+            <span className="text-sm text-gray-400">/</span>
+            <span>{currentX === 0 ? "↔︎" : currentX > 0 ? "←" : "→"}</span>
+            <span className="font-bold">{Math.abs(currentX)}m</span>
+          </InfoBox>
+          {
+            nextPosition && deltaX !== undefined && deltaY !== undefined &&
+            <InfoBox title="次への移動">
+              <div className="flex items-center justify-center gap-1">
+                {
+                  deltaX === 0 && deltaY === 0 && <span className="font-bold">なし</span>
+                }
+                {
+                  deltaY !== 0 && 
+                  <>
+                    <span>
+                      {
+                        ((deltaY > 0 && geometry.yAxis === "bottom-up") ||
+                          (deltaY < 0 && geometry.yAxis === "top-down")) ? 
+                        "↑" : "↓"
+                      }
+                    </span>
+                    <span className="font-bold">{Math.abs(deltaY)}m</span>
+                  </>
+                }
+                {
+                  deltaX !== 0 && deltaY !== 0 && 
+                  <span className="text-sm text-gray-400">/</span>
+                }
+                {
+                  deltaX !== 0 && 
+                  <>
+                    <span>{deltaX > 0 ? "→" : "←"}</span>
+                    <span className="font-bold">{Math.abs(deltaX)}m</span>
+                  </>
+                }
+              </div>
+            </InfoBox>
+          }
         </div>
-        {
-          nextPosition &&
-          <div className="flex justify-between">
-            <span className="text-gray-500 shrink">次への移動</span>
-            <span className="font-medium text-nowrap">{deltaString}</span>
-          </div>
-        }
       </div>
       {
         actions && actions.length > 0 &&
         <>
-          <Divider/>
-          <div className="space-y-1 border-gray-200">
-            <div className="text-gray-500">カウント</div>
+          <div className="flex flex-wrap w-full gap-2">
             {
               actions.map(action => {
                 var assignedTiming = action.timings.find(t => t.dancerIds.includes(dancer.id));
                 
-                return <div key={action.id} className="flex justify-between pl-2">
-                  <span>{action.name}</span>
+                return <InfoBox title={action.name} isSmall>
                   <span className="font-medium">{assignedTiming?.name ?? "---"}</span>
-                </div>
+                </InfoBox>
               })
             }
           </div>
@@ -105,4 +98,19 @@ export default function PositionHint({
       }
     </div>
   );
-} 
+}
+
+type InfoBoxProps = {
+  title: string,
+  children: ReactNode,
+  isSmall?: boolean,
+}
+
+function InfoBox({title, children, isSmall}: InfoBoxProps) {
+  return <div className={"flex flex-col justify-between p-2 border border-gray-300 rounded-md" + (isSmall ? "" : " flex-1")}>
+    <span className="text-sm font-semibold text-center text-gray-400">{title}</span>
+    <div className="flex items-center justify-center gap-1">
+      {children}
+    </div>
+  </div>
+}
