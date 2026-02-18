@@ -64,6 +64,7 @@ export default function ExportDialog({
         onClose={() => {
           onClose();
           setFollowingId("");
+          setStep("prep");
         }}
         isActionButtonDisabled={isExportNameValid}
       >
