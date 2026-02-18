@@ -1,10 +1,8 @@
 import { ReactNode, useEffect, useState } from "react";
-import { Coordinates } from "../../models/base";
 import { StageGeometry } from "../../models/choreo";
 import { Dancer, DancerPosition } from "../../models/dancer";
 import { DancerAction } from "../../models/dancerAction";
 import { roundToTenth } from "../../lib/helpers/globalHelper";
-import Divider from "../basic/Divider";
 
 type PositionHintProps = {
   dancer: Dancer;
@@ -30,8 +28,8 @@ export default function PositionHint({
   useEffect(() => {
     setCurrentX(roundToTenth(geometry.stageWidth / 2 - position.x));
     setCurrentY(roundToTenth(position.y));
-    setDeltaX(nextPosition ? roundToTenth(nextPosition.x) - roundToTenth(position.x) : undefined);
-    setDeltaY(nextPosition ? roundToTenth(nextPosition.y) - roundToTenth(position.y) : undefined);
+    setDeltaX(nextPosition ? roundToTenth(roundToTenth(nextPosition.x) - roundToTenth(position.x)) : undefined);
+    setDeltaY(nextPosition ? roundToTenth(roundToTenth(nextPosition.y) - roundToTenth(position.y)) : undefined);
   }, [position, nextPosition]);
 
   return (
