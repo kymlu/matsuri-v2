@@ -513,6 +513,7 @@ export async function exportToPdf (
       return;
     } catch (e: any) {
       if (e?.name === "AbortError" || e?.name === "NotAllowedError") {
+        onComplete();
         return;
       }
     }
