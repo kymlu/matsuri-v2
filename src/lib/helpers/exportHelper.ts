@@ -206,8 +206,8 @@ export async function exportToPdf (
       pdf.setFillColor(colorPalette.primary);
       pdf.triangle(
         centerX, stageTopPx - gridSizePx * 0.3 + titleBuffer,
-        centerX - gridSizePx * 0.75, stageTopPx - gridSizePx * 1.2 + titleBuffer,
-        centerX + gridSizePx * 0.75, stageTopPx - gridSizePx * 1.2 + titleBuffer,
+        centerX - gridSizePx * 0.5, stageTopPx - gridSizePx * 1.2 + titleBuffer,
+        centerX + gridSizePx * 0.5, stageTopPx - gridSizePx * 1.2 + titleBuffer,
         "FD"
       )
 
