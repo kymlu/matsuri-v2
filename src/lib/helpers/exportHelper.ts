@@ -19,15 +19,28 @@ const ZIP_OPTIONS = {
 };
 
 async function downloadZip(zip: JSZip, fileName: string) {
+  const fullFileName = `${getSafeFileName(fileName)}.zip`
+
   const blob = await zip.generateAsync(ZIP_OPTIONS);
   const url = URL.createObjectURL(blob);
+  
+  const file = new File ([blob], fullFileName, {
+    type: "application/zip"
+  });
+  const dataToShare = {"files": [file]};
+  if (navigator.canShare?.(dataToShare)) {
+    try {
+      await navigator.share(dataToShare);
+      return;
+    } catch {
+    }
+  }
 
   const link = document.createElement("a");
   link.href = url;
-  link.download = `${getSafeFileName(fileName)}.zip`;
+  link.download = fullFileName;
   link.click();
-
-  URL.revokeObjectURL(url);
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 export async function exportChoreo(choreo: Choreo) {
