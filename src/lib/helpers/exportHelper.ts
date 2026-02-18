@@ -70,7 +70,9 @@ export async function exportToPdf (
   const gridSizePx = 20;
 
   const titleBuffer = gridSizePx * 1.5;
+  const pageMargin = gridSizePx * 0.5;
   const memoBuffer = gridSizePx * 6;
+  const memoWidth = gridSizePx * 5;
 
   const stage = choreo.stageGeometry;
   
@@ -85,11 +87,11 @@ export async function exportToPdf (
   const stageHeightPx = stage.stageLength * gridSizePx;
     
   // total area (stage + out of bounds) dimensions
-  const totalWidthPx = totalWidthM * gridSizePx;
-  const totalHeightPx = totalLengthM * gridSizePx;
+  const diagramWidthPx = totalWidthM * gridSizePx;
+  const diagramHeightPx = totalLengthM * gridSizePx;
 
   // stage borders
-  const stageLeftPx = sideMarginM * gridSizePx;
+  const stageLeftPx = sideMarginM * gridSizePx + pageMargin;
   const stageRightPx = stageLeftPx + stageWidthPx;
   const stageTopPx = topMarginM * gridSizePx;
   const stageBottomPx = stageTopPx + stageHeightPx;
@@ -103,12 +105,13 @@ export async function exportToPdf (
   const gridOffsetPx = gridOffsetMeters * gridSizePx;
 
   const followingDancer = choreo.dancers[followingId];
+  var memoLeft = diagramWidthPx + pageMargin * 2;
 
   // only add memo space if there are notes or there is a dancer being followed 
-  const fileWidth = totalWidthPx + (
+  const fileWidth = diagramWidthPx + pageMargin + (
     followingDancer || choreo.sections.some(x => !isNullOrUndefinedOrBlank(x.note)) ?
-    memoBuffer : 0);
-  const fileHeight = totalHeightPx + titleBuffer;
+    memoBuffer : pageMargin);
+  const fileHeight = diagramHeightPx + titleBuffer + pageMargin;
   
   // create pdf and set settings
   const pdf = new jsPDF({
@@ -155,18 +158,18 @@ export async function exportToPdf (
     // draw section title 
     pdf.setTextColor(colorPalette.black);
     pdf.setFontSize(16);
-    pdf.text(section.name, centerX, gridSizePx, {maxWidth: totalWidthPx, align: "center"});
+    pdf.text(section.name, centerX, gridSizePx, {maxWidth: diagramWidthPx, align: "center"});
 
     // draw out of bounds
     pdf.setFillColor(colorPalette.offWhite);
-    pdf.rect(0, 0 + titleBuffer, totalWidthPx, totalHeightPx, "F");
+    pdf.roundedRect(pageMargin, 0 + titleBuffer, diagramWidthPx, diagramHeightPx, 5, 5, "F");
 
     // draw in bounds area
     pdf.setFillColor(colorPalette.white);
     pdf.rect(stageLeftPx, stageTopPx + titleBuffer, stageWidthPx, stageHeightPx, "F");
 
     // Vertical grid lines (across full area)
-    for (let m = 0; m <= totalWidthM - gridOffsetMeters; m++) {
+    for (let m = 1; m < totalWidthM - gridOffsetMeters; m++) {
       const x = m * gridSizePx + gridOffsetPx;
     
       const distFromCenter = Math.abs(
@@ -175,7 +178,7 @@ export async function exportToPdf (
     
       const isMajor = Math.round(distFromCenter) % 2 === 0;
 
-      drawLine(pdf, colorPalette.lightGrey, 0.6, isMajor ? [10, 6] : [4, 6], x, 0 + titleBuffer, x, totalHeightPx + titleBuffer);
+      drawLine(pdf, colorPalette.lightGrey, 0.6, isMajor ? [10, 6] : [4, 6], x + pageMargin, 0 + titleBuffer, x + pageMargin, diagramHeightPx + titleBuffer);
     }
 
     // Horizontal grid lines + right labels
@@ -183,7 +186,9 @@ export async function exportToPdf (
       const y = m * gridSizePx;
       const isMajor = m % 2 === 0;
 
-      drawLine(pdf, colorPalette.lightGrey, 0.6, isMajor ? [10, 6] : [4, 6], 0, y + titleBuffer, totalWidthPx, y + titleBuffer);
+      if (m > 0 && m < totalLengthM) {
+        drawLine(pdf, colorPalette.lightGrey, 0.6, isMajor ? [10, 6] : [4, 6], pageMargin, y + titleBuffer, diagramWidthPx + pageMargin, y + titleBuffer);
+      }
 
       // Right-side meter labels
       // if stage, 0 at top of stage
@@ -217,9 +222,9 @@ export async function exportToPdf (
       pdf.rect(stageLeftPx, stageTopPx + titleBuffer, stageWidthPx, stageHeightPx)
 
       // Center line
-      drawLine(pdf, colorPalette.primary, 1.25, [10, 6], centerX, 0 + titleBuffer, centerX, totalHeightPx + titleBuffer);
+      drawLine(pdf, colorPalette.primary, 1.25, [10, 6], centerX, 0 + titleBuffer, centerX, diagramHeightPx + titleBuffer);
         
-      for (let m = 0; m <= totalWidthM; m++) {
+      for (let m = 1; m < totalWidthM; m++) {
         const x = m * gridSizePx + gridOffsetPx;
       
         const isCenter = x === centerX;
@@ -249,6 +254,7 @@ export async function exportToPdf (
     }
 
     pdf.setLineDashPattern([], 0);
+    pdf.setFontSize(8);
 
     // Draw props
     Object.values(section.formation.propPositions).forEach(p => {
@@ -256,7 +262,7 @@ export async function exportToPdf (
       if (prop) {
         context.save();
         const positionInPx = stageMetersToPx(p, stage, gridSizePx, prop.length);
-        const propX = positionInPx.x;
+        const propX = positionInPx.x + pageMargin;
         const propY = positionInPx.y + titleBuffer;
 
         const propWidth  = gridSizePx * prop.width;
@@ -294,7 +300,7 @@ export async function exportToPdf (
         const isFollowing = strEquals(followingId, dancer.id);
   
         const positionInPx = stageMetersToPx(p, stage, gridSizePx);
-        const x =  positionInPx.x;
+        const x =  positionInPx.x + pageMargin;
         const y = positionInPx.y
         
         if (isFollowing) {
@@ -319,7 +325,7 @@ export async function exportToPdf (
     pdf.setTextColor(colorPalette.black);
     pdf.setFontSize(12);
 
-    var memoY = gridSizePx * 2;
+    var memoY = gridSizePx;
 
     if (followingDancer) {
       var position = section.formation.dancerPositions[followingDancer.id];
@@ -336,20 +342,35 @@ export async function exportToPdf (
       var displayY = position.y;
 
       pdf.setFontSize(14);
-      pdf.text(followingDancer.name, totalWidthPx + 5, memoY, {maxWidth: memoBuffer - 10});
-      memoY += pdf.getTextDimensions(followingDancer.name, {maxWidth: memoBuffer - 10}).h * 1.25;
+      pdf.text(followingDancer.name, memoLeft, memoY, {maxWidth: memoWidth});
+
+      const dancerNameHeight = pdf.getTextDimensions(followingDancer.name, {maxWidth: memoWidth}).h;
+      pdf.setDrawColor(colorPalette.primary);
+      memoY += 10;
+      pdf.line(memoLeft, memoY, memoLeft + memoWidth, memoY);
+
+      memoY += dancerNameHeight;
+
+      // current position
+      pdf.setDrawColor(colorPalette.lightGrey);
+      pdf.setLineWidth(1);
+      pdf.roundedRect(memoLeft, memoY, memoWidth, 30, 5, 5, "S");
       
-      pdf.setFontSize(12);
-      memoY += pdf.getTextDimensions("O", {maxWidth: memoBuffer - 10}).h * 1.25;
+      memoY += 10;
       
-      pdf.text("現在の位置", totalWidthPx + 5, memoY, {maxWidth: memoBuffer - 10});
-      memoY += pdf.getTextDimensions("現在の位置", {maxWidth: memoBuffer - 10}).h * 1.25;
-      
+      pdf.setFontSize(8);
       pdf.setFont(font);
+      pdf.setTextColor(colorPalette.grey);
+      pdf.text("現在の位置", memoLeft + memoWidth/2, memoY, {maxWidth: memoWidth, align: "center"});
+      memoY += pdf.getTextDimensions("現在の位置", {maxWidth: memoWidth}).h * 2.2;
+      
+      pdf.setFontSize(14);
+      pdf.setFont(boldFont);
+      pdf.setTextColor(colorPalette.black);
       const currentPositionText = `${displayY}m/${displayX}m`;
-      pdf.text(currentPositionText, totalWidthPx + 5, memoY, {maxWidth: memoBuffer - 10});
-      memoY += pdf.getTextDimensions(currentPositionText, {maxWidth: memoBuffer - 10}).h * 1.25;
-      memoY += pdf.getTextDimensions("O", {maxWidth: memoBuffer - 10}).h * 1.25;
+      pdf.text(currentPositionText, memoLeft + memoWidth/2 + 4, memoY, {maxWidth: memoWidth, align: "center"});
+      memoY += pdf.getTextDimensions(currentPositionText, {maxWidth: memoWidth}).h * 1.25;
+      memoY += pdf.getTextDimensions("O", {maxWidth: memoWidth}).h / 2;
 
       var nextPosition = choreo.sections[i + 1]?.formation?.dancerPositions[followingDancer.id];
       
@@ -359,13 +380,25 @@ export async function exportToPdf (
       } : null;
   
       if (delta) {
-        pdf.setFont(boldFont);
-        pdf.text("次への移動", totalWidthPx + 5, memoY, {maxWidth: memoBuffer - 10});
-        memoY += pdf.getTextDimensions("次への移動", {maxWidth: memoBuffer - 10}).h * 1.25;
+        pdf.setDrawColor(colorPalette.lightGrey);
+        pdf.setLineWidth(1);
+        pdf.roundedRect(memoLeft, memoY, memoWidth, 30, 5, 5, "S");
+        
+        memoY += 10;
+        
+        pdf.setFontSize(8);
         pdf.setFont(font);
+        pdf.setTextColor(colorPalette.grey);
+        pdf.text("次への移動", memoLeft + memoWidth/2, memoY, {maxWidth: memoWidth, align: "center"});
+        memoY += pdf.getTextDimensions("次への移動", {maxWidth: memoWidth}).h * 2.2;
+        
+        pdf.setFontSize(14);
+        pdf.setFont(boldFont);
+        pdf.setTextColor(colorPalette.black);
+
         if (delta.x === 0 && delta.y === 0) {
-          pdf.text("なし", totalWidthPx + 5, memoY, {maxWidth: memoBuffer - 10});
-          memoY += pdf.getTextDimensions("なし", {maxWidth: memoBuffer - 10}).h * 1.25;
+          pdf.text("なし", memoLeft + memoWidth/2, memoY, {maxWidth: memoWidth, align: "center"});
+          memoY += pdf.getTextDimensions("なし", {maxWidth: memoWidth}).h * 1.25;
         } else {
           var xMovement: string | null = null;
           var yMovement: string | null = null;
@@ -383,37 +416,59 @@ export async function exportToPdf (
           }
   
           const deltaText = `${[yMovement, xMovement].filter(x => x !== null).join("/")}`;
-          pdf.text(deltaText, totalWidthPx + 5, memoY, {maxWidth: memoBuffer - 10});
-          memoY += pdf.getTextDimensions(deltaText, {maxWidth: memoBuffer - 10}).h * 1.25;
+          pdf.text(deltaText, memoLeft + memoWidth/2 + 2, memoY, {maxWidth: memoWidth, align: "center"});
+          memoY += pdf.getTextDimensions(deltaText, {maxWidth: memoWidth}).h * 1.25;
         }
-        memoY += pdf.getTextDimensions("O", {maxWidth: memoBuffer - 10}).h * 1.25;
+        memoY += pdf.getTextDimensions("O", {maxWidth: memoWidth}).h / 2;
       }
 
       if (section.formation.dancerActions.length > 0) {
-        section.formation.dancerActions.forEach((action) => {
+        section.formation.dancerActions.forEach((action, i) => {
           var assignedTiming = action.timings.find(t => t.dancerIds.includes(followingDancer.id));
-          pdf.setFont(boldFont);
-          pdf.text(action.name, totalWidthPx + 5, memoY, {maxWidth: (memoBuffer - 10) / 2});
-          pdf.setFont(font);
-          memoY += pdf.getTextDimensions(action.name, {maxWidth: memoBuffer - 10}).h * 1.25;
-          pdf.text(`${assignedTiming?.name ?? "---"}`, totalWidthPx + 5, memoY, {maxWidth: (memoBuffer - 10) / 2});
-          memoY += pdf.getTextDimensions(`${assignedTiming?.name ?? "---"}`, {maxWidth: memoBuffer - 10}).h * 1.25;
-        });
+          var x = memoLeft + (i % 2 === 0 ? 0 : (memoWidth / 2 + 4));
+          var additionalY = 0;
 
-        memoY += pdf.getTextDimensions("O", {maxWidth: memoBuffer - 10}).h * 1.25;
+          pdf.setDrawColor(colorPalette.lightGrey);
+          pdf.setLineWidth(1);
+          pdf.roundedRect(x, memoY, memoWidth / 2 - 2, 30, 5, 5, "S");
+          
+          additionalY += 5;
+          
+          pdf.setFontSize(8);
+          pdf.setFont(font);
+          pdf.setTextColor(colorPalette.grey);
+
+          additionalY += 5;
+
+          pdf.text(action.name, x + memoWidth/4, memoY + additionalY, {maxWidth: memoWidth, align: "center"});
+          additionalY += pdf.getTextDimensions(action.name, {maxWidth: memoWidth}).h * 2.2;
+
+          pdf.setFontSize(14);
+          pdf.setFont(boldFont);
+          pdf.setTextColor(colorPalette.black);
+          
+          var timingText = `${assignedTiming?.name ?? "---"}`;
+          pdf.text(timingText, x + memoWidth/4, memoY + additionalY, {maxWidth: memoWidth, align: "center"});
+          additionalY += pdf.getTextDimensions(timingText, {maxWidth: memoWidth}).h * 1.25;
+          additionalY += pdf.getTextDimensions("O", {maxWidth: memoWidth}).h / 2;
+
+          if (i % 2 === 1 || i === section.formation.dancerActions.length - 1) {
+            memoY += additionalY;
+          }
+        });
       }
     }
 
+    pdf.setFontSize(12);
     // write note
     if (section.note) {
       pdf.setFont(font);
       if (memoY > (gridSizePx * 2)) {
-        pdf.text("- - - - -", totalWidthPx + 5, memoY, {maxWidth: (memoBuffer - 10)});
-        memoY += pdf.getTextDimensions("- - - - -", {maxWidth: memoBuffer - 10}).h * 1.25;
-        memoY += pdf.getTextDimensions("O", {maxWidth: memoBuffer - 10}).h * 1.25;
+        pdf.line(memoLeft, memoY, memoLeft + memoWidth, memoY);
+        memoY += pdf.getTextDimensions("O", {maxWidth: memoWidth}).h * 2.2;
       }
 
-      pdf.text(section.note, totalWidthPx + 5, memoY, {maxWidth: (memoBuffer - 10)});
+      pdf.text(section.note, memoLeft, memoY, {maxWidth: (memoWidth)});
     }
     pdf.setFont(boldFont);
 

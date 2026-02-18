@@ -168,7 +168,7 @@ function SortableActionSection ({
     transition,
   };
 
-  return <div className="relative flex flex-row items-start gap-2 p-4 bg-white rounded-md" style={style} ref={setNodeRef}>
+  return <div className="relative flex flex-row items-start gap-2 p-4 bg-white border border-gray-300 rounded-md" style={style} ref={setNodeRef}>
     <div {...attributes} {...listeners}>
       <Icon src={ICON.dragHandle}/>
     </div>
@@ -195,7 +195,7 @@ function SortableActionSection ({
       </div>
     </div>
     <div className="absolute top-2 right-2">
-      <IconButton size="sm" noBorder src={ICON.delete} onClick={() => onDeleteAction()}/>
+      <IconButton size="sm" colour="primary" noBorder src={ICON.delete} onClick={() => onDeleteAction()}/>
     </div>
   </div>
 }
@@ -214,6 +214,6 @@ function TimingItem ({
     <TextInput required maxLength={5} compact short defaultValue={timing.name} onContentChange={(newName) => {onRenameTiming(newName)}}/>
     <Icon size="sm" src={ICON.person}/>
     <span>{timing.dancerIds.length}</span>
-    {showDeleteButton && <IconButton size="sm" noBorder src={ICON.delete} onClick={() => {onDeleteTiming()}}/>}
+    {showDeleteButton && <IconButton colour="primary" size="sm" noBorder src={ICON.delete} onClick={() => {onDeleteTiming()}}/>}
   </div>
 }

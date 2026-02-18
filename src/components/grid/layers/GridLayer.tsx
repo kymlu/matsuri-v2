@@ -58,6 +58,7 @@ export default function GridLayer({
         fill={colorPalette.offWhite}
         x={0}
         y={0}
+        cornerRadius={METER_PX/2}
         />
     );
 
@@ -75,7 +76,7 @@ export default function GridLayer({
     
     // Vertical grid lines (across full area)
     if(showGridLines){
-      for (let m = 0; m <= margins.leftMargin + width + margins.rightMargin - gridOffsetMeters; m++) {
+      for (let m = 1; m < margins.leftMargin + width + margins.rightMargin - gridOffsetMeters; m++) {
         const x = m * gridSizePx + gridOffsetPx;
       
         const distFromCenter = Math.abs(
@@ -114,7 +115,7 @@ export default function GridLayer({
       const y = m * gridSizePx;
       const isMajor = m % 2 === 0;
     
-      if (showGridLines) {
+      if (showGridLines && m > 0 && m < margins.topMargin + length + margins.bottomMargin) {
         elements.push(
           <Line
             key={`h-${m}`}
@@ -167,20 +168,12 @@ export default function GridLayer({
     
     // Draw main stage border
     elements.push(
-      <Line
+      <Rect
         key="stage-border"
-        points={[
-          stageLeftPx,
-          stageTopPx,
-          stageRightPx,
-          stageTopPx,
-          stageRightPx,
-          stageBottomPx,
-          stageLeftPx,
-          stageBottomPx,
-          stageLeftPx,
-          stageTopPx,
-        ]}
+        x={stageLeftPx}
+        y={stageTopPx}
+        width={stageWidthPx}
+        height={stageHeightPx}
         stroke={colorPalette.primary}
         strokeWidth={2}
       />
