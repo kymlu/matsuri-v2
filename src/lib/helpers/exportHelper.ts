@@ -33,6 +33,7 @@ async function downloadZip(zip: JSZip, fileName: string) {
       await navigator.share(dataToShare);
       return;
     } catch (e: any) {
+      console.log("Navigator share failed:", e);
       if (e?.name === "AbortError" || e?.name === "NotAllowedError") {
         return;
       }
@@ -512,6 +513,7 @@ export async function exportToPdf (
       onComplete();
       return;
     } catch (e: any) {
+      console.log("Navigator share failed:", e);
       if (e?.name === "AbortError" || e?.name === "NotAllowedError") {
         onComplete();
         return;
