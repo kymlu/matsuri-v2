@@ -64,24 +64,42 @@ function ActionSection ({
     </Button>
     {
       isExpanded &&
-      action.timings.map(timing => <Button
-        key={timing.id}
-        compact
-        primary={strEquals(timing.id, selectedTimingId)}
-        fontSize="text-base"
-        onClick={() => {onSelectTiming(timing)}}>
-        <div className="flex items-center justify-center gap-1 truncate min-w-16">
-          <span className="truncate">
-            {timing.name}
-          </span>
-          <div className="flex items-center justify-center">
-            <span>{"("}</span>
-            <Icon colour={strEquals(timing.id, selectedTimingId) ? "white" : "grey"} src={ICON.group} size="xs"/>
-            {timing.dancerIds.length}
-            <span>{")"}</span>
-          </div>
-        </div>
-      </Button>)
+      action.timings.map(timing => <TimingButton
+        timing={timing}
+        selectedTimingId={selectedTimingId}
+        onSelectTiming={() => onSelectTiming(timing)}/>)
     }
   </div>
+}
+
+type TimingButtonProps = {
+  timing: DancerActionTiming,
+  selectedTimingId?: string,
+  onSelectTiming: () => void,
+}
+
+function TimingButton ({timing, selectedTimingId, onSelectTiming}: TimingButtonProps){
+  const ref = useRef<HTMLButtonElement | null>(null);
+  return <Button
+    key={timing.id}
+    compact
+    buttonref={ref}
+    primary={strEquals(timing.id, selectedTimingId)}
+    fontSize="text-base"
+    onClick={() => {
+      onSelectTiming();
+      ref.current?.scrollIntoView({"behavior": "smooth", "block": "center", "inline": "center"});
+    }}>
+    <div className="flex items-center justify-center gap-1 truncate min-w-16">
+      <span className="truncate">
+        {timing.name}
+      </span>
+      <div className="flex items-center justify-center">
+        <span>{"("}</span>
+        <Icon colour={strEquals(timing.id, selectedTimingId) ? "white" : "grey"} src={ICON.group} size="xs"/>
+        {timing.dancerIds.length}
+        <span>{")"}</span>
+      </div>
+    </div>
+  </Button>
 }
