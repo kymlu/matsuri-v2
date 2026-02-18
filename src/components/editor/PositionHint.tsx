@@ -30,8 +30,8 @@ export default function PositionHint({
   useEffect(() => {
     setCurrentX(roundToTenth(geometry.stageWidth / 2 - position.x));
     setCurrentY(roundToTenth(position.y));
-    setDeltaX(nextPosition ? roundToTenth(nextPosition.x - position.x) : undefined);
-    setDeltaY(nextPosition ? roundToTenth(nextPosition.y - position.y) : undefined);
+    setDeltaX(nextPosition ? roundToTenth(nextPosition.x) - roundToTenth(position.x) : undefined);
+    setDeltaY(nextPosition ? roundToTenth(nextPosition.y) - roundToTenth(position.y) : undefined);
   }, [position, nextPosition]);
 
   return (

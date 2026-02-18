@@ -375,8 +375,8 @@ export async function exportToPdf (
       var nextPosition = choreo.sections[i + 1]?.formation?.dancerPositions[followingDancer.id];
       
       const delta: Coordinates | null = nextPosition ? {
-        x: nextPosition.x - position.x,
-        y: nextPosition.y - position.y,
+        x: roundToTenth(nextPosition.x) - roundToTenth(position.x),
+        y: roundToTenth(nextPosition.y) - roundToTenth(position.y),
       } : null;
   
       if (delta) {
