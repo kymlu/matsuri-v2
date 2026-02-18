@@ -214,6 +214,7 @@ export default function GridLayer({
             <Text
               text={`${meterFromCenter}`}
               fill="white"
+              fontStyle="bold"
               fontSize={12}
               width={radius * 2}
               height={radius * 2}
