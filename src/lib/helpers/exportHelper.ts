@@ -51,7 +51,7 @@ export async function exportChoreo(choreo: Choreo) {
   const zip = new JSZip();
 
   zip.file(
-    `${getSafeFileName(choreo.name)}.mtr`,
+    `${getSafeFileName(`${choreo.event} - }${choreo.name}`)}.mtr`,
     JSON.stringify(choreo)
   );
   zip.file("README.txt", README_TEXT);
