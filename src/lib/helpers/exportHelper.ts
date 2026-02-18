@@ -492,7 +492,30 @@ export async function exportToPdf (
     }
   }
 
-  pdf.save(`${fileName}.pdf`);
+  var blob = pdf.output("blob");
+  
+  const fullFileName = `${getSafeFileName(fileName)}.pdf`
+
+  const url = URL.createObjectURL(blob);
+  
+  const file = new File ([blob], fullFileName, {
+    type: "application/pdf"
+  });
+  const dataToShare = {"files": [file]};
+  if (navigator.canShare?.(dataToShare)) {
+    try {
+      await navigator.share(dataToShare);
+      onComplete();
+      return;
+    } catch {
+    }
+  }
+
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = fullFileName;
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 
   onComplete();
 }
