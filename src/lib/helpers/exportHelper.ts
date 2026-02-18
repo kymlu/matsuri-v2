@@ -32,7 +32,10 @@ async function downloadZip(zip: JSZip, fileName: string) {
     try {
       await navigator.share(dataToShare);
       return;
-    } catch {
+    } catch (e: any) {
+      if (e?.name === "AbortError" || e?.name === "NotAllowedError") {
+        return;
+      }
     }
   }
 
@@ -155,6 +158,7 @@ export async function exportToPdf (
   pdf.addFont("NotoSansJPRegular.ttf", font, "normal");
   pdf.setFont(boldFont);
 
+  updateProgress(Math.round((1 / (choreo.sections.length + 1)) * 100));
   console.log("Exporting to PDF: ", fileName);
 
   for (let i = 0; i < choreo.sections.length; i++) {
@@ -485,7 +489,7 @@ export async function exportToPdf (
     }
     pdf.setFont(boldFont);
 
-    updateProgress(Math.round(((i + 1) / choreo.sections.length) * 100));
+    updateProgress(Math.round(((i + 2) / (choreo.sections.length + 1)) * 100));
 
     if (i < choreo.sections.length - 1) {
       pdf.addPage();
@@ -507,7 +511,10 @@ export async function exportToPdf (
       await navigator.share(dataToShare);
       onComplete();
       return;
-    } catch {
+    } catch (e: any) {
+      if (e?.name === "AbortError" || e?.name === "NotAllowedError") {
+        return;
+      }
     }
   }
 
