@@ -30,7 +30,7 @@ export default function CustomToggleGroup({
                 key={option.value}
                 value={option.value}
                 disabled={strEquals(option.value, currentValue)}
-                className="flex size-8 items-center justify-center rounded-sm text-black select-none lg:hover:bg-gray-100 focus-visible:bg-none focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-1 active:bg-gray-200 data-[pressed]:font-bold data-[pressed]:bg-gray-300">
+                className="flex size-8 items-center justify-center rounded-sm text-black select-none lg:hover:bg-gray-100 focus-visible:bg-none focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-1 active:bg-gray-200 data-[pressed]:font-bold data-[pressed]:bg-gray-400">
                 {option.label}
               </Toggle>
             )

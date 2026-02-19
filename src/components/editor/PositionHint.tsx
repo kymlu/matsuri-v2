@@ -105,8 +105,8 @@ type InfoBoxProps = {
 }
 
 function InfoBox({title, children, isSmall}: InfoBoxProps) {
-  return <div className={"flex flex-col justify-between p-2 border border-gray-300 rounded-md" + (isSmall ? "" : " flex-1")}>
-    <span className="text-sm font-semibold text-center text-gray-400">{title}</span>
+  return <div className={"flex flex-col justify-between p-2 border border-gray-400 rounded-md" + (isSmall ? "" : " flex-1")}>
+    <span className="text-sm font-semibold text-center text-gray-600">{title}</span>
     <div className="flex items-center justify-center gap-1">
       {children}
     </div>

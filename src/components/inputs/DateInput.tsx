@@ -34,7 +34,7 @@ export default function DateInput({
   }
 
   var inputClasses = classNames(
-    "w-full col-start-1 row-start-1 px-2 text-black border border-gray-300 rounded-md focus-within:border-primary focus:outline-none",
+    "w-full col-start-1 row-start-1 px-2 text-black border border-gray-400 rounded-md focus-within:border-primary focus:outline-none",
     {
       "h-10": tall,
       "h-6": short,

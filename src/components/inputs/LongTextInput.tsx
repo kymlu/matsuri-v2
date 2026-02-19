@@ -57,7 +57,7 @@ export default function LongTextInput({
   }
 
   var inputClasses = classNames(
-    "w-full h-full col-start-1 row-start-1 pl-2 text-black p-3 border-gray-300 rounded-md border-grey-300 border focus-within:border-primary focus:outline-none",
+    "w-full h-full col-start-1 row-start-1 pl-2 text-black p-3 border-gray-400 rounded-md border focus-within:border-primary focus:outline-none",
     {
       "pr-6": clearable,
       "pr-2": !clearable,

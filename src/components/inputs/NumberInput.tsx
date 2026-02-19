@@ -58,7 +58,7 @@ export default function NumberInput ({
         disabled={disabled}
         >
         <div className={wrapperClasses}>
-          <NumberField.Group className="grid grid-cols-[1fr,2fr,1fr] w-full bg-white data-[disabled]:bg-gray-200 border rounded-md border-gray-300 focus-within:border-primary">
+          <NumberField.Group className="grid grid-cols-[1fr,2fr,1fr] w-full bg-white data-[disabled]:bg-gray-200 border rounded-md border-gray-400 focus-within:border-primary">
             <NumberField.Decrement className={"flex items-center justify-center select-none rounded-l-md min-w-4 bg-clip-padding" + ((value ?? 1) > (min ?? 0) ? " opacity-100" : " opacity-30")}>
               <Icon src={ICON.remove} colour="black" size="sm"/>
             </NumberField.Decrement>

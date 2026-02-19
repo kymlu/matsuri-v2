@@ -47,7 +47,7 @@ export default function Button({
     "px-3 py-1.5": compact !== true,
     "lg:hover:bg-gray-100": !disabled && primary !== true && grey !== true,
     "lg:hover:opacity-70": !disabled && (primary || grey),
-    "border-gray-300 bg-white": primary !== true && grey !== true,
+    "border-gray-400 bg-white": primary !== true && grey !== true,
     "bg-primary text-white border-primary": primary,
     "bg-gray-600 text-white border-gray-600": grey,
     "lg:hover:bg-primary-light": primary && !disabled,

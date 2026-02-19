@@ -51,7 +51,7 @@ export default function TextInput({
   }
 
   var inputClasses = classNames(
-    "col-start-1 border row-start-1 text-black p-3 border-gray-300 rounded-md focus-within:border-primary focus:outline-none",
+    "col-start-1 border row-start-1 text-black p-3 border-gray-400 rounded-md focus-within:border-primary focus:outline-none",
     {
       "pr-6": clearable,
       "pr-2": !clearable,

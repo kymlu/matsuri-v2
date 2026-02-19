@@ -168,7 +168,7 @@ function SortableActionSection ({
     transition,
   };
 
-  return <div className="relative flex flex-row items-start gap-2 p-4 bg-white border border-gray-300 rounded-md" style={style} ref={setNodeRef}>
+  return <div className="relative flex flex-row items-start gap-2 p-4 bg-white border border-gray-400 rounded-md" style={style} ref={setNodeRef}>
     <div {...attributes} {...listeners}>
       <Icon src={ICON.dragHandle}/>
     </div>

@@ -473,7 +473,7 @@ function EventSection({
                 choreo.event.toLowerCase().includes(searchTerm.toLowerCase())) &&
                 <div
                   onClick={() => {goToViewPage(choreo)}}
-                  className="flex flex-col justify-between h-full p-2 transition-colors bg-white border rounded-md cursor-pointer border-grey-300">
+                  className="flex flex-col justify-between h-full p-2 transition-colors bg-white border border-gray-400 rounded-md cursor-pointer">
                   {/* Title */}
                   <div className="flex flex-row items-start justify-between gap-2">
                     <span className="text-lg font-medium text-left break-words text-wrap">

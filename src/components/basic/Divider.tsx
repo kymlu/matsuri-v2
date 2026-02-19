@@ -24,7 +24,7 @@ export default function Divider({
 export function VerticalDivider() {
   return (
     <div
-      className={"mx-2 border-l h-full border-gray-300"}
+      className={"mx-2 border-l h-full border-gray-400"}
     />
   );
 }
