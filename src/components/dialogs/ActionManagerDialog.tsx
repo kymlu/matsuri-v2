@@ -95,6 +95,9 @@ export function ActionManagerDialog({
     full
     isActionButtonDisabled={!canSubmit}
     actionButtonText="保存"
+    onClose={() => {
+      setActions([...section.formation.dancerActions]);
+    }}
     onSubmit={() => {onSubmit(actions)}}>
     <div className="space-y-4">
       <IconLabelButton

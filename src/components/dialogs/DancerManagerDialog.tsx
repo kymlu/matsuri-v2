@@ -45,6 +45,11 @@ export function DancerManagerDialog({
       full
       isActionButtonDisabled={dancerNames[""] === null || dancerNames[""] > 0}
       actionButtonText="保存"
+      onClose={() => {
+        setDancerList([...Object.values(dancers)].sort((a, b) => {
+          return strCompare<Dancer>(a, b, "name");
+        }));
+      }}
       onSubmit={() => {onSubmit(dancerList, deletedDancerIds)}}>
       <div className="max-h-full grid grid-rows-[1fr,auto]">
         <div className="justify-center max-h-full space-y-2 overflow-scroll md:flex md:flex-wrap md:gap-4">
@@ -66,6 +71,7 @@ export function DancerManagerDialog({
                 <IconButton
                   noBorder
                   size="sm"
+                  colour="primary"
                   src={ICON.delete}
                   onClick={() => {
                     setDeletedDancerIds(prev => [...prev, dancer.id]);
