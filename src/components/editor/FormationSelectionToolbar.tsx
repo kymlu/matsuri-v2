@@ -79,6 +79,7 @@ export default function FormationSelectionToolbar({
                         onChangeSection={() => onChangeSection(s)}
                         isSelected={strEquals(currentSectionId, s.id)}
                         asDiv
+                        full
                       />
                     </Dialog.Close>
                   )
@@ -176,11 +177,10 @@ function FormationSectionItem (props: {
           onOpenSectionMenu?.();
         }
       }}
-      noBorder={full}
       asDiv={asDiv}
       full={full}
       >
-      <div className="flex flex-row items-center w-full h-6 gap-1 justify-evenly min-w-24">
+      <div className={"flex flex-row items-center w-full h-6 gap-1 min-w-24 " + (full ? "justify-between" : "justify-evenly")}>
         <span className={"truncate" + (isSelected ? " font-semibold" : " font-medium")}>
           {section.name}
         </span>
