@@ -56,7 +56,7 @@ export default function FormationSelectionToolbar({
             <div className="flex-shrink-0 pt-6 pb-4 touch-none">
               <div className="w-1/3 h-1 mx-auto rounded-full bg-primary cursor-grab"/>
             </div>
-            <Drawer.Content className="h-full px-4 pb-6">
+            <Drawer.Content className="h-full px-4 pb-8">
               <div className="flex items-center self-end justify-between w-full mb-2">
                 <span className="h-8 text-base font-bold truncate">
                   セクション選択
