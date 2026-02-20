@@ -25,7 +25,7 @@ export function PropManagerDialog({
   useEffect(() => {
     setPropList([...Object.values(props)].sort((a, b) => {
       return strCompare<Prop>(a, b, "name");
-    }))
+    }));
   }, [props]);
 
   useEffect(() => {
@@ -49,86 +49,97 @@ export function PropManagerDialog({
       full
       isActionButtonDisabled={propNames[""] === null || propNames[""] > 0}
       actionButtonText="保存"
+      onClose={() => {
+        setPropList([...Object.values(props)].sort((a, b) => {
+          return strCompare<Prop>(a, b, "name");
+        }));}}
       onSubmit={() => {onSubmit(propList, deletedPropIds)}}>
       <div className="max-h-full grid grid-rows-[1fr,auto]">
-        <div className="justify-center max-h-full overflow-scroll grid grid-cols-[auto,1fr,1fr,1fr,auto] gap-2">
+        <div className="justify-center max-h-full overflow-scroll grid grid-cols-[1fr,auto] gap-2">
           {
             propList.map((prop, i) => 
               <React.Fragment key={prop.id}>
-                <CustomMenu
-                  trigger={
-                    <div
-                      className="rounded-full size-8 min-h-8 min-w-8 max-h-8 max-w-8"
-                      style={{backgroundColor: prop.color}}/>
-                }>
-                  <div className="grid grid-cols-6 gap-2">
-                    {
-                      colorPalette.allColors().map((color) => 
-                        <button
-                          key={color}
-                          onClick={() => {
-                            setPropList(prev => {
-                              prev[i].color = color;
-                              return [...prev];
-                            });
-                          }}
-                          style={{"backgroundColor": color}}
-                          className={"rounded-full size-8 min-h-8 min-w-8 max-h-8 max-w-8 " + 
-                            (strEquals(color, prop.color) ? "border border-primary" : "")
-                          }/>
-                      )
-                    }
+                <div className="md:grid md:grid-cols-[3fr,2fr] md:gap-2">
+                  <div className="flex gap-2">
+                    <CustomMenu
+                      trigger={
+                        <div
+                          className="rounded-full size-8 min-h-8 min-w-8 max-h-8 max-w-8"
+                          style={{backgroundColor: prop.color}}/>
+                    }>
+                      <div className="grid grid-cols-6 gap-2">
+                        {
+                          colorPalette.allColors().map((color) => 
+                            <button
+                              key={color}
+                              onClick={() => {
+                                setPropList(prev => {
+                                  prev[i].color = color;
+                                  return [...prev];
+                                });
+                              }}
+                              style={{"backgroundColor": color}}
+                              className={"rounded-full size-8 min-h-8 min-w-8 max-h-8 max-w-8 " + 
+                                (strEquals(color, prop.color) ? "border border-primary" : "")
+                              }/>
+                          )
+                        }
+                      </div>
+                    </CustomMenu>
+                    <TextInput
+                      label="道具名"
+                      required
+                      defaultValue={prop.name}
+                      hasError={propNames[prop.name] > 1}
+                      onContentChange={(newName) => {
+                        setPropList(prev => {
+                          prev[i].name = newName;
+                          return [...prev];
+                        });
+                      }}
+                    />
                   </div>
-                </CustomMenu>
-                <TextInput
-                  label="道具名"
-                  required
-                  defaultValue={prop.name}
-                  hasError={propNames[prop.name] > 1}
-                  onContentChange={(newName) => {
-                    setPropList(prev => {
-                      prev[i].name = newName;
-                      return [...prev];
-                    });
-                  }}
+                  <div className="flex gap-2">
+                    <NumberInput
+                      label="幅"
+                      defaultValue={prop.width}
+                      min={MIN_PROP_DIMENSION}
+                      max={MAX_PROP_DIMENSION}
+                      baseStep={0.1}
+                      buttonStep={0.5}
+                      onChange={(number) => {
+                        setPropList(prev => {
+                          prev[i].width = number ?? MIN_PROP_DIMENSION;
+                          return [...prev];
+                        })
+                      }}
+                    />
+                    <NumberInput
+                      label="縦"
+                      defaultValue={prop.length}
+                      min={MIN_PROP_DIMENSION}
+                      max={MAX_PROP_DIMENSION}
+                      baseStep={0.1}
+                      buttonStep={0.5}
+                      onChange={(number) => {
+                        setPropList(prev => {
+                          prev[i].length = number ?? MIN_PROP_DIMENSION;
+                          return [...prev];
+                        })
+                      }}
+                    />
+                </div>
+              </div>
+              <IconButton
+                noBorder
+                size="sm"
+                colour="primary"
+                src={ICON.delete}
+                onClick={() => {
+                  setDeletedPropIds(prev => [...prev, prop.id]);
+                  setPropList(prev => prev.filter(x => !strEquals(x.id, prop.id)));
+                }}
                 />
-                <NumberInput
-                  label="幅"
-                  defaultValue={prop.width}
-                  min={MIN_PROP_DIMENSION}
-                  max={MAX_PROP_DIMENSION}
-                  baseStep={0.1}
-                  buttonStep={0.5}
-                  onChange={(number) => {
-                    setPropList(prev => {
-                      prev[i].width = number ?? MIN_PROP_DIMENSION;
-                      return [...prev];
-                    })
-                  }}
-                />
-                <NumberInput
-                  label="縦"
-                  defaultValue={prop.length}
-                  min={MIN_PROP_DIMENSION}
-                  max={MAX_PROP_DIMENSION}
-                  baseStep={0.1}
-                  buttonStep={0.5}
-                  onChange={(number) => {
-                    setPropList(prev => {
-                      prev[i].length = number ?? MIN_PROP_DIMENSION;
-                      return [...prev];
-                    })
-                  }}
-                />
-                <IconButton
-                  noBorder
-                  size="sm"
-                  src={ICON.delete}
-                  onClick={() => {
-                    setDeletedPropIds(prev => [...prev, prop.id]);
-                    setPropList(prev => prev.filter(x => !strEquals(x.id, prop.id)));
-                  }}
-                  />
               </React.Fragment>
             )
           }
