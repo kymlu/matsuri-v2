@@ -73,7 +73,7 @@ export default function TextInput({
     },);
 
   return (
-    <FieldWithLabel label={label}>
+    <FieldWithLabel label={label} full={!compact}>
       <div className={wrapperClasses}>
         <div className="relative flex items-center gap-2">
           <input
