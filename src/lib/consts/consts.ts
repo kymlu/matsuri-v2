@@ -81,6 +81,7 @@ export const ICON = {
   lists: "lists",
   lock: "lock",
   lockOpen: "lock_open",
+  menu: "menu",
   moreVert: "more_vert",
   musicNote: "music_note",
   noteStack: "note_stack",

@@ -54,7 +54,7 @@ export default function Header({
   goToEdit,
   goToView,
 }: HeaderProps) {
-  return <header className="z-10 flex items-center justify-between w-screen p-2 border-b-2 select-none bg-gradient-to-b from-white to-transparent ">
+  return <header className="flex items-center justify-between w-screen p-2 border-b-2 select-none from-white to-transparent ">
     <div className="flex">
       <IconButton
         src={ICON.home}

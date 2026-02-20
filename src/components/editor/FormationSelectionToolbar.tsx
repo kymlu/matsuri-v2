@@ -9,6 +9,7 @@ import { arrayMove, SortableContext, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { restrictToHorizontalAxis, restrictToParentElement } from "@dnd-kit/modifiers";
 import Icon from "../basic/Icon";
+import { Dialog, DrawerPreview as Drawer } from "@base-ui/react";
 
 type FormationSelectionToolbarProps = {
   currentSectionId: string,
@@ -35,7 +36,57 @@ export default function FormationSelectionToolbar({
     })
 )
 
-  return <div className="grid grid-cols-[1fr,auto] w-full max-w-full gap-2 p-2 overflow-scroll max-w-screen">
+  return <div className="grid grid-cols-[auto,1fr,auto] w-full max-w-full gap-2 p-2 overflow-scroll max-w-screen">
+    <Drawer.Root
+      swipeDirection="down"
+      modal={true}
+    >
+      <Drawer.Trigger>
+        <IconButton
+          src={ICON.menu}
+          size="sm"
+          asDiv
+        />
+      </Drawer.Trigger>
+      <Drawer.Portal>
+        <Drawer.Viewport className="fixed bottom-0 flex flex-col w-full pointer-events-none">
+          <div className="z-40 fixed w-[100svw] h-[100svh] top-0 bg-black/30"></div>
+          <Drawer.Popup className="z-50 pointer-events-auto w-full max-h-[75svh] bg-white rounded-t-2xl overscroll-contain transition-transform duration-[450ms] ease-[cubic-bezier(0.32,0.72,0,1)] shadow-[0_-2px_16px_rgba(0,0,0,0.15)] [transform:translateY(calc(var(--drawer-snap-point-offset)+var(--drawer-swipe-movement-y)))]
+            will-change-transform outline-none data-[data-swiping]:select-none data-[starting-style]:translate-y-[calc(100%-var(--bleed))] data-[ending-style]:translate-y-[calc(100%-var(--bleed))] data-[ending-style]:duration-[calc(var(--drawer-swipe-strength)*400ms)]">
+            <div className="flex-shrink-0 pt-6 pb-4 touch-none">
+              <div className="w-1/3 h-1 mx-auto rounded-full bg-primary cursor-grab"/>
+            </div>
+            <Drawer.Content className="h-full px-4 pb-6">
+              <div className="flex items-center self-end justify-between w-full mb-2">
+                <span className="h-8 text-base font-bold truncate">
+                  セクション選択
+                </span>
+                <Drawer.Close>
+                  <Icon
+                    size="sm"
+                    src={ICON.clear}
+                  />
+                </Drawer.Close>
+              </div>
+              <div className="flex flex-col gap-2 overflow-auto h-max max-h-[50svh]">
+                {
+                  sections.map(s =>
+                    <Dialog.Close key={s.id}>
+                      <FormationSectionItem
+                        section={s}
+                        onClickSection={() => onClickSection(s)}
+                        isSelected={strEquals(currentSectionId, s.id)}
+                        asDiv
+                      />
+                    </Dialog.Close>
+                  )
+                }
+              </div>
+            </Drawer.Content>
+          </Drawer.Popup>
+        </Drawer.Viewport>
+      </Drawer.Portal>
+    </Drawer.Root>
     <div className="flex gap-2 overflow-scroll">
       <DndContext
         sensors={sensors}
@@ -89,8 +140,10 @@ function FormationSectionItem (props: {
   section: ChoreoSection,
   isSelected: boolean,
   onClickSection: (section: ChoreoSection) => void,
+  asDiv?: boolean,
+  full?: boolean,
 }) {
-  var {section, isSelected, onClickSection} = props;
+  var {section, isSelected, onClickSection, asDiv, full} = props;
 
   const {
     attributes,
@@ -116,18 +169,28 @@ function FormationSectionItem (props: {
           ref?.current?.scrollIntoView({"behavior": "smooth", "inline": "center"})
           onClickSection(section);
         }
-      }}>
-      <div className="flex flex-row items-center justify-center gap-1 min-w-24 w-max">
+      }}
+      noBorder={full}
+      asDiv={asDiv}
+      full={full}
+      >
+      <div className="flex flex-row items-center w-full h-6 gap-1 justify-evenly min-w-24">
         <span className={"truncate" + (isSelected ? " font-semibold" : " font-medium")}>
           {section.name}
         </span>
         {
           !isNullOrUndefinedOrBlank(section.note) && 
-          <Icon colour={ isSelected? "white" : "black" } src={ICON.speakerNotes} size="xs"/>
-        }
-        {
           section.formation.dancerActions.length > 0 && 
-          <Icon colour={ isSelected? "white" : "black" } src={ICON[123]} size="sm"/>
+          <div className="flex items-center">
+            {
+              !isNullOrUndefinedOrBlank(section.note) && 
+              <Icon colour={ isSelected? "white" : "black" } src={ICON.speakerNotes} size="xs"/>
+            }
+            {
+              section.formation.dancerActions.length > 0 && 
+              <Icon colour={ isSelected? "white" : "black" } src={ICON[123]} size="sm"/>
+            }
+          </div>
         }
       </div>
     </Button>

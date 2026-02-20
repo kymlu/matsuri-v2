@@ -8,7 +8,7 @@ import { isNullOrUndefinedOrBlank, strEquals } from "../../lib/helpers/globalHel
 import Divider from "../basic/Divider";
 import Button from "../basic/Button";
 import React, { ReactNode } from "react";
-import BottomDrawer from "../inputs/BottomDrawer";
+import BottomDrawer from "../basic/BottomDrawer";
 
 type ViewerSidebarProps = {
   note?: string;
