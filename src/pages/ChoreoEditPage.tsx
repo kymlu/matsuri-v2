@@ -690,10 +690,10 @@ export default function ChoreoEditPage(props: {
         onOpenChange={handleEditChoreoInfoDialogOpen}>
         <EditChoreoInfoDialog
           choreo={history.presentState.state}
-          onSubmit={(name) => {
+          onSubmit={(name, event) => {
             dispatch({
               type: "SET_STATE",
-              newState: renameChoreo(history.presentState.state, name),
+              newState: renameChoreo(history.presentState.state, name, event),
               currentSectionId: currentSection.id,
               commit: true});
             editChoreoInfoDialog.close();
