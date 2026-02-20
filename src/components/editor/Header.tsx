@@ -54,7 +54,7 @@ export default function Header({
   goToEdit,
   goToView,
 }: HeaderProps) {
-  return <header className="flex items-center justify-between w-screen p-2 border-b-2 select-none from-white to-transparent ">
+  return <header className="flex items-center justify-between w-screen gap-2 p-2 border-b-2 select-none from-white to-transparent ">
     <div className="flex">
       <IconButton
         src={ICON.home}
@@ -65,9 +65,10 @@ export default function Header({
         }}/>
     </div>
     <div
-      className="font-bold truncate"
+      className="w-full text-center truncate"
       onDoubleClick={downloadLogs}>
-      {currentChoreo.name}
+      <p className="text-sm text-gray-400">{currentChoreo.event}</p>
+      <p className="font-bold">{currentChoreo.name}</p>
     </div>
     <div className="flex justify-end gap-2">
       <IconButton
