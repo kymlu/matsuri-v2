@@ -94,7 +94,7 @@ export default function ChoreoViewPage(props: {
             <FormationSelectionToolbar
               currentSectionId={currentSection.id}
               sections={props.currentChoreo.sections}
-              onClickSection={(section) => {
+              onChangeSection={(section) => {
                 if (selectedTimingId) {
                   setSelectedTimingId(undefined);
                   resetSelectedIds();

@@ -34,9 +34,12 @@ import { DancerManagerDialog } from "../components/dialogs/DancerManagerDialog";
 import ExportDialog from "../components/dialogs/ExportDialog";
 import { PropManagerDialog } from "../components/dialogs/PropManagerDialog";
 import EditNameDialog from "../components/dialogs/EditNameDialog";
+import CustomDialog from "../components/basic/CustomDialog";
+import { IconLabelButton } from "../components/basic/Button";
 
 const resizeDialog = Dialog.createHandle<Choreo>();
 const editChoreoInfoDialog = Dialog.createHandle<string>();
+const sectionManagerDialog = Dialog.createHandle<string>();
 const renameDancerDialog = Dialog.createHandle<string>();
 const renamePropDialog = Dialog.createHandle<string>();
 const editDancerColourDialog = Dialog.createHandle<string>();
@@ -291,6 +294,7 @@ export default function ChoreoEditPage(props: {
   // dialogs
   const [resizeDialogOpen, setResizeDialogOpen] = useState(false);
   const [editChoreoInfoDialogOpen, setEditChoreoInfoDialogOpen] = useState(false);
+  const [sectionManagerDialogOpen, setSectionManagerDialogOpen] = useState(false);
   const [renameDancerDialogOpen, setRenameDancerDialogOpen] = useState(false);
   const [renamePropDialogOpen, setRenamePropDialogOpen] = useState(false);
   const [editDancerColourDialogOpen, setEditDancerColourDialogOpen] = useState(false);
@@ -319,6 +323,10 @@ export default function ChoreoEditPage(props: {
 
   const handleEditChoreoInfoDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setEditChoreoInfoDialogOpen(isOpen);
+  };
+
+  const handleSectionManagerDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
+    setSectionManagerDialogOpen(isOpen);
   };
 
   const handleRenameDancerDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
@@ -499,9 +507,12 @@ export default function ChoreoEditPage(props: {
                     commit: true
                   });
                 }}
-                onClickSection={(section) => {
+                onChangeSection={(section) => {
                   setCurrentSection(section);
                   resetSelectedIds();
+                }}
+                onOpenSectionMenu={() => {
+                  setSectionManagerDialogOpen(true);
                 }}
                 onReorder={(sections) => {
                   resetSelectedIds();
@@ -608,28 +619,6 @@ export default function ChoreoEditPage(props: {
         showRenameDancer={selectedObjects.dancers.length === 1 && selectedObjects.props.length === 0}
         onRenameProp={() => {setRenamePropDialogOpen(true)}}
         showRenameProp={selectedObjects.props.length === 1 && selectedObjects.dancers.length === 0}
-        onRenameSection={() => {
-          resetSelectedIds();
-          setRenameSectionDialogOpen(true);
-        }}
-        onAddNoteToSection={() => {
-          resetSelectedIds();
-          setAddNoteToSectionDialogOpen(true);
-        }}
-        onDuplicateSection={() => {
-          resetSelectedIds();
-          dispatch({
-            type: "SET_STATE",
-            newState: duplicateSection(history.presentState.state, currentSection, history.presentState.state.sections.findIndex(x => strEquals(x.id, currentSection.id))),
-            currentSectionId: currentSection.id,
-            commit: true,
-          });
-        }}
-        canDeleteSection={history.presentState.state.sections.length > 1}
-        onDeleteSection={() => {
-          resetSelectedIds();
-          setDeleteSectionDialogOpen(true)
-        }}
       />
       {
         isAddingDancers &&
@@ -710,6 +699,73 @@ export default function ChoreoEditPage(props: {
             editChoreoInfoDialog.close();
             setEditChoreoInfoDialogOpen(false);
           }}/>
+      </Dialog.Root>
+      <Dialog.Root
+        handle={sectionManagerDialog}
+        open={sectionManagerDialogOpen}
+        onOpenChange={handleSectionManagerDialogOpen}>
+        <CustomDialog
+          title={`${currentSection.name}管理`}
+          hasX>
+          <div className="flex flex-col gap-2">
+            <Dialog.Close>
+              <IconLabelButton
+                icon={ICON.textFieldsAlt}
+                label="名前変更"
+                asDiv
+                onClick={() => {
+                  resetSelectedIds();
+                  setRenameSectionDialogOpen(true);
+                }}
+                full />
+            </Dialog.Close>
+
+            <Dialog.Close>
+              <IconLabelButton
+                icon={ICON.speakerNotes}
+                label="メモ編集"
+                asDiv
+                onClick={() => {
+                  resetSelectedIds();
+                  setAddNoteToSectionDialogOpen(true);
+                }}
+                full />
+            </Dialog.Close>
+
+            <Dialog.Close>
+              <IconLabelButton
+                icon={ICON.fileCopy}
+                label="複製"
+                asDiv
+                onClick={() => {
+                  resetSelectedIds();
+                  dispatch({
+                    type: "SET_STATE",
+                    newState: duplicateSection(history.presentState.state, currentSection, history.presentState.state.sections.findIndex(x => strEquals(x.id, currentSection.id))),
+                    currentSectionId: currentSection.id,
+                    commit: true,
+                  });
+                }}
+                full />
+            </Dialog.Close>
+
+            {
+              history.presentState.state.sections.length > 1 &&
+              <Dialog.Close>
+                <IconLabelButton
+                  icon={ICON.delete}
+                  label="削除"
+                  asDiv
+                  primaryText
+                  onClick={() => {
+                    resetSelectedIds();
+                    setDeleteSectionDialogOpen(true)
+                  }}
+                  full />
+              </Dialog.Close>
+            }
+          </div>
+        </CustomDialog>
       </Dialog.Root>
       <Dialog.Root
         handle={renameDancerDialog}
@@ -861,10 +917,15 @@ export default function ChoreoEditPage(props: {
         <ConfirmDeletionDialog
           section={currentSection}
           onSubmit={() => {
+            const currentSectionIndex = history.presentState.state.sections
+              .findIndex((s) => strEquals(s.id, currentSection.id));
+            
+            const newSectionIndex = currentSectionIndex > 0 ? currentSectionIndex - 1 : 1;
+
             dispatch({
               type: "SET_STATE",
               newState: removeSection(history.presentState.state, currentSection.id),
-              currentSectionId: currentSection.id,
+              currentSectionId: history.presentState.state.sections[newSectionIndex].id,
               commit: true,
             });
             deleteSectionDialog.close();

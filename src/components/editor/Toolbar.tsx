@@ -51,13 +51,6 @@ type ToolbarProps = {
   onAssignActions: () => void;
   isAssigningActionsEnabled: boolean;
   isAssigningActions: boolean;
-
-  // section
-  onRenameSection: () => void;
-  onAddNoteToSection: () => void;
-  canDeleteSection: boolean;
-  onDeleteSection: () => void;
-  onDuplicateSection: () => void;
 };
 
 export default function Toolbar({
@@ -99,19 +92,12 @@ export default function Toolbar({
   onAssignActions,
   isAssigningActionsEnabled,
   isAssigningActions,
-
-  onRenameSection,
-  onAddNoteToSection,
-  canDeleteSection,
-  onDeleteSection,
-  onDuplicateSection,
 }: ToolbarProps) {
   const [isAddManagerVisible, setIsAddManagerVisible] = useState<boolean>(false);
   const [isArrangeVisible, setIsArrangeVisible] = useState<boolean>(false);
   const [isActionManagerVisible, setIsActionManagerVisible] = useState<boolean>(false);
-  const [isSectionManagerVisible, setIsSectionManagerVisible] = useState<boolean>(false);
 
-  const isSubmenuOpen = isAddManagerVisible || isArrangeVisible || isActionManagerVisible || isSectionManagerVisible;
+  const isSubmenuOpen = isAddManagerVisible || isArrangeVisible || isActionManagerVisible;
   const areSelectionActionsActivated = showRenameDancer || showArrange || showDeleteObjects;
 
   useEffect(() => {
@@ -133,7 +119,6 @@ export default function Toolbar({
         {
           !areSelectionActionsActivated && <>
             <IconButton src={ICON.add} label="追加" onClick={()=>{setIsAddManagerVisible(true)}}/>
-            <IconButton src={ICON.gridOn} label="セクション" onClick={()=>{setIsSectionManagerVisible(true)}}/>
             <IconButton src={ICON[123]} label="カウント" onClick={()=>{setIsActionManagerVisible(true)}}/>
           </>
         }
@@ -163,7 +148,6 @@ export default function Toolbar({
           setIsArrangeVisible(false);
           setIsAddManagerVisible(false);
           setIsActionManagerVisible(false);
-          setIsSectionManagerVisible(false);
         }}/>
         <VerticalDivider/>
         {
@@ -197,30 +181,6 @@ export default function Toolbar({
                 <IconButton src={ICON.verticalDistribute} label="縦均" onClick={() => {onDistribute("y")}} />
                 <IconButton src={ICON.horizontalDistribute} label="横均" onClick={() => {onDistribute("x")}} />
               </>
-            }
-          </>
-        }
-        {
-          isSectionManagerVisible &&
-          <>
-            <IconButton
-              src={ICON.textFieldsAlt}
-              label="名前変更"
-              onClick={() => {onRenameSection()}} />
-            <IconButton
-              src={ICON.speakerNotes}
-              label="メモ"
-              onClick={() => {onAddNoteToSection()}} />
-            <IconButton
-              src={ICON.contentCopy}
-              label="複製"
-              onClick={() => {onDuplicateSection()}} />
-            {
-              canDeleteSection &&
-              <IconButton
-                src={ICON.delete}
-                onClick={() => {onDeleteSection()}}
-                label="削除" />
             }
           </>
         }

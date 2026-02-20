@@ -16,12 +16,14 @@ type FormationSelectionToolbarProps = {
   sections: ChoreoSection[],
   showAddButton?: boolean,
   onClickAddButton?: (id: string) => void,
-  onClickSection: (section: ChoreoSection) => void,
+  onChangeSection: (section: ChoreoSection) => void,
+  onOpenSectionMenu?: () => void,
   onReorder?: (newSectionOrder: ChoreoSection[]) => void,
 }
 
 export default function FormationSelectionToolbar({
-  currentSectionId, sections, showAddButton, onClickAddButton, onClickSection, onReorder
+  currentSectionId, sections, showAddButton, onClickAddButton, 
+  onChangeSection, onOpenSectionMenu, onReorder
 }: FormationSelectionToolbarProps) {
 
   const [isDragging, setIsDragging] = useState<boolean>(false);
@@ -34,7 +36,7 @@ export default function FormationSelectionToolbar({
         tolerance: 50,
       },
     })
-)
+  );
 
   return <div className="grid grid-cols-[auto,1fr,auto] w-full max-w-full gap-2 p-2 overflow-scroll max-w-screen">
     <Drawer.Root
@@ -74,7 +76,7 @@ export default function FormationSelectionToolbar({
                     <Dialog.Close key={s.id}>
                       <FormationSectionItem
                         section={s}
-                        onClickSection={() => onClickSection(s)}
+                        onChangeSection={() => onChangeSection(s)}
                         isSelected={strEquals(currentSectionId, s.id)}
                         asDiv
                       />
@@ -118,7 +120,8 @@ export default function FormationSelectionToolbar({
                 key={section.id}
                 section={section}
                 isSelected={strEquals(currentSectionId, section.id)}
-                onClickSection={onClickSection}
+                onChangeSection={onChangeSection}
+                onOpenSectionMenu={onOpenSectionMenu}
                 />
             )
           }
@@ -139,11 +142,12 @@ export default function FormationSelectionToolbar({
 function FormationSectionItem (props: {
   section: ChoreoSection,
   isSelected: boolean,
-  onClickSection: (section: ChoreoSection) => void,
+  onChangeSection: (section: ChoreoSection) => void,
+  onOpenSectionMenu?: () => void,
   asDiv?: boolean,
   full?: boolean,
 }) {
-  var {section, isSelected, onClickSection, asDiv, full} = props;
+  var {section, isSelected, onChangeSection, onOpenSectionMenu, asDiv, full} = props;
 
   const {
     attributes,
@@ -167,7 +171,9 @@ function FormationSectionItem (props: {
       onClick={() => {
         if (!isSelected) {
           ref?.current?.scrollIntoView({"behavior": "smooth", "inline": "center"})
-          onClickSection(section);
+          onChangeSection(section);
+        } else {
+          onOpenSectionMenu?.();
         }
       }}
       noBorder={full}
@@ -179,8 +185,8 @@ function FormationSectionItem (props: {
           {section.name}
         </span>
         {
-          !isNullOrUndefinedOrBlank(section.note) && 
-          section.formation.dancerActions.length > 0 && 
+          (!isNullOrUndefinedOrBlank(section.note) ||
+          section.formation.dancerActions.length > 0) && 
           <div className="flex items-center">
             {
               !isNullOrUndefinedOrBlank(section.note) && 
