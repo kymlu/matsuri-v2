@@ -37,7 +37,7 @@ export const colorPalette = {
   // Initialize the cached text contrast
   initTextContrast() {
     this.allColors().forEach((c) => {
-      this.textContrast[c] = getLuminance(c) > 0.5 ? "#000000" : "#FFFFFF";
+      this.textContrast[c] = getTextColorForBg(c);
     });
   },
 
@@ -47,7 +47,7 @@ export const colorPalette = {
     if (textColour) {
       return textColour;
     } else {
-      this.textContrast[bg] = getLuminance(bg) > 0.5 ? "#000000" : "#FFFFFF";
+      this.textContrast[bg] = getTextColorForBg(bg);
       return this.textContrast[bg];
     }
   },
@@ -69,5 +69,9 @@ const getLuminance = (hex: string) => {
   );
   return 0.2126 * srgb[0] + 0.7152 * srgb[1] + 0.0722 * srgb[2];
 };
+
+const getTextColorForBg = (colour: string) => {
+  return getLuminance(colour) > 0.22 ? "#000000" : "#FFFFFF";
+}
 
 colorPalette.initTextContrast();
