@@ -111,7 +111,7 @@ export default function BaseGridObject({
       }}
       onPointerUp={(e) => {
         if (dragStartRef && !isDraggingRef.current) {
-          onClick?.();
+          onClick?.(); // TODO: don't select if dragging something else
         }
       }}
       onDragEnd={(e) => {

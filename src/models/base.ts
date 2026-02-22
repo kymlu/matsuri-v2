@@ -14,7 +14,7 @@ export const CoordinatesSchema = z.object({
 
 export type Coordinates = z.infer<typeof CoordinatesSchema>;
 
-export const ObjectTypeSchema = z.enum(["dancer", "prop"]);
+export const ObjectTypeSchema = z.enum(["dancer", "prop", "obstacle"]);
 export type ObjectType = z.infer<typeof ObjectTypeSchema>;
 
 export const BasePositionSchema = CoordinatesSchema.extend({

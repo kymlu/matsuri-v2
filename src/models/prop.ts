@@ -14,3 +14,9 @@ export const PropPositionSchema = BasePositionSchema.extend({
 });
 
 export type PropPosition = z.infer<typeof PropPositionSchema>;
+
+export const ObstacleSchema = BaseModelSchema
+  .extend(BasePositionSchema.shape)
+  .extend(PropSchema.shape);
+
+export type Obstacle = z.infer<typeof ObstacleSchema>;

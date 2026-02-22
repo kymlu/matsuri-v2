@@ -108,6 +108,7 @@ export const ICON = {
   upload: "upload",
   verticalDistribute: "vertical_distribute",
   visibility: "visibility",
+  warning: "warning",
   zoomIn: "zoom_in",
   zoomOut: "zoom_out",
 }

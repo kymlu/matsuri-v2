@@ -1,7 +1,7 @@
 import { BaseModelSchema } from "./base";
 import { ChoreoSectionSchema } from "./choreoSection";
 import { DancerSchema } from "./dancer";
-import { PropSchema } from "./prop";
+import { ObstacleSchema, PropSchema } from "./prop";
 import * as z from "zod";
 
 export const StageTypeSchema = z.enum(["stage", "parade"]);
@@ -33,6 +33,7 @@ export const ChoreoSchema = BaseModelSchema.extend({
   sections: z.array(ChoreoSectionSchema),
   dancers: z.record(z.string().nonempty(), DancerSchema),
   props: z.record(z.string().nonempty(), PropSchema),
+  obstacles: z.record(z.string().nonempty(), ObstacleSchema).optional(),
   lastUpdated: z.string().optional(),
   version: z.string().optional(),
 });

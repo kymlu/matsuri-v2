@@ -3,14 +3,15 @@ import { StageGeometry } from "../../../models/choreo";
 import { Dancer, DancerPosition } from "../../../models/dancer";
 import DancerGridObject from "../gridObjects/DancerGridObject";
 import Konva from "konva";
-import { Dispatch, SetStateAction, useEffect, useRef } from "react";
+import { SetStateAction, useEffect, useMemo, useRef } from "react";
 import { colorPalette } from "../../../lib/consts/colors";
 import { DancerDisplayType } from "../../../models/appSettings";
-import { Prop, PropPosition } from "../../../models/prop";
+import { Obstacle, Prop, PropPosition } from "../../../models/prop";
 import PropGridObject from "../gridObjects/PropGridObject";
 import { StageEntities } from "../../../models/history";
 import { pxToStageMeters } from "../../../lib/helpers/editorCalculationHelper";
 import { MAX_PROP_DIMENSION, METER_PX, MIN_PROP_DIMENSION, PROP_SNAP_SIZE } from "../../../lib/consts/consts";
+import ObstacleGridObject from "../gridObjects/ObstacleGridObject";
 
 type FormationLayerProps = {
   canEdit: boolean,
@@ -22,10 +23,13 @@ type FormationLayerProps = {
   dancerPositions: DancerPosition[],
   props: Record<string, Prop>,
   propPositions: PropPosition[],
+  obstacles?: Record<string, Obstacle>,
   geometry: StageGeometry,
   updateDancerPosition?: (x: number, y: number, dancerId: string) => void,
   updatePropPosition?: (x: number, y: number, propId: string) => void,
   updatePropSizeAndRotate?: (width: number, length: number, rotation: number, x: number, y: number, propId: string) => void
+  updateObstaclePosition?: (x: number, y: number, itemId: string) => void,
+  updateObstacleSizeAndRotate?: (width: number, length: number, rotation: number, x: number, y: number, itemId: string) => void
   selectedIds: StageEntities<string[]>,
   setSelectedIds: (action: SetStateAction<StageEntities<string[]>>) => void,
   snapToGrid?: boolean,
@@ -41,10 +45,13 @@ export default function FormationLayer({
   dancerPositions,
   props,
   propPositions,
+  obstacles,
   geometry,
   updateDancerPosition,
   updatePropPosition,
   updatePropSizeAndRotate,
+  updateObstaclePosition,
+  updateObstacleSizeAndRotate,
   selectedIds,
   setSelectedIds,
   snapToGrid,
@@ -58,7 +65,6 @@ export default function FormationLayer({
 	function refreshTransformer() {
 		transformerRef.current?.forceUpdate();
 	}
-
 
   const registerNode = (id: string, node: Konva.Node | null) => {
     if (node) {
@@ -76,19 +82,34 @@ export default function FormationLayer({
           (prev.dancers.includes(id) ?
             prev.dancers.filter((x) => x !== id) :
             [...prev.dancers, id]) :
-          [id]
+          [id],
+        obstacles: isAdditive ? [...prev.obstacles] : [],
       }));
     }
   }
   const togglePropSelect = (id: string, isAdditive: boolean = true) => {
-    if(canSelectDancers) {
+    if(canSelectProps) {
       setSelectedIds((prev) => ({
         dancers: isAdditive ? [...prev.dancers] : [],
         props: (canToggleSelection && isAdditive) ?
           (prev.props.includes(id) ?
             prev.props.filter((x) => x !== id) :
             [...prev.props, id]) :
-          [id]
+          [id],
+        obstacles: isAdditive ? [...prev.obstacles] : [],
+      }));
+    }
+  }
+  const toggleObstacleSelect = (id: string, isAdditive: boolean = true) => {
+    if(canSelectProps) {
+      setSelectedIds((prev) => ({
+        dancers: isAdditive ? [...prev.dancers] : [],
+        props: isAdditive ? [...prev.props] : [],
+        obstacles: (canToggleSelection && isAdditive) ?
+          (prev.obstacles.includes(id) ?
+            prev.obstacles.filter((x) => x !== id) :
+            [...prev.obstacles, id]) :
+          [id],
       }));
     }
   }
@@ -98,15 +119,46 @@ export default function FormationLayer({
     if (!transformer) return;
     const nodes = [
       ...selectedIds.dancers.map((id) => nodeMap.current.get(id)).filter(Boolean),
-      ...selectedIds.props.map((id) => nodeMap.current.get(id)).filter(Boolean)
+      ...selectedIds.props.map((id) => nodeMap.current.get(id)).filter(Boolean),
+      ...selectedIds.obstacles.map((id) => nodeMap.current.get(id)).filter(Boolean)
     ] as Konva.Node[];
 
     transformer.nodes(nodes);
     transformer.getLayer()?.batchDraw();
   }, [selectedIds]);
 
+  const obstacleList = useMemo(() => {
+    if (obstacles) {
+      return Object.values(obstacles);
+    } else {
+      return [];
+    }
+  }, [obstacles]);
+
+  const isTransformerActive = useMemo(() => {
+    return (selectedIds.dancers.length + selectedIds.props.length + selectedIds.obstacles.length) > 1
+  }, [selectedIds]);
+
   return ( 
     <Layer>
+      {obstacleList.map((obstacle) => {
+        return (
+          <ObstacleGridObject
+            key={obstacle.id}
+            obstacle={obstacle}
+            stageGeometry={geometry}
+            updatePosition={(x, y) => updateObstaclePosition?.(x, y, obstacle.id)}
+            onClick={(isAdditive) => {toggleObstacleSelect(obstacle.id, isAdditive)}}
+            isSelected={selectedIds.obstacles.includes(obstacle.id)}
+            isTransformerActive={isTransformerActive}
+            registerNode={registerNode}
+            canEdit={canEdit}
+            snapToGrid={snapToGrid}
+            canSelect={canSelectProps}
+            animate
+          />
+        );
+      })}
       {propPositions.map((propPosition) => {
         return (
           <PropGridObject
@@ -117,7 +169,7 @@ export default function FormationLayer({
             updatePosition={(x, y) => updatePropPosition?.(x, y, propPosition.propId)}
             onClick={(isAdditive) => {togglePropSelect(propPosition.propId, isAdditive)}}
             isSelected={selectedIds.props.includes(propPosition.propId)}
-            isTransformerActive={(selectedIds.dancers.length + selectedIds.props.length) > 1}
+            isTransformerActive={isTransformerActive}
             registerNode={registerNode}
             canEdit={canEdit}
             snapToGrid={snapToGrid}
@@ -136,7 +188,7 @@ export default function FormationLayer({
             updatePosition={(x, y) => updateDancerPosition?.(x, y, dancerPosition.dancerId)}
             onClick={(isAdditive) => {toggleDancerSelect(dancerPosition.dancerId, isAdditive)}}
             isSelected={selectedIds.dancers.includes(dancerPosition.dancerId)}
-            isTransformerActive={(selectedIds.dancers.length + selectedIds.props.length) > 1}
+            isTransformerActive={isTransformerActive}
             registerNode={registerNode}
             canEdit={canEdit}
             snapToGrid={snapToGrid}
@@ -146,17 +198,17 @@ export default function FormationLayer({
         );
       })}
       {
-        (selectedIds.dancers.length > 0 || selectedIds.props.length > 0) && (
+        (selectedIds.dancers.length > 0 || selectedIds.props.length > 0 || selectedIds.obstacles.length > 0) && (
         <Transformer
           draggable
           flipEnabled={false}
           keepRatio={false}
           ref={transformerRef}
-          resizeEnabled={selectedIds.dancers.length === 0 && selectedIds.props.length === 1}
+          resizeEnabled={selectedIds.dancers.length === 0 && (selectedIds.props.length + selectedIds.obstacles.length) === 1}
           enabledAnchors={["middle-right", "middle-left", "top-center", "bottom-center"]}
-          rotateEnabled={selectedIds.dancers.length === 0 && selectedIds.props.length === 1}
+          rotateEnabled={selectedIds.dancers.length === 0 && (selectedIds.props.length + selectedIds.obstacles.length) === 1}
           borderStrokeWidth={2}
-          borderEnabled={((selectedIds.dancers.length) > 1 || selectedIds.props.length > 0) && !hideTransformerBorder}
+          borderEnabled={(selectedIds.dancers.length > 1 || selectedIds.props.length > 0 || selectedIds.obstacles.length > 0) && !hideTransformerBorder}
           borderStroke={colorPalette.primary}
           anchorStrokeWidth={2}
           anchorStroke={colorPalette.primary}
@@ -166,25 +218,54 @@ export default function FormationLayer({
           ]}
           rotationSnapTolerance={10}
           onTransformEnd={(event) => {
-            const prop = {...props[selectedIds.props[0]]};
-            if (!prop) return;
+            var selectedItemType: "prop" | "obstacle" | undefined;
+            var selectedItemId: string | undefined;
+            var selectedWidth: number | undefined;
+            var selectedLength: number | undefined;
+            
+            if (selectedIds.props.length === 1) {
+              selectedItemId = selectedIds.props[0];
+              const prop = {...props[selectedItemId]};
+              if (!prop) return;
+              selectedItemType = "prop";
+              selectedWidth = prop.width;
+              selectedLength = prop.length;
+            } else if (selectedIds.obstacles.length === 1) {
+              selectedItemId = selectedIds.obstacles[0];
+              const obstacle = {...obstacles?.[selectedIds.obstacles[0]]};
+              if (!obstacle) return;
+              selectedItemType = "obstacle";
+              selectedWidth = obstacle.width;
+              selectedLength = obstacle.length;
+            } else {
+              return;
+            }
             
             const group = event.target as Konva.Group;
             if (!group) return;
 
-            var width = Math.min(Math.max(Math.round(prop.width * group.scaleX() / PROP_SNAP_SIZE) * PROP_SNAP_SIZE, MIN_PROP_DIMENSION), MAX_PROP_DIMENSION);
-            var length = Math.min(Math.max(Math.round(prop.length * group.scaleY() / PROP_SNAP_SIZE) * PROP_SNAP_SIZE, MIN_PROP_DIMENSION), MAX_PROP_DIMENSION);
+            var width = Math.min(Math.max(Math.round(selectedWidth!! * group.scaleX() / PROP_SNAP_SIZE) * PROP_SNAP_SIZE, MIN_PROP_DIMENSION), MAX_PROP_DIMENSION);
+            var length = Math.min(Math.max(Math.round(selectedLength!! * group.scaleY() / PROP_SNAP_SIZE) * PROP_SNAP_SIZE, MIN_PROP_DIMENSION), MAX_PROP_DIMENSION);
             var newCoords = pxToStageMeters(
               {x: event.target.attrs.x, y: event.target.attrs.y},
               geometry,
               METER_PX,
-              props[selectedIds.props[0]].length);
+              length);
 
-            updatePropSizeAndRotate?.(
-              width, length,
-              event.target.attrs.rotation,
-              newCoords.x, newCoords.y,
-              selectedIds.props[0]);
+            if (selectedItemType === "prop") {
+              updatePropSizeAndRotate?.(
+                width, length,
+                event.target.attrs.rotation,
+                newCoords.x, newCoords.y,
+                selectedItemId);
+            } else {
+              updateObstacleSizeAndRotate?.(
+                width, length,
+                event.target.attrs.rotation,
+                newCoords.x, newCoords.y,
+                selectedItemId
+              );
+            }
             
             group.scale({ x: 1, y: 1 });
 

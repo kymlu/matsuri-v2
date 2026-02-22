@@ -1,24 +1,31 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import BaseEditDialog from "./BaseEditDialog";
 import { colorPalette } from "../../lib/consts/colors";
-import { strEquals } from "../../lib/helpers/globalHelper";
+import { isNullOrUndefinedOrBlank, strEquals } from "../../lib/helpers/globalHelper";
 import Button from "../basic/Button";
 
 export type colourMode = "all" | "current" | "currentAndAfter";
 
 type EditDancerColourDialogProps = {
+  selectedObjectColour: string | undefined,
   propOnly: boolean,
   onSubmit: (colour: string, mode: colourMode) => void,
 }
 
 export default function EditDancerColourDialog({
-  propOnly, onSubmit
+  selectedObjectColour, propOnly, onSubmit
 }: EditDancerColourDialogProps) {
   const [selectedColour, setSelectedColour] = useState("");
   const [mode, setMode] = useState<colourMode>("current");
 
+  useEffect(() => {
+    setSelectedColour(selectedObjectColour ?? "");
+  }, [selectedObjectColour]);
+
   return <BaseEditDialog
     title="色"
+    isActionButtonDisabled={isNullOrUndefinedOrBlank(selectedColour)}
+    onClose={() => setSelectedColour(selectedObjectColour ?? "")}
     onSubmit={() => { onSubmit(selectedColour, mode) }}
     >
       {

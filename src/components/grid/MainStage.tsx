@@ -1,6 +1,6 @@
 import { Stage } from "react-konva";
 import GridLayer from "./layers/GridLayer";
-import { useState, useCallback, useEffect, useRef, Dispatch, SetStateAction } from "react";
+import { useState, useCallback, useEffect, useRef, SetStateAction } from "react";
 import { Choreo, StageGeometry } from "../../models/choreo";
 import FormationLayer from "./layers/FormationLayer";
 import { ChoreoSection } from "../../models/choreoSection";
@@ -22,24 +22,31 @@ type MainStageProps = {
   canSelectProps: boolean,
   isAddingDancer?: boolean,
   isAddingProp?: boolean,
+  isAddingObstacles?: boolean,
   hideTransformerBorder?: boolean,
   currentChoreo: Choreo,
   currentSection: ChoreoSection,
   updateDancerPosition?: (x: number, y: number, dancerId: string) => void,
   updatePropPosition?: (x: number, y: number, propId: string) => void,
+  updateObstaclePosition?: (x: number, y: number, itemId: string) => void,
   updatePropSizeAndRotate?: (width: number, length: number, rotation: number, x: number, y: number, propId: string) => void
+  updateObstacleSizeAndRotate?: (width: number, length: number, rotation: number, x: number, y: number, itemId: string) => void
   selectedIds: StageEntities<string[]>,
   setSelectedIds: (action: SetStateAction<StageEntities<string[]>>) => void,
   addDancer?: (x: number, y: number) => void,
   addProp?: (x: number, y: number) => void,
+  addObstacle?: (x: number, y: number) => void,
   appSettings: AppSetting,
   previousSection?: ChoreoSection,
 }
 
 export default function MainStage({
-  canEdit, canToggleSelection, canSelectDancers, canSelectProps, isAddingDancer, isAddingProp,
-  hideTransformerBorder, currentChoreo, currentSection, updateDancerPosition, updatePropPosition,
-  updatePropSizeAndRotate, selectedIds, setSelectedIds, addDancer, addProp, appSettings, previousSection
+  canEdit, canToggleSelection, canSelectDancers, canSelectProps,
+  isAddingDancer, isAddingProp, isAddingObstacles,
+  hideTransformerBorder, currentChoreo, currentSection,
+  updateDancerPosition, updatePropPosition, updateObstaclePosition,
+  updatePropSizeAndRotate, updateObstacleSizeAndRotate, selectedIds, setSelectedIds,
+  addDancer, addProp, addObstacle, appSettings, previousSection
 }: MainStageProps) {
   const [dancerPositions, setDancerPositions] = useState<DancerPosition[]>([]);
   const [propPositions, setPropPositions] = useState<PropPosition[]>([]);
@@ -233,11 +240,11 @@ export default function MainStage({
         onPointerUp={(e) => {
           if (clickedOnEmpty && isDraggingOnEmpty === undefined) {
             if (canEdit) {
-              setSelectedIds({props: [], dancers: []});
+              setSelectedIds({props: [], dancers: [], obstacles: []});
             }
             const stagePosition = e.target.getStage();
             
-            if ((isAddingDancer || isAddingProp) && stagePosition) {
+            if ((isAddingDancer || isAddingProp || isAddingObstacles) && stagePosition) {
               var position = {
                 x: (e.evt.x - stagePosition.attrs.x)/stagePosition.attrs.scaleX,
                 y: (e.evt.y - stagePosition.attrs.y - stageGeometry.margin.topMargin * METER_PX) / stagePosition.attrs.scaleY
@@ -259,6 +266,8 @@ export default function MainStage({
                   addDancer?.(positionM.x, positionM.y);
                 } else if (isAddingProp) {
                   addProp?.(positionM.x, positionM.y);
+                } else if (isAddingObstacles) {
+                  addObstacle?.(positionM.x, positionM.y);
                 }
               }
             }
@@ -301,9 +310,12 @@ export default function MainStage({
           dancerPositions={dancerPositions}
           props={currentChoreo.props}
           propPositions={propPositions}
+          obstacles={currentChoreo.obstacles}
           updateDancerPosition={updateDancerPosition}
           updatePropPosition={updatePropPosition}
           updatePropSizeAndRotate={updatePropSizeAndRotate}
+          updateObstaclePosition={updateObstaclePosition}
+          updateObstacleSizeAndRotate={updateObstacleSizeAndRotate}
           selectedIds={selectedIds}
           setSelectedIds={setSelectedIds}
           snapToGrid={appSettings.snapToGrid}

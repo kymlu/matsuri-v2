@@ -10,6 +10,8 @@ type ToolbarProps = {
   isAddingDancer: boolean;
   onAddProp: () => void;
   isAddingProp: boolean;
+  onAddObstacle: () => void;
+  isAddingObstacle: boolean;
 
   // selection / attributes
   showSelectDancer: boolean;
@@ -41,6 +43,8 @@ type ToolbarProps = {
   onRenameDancer: () => void;
   showRenameProp: boolean;
   onRenameProp: () => void;
+  showRenameObstacle: boolean;
+  onRenameObstacle: () => void;
 
   // delete
   showDeleteObjects: boolean;
@@ -58,6 +62,8 @@ export default function Toolbar({
   isAddingDancer,
   onAddProp,
   isAddingProp,
+  onAddObstacle,
+  isAddingObstacle,
 
   showSelectDancer,
   onSelectColor,
@@ -84,6 +90,8 @@ export default function Toolbar({
   onRenameDancer,
   showRenameProp,
   onRenameProp,
+  showRenameObstacle,
+  onRenameObstacle,
 
   showDeleteObjects,
   onDeleteObjects,
@@ -131,6 +139,7 @@ export default function Toolbar({
         }
         {showRenameDancer && <IconButton src={ICON.textFieldsAlt} label="名前変更" onClick={() => {onRenameDancer()}} />}
         {showRenameProp && <IconButton src={ICON.textFieldsAlt} label="名前変更" onClick={() => {onRenameProp()}} />}
+        {showRenameObstacle && <IconButton src={ICON.textFieldsAlt} label="名前変更" onClick={() => {onRenameObstacle()}} />}
         {showArrange && <IconButton src={ICON.straighten} label="整理" onClick={()=>{setIsArrangeVisible(true)}}/>}
         {showChangeColour && <IconButton src={ICON.colors} label="色" onClick={() => {onChangeColor()}} />}
         {showCopyPosition && <IconButton src={ICON.contentCopy} label="コピー" onClick={() => {onCopyPosition()}} />}
@@ -144,7 +153,7 @@ export default function Toolbar({
     {
       isSubmenuOpen && 
       <>
-        <IconButton disabled={isAssigningActions || isAddingDancer || isAddingProp} src={ICON.chevronBackward} label="戻る" onClick={()=>{
+        <IconButton disabled={isAssigningActions || isAddingDancer || isAddingProp || isAddingObstacle} src={ICON.chevronBackward} label="戻る" onClick={()=>{
           setIsArrangeVisible(false);
           setIsAddManagerVisible(false);
           setIsActionManagerVisible(false);
@@ -155,14 +164,19 @@ export default function Toolbar({
           <>
             <IconButton
               src={isAddingDancer ? ICON.clear : ICON.person}
-              disabled={isAddingProp}
+              disabled={isAddingProp || isAddingObstacle}
               label="ダンサー"
               onClick={() => {onAddDancer()}} />
             <IconButton
               src={isAddingProp ? ICON.clear : ICON.flag}
-              disabled={isAddingDancer}
+              disabled={isAddingDancer || isAddingObstacle}
               label="道具"
               onClick={() => {onAddProp()}} />
+            <IconButton
+              src={isAddingObstacle ? ICON.clear : ICON.warning}
+              disabled={isAddingDancer || isAddingProp}
+              label="障害物"
+              onClick={() => {onAddObstacle()}} />
           </>
         }
         {

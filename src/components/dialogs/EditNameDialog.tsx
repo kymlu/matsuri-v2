@@ -7,7 +7,7 @@ import BaseEditDialog from "./BaseEditDialog";
 type EditNameDialogProps = {
   name?: string,
   required?: boolean,
-  type: "ダンサー" | "道具" | "隊列表" | "イベント" | "セクション",
+  type: "ダンサー" | "道具" | "隊列表" | "イベント" | "セクション" | "障害物",
   onSubmit: (name: string) => void,
   onClose?: () => void,
 }

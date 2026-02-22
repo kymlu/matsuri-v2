@@ -21,9 +21,9 @@ export default function ChoreoViewPage(props: {
 }) {
   const [currentSection, setCurrentSection] = useState<ChoreoSection>(props.currentChoreo.sections[0]);
   const [nextSection, setNextSection] = useState<ChoreoSection | undefined>();
-  const [selectedIds, setSelectedIds] = useState<StageEntities<string[]>>({props: [], dancers: []});
+  const [selectedIds, setSelectedIds] = useState<StageEntities<string[]>>({props: [], dancers: [], obstacles: []});
   const [selectedTimingId, setSelectedTimingId] = useState<string | undefined>();
-  const [selectedObjects, setSelectedObjects] = useState<StageEntities<PropPosition[], DancerPosition[]>>({dancers: [], props: []});
+  const [selectedObjects, setSelectedObjects] = useState<StageEntities<PropPosition[], DancerPosition[]>>({dancers: [], props: [], obstacles: []});
   const [appSettings, setAppSettings] = useState<AppSetting>({
     snapToGrid: true,
     showGrid: true,
@@ -34,7 +34,8 @@ export default function ChoreoViewPage(props: {
   useEffect(() => {
     setSelectedObjects({
       dancers: Object.entries(currentSection.formation.dancerPositions).filter(x => selectedIds.dancers.includes(x[0])).map(x => x[1]),
-      props: Object.entries(currentSection.formation.propPositions).filter(x => selectedIds.props.includes(x[0])).map(x => x[1]),
+      props: [],
+      obstacles: []
     });
   }, [selectedIds]);
 
@@ -43,7 +44,7 @@ export default function ChoreoViewPage(props: {
     setNextSection(props.currentChoreo.sections[currentSectionIndex + 1]);
   }, [currentSection]);
 
-  const resetSelectedIds = () => setSelectedIds({props: [], dancers: []});
+  const resetSelectedIds = () => setSelectedIds({props: [], dancers: [], obstacles: []});
 
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
   const exportDialog = Dialog.createHandle<{}>();
@@ -82,7 +83,7 @@ export default function ChoreoViewPage(props: {
           deselectPosition={resetSelectedIds}
           onSelectTiming={(timing) => {
             if (timing) {
-              setSelectedIds({props: [], dancers: timing.dancerIds});
+              setSelectedIds({props: [], dancers: timing.dancerIds, obstacles: []});
               setSelectedTimingId(timing.id);
             } else {
               resetSelectedIds();

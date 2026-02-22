@@ -91,6 +91,7 @@ export function NewChoreoPage({
       },
       dancers: dancers,
       props: {},
+      obstacles: {},
       sections: [{
         id: sectionId,
         name: "セクション1",

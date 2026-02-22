@@ -14,7 +14,8 @@ export type EditAction<T> =
   | { type: "UNDO" }
   | { type: "REDO" };
 
-export type StageEntities<TProp, TDancer = TProp> = {
+export type StageEntities<TProp, TDancer = TProp, TObstacle = TProp> = {
   props: TProp;
   dancers: TDancer;
+  obstacles: TObstacle,
 }
