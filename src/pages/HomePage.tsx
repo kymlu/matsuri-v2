@@ -24,6 +24,7 @@ import CustomMenu from "../components/inputs/CustomMenu"
 import Divider from "../components/basic/Divider"
 import EditNameDialog from "../components/dialogs/EditNameDialog"
 import TextInput from "../components/inputs/TextInput"
+import { loadAllForYear } from "../lib/dataAccess/FileAccess"
 
 type HomePageProps = {
   goToNewChoreoPage: (eventName?: string) => void,
@@ -49,7 +50,14 @@ export default function HomePage({
       if(!choreos.find(c => strEquals(c.id, SampleParade.id))) {
         choreos.push(z.parse(ChoreoSchema, SampleParade));
       }
-      setSavedChoreos(choreos);
+      loadAllForYear("2026").then((choreosForYear) => {
+        choreosForYear.forEach(choreo => {
+          if (!choreos.find(c => strEquals(c.id, choreo.id))) {
+            choreos.push(choreo);
+          }
+        });
+        setSavedChoreos(choreos);
+      });
     });
   }
 
