@@ -187,8 +187,10 @@ export async function exportToPdf (
     pdf.rect(stageLeftPx, stageTopPx + titleBuffer, stageWidthPx, stageHeightPx, "F");
 
     // Vertical grid lines (across full area)
-    for (let m = 1; m < totalWidthM - gridOffsetMeters; m++) {
+    for (let m = 0; m < totalWidthM - gridOffsetMeters; m++) {
       const x = m * gridSizePx + gridOffsetPx;
+
+      if (m === 0) continue;
     
       const distFromCenter = Math.abs(
         x - centerX

@@ -76,8 +76,10 @@ export default function GridLayer({
     
     // Vertical grid lines (across full area)
     if(showGridLines){
-      for (let m = 1; m < margins.leftMargin + width + margins.rightMargin - gridOffsetMeters; m++) {
+      for (let m = 0; m < margins.leftMargin + width + margins.rightMargin - gridOffsetMeters; m++) {
         const x = m * gridSizePx + gridOffsetPx;
+        
+        if (x === 0) continue;
       
         const distFromCenter = Math.abs(
           x - centerX
