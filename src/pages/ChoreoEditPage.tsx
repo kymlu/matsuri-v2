@@ -536,7 +536,7 @@ export default function ChoreoEditPage(props: {
                   name: Object.keys(history.presentState.state.obstacles ?? {}).length.toString(),
                   length: DEFAULT_PROP_LENGTH,
                   width: DEFAULT_PROP_WIDTH,
-                  color: colorPalette.rainbow.blue[0],
+                  color: colorPalette.greys[2],
                   x: x - 2,
                   y: y - 0.5,
                   rotation: 0,
