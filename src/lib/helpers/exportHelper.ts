@@ -52,13 +52,15 @@ async function downloadZip(zip: JSZip, fileName: string) {
 export async function exportChoreo(choreo: Choreo) {
   const zip = new JSZip();
 
+  const fileName = getSafeFileName(`${choreo.event} - ${choreo.name}`);
+  
   zip.file(
-    `${getSafeFileName(`${choreo.event} - }${choreo.name}`)}.mtr`,
+    `${fileName}.mtr`,
     JSON.stringify(choreo)
   );
   zip.file("README.txt", README_TEXT);
 
-  await downloadZip(zip, choreo.name);
+  await downloadZip(zip, fileName);
 }
 
 export async function exportEvent(
