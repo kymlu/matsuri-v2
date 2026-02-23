@@ -25,15 +25,18 @@ import Divider from "../components/basic/Divider"
 import EditNameDialog from "../components/dialogs/EditNameDialog"
 import TextInput from "../components/inputs/TextInput"
 import { loadAllForYear } from "../lib/dataAccess/FileAccess"
+import UserNameEditDialog from "../components/dialogs/UserNameEditDialog"
 
 type HomePageProps = {
   goToNewChoreoPage: (eventName?: string) => void,
   goToViewPage: (choreo: Choreo) => void,
+  userName: string | null,
+  setUserName: (newName: string) => void,
 }
 
 export default function HomePage({
-  goToNewChoreoPage,
-  goToViewPage,
+  goToNewChoreoPage, goToViewPage,
+  userName, setUserName,
 }: HomePageProps) {
   const [savedChoreos, setSavedChoreos] = useState<Choreo[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -149,128 +152,137 @@ export default function HomePage({
   }
 
   return (
-    <div className='grid bg-gray-50 grid-rows-[auto,auto,auto,1fr] overflow-hide w-full gap-2 mx-auto py-10 px-6 h-[100svh]'>
-      <Dialog.Root>
-        <Dialog.Trigger>
-          <h1 className='mx-4 mb-2 text-2xl font-bold text-center'>隊列表作成</h1>
-        </Dialog.Trigger>
-        <CustomDialog title="サイト情報" hasX>
-          <div className="flex flex-col">
-            <span>{LAST_UPDATED}</span>
-            <Button onClick={downloadLogs}>ログをダウンロード</Button>
-          </div>
-        </CustomDialog>
-      </Dialog.Root>
-      <div className="flex gap-2 mb-2">
-        <IconLabelButton
-          full
-          primary
-          label="新規作成"
-          icon={ICON.add}
-          onClick={() => goToNewChoreoPage()}
-          />
-        <IconLabelButton
-          full
-          label="アップロード"
-          icon={ICON.upload}
-          onClick={triggerUpload}
-          />
+    <div className="bg-gray-50">
+      <div className="fixed top-4 right-4">
+        <Dialog.Root>
+          <Dialog.Trigger>
+            <IconButton src={ICON.personEdit} colour="primary" noBorder asDiv/>
+          </Dialog.Trigger>
+          <UserNameEditDialog name={userName ?? ""} onSubmit={(name) => setUserName(name)}/>
+        </Dialog.Root>
       </div>
-      <TextInput
-        defaultValue={searchTerm}
-        placeholder="隊列、イベントを探す"
-        onContentChange={(newSearchTerm) => setSearchTerm(newSearchTerm)}
-        search
-        maxLength={100}
-        clearable/>
-      <div className="h-full space-y-4 overflow-scroll">
-        {
-          Object.entries(filteredChoreos).length === 0 &&
-          <div className="mt-4 text-center">隊列表はありません</div>
-        }
-        {
-          Object.entries(filteredChoreos).map(([eventName, choreos]) =>
-            <EventSection
-              key={eventName}
-              eventName={eventName}
-              choreos={choreos}
-              searchTerm={searchTerm}
-              goToViewPage={goToViewPage}
-              duplicateChoreo={duplicateChoreo}
-              editChoreoName={(choreo) => {
-                setEditingChoreo(choreo);
-                setEditChoreoInfoDialogOpen(true);
-              }}
-              deleteChoreo={(choreo) => {
-                setEditingChoreo(choreo);
-                setDeleteChoreoDialogOpen(true);
-              }}
-              onPdfExport={(choreo) => {
-                setExportingChoreo(choreo);
-                setPdfExportDialogOpen(true);
-              }}
-              addEvent={() => {goToNewChoreoPage(eventName)}}
-              editEventName={() => {
-                setEditingEventName(eventName);
-                setEventNameDialogOpen(true);
-              }}
+      <div className='grid py-10 px-6 h-[100svh] grid-rows-[auto,auto,auto,1fr] overflow-hide gap-2 w-full mx-auto'>
+        <Dialog.Root>
+          <Dialog.Trigger>
+            <h1 className='mx-4 mb-2 text-2xl font-bold text-center'>隊列表作成</h1>
+          </Dialog.Trigger>
+          <CustomDialog title="サイト情報" hasX>
+            <div className="flex flex-col">
+              <span>{LAST_UPDATED}</span>
+              <Button onClick={downloadLogs}>ログをダウンロード</Button>
+            </div>
+          </CustomDialog>
+        </Dialog.Root>
+        <div className="flex gap-2 mb-2">
+          <IconLabelButton
+            full
+            primary
+            label="新規作成"
+            icon={ICON.add}
+            onClick={() => goToNewChoreoPage()}
             />
-          )
-        }
-      </div>
-
-      <input
-        className='hidden'
-        type="file"
-        id="uploadFileInput"
-        accept=".mtr, application/zip"
-        onChange={(event) => {
-          if (!event.target.files || event.target.files.length === 0) {
-            console.log("No files were selected to upload.");              
-          } else {
-            var file = event.target.files?.[0];
-            readUploadedFile(
-              file,
-              (newChoreo: Choreo) => {
-                const existingChoreos = Object.values(savedChoreos).flat();
-                const duplicateChoreo = existingChoreos.find(c => strEquals(c.name, newChoreo.name) && strEquals(c.event, newChoreo.event));
-                if (duplicateChoreo) {
-                  setDuplicateChoreoId(duplicateChoreo.id);
-                  setUploadChoreoDialogOpen(true);
-                  setUploadedChoreo(newChoreo);
-                } else {
-                  newChoreo.id = crypto.randomUUID();
-                  saveChoreo(newChoreo, () => {goToViewPage(newChoreo)});
-                }
-              },
-              (newChoreos: Choreo[], errorMessage?: string) => {
-                if (newChoreos.length > 0) {
-                  saveChoreos(
-                    [...newChoreos.map((c) => ({...c, id: crypto.randomUUID()}))],
-                    () => {
-                      loadChoreos();
-                      if (errorMessage) {
-                        setUploadErrorMessage(errorMessage);
-                        setUploadFailedDialogOpen(true);
-                      } else {
-                        setUploadSucceededDialogOpen(true);
-                      }
-                    }
-                  );
-                } else {
-                  setUploadErrorMessage(errorMessage ?? "アップロードできませんでした。");
-                  setUploadFailedDialogOpen(true);
-                }
-                event.target.value = "";
-              },
-              (e) => {
-                setUploadErrorMessage(e);
-                setUploadFailedDialogOpen(true);
-                event.target.value = "";
-              }
-            );
+          <IconLabelButton
+            full
+            label="アップロード"
+            icon={ICON.upload}
+            onClick={triggerUpload}
+            />
+        </div>
+        <TextInput
+          defaultValue={searchTerm}
+          placeholder="隊列、イベントを探す"
+          onContentChange={(newSearchTerm) => setSearchTerm(newSearchTerm)}
+          search
+          maxLength={100}
+          clearable/>
+        <div className="h-full space-y-4 overflow-scroll">
+          {
+            Object.entries(filteredChoreos).length === 0 &&
+            <div className="mt-4 text-center">隊列表はありません</div>
           }
-        }}/>
+          {
+            Object.entries(filteredChoreos).map(([eventName, choreos]) =>
+              <EventSection
+                key={eventName}
+                eventName={eventName}
+                choreos={choreos}
+                searchTerm={searchTerm}
+                goToViewPage={goToViewPage}
+                duplicateChoreo={duplicateChoreo}
+                editChoreoName={(choreo) => {
+                  setEditingChoreo(choreo);
+                  setEditChoreoInfoDialogOpen(true);
+                }}
+                deleteChoreo={(choreo) => {
+                  setEditingChoreo(choreo);
+                  setDeleteChoreoDialogOpen(true);
+                }}
+                onPdfExport={(choreo) => {
+                  setExportingChoreo(choreo);
+                  setPdfExportDialogOpen(true);
+                }}
+                addEvent={() => {goToNewChoreoPage(eventName)}}
+                editEventName={() => {
+                  setEditingEventName(eventName);
+                  setEventNameDialogOpen(true);
+                }}
+              />
+            )
+          }
+        </div>
+
+        <input
+          className='hidden'
+          type="file"
+          id="uploadFileInput"
+          accept=".mtr, application/zip"
+          onChange={(event) => {
+            if (!event.target.files || event.target.files.length === 0) {
+              console.log("No files were selected to upload.");              
+            } else {
+              var file = event.target.files?.[0];
+              readUploadedFile(
+                file,
+                (newChoreo: Choreo) => {
+                  const existingChoreos = Object.values(savedChoreos).flat();
+                  const duplicateChoreo = existingChoreos.find(c => strEquals(c.name, newChoreo.name) && strEquals(c.event, newChoreo.event));
+                  if (duplicateChoreo) {
+                    setDuplicateChoreoId(duplicateChoreo.id);
+                    setUploadChoreoDialogOpen(true);
+                    setUploadedChoreo(newChoreo);
+                  } else {
+                    newChoreo.id = crypto.randomUUID();
+                    saveChoreo(newChoreo, () => {goToViewPage(newChoreo)});
+                  }
+                },
+                (newChoreos: Choreo[], errorMessage?: string) => {
+                  if (newChoreos.length > 0) {
+                    saveChoreos(
+                      [...newChoreos.map((c) => ({...c, id: crypto.randomUUID()}))],
+                      () => {
+                        loadChoreos();
+                        if (errorMessage) {
+                          setUploadErrorMessage(errorMessage);
+                          setUploadFailedDialogOpen(true);
+                        } else {
+                          setUploadSucceededDialogOpen(true);
+                        }
+                      }
+                    );
+                  } else {
+                    setUploadErrorMessage(errorMessage ?? "アップロードできませんでした。");
+                    setUploadFailedDialogOpen(true);
+                  }
+                  event.target.value = "";
+                },
+                (e) => {
+                  setUploadErrorMessage(e);
+                  setUploadFailedDialogOpen(true);
+                  event.target.value = "";
+                }
+              );
+            }
+          }}/>
         <Dialog.Root
           handle={editChoreoInfoDialog}
           open={editChoreoInfoDialogOpen}
@@ -406,6 +418,7 @@ export default function HomePage({
             }}
           />
         </Dialog.Root>
+      </div>
     </div>
   )
 }

@@ -5,7 +5,7 @@ import { Choreo } from "../models/choreo";
 import { ChoreoSection } from "../models/choreoSection";
 import MainStage from "../components/grid/MainStage";
 import { AppSetting } from "../models/appSettings";
-import { strEquals } from "../lib/helpers/globalHelper";
+import { isNullOrUndefinedOrBlank, strEquals } from "../lib/helpers/globalHelper";
 import ViewerSidebar from "../components/editor/ViewerSidebar";
 import { StageEntities } from "../models/history";
 import { DancerPosition } from "../models/dancer";
@@ -18,6 +18,7 @@ export default function ChoreoViewPage(props: {
   goToHomePage: () => void
   currentChoreo: Choreo,
   goToEditPage: () => void,
+  userName: string | null,
 }) {
   const [currentSection, setCurrentSection] = useState<ChoreoSection>(props.currentChoreo.sections[0]);
   const [nextSection, setNextSection] = useState<ChoreoSection | undefined>();
@@ -30,6 +31,17 @@ export default function ChoreoViewPage(props: {
     showPreviousSection: false,
     dancerDisplayType: "large",
   });
+
+  useEffect(() => {
+    if (!isNullOrUndefinedOrBlank(props.userName)) {
+      const dancer = Object.values(props.currentChoreo.dancers).find(x => strEquals(x.name, props.userName));
+      if (dancer) {
+        setSelectedIds({dancers: [dancer.id], props: [], obstacles: []});
+      } else {
+        resetSelectedIds();
+      }
+    }
+  }, [props.currentChoreo, props.userName]);
   
   useEffect(() => {
     setSelectedObjects({

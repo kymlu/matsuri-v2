@@ -5,6 +5,7 @@ import { NewChoreoPage } from './pages/NewChoreoPage';
 import ChoreoEditPage from './pages/ChoreoEditPage';
 import ChoreoViewPage from './pages/ChoreoViewPage';
 import { Choreo } from './models/choreo';
+import { getUserName, setUserName } from './lib/dataAccess/LocalStorageController';
 
 type Mode = "home" | "form" | "edit" | "view";
 
@@ -12,6 +13,16 @@ function App() {
   const [mode, setMode] = useState<Mode>("home");
   const [selectedEvent, setSelectedEventName] = useState<string | undefined>();
   const [currentChoreo, setCurrentChoreo] = useState<Choreo | undefined>();
+  const [name, setName] = useState<string | null>(null);
+
+  useEffect(() => {
+    setName(getUserName());
+  }, []);
+
+  const setNewName = (newName: string) => {
+    setUserName(newName);
+    setName(newName);
+  }
 
   useEffect(() => {
     console.log("Changing mode:", mode);
@@ -29,6 +40,8 @@ function App() {
             setCurrentChoreo(choreo);
             setMode("view");
           }}
+          userName={name}
+          setUserName={(newName) => setNewName(newName)}
         />
       )}
       {mode === "form" && (
@@ -56,6 +69,7 @@ function App() {
           currentChoreo={currentChoreo!!}
           goToHomePage={() => setMode("home")}
           goToEditPage={() => setMode("edit")}
+          userName={name}
         />
       )}
     </div>

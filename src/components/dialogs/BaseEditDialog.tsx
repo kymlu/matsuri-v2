@@ -6,6 +6,7 @@ type BaseEditDialogProps = {
   title: string,
   isActionButtonDisabled?: boolean,
   actionButtonText?: string,
+  noDetachedTrigger?: boolean,
   full?: boolean,
   onClose?: () => void,
   onSubmit: () => void,
@@ -13,7 +14,7 @@ type BaseEditDialogProps = {
 }
 
 export default function BaseEditDialog({
-  title, isActionButtonDisabled, actionButtonText, full, onClose, onSubmit, children
+  title, isActionButtonDisabled, actionButtonText, noDetachedTrigger, full, onClose, onSubmit, children
 }: BaseEditDialogProps) {
   return <CustomDialog
     hasX
@@ -36,15 +37,33 @@ export default function BaseEditDialog({
             </span>
           </Button>
         </Dialog.Close>
-        <Button
-          onClick={() => {onSubmit()}}
-          disabled={isActionButtonDisabled}
-          full
-          primary>
-          <span className="font-semibold text-nowrap">
-            {actionButtonText ?? "保存"}
-          </span>
-        </Button>
+        {
+          !noDetachedTrigger &&
+          <Button
+            onClick={() => {onSubmit()}}
+            disabled={isActionButtonDisabled}
+            full
+            primary>
+            <span className="font-semibold text-nowrap">
+              {actionButtonText ?? "保存"}
+            </span>
+          </Button>
+        }
+        {
+          noDetachedTrigger &&
+          <Dialog.Close className="w-full">
+            <Button
+              onClick={() => {onSubmit()}}
+              disabled={isActionButtonDisabled}
+              full
+              primary
+              asDiv>
+              <span className="font-semibold text-nowrap">
+                {actionButtonText ?? "保存"}
+              </span>
+            </Button>
+          </Dialog.Close>
+        }
       </div>
     }>
       <>

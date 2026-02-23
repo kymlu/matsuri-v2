@@ -29,7 +29,7 @@ export default function EditNameDialog({
     >
     <TextInput
       required={required}
-      defaultValue={newName ?? ""}
+      defaultValue={name ?? ""}
       onContentChange={ (newName) => { setNewName(newName) }}
       maxLength={15}/>
   </BaseEditDialog>
