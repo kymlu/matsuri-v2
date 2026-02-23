@@ -542,8 +542,6 @@ export async function exportToPdf (
     }
   }
 
-  pdf.save(fileName)
-
   var blob = pdf.output("blob");
   
   const fullFileName = `${getSafeFileName(fileName)}.pdf`
