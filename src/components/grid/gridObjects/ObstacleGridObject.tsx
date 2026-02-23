@@ -1,4 +1,4 @@
-import { Group, Line, Rect, Text } from "react-konva";
+import { Line, Rect, Text } from "react-konva";
 import { StageGeometry } from "../../../models/choreo";
 import BaseGridObject from "./BaseGridObject";
 import Konva from "konva";
