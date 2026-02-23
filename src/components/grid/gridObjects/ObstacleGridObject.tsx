@@ -21,7 +21,7 @@ type ObstacleGridObjectProps = {
   animate: boolean,
 };
 
-const linesPerMetre = 10;
+const STRIPES_PER_METRE = 10;
 
 export default function ObstacleGridObject({
   obstacle,
@@ -43,7 +43,7 @@ export default function ObstacleGridObject({
   const stripeLines = useMemo(() => {
     const width = obstacle.width * METER_PX;
     const height = obstacle.length * METER_PX;
-    const spacing = METER_PX / linesPerMetre;
+    const spacing = METER_PX / STRIPES_PER_METRE;
 
     const dx = width;
     const dy = -height;

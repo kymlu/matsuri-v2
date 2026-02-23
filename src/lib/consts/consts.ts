@@ -1,5 +1,6 @@
 export const LAST_UPDATED = "更新 2月23日"
 export const METER_PX = 25;
+export const PDF_METER_PX = 20;
 export const PROP_SNAP_SIZE = 0.25;
 
 export const MIN_STAGE_DIMENSION = 3;
@@ -15,6 +16,8 @@ export const MAX_STAGE_MARGIN = 20;
 
 export const MIN_ZOOM = 0.3;
 export const MAX_ZOOM = 4;
+
+export const STRIPES_PER_METRE = 10;
 
 export enum CUSTOM_EVENT {
 }

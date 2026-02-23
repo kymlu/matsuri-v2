@@ -5,6 +5,8 @@ import { getSafeFileName, isNullOrUndefinedOrBlank, roundToTenth, strEquals } fr
 import { stageMetersToPx } from "./editorCalculationHelper";
 import { Coordinates } from "../../models/base";
 import JSZip from "jszip";
+import { Obstacle } from "../../models/prop";
+import { PDF_METER_PX, STRIPES_PER_METRE } from "../consts/consts";
 
 const README_TEXT =
   "このZIPには本アプリ用のデータが含まれています。\n" +
@@ -84,12 +86,10 @@ export async function exportToPdf (
   updateProgress: (progress: number) => void,
   onComplete: () => void,
 ) {
-  const gridSizePx = 20;
-
-  const titleBuffer = gridSizePx * 1.5;
-  const pageMargin = gridSizePx * 0.5;
-  const memoBuffer = gridSizePx * 6;
-  const memoWidth = gridSizePx * 5;
+  const titleBuffer = PDF_METER_PX * 1.5;
+  const pageMargin = PDF_METER_PX * 0.5;
+  const memoBuffer = PDF_METER_PX * 6;
+  const memoWidth = PDF_METER_PX * 5;
 
   const stage = choreo.stageGeometry;
   
@@ -100,17 +100,17 @@ export async function exportToPdf (
   const totalLengthM = stage.stageLength + topMarginM * 2;
   
   // stage-only dimensions
-  const stageWidthPx = stage.stageWidth * gridSizePx;
-  const stageHeightPx = stage.stageLength * gridSizePx;
+  const stageWidthPx = stage.stageWidth * PDF_METER_PX;
+  const stageHeightPx = stage.stageLength * PDF_METER_PX;
     
   // total area (stage + out of bounds) dimensions
-  const diagramWidthPx = totalWidthM * gridSizePx;
-  const diagramHeightPx = totalLengthM * gridSizePx;
+  const diagramWidthPx = totalWidthM * PDF_METER_PX;
+  const diagramHeightPx = totalLengthM * PDF_METER_PX;
 
   // stage borders
-  const stageLeftPx = sideMarginM * gridSizePx + pageMargin;
+  const stageLeftPx = sideMarginM * PDF_METER_PX + pageMargin;
   const stageRightPx = stageLeftPx + stageWidthPx;
-  const stageTopPx = topMarginM * gridSizePx;
+  const stageTopPx = topMarginM * PDF_METER_PX;
   const stageBottomPx = stageTopPx + stageHeightPx;
 
   // x of the center
@@ -119,7 +119,7 @@ export async function exportToPdf (
   // offset by 0.5m if the grid totalWidthM is uneven
   const isOddTotal = totalWidthM % 2 === 1;
   const gridOffsetMeters = isOddTotal ? 0.5 : 0;
-  const gridOffsetPx = gridOffsetMeters * gridSizePx;
+  const gridOffsetPx = gridOffsetMeters * PDF_METER_PX;
 
   const followingDancer = choreo.dancers[followingId];
   var memoLeft = diagramWidthPx + pageMargin * 2;
@@ -176,7 +176,7 @@ export async function exportToPdf (
     // draw section title 
     pdf.setTextColor(colorPalette.black);
     pdf.setFontSize(16);
-    pdf.text(section.name, centerX, gridSizePx, {maxWidth: diagramWidthPx, align: "center"});
+    pdf.text(section.name, centerX, PDF_METER_PX, {maxWidth: diagramWidthPx, align: "center"});
 
     // draw out of bounds
     pdf.setFillColor(colorPalette.offWhite);
@@ -188,13 +188,13 @@ export async function exportToPdf (
 
     // Vertical grid lines (across full area)
     for (let m = 0; m < totalWidthM - gridOffsetMeters; m++) {
-      const x = m * gridSizePx + gridOffsetPx;
+      const x = m * PDF_METER_PX + gridOffsetPx;
 
       if (m === 0) continue;
     
       const distFromCenter = Math.abs(
         x - centerX
-      ) / gridSizePx;
+      ) / PDF_METER_PX;
     
       const isMajor = Math.round(distFromCenter) % 2 === 0;
 
@@ -203,7 +203,7 @@ export async function exportToPdf (
 
     // Horizontal grid lines + right labels
     for (let m = 0; m <= totalLengthM; m++) {
-      const y = m * gridSizePx;
+      const y = m * PDF_METER_PX;
       const isMajor = m % 2 === 0;
 
       if (m > 0 && m < totalLengthM) {
@@ -216,8 +216,8 @@ export async function exportToPdf (
       if (y >= stageTopPx && y <= stageBottomPx) {
         const meterFromTop =
           stage.yAxis === "top-down" ? 
-          (y - stageTopPx) / gridSizePx :
-          (stageBottomPx - y) / gridSizePx;
+          (y - stageTopPx) / PDF_METER_PX :
+          (stageBottomPx - y) / PDF_METER_PX;
 
         pdf.setFontSize(12);
         pdf.setTextColor(colorPalette.black);
@@ -230,9 +230,9 @@ export async function exportToPdf (
       pdf.setDrawColor(colorPalette.primary);
       pdf.setFillColor(colorPalette.primary);
       pdf.triangle(
-        centerX, stageTopPx - gridSizePx * 0.3 + titleBuffer,
-        centerX - gridSizePx * 0.5, stageTopPx - gridSizePx * 1.2 + titleBuffer,
-        centerX + gridSizePx * 0.5, stageTopPx - gridSizePx * 1.2 + titleBuffer,
+        centerX, stageTopPx - PDF_METER_PX * 0.3 + titleBuffer,
+        centerX - PDF_METER_PX * 0.5, stageTopPx - PDF_METER_PX * 1.2 + titleBuffer,
+        centerX + PDF_METER_PX * 0.5, stageTopPx - PDF_METER_PX * 1.2 + titleBuffer,
         "FD"
       )
 
@@ -245,7 +245,7 @@ export async function exportToPdf (
       drawLine(pdf, colorPalette.primary, 1.25, [10, 6], centerX, 0 + titleBuffer, centerX, diagramHeightPx + titleBuffer);
         
       for (let m = 1; m < totalWidthM; m++) {
-        const x = m * gridSizePx + gridOffsetPx;
+        const x = m * PDF_METER_PX + gridOffsetPx;
       
         const isCenter = x === centerX;
         // Top numbering relative to center (stage only)
@@ -255,11 +255,11 @@ export async function exportToPdf (
           !isCenter
         ) {
           const meterFromCenter =
-          Math.abs(x - centerX) / gridSizePx;
+          Math.abs(x - centerX) / PDF_METER_PX;
   
           if (meterFromCenter % 2 !== 0) continue;
       
-          const radius = gridSizePx * 0.3;
+          const radius = PDF_METER_PX * 0.3;
           const cx = x;
           const cy = stageTopPx - 20;
 
@@ -268,7 +268,7 @@ export async function exportToPdf (
           pdf.setDrawColor(colorPalette.primary);
           pdf.setTextColor(colorPalette.white);
           pdf.circle(cx, cy + titleBuffer, radius, "F");
-          pdf.text(`${meterFromCenter}`, cx, cy - 3 + titleBuffer, {align: "center", baseline: "top", maxWidth: gridSizePx});
+          pdf.text(`${meterFromCenter}`, cx, cy - 3 + titleBuffer, {align: "center", baseline: "top", maxWidth: PDF_METER_PX});
         }
       }
     }
@@ -276,17 +276,60 @@ export async function exportToPdf (
     pdf.setLineDashPattern([], 0);
     pdf.setFontSize(8);
 
+    // Draw obstacles
+    if (choreo.obstacles) {
+      Object.values(choreo.obstacles).forEach(obstacle => {
+        context.save();
+        const positionInPx = stageMetersToPx({x: obstacle.x, y: obstacle.y}, stage, PDF_METER_PX, obstacle.length);
+        const obstacleX = positionInPx.x + pageMargin;
+        const obstacleY = positionInPx.y + titleBuffer;
+
+        const obstacleWidth  = PDF_METER_PX * obstacle.width;
+        const obstacleHeight = PDF_METER_PX * obstacle.length;
+
+        const angle = ((obstacle.rotation ?? 0) * Math.PI) / 180;
+
+        context.save();
+
+        // Move origin to the item's top-left
+        context.translate(obstacleX, obstacleY);
+
+        // Rotate around that point
+        context.rotate(angle);
+
+        // Draw the item relative to its own top-left
+        context.strokeStyle = obstacle.color;
+        context.strokeRect(0, 0, obstacleWidth, obstacleHeight);
+
+        const stripes = getStripeLines(obstacle);
+        stripes.forEach(({x1, y1, x2, y2}) => {
+          context.moveTo(x1, y1);
+          context.lineTo(x2, y2);
+          context.stroke();
+        })
+        
+        context.fillStyle = colorPalette.getTextColor(obstacle.color);
+        var textDimension = pdf.getTextDimensions(obstacle.name, {maxWidth: obstacleWidth});
+        context.fillText(obstacle.name,
+          obstacleWidth/2 - textDimension.w/2,
+          obstacleHeight/2 + (textDimension.h/3),
+          obstacleWidth);
+
+        context.restore();
+      });
+    }
+
     // Draw props
     Object.values(section.formation.propPositions).forEach(p => {
       var prop = choreo.props[p.propId];
       if (prop) {
         context.save();
-        const positionInPx = stageMetersToPx(p, stage, gridSizePx, prop.length);
+        const positionInPx = stageMetersToPx(p, stage, PDF_METER_PX, prop.length);
         const propX = positionInPx.x + pageMargin;
         const propY = positionInPx.y + titleBuffer;
 
-        const propWidth  = gridSizePx * prop.width;
-        const propHeight = gridSizePx * prop.length;
+        const propWidth  = PDF_METER_PX * prop.width;
+        const propHeight = PDF_METER_PX * prop.length;
 
         const angle = ((p.rotation ?? 0) * Math.PI) / 180;
 
@@ -319,7 +362,7 @@ export async function exportToPdf (
       if (dancer) {
         const isFollowing = strEquals(followingId, dancer.id);
   
-        const positionInPx = stageMetersToPx(p, stage, gridSizePx);
+        const positionInPx = stageMetersToPx(p, stage, PDF_METER_PX);
         const x =  positionInPx.x + pageMargin;
         const y = positionInPx.y
         
@@ -327,25 +370,25 @@ export async function exportToPdf (
           pdf.setLineWidth(1.5);
           pdf.setDrawColor(colorPalette.primary);
           pdf.setFillColor(colorPalette.white);
-          pdf.circle(x, y + titleBuffer, gridSizePx * 0.4, "FD");
+          pdf.circle(x, y + titleBuffer, PDF_METER_PX * 0.4, "FD");
         }
 
         pdf.setLineWidth(0.8);
         pdf.setDrawColor(p.color);
         pdf.setFillColor(p.color);
-        pdf.circle(x, y + titleBuffer, gridSizePx * (isFollowing ? 0.3 : 0.4), "FD");
+        pdf.circle(x, y + titleBuffer, PDF_METER_PX * (isFollowing ? 0.3 : 0.4), "FD");
   
         pdf.setTextColor(colorPalette.getTextColor(p.color));
         var displayName = dancer.name ?? "";
-        var textHeight = pdf.getTextDimensions(displayName, {maxWidth: gridSizePx}).h;
-        pdf.text(displayName, x, y - textHeight/2 + titleBuffer, {align: "center", baseline: "top", maxWidth: gridSizePx});
+        var textHeight = pdf.getTextDimensions(displayName, {maxWidth: PDF_METER_PX}).h;
+        pdf.text(displayName, x, y - textHeight/2 + titleBuffer, {align: "center", baseline: "top", maxWidth: PDF_METER_PX});
       }
     });
 
     pdf.setTextColor(colorPalette.black);
     pdf.setFontSize(12);
 
-    var memoY = gridSizePx;
+    var memoY = PDF_METER_PX;
 
     if (followingDancer) {
       var position = section.formation.dancerPositions[followingDancer.id];
@@ -483,7 +526,7 @@ export async function exportToPdf (
     // write note
     if (section.note) {
       pdf.setFont(font);
-      if (memoY > (gridSizePx * 2)) {
+      if (memoY > (PDF_METER_PX * 2)) {
         pdf.line(memoLeft, memoY, memoLeft + memoWidth, memoY);
         memoY += pdf.getTextDimensions("O", {maxWidth: memoWidth}).h * 2.2;
       }
@@ -498,6 +541,8 @@ export async function exportToPdf (
       pdf.addPage();
     }
   }
+
+  pdf.save(fileName)
 
   var blob = pdf.output("blob");
   
@@ -544,4 +589,71 @@ function drawLine(
   pdf.setLineWidth(lineWidth);
   pdf.setLineDashPattern(lineDashPattern, 0);
   pdf.line(x1, y1, x2, y2);
+}
+
+function clipLine(x0: number, y0: number, dx: number, dy: number, width: number, height: number) {
+  const points = [];
+  let t, x, y;
+
+  // x = 0
+  t = (0 - x0) / dx;
+  y = y0 + t * dy;
+  if (y >= 0 && y <= height) points.push({ x: 0, y });
+
+  // x = width
+  t = (width - x0) / dx;
+  y = y0 + t * dy;
+  if (y >= 0 && y <= height) points.push({ x: width, y });
+
+  // y = 0
+  t = (0 - y0) / dy;
+  x = x0 + t * dx;
+  if (x >= 0 && x <= width) points.push({ x, y: 0 });
+
+  // y = height
+  t = (height - y0) / dy;
+  x = x0 + t * dx;
+  if (x >= 0 && x <= width) points.push({ x, y: height });
+
+  return points.length === 2 ? points : null;
+}
+
+
+function getStripeLines(obstacle: Obstacle): {x1: number, y1: number, x2: number, y2: number}[] {
+  const width = obstacle.width * PDF_METER_PX;
+  const height = obstacle.length * PDF_METER_PX;
+  const spacing = PDF_METER_PX / STRIPES_PER_METRE;
+
+  const dx = width;
+  const dy = -height;
+  const length = Math.hypot(dx, dy);
+
+  const nx = dy / length;
+  const ny = -dx / length;
+
+  const diagLength = Math.hypot(width, height);
+  const maxOffset = Math.ceil(diagLength / spacing);
+
+  // Generate lines
+  const lines = [...Array.from({ length: maxOffset * 2 + 1 })
+    .map((_, i) => {
+      const offset = (i - maxOffset) * spacing;
+      const x0 = nx * offset;
+      const y0 = height + ny * offset;
+
+      const clipped = clipLine(x0, y0, dx, dy, width, height);
+      if (!clipped) return null;
+
+      return {
+        x1: clipped[0].x,
+        y1: clipped[0].y,
+        x2: clipped[1].x,
+        y2: clipped[1].y,
+      };
+    })
+    .filter(Boolean)];
+
+  // Add the extra diagonal across corners
+  lines.push({ x1: 0, y1: height, x2: width, y2: 0 });
+  return lines.filter(x => x !== null);
 }
