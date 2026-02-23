@@ -859,6 +859,7 @@ export default function ChoreoEditPage(props: {
         onOpenChange={handleRenameDancerDialogOpen}>
         <EditNameDialog
           name={history.presentState.state.dancers[selectedIds.dancers[0]]?.name}
+          otherNames={Object.values(history.presentState.state.dancers).map(x => x.name)}
           type="ダンサー"
           onSubmit={(name) => {
             dispatch({
