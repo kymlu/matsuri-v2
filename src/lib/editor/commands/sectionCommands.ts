@@ -1,6 +1,7 @@
 import { Choreo } from "../../../models/choreo"
 import { ChoreoSection } from "../../../models/choreoSection"
 import { DancerAction } from "../../../models/dancerAction";
+import { incrementBracketSuffix } from "../../helpers/globalHelper";
 
 export function addSection(state: Choreo, id: string): Choreo {
   const previousSection = {...state.sections[state.sections.length - 1]};
@@ -12,7 +13,7 @@ export function addSection(state: Choreo, id: string): Choreo {
       ...state.sections,
       {
         id: id,
-        name: `${previousSection.name} (1)`,
+        name: incrementBracketSuffix(previousSection.name),
         formation: previousSection
           ? { ...previousSection.formation }
           : {}

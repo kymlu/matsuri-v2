@@ -74,3 +74,14 @@ export function getSafeFileName(fileName: string) {
 export function testInvalidCharacters(text: string) {
   return RegExp(/[<>:"/\\|?*]$/g).test(text);
 }
+
+export function incrementBracketSuffix(str: string) {
+  const match = str.match(/^(.*)\((\d+)\)$/);
+
+  if (!match) return `${str} (1)`;
+
+  const base = match[1];
+  const num = parseInt(match[2], 10);
+
+  return `${base}(${num + 1})`;
+}
