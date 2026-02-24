@@ -153,26 +153,29 @@ export default function HomePage({
 
   return (
     <div className="bg-gray-50">
-      <div className="fixed top-4 right-4">
-        <Dialog.Root>
-          <Dialog.Trigger>
-            <IconButton src={ICON.personEdit} colour="primary" noBorder asDiv/>
-          </Dialog.Trigger>
-          <UserNameEditDialog name={userName ?? ""} onSubmit={(name) => setUserName(name)}/>
-        </Dialog.Root>
-      </div>
       <div className='grid py-10 px-6 h-[100svh] grid-rows-[auto,auto,auto,1fr] overflow-hide gap-2 w-full mx-auto'>
-        <Dialog.Root>
-          <Dialog.Trigger>
-            <h1 className='mx-4 mb-2 text-2xl font-bold text-center'>隊列表作成</h1>
-          </Dialog.Trigger>
-          <CustomDialog title="サイト情報" hasX>
-            <div className="flex flex-col">
-              <span>{LAST_UPDATED}</span>
-              <Button onClick={downloadLogs}>ログをダウンロード</Button>
-            </div>
-          </CustomDialog>
-        </Dialog.Root>
+        <div className="flex items-center justify-between">
+          <h1 className='text-2xl font-bold'>隊列表作成</h1>
+          <div>
+            <Dialog.Root>
+              <Dialog.Trigger>
+                <IconButton src={ICON.info} colour="primary" noBorder asDiv/>
+              </Dialog.Trigger>
+              <CustomDialog title="サイト情報" hasX>
+                <div className="flex flex-col">
+                  <span>{LAST_UPDATED}</span>
+                  <Button onClick={downloadLogs}>ログをダウンロード</Button>
+                </div>
+              </CustomDialog>
+            </Dialog.Root>
+            <Dialog.Root>
+              <Dialog.Trigger>
+                <IconButton src={ICON.personEdit} colour="primary" noBorder asDiv/>
+              </Dialog.Trigger>
+              <UserNameEditDialog name={userName ?? ""} onSubmit={(name) => setUserName(name)}/>
+            </Dialog.Root>
+          </div>
+        </div>
         <div className="flex gap-2 mb-2">
           <IconLabelButton
             full
@@ -540,7 +543,7 @@ function EventSection({
                           colour="grey"
                           size="sm"
                         />
-                        <span>{Object.keys(choreo.dancers).length}</span>
+                        <span>{Object.keys(choreo.dancers).length}人</span>
                       </div>
                     </div>
                   </div>
