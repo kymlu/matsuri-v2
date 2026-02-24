@@ -18,7 +18,7 @@ type DancerGridObjectProps = {
   isTransformerActive?: boolean;
   canEdit: boolean;
   snapToGrid?: boolean;
-  dancerDisplayType: DancerDisplayType;
+  dancerDisplayType?: DancerDisplayType;
   animate: boolean;
 };
 
@@ -33,7 +33,7 @@ export default function DancerGridObject({
   isTransformerActive,
   canEdit,
   snapToGrid,
-  dancerDisplayType,
+  dancerDisplayType = "large",
   animate
 }: DancerGridObjectProps) {
   return <>
