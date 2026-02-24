@@ -187,7 +187,7 @@ function FormationSectionItem (props: {
         {
           (!isNullOrUndefinedOrBlank(section.note) ||
           section.formation.dancerActions.length > 0 ||
-          isSelected) && 
+          (onOpenSectionMenu && isSelected)) && 
           <div className="flex items-center">
             {
               !isNullOrUndefinedOrBlank(section.note) && 
@@ -198,7 +198,7 @@ function FormationSectionItem (props: {
               <Icon colour={ isSelected? "white" : "black" } src={ICON[123]} size="sm"/>
             }
             {
-              isSelected && 
+              onOpenSectionMenu && isSelected && 
               <Icon colour={ isSelected? "white" : "black" } src={ICON.arrowDropDown} size="sm"/>
             }
           </div>
