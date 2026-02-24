@@ -12,6 +12,7 @@ import Konva from "konva";
 import { PropPosition } from "../../models/prop";
 import { StageEntities } from "../../models/history";
 import GhostLayer from "./layers/GhostLayer";
+import NextDirectionLayer from "./layers/NextDirectionLayer";
 
 Konva.hitOnDragEnabled = true;
 
@@ -38,6 +39,7 @@ type MainStageProps = {
   addObstacle?: (x: number, y: number) => void,
   appSettings: AppSetting,
   previousSection?: ChoreoSection,
+  selectedDancerMovement?: {current?: DancerPosition, next?: DancerPosition},
 }
 
 export default function MainStage({
@@ -46,7 +48,7 @@ export default function MainStage({
   hideTransformerBorder, currentChoreo, currentSection,
   updateDancerPosition, updatePropPosition, updateObstaclePosition,
   updatePropSizeAndRotate, updateObstacleSizeAndRotate, selectedIds, setSelectedIds,
-  addDancer, addProp, addObstacle, appSettings, previousSection
+  addDancer, addProp, addObstacle, appSettings, previousSection, selectedDancerMovement
 }: MainStageProps) {
   const [dancerPositions, setDancerPositions] = useState<DancerPosition[]>([]);
   const [propPositions, setPropPositions] = useState<PropPosition[]>([]);
@@ -321,6 +323,14 @@ export default function MainStage({
           snapToGrid={appSettings.snapToGrid}
           dancerDisplayType={appSettings.dancerDisplayType}
           />
+        {
+          selectedDancerMovement &&
+          <NextDirectionLayer
+            geometry={stageGeometry}
+            currentPosition={selectedDancerMovement.current}
+            nextPosition={selectedDancerMovement.next}
+          />
+        }
       </Stage>
     }
   </div>

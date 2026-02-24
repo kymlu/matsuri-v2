@@ -7,6 +7,7 @@ import CustomSelect from "../inputs/CustomSelect"
 import CustomDialog from "../basic/CustomDialog"
 import { Choreo } from "../../models/choreo"
 import { exportToPdf } from "../../lib/helpers/exportHelper"
+import CustomSwitch from "../inputs/CustomSwitch"
 
 type ExportDialogProps = {
   choreo: Choreo,
@@ -20,6 +21,7 @@ export default function ExportDialog({
   const [step, setStep] = useState<"prep" | "export">("prep");
   const [exportName, setExportName] = useState<string>("");
   const [followingId, setFollowingId] = useState<string>(selectedId);
+  const [showFollowingPath, setShowFollowingPath] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
 
   const isExportNameValid = useMemo(() => {
@@ -56,6 +58,7 @@ export default function ExportDialog({
           await exportToPdf(choreo,
             exportName,
             followingId,
+            showFollowingPath,
             (progress) => {
               setProgress(progress);
             },
@@ -65,6 +68,7 @@ export default function ExportDialog({
           onClose();
           setFollowingId("");
           setStep("prep");
+          setShowFollowingPath(false);
         }}
         isActionButtonDisabled={isExportNameValid}
       >
@@ -90,6 +94,14 @@ export default function ExportDialog({
               setFollowingId(newValue);
             }}
             />
+        }
+        {
+          <CustomSwitch
+            label="動線表示"
+            disabled={isNullOrUndefinedOrBlank(followingId)}
+            defaultChecked={false}
+            onChange={(checked) => setShowFollowingPath(checked)}
+          />
         }
         
       </BaseEditDialog>

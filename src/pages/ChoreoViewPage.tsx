@@ -25,6 +25,7 @@ export default function ChoreoViewPage(props: {
   const [selectedIds, setSelectedIds] = useState<StageEntities<string[]>>({props: [], dancers: [], obstacles: []});
   const [selectedTimingId, setSelectedTimingId] = useState<string | undefined>();
   const [selectedObjects, setSelectedObjects] = useState<StageEntities<PropPosition[], DancerPosition[]>>({dancers: [], props: [], obstacles: []});
+  const [showPaths, setShowPaths] = useState<boolean>(false);
   const [appSettings, setAppSettings] = useState<AppSetting>({
     snapToGrid: true,
     showGrid: true,
@@ -76,6 +77,9 @@ export default function ChoreoViewPage(props: {
         }}
         appSettings={appSettings}
         goToEdit={props.goToEditPage}
+        toggleShowPath={() => setShowPaths(prev => !prev)}
+        showPath={showPaths}
+        isShowPathBtnDisabled={selectedIds.dancers.length !== 1 || selectedTimingId !== undefined}
         />
       <div className="relative flex-1 overflow-hidden border-b-2 md:flex">
         <ViewerSidebar
@@ -131,6 +135,14 @@ export default function ChoreoViewPage(props: {
             setSelectedIds(action);
             setSelectedTimingId(undefined);
           }}
+          selectedDancerMovement={
+            showPaths && selectedIds.dancers.length === 1 && !selectedTimingId && nextSection ?
+            {
+              current: currentSection.formation.dancerPositions[selectedIds.dancers[0]],
+              next: nextSection.formation.dancerPositions[selectedIds.dancers[0]]
+             } :
+            undefined
+          }
         />
       </div>
       

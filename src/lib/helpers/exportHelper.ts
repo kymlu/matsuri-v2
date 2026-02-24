@@ -1,4 +1,4 @@
-import jsPDF from "jspdf";
+import jsPDF, { GState } from "jspdf";
 import { Choreo } from "../../models/choreo";
 import { colorPalette } from "../consts/colors";
 import { getSafeFileName, isNullOrUndefined, isNullOrUndefinedOrBlank, roundToTenth, strEquals } from "./globalHelper";
@@ -85,6 +85,7 @@ export async function exportToPdf (
   choreo: Choreo,
   fileName: string,
   followingId: string,
+  showFollowingPath: boolean = false,
   updateProgress: (progress: number) => void,
   onComplete: () => void,
 ) {
@@ -427,12 +428,39 @@ export async function exportToPdf (
       }
     });
 
-    pdf.setTextColor(colorPalette.black);
-    pdf.setFontSize(12);
-
     var memoY = PDF_METER_PX;
 
     if (followingDancer) {
+      if (showFollowingPath) {
+        var currentPosition = section.formation.dancerPositions[followingDancer.id];
+        var nextPosition = choreo.sections[i + 1]?.formation?.dancerPositions[followingDancer.id];
+        if (currentPosition && nextPosition &&
+          (currentPosition.x !== nextPosition.x || currentPosition.y !== nextPosition.y)) {
+            const currentPx = stageMetersToPx(currentPosition, stage, PDF_METER_PX);
+            const currentX =  currentPx.x + pageMargin;
+            const currentY = currentPx.y - startingPointDelta + titleBuffer;
+            const nextPx = stageMetersToPx(nextPosition, stage, PDF_METER_PX);
+            const nextX =  nextPx.x + pageMargin;
+            const nextY = nextPx.y - startingPointDelta + titleBuffer;
+            
+            pdf.saveGraphicsState();
+            const gState = new GState({ opacity: 0.5 });
+            pdf.setGState(gState);
+
+            pdf.setLineWidth(0.8);
+            pdf.setDrawColor(nextPosition.color);
+            pdf.setFillColor(nextPosition.color);
+
+            pdf.circle(nextX, nextY, PDF_METER_PX * 0.4, "FD");
+            drawLine(pdf, colorPalette.primary, 1, [1, 1], currentX, currentY, nextX, nextY);
+            
+            pdf.restoreGraphicsState();
+        }
+      }
+
+      pdf.setTextColor(colorPalette.black);
+      pdf.setFontSize(12);
+      
       var position = section.formation.dancerPositions[followingDancer.id];
       var displayX = "";
       var xFromCenter = stage.stageWidth / 2 - position.x;
@@ -564,6 +592,7 @@ export async function exportToPdf (
       }
     }
 
+    pdf.setTextColor(colorPalette.black);
     pdf.setFontSize(12);
     // write note
     if (section.note) {

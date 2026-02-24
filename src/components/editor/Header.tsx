@@ -30,29 +30,25 @@ type HeaderProps = {
   appSettings: AppSetting;
   goToEdit?: () => void;
   goToView?: () => void;
+  toggleShowPath?: () => void;
+  showPath?: boolean,
+  isShowPathBtnDisabled?: boolean,
 };
 
 export default function Header({
   returnHome,
   hasSidebar = false,
   currentChoreo,
-  onSave,
-  onDownload,
-  editName,
-  editSize,
-  showManageDancers,
-  manageDancers,
-  showManageProps,
-  manageProps,
+  onSave, onDownload,
+  editName, editSize,
+  showManageDancers, manageDancers,
+  showManageProps, manageProps, 
   manageSections,
   exportChoreo,
-  changeSnap,
-  changeShowGrid,
-  changeShowPrevious,
-  changeDancerSize,
+  changeSnap, changeShowGrid, changeShowPrevious, changeDancerSize,
   appSettings,
-  goToEdit,
-  goToView,
+  goToEdit, goToView,
+  toggleShowPath, showPath, isShowPathBtnDisabled
 }: HeaderProps) {
   return <header className="flex items-center justify-between w-screen gap-2 p-2 border-b-2 select-none from-white to-transparent ">
     <div className="flex">
@@ -82,6 +78,16 @@ export default function Header({
             goToView();
           } }}
         />
+      {
+        toggleShowPath &&
+        <IconButton
+          colour="black"
+          src={showPath ? ICON.doNotStep : ICON.podiatry}
+          noBorder
+          onClick={toggleShowPath}
+          disabled={isShowPathBtnDisabled}
+          />
+      }
       {
         onDownload &&
         <CustomMenu trigger={
