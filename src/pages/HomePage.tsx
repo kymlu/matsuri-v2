@@ -40,12 +40,14 @@ export default function HomePage({
 }: HomePageProps) {
   const [savedChoreos, setSavedChoreos] = useState<Choreo[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     loadChoreos();
   }, []);
 
   const loadChoreos = () => {
+    setIsLoading(true);
     getAllChoreos().then((choreos) => {
       if(!choreos.find(c => strEquals(c.id, SampleStage.id))) {
         choreos.push(z.parse(ChoreoSchema, SampleStage));
@@ -60,6 +62,7 @@ export default function HomePage({
           }
         });
         setSavedChoreos(choreos);
+        setIsLoading(false);
       });
     });
   }
@@ -200,10 +203,11 @@ export default function HomePage({
           clearable/>
         <div className="h-full space-y-4 overflow-scroll">
           {
-            Object.entries(filteredChoreos).length === 0 &&
+            !isLoading && Object.entries(filteredChoreos).length === 0 &&
             <div className="mt-4 text-center">隊列表はありません</div>
           }
           {
+            !isLoading &&
             Object.entries(filteredChoreos).map(([eventName, choreos]) =>
               <EventSection
                 key={eventName}
