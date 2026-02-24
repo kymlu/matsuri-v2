@@ -6,10 +6,11 @@ export interface CustomSwitchProps {
   defaultChecked?: boolean,
   onChange?: (checked: boolean) => void,
   ref?: React.Ref<any>,
+  disabled?: boolean,
 }
 
 export default function CustomSwitch({
-  label, defaultChecked, onChange, ref
+  label, defaultChecked, onChange, ref, disabled
 }: CustomSwitchProps){
   const [checked, setChecked] = React.useState<boolean>(defaultChecked ?? false);
 
@@ -25,9 +26,10 @@ export default function CustomSwitch({
   }
 
   return (
-    <div className={"grid gap-2 items-center my-2 mr-2 " + (label ? "grid-cols-[auto,1fr]" : "")}>
+    <div className={"grid gap-2 items-center my-2 mr-2 " + (disabled ? "opacity-50 " : "") + (label ? "grid-cols-[auto,1fr]" : "")}>
       {label && <label>{label}</label>}
       <Switch.Root
+        disabled={disabled}
         checked={checked}
         defaultChecked={defaultChecked ?? false}
         onCheckedChange={(checked) => {handleChange(checked)}}
