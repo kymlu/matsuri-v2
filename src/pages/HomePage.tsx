@@ -1,7 +1,7 @@
 import { Dialog, Menu } from "@base-ui/react"
 import CustomDialog from "../components/basic/CustomDialog"
 import { ICON, LAST_UPDATED } from "../lib/consts/consts"
-import Button, { IconLabelButton } from "../components/basic/Button"
+import { IconLabelButton } from "../components/basic/Button"
 import Icon from "../components/basic/Icon"
 import { readUploadedFile } from "../lib/helpers/uploadHelper"
 import { useEffect, useMemo, useState } from "react"
@@ -158,16 +158,17 @@ export default function HomePage({
     <div className="bg-gray-50">
       <div className='grid py-10 px-6 h-[100svh] grid-rows-[auto,auto,auto,1fr] overflow-hide gap-2 w-full mx-auto'>
         <div className="flex items-center justify-between">
-          <h1 className='text-2xl font-bold'>隊列表作成</h1>
+          <h1 className='text-2xl font-bold'>隊列表一覧</h1>
           <div>
             <Dialog.Root>
               <Dialog.Trigger>
                 <IconButton src={ICON.info} colour="primary" noBorder asDiv/>
               </Dialog.Trigger>
               <CustomDialog title="サイト情報" hasX>
-                <div className="flex flex-col">
-                  <span>{LAST_UPDATED}</span>
-                  <Button onClick={downloadLogs}>ログをダウンロード</Button>
+                <div className="flex flex-col justify-center gap-2 mb-4">
+                  <span className="mb-2 text-center">問題がある場合は、<br/><b>ケイティー</b>まで<br/>問い合わせてください</span>
+                  <IconLabelButton label="ログをダウンロード" icon={ICON.download} primary onClick={downloadLogs}/>
+                  <span className="text-center text-gray-600">{LAST_UPDATED}</span>
                 </div>
               </CustomDialog>
             </Dialog.Root>
