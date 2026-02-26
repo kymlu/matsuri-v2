@@ -26,6 +26,8 @@ import EditNameDialog from "../components/dialogs/EditNameDialog"
 import TextInput from "../components/inputs/TextInput"
 import { loadAllForYear } from "../lib/dataAccess/FileAccess"
 import UserNameEditDialog from "../components/dialogs/UserNameEditDialog"
+import { Oval } from "react-loader-spinner"
+import { colorPalette } from "../lib/consts/colors"
 
 type HomePageProps = {
   goToNewChoreoPage: (eventName?: string) => void,
@@ -206,6 +208,13 @@ export default function HomePage({
           {
             !isLoading && Object.entries(filteredChoreos).length === 0 &&
             <div className="mt-4 text-center">隊列表はありません</div>
+          }
+          {
+            isLoading &&
+            <Oval
+              wrapperClass="mt-4 justify-self-center"
+              color={colorPalette.primary}
+              secondaryColor={colorPalette.rainbow.red[2]}/>
           }
           {
             !isLoading &&
