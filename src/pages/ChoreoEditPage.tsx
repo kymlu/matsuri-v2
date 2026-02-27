@@ -236,7 +236,6 @@ export default function ChoreoEditPage(props: {
 
   const onSave = useCallback(() => {
     if (isDirty.current) {
-      console.log("Saving state to db: ", history.presentState.state);
       saveChoreo(history.presentState.state, () => { isDirty.current = false }, true);
     }
   }, [history.presentState.state]);
