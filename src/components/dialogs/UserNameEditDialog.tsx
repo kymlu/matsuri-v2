@@ -22,7 +22,7 @@ export default function UserNameEditDialog ({
     onSubmit={() => onSubmit(newName)}
     noDetachedTrigger
     >
-    <span>名前を入力すると、隊列にその名前があれば自動的に選択されます。</span>
+    <span>名前を入力すると、隊列内に同じ名前があれば自動で選択されます。</span>
     <TextInput
       defaultValue={name ?? ""}
       onContentChange={ (newName) => { setNewName(newName) }}
