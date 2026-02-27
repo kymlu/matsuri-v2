@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react"
 import TextInput from "../inputs/TextInput"
 import BaseEditDialog from "./BaseEditDialog"
 import { Dancer } from "../../models/dancer"
-import { getSafeFileName, isNullOrUndefinedOrBlank, strCompare, testInvalidCharacters } from "../../lib/helpers/globalHelper"
+import { getDefaultFileName, isNullOrUndefinedOrBlank, strCompare, testInvalidCharacters } from "../../lib/helpers/globalHelper"
 import CustomSelect from "../inputs/CustomSelect"
 import CustomDialog from "../basic/CustomDialog"
 import { Choreo } from "../../models/choreo"
@@ -40,7 +40,7 @@ export default function ExportDialog({
   }, [choreo]);
 
   const defaultName = useMemo(() => {
-    return getSafeFileName(`${isNullOrUndefinedOrBlank(choreo.event) ? "" : `${choreo.event} - `}${choreo.name}`);
+    return getDefaultFileName(choreo);
   }, [choreo]);
 
   useEffect(() => {

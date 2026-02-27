@@ -1,7 +1,7 @@
 import jsPDF, { GState } from "jspdf";
 import { Choreo } from "../../models/choreo";
 import { colorPalette } from "../consts/colors";
-import { getSafeFileName, isNullOrUndefined, isNullOrUndefinedOrBlank, roundToTenth, strEquals } from "./globalHelper";
+import { getDefaultFileName, getSafeFileName, isNullOrUndefined, isNullOrUndefinedOrBlank, roundToTenth, strEquals } from "./globalHelper";
 import { stageMetersToPx } from "./editorCalculationHelper";
 import { Coordinates } from "../../models/base";
 import JSZip from "jszip";
@@ -52,8 +52,7 @@ async function downloadZip(zip: JSZip, fileName: string) {
 export async function exportChoreo(choreo: Choreo) {
   const zip = new JSZip();
 
-  const fileName = getSafeFileName(`${choreo.event} - ${choreo.name}`);
-  
+  const fileName = getDefaultFileName(choreo);  
   zip.file(
     `${fileName}.mtr`,
     JSON.stringify(choreo)

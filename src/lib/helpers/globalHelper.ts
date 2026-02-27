@@ -1,3 +1,5 @@
+import { Choreo } from "../../models/choreo";
+
 export function strEquals(str1: string | null | undefined, str2: string | null | undefined) {
   return !isNullOrUndefined(str1) && !isNullOrUndefined(str2) && str1?.localeCompare?.(str2!) === 0
 }
@@ -69,6 +71,11 @@ export function testFilename(fileName: string) {
 
 export function getSafeFileName(fileName: string) {
   return fileName.replace(/[\\/:*?"<>|]/g, "_");
+}
+
+export function getDefaultFileName(choreo: Choreo): string {
+  return getSafeFileName(isNullOrUndefinedOrBlank(choreo.event) ?
+    choreo.name : `${choreo.event} - ${choreo.name}`);
 }
 
 export function testInvalidCharacters(text: string) {
