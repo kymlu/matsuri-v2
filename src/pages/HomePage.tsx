@@ -199,7 +199,7 @@ export default function HomePage({
         </div>
         <TextInput
           defaultValue={searchTerm}
-          placeholder="隊列、イベントを探す"
+          placeholder="隊列表、イベントを探す"
           onContentChange={(newSearchTerm) => setSearchTerm(newSearchTerm)}
           search
           maxLength={100}
