@@ -576,19 +576,19 @@ function EventSection({
               <div className="flex flex-col gap-2">
                 <Dialog.Close>
                   <IconLabelButton
-                    icon={ICON.fileCopy}
-                    label="複製"
-                    asDiv
-                    onClick={() => duplicateChoreo(selectedChoreo)}
-                    full />
-                </Dialog.Close>
-
-                <Dialog.Close>
-                  <IconLabelButton
                     icon={ICON.textFieldsAlt}
                     label="名前編集"
                     asDiv
                     onClick={() => editChoreoName(selectedChoreo)}
+                    full />
+                </Dialog.Close>
+                
+                <Dialog.Close>
+                  <IconLabelButton
+                    icon={ICON.fileCopy}
+                    label="複製"
+                    asDiv
+                    onClick={() => duplicateChoreo(selectedChoreo)}
                     full />
                 </Dialog.Close>
 
