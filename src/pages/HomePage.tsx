@@ -1,13 +1,13 @@
 import { Dialog, Menu } from "@base-ui/react"
 import CustomDialog from "../components/basic/CustomDialog"
 import { ICON, LAST_UPDATED } from "../lib/consts/consts"
-import { IconLabelButton } from "../components/basic/Button"
+import Button, { IconLabelButton } from "../components/basic/Button"
 import Icon from "../components/basic/Icon"
 import { readUploadedFile } from "../lib/helpers/uploadHelper"
 import { useEffect, useMemo, useState } from "react"
 import { deleteChoreo, getAllChoreos, saveChoreo, saveChoreos } from "../lib/dataAccess/DataController"
 import { Choreo, ChoreoSchema } from "../models/choreo"
-import { groupByKey, isNullOrUndefinedOrBlank, strCompare, strEquals } from "../lib/helpers/globalHelper"
+import { groupByKey, indexByKey, isNullOrUndefinedOrBlank, strCompare, strEquals } from "../lib/helpers/globalHelper"
 import { downloadLogs } from "../lib/helpers/logHelper"
 import { getDate } from "../lib/helpers/dateHelper"
 import IconButton from "../components/basic/IconButton"
@@ -36,13 +36,18 @@ type HomePageProps = {
   setUserName: (newName: string) => void,
 }
 
+type ChoreoWithStatus = Choreo & {
+  status: "localOnly" | "syncRequired" | "upToDate" | "edited"
+}
+
 export default function HomePage({
   goToNewChoreoPage, goToViewPage,
   userName, setUserName,
 }: HomePageProps) {
-  const [savedChoreos, setSavedChoreos] = useState<Choreo[]>([]);
+  const [savedChoreos, setSavedChoreos] = useState<ChoreoWithStatus[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [choreosFromServer, setChoreosFromServer] = useState<Record<string, Choreo>>({});
 
   useEffect(() => {
     loadChoreos();
@@ -50,36 +55,59 @@ export default function HomePage({
 
   const loadChoreos = () => {
     setIsLoading(true);
-    getAllChoreos().then((choreos) => {
-      if(!choreos.find(c => strEquals(c.id, SampleStage.id))) {
-        choreos.push(z.parse(ChoreoSchema, SampleStage));
-      }
-      if(!choreos.find(c => strEquals(c.id, SampleParade.id))) {
-        choreos.push(z.parse(ChoreoSchema, SampleParade));
-      }
-      loadAllForYear("2026").then((choreosForYear) => {
-        choreosForYear.forEach(choreo => {
-          if (!choreos.find(c => strEquals(c.id, choreo.id))) {
-            choreos.push(choreo);
+    Promise.all([
+      getAllChoreos(),
+      loadAllForYear("2026")
+    ]).then(([local, server]) => {
+      server.push(z.parse(ChoreoSchema, SampleParade));
+      server.push(z.parse(ChoreoSchema, SampleStage));
+      const choreos: ChoreoWithStatus[] = [];
+      const choreosFromServer: Record<string, Choreo> = {};
+      const indexedLocal = indexByKey(local, "id");
+      const indexedServer = indexByKey(server, "id");
+      const allIds = new Set([...Object.keys(indexedLocal), ...Object.keys(indexedServer)]);
+      
+      allIds.forEach((id) => {
+        const localChoreo = indexedLocal[id];
+        const serverChoreo = indexedServer[id];
+        if (!localChoreo) {
+          choreos.push({...serverChoreo, status: "upToDate"});
+        } else if (!serverChoreo) {
+          choreos.push({...localChoreo, status: "localOnly"});
+        } else if (serverChoreo.version !== localChoreo.version) {
+          if (localChoreo.isDirty === true || localChoreo.isDirty === undefined) {
+            choreosFromServer[serverChoreo.id] = serverChoreo;
+            choreos.push({...localChoreo, status: "syncRequired"});
+          } else {
+            saveChoreo(serverChoreo, () => {}, false, false);
+            choreos.push({...serverChoreo, status: "upToDate"});
           }
-        });
-        setSavedChoreos(choreos);
-        setIsLoading(false);
+        } else {
+          if (localChoreo.isDirty === true || localChoreo.isDirty === undefined) {
+            choreosFromServer[serverChoreo.id] = serverChoreo;
+            choreos.push({...localChoreo, status: "edited"});
+          } else {
+            choreos.push({...serverChoreo, status: "upToDate"});
+          }
+        }
       });
+      setSavedChoreos(choreos);
+      setChoreosFromServer(choreosFromServer);
+      setIsLoading(false);
     });
   }
 
-  const groupChoreos = (choreos: Choreo[]) => {
+  const groupChoreos = (choreos: ChoreoWithStatus[]) => {
     return groupByKey(
       choreos.sort((a, b) => {
-        const eventCmp = strCompare<Choreo>(a, b, "event");
+        const eventCmp = strCompare<ChoreoWithStatus>(a, b, "event");
         if (eventCmp !== 0) return eventCmp;
 
         const dateA = a.lastUpdated ? new Date(a.lastUpdated)?.getTime() : 0;
         const dateB = b.lastUpdated ? new Date(b.lastUpdated)?.getTime() : 0;
         if (dateA !== dateB) return dateB - dateA;
 
-        return strCompare<Choreo>(a, b, "name");
+        return strCompare<ChoreoWithStatus>(a, b, "name");
       }),
       "event"
     )
@@ -103,10 +131,17 @@ export default function HomePage({
     setEventNameDialogOpen(isOpen);
   }
 
+  const [deleteChoreoVerb, setDeleteChoreoVerb] = useState<"削除"| "破棄">("削除");
   const [deleteChoreoDialogOpen, setDeleteChoreoDialogOpen] = useState(false);
   const deleteChoreoDialog = Dialog.createHandle<{}>();
   const handleDeleteChoreoDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setDeleteChoreoDialogOpen(isOpen);
+  };
+
+  const [syncChoreoDialogOpen, setSyncChoreoDialogOpen] = useState(false);
+  const syncChoreoDialog = Dialog.createHandle<{}>();
+  const handleSyncChoreoDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
+    setSyncChoreoDialogOpen(isOpen);
   };
 
   const [uploadErrorMessage, setUploadErrorMessage] = useState<string>("");
@@ -152,7 +187,7 @@ export default function HomePage({
       lastUpdated: new Date().toISOString(),
     } as Choreo;
     saveChoreo(newChoreo, () => {
-      setSavedChoreos(prev => [...prev, newChoreo]);
+      setSavedChoreos(prev => [...prev, {...newChoreo, status: "localOnly"}]);
     });
   }
 
@@ -167,7 +202,7 @@ export default function HomePage({
                 <IconButton src={ICON.info} colour="primary" noBorder asDiv/>
               </Dialog.Trigger>
               <CustomDialog title="サイト情報" hasX>
-                <div className="flex flex-col justify-center gap-2 mb-4">
+                <div className="flex flex-col justify-center gap-2 mb-2">
                   <span className="mb-2 text-center">問題がある場合は、<br/><b>ケイティー</b>まで<br/>問い合わせてください</span>
                   <IconLabelButton label="ログをダウンロード" icon={ICON.download} primary onClick={downloadLogs}/>
                   <span className="text-center text-gray-600">{LAST_UPDATED}</span>
@@ -231,8 +266,18 @@ export default function HomePage({
                   setEditChoreoInfoDialogOpen(true);
                 }}
                 deleteChoreo={(choreo) => {
+                  setDeleteChoreoVerb("削除");
                   setEditingChoreo(choreo);
                   setDeleteChoreoDialogOpen(true);
+                }}
+                revertChoreo={(choreo) => {
+                  setDeleteChoreoVerb("破棄");
+                  setEditingChoreo(choreo);
+                  setDeleteChoreoDialogOpen(true);
+                }}
+                syncChoreo={(choreo) => {
+                  setEditingChoreo(choreo);
+                  setSyncChoreoDialogOpen(true);
                 }}
                 onPdfExport={(choreo) => {
                   setExportingChoreo(choreo);
@@ -358,12 +403,89 @@ export default function HomePage({
           }
         </Dialog.Root>
         <Dialog.Root
+          handle={syncChoreoDialog}
+          open={syncChoreoDialogOpen}
+          onOpenChange={handleSyncChoreoDialogOpen}>
+            
+          <CustomDialog
+            title="確認"
+            hasX
+            onClose={() => setSyncChoreoDialogOpen(false)}
+          >
+            <p>この隊列表には最新の内容があります。</p>
+            <p>現在の変更をどうしますか？</p>
+            <div className="space-y-1">
+              <Dialog.Close
+                className="w-full"
+                onClick={() => {
+                  if (editingChoreo) {
+                    setSyncChoreoDialogOpen(false);
+                    setEditingChoreo(undefined);
+                    goToViewPage(editingChoreo);
+                  }
+                }}
+                >
+                <Button
+                  asDiv
+                  full
+                  >
+                  <span className="font-semibold text-nowrap">
+                    このまま開く
+                  </span>
+                </Button>
+              </Dialog.Close>
+              <Dialog.Close
+                className="w-full"
+                onClick={() => {
+                  if(editingChoreo) {
+                    duplicateChoreo(editingChoreo);
+                    deleteChoreo(editingChoreo.id, () => {
+                      goToViewPage(choreosFromServer[editingChoreo.id]);
+                    });
+                  }
+                }}
+                >
+                <Button
+                  asDiv
+                  full
+                  >
+                  <span className="font-semibold text-nowrap">
+                    コピーして最新版へ
+                  </span>
+                </Button>
+              </Dialog.Close>
+              <Dialog.Close
+                className="w-full"
+                onClick={() => {
+                  if (editingChoreo) {
+                    deleteChoreo(editingChoreo.id, () => {
+                      syncChoreoDialog.close();
+                      setSyncChoreoDialogOpen(false);
+                      setEditingChoreo(undefined);
+                      goToViewPage(choreosFromServer[editingChoreo.id]);
+                    });
+                  }
+                }}
+                >
+                <Button
+                  asDiv
+                  full
+                  >
+                  <span className="font-semibold text-nowrap">
+                    破棄して最新版へ
+                  </span>
+                </Button>
+              </Dialog.Close>
+            </div>
+          </CustomDialog>
+        </Dialog.Root>
+        <Dialog.Root
           handle={deleteChoreoDialog}
           open={deleteChoreoDialogOpen}
           onOpenChange={handleDeleteChoreoDialogOpen}>
             
           <BaseEditDialog
-            title={`本当に${editingChoreo?.name}を削除しますか？`}
+            title={`${deleteChoreoVerb}確認`}
             actionButtonText="OK"
             onSubmit={() => {
               if (editingChoreo) {
@@ -375,7 +497,8 @@ export default function HomePage({
                 });
               }
             }}>
-            この操作は取り消せません。
+            <p>本当に<b> {editingChoreo?.name} </b>を{deleteChoreoVerb}しますか？</p>
+            <p>この操作は取り消せません。</p>
           </BaseEditDialog>
         </Dialog.Root>
         <Dialog.Root
@@ -417,8 +540,9 @@ export default function HomePage({
               const newChoreo = {
                 ...uploadedChoreo!,
                 id: crypto.randomUUID(),
-                name: `${uploadedChoreo!.name} - コピー`
-              };
+                name: `${uploadedChoreo!.name} - コピー`,
+                isDirty: false,
+              } as Choreo;
               saveChoreo(newChoreo, () => {goToViewPage(newChoreo)});
               setUploadedChoreo(undefined);
               setUploadChoreoDialogOpen(false);
@@ -428,7 +552,8 @@ export default function HomePage({
               const newChoreo = {
                 ...uploadedChoreo!,
                 id: duplicateChoreoId ?? crypto.randomUUID(),
-              };
+                isDirty: true,
+              } as Choreo;
               saveChoreo(newChoreo, () => {goToViewPage(newChoreo)});
               setUploadedChoreo(undefined);
               setUploadChoreoDialogOpen(false);
@@ -442,7 +567,7 @@ export default function HomePage({
 
 type EventSectionProps = {
   eventName: string,
-  choreos: Choreo[],
+  choreos: ChoreoWithStatus[],
   searchTerm: string,
   addEvent: () => void,
   editEventName: () => void,
@@ -450,17 +575,19 @@ type EventSectionProps = {
   duplicateChoreo: (choreo: Choreo) => void,
   editChoreoName: (choreo: Choreo) => void,
   deleteChoreo: (choreo: Choreo) => void,
+  revertChoreo: (choreo: Choreo) => void,
+  syncChoreo: (choreo: Choreo) => void,
   onPdfExport: (choreo: Choreo) => void,
 }
 
 function EventSection({
   eventName, choreos, searchTerm, goToViewPage, addEvent, editEventName,
-  duplicateChoreo, editChoreoName, deleteChoreo, onPdfExport
+  duplicateChoreo, editChoreoName, deleteChoreo, revertChoreo, syncChoreo, onPdfExport
 }: EventSectionProps) {
   const [isExpanded, setIsExpanded] = useState<boolean>(true);
   const optionsDialog = Dialog.createHandle<Choreo>();
   const [optionsDialogOpen, setOptionsDialogOpen] = React.useState(false);
-  const [selectedChoreo, setSelectedChoreo] = useState<Choreo | undefined>();
+  const [selectedChoreo, setSelectedChoreo] = useState<ChoreoWithStatus | undefined>();
 
   const handleOptionsDialogOpenChange = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setOptionsDialogOpen(isOpen);
@@ -510,26 +637,43 @@ function EventSection({
                 choreo.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 choreo.event.toLowerCase().includes(searchTerm.toLowerCase())) &&
                 <div
-                  onClick={() => {goToViewPage(choreo)}}
-                  className="flex flex-col justify-between h-full p-2 transition-colors bg-white border border-gray-400 rounded-md cursor-pointer">
+                  onClick={() => {
+                    const {status, ...c} = choreo;
+                    if (status === "syncRequired") {
+                      syncChoreo(c);
+                    } else {
+                      goToViewPage(c);
+                    }
+                  }}
+                  className="relative flex flex-col justify-between h-full p-2 transition-colors bg-white border border-gray-400 rounded-md cursor-pointer">
                   {/* Title */}
                   <div className="flex flex-row items-start justify-between gap-2">
                     <span className="text-lg font-medium text-left break-words text-wrap">
                       {choreo.name}
                     </span>
-                    <Dialog.Trigger id={choreo.id} payload={choreo} handle={optionsDialog} onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedChoreo(choreo);
-                      setOptionsDialogOpen(true);
-                    }}>
-                      <IconButton
-                        src={ICON.moreVert}
-                        colour="grey"
-                        size="sm"
-                        noBorder
-                        asDiv
-                      />
-                    </Dialog.Trigger>
+                    <div className="flex flex-row gap-2">
+                      {
+                        choreo.status === "syncRequired" &&
+                        <div className="p-1 text-sm font-semibold text-white border rounded-md text-nowrap bg-primary border-primary">要確認</div>
+                      }
+                      {
+                        (choreo.status === "localOnly" || choreo.status === "edited") &&
+                        <div className="p-1 text-sm text-gray-600 bg-white border border-gray-600 rounded-md text-nowrap">未公開</div>
+                      }
+                      <Dialog.Trigger id={choreo.id} payload={choreo} handle={optionsDialog} onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedChoreo(choreo);
+                        setOptionsDialogOpen(true);
+                      }}>
+                        <IconButton
+                          src={ICON.moreVert}
+                          colour="grey"
+                          size="sm"
+                          noBorder
+                          asDiv
+                        />
+                      </Dialog.Trigger>
+                    </div>
                   </div>
                   {/* Meta row */}
                   <div className="items-center justify-between text-sm text-gray-500 md:flex">
@@ -576,19 +720,19 @@ function EventSection({
               <div className="flex flex-col gap-2">
                 <Dialog.Close>
                   <IconLabelButton
-                    icon={ICON.fileCopy}
-                    label="複製"
+                    icon={ICON.textFieldsAlt}
+                    label="名前編集"
                     asDiv
-                    onClick={() => duplicateChoreo(selectedChoreo)}
+                    onClick={() => editChoreoName(selectedChoreo)}
                     full />
                 </Dialog.Close>
 
                 <Dialog.Close>
                   <IconLabelButton
-                    icon={ICON.textFieldsAlt}
-                    label="名前編集"
+                    icon={ICON.fileCopy}
+                    label="複製"
                     asDiv
-                    onClick={() => editChoreoName(selectedChoreo)}
+                    onClick={() => duplicateChoreo(selectedChoreo)}
                     full />
                 </Dialog.Close>
 
@@ -610,15 +754,47 @@ function EventSection({
                     full />
                 </Dialog.Close>
 
-                <Dialog.Close>
-                  <IconLabelButton
-                    primaryText
-                    icon={ICON.delete}
-                    label="削除"
-                    asDiv
-                    onClick={() => deleteChoreo(selectedChoreo)}
-                    full />
-                </Dialog.Close>
+                {
+                  selectedChoreo.status === "localOnly" &&
+                  <Dialog.Close>
+                    <IconLabelButton
+                      primaryText
+                      icon={ICON.delete}
+                      label="削除"
+                      asDiv
+                      onClick={() => deleteChoreo(selectedChoreo)}
+                      full />
+                  </Dialog.Close>
+                }
+
+                {
+                  selectedChoreo.status === "syncRequired" &&
+                  <Dialog.Close>
+                    <IconLabelButton
+                      primaryText
+                      icon={ICON.warning}
+                      label="確認"
+                      asDiv
+                      onClick={() => {
+                        const {status, ...c} = selectedChoreo;
+                        syncChoreo(c);
+                      }}
+                      full />
+                  </Dialog.Close>
+                }
+
+                {
+                  selectedChoreo.status === "edited" &&
+                  <Dialog.Close>
+                    <IconLabelButton
+                      primaryText
+                      icon={ICON.restorePage}
+                      label="変更を破棄"
+                      asDiv
+                      onClick={() => revertChoreo(selectedChoreo)}
+                      full />
+                  </Dialog.Close>
+                }
               </div>
             </CustomDialog>
           }
