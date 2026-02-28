@@ -29,7 +29,6 @@ import UserNameEditDialog from "../components/dialogs/UserNameEditDialog"
 import { Oval } from "react-loader-spinner"
 import { colorPalette } from "../lib/consts/colors"
 import EditChoreoInfoDialog from "../components/dialogs/EditChoreoInfoDialog"
-import { eventNames } from "process"
 
 type HomePageProps = {
   eventList: string[]
