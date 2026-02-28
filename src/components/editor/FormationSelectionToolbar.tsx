@@ -48,6 +48,7 @@ export default function FormationSelectionToolbar({
           src={ICON.menu}
           size="sm"
           asDiv
+          colour="grey"
         />
       </Drawer.Trigger>
       <Drawer.Portal>
@@ -134,6 +135,7 @@ export default function FormationSelectionToolbar({
       <IconButton
         size="sm"
         src={ICON.add}
+        colour="grey"
         onClick={() => {onClickAddButton?.(crypto.randomUUID())}}
       />
     }
