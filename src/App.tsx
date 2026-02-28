@@ -12,6 +12,7 @@ type Mode = "home" | "form" | "edit" | "view";
 function App() {
   const [mode, setMode] = useState<Mode>("home");
   const [selectedEvent, setSelectedEventName] = useState<string | undefined>();
+  const [eventList, setEventList] = useState<string[]>([]);
   const [currentChoreo, setCurrentChoreo] = useState<Choreo | undefined>();
   const [name, setName] = useState<string | null>(null);
 
@@ -32,6 +33,10 @@ function App() {
     <div>
       {mode === "home" && (
         <HomePage
+          eventList={eventList}
+          setEventList={(eventList) => {
+            setEventList(eventList);
+          }}
           goToNewChoreoPage={(event) => {
             setSelectedEventName(event);
             setMode("form");
@@ -51,6 +56,7 @@ function App() {
             setCurrentChoreo(choreo);
             setMode("edit");
           }}
+          eventList={eventList}
           eventName={selectedEvent}
         />
       )}
@@ -62,6 +68,7 @@ function App() {
             setCurrentChoreo(choreo);
             setMode("view");
           }}
+          eventList={eventList}
         />
       )}
       {mode === "view" && (

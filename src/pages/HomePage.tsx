@@ -7,7 +7,7 @@ import { readUploadedFile } from "../lib/helpers/uploadHelper"
 import { useEffect, useMemo, useState } from "react"
 import { deleteChoreo, getAllChoreos, saveChoreo, saveChoreos } from "../lib/dataAccess/DataController"
 import { Choreo, ChoreoSchema } from "../models/choreo"
-import { groupByKey, isNullOrUndefinedOrBlank, strCompare, strEquals } from "../lib/helpers/globalHelper"
+import { isNullOrUndefinedOrBlank, mapByKey, strCompare, strEquals } from "../lib/helpers/globalHelper"
 import { downloadLogs } from "../lib/helpers/logHelper"
 import { getDate } from "../lib/helpers/dateHelper"
 import IconButton from "../components/basic/IconButton"
@@ -28,8 +28,12 @@ import { loadAllForYear } from "../lib/dataAccess/FileAccess"
 import UserNameEditDialog from "../components/dialogs/UserNameEditDialog"
 import { Oval } from "react-loader-spinner"
 import { colorPalette } from "../lib/consts/colors"
+import EditChoreoInfoDialog from "../components/dialogs/EditChoreoInfoDialog"
+import { eventNames } from "process"
 
 type HomePageProps = {
+  eventList: string[]
+  setEventList: (eventList: string[]) => void,
   goToNewChoreoPage: (eventName?: string) => void,
   goToViewPage: (choreo: Choreo) => void,
   userName: string | null,
@@ -37,6 +41,7 @@ type HomePageProps = {
 }
 
 export default function HomePage({
+  eventList, setEventList,
   goToNewChoreoPage, goToViewPage,
   userName, setUserName,
 }: HomePageProps) {
@@ -69,8 +74,19 @@ export default function HomePage({
     });
   }
 
+  useEffect(() => {
+    setEventList(Array.from(
+      new Set(
+        savedChoreos
+          .map(x => x.event)
+          .filter(x => !isNullOrUndefinedOrBlank(x))
+          .sort()
+      )
+    ));
+  }, [savedChoreos]);
+
   const groupChoreos = (choreos: Choreo[]) => {
-    return groupByKey(
+    return mapByKey(
       choreos.sort((a, b) => {
         const eventCmp = strCompare<Choreo>(a, b, "event");
         if (eventCmp !== 0) return eventCmp;
@@ -206,7 +222,7 @@ export default function HomePage({
           clearable/>
         <div className="h-full space-y-4 overflow-scroll">
           {
-            !isLoading && Object.entries(filteredChoreos).length === 0 &&
+            !isLoading && filteredChoreos.size === 0 &&
             <div className="mt-4 text-center">隊列表はありません</div>
           }
           {
@@ -218,7 +234,7 @@ export default function HomePage({
           }
           {
             !isLoading &&
-            Object.entries(filteredChoreos).map(([eventName, choreos]) =>
+            Array.from(filteredChoreos).map(([eventName, choreos]) =>
               <EventSection
                 key={eventName}
                 eventName={eventName}
@@ -304,13 +320,13 @@ export default function HomePage({
           handle={editChoreoInfoDialog}
           open={editChoreoInfoDialogOpen}
           onOpenChange={handleEditChoreoInfoDialogOpen}>
-          <EditNameDialog
-            name={editingChoreo?.name}
-            type="隊列表"
+          <EditChoreoInfoDialog
+            choreo={editingChoreo}
+            eventList={eventList}
             onClose={() => {setEditingChoreo(undefined)}}
-            onSubmit={(name: string) => {
+            onSubmit={(name: string, event: string) => {
               if (editingChoreo) {
-                saveChoreo({...editingChoreo, name}, () => {
+                saveChoreo({...editingChoreo, name, event}, () => {
                   editChoreoInfoDialog.close();
                   setEditChoreoInfoDialogOpen(false);
                   setEditingChoreo(undefined);
@@ -576,8 +592,8 @@ function EventSection({
               <div className="flex flex-col gap-2">
                 <Dialog.Close>
                   <IconLabelButton
-                    icon={ICON.textFieldsAlt}
-                    label="名前編集"
+                    icon={ICON.edit}
+                    label="隊列情報変更"
                     asDiv
                     onClick={() => editChoreoName(selectedChoreo)}
                     full />

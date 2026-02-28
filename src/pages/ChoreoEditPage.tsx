@@ -55,6 +55,7 @@ export default function ChoreoEditPage(props: {
   goToHomePage: () => void,
   currentChoreo: Choreo,
   goToViewPage: (newChoreo: Choreo) => void,
+  eventList: string[],
 }) {
   const [currentSection, setCurrentSection] = useState<ChoreoSection>(props.currentChoreo.sections[0]);
   const [currentAction, setCurrentAction] = useState<DancerAction | undefined>();
@@ -775,6 +776,7 @@ export default function ChoreoEditPage(props: {
         onOpenChange={handleEditChoreoInfoDialogOpen}>
         <EditChoreoInfoDialog
           choreo={history.presentState.state}
+          eventList={props.eventList}
           onSubmit={(name, event) => {
             dispatch({
               type: "SET_STATE",

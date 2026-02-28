@@ -54,6 +54,22 @@ export function groupByKey<T extends Record<string, any>, K extends keyof T>(
   }, {} as Record<string, T[]>);
 }
 
+export function mapByKey<T, K extends keyof T>(
+  items: T[],
+  key: K
+): Map<string, T[]> {
+  return items.reduce((acc, item) => {
+    const groupKey = String(item[key]);
+
+    if (!acc.has(groupKey)) {
+      acc.set(groupKey, []);
+    }
+
+    acc.get(groupKey)!.push(item);
+    return acc;
+  }, new Map<string, T[]>());
+}
+
 export function indexByKey<T extends Record<string, any>, K extends keyof T>(
   items: T[],
   key: K

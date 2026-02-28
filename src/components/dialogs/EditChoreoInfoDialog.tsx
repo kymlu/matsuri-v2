@@ -3,14 +3,17 @@ import TextInput from "../inputs/TextInput";
 import { isNullOrUndefinedOrBlank, testInvalidCharacters } from "../../lib/helpers/globalHelper";
 import BaseEditDialog from "./BaseEditDialog";
 import { Choreo } from "../../models/choreo";
+import CustomAutocomplete from "../inputs/CustomAutocomplete";
 
 type EditChoreoInfoDialogProps = {
   choreo?: Choreo,
+  eventList: string[],
+  onClose?: () => void,
   onSubmit: (name: string, event: string) => void,
 }
 
 export default function EditChoreoInfoDialog({
-  choreo, onSubmit
+  choreo, eventList, onClose, onSubmit
 }: EditChoreoInfoDialogProps) {
   const [name, setName] = useState("");
   const [event, setEvent] = useState("");
@@ -22,6 +25,7 @@ export default function EditChoreoInfoDialog({
 
   return <BaseEditDialog
     title="隊列情報変更"
+    onClose={onClose}
     onSubmit={() => { onSubmit(name, event) }}
     isActionButtonDisabled={isNullOrUndefinedOrBlank(name)}
     >
@@ -33,11 +37,14 @@ export default function EditChoreoInfoDialog({
       restrictFn={(s) => !testInvalidCharacters(s)}
       />
 
-    <TextInput
-      label="イベント（任意）"
+    <CustomAutocomplete
       defaultValue={choreo?.event ?? ""}
-      onContentChange={ (newEvent) => { setEvent(newEvent) }}
+      options={eventList}
+      onContentChange={newValue => setEvent(newValue)}
+      placeholder="イベント名を入力してください"
+      label="イベント（任意）"
       restrictFn={(s) => !testInvalidCharacters(s)}
-      />
+      inline
+    />
   </BaseEditDialog>
 }
