@@ -139,7 +139,7 @@ export function NewChoreoPage({
               onContentChange={newValue => handleChange("eventName", newValue)}
               placeholder="イベント名を入力してください"
               label="イベント（任意）"
-              restrictFn={(s) => !testInvalidCharacters(s)}
+              // restrictFn={(s) => !testInvalidCharacters(s)} // todo: after pushing the official goen change to restrict
             />
           </div>
         )}

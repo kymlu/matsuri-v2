@@ -11,7 +11,6 @@ export type CustomAutocompleteProps = {
   name?: string,
   defaultValue?: string,
   options: string[],
-  inline?: boolean,
   onContentChange: (newContent: string) => void,
   placeholder?: string,
   search?: boolean,
@@ -32,7 +31,7 @@ export type CustomAutocompleteProps = {
 }
 
 export default function CustomAutocomplete({
-  name, options, inline, defaultValue, onContentChange, placeholder,
+  name, options, defaultValue, onContentChange, placeholder,
   search, clearable, compact, tall, short, centered,
   required, hasError, disabled, ref, maxLength,
   showLength, label, rightLabel, restrictFn
@@ -84,50 +83,27 @@ export default function CustomAutocomplete({
             onValueChange={(newValue: string) => handleChange(newValue)}
             filter={(item: string, query: string) => {return item.toLowerCase().includes(query.toLowerCase())}}
             highlightItemOnHover
-            inline={inline}
           >
-            <div className={compact ? "max-w-32": "w-full"}>
-              <Autocomplete.Input
-                disabled={disabled}
-                type="text"
-                name={name}
-                maxLength={maxLength ?? 20}
-                placeholder={placeholder ?? ""}
-                value={value ?? ""}
-                className={inputClasses}
-              />
-              {
-                inline &&
-                <div className="h-32 mt-2 scroll-py-[0.5rem] py-2 overflow-y-auto border rounded-md overscroll-contain border-primary outline-0 ">
-                  <Autocomplete.Empty className="text-center h-max">
-                    一致する候補はありません
-                  </Autocomplete.Empty>
+            <Autocomplete.Input
+              disabled={disabled}
+              type="text"
+              name={name}
+              maxLength={maxLength ?? 20}
+              placeholder={placeholder ?? ""}
+              value={value ?? ""}
+              className={inputClasses}
+            />
+            <Autocomplete.Portal>
+              <Autocomplete.Positioner className="z-50 outline-none" sideOffset={4}>
+                <Autocomplete.Popup className="rounded-md border-primary border overflow-y-auto scroll-py-[0.5rem] py-2 overscroll-contain max-h-[min(23rem,var(--available-height))] data-[empty]:hidden w-[var(--anchor-width)] max-w-[var(--available-width)] bg-[canvas] shadow-lg shadow-gray-200 outline-1 outline-gray-200 dark:shadow-none dark:-outline-offset-1 dark:outline-gray-300">
                   <Autocomplete.List>
                     {(item: string) => (
-                      <AutocompleteItem
-                        key={item}
-                        item={item}
-                        onClick={() => handleChange(item)}
-                        />
+                      <AutocompleteItem key={item} item={item}/>
                     )}
                   </Autocomplete.List>
-                </div>
-              }
-            </div>
-            {
-              !inline &&
-              <Autocomplete.Portal>
-                <Autocomplete.Positioner className="outline-none" sideOffset={4}>
-                  <Autocomplete.Popup className="w-[var(--anchor-width)] max-h-[23rem] max-w-[var(--available-width)] bg-[canvas] shadow-lg shadow-gray-200 outline-1 outline-gray-200 dark:shadow-none dark:-outline-offset-1 dark:outline-gray-300">
-                    <Autocomplete.List className="rounded-md border-primary border outline-0 overflow-y-auto scroll-py-[0.5rem] py-2 overscroll-contain max-h-[min(23rem,var(--available-height))] data-[empty]:hidden">
-                      {(item: string) => (
-                        <AutocompleteItem key={item} item={item}/>
-                      )}
-                    </Autocomplete.List>
-                  </Autocomplete.Popup>
-                </Autocomplete.Positioner>
-              </Autocomplete.Portal>
-            }
+                </Autocomplete.Popup>
+              </Autocomplete.Positioner>
+            </Autocomplete.Portal>
           </Autocomplete.Root>
           {
             rightLabel && <span>{rightLabel}</span>
