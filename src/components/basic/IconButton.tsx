@@ -19,7 +19,7 @@ export default function IconButton ({
     "border-0": noBorder,
     "border-primary": noBorder !== true && colour === "primary",
     "border-black": noBorder !== true && (colour === undefined || colour === "black"),
-    "border-gray-400": noBorder !== true && colour === "grey",
+    "border-gray-600": noBorder !== true && colour === "grey",
     "border-white": noBorder !== true && colour === "white",
     "border-2 bg-white p-1": noBorder !== true,
     "opacity-30": disabled,

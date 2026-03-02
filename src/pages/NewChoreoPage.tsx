@@ -9,6 +9,7 @@ import { MAX_STAGE_DIMENSION, MAX_STAGE_MARGIN, MIN_STAGE_DIMENSION, MIN_STAGE_M
 import { saveChoreo } from "../lib/dataAccess/DataController";
 import GridPreview from "../components/grid/GridPreview";
 import Button from "../components/basic/Button";
+import CustomAutocomplete from "../components/inputs/CustomAutocomplete";
 
 interface FormationForm {
   name: string;
@@ -24,11 +25,12 @@ interface FormationForm {
 type NewChoreoPageProps = {
   goToHomePage: () => void,
   goToEditPage: (choreo: Choreo) => void,
+  eventList: string[],
   eventName?: string,
 }
 
 export function NewChoreoPage({
-  goToEditPage, goToHomePage, eventName
+  goToEditPage, goToHomePage, eventList, eventName
 }: NewChoreoPageProps) {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState<FormationForm>({
@@ -131,12 +133,13 @@ export function NewChoreoPage({
               label="隊列名前"
               restrictFn={(s) => !testInvalidCharacters(s)}
             />
-            <TextInput
+            <CustomAutocomplete
               defaultValue={eventName}
+              options={eventList}
               onContentChange={newValue => handleChange("eventName", newValue)}
               placeholder="イベント名を入力してください"
               label="イベント（任意）"
-              restrictFn={(s) => !testInvalidCharacters(s)}
+              // restrictFn={(s) => !testInvalidCharacters(s)} // todo: after pushing the official goen change to restrict
             />
           </div>
         )}
