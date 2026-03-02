@@ -1,7 +1,7 @@
 import { Dialog, Menu } from "@base-ui/react"
 import CustomDialog from "../components/basic/CustomDialog"
 import { ICON, LAST_UPDATED } from "../lib/consts/consts"
-import Button, { IconLabelButton } from "../components/basic/Button"
+import { IconLabelButton } from "../components/basic/Button"
 import Icon from "../components/basic/Icon"
 import { readUploadedFile } from "../lib/helpers/uploadHelper"
 import { useEffect, useMemo, useState } from "react"
@@ -29,6 +29,7 @@ import UserNameEditDialog from "../components/dialogs/UserNameEditDialog"
 import { Oval } from "react-loader-spinner"
 import { colorPalette } from "../lib/consts/colors"
 import EditChoreoInfoDialog from "../components/dialogs/EditChoreoInfoDialog"
+import SyncChoreoDialog from "../components/dialogs/SyncChoreoDialog"
 
 type HomePageProps = {
   eventList: string[]
@@ -217,7 +218,6 @@ export default function HomePage({
                 <IconButton src={ICON.info} colour="primary" noBorder asDiv/>
               </Dialog.Trigger>
               <CustomDialog title="サイト情報" hasX>
-                <div className="flex flex-col justify-center gap-2 mb-2">
                 <div className="flex flex-col justify-center gap-2 mb-2">
                   <span className="mb-2 text-center">問題がある場合は、<br/><b>ケイティー</b>まで<br/>問い合わせてください</span>
                   <IconLabelButton label="ログをダウンロード" icon={ICON.download} primary onClick={downloadLogs}/>
@@ -422,78 +422,36 @@ export default function HomePage({
           handle={syncChoreoDialog}
           open={syncChoreoDialogOpen}
           onOpenChange={handleSyncChoreoDialogOpen}>
-            
-          <CustomDialog
-            title="確認"
-            hasX
+          <SyncChoreoDialog
+            savedChoreo={editingChoreo}
+            serverChoreo={choreosFromServer[editingChoreo?.id ?? ""]}
             onClose={() => setSyncChoreoDialogOpen(false)}
-          >
-            <p>この隊列表には最新の内容があります。</p>
-            <p>現在の変更をどうしますか？</p>
-            <div className="space-y-1">
-              <Dialog.Close
-                className="w-full"
-                onClick={() => {
-                  if (editingChoreo) {
-                    setSyncChoreoDialogOpen(false);
-                    setEditingChoreo(undefined);
-                    goToViewPage(editingChoreo);
-                  }
-                }}
-                >
-                <Button
-                  asDiv
-                  full
-                  >
-                  <span className="font-semibold text-nowrap">
-                    このまま開く
-                  </span>
-                </Button>
-              </Dialog.Close>
-              <Dialog.Close
-                className="w-full"
-                onClick={() => {
-                  if(editingChoreo) {
-                    duplicateChoreo(editingChoreo);
-                    deleteChoreo(editingChoreo.id, () => {
-                      goToViewPage(choreosFromServer[editingChoreo.id]);
-                    });
-                  }
-                }}
-                >
-                <Button
-                  asDiv
-                  full
-                  >
-                  <span className="font-semibold text-nowrap">
-                    コピーして最新版へ
-                  </span>
-                </Button>
-              </Dialog.Close>
-              <Dialog.Close
-                className="w-full"
-                onClick={() => {
-                  if (editingChoreo) {
-                    deleteChoreo(editingChoreo.id, () => {
-                      syncChoreoDialog.close();
-                      setSyncChoreoDialogOpen(false);
-                      setEditingChoreo(undefined);
-                      goToViewPage(choreosFromServer[editingChoreo.id]);
-                    });
-                  }
-                }}
-                >
-                <Button
-                  asDiv
-                  full
-                  >
-                  <span className="font-semibold text-nowrap">
-                    破棄して最新版へ
-                  </span>
-                </Button>
-              </Dialog.Close>
-            </div>
-          </CustomDialog>
+            onOpenSaved={() => {
+              if (editingChoreo) {
+                setSyncChoreoDialogOpen(false);
+                setEditingChoreo(undefined);
+                goToViewPage(editingChoreo);
+              }
+            }}
+            onDuplicate={() => {
+              if(editingChoreo) {
+                duplicateChoreo(editingChoreo);
+                deleteChoreo(editingChoreo.id, () => {
+                  goToViewPage(choreosFromServer[editingChoreo.id]);
+                });
+              }
+            }}
+            onDelete={() => {
+              if (editingChoreo) {
+                deleteChoreo(editingChoreo.id, () => {
+                  syncChoreoDialog.close();
+                  setSyncChoreoDialogOpen(false);
+                  setEditingChoreo(undefined);
+                  goToViewPage(choreosFromServer[editingChoreo.id]);
+                });
+              }
+            }}
+          />
         </Dialog.Root>
         <Dialog.Root
           handle={deleteChoreoDialog}
