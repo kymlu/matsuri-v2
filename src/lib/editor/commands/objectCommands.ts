@@ -472,8 +472,8 @@ export function alignHorizontalPositions (
       ...positions.props.map(x => x.x + state.props[x.propId].width / 2),
       ...positions.props.map(x => x.x + state.props[x.propId].width),
       ...positions.obstacles.map(x => x.x),
-      ...positions.obstacles.map(x => x.x + (state.obstacles ?? {})[x.id]?.width / 2),
-      ...positions.obstacles.map(x => x.x + (state.obstacles ?? {})[x.id]?.width),
+      ...positions.obstacles.map(x => x.x + ((state.obstacles ?? {})[x.id]?.width ?? 0) / 2),
+      ...positions.obstacles.map(x => x.x + ((state.obstacles ?? {})[x.id]?.width ?? 0)),
     ];
 
     switch (type) {
@@ -520,7 +520,7 @@ export function alignHorizontalPositions (
     positions.obstacles.map(x => x.id),
     f => ({
       ...f,
-      x:  newValue + 
+      x:  newValue -
         (type === "left" ? 0 :
           type === "centre" ? state.obstacles!![f.id].width / 2 :
           state.obstacles!![f.id].width
