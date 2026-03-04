@@ -282,8 +282,7 @@ export function moveObjectPositions(
   const newObstacles = {...state.obstacles};
   for (const [id, item] of Object.entries(positions.obstacles)) {
     if (newObstacles[id]) {
-      newObstacles[id].x = item.x;
-      newObstacles[id].y = item.y;
+      newObstacles[id] = {...newObstacles[id], x: item.x, y: item.y}
     }
   }
 
