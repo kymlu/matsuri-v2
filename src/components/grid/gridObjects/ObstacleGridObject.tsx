@@ -157,7 +157,7 @@ export default function ObstacleGridObject({
       text={obstacle.name}
       fontSize={METER_PX/3}
       fontStyle="bold"
-      fill={colorPalette.textContrast[obstacle.color]}
+      fill={colorPalette.black}
       verticalAlign="middle"
       align="center" />
   </BaseGridObject>
