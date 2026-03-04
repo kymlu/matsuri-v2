@@ -145,7 +145,20 @@ export function renameProp(state: Choreo, id: string, newName: string): Choreo {
 }
 
 export function addObstacle(state: Choreo, obstacle: Obstacle): Choreo {
-  const newObstacles = { ...state.obstacles, [obstacle.id]: obstacle }
+  const newObstacles = { ...state.obstacles, [obstacle.id]: obstacle };
+
+  return {
+    ...state,
+    obstacles: newObstacles,
+  }
+}
+
+export function addObstacles(state: Choreo, obstacle: Obstacle[]): Choreo {
+  const newObstacles = { ...state.obstacles };
+  obstacle.reduce((acc, item) => {
+    acc[item.id] = item;
+    return acc;
+  }, newObstacles);
 
   return {
     ...state,
