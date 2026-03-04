@@ -318,7 +318,7 @@ export function updatePropSizeAndRotate(
   rotation: number,
   x: number,
   y: number,
-  propId: string) {
+  propId: string): Choreo {
   const newSections = state.sections.map(section => {
     if (section.id !== sectionId) return section
     return {
@@ -366,7 +366,7 @@ export function changeObjectColours(
   mode: colourMode,
   ids: StageEntities<string[]>,
   color: string,
-) {
+): Choreo {
   // update dancers
   const shouldUpdate = (i: number) => {
     switch (mode) {
@@ -398,16 +398,17 @@ export function changeObjectColours(
   // update props
   const newProps = {...state.props};
   ids.props.forEach(id => {
-    newProps[id].color = color;
+    newProps[id] = {...newProps[id], color: color};
   });
 
   const newObstacles = {...state.obstacles};
   ids.obstacles.forEach(id => {
-    newObstacles[id].color = color;
+    newObstacles[id] = {...newObstacles[id], color: color};
   })
 
   return {
     ...state,
+    obstacles: newObstacles,
     props: newProps,
     sections: newSections
   }
