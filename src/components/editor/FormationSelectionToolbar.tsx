@@ -41,7 +41,7 @@ export default function FormationSelectionToolbar({
   return <div className="grid grid-cols-[auto,1fr,auto] w-full max-w-full gap-2 p-2 overflow-scroll max-w-screen">
     <Drawer.Root
       swipeDirection="down"
-      modal={true}
+      modal
     >
       <Drawer.Trigger>
         <IconButton
@@ -52,10 +52,9 @@ export default function FormationSelectionToolbar({
         />
       </Drawer.Trigger>
       <Drawer.Portal>
-        <Drawer.Viewport className="fixed bottom-0 flex flex-col w-full pointer-events-none">
-          <div className="z-40 fixed w-[100svw] h-[100svh] top-0 bg-black/30"></div>
-          <Drawer.Popup className="z-50 pointer-events-auto w-full max-h-[75svh] bg-white rounded-t-2xl overscroll-contain transition-transform duration-[450ms] ease-[cubic-bezier(0.32,0.72,0,1)] shadow-[0_-2px_16px_rgba(0,0,0,0.15)] [transform:translateY(calc(var(--drawer-snap-point-offset)+var(--drawer-swipe-movement-y)))]
-            will-change-transform outline-none data-[data-swiping]:select-none data-[starting-style]:translate-y-[calc(100%-var(--bleed))] data-[ending-style]:translate-y-[calc(100%-var(--bleed))] data-[ending-style]:duration-[calc(var(--drawer-swipe-strength)*400ms)]">
+        <Drawer.Viewport className="fixed bottom-0 flex flex-col w-full pointer-events-none group">
+          <div className="z-40 fixed w-[100svw] h-[100svh] top-0 bg-black/30 transition-opacity duration-[450ms] ease-[cubic-bezier(0.32,0.72,0,1)] group-data-[starting-style]:opacity-0 group-data-[ending-style]:opacity-0"/>
+          <Drawer.Popup className="relative flex w-full max-h-[calc(100dvh-var(--top-margin))] min-h-0 flex-col overflow-visible rounded-t-2xl bg-gray-50 text-gray-900 touch-none shadow-[0_-16px_48px_rgb(0_0_0/0.12),0_6px_18px_rgb(0_0_0/0.06)] [--bleed:0rem] z-50 pointer-events-auto overscroll-contain transition-[transform,translate] duration-[450ms] ease-[cubic-bezier(0.32,0.72,0,1)] [transform:translateY(calc(var(--drawer-snap-point-offset)+var(--drawer-swipe-movement-y)))] after:pointer-events-none after:absolute after:inset-x-0 after:top-full after:h-[var(--bleed)] after:bg-gray-50 after:content-[''] outline-none data-[swiping]:select-none data-[starting-style]:translate-y-[calc(100%-var(--bleed))] data-[ending-style]:translate-y-[calc(100%-var(--bleed))] data-[ending-style]:duration-[calc(var(--drawer-swipe-strength)*400ms)]">
             <div className="flex-shrink-0 pt-6 pb-4 touch-none">
               <div className="w-1/3 h-1 mx-auto rounded-full bg-primary cursor-grab"/>
             </div>
