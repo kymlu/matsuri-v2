@@ -55,6 +55,10 @@ type ToolbarProps = {
   onAssignActions: () => void;
   isAssigningActionsEnabled: boolean;
   isAssigningActions: boolean;
+
+  // obstacles
+  showDuplicateObstacle: boolean;
+  onDuplicateObstacle: () => void;
 };
 
 export default function Toolbar({
@@ -100,6 +104,9 @@ export default function Toolbar({
   onAssignActions,
   isAssigningActionsEnabled,
   isAssigningActions,
+
+  showDuplicateObstacle,
+  onDuplicateObstacle,
 }: ToolbarProps) {
   const [isAddManagerVisible, setIsAddManagerVisible] = useState<boolean>(false);
   const [isArrangeVisible, setIsArrangeVisible] = useState<boolean>(false);
@@ -145,6 +152,7 @@ export default function Toolbar({
         {showCopyPosition && <IconButton src={ICON.contentCopy} label="コピー" onClick={() => {onCopyPosition()}} />}
         {showPastePosition && <IconButton src={ICON.contentPaste} label="ペースト" onClick={() => {onPastePosition()}} />}
         {showSwapPosition && <IconButton src={ICON.swapHoriz} label="位置交換" onClick={() => {onSwapPosition()}} />}
+        {showDuplicateObstacle && <IconButton src={ICON.contentCopy} label="複製" onClick={() => {onDuplicateObstacle()}} />}
         {showDeleteObjects && <IconButton src={ICON.delete} label="削除" onClick={()=>{onDeleteObjects()}}/>}
         <IconButton src={ICON.selectAll} label="全員選択" onClick={() => {onSelectType()}} />
         {showSelectDancer && <IconButton src={ICON.selectAll} label="同色選択" onClick={() => {onSelectColor()}} />}

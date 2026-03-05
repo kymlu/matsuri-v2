@@ -22,7 +22,7 @@ export function addSection(state: Choreo, id: string): Choreo {
   };
 }
 
-export function duplicateSection(state: Choreo, section: ChoreoSection, index: number) {
+export function duplicateSection(state: Choreo, section: ChoreoSection, index: number): Choreo {
   var duplicatedSection = { ...section };
   var newId = crypto.randomUUID();
   duplicatedSection.id = newId;

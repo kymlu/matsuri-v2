@@ -306,7 +306,7 @@ export async function exportToPdf (
           context.stroke();
         })
         
-        context.fillStyle = colorPalette.getTextColor(obstacle.color);
+        context.fillStyle = colorPalette.black;
         var textDimension = pdf.getTextDimensions(obstacle.name, {maxWidth: obstacleWidth});
         context.fillText(obstacle.name,
           obstacleWidth/2 - textDimension.w/2,

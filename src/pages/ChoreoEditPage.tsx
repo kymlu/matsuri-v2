@@ -28,7 +28,7 @@ import ConfirmDeletionDialog from "../components/dialogs/ConfirmDeletionDialog";
 import EditSectionNoteDialog from "../components/dialogs/EditSectionNoteDialog";
 import { Coordinates } from "../models/base";
 import { colorPalette } from "../lib/consts/colors";
-import { addDancer, addObstacle, addProp, alignHorizontalPositions, alignVerticalPositions, changeObjectColours, distributePositions, editAndDeleteProps, moveObjectPositions, pastePositions, removeObjects, renameAndDeleteDancers, renameDancer, renameObstacle, renameProp, swapPositions, updateObstacleSizeAndRotate, updatePropSizeAndRotate } from "../lib/editor/commands/objectCommands";
+import { addDancer, addObstacle, addObstacles, addProp, alignHorizontalPositions, alignVerticalPositions, changeObjectColours, distributePositions, editAndDeleteProps, moveObjectPositions, pastePositions, removeObjects, renameAndDeleteDancers, renameDancer, renameObstacle, renameProp, swapPositions, updateObstacleSizeAndRotate, updatePropSizeAndRotate } from "../lib/editor/commands/objectCommands";
 import { Obstacle, PropPosition } from "../models/prop";
 import { DancerManagerDialog } from "../components/dialogs/DancerManagerDialog";
 import ExportDialog from "../components/dialogs/ExportDialog";
@@ -624,13 +624,13 @@ export default function ChoreoEditPage(props: {
           setIsAddingObstacles(prev => !prev);
         }}
         isAddingObstacle={isAddingObstacles}
-        showChangeColour={selectedObjects.dancers.length > 0 || selectedObjects.props.length > 0 || selectedObjects.obstacles.length > 0}
+        showChangeColour={selectedIds.dancers.length > 0 || selectedIds.props.length > 0 || selectedIds.obstacles.length > 0}
         onChangeColor={() => {setEditDancerColourDialogOpen(true)}}
         showCopyPosition={selectedIds.dancers.length > 0 || selectedIds.props.length > 0}
         onCopyPosition={() => {onCopy()}}
         showPastePosition={Object.keys(copyBuffer.current.dancers).length > 0 || Object.keys(copyBuffer.current.props).length > 0}
         onPastePosition={() => {onPaste()}}
-        showSelectDancer={selectedObjects.dancers.length > 0}
+        showSelectDancer={selectedIds.dancers.length > 0}
         onSelectColor={() => {
           var positions = Object.entries(currentSection.formation.dancerPositions);
           var currentColours = new Set(positions.filter(x => selectedIds.dancers.includes(x[0])).map(x => x[1].color));
@@ -666,7 +666,7 @@ export default function ChoreoEditPage(props: {
           });
         }}
         showArrange={selectedIds.dancers.length > 0 || selectedIds.props.length > 0 || selectedIds.obstacles.length > 0}
-        showSwapPosition={selectedObjects.dancers.length === 2 && selectedObjects.props.length === 0 && selectedObjects.obstacles.length === 0}
+        showSwapPosition={selectedIds.dancers.length === 2 && selectedIds.props.length === 0 && selectedIds.obstacles.length === 0}
         onSwapPosition={onSwapPositions}
         showDeleteObjects={selectedIds.dancers.length > 0 || selectedIds.props.length > 0 || selectedIds.obstacles.length > 0}
         onDeleteObjects={() => {
@@ -688,11 +688,30 @@ export default function ChoreoEditPage(props: {
         isAssigningActionsEnabled={currentSection.formation.dancerActions.length > 0}
         isAssigningActions={isAssigningActions}
         onRenameDancer={() => {setRenameDancerDialogOpen(true)}}
-        showRenameDancer={selectedObjects.dancers.length === 1 && (selectedIds.props.length + selectedIds.obstacles.length) === 0}
+        showRenameDancer={selectedIds.dancers.length === 1 && (selectedIds.props.length + selectedIds.obstacles.length) === 0}
         onRenameProp={() => {setRenamePropDialogOpen(true)}}
-        showRenameProp={selectedObjects.props.length === 1 && (selectedIds.dancers.length + selectedIds.obstacles.length === 0)}
+        showRenameProp={selectedIds.props.length === 1 && (selectedIds.dancers.length + selectedIds.obstacles.length === 0)}
         onRenameObstacle={() => {setRenameObstacleDialogOpen(true)}}
-        showRenameObstacle={selectedObjects.obstacles.length === 1 && (selectedIds.dancers.length + selectedIds.props.length === 0)}
+        showRenameObstacle={selectedIds.obstacles.length === 1 && (selectedIds.dancers.length + selectedIds.props.length === 0)}
+        showDuplicateObstacle={selectedIds.obstacles.length > 0 && selectedIds.dancers.length === 0 && selectedIds.props.length === 0}
+        onDuplicateObstacle={() => {
+          var newObstacles = selectedObjects.obstacles.map(o => ({
+            ...o,
+            id: crypto.randomUUID(),
+            x: o.x + 0.5,
+            y: o.y + (history.presentState.state.stageGeometry.yAxis === "bottom-up" ? -0.5 : +0.5)
+          }));
+          var newIds = newObstacles.map(o => o.id);
+          dispatch({
+            type: "SET_STATE",
+            newState: addObstacles(
+              history.presentState.state, 
+              newObstacles,
+            ),
+            currentSectionId: currentSection.id,
+            commit: true});
+          setSelectedIds({props: [], dancers: [], obstacles: newIds});
+        }}
       />
       {
         isAddingDancers &&

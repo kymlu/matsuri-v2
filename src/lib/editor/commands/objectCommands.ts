@@ -145,7 +145,20 @@ export function renameProp(state: Choreo, id: string, newName: string): Choreo {
 }
 
 export function addObstacle(state: Choreo, obstacle: Obstacle): Choreo {
-  const newObstacles = { ...state.obstacles, [obstacle.id]: obstacle }
+  const newObstacles = { ...state.obstacles, [obstacle.id]: obstacle };
+
+  return {
+    ...state,
+    obstacles: newObstacles,
+  }
+}
+
+export function addObstacles(state: Choreo, obstacle: Obstacle[]): Choreo {
+  const newObstacles = { ...state.obstacles };
+  obstacle.reduce((acc, item) => {
+    acc[item.id] = item;
+    return acc;
+  }, newObstacles);
 
   return {
     ...state,
@@ -282,8 +295,7 @@ export function moveObjectPositions(
   const newObstacles = {...state.obstacles};
   for (const [id, item] of Object.entries(positions.obstacles)) {
     if (newObstacles[id]) {
-      newObstacles[id].x = item.x;
-      newObstacles[id].y = item.y;
+      newObstacles[id] = {...newObstacles[id], x: item.x, y: item.y}
     }
   }
 
@@ -319,7 +331,7 @@ export function updatePropSizeAndRotate(
   rotation: number,
   x: number,
   y: number,
-  propId: string) {
+  propId: string): Choreo {
   const newSections = state.sections.map(section => {
     if (section.id !== sectionId) return section
     return {
@@ -367,7 +379,7 @@ export function changeObjectColours(
   mode: colourMode,
   ids: StageEntities<string[]>,
   color: string,
-) {
+): Choreo {
   // update dancers
   const shouldUpdate = (i: number) => {
     switch (mode) {
@@ -399,16 +411,17 @@ export function changeObjectColours(
   // update props
   const newProps = {...state.props};
   ids.props.forEach(id => {
-    newProps[id].color = color;
+    newProps[id] = {...newProps[id], color: color};
   });
 
   const newObstacles = {...state.obstacles};
   ids.obstacles.forEach(id => {
-    newObstacles[id].color = color;
+    newObstacles[id] = {...newObstacles[id], color: color};
   })
 
   return {
     ...state,
+    obstacles: newObstacles,
     props: newProps,
     sections: newSections
   }
@@ -473,8 +486,8 @@ export function alignHorizontalPositions (
       ...positions.props.map(x => x.x + state.props[x.propId].width / 2),
       ...positions.props.map(x => x.x + state.props[x.propId].width),
       ...positions.obstacles.map(x => x.x),
-      ...positions.obstacles.map(x => x.x + (state.obstacles ?? {})[x.id]?.width / 2),
-      ...positions.obstacles.map(x => x.x + (state.obstacles ?? {})[x.id]?.width),
+      ...positions.obstacles.map(x => x.x + ((state.obstacles ?? {})[x.id]?.width ?? 0) / 2),
+      ...positions.obstacles.map(x => x.x + ((state.obstacles ?? {})[x.id]?.width ?? 0)),
     ];
 
     switch (type) {
@@ -521,7 +534,7 @@ export function alignHorizontalPositions (
     positions.obstacles.map(x => x.id),
     f => ({
       ...f,
-      x:  newValue + 
+      x:  newValue -
         (type === "left" ? 0 :
           type === "centre" ? state.obstacles!![f.id].width / 2 :
           state.obstacles!![f.id].width
