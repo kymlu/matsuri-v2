@@ -322,6 +322,7 @@ export default function MainStage({
           setSelectedIds={setSelectedIds}
           snapToGrid={appSettings.snapToGrid}
           dancerDisplayType={appSettings.dancerDisplayType}
+          isDraggingOnEmpty={isDraggingOnEmpty}
           />
         {
           selectedDancerMovement &&

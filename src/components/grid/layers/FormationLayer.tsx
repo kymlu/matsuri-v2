@@ -34,6 +34,7 @@ type FormationLayerProps = {
   setSelectedIds: (action: SetStateAction<StageEntities<string[]>>) => void,
   snapToGrid?: boolean,
   dancerDisplayType: DancerDisplayType,
+  isDraggingOnEmpty?: boolean,
 };
 
 export default function FormationLayer({
@@ -56,7 +57,8 @@ export default function FormationLayer({
   setSelectedIds,
   snapToGrid,
   hideTransformerBorder,
-  dancerDisplayType
+  dancerDisplayType,
+  isDraggingOnEmpty
 }: FormationLayerProps) {
 	const transformerRef = useRef<Konva.Transformer>(null);
 
@@ -75,7 +77,7 @@ export default function FormationLayer({
   };
 
   const toggleDancerSelect = (id: string, isAdditive: boolean = true) => {
-    if(canSelectDancers) {
+    if(canSelectDancers && !isDraggingOnEmpty) {
       setSelectedIds((prev) => ({
         props: isAdditive ? [...prev.props] : [],
         dancers: (canToggleSelection && isAdditive) ?
@@ -88,7 +90,7 @@ export default function FormationLayer({
     }
   }
   const togglePropSelect = (id: string, isAdditive: boolean = true) => {
-    if(canSelectProps) {
+    if(canSelectProps && !isDraggingOnEmpty) {
       setSelectedIds((prev) => ({
         dancers: isAdditive ? [...prev.dancers] : [],
         props: (canToggleSelection && isAdditive) ?
@@ -101,7 +103,7 @@ export default function FormationLayer({
     }
   }
   const toggleObstacleSelect = (id: string, isAdditive: boolean = true) => {
-    if(canSelectProps) {
+    if(canSelectProps && !isDraggingOnEmpty) {
       setSelectedIds((prev) => ({
         dancers: isAdditive ? [...prev.dancers] : [],
         props: isAdditive ? [...prev.props] : [],
