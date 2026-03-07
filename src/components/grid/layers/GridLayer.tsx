@@ -74,8 +74,48 @@ export default function GridLayer({
         />
     );
     
-    // Vertical grid lines (across full area)
     if(showGridLines){
+      // Horizontal grid lines + right labels
+      for (let m = 0; m <= margins.topMargin + length + margins.bottomMargin; m++) {
+        const y = m * gridSizePx;
+        const isMajor = m % 2 === 0;
+      
+        if (m > 0 && m < margins.topMargin + length + margins.bottomMargin) {
+          elements.push(
+            <Line
+              key={`h-${m}`}
+              points={[0, y, totalWidthPx, y]}
+              stroke={colorPalette.lightGrey}
+              strokeWidth={1}
+              dash={isMajor ? [10, 6] : [4, 6]}
+            />
+          );
+        }
+
+        // Right-side meter labels
+        // if stage, 0 at top of stage
+        // if parade, 0 at bottom of stage
+        if (y >= stageTopPx && y <= stageBottomPx) {
+          const meterFromTop =
+            yAxis === "top-down" ? 
+            (y - stageTopPx) / gridSizePx :
+            (stageBottomPx - y) / gridSizePx;
+      
+          elements.push(
+            <Text
+              key={`hr-${m}`}
+              x={stageRightPx + 8}
+              y={y - 6}
+              text={`${meterFromTop}m`}
+              fontSize={12}
+              fontStyle="bold"
+              fill="black"
+            />
+          );
+        }
+      }
+      
+      // Vertical grid lines (across full area)
       for (let m = 0; m < margins.leftMargin + width + margins.rightMargin - gridOffsetMeters; m++) {
         const x = m * gridSizePx + gridOffsetPx;
         
@@ -110,46 +150,6 @@ export default function GridLayer({
           dash={[10, 6]}
         />
       );
-    }
-    
-    // Horizontal grid lines + right labels
-    for (let m = 0; m <= margins.topMargin + length + margins.bottomMargin; m++) {
-      const y = m * gridSizePx;
-      const isMajor = m % 2 === 0;
-    
-      if (showGridLines && m > 0 && m < margins.topMargin + length + margins.bottomMargin) {
-        elements.push(
-          <Line
-            key={`h-${m}`}
-            points={[0, y, totalWidthPx, y]}
-            stroke={colorPalette.lightGrey}
-            strokeWidth={1}
-            dash={isMajor ? [10, 6] : [4, 6]}
-          />
-        );
-      }
-    
-      // Right-side meter labels
-      // if stage, 0 at top of stage
-      // if parade, 0 at bottom of stage
-      if (y >= stageTopPx && y <= stageBottomPx) {
-        const meterFromTop =
-          yAxis === "top-down" ? 
-          (y - stageTopPx) / gridSizePx :
-          (stageBottomPx - y) / gridSizePx;
-    
-        elements.push(
-          <Text
-            key={`hr-${m}`}
-            x={stageRightPx + 8}
-            y={y - 6}
-            text={`${meterFromTop}m`}
-            fontSize={12}
-            fontStyle="bold"
-            fill="black"
-          />
-        );
-      }
     }
     
     // Centre triangle marker
