@@ -67,6 +67,7 @@ export default function ChoreoEditPage(props: {
   const [isAddingProps, setIsAddingProps] = useState<boolean>(false);
   const [isAddingObstacles, setIsAddingObstacles] = useState<boolean>(false);
   const [isAssigningActions, setIsAssigningActions] = useState<boolean>(false);
+  const [areObstaclesLocked, setAreObstaclesLocked] = useState<boolean>(false);
   const [appSettings, setAppSettings] = useState<AppSetting>({
     snapToGrid: true,
     showGrid: true,
@@ -450,6 +451,7 @@ export default function ChoreoEditPage(props: {
           canEdit={!isAssigningActions}
           canSelectDancers={!isAssigningActions || currentTiming !== undefined}
           canSelectProps={!isAssigningActions}
+          canSelectObstacles={!isAssigningActions && !areObstaclesLocked}
           canToggleSelection
           appSettings={appSettings}
           isAddingDancer={isAddingDancers}
@@ -622,6 +624,7 @@ export default function ChoreoEditPage(props: {
         onAddObstacle={() => {
           resetSelectedIds();
           setIsAddingObstacles(prev => !prev);
+          setAreObstaclesLocked(false);
         }}
         isAddingObstacle={isAddingObstacles}
         showChangeColour={selectedIds.dancers.length > 0 || selectedIds.props.length > 0 || selectedIds.obstacles.length > 0}
@@ -712,6 +715,9 @@ export default function ChoreoEditPage(props: {
             commit: true});
           setSelectedIds({props: [], dancers: [], obstacles: newIds});
         }}
+        showLockObstacle={(Object.keys(history.presentState.state.obstacles ?? {})?.length ?? 0) > 0}
+        areObstaclesLocked={areObstaclesLocked}
+        onToggleObstacleLock={() => {setAreObstaclesLocked(prev => !prev)}}
       />
       {
         isAddingDancers &&

@@ -125,6 +125,7 @@ export default function ChoreoViewPage(props: {
           appSettings={appSettings}
           canEdit={false}
           canSelectProps={false}
+          canSelectObstacles={false}
           hideTransformerBorder
           canSelectDancers
           canToggleSelection={false}

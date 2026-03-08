@@ -59,6 +59,9 @@ type ToolbarProps = {
   // obstacles
   showDuplicateObstacle: boolean;
   onDuplicateObstacle: () => void;
+  showLockObstacle: boolean;
+  onToggleObstacleLock: () => void;
+  areObstaclesLocked: boolean;
 };
 
 export default function Toolbar({
@@ -107,6 +110,9 @@ export default function Toolbar({
 
   showDuplicateObstacle,
   onDuplicateObstacle,
+  showLockObstacle,
+  onToggleObstacleLock,
+  areObstaclesLocked,
 }: ToolbarProps) {
   const [isAddManagerVisible, setIsAddManagerVisible] = useState<boolean>(false);
   const [isArrangeVisible, setIsArrangeVisible] = useState<boolean>(false);
@@ -156,6 +162,7 @@ export default function Toolbar({
         {showDeleteObjects && <IconButton src={ICON.delete} label="削除" onClick={()=>{onDeleteObjects()}}/>}
         <IconButton src={ICON.selectAll} label="全員選択" onClick={() => {onSelectType()}} />
         {showSelectDancer && <IconButton src={ICON.selectAll} label="同色選択" onClick={() => {onSelectColor()}} />}
+        {showLockObstacle && <IconButton src={areObstaclesLocked ? ICON.lockOpen : ICON.lock} label={ areObstaclesLocked ? "障害物解除" : "障害物固定"} onClick={() => {onToggleObstacleLock()}} />}
       </>
     }
     {

@@ -21,6 +21,7 @@ type MainStageProps = {
   canToggleSelection: boolean,
   canSelectDancers: boolean,
   canSelectProps: boolean,
+  canSelectObstacles: boolean,
   isAddingDancer?: boolean,
   isAddingProp?: boolean,
   isAddingObstacles?: boolean,
@@ -43,7 +44,8 @@ type MainStageProps = {
 }
 
 export default function MainStage({
-  canEdit, canToggleSelection, canSelectDancers, canSelectProps,
+  canEdit, canToggleSelection,
+  canSelectDancers, canSelectProps, canSelectObstacles,
   isAddingDancer, isAddingProp, isAddingObstacles,
   hideTransformerBorder, currentChoreo, currentSection,
   updateDancerPosition, updatePropPosition, updateObstaclePosition,
@@ -306,6 +308,7 @@ export default function MainStage({
           hideTransformerBorder={hideTransformerBorder}
           canSelectDancers={canSelectDancers}
           canSelectProps={canSelectProps}
+          canSelectObstacles={canSelectObstacles}
           canToggleSelection={canToggleSelection}
           geometry={stageGeometry}
           dancers={currentChoreo.dancers}
