@@ -104,6 +104,17 @@ export default function CustomAutocomplete({
                 </Autocomplete.Popup>
               </Autocomplete.Positioner>
             </Autocomplete.Portal>
+            {
+              clearable && !isNullOrUndefinedOrBlank(value) && 
+              <Autocomplete.Clear className="absolute right-2">
+                <IconButton
+                  src={ICON.clear}
+                  colour="primary"
+                  size="sm"
+                  noBorder
+                  asDiv/>
+              </Autocomplete.Clear>
+            }
           </Autocomplete.Root>
           {
             rightLabel && <span>{rightLabel}</span>
@@ -116,17 +127,6 @@ export default function CustomAutocomplete({
                 colour="grey"
                 size="sm"/>
             </div>
-          }
-          {
-            clearable && !isNullOrUndefinedOrBlank(value) && 
-            <Autocomplete.Clear className="absolute right-2">
-              <IconButton
-                src={ICON.clear}
-                colour="primary"
-                size="sm"
-                noBorder
-                asDiv/>
-            </Autocomplete.Clear>
           }
         </div>
 

@@ -43,6 +43,7 @@ export default function EditChoreoInfoDialog({
       onContentChange={newValue => setEvent(newValue)}
       placeholder="イベント名を入力してください"
       label="イベント（任意）"
+      clearable
       // restrictFn={(s) => !testInvalidCharacters(s)} // todo: after pushing the official goen change to restrict
     />
   </BaseEditDialog>
