@@ -364,12 +364,12 @@ export default function HomePage({
             exportingChoreo &&
             <ExportDialog
               choreo={exportingChoreo!}
-              selectedId=""
+              selectedId={Object.values(exportingChoreo.dancers).find(d => strEquals(d.name, userName))?.id ?? ""}
               onClose={() => {
                 setPdfExportDialogOpen(false);
                 setExportingChoreo(undefined);
               }}
-              />
+            />
           }
         </Dialog.Root>
         <Dialog.Root
