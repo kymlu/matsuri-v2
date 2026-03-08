@@ -208,7 +208,7 @@ export async function exportToPdf (
     for (let m = 0; m < totalWidthM - gridOffsetMeters; m++) {
       const x = m * PDF_METER_PX + gridOffsetPx;
 
-      if (m === 0) continue;
+      if (x === 0) continue;
     
       const distFromCenter = Math.abs(
         x - centerX

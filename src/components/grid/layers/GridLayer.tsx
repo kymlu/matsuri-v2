@@ -75,7 +75,7 @@ export default function GridLayer({
     );
     
     if(showGridLines){
-      // Horizontal grid lines + right labels
+      // Horizontal grid lines
       for (let m = 0; m <= margins.topMargin + length + margins.bottomMargin; m++) {
         const y = m * gridSizePx;
         const isMajor = m % 2 === 0;
@@ -91,30 +91,8 @@ export default function GridLayer({
             />
           );
         }
-
-        // Right-side meter labels
-        // if stage, 0 at top of stage
-        // if parade, 0 at bottom of stage
-        if (y >= stageTopPx && y <= stageBottomPx) {
-          const meterFromTop =
-            yAxis === "top-down" ? 
-            (y - stageTopPx) / gridSizePx :
-            (stageBottomPx - y) / gridSizePx;
-      
-          elements.push(
-            <Text
-              key={`hr-${m}`}
-              x={stageRightPx + 8}
-              y={y - 6}
-              text={`${meterFromTop}m`}
-              fontSize={12}
-              fontStyle="bold"
-              fill="black"
-            />
-          );
-        }
       }
-      
+
       // Vertical grid lines (across full area)
       for (let m = 0; m < margins.leftMargin + width + margins.rightMargin - gridOffsetMeters; m++) {
         const x = m * gridSizePx + gridOffsetPx;
@@ -168,6 +146,32 @@ export default function GridLayer({
       />
     )
     
+    // Right-side meter labels
+    for (let m = 0; m <= margins.topMargin + length + margins.bottomMargin; m++) {
+        const y = m * gridSizePx;
+
+      // if stage, 0 at top of stage
+      // if parade, 0 at bottom of stage
+      if (y >= stageTopPx && y <= stageBottomPx) {
+        const meterFromTop =
+          yAxis === "top-down" ? 
+          (y - stageTopPx) / gridSizePx :
+          (stageBottomPx - y) / gridSizePx;
+    
+        elements.push(
+          <Text
+            key={`hr-${m}`}
+            x={stageRightPx + 8}
+            y={y - 6}
+            text={`${meterFromTop}m`}
+            fontSize={12}
+            fontStyle="bold"
+            fill="black"
+          />
+        );
+      }
+    }
+
     // Draw main stage border
     elements.push(
       <Rect
