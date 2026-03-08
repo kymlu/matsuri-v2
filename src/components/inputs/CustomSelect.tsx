@@ -49,7 +49,7 @@ export default function CustomSelect({
           </Select.Icon>
         </Select.Trigger>
         <Select.Portal>
-          <Select.Positioner side="bottom" className="z-50 bg-white border rounded-md select-none border-primary">
+          <Select.Positioner sideOffset={4} side="bottom" className="z-50 bg-white border rounded-md select-none border-primary">
             <Select.Popup>
               <div className="flex flex-col gap-1 p-2 max-h-[40svh] overflow-y-auto">
                 { Object.entries(items).map(([itemValue, label]) => (
