@@ -158,6 +158,7 @@ export default function ChoreoViewPage(props: {
             choreo={props.currentChoreo}
             selectedId={selectedIds.dancers.length === 1 ? selectedIds.dancers[0] : ""}
             onClose={() => setExportDialogOpen(false)}
+            showPaths={showPaths}
           />
         }
       </Dialog.Root>

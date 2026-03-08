@@ -13,10 +13,11 @@ type ExportDialogProps = {
   choreo: Choreo,
   selectedId: string,
   onClose: () => void,
+  showPaths?: boolean,
 }
 
 export default function ExportDialog({
-  choreo, selectedId, onClose
+  choreo, selectedId, onClose, showPaths
 }: ExportDialogProps) {
   const [step, setStep] = useState<"prep" | "export">("prep");
   const [exportName, setExportName] = useState<string>("");
@@ -99,7 +100,7 @@ export default function ExportDialog({
           <CustomSwitch
             label="動線表示"
             disabled={isNullOrUndefinedOrBlank(followingId)}
-            defaultChecked={false}
+            defaultChecked={showPaths === undefined ? false : showPaths}
             onChange={(checked) => setShowFollowingPath(checked)}
           />
         }
