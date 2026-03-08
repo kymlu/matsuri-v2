@@ -86,7 +86,7 @@ export default function PositionHint({
               actions.map(action => {
                 var assignedTiming = action.timings.find(t => t.dancerIds.includes(dancer.id));
                 
-                return <InfoBox title={action.name} isSmall>
+                return <InfoBox key={action.id} title={action.name} isSmall>
                   <span className="font-medium">{assignedTiming?.name ?? "---"}</span>
                 </InfoBox>
               })
