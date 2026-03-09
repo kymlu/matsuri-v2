@@ -67,7 +67,7 @@ export default function ChoreoEditPage(props: {
   const [isAddingProps, setIsAddingProps] = useState<boolean>(false);
   const [isAddingObstacles, setIsAddingObstacles] = useState<boolean>(false);
   const [isAssigningActions, setIsAssigningActions] = useState<boolean>(false);
-  const [areObstaclesLocked, setAreObstaclesLocked] = useState<boolean>(false);
+  const [areObstaclesLocked, setAreObstaclesLocked] = useState<boolean>(true);
   const [appSettings, setAppSettings] = useState<AppSetting>({
     snapToGrid: true,
     showGrid: true,
