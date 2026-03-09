@@ -55,7 +55,7 @@ export function DancerManagerDialog({
         <div className="justify-center max-h-full space-y-2 overflow-scroll md:flex md:flex-wrap md:gap-4">
           {
             dancerList.map((dancer, i) => 
-              <div className="flex flex-row items-center" key={dancer.id}>
+              <div className="flex flex-row items-center gap-1" key={dancer.id}>
                 <TextInput
                   label="ダンサー名"
                   required
@@ -68,16 +68,18 @@ export function DancerManagerDialog({
                     });
                   }}
                 />
-                <IconButton
-                  noBorder
-                  size="sm"
-                  colour="primary"
-                  src={ICON.delete}
-                  onClick={() => {
-                    setDeletedDancerIds(prev => [...prev, dancer.id]);
-                    setDancerList(prev => prev.filter(x => !strEquals(x.id, dancer.id)));
-                  }}
-                  />
+                <div className="px-2 pt-4">
+                  <IconButton
+                    noBorder
+                    size="sm"
+                    colour="primary"
+                    src={ICON.delete}
+                    onClick={() => {
+                      setDeletedDancerIds(prev => [...prev, dancer.id]);
+                      setDancerList(prev => prev.filter(x => !strEquals(x.id, dancer.id)));
+                    }}
+                    />
+                </div>
               </div>
             )
           }
