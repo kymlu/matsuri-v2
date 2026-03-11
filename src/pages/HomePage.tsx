@@ -554,7 +554,7 @@ function EventSection({
                   </span>
                   <div className="flex flex-row gap-2">
                     {
-                      missingNames[choreo.id]?.size > 0 &&
+                      eventName.length > 0 && missingNames[choreo.id]?.size > 0 &&
                       <Dialog.Trigger handle={dancerWarningDialog} onClick={(e) => {
                         e.stopPropagation();
                         setSelectedChoreo(choreo);
@@ -676,6 +676,7 @@ function EventSection({
         handle={dancerWarningDialog}>
         <AbsentDancersWarningDialog
           choreoName={selectedChoreo?.name}
+          eventName={selectedChoreo?.event}
           dancerNames={selectedChoreo ? Array.from(missingNames[selectedChoreo.id]): []}
         />
       </Dialog.Root>

@@ -2,14 +2,15 @@ import BaseErrorDialog from "./BaseErrorDialog";
 
 type AbsentDancersWarningDialog = {
   choreoName?: string,
+  eventName?: string,
   dancerNames?: string[],
 }
 
 export default function AbsentDancersWarningDialog({
-  choreoName, dancerNames
+  choreoName, eventName, dancerNames
 }: AbsentDancersWarningDialog) {
   return <BaseErrorDialog title="ダンサー確認">
-    <p>同じイベントの他の隊列にいますが、<b>「{choreoName}」</b>に含まれていないダンサーがいます。</p>
+    <p><b>「{eventName}」</b>の他の隊列にいますが、<b>「{choreoName}」</b>に含まれていないダンサーがいます。</p>
     <div className="flex flex-wrap gap-2 mt-2 overflow-y-auto max-h-52">
       {
         dancerNames?.sort().map(name =>
