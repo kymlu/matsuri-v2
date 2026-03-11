@@ -15,7 +15,11 @@ export function addSection(state: Choreo, id: string): Choreo {
         id: id,
         name: incrementBracketSuffix(previousSection.name),
         formation: previousSection
-          ? { ...previousSection.formation }
+          ? { 
+            dancerPositions: previousSection.formation.dancerPositions,
+            propPositions: previousSection.formation.propPositions,
+            dancerActions: [],
+          }
           : {}
       } as ChoreoSection
     ]

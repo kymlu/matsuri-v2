@@ -126,21 +126,26 @@ export function NewChoreoPage({
       <div className="flex-1">
         {step === 1 && (
           <div className="flex flex-col h-full pt-10 pb-20 justify-evenly">
-            <TextInput
-              defaultValue={form.name}
-              onContentChange={newValue => handleChange("name", newValue)}
-              placeholder="名前を入力してください"
-              label="隊列名前"
-              restrictFn={(s) => !testInvalidCharacters(s)}
-            />
-            <CustomAutocomplete
-              defaultValue={eventName}
-              options={eventList}
-              onContentChange={newValue => handleChange("eventName", newValue)}
-              placeholder="イベント名を入力してください"
-              label="イベント（任意）"
-              // restrictFn={(s) => !testInvalidCharacters(s)} // todo: after pushing the official goen change to restrict
-            />
+            <div>
+              <TextInput
+                defaultValue={form.name}
+                onContentChange={newValue => handleChange("name", newValue)}
+                placeholder="名前を入力してください"
+                label="隊列名前"
+                restrictFn={(s) => !testInvalidCharacters(s)}
+              />
+            </div>
+            <div>
+              <CustomAutocomplete
+                defaultValue={eventName}
+                options={eventList}
+                onContentChange={newValue => handleChange("eventName", newValue)}
+                placeholder="イベント名を入力してください"
+                label="イベント（任意）"
+                clearable
+                // restrictFn={(s) => !testInvalidCharacters(s)} // todo: after pushing the official goen change to restrict
+              />
+            </div>
           </div>
         )}
 

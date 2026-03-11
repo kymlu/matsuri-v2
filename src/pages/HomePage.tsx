@@ -20,7 +20,6 @@ import ConfirmUploadDialog from "../components/dialogs/ConfirmUploadDialog"
 import BaseErrorDialog from "../components/dialogs/BaseErrorDialog"
 import ExportDialog from "../components/dialogs/ExportDialog"
 import React from "react"
-import CustomMenu from "../components/inputs/CustomMenu"
 import Divider from "../components/basic/Divider"
 import EditNameDialog from "../components/dialogs/EditNameDialog"
 import TextInput from "../components/inputs/TextInput"
@@ -30,6 +29,8 @@ import { Oval } from "react-loader-spinner"
 import { colorPalette } from "../lib/consts/colors"
 import EditChoreoInfoDialog from "../components/dialogs/EditChoreoInfoDialog"
 import SyncChoreoDialog from "../components/dialogs/SyncChoreoDialog"
+import ExpandableSection from "../components/basic/ExpandableSection"
+import AbsentDancersWarningDialog from "../components/dialogs/AbsentDancersWarningDialog"
 
 type HomePageProps = {
   eventList: string[]
@@ -38,6 +39,8 @@ type HomePageProps = {
   goToViewPage: (choreo: Choreo) => void,
   userName: string | null,
   setUserName: (newName: string) => void,
+  dancerNamesByEvent: Record<string, Record<string, string[]>>,
+  setDancerNamesByEvent: (groupedNames: Record<string, Record<string, string[]>>) => void,
 }
 
 type ChoreoWithStatus = Choreo & {
@@ -48,6 +51,7 @@ export default function HomePage({
   eventList, setEventList,
   goToNewChoreoPage, goToViewPage,
   userName, setUserName,
+  dancerNamesByEvent, setDancerNamesByEvent,
 }: HomePageProps) {
   const [savedChoreos, setSavedChoreos] = useState<ChoreoWithStatus[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -96,6 +100,18 @@ export default function HomePage({
           }
         }
       });
+      setDancerNamesByEvent(
+        choreos.reduce((acc, item) => {
+          const names = Object.values(item.dancers).map(d => d.name);
+          return {
+            ...acc,
+            [item.event]: {
+              ...(acc[item.event] ?? {}),
+              [item.id]: names,
+            },
+          };
+        }, {} as Record<string, Record<string, string[]>>)
+      );
       setSavedChoreos(choreos);
       setChoreosFromServer(choreosFromServer);
       setIsLoading(false);
@@ -212,7 +228,7 @@ export default function HomePage({
       <div className='grid py-10 px-6 h-[100svh] grid-rows-[auto,auto,auto,1fr] overflow-hide gap-2 w-full mx-auto'>
         <div className="flex items-center justify-between">
           <h1 className='text-2xl font-bold'>隊列表一覧</h1>
-          <div>
+          <div className="flex items-center ">
             <Dialog.Root>
               <Dialog.Trigger>
                 <IconButton src={ICON.info} colour="primary" noBorder asDiv/>
@@ -273,6 +289,7 @@ export default function HomePage({
               <EventSection
                 key={eventName}
                 eventName={eventName}
+                dancerNamesByFormation={dancerNamesByEvent[eventName]}
                 choreos={choreos}
                 searchTerm={searchTerm}
                 goToViewPage={goToViewPage}
@@ -410,12 +427,12 @@ export default function HomePage({
             exportingChoreo &&
             <ExportDialog
               choreo={exportingChoreo!}
-              selectedId=""
+              selectedId={Object.values(exportingChoreo.dancers).find(d => strEquals(d.name, userName))?.id ?? ""}
               onClose={() => {
                 setPdfExportDialogOpen(false);
                 setExportingChoreo(undefined);
               }}
-              />
+            />
           }
         </Dialog.Root>
         <Dialog.Root
@@ -543,6 +560,7 @@ type EventSectionProps = {
   eventName: string,
   choreos: ChoreoWithStatus[],
   searchTerm: string,
+  dancerNamesByFormation?: Record<string, string[]>,
   addEvent: () => void,
   editEventName: () => void,
   goToViewPage: (choreo: Choreo) => void,
@@ -555,38 +573,41 @@ type EventSectionProps = {
 }
 
 function EventSection({
-  eventName, choreos, searchTerm, goToViewPage, addEvent, editEventName,
+  eventName, dancerNamesByFormation, choreos, searchTerm, goToViewPage, addEvent, editEventName,
   duplicateChoreo, editChoreoName, deleteChoreo, revertChoreo, syncChoreo, onPdfExport
 }: EventSectionProps) {
-  const [isExpanded, setIsExpanded] = useState<boolean>(true);
   const optionsDialog = Dialog.createHandle<Choreo>();
   const [optionsDialogOpen, setOptionsDialogOpen] = React.useState(false);
   const [selectedChoreo, setSelectedChoreo] = useState<ChoreoWithStatus | undefined>();
+  const dancerWarningDialog = Dialog.createHandle<Choreo>();
+  const [dancerWarningDialogOpen, setDancerWarningDialogOpen] = React.useState(false);
+
+  const missingNames = useMemo(() => {
+    if (dancerNamesByFormation) {
+      var allNames = new Set(Object.values(dancerNamesByFormation ?? {}).flat());
+      var returnVal = Object.entries(dancerNamesByFormation).reduce((acc, [id, names]) => {
+        return {
+          ...acc,
+          [id]: allNames.difference(new Set(names)),
+        }
+      }, {} as Record<string, Set<string>>);
+      return returnVal;
+    } else {
+      return {}
+    }
+  }, [dancerNamesByFormation]);
 
   const handleOptionsDialogOpenChange = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setOptionsDialogOpen(isOpen);
   };
+  const handleDancerWarningDialogOpenChange = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
+    setDancerWarningDialogOpen(isOpen);
+  };
   
-  return <div className="space-y-2">
-    <div className="flex flex-row justify-between w-full">
-      <button onClick={() => setIsExpanded(prev => !prev)} className='flex flex-row items-center w-full'>
-        <IconButton
-          src={isExpanded ? ICON.arrowDropDown : ICON.arrowRight}
-          size="sm"
-          colour="primary"
-          noBorder
-          asDiv />
-        <h2 className='text-xl font-bold text-primary'>{eventName.length === 0 ? "イベント不明" : eventName}</h2>
-      </button>
-      <CustomMenu trigger={
-        <IconButton
-          src={ICON.moreVert}
-          asDiv
-          noBorder
-          colour="grey"
-          size="sm"
-        />
-      }>
+  return <ExpandableSection
+    title={eventName.length === 0 ? "イベント不明" : eventName}
+    menuContents={
+      <>
         <Menu.Item>
           <IconLabelButton full noBorder icon={ICON.add} label="追加" onClick={addEvent}/>
         </Menu.Item>
@@ -598,182 +619,198 @@ function EventSection({
         <Menu.Item>
           <IconLabelButton full noBorder icon={ICON.download} label="共有" onClick={() => exportEvent(choreos, eventName)}/>
         </Menu.Item>
-      </CustomMenu>
-    </div>
-    {
-      isExpanded && 
-      <div className="flex flex-col gap-2 md:grid md:grid-cols-2">
-        {
-          choreos.map((choreo) =>
-            <React.Fragment key={choreo.id}>
-              {
-                (isNullOrUndefinedOrBlank(searchTerm) ||
-                choreo.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                choreo.event.toLowerCase().includes(searchTerm.toLowerCase())) &&
-                <div
-                  onClick={() => {
-                    const {status, ...c} = choreo;
-                    if (status === "syncRequired") {
-                      syncChoreo(c);
-                    } else {
-                      goToViewPage(c);
-                    }
-                  }}
-                  className="relative flex flex-col justify-between h-full p-2 transition-colors bg-white border border-gray-400 rounded-md cursor-pointer">
-                  {/* Title */}
-                  <div className="flex flex-row items-start justify-between gap-2">
-                    <span className="text-lg font-medium text-left break-words text-wrap">
-                      {choreo.name}
-                    </span>
-                    <div className="flex flex-row gap-2">
-                      {
-                        choreo.status === "syncRequired" &&
-                        <div className="p-1 text-sm font-semibold text-white border rounded-md text-nowrap bg-primary border-primary">要確認</div>
-                      }
-                      {
-                        (choreo.status === "localOnly" || choreo.status === "edited") &&
-                        <div className="p-1 text-sm text-gray-600 bg-white border border-gray-600 rounded-md text-nowrap">未公開</div>
-                      }
-                      <Dialog.Trigger id={choreo.id} payload={choreo} handle={optionsDialog} onClick={(e) => {
+      </>
+    }
+  >
+    <div className="flex flex-col gap-2 md:grid md:grid-cols-2">
+      {
+        choreos.map((choreo) =>
+          <React.Fragment key={choreo.id}>
+            {
+              (isNullOrUndefinedOrBlank(searchTerm) ||
+              choreo.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              choreo.event.toLowerCase().includes(searchTerm.toLowerCase())) &&
+              <div
+                onClick={() => {
+                  const {status, ...c} = choreo;
+                  if (status === "syncRequired") {
+                    syncChoreo(c);
+                  } else {
+                    goToViewPage(c);
+                  }
+                }}
+                className="flex flex-col justify-between h-full p-2 transition-colors bg-white border border-gray-400 rounded-md cursor-pointer">
+                {/* Title */}
+                <div className="relative flex flex-row items-start justify-between gap-2">
+                  <span className="text-lg font-medium text-left break-words text-wrap">
+                    {choreo.name}
+                  </span>
+                  <div className="flex flex-row gap-2">
+                    {
+                      missingNames[choreo.id]?.size > 0 &&
+                      <Dialog.Trigger handle={dancerWarningDialog} onClick={(e) => {
                         e.stopPropagation();
                         setSelectedChoreo(choreo);
-                        setOptionsDialogOpen(true);
+                        setDancerWarningDialogOpen(true);
                       }}>
-                        <IconButton
-                          src={ICON.moreVert}
-                          colour="grey"
-                          size="sm"
-                          noBorder
-                          asDiv
-                        />
+                        <IconButton asDiv noBorder size="sm" src={ICON.warning} colour="primary"/>
                       </Dialog.Trigger>
-                    </div>
+                    }
+                    {
+                      choreo.status === "syncRequired" &&
+                      <div className="p-1 text-sm font-semibold text-white border rounded-md text-nowrap bg-primary border-primary">要確認</div>
+                    }
+                    {
+                      (choreo.status === "localOnly" || choreo.status === "edited") &&
+                      <div className="p-1 text-sm text-gray-600 bg-white border border-gray-600 rounded-md text-nowrap">未公開</div>
+                    }
+                    <Dialog.Trigger id={choreo.id} payload={choreo} handle={optionsDialog} onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedChoreo(choreo);
+                      setOptionsDialogOpen(true);
+                    }}>
+                      <IconButton
+                        src={ICON.moreVert}
+                        colour="grey"
+                        size="sm"
+                        noBorder
+                        asDiv
+                      />
+                    </Dialog.Trigger>
                   </div>
-                  {/* Meta row */}
-                  <div className="items-center justify-between text-sm text-gray-500 md:flex">
-                    {choreo.lastUpdated ? (
-                      <div className="flex items-center gap-1">
-                        <Icon colour="grey" size="sm" src={ICON.history}/>{getDate(new Date(choreo.lastUpdated))}
-                      </div>
-                    ) : (
-                      <div />
-                    )}
+                </div>
+                {/* Meta row */}
+                <div className="items-center justify-between text-sm text-gray-500 md:flex">
+                  {choreo.lastUpdated ? (
+                    <div className="flex items-center gap-1">
+                      <Icon colour="grey" size="sm" src={ICON.history}/>{getDate(new Date(choreo.lastUpdated))}
+                    </div>
+                  ) : (
+                    <div />
+                  )}
 
-                    <div className="flex items-center gap-2">
-                      <div className="flex items-center gap-1">
-                        <Icon
-                          src={ICON.resize}
-                          colour="grey"
-                          size="sm"
-                        />
-                        <span>幅{choreo.stageGeometry.stageWidth}m 縦{choreo.stageGeometry.stageLength}m</span>
-                      </div>
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
+                      <Icon
+                        src={ICON.resize}
+                        colour="grey"
+                        size="sm"
+                      />
+                      <span>幅{choreo.stageGeometry.stageWidth}m 縦{choreo.stageGeometry.stageLength}m</span>
+                    </div>
 
-                      <div className="flex items-center gap-1">
-                        <Icon
-                          src={ICON.group}
-                          colour="grey"
-                          size="sm"
-                        />
-                        <span>{Object.keys(choreo.dancers).length}人</span>
-                      </div>
+                    <div className="flex items-center gap-1">
+                      <Icon
+                        src={ICON.group}
+                        colour="grey"
+                        size="sm"
+                      />
+                      <span>{Object.keys(choreo.dancers).length}人</span>
                     </div>
                   </div>
                 </div>
-              }
-            </React.Fragment>
-          )
-        }
-        <Dialog.Root
-          open={optionsDialogOpen}
-          onOpenChange={handleOptionsDialogOpenChange}
-          handle={optionsDialog}>
-          {
-            selectedChoreo &&
-            <CustomDialog hasX title={selectedChoreo.name}>
-              <div className="flex flex-col gap-2">
-                <Dialog.Close>
-                  <IconLabelButton
-                    icon={ICON.edit}
-                    label="隊列情報変更"
-                    asDiv
-                    onClick={() => editChoreoName(selectedChoreo)}
-                    full />
-                </Dialog.Close>
-                
-                <Dialog.Close>
-                  <IconLabelButton
-                    icon={ICON.fileCopy}
-                    label="複製"
-                    asDiv
-                    onClick={() => duplicateChoreo(selectedChoreo)}
-                    full />
-                </Dialog.Close>
-
-                <Dialog.Close>
-                  <IconLabelButton
-                    icon={ICON.fileExport}
-                    label="共有用エクスポート"
-                    asDiv
-                    onClick={() => exportChoreo(selectedChoreo)}
-                    full />
-                </Dialog.Close>
-                
-                <Dialog.Close>
-                  <IconLabelButton
-                    icon={ICON.pictureAsPdf}
-                    label="PDFをダウンロード"
-                    asDiv
-                    onClick={() => onPdfExport(selectedChoreo)}
-                    full />
-                </Dialog.Close>
-
-                {
-                  selectedChoreo.status === "localOnly" &&
-                  <Dialog.Close>
-                    <IconLabelButton
-                      primaryText
-                      icon={ICON.delete}
-                      label="削除"
-                      asDiv
-                      onClick={() => deleteChoreo(selectedChoreo)}
-                      full />
-                  </Dialog.Close>
-                }
-
-                {
-                  selectedChoreo.status === "syncRequired" &&
-                  <Dialog.Close>
-                    <IconLabelButton
-                      primaryText
-                      icon={ICON.warning}
-                      label="確認"
-                      asDiv
-                      onClick={() => {
-                        const {status, ...c} = selectedChoreo;
-                        syncChoreo(c);
-                      }}
-                      full />
-                  </Dialog.Close>
-                }
-
-                {
-                  selectedChoreo.status === "edited" &&
-                  <Dialog.Close>
-                    <IconLabelButton
-                      primaryText
-                      icon={ICON.restorePage}
-                      label="変更を破棄"
-                      asDiv
-                      onClick={() => revertChoreo(selectedChoreo)}
-                      full />
-                  </Dialog.Close>
-                }
               </div>
-            </CustomDialog>
-          }
-        </Dialog.Root>
-      </div>
-    }
-  </div>
+            }
+          </React.Fragment>
+        )
+      }
+      <Dialog.Root
+        open={optionsDialogOpen}
+        onOpenChange={handleOptionsDialogOpenChange}
+        handle={optionsDialog}>
+        {
+          selectedChoreo &&
+          <CustomDialog hasX title={selectedChoreo.name}>
+            <div className="flex flex-col gap-2">
+              <Dialog.Close>
+                <IconLabelButton
+                  icon={ICON.edit}
+                  label="隊列情報変更"
+                  asDiv
+                  onClick={() => editChoreoName(selectedChoreo)}
+                  full />
+              </Dialog.Close>
+              
+              <Dialog.Close>
+                <IconLabelButton
+                  icon={ICON.fileCopy}
+                  label="複製"
+                  asDiv
+                  onClick={() => duplicateChoreo(selectedChoreo)}
+                  full />
+              </Dialog.Close>
+
+              <Dialog.Close>
+                <IconLabelButton
+                  icon={ICON.fileExport}
+                  label="共有用エクスポート"
+                  asDiv
+                  onClick={() => exportChoreo(selectedChoreo)}
+                  full />
+              </Dialog.Close>
+              
+              <Dialog.Close>
+                <IconLabelButton
+                  icon={ICON.pictureAsPdf}
+                  label="PDFをダウンロード"
+                  asDiv
+                  onClick={() => onPdfExport(selectedChoreo)}
+                  full />
+              </Dialog.Close>
+              {
+                selectedChoreo.status === "localOnly" &&
+                <Dialog.Close>
+                  <IconLabelButton
+                    primaryText
+                    icon={ICON.delete}
+                    label="削除"
+                    asDiv
+                    onClick={() => deleteChoreo(selectedChoreo)}
+                    full />
+                </Dialog.Close>
+              }
+
+              {
+                selectedChoreo.status === "syncRequired" &&
+                <Dialog.Close>
+                  <IconLabelButton
+                    primaryText
+                    icon={ICON.warning}
+                    label="確認"
+                    asDiv
+                    onClick={() => {
+                      const {status, ...c} = selectedChoreo;
+                      syncChoreo(c);
+                    }}
+                    full />
+                </Dialog.Close>
+              }
+
+              {
+                selectedChoreo.status === "edited" &&
+                <Dialog.Close>
+                  <IconLabelButton
+                    primaryText
+                    icon={ICON.restorePage}
+                    label="変更を破棄"
+                    asDiv
+                    onClick={() => revertChoreo(selectedChoreo)}
+                    full />
+                </Dialog.Close>
+              }
+            </div>
+          </CustomDialog>
+        }
+      </Dialog.Root>
+      <Dialog.Root
+        open={dancerWarningDialogOpen}
+        onOpenChange={handleDancerWarningDialogOpenChange}
+        handle={dancerWarningDialog}>
+        <AbsentDancersWarningDialog
+          choreoName={selectedChoreo?.name}
+          dancerNames={selectedChoreo ? Array.from(missingNames[selectedChoreo.id]): []}
+        />
+      </Dialog.Root>
+    </div>
+  </ExpandableSection>
 }

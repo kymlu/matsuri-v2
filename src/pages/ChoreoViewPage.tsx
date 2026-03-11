@@ -125,6 +125,7 @@ export default function ChoreoViewPage(props: {
           appSettings={appSettings}
           canEdit={false}
           canSelectProps={false}
+          canSelectObstacles={false}
           hideTransformerBorder
           canSelectDancers
           canToggleSelection={false}
@@ -157,6 +158,7 @@ export default function ChoreoViewPage(props: {
             choreo={props.currentChoreo}
             selectedId={selectedIds.dancers.length === 1 ? selectedIds.dancers[0] : ""}
             onClose={() => setExportDialogOpen(false)}
+            showPaths={showPaths}
           />
         }
       </Dialog.Root>

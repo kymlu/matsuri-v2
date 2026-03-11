@@ -36,6 +36,7 @@ import { PropManagerDialog } from "../components/dialogs/PropManagerDialog";
 import EditNameDialog from "../components/dialogs/EditNameDialog";
 import CustomDialog from "../components/basic/CustomDialog";
 import { IconLabelButton } from "../components/basic/Button";
+import EditDancerNameDialog from "../components/dialogs/EditDancerNameDialog";
 
 const resizeDialog = Dialog.createHandle<Choreo>();
 const editChoreoInfoDialog = Dialog.createHandle<string>();
@@ -56,6 +57,7 @@ export default function ChoreoEditPage(props: {
   currentChoreo: Choreo,
   goToViewPage: (newChoreo: Choreo) => void,
   eventList: string[],
+  dancerNamesByEvent: Record<string, Record<string, string[]>>,
 }) {
   const [currentSection, setCurrentSection] = useState<ChoreoSection>(props.currentChoreo.sections[0]);
   const [currentAction, setCurrentAction] = useState<DancerAction | undefined>();
@@ -67,6 +69,7 @@ export default function ChoreoEditPage(props: {
   const [isAddingProps, setIsAddingProps] = useState<boolean>(false);
   const [isAddingObstacles, setIsAddingObstacles] = useState<boolean>(false);
   const [isAssigningActions, setIsAssigningActions] = useState<boolean>(false);
+  const [areObstaclesLocked, setAreObstaclesLocked] = useState<boolean>(true);
   const [appSettings, setAppSettings] = useState<AppSetting>({
     snapToGrid: true,
     showGrid: true,
@@ -412,6 +415,14 @@ export default function ChoreoEditPage(props: {
     setMovementUpdateGroup({props: {}, dancers: {}, obstacles: {}});
   }, [movementUpdateGroup]);
 
+  const missingNames = useMemo(() => {
+    const pool = new Set(Object.entries(props.dancerNamesByEvent[history.presentState.state.event])
+      .filter(([id]) => id !== history.presentState.state.id)
+      .flatMap(([, names]) => names));
+    const currentNames = new Set(Object.values(history.presentState.state.dancers).map(x => x.name));
+    return Array.from(new Set(pool).difference(currentNames)).sort();
+  }, [props.dancerNamesByEvent, history.presentState.state.dancers, history.presentState.state.event]);
+
   return (
     <div className='flex flex-col justify-between w-screen h-[100svh] max-h-[100svh]'>
       <Header
@@ -450,6 +461,7 @@ export default function ChoreoEditPage(props: {
           canEdit={!isAssigningActions}
           canSelectDancers={!isAssigningActions || currentTiming !== undefined}
           canSelectProps={!isAssigningActions}
+          canSelectObstacles={!isAssigningActions && !areObstaclesLocked}
           canToggleSelection
           appSettings={appSettings}
           isAddingDancer={isAddingDancers}
@@ -622,6 +634,7 @@ export default function ChoreoEditPage(props: {
         onAddObstacle={() => {
           resetSelectedIds();
           setIsAddingObstacles(prev => !prev);
+          setAreObstaclesLocked(false);
         }}
         isAddingObstacle={isAddingObstacles}
         showChangeColour={selectedIds.dancers.length > 0 || selectedIds.props.length > 0 || selectedIds.obstacles.length > 0}
@@ -712,6 +725,9 @@ export default function ChoreoEditPage(props: {
             commit: true});
           setSelectedIds({props: [], dancers: [], obstacles: newIds});
         }}
+        showLockObstacle={(Object.keys(history.presentState.state.obstacles ?? {})?.length ?? 0) > 0}
+        areObstaclesLocked={areObstaclesLocked}
+        onToggleObstacleLock={() => {setAreObstaclesLocked(prev => !prev)}}
       />
       {
         isAddingDancers &&
@@ -877,10 +893,10 @@ export default function ChoreoEditPage(props: {
         handle={renameDancerDialog}
         open={renameDancerDialogOpen}
         onOpenChange={handleRenameDancerDialogOpen}>
-        <EditNameDialog
+        <EditDancerNameDialog
           name={history.presentState.state.dancers[selectedIds.dancers[0]]?.name}
           otherNames={Object.values(history.presentState.state.dancers).map(x => x.name)}
-          type="ダンサー"
+          missingNames={missingNames}
           onSubmit={(name) => {
             dispatch({
               type: "SET_STATE",

@@ -17,6 +17,7 @@ type FormationLayerProps = {
   canEdit: boolean,
   canSelectDancers: boolean,
   canSelectProps: boolean,
+  canSelectObstacles: boolean,
   canToggleSelection: boolean,
   hideTransformerBorder?: boolean,
   dancers: Record<string, Dancer>,
@@ -34,12 +35,14 @@ type FormationLayerProps = {
   setSelectedIds: (action: SetStateAction<StageEntities<string[]>>) => void,
   snapToGrid?: boolean,
   dancerDisplayType: DancerDisplayType,
+  isDraggingOnEmpty?: boolean,
 };
 
 export default function FormationLayer({
   canEdit,
   canSelectDancers,
   canSelectProps,
+  canSelectObstacles,
   canToggleSelection,
   dancers,
   dancerPositions,
@@ -56,7 +59,8 @@ export default function FormationLayer({
   setSelectedIds,
   snapToGrid,
   hideTransformerBorder,
-  dancerDisplayType
+  dancerDisplayType,
+  isDraggingOnEmpty
 }: FormationLayerProps) {
 	const transformerRef = useRef<Konva.Transformer>(null);
 
@@ -75,7 +79,7 @@ export default function FormationLayer({
   };
 
   const toggleDancerSelect = (id: string, isAdditive: boolean = true) => {
-    if(canSelectDancers) {
+    if(canSelectDancers && !isDraggingOnEmpty) {
       setSelectedIds((prev) => ({
         props: isAdditive ? [...prev.props] : [],
         dancers: (canToggleSelection && isAdditive) ?
@@ -88,7 +92,7 @@ export default function FormationLayer({
     }
   }
   const togglePropSelect = (id: string, isAdditive: boolean = true) => {
-    if(canSelectProps) {
+    if(canSelectProps && !isDraggingOnEmpty) {
       setSelectedIds((prev) => ({
         dancers: isAdditive ? [...prev.dancers] : [],
         props: (canToggleSelection && isAdditive) ?
@@ -101,7 +105,7 @@ export default function FormationLayer({
     }
   }
   const toggleObstacleSelect = (id: string, isAdditive: boolean = true) => {
-    if(canSelectProps) {
+    if(canSelectObstacles && !isDraggingOnEmpty) {
       setSelectedIds((prev) => ({
         dancers: isAdditive ? [...prev.dancers] : [],
         props: isAdditive ? [...prev.props] : [],
@@ -152,9 +156,9 @@ export default function FormationLayer({
             isSelected={selectedIds.obstacles.includes(obstacle.id)}
             isTransformerActive={isTransformerActive}
             registerNode={registerNode}
-            canEdit={canEdit}
+            canEdit={canEdit && canSelectObstacles}
             snapToGrid={snapToGrid}
-            canSelect={canSelectProps}
+            canSelect={canSelectObstacles}
             animate
           />
         );
@@ -171,7 +175,7 @@ export default function FormationLayer({
             isSelected={selectedIds.props.includes(propPosition.propId)}
             isTransformerActive={isTransformerActive}
             registerNode={registerNode}
-            canEdit={canEdit}
+            canEdit={canEdit && canSelectProps}
             snapToGrid={snapToGrid}
             canSelect={canSelectProps}
             animate

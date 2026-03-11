@@ -1,4 +1,4 @@
-export const LAST_UPDATED = "更新 3月5日"
+export const LAST_UPDATED = "更新 3月10日"
 export const METER_PX = 25;
 export const PDF_METER_PX = 20;
 export const PROP_SNAP_SIZE = 0.25;
@@ -55,6 +55,7 @@ export const ICON = {
   edit: "edit",
   editOff: "edit_off",
   editDocument: "edit_document",
+  emergencyHome: "emergency_home",
   expandLess: "expand_less",
   expandMore: "expand_more",
   familiarFaceAndZone: "familiar_face_and_zone",

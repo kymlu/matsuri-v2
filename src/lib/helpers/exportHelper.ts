@@ -129,19 +129,19 @@ export async function exportToPdf (
   // formations longer than 20m will print in increments
   var visualDiagramHeightPx = diagramHeightPx;
   var startingPoints: number[] = [];
+  var sectionDeltas: number[] = [];
   if (stage.yAxis === "bottom-up" && stage.stageLength > 20) {
-    var largestYDelta = 0;
     choreo.sections.forEach((s) => {
       var yValues = Object.values(s.formation.dancerPositions).map(p => p.y );
       var propYValues = Object.values(s.formation.propPositions).map(p => p.y); // to do: consider the length of the prop?
       var min = Math.min(...yValues.map(y => y - 2), ...propYValues.map(y => y - 2));
       var max = Math.max(...yValues.map(y => y + 2), ...propYValues.map(y => y + 2));
+      var delta = Math.ceil(max - min);
       startingPoints.push(Math.ceil(max));
-      var delta = max - min;
-      if (delta > largestYDelta) largestYDelta = delta;
+      sectionDeltas.push(delta)
     });
 
-    if (largestYDelta > 0) visualDiagramHeightPx = largestYDelta * PDF_METER_PX;
+    visualDiagramHeightPx = Math.max(...sectionDeltas, 8) * PDF_METER_PX;
   }
 
   // only add memo space if there are notes or there is a dancer being followed 
@@ -193,7 +193,7 @@ export async function exportToPdf (
     });
     console.log("Exporting", section.name);
 
-    const startingPoint: number | null = startingPoints[i];
+    const startingPoint: number | null = startingPoints[i] ? (startingPoints[i] + (visualDiagramHeightPx/PDF_METER_PX - sectionDeltas[i])) : null;
     const startingPointDelta = startingPoint ? Math.max(stageHeightPx - (startingPoint * PDF_METER_PX), -PDF_METER_PX) + topMarginM * PDF_METER_PX : 0;
 
     // draw out of bounds
@@ -208,7 +208,7 @@ export async function exportToPdf (
     for (let m = 0; m < totalWidthM - gridOffsetMeters; m++) {
       const x = m * PDF_METER_PX + gridOffsetPx;
 
-      if (m === 0) continue;
+      if (x === 0) continue;
     
       const distFromCenter = Math.abs(
         x - centerX
@@ -430,9 +430,9 @@ export async function exportToPdf (
     var memoY = PDF_METER_PX;
 
     if (followingDancer) {
+      var nextPosition = choreo.sections[i + 1]?.formation?.dancerPositions[followingDancer.id];
       if (showFollowingPath) {
         var currentPosition = section.formation.dancerPositions[followingDancer.id];
-        var nextPosition = choreo.sections[i + 1]?.formation?.dancerPositions[followingDancer.id];
         if (currentPosition && nextPosition &&
           (currentPosition.x !== nextPosition.x || currentPosition.y !== nextPosition.y)) {
             const currentPx = stageMetersToPx(currentPosition, stage, PDF_METER_PX);
@@ -503,8 +503,6 @@ export async function exportToPdf (
       pdf.text(currentPositionText, memoLeft + memoWidth/2 + 4, memoY, {maxWidth: memoWidth, align: "center"});
       memoY += pdf.getTextDimensions(currentPositionText, {maxWidth: memoWidth}).h * 1.25;
       memoY += pdf.getTextDimensions("O", {maxWidth: memoWidth}).h / 2;
-
-      var nextPosition = choreo.sections[i + 1]?.formation?.dancerPositions[followingDancer.id];
       
       const delta: Coordinates | null = nextPosition ? {
         x: roundToTenth(nextPosition.x) - roundToTenth(position.x),
@@ -611,7 +609,7 @@ export async function exportToPdf (
       pdf.addPage();
     }
   }
-
+  pdf.save();
   var blob = pdf.output("blob");
   
   const fullFileName = `${getSafeFileName(fileName)}.pdf`

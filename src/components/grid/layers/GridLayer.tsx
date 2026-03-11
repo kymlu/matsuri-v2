@@ -74,8 +74,26 @@ export default function GridLayer({
         />
     );
     
-    // Vertical grid lines (across full area)
     if(showGridLines){
+      // Horizontal grid lines
+      for (let m = 0; m <= margins.topMargin + length + margins.bottomMargin; m++) {
+        const y = m * gridSizePx;
+        const isMajor = m % 2 === 0;
+      
+        if (m > 0 && m < margins.topMargin + length + margins.bottomMargin) {
+          elements.push(
+            <Line
+              key={`h-${m}`}
+              points={[0, y, totalWidthPx, y]}
+              stroke={colorPalette.lightGrey}
+              strokeWidth={1}
+              dash={isMajor ? [10, 6] : [4, 6]}
+            />
+          );
+        }
+      }
+
+      // Vertical grid lines (across full area)
       for (let m = 0; m < margins.leftMargin + width + margins.rightMargin - gridOffsetMeters; m++) {
         const x = m * gridSizePx + gridOffsetPx;
         
@@ -112,24 +130,26 @@ export default function GridLayer({
       );
     }
     
-    // Horizontal grid lines + right labels
+    // Centre triangle marker
+    elements.push(
+      <Shape
+        key={"triangle"}
+        sceneFunc={(context, shape) => {
+          context.beginPath();
+          context.moveTo(centerX, stageTopPx - gridSizePx * 0.3);
+          context.lineTo(centerX - gridSizePx * 0.5, stageTopPx - gridSizePx * 1.2);
+          context.lineTo(centerX + gridSizePx * 0.5, stageTopPx - gridSizePx * 1.2);
+          context.closePath();
+          context.fillStrokeShape(shape);
+        }}
+        fill={colorPalette.primary}
+      />
+    )
+    
+    // Right-side meter labels
     for (let m = 0; m <= margins.topMargin + length + margins.bottomMargin; m++) {
-      const y = m * gridSizePx;
-      const isMajor = m % 2 === 0;
-    
-      if (showGridLines && m > 0 && m < margins.topMargin + length + margins.bottomMargin) {
-        elements.push(
-          <Line
-            key={`h-${m}`}
-            points={[0, y, totalWidthPx, y]}
-            stroke={colorPalette.lightGrey}
-            strokeWidth={1}
-            dash={isMajor ? [10, 6] : [4, 6]}
-          />
-        );
-      }
-    
-      // Right-side meter labels
+        const y = m * gridSizePx;
+
       // if stage, 0 at top of stage
       // if parade, 0 at bottom of stage
       if (y >= stageTopPx && y <= stageBottomPx) {
@@ -151,23 +171,7 @@ export default function GridLayer({
         );
       }
     }
-    
-    // Centre triangle marker
-    elements.push(
-      <Shape
-        key={"triangle"}
-        sceneFunc={(context, shape) => {
-          context.beginPath();
-          context.moveTo(centerX, stageTopPx - gridSizePx * 0.3);
-          context.lineTo(centerX - gridSizePx * 0.5, stageTopPx - gridSizePx * 1.2);
-          context.lineTo(centerX + gridSizePx * 0.5, stageTopPx - gridSizePx * 1.2);
-          context.closePath();
-          context.fillStrokeShape(shape);
-        }}
-        fill={colorPalette.primary}
-      />
-    )
-    
+
     // Draw main stage border
     elements.push(
       <Rect
