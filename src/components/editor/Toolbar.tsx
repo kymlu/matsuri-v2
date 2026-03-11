@@ -188,7 +188,7 @@ export default function Toolbar({
               label="道具"
               onClick={() => {onAddProp()}} />
             <IconButton
-              src={isAddingObstacle ? ICON.clear : ICON.warning}
+              src={isAddingObstacle ? ICON.clear : ICON.emergencyHome}
               disabled={isAddingDancer || isAddingProp}
               label="障害物"
               onClick={() => {onAddObstacle()}} />

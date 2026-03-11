@@ -55,6 +55,7 @@ export const ICON = {
   edit: "edit",
   editOff: "edit_off",
   editDocument: "edit_document",
+  emergencyHome: "emergency_home",
   expandLess: "expand_less",
   expandMore: "expand_more",
   familiarFaceAndZone: "familiar_face_and_zone",
