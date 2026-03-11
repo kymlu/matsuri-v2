@@ -78,6 +78,7 @@ export default function CustomAutocomplete({
       <div className={wrapperClasses}>
         <div className="relative flex items-center gap-2">
           <Autocomplete.Root
+            defaultValue={defaultValue}
             openOnInputClick
             items={options}
             onValueChange={(newValue: string) => handleChange(newValue)}
@@ -90,7 +91,6 @@ export default function CustomAutocomplete({
               name={name}
               maxLength={maxLength ?? 20}
               placeholder={placeholder ?? ""}
-              value={value ?? ""}
               className={inputClasses}
             />
             <Autocomplete.Portal>
