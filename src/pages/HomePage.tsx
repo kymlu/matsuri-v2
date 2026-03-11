@@ -552,7 +552,7 @@ function EventSection({
                   <span className="text-lg font-medium text-left break-words text-wrap">
                     {choreo.name}
                   </span>
-                  <div className="flex flex-row gap-2">
+                  <div className="flex flex-row items-center gap-2">
                     {
                       eventName.length > 0 && missingNames[choreo.id]?.size > 0 &&
                       <Dialog.Trigger handle={dancerWarningDialog} onClick={(e) => {
@@ -560,7 +560,7 @@ function EventSection({
                         setSelectedChoreo(choreo);
                         setDancerWarningDialogOpen(true);
                       }}>
-                        <IconButton asDiv noBorder size="sm" src={ICON.warning} colour="primary"/>
+                        <IconButton asDiv noBorder size="sm" src={ICON.personAlert} colour="primary"/>
                       </Dialog.Trigger>
                     }
                     <Dialog.Trigger id={choreo.id} payload={choreo} handle={optionsDialog} onClick={(e) => {

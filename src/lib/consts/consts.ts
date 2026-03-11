@@ -93,6 +93,7 @@ export const ICON = {
   noteStack: "note_stack",
   person: "person",
   personAdd: "person_add",
+  personAlert: "person_alert",
   personEdit: "person_edit",
   pictureAsPdf: "picture_as_pdf",
   podiatry: "podiatry",
