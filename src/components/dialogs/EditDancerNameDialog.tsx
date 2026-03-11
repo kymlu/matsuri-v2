@@ -1,20 +1,20 @@
 import { useEffect, useMemo, useState } from "react";
-import TextInput from "../inputs/TextInput";
 import { isNullOrUndefinedOrBlank, strEquals } from "../../lib/helpers/globalHelper";
 import BaseEditDialog from "./BaseEditDialog";
+import CustomAutocomplete from "../inputs/CustomAutocomplete";
 
-type EditNameDialogProps = {
+type EditDancerNameDialogProps = {
   name?: string,
   required?: boolean,
   otherNames?: string[],
-  type: "道具" | "隊列表" | "イベント" | "セクション" | "障害物",
+  missingNames: string[],
   onSubmit: (name: string) => void,
   onClose?: () => void,
 }
 
-export default function EditNameDialog({
-  name, required = true, otherNames, type, onSubmit, onClose
-}: EditNameDialogProps) {
+export default function EditDancerNameDialog({
+  name, required = true, otherNames, missingNames, onSubmit, onClose
+}: EditDancerNameDialogProps) {
   const [newName, setNewName] = useState("");
 
   useEffect(() => {
@@ -38,16 +38,17 @@ export default function EditNameDialog({
   }, [nameCounts, newName]);
 
   return <BaseEditDialog
-    title={`${type}名`}
+    title={`ダンサー名`}
     onSubmit={() => { onSubmit(newName) }}
     onClose={() => onClose?.()}
     isActionButtonDisabled={required && isNullOrUndefinedOrBlank(newName)}
     >
-    <TextInput
-      required={required}
+    <CustomAutocomplete
       defaultValue={name ?? ""}
       onContentChange={ (newName) => { setNewName(newName) }}
-      maxLength={15}/>
+      maxLength={15}
+      options={missingNames}
+    />
     
     {
       hasDuplicate && <div className="font-bold text-center text-wrap text-primary">

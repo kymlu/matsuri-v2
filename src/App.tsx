@@ -13,6 +13,7 @@ function App() {
   const [mode, setMode] = useState<Mode>("home");
   const [selectedEvent, setSelectedEventName] = useState<string | undefined>();
   const [eventList, setEventList] = useState<string[]>([]);
+  const [dancerNamesByEvent, setDancerNamesByEvent] = useState<Record<string, Record<string, string[]>>>({});
   const [currentChoreo, setCurrentChoreo] = useState<Choreo | undefined>();
   const [name, setName] = useState<string | null>(null);
 
@@ -47,6 +48,8 @@ function App() {
           }}
           userName={name}
           setUserName={(newName) => setNewName(newName)}
+          dancerNamesByEvent={dancerNamesByEvent}
+          setDancerNamesByEvent={(groupedNames) => setDancerNamesByEvent(groupedNames)}
         />
       )}
       {mode === "form" && (
@@ -69,6 +72,7 @@ function App() {
             setMode("view");
           }}
           eventList={eventList}
+          dancerNamesByEvent={dancerNamesByEvent}
         />
       )}
       {mode === "view" && (

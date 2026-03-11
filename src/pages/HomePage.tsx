@@ -29,6 +29,7 @@ import { Oval } from "react-loader-spinner"
 import { colorPalette } from "../lib/consts/colors"
 import EditChoreoInfoDialog from "../components/dialogs/EditChoreoInfoDialog"
 import ExpandableSection from "../components/basic/ExpandableSection"
+import AbsentDancersWarningDialog from "../components/dialogs/AbsentDancersWarningDialog"
 
 type HomePageProps = {
   eventList: string[]
@@ -37,12 +38,15 @@ type HomePageProps = {
   goToViewPage: (choreo: Choreo) => void,
   userName: string | null,
   setUserName: (newName: string) => void,
+  dancerNamesByEvent: Record<string, Record<string, string[]>>,
+  setDancerNamesByEvent: (groupedNames: Record<string, Record<string, string[]>>) => void,
 }
 
 export default function HomePage({
   eventList, setEventList,
   goToNewChoreoPage, goToViewPage,
   userName, setUserName,
+  dancerNamesByEvent, setDancerNamesByEvent,
 }: HomePageProps) {
   const [savedChoreos, setSavedChoreos] = useState<Choreo[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -68,6 +72,18 @@ export default function HomePage({
           }
         });
         setSavedChoreos(choreos);
+        setDancerNamesByEvent(
+          choreos.reduce((acc, item) => {
+            const names = Object.values(item.dancers).map(d => d.name);
+            return {
+              ...acc,
+              [item.event]: {
+                ...(acc[item.event] ?? {}),
+                [item.id]: names,
+              },
+            };
+          }, {} as Record<string, Record<string, string[]>>)
+        );
         setIsLoading(false);
       });
     });
@@ -237,6 +253,7 @@ export default function HomePage({
               <EventSection
                 key={eventName}
                 eventName={eventName}
+                dancerNamesByFormation={dancerNamesByEvent[eventName]}
                 choreos={choreos}
                 searchTerm={searchTerm}
                 goToViewPage={goToViewPage}
@@ -459,6 +476,7 @@ type EventSectionProps = {
   eventName: string,
   choreos: Choreo[],
   searchTerm: string,
+  dancerNamesByFormation?: Record<string, string[]>,
   addEvent: () => void,
   editEventName: () => void,
   goToViewPage: (choreo: Choreo) => void,
@@ -469,15 +487,35 @@ type EventSectionProps = {
 }
 
 function EventSection({
-  eventName, choreos, searchTerm, goToViewPage, addEvent, editEventName,
+  eventName, dancerNamesByFormation, choreos, searchTerm, goToViewPage, addEvent, editEventName,
   duplicateChoreo, editChoreoName, deleteChoreo, onPdfExport
 }: EventSectionProps) {
   const optionsDialog = Dialog.createHandle<Choreo>();
   const [optionsDialogOpen, setOptionsDialogOpen] = React.useState(false);
+  const dancerWarningDialog = Dialog.createHandle<Choreo>();
+  const [dancerWarningDialogOpen, setDancerWarningDialogOpen] = React.useState(false);
   const [selectedChoreo, setSelectedChoreo] = useState<Choreo | undefined>();
+
+  const missingNames = useMemo(() => {
+    if (dancerNamesByFormation) {
+      var allNames = new Set(Object.values(dancerNamesByFormation ?? {}).flat());
+      var returnVal = Object.entries(dancerNamesByFormation).reduce((acc, [id, names]) => {
+        return {
+          ...acc,
+          [id]: allNames.difference(new Set(names)),
+        }
+      }, {} as Record<string, Set<string>>);
+      return returnVal;
+    } else {
+      return {}
+    }
+  }, [dancerNamesByFormation]);
 
   const handleOptionsDialogOpenChange = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setOptionsDialogOpen(isOpen);
+  };
+  const handleDancerWarningDialogOpenChange = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
+    setDancerWarningDialogOpen(isOpen);
   };
   
   return <ExpandableSection
@@ -510,23 +548,35 @@ function EventSection({
                 onClick={() => {goToViewPage(choreo)}}
                 className="flex flex-col justify-between h-full p-2 transition-colors bg-white border border-gray-400 rounded-md cursor-pointer">
                 {/* Title */}
-                <div className="flex flex-row items-start justify-between gap-2">
+                <div className="relative flex flex-row items-start justify-between gap-2">
                   <span className="text-lg font-medium text-left break-words text-wrap">
                     {choreo.name}
                   </span>
-                  <Dialog.Trigger id={choreo.id} payload={choreo} handle={optionsDialog} onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedChoreo(choreo);
-                    setOptionsDialogOpen(true);
-                  }}>
-                    <IconButton
-                      src={ICON.moreVert}
-                      colour="grey"
-                      size="sm"
-                      noBorder
-                      asDiv
-                    />
-                  </Dialog.Trigger>
+                  <div className="flex flex-row gap-2">
+                    {
+                      missingNames[choreo.id]?.size > 0 &&
+                      <Dialog.Trigger handle={dancerWarningDialog} onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedChoreo(choreo);
+                        setDancerWarningDialogOpen(true);
+                      }}>
+                        <IconButton asDiv noBorder size="sm" src={ICON.warning} colour="primary"/>
+                      </Dialog.Trigger>
+                    }
+                    <Dialog.Trigger id={choreo.id} payload={choreo} handle={optionsDialog} onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedChoreo(choreo);
+                      setOptionsDialogOpen(true);
+                    }}>
+                      <IconButton
+                        src={ICON.moreVert}
+                        colour="grey"
+                        size="sm"
+                        noBorder
+                        asDiv
+                      />
+                    </Dialog.Trigger>
+                  </div>
                 </div>
                 {/* Meta row */}
                 <div className="items-center justify-between text-sm text-gray-500 md:flex">
@@ -619,6 +669,15 @@ function EventSection({
             </div>
           </CustomDialog>
         }
+      </Dialog.Root>
+      <Dialog.Root
+        open={dancerWarningDialogOpen}
+        onOpenChange={handleDancerWarningDialogOpenChange}
+        handle={dancerWarningDialog}>
+        <AbsentDancersWarningDialog
+          choreoName={selectedChoreo?.name}
+          dancerNames={selectedChoreo ? Array.from(missingNames[selectedChoreo.id]): []}
+        />
       </Dialog.Root>
     </div>
   </ExpandableSection>
