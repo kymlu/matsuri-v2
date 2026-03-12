@@ -37,6 +37,7 @@ import EditNameDialog from "../components/dialogs/EditNameDialog";
 import CustomDialog from "../components/basic/CustomDialog";
 import { IconLabelButton } from "../components/basic/Button";
 import EditDancerNameDialog from "../components/dialogs/EditDancerNameDialog";
+import AbsentDancersWarningDialog from "../components/dialogs/AbsentDancersWarningDialog";
 
 const resizeDialog = Dialog.createHandle<Choreo>();
 const editChoreoInfoDialog = Dialog.createHandle<string>();
@@ -51,6 +52,7 @@ const propManagerDialog = Dialog.createHandle<string>();
 const renameSectionDialog = Dialog.createHandle<ChoreoSection>();
 const addNoteToSectionDialog = Dialog.createHandle<ChoreoSection>();
 const deleteSectionDialog = Dialog.createHandle<ChoreoSection>();
+const dancerWarningDialog = Dialog.createHandle<Choreo>();
 
 export default function ChoreoEditPage(props: {
   goToHomePage: () => void,
@@ -325,6 +327,7 @@ export default function ChoreoEditPage(props: {
   const [renameSectionDialogOpen, setRenameSectionDialogOpen] = useState(false);
   const [addNoteToSectionDialogOpen, setAddNoteToSectionDialogOpen] = useState(false);
   const [deleteSectionDialogOpen, setDeleteSectionDialogOpen] = useState(false);
+  const [dancerWarningDialogOpen, setDancerWarningDialogOpen] = useState(false);
   
   const handleRenameSectionDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setRenameSectionDialogOpen(isOpen);
@@ -376,6 +379,10 @@ export default function ChoreoEditPage(props: {
 
   const handlePropManagerDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setPropManagerDialogOpen(isOpen);
+  };
+
+  const handleDancerWarningDialogOpenChange = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
+    setDancerWarningDialogOpen(isOpen);
   };
   
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
@@ -455,6 +462,7 @@ export default function ChoreoEditPage(props: {
         }}
         appSettings={appSettings}
         goToView={() => {props.goToViewPage(history.presentState.state)}}
+        showDancerWarningMessage={missingNames.length > 0 ? () => {setDancerWarningDialogOpen(true)} : undefined}
         />
       <div className="relative flex-1">
         <MainStage
@@ -1091,6 +1099,16 @@ export default function ChoreoEditPage(props: {
             onClose={() => setExportDialogOpen(false)}
           />
         }
+      </Dialog.Root>
+      <Dialog.Root
+        open={dancerWarningDialogOpen}
+        onOpenChange={handleDancerWarningDialogOpenChange}
+        handle={dancerWarningDialog}>
+        <AbsentDancersWarningDialog
+          choreoName={history.presentState.state?.name}
+          eventName={history.presentState.state?.event}
+          dancerNames={missingNames}
+        />
       </Dialog.Root>
     </div>
   )

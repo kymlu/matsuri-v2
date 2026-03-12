@@ -33,6 +33,7 @@ type HeaderProps = {
   toggleShowPath?: () => void;
   showPath?: boolean,
   isShowPathBtnDisabled?: boolean,
+  showDancerWarningMessage?: () => void;
 };
 
 export default function Header({
@@ -48,7 +49,8 @@ export default function Header({
   changeSnap, changeShowGrid, changeShowPrevious, changeDancerSize,
   appSettings,
   goToEdit, goToView,
-  toggleShowPath, showPath, isShowPathBtnDisabled
+  toggleShowPath, showPath, isShowPathBtnDisabled,
+  showDancerWarningMessage
 }: HeaderProps) {
   return <header className="flex items-center justify-between w-screen gap-2 p-2 border-b-2 select-none from-white to-transparent ">
     <div className="flex">
@@ -78,6 +80,15 @@ export default function Header({
             goToView();
           } }}
         />
+      {
+        showDancerWarningMessage &&
+        <IconButton
+          colour="primary"
+          src={ICON.personAlert}
+          noBorder
+          onClick={showDancerWarningMessage}
+        />
+      }
       {
         toggleShowPath &&
         <IconButton
