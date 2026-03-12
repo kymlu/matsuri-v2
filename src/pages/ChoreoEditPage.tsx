@@ -739,63 +739,43 @@ export default function ChoreoEditPage(props: {
       />
       {
         isAddingDancers &&
-        <div className="absolute items-center w-max rounded-md flex gap-2 p-2 top-20 left-1/2 translate-x-[-50%] bg-white border border-primary">
-          <span>
-            グリッドを押して<b>ダンサー</b>を追加する
-          </span>
-          <IconButton
-            src={ICON.clear}
-            size="sm"
-            onClick={() => {setIsAddingDancers(false);}}/>
-        </div>
+        <InstructionMessage
+          instruction={<>グリッドを押して<b>ダンサー</b>を追加する</>}
+          onClose={() => setIsAddingDancers(false)}
+        />
       }
       {
         isAddingProps &&
-        <div className="absolute items-center w-max rounded-md flex gap-2 p-2 top-20 left-1/2 translate-x-[-50%] bg-white border border-primary">
-          <span>
-            グリッドを押して<b>道具</b>を追加する
-          </span>
-          <IconButton
-            src={ICON.clear}
-            size="sm"
-            onClick={() => {setIsAddingProps(false);}}/>
-        </div>
+        <InstructionMessage
+          instruction={<>グリッドを押して<b>道具</b>を追加する</>}
+          onClose={() => setIsAddingProps(false)}
+        />
       }
       {
         isAddingObstacles &&
-        <div className="absolute items-center w-max rounded-md flex gap-2 p-2 top-20 left-1/2 translate-x-[-50%] bg-white border border-primary">
-          <span>
-            グリッドを押して<b>障害物</b>を追加する
-          </span>
-          <IconButton
-            src={ICON.clear}
-            size="sm"
-            onClick={() => {setIsAddingObstacles(false);}}/>
-        </div>
+        <InstructionMessage
+          instruction={<>グリッドを押して<b>障害物</b>を追加する</>}
+          onClose={() => setIsAddingObstacles(false)}
+        />
       }
       {
         isAssigningActions &&
-        <div className="absolute items-center w-max max-w-full rounded-md flex gap-2 p-2 top-20 left-1/2 translate-x-[-50%] bg-white border border-primary">
-          <span className="text-center">
-            {
-              currentAction && currentTiming && `「${currentAction.name}-${currentTiming.name}」を割り当てるダンサーをタップ`
+        <InstructionMessage
+          instruction={
+            <>
+              { currentAction && currentTiming && <><b>「{currentAction.name} - {currentTiming.name}」</b>に入るダンサーをタップ</> }
+              { (currentAction === undefined || currentTiming === undefined) && "カウントを選択してください" }
+            </>
+          }
+          onClose={() => {
+            resetSelectedIds();
+            setCurrentAction(undefined);
+            setCurrentTiming(undefined);
+            if (currentAction === undefined || currentTiming === undefined) {
+              setIsAssigningActions(false);
             }
-            {
-              (currentAction === undefined || currentTiming === undefined) && "カウントを選択してください"
-            }
-          </span>
-          <IconButton
-            src={ICON.clear}
-            size="sm"
-            onClick={() => {
-              resetSelectedIds();
-              setCurrentAction(undefined);
-              setCurrentTiming(undefined);
-              if (currentAction === undefined || currentTiming === undefined) {
-                setIsAssigningActions(false);
-              }
-            }}/>
-        </div>
+          }}
+        />
       }
       <Dialog.Root
         handle={resizeDialog}
@@ -1112,4 +1092,23 @@ export default function ChoreoEditPage(props: {
       </Dialog.Root>
     </div>
   )
+}
+
+type InstructionMessageProps = {
+  instruction: React.ReactNode,
+  onClose: () => void,
+}
+
+function InstructionMessage({
+  instruction, onClose
+}: InstructionMessageProps) {
+  return <div className="absolute items-center w-max rounded-md flex gap-2 p-2 top-20 left-1/2 translate-x-[-50%] bg-white border border-primary">
+    <span>
+      {instruction}
+    </span>
+    <IconButton
+      src={ICON.clear}
+      size="sm"
+      onClick={onClose}/>
+  </div>
 }
