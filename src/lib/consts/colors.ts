@@ -23,8 +23,24 @@ export const colorPalette = {
   paleGrey: "#D4D4D4",
   primary: "#AB1010",
 
+  actionOutlineColours: [
+    "#F3C300", "#875692", "#F38400", "#A1CAF1",
+    "#D44BA6", "#C2B280", "#848482", "#008856",
+    "#E68FAC", "#0067A5", "#F99379", "#604E97",
+    "#F6A600", "#B3446C", "#DCD300", "#882D17"
+  ],
+
   // Helper: return all colors flattened
   allColors(): string[] {
+    return [
+      ...Object.values(this.rainbow).flat(),
+      ...this.browns,
+      ...this.greys,
+      ...this.actionOutlineColours,
+    ];
+  },
+  
+  gridObjectColors(): string[] {
     return [
       ...Object.values(this.rainbow).flat(),
       ...this.browns,

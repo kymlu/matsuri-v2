@@ -105,6 +105,7 @@ export function ActionManagerDialog({
         full
         onClick={addAction}
         primary
+        disabled={actions.length >= 5}
         label="アクション追加"
         />
       <DndContext
@@ -176,7 +177,7 @@ function SortableActionSection ({
       <Icon src={ICON.dragHandle}/>
     </div>
     <div className="flex-1">
-      <TextInput required label="アクション名" defaultValue={action.name} onContentChange={(newName) => {onRenameAction(newName)}}/>
+      <TextInput required maxLength={10} label="アクション名" defaultValue={action.name} onContentChange={(newName) => {onRenameAction(newName)}}/>
       <span className="font-semibold">カウント（重複不可）</span>
       <div className="flex flex-wrap gap-4">
         {
@@ -194,7 +195,10 @@ function SortableActionSection ({
               />
           )
         }
-        <IconButton onClick={onAddTiming} src={ICON.add} size="sm"/>
+        {
+          action.timings.length < 16 &&
+          <IconButton onClick={onAddTiming} src={ICON.add} size="sm"/>
+        }
       </div>
     </div>
     <div className="absolute top-2 right-2">

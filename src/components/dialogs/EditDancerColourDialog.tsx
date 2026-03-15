@@ -59,7 +59,7 @@ export default function EditDancerColourDialog({
       }
       <div className="grid grid-cols-6 gap-2 w-max">
         {
-          colorPalette.allColors().map((color) => 
+          colorPalette.gridObjectColors().map((color) => 
             <button
               key={color}
               onClick={() => {setSelectedColour(color)}}

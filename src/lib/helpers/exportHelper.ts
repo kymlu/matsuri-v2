@@ -144,9 +144,9 @@ export async function exportToPdf (
     visualDiagramHeightPx = Math.max(...sectionDeltas, 8) * PDF_METER_PX;
   }
 
-  // only add memo space if there are notes or there is a dancer being followed 
+  // only add memo space if there are notes, actions, or there is a dancer being followed 
   const fileWidth = diagramWidthPx + pageMargin + (
-    followingDancer || choreo.sections.some(x => !isNullOrUndefinedOrBlank(x.note)) ?
+    followingDancer || choreo.sections.some(x => !isNullOrUndefinedOrBlank(x.note) || x.formation.dancerActions.length > 0) ?
     memoBuffer : pageMargin);
   const fileHeight = visualDiagramHeightPx + titleBuffer + pageMargin;
   
@@ -211,12 +211,12 @@ export async function exportToPdf (
       if (x === 0) continue;
     
       const distFromCenter = Math.abs(
-        x - centerX
+        x - centerX - pageMargin
       ) / PDF_METER_PX;
     
       const isMajor = Math.round(distFromCenter) % 2 === 0;
 
-      drawLine(pdf, colorPalette.lightGrey, 0.6, isMajor ? [10, 6] : [4, 6], x + pageMargin, 0 + titleBuffer, x + pageMargin, visualDiagramHeightPx + titleBuffer);
+      drawLine(pdf, colorPalette.lightGrey, 0.6, isMajor ? [4, 6] : [10, 6], x + pageMargin, 0 + titleBuffer, x + pageMargin, visualDiagramHeightPx + titleBuffer);
     }
 
     // Horizontal grid lines + right labels
@@ -287,8 +287,6 @@ export async function exportToPdf (
 
         const angle = ((obstacle.rotation ?? 0) * Math.PI) / 180;
 
-        context.save();
-
         // Move origin to the item's top-left
         context.translate(obstacleX, obstacleY);
 
@@ -297,6 +295,7 @@ export async function exportToPdf (
 
         // Draw the item relative to its own top-left
         context.strokeStyle = obstacle.color;
+        context.lineWidth = 1;
         context.strokeRect(0, 0, obstacleWidth, obstacleHeight);
 
         const stripes = getStripeLines(obstacle);
@@ -398,27 +397,58 @@ export async function exportToPdf (
       }
     });
 
+    // Get actions by dancer
+    var actionsByDancer = Object.keys(choreo.dancers).reduce((acc, item) => {
+      acc[item] = [];
+      return acc;
+    }, {} as Record<string, (number | undefined)[]>);
+
+    section.formation.dancerActions.forEach((action, i) => {
+      action.timings.forEach((t, tIndex) => {
+        t.dancerIds.forEach(d => {
+          actionsByDancer[d][i] = tIndex;
+        })
+      })
+    });
+
     // Draw participants
     Object.values(section.formation.dancerPositions).forEach(p => {
       var dancer = choreo.dancers[p.dancerId];
       if (dancer) {
         const isFollowing = strEquals(followingId, dancer.id);
+        const hasActions = actionsByDancer[p.dancerId]?.length > 0;
   
         const positionInPx = stageMetersToPx(p, stage, PDF_METER_PX);
         const x =  positionInPx.x + pageMargin;
         const y = positionInPx.y - startingPointDelta;
         
         if (isFollowing) {
-          pdf.setLineWidth(1.5);
+          pdf.setLineWidth(1.7);
           pdf.setDrawColor(colorPalette.primary);
           pdf.setFillColor(colorPalette.white);
           pdf.circle(x, y + titleBuffer, PDF_METER_PX * 0.4, "FD");
+        } else if (hasActions) {
+          pdf.setFillColor(colorPalette.white);
+          pdf.setDrawColor(colorPalette.white);
+          pdf.setLineWidth(1.7);
+          pdf.circle(x, y + titleBuffer, PDF_METER_PX * 0.4, "FD");
+
+          context.lineWidth = 1.7;
+          section.formation.dancerActions.forEach((_, i) => {
+            if (actionsByDancer[p.dancerId][i] !== undefined) {
+              const [start, end] = getSectionRadians(section.formation.dancerActions.length, i);
+              context.strokeStyle = colorPalette.actionOutlineColours[actionsByDancer[p.dancerId][i] as number];
+              context.beginPath();
+              context.arc(x, y + titleBuffer, PDF_METER_PX * 0.4, start, end, false);
+              context.stroke();
+            }
+          })
         }
 
         pdf.setLineWidth(0.8);
         pdf.setDrawColor(p.color);
         pdf.setFillColor(p.color);
-        pdf.circle(x, y + titleBuffer, PDF_METER_PX * (isFollowing ? 0.3 : 0.4), "FD");
+        pdf.circle(x, y + titleBuffer, PDF_METER_PX * (isFollowing || hasActions ? 0.3 : 0.4), "FD");
   
         pdf.setTextColor(colorPalette.getTextColor(p.color));
         var displayName = dancer.name ?? "";
@@ -477,11 +507,10 @@ export async function exportToPdf (
       pdf.text(followingDancer.name, memoLeft, memoY, {maxWidth: memoWidth});
 
       const dancerNameHeight = pdf.getTextDimensions(followingDancer.name, {maxWidth: memoWidth}).h;
-      pdf.setDrawColor(colorPalette.primary);
-      memoY += 10;
-      pdf.line(memoLeft, memoY, memoLeft + memoWidth, memoY);
+      memoY += dancerNameHeight > 20 ? dancerNameHeight / 2 + 5 : 5;
+      drawLine(pdf, colorPalette.primary, 0.8, [], memoLeft, memoY, memoLeft + memoWidth, memoY);
 
-      memoY += dancerNameHeight;
+      memoY += 5;
 
       // current position
       pdf.setDrawColor(colorPalette.lightGrey);
@@ -501,8 +530,7 @@ export async function exportToPdf (
       pdf.setTextColor(colorPalette.black);
       const currentPositionText = `${displayY}m/${displayX}m`;
       pdf.text(currentPositionText, memoLeft + memoWidth/2 + 4, memoY, {maxWidth: memoWidth, align: "center"});
-      memoY += pdf.getTextDimensions(currentPositionText, {maxWidth: memoWidth}).h * 1.25;
-      memoY += pdf.getTextDimensions("O", {maxWidth: memoWidth}).h / 2;
+      memoY += pdf.getTextDimensions(currentPositionText, {maxWidth: memoWidth}).h;
       
       const delta: Coordinates | null = nextPosition ? {
         x: roundToTenth(nextPosition.x) - roundToTenth(position.x),
@@ -547,18 +575,18 @@ export async function exportToPdf (
   
           const deltaText = `${[yMovement, xMovement].filter(x => x !== null).join("/")}`;
           pdf.text(deltaText, memoLeft + memoWidth/2 + 2, memoY, {maxWidth: memoWidth, align: "center"});
-          memoY += pdf.getTextDimensions(deltaText, {maxWidth: memoWidth}).h * 1.25;
+          memoY += pdf.getTextDimensions(deltaText, {maxWidth: memoWidth}).h;
         }
-        memoY += pdf.getTextDimensions("O", {maxWidth: memoWidth}).h / 2;
       }
 
       if (section.formation.dancerActions.length > 0) {
         section.formation.dancerActions.forEach((action, i) => {
-          var assignedTiming = action.timings.find(t => t.dancerIds.includes(followingDancer.id));
+          var assignedTiming = actionsByDancer[followingId][i] !== undefined ? 
+            action.timings[actionsByDancer[followingId][i]].name : undefined;
           var x = memoLeft + (i % 2 === 0 ? 0 : (memoWidth / 2 + 4));
           var additionalY = 0;
 
-          pdf.setDrawColor(colorPalette.lightGrey);
+          pdf.setDrawColor(colorPalette.actionOutlineColours[actionsByDancer[followingId][i] as number] ?? colorPalette.lightGrey);
           pdf.setLineWidth(1);
           pdf.roundedRect(x, memoY, memoWidth / 2 - 2, 30, 5, 5, "S");
           
@@ -569,23 +597,23 @@ export async function exportToPdf (
           pdf.setTextColor(colorPalette.grey);
 
           additionalY += 5;
-
-          pdf.text(action.name, x + memoWidth/4, memoY + additionalY, {maxWidth: memoWidth, align: "center"});
-          additionalY += pdf.getTextDimensions(action.name, {maxWidth: memoWidth}).h * 2.2;
+          var actionNameDimensions = pdf.getTextDimensions(action.name, {maxWidth: memoWidth/2 - 8});
+          pdf.text(action.name, x + memoWidth/4, memoY + additionalY - (actionNameDimensions.h > 8 ? 3 : 0), {maxWidth: memoWidth/2 - 8, align: "center"});
+          additionalY += 13 + (actionNameDimensions.h > 8 ? 2 : 0);
 
           pdf.setFontSize(14);
           pdf.setFont(boldFont);
           pdf.setTextColor(colorPalette.black);
           
-          var timingText = `${assignedTiming?.name ?? "---"}`;
+          var timingText = `${assignedTiming ?? "---"}`;
           pdf.text(timingText, x + memoWidth/4, memoY + additionalY, {maxWidth: memoWidth, align: "center"});
-          additionalY += pdf.getTextDimensions(timingText, {maxWidth: memoWidth}).h * 1.25;
-          additionalY += pdf.getTextDimensions("O", {maxWidth: memoWidth}).h / 2;
+          additionalY += 12;
 
           if (i % 2 === 1 || i === section.formation.dancerActions.length - 1) {
-            memoY += additionalY;
+            memoY += 34;
           }
         });
+        memoY += 5;
       }
     }
 
@@ -594,13 +622,65 @@ export async function exportToPdf (
     // write note
     if (section.note) {
       pdf.setFont(font);
-      if (memoY > (PDF_METER_PX * 2)) {
-        pdf.line(memoLeft, memoY, memoLeft + memoWidth, memoY);
-        memoY += pdf.getTextDimensions("O", {maxWidth: memoWidth}).h * 2.2;
+      if (memoY > (PDF_METER_PX)) {
+        drawLine(pdf, colorPalette.lightGrey, 1, [], memoLeft, memoY, memoLeft + memoWidth, memoY);
+        memoY += pdf.getTextDimensions("O", {maxWidth: memoWidth}).h * 2;
       }
 
       pdf.text(section.note, memoLeft, memoY, {maxWidth: (memoWidth)});
+      memoY += pdf.getTextDimensions(section.note, {maxWidth: memoWidth}).h;
     }
+
+    if (section.formation.dancerActions.length > 0) {
+      if (memoY > (PDF_METER_PX)) {
+        drawLine(pdf, colorPalette.lightGrey, 1, [], memoLeft, memoY, memoLeft + memoWidth, memoY);
+        memoY += pdf.getTextDimensions("O", {maxWidth: memoWidth}).h * 2;
+      }
+
+      pdf.setFontSize(10);
+      pdf.setFont(boldFont);
+      pdf.text("カウント凡例", memoLeft, memoY);
+      memoY += 14;
+      section.formation.dancerActions.forEach((action, i) => {
+        pdf.setLineWidth(1);
+        pdf.setDrawColor(colorPalette.black);
+        pdf.circle(memoLeft + 4, memoY - 3, 3.5, "S");
+
+        const [start, end] = getSectionRadians(section.formation.dancerActions.length, i);
+
+        context.fillStyle = colorPalette.black;
+        context.beginPath();
+        context.arc(memoLeft + 4, memoY - 3, 3.5, start, end, false);
+        context.lineTo(memoLeft + 4, memoY - 3);
+        context.fill();
+
+        pdf.setFontSize(8);
+        pdf.setFont(font);
+        pdf.setTextColor(colorPalette.grey);
+
+        var actionNameDimensions = pdf.getTextDimensions(action.name, {maxWidth: memoWidth/2 - 12});
+        pdf.text(action.name, memoLeft + 11, memoY - 1 - (actionNameDimensions.h > 8 ? 3 : 0), {maxWidth: memoWidth/2 - 12});
+        var timingX = 0;
+        action.timings.forEach((timing, i) => {
+          pdf.setFontSize(10);
+          pdf.setFont(boldFont);
+          pdf.setTextColor(colorPalette.getTextColor(colorPalette.actionOutlineColours[i % 16]));
+          pdf.setFillColor(colorPalette.actionOutlineColours[i % 16]);
+          var w = pdf.getTextWidth(timing.name);
+
+          if ((timingX + w) > memoWidth / 2) {
+            timingX = 0;
+            memoY += 11;
+          }
+
+          pdf.roundedRect(memoLeft + memoWidth/2 + timingX, memoY - 8, w + 4, 10, 2, 2, "F");
+          pdf.text(timing.name, memoLeft + memoWidth/2 + timingX + 2, memoY);
+          timingX += w + 4 + 1;
+        });
+        memoY += 13;
+      });
+    }
+
     pdf.setFont(boldFont);
 
     updateProgress(Math.round(((i + 2) / (choreo.sections.length + 1)) * 100));
@@ -609,7 +689,7 @@ export async function exportToPdf (
       pdf.addPage();
     }
   }
-  pdf.save();
+
   var blob = pdf.output("blob");
   
   const fullFileName = `${getSafeFileName(fileName)}.pdf`
@@ -722,4 +802,11 @@ function getStripeLines(obstacle: Obstacle): {x1: number, y1: number, x2: number
   // Add the extra diagonal across corners
   lines.push({ x1: 0, y1: height, x2: width, y2: 0 });
   return lines.filter(x => x !== null);
+}
+
+function getSectionRadians(sections: number, index: number): [number, number] {
+  const sectionSize = (2 * Math.PI) / sections;
+  const start = sectionSize * index - Math.PI * ([2, 4].includes(sections) ? 1 : sections === 3 ? 7/6 : 4.5/5);
+  const end = start + sectionSize;
+  return [start, end];
 }

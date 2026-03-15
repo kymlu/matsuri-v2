@@ -69,7 +69,7 @@ export function PropManagerDialog({
                     }>
                       <div className="grid grid-cols-6 gap-2">
                         {
-                          colorPalette.allColors().map((color) => 
+                          colorPalette.gridObjectColors().map((color) => 
                             <button
                               key={color}
                               onClick={() => {
