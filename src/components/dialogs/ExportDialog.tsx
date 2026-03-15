@@ -77,6 +77,7 @@ export default function ExportDialog({
           <TextInput
             label="ファイル名"
             rightLabel=".pdf"
+            maxLength={50}
             hasError={isExportNameValid}
             defaultValue={defaultName}
             restrictFn={(s) => !testInvalidCharacters(s)}
