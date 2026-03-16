@@ -66,9 +66,6 @@ export default function BaseEditDialog({
         }
       </div>
     }>
-      <>
-        {children}
-      </>
-      
-    </CustomDialog>
+    {children}
+  </CustomDialog>
 }
