@@ -22,6 +22,7 @@ export function ActionManagerDialog({
   section, onSubmit
 }: ActionManagerDialogProps) {
   const [actions, setActions] = useState<DancerAction[]>([]);
+  const [errorMessage, setErrorMessage] = useState<string | null>();
 
   useEffect(() => {
     setActions([...section.formation.dancerActions]);
@@ -75,18 +76,27 @@ export function ActionManagerDialog({
     
     const names = actions.map(x => x.name);
     const nameSet = new Set(names);
-    if (names.length !== nameSet.size || nameSet.has("")) {
+    if (names.length !== nameSet.size) {
+      setErrorMessage("重複のアクション名がある。");
+      return false;
+    } else if (nameSet.has("")) {
+      setErrorMessage("空のアクション名がある。");
       return false;
     }
 
     for (const action of actions) {
       const timingNames = action.timings.map(x => x.name);
       const timingNameSet = new Set(timingNames);
-      if (timingNames.length !== timingNameSet.size || timingNameSet.has("")) {
+      if (timingNames.length !== timingNameSet.size){
+        setErrorMessage("重複のタイミング名がある。");
+        return false;
+      } else if (timingNameSet.has("")) {
+        setErrorMessage("空のタイミング名がある。");
         return false;
       }
     }
 
+    setErrorMessage(null);
     return true;
   }, [actions]);
 
@@ -99,50 +109,57 @@ export function ActionManagerDialog({
       setActions([...section.formation.dancerActions]);
     }}
     onSubmit={() => {onSubmit(actions)}}>
-    <div className="space-y-4">
-      <IconLabelButton
-        icon={ICON.add}
-        full
-        onClick={addAction}
-        primary
-        disabled={actions.length >= 5}
-        label="アクション追加"
-        />
-      <DndContext
-        modifiers={[restrictToParentElement]}
-        onDragEnd={(event) => {
-          const { active, over } = event;
+    <div className="h-full max-h-full grid gap-2 grid-rows-[1fr,auto]">
+      <div className="max-h-full space-y-4 overflow-scroll">
+        <IconLabelButton
+          icon={ICON.add}
+          full
+          onClick={addAction}
+          primary
+          disabled={actions.length >= 5}
+          label="アクション追加"
+          />
+        <DndContext
+          modifiers={[restrictToParentElement]}
+          onDragEnd={(event) => {
+            const { active, over } = event;
 
-          if (over && active.id !== over.id) {
-            const oldIndex = actions.findIndex((item) => strEquals(item.id, active.id.toString()));
-            const newIndex = actions.findIndex((item) => strEquals(item.id, over.id.toString()));
-            if (oldIndex !== -1 && newIndex !== -1) {
-              setActions(arrayMove(actions, oldIndex, newIndex));
+            if (over && active.id !== over.id) {
+              const oldIndex = actions.findIndex((item) => strEquals(item.id, active.id.toString()));
+              const newIndex = actions.findIndex((item) => strEquals(item.id, over.id.toString()));
+              if (oldIndex !== -1 && newIndex !== -1) {
+                setActions(arrayMove(actions, oldIndex, newIndex));
+              }
             }
-          }
-        }}>
-          <SortableContext items={actions}>
-            {
-              actions.map((action, i) => 
-                <SortableActionSection
-                  key={action.id}
-                  action={action}
-                  onRenameAction={(name) => {
-                    var newActions = [...actions];
-                    newActions[i].name = name;
-                    setActions(newActions);
-                  }}
-                  onDeleteAction={() => {
-                    var newActions = [...actions.slice(0, i), ...actions.slice(i + 1)];
-                    setActions(newActions);
-                  }}
-                  onAddTiming={() => {addTiming(i)}}
-                  onRenameTiming={(newTimings) => setNewTimings(i, newTimings)}
-                  onDeleteTiming={(newTimings) => setNewTimings(i, newTimings)}/>
-              )
-            }
-          </SortableContext>
-      </DndContext>
+          }}>
+            <SortableContext items={actions}>
+              {
+                actions.map((action, i) => 
+                  <SortableActionSection
+                    key={action.id}
+                    action={action}
+                    onRenameAction={(name) => {
+                      var newActions = [...actions];
+                      newActions[i].name = name;
+                      setActions(newActions);
+                    }}
+                    onDeleteAction={() => {
+                      var newActions = [...actions.slice(0, i), ...actions.slice(i + 1)];
+                      setActions(newActions);
+                    }}
+                    onAddTiming={() => {addTiming(i)}}
+                    onRenameTiming={(newTimings) => setNewTimings(i, newTimings)}
+                    onDeleteTiming={(newTimings) => setNewTimings(i, newTimings)}/>
+                )
+              }
+            </SortableContext>
+        </DndContext>
+      </div>
+      {
+        errorMessage && <div className="font-bold text-center text-wrap text-primary">
+        {errorMessage}
+      </div>
+      }
     </div>
   </BaseEditDialog>
 }
