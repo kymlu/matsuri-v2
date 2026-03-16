@@ -27,7 +27,7 @@ export const colorPalette = {
     "#F3C300", "#875692", "#F38400", "#A1CAF1",
     "#D44BA6", "#C2B280", "#848482", "#008856",
     "#E68FAC", "#0067A5", "#F99379", "#604E97",
-    "#F6A600", "#B3446C", "#DCD300", "#882D17"
+    "#F6A600", "#B3446C", "#DCD300", "#64200F"
   ],
 
   // Helper: return all colors flattened

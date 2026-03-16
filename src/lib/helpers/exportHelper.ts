@@ -423,23 +423,23 @@ export async function exportToPdf (
         const y = positionInPx.y - startingPointDelta;
         
         if (isFollowing) {
-          pdf.setLineWidth(1.9);
+          pdf.setLineWidth(2);
           pdf.setDrawColor(colorPalette.primary);
           pdf.setFillColor(colorPalette.white);
-          pdf.circle(x, y + titleBuffer, PDF_METER_PX * 0.39, "FD");
+          pdf.circle(x, y + titleBuffer, PDF_METER_PX * 0.38, "FD");
         } else if (hasActions) {
           pdf.setFillColor(colorPalette.white);
           pdf.setDrawColor(colorPalette.white);
           pdf.setLineWidth(1.7);
-          pdf.circle(x, y + titleBuffer, PDF_METER_PX * 0.39, "FD");
+          pdf.circle(x, y + titleBuffer, PDF_METER_PX * 0.38, "FD");
 
-          context.lineWidth = 1.9;
+          context.lineWidth = 2;
           section.formation.dancerActions.forEach((_, i) => {
             if (actionsByDancer[p.dancerId][i] !== undefined) {
               const [start, end] = getSectionRadians(section.formation.dancerActions.length, i);
               context.strokeStyle = colorPalette.actionOutlineColours[actionsByDancer[p.dancerId][i] as number];
               context.beginPath();
-              context.arc(x, y + titleBuffer, PDF_METER_PX * 0.39, start, end, false);
+              context.arc(x, y + titleBuffer, PDF_METER_PX * 0.38, start, end, false);
               context.stroke();
             }
           })
@@ -448,7 +448,7 @@ export async function exportToPdf (
         pdf.setLineWidth(0.8);
         pdf.setDrawColor(p.color);
         pdf.setFillColor(p.color);
-        pdf.circle(x, y + titleBuffer, PDF_METER_PX * (isFollowing || hasActions ? 0.28 : 0.4), "FD");
+        pdf.circle(x, y + titleBuffer, PDF_METER_PX * (isFollowing || hasActions ? 0.27 : 0.4), "FD");
   
         pdf.setTextColor(colorPalette.getTextColor(p.color));
         var displayName = dancer.name ?? "";
@@ -461,7 +461,7 @@ export async function exportToPdf (
 
     if (followingDancer) {
       var nextPosition = choreo.sections[i + 1]?.formation?.dancerPositions[followingDancer.id];
-      console.log(showFollowingPath)
+
       if (showFollowingPath) {
         var currentPosition = section.formation.dancerPositions[followingDancer.id];
         if (currentPosition && nextPosition &&
@@ -620,7 +620,7 @@ export async function exportToPdf (
       }
 
       pdf.text(section.note, memoLeft, memoY, {maxWidth: (memoWidth)});
-      memoY += 8;
+      memoY += pdf.getTextDimensions(section.note, {maxWidth: memoWidth}).h;
     }
 
     if (section.formation.dancerActions.length > 0) {
