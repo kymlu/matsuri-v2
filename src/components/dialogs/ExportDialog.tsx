@@ -22,7 +22,7 @@ export default function ExportDialog({
   const [step, setStep] = useState<"prep" | "export">("prep");
   const [exportName, setExportName] = useState<string>("");
   const [followingId, setFollowingId] = useState<string>(selectedId);
-  const [showFollowingPath, setShowFollowingPath] = useState<boolean>(false);
+  const [showFollowingPath, setShowFollowingPath] = useState<boolean>(showPaths ?? false);
   const [progress, setProgress] = useState<number>(0);
 
   const isExportNameValid = useMemo(() => {

@@ -423,23 +423,23 @@ export async function exportToPdf (
         const y = positionInPx.y - startingPointDelta;
         
         if (isFollowing) {
-          pdf.setLineWidth(1.7);
+          pdf.setLineWidth(1.9);
           pdf.setDrawColor(colorPalette.primary);
           pdf.setFillColor(colorPalette.white);
-          pdf.circle(x, y + titleBuffer, PDF_METER_PX * 0.4, "FD");
+          pdf.circle(x, y + titleBuffer, PDF_METER_PX * 0.39, "FD");
         } else if (hasActions) {
           pdf.setFillColor(colorPalette.white);
           pdf.setDrawColor(colorPalette.white);
           pdf.setLineWidth(1.7);
-          pdf.circle(x, y + titleBuffer, PDF_METER_PX * 0.4, "FD");
+          pdf.circle(x, y + titleBuffer, PDF_METER_PX * 0.39, "FD");
 
-          context.lineWidth = 1.7;
+          context.lineWidth = 1.9;
           section.formation.dancerActions.forEach((_, i) => {
             if (actionsByDancer[p.dancerId][i] !== undefined) {
               const [start, end] = getSectionRadians(section.formation.dancerActions.length, i);
               context.strokeStyle = colorPalette.actionOutlineColours[actionsByDancer[p.dancerId][i] as number];
               context.beginPath();
-              context.arc(x, y + titleBuffer, PDF_METER_PX * 0.4, start, end, false);
+              context.arc(x, y + titleBuffer, PDF_METER_PX * 0.39, start, end, false);
               context.stroke();
             }
           })
@@ -448,7 +448,7 @@ export async function exportToPdf (
         pdf.setLineWidth(0.8);
         pdf.setDrawColor(p.color);
         pdf.setFillColor(p.color);
-        pdf.circle(x, y + titleBuffer, PDF_METER_PX * (isFollowing || hasActions ? 0.3 : 0.4), "FD");
+        pdf.circle(x, y + titleBuffer, PDF_METER_PX * (isFollowing || hasActions ? 0.28 : 0.4), "FD");
   
         pdf.setTextColor(colorPalette.getTextColor(p.color));
         var displayName = dancer.name ?? "";
@@ -461,6 +461,7 @@ export async function exportToPdf (
 
     if (followingDancer) {
       var nextPosition = choreo.sections[i + 1]?.formation?.dancerPositions[followingDancer.id];
+      console.log(showFollowingPath)
       if (showFollowingPath) {
         var currentPosition = section.formation.dancerPositions[followingDancer.id];
         if (currentPosition && nextPosition &&
@@ -523,14 +524,14 @@ export async function exportToPdf (
       pdf.setFont(font);
       pdf.setTextColor(colorPalette.grey);
       pdf.text("現在の位置", memoLeft + memoWidth/2, memoY, {maxWidth: memoWidth, align: "center"});
-      memoY += pdf.getTextDimensions("現在の位置", {maxWidth: memoWidth}).h * 2.2;
+      memoY += 13.5;
       
       pdf.setFontSize(14);
       pdf.setFont(boldFont);
       pdf.setTextColor(colorPalette.black);
       const currentPositionText = `${displayY}m/${displayX}m`;
       pdf.text(currentPositionText, memoLeft + memoWidth/2 + 4, memoY, {maxWidth: memoWidth, align: "center"});
-      memoY += pdf.getTextDimensions(currentPositionText, {maxWidth: memoWidth}).h;
+      memoY += 10.5;
       
       const delta: Coordinates | null = nextPosition ? {
         x: roundToTenth(nextPosition.x) - roundToTenth(position.x),
@@ -548,7 +549,7 @@ export async function exportToPdf (
         pdf.setFont(font);
         pdf.setTextColor(colorPalette.grey);
         pdf.text("次への移動", memoLeft + memoWidth/2, memoY, {maxWidth: memoWidth, align: "center"});
-        memoY += pdf.getTextDimensions("次への移動", {maxWidth: memoWidth}).h * 2.2;
+        memoY += 13.5;
         
         pdf.setFontSize(14);
         pdf.setFont(boldFont);
@@ -556,7 +557,7 @@ export async function exportToPdf (
 
         if (delta.x === 0 && delta.y === 0) {
           pdf.text("なし", memoLeft + memoWidth/2, memoY, {maxWidth: memoWidth, align: "center"});
-          memoY += pdf.getTextDimensions("なし", {maxWidth: memoWidth}).h * 1.25;
+          memoY += 10.5;
         } else {
           var xMovement: string | null = null;
           var yMovement: string | null = null;
@@ -575,45 +576,36 @@ export async function exportToPdf (
   
           const deltaText = `${[yMovement, xMovement].filter(x => x !== null).join("/")}`;
           pdf.text(deltaText, memoLeft + memoWidth/2 + 2, memoY, {maxWidth: memoWidth, align: "center"});
-          memoY += pdf.getTextDimensions(deltaText, {maxWidth: memoWidth}).h;
+          memoY += 10.5;
         }
       }
 
       if (section.formation.dancerActions.length > 0) {
         section.formation.dancerActions.forEach((action, i) => {
+          pdf.setTextColor(colorPalette.black);
           var assignedTiming = actionsByDancer[followingId][i] !== undefined ? 
             action.timings[actionsByDancer[followingId][i]].name : undefined;
-          var x = memoLeft + (i % 2 === 0 ? 0 : (memoWidth / 2 + 4));
-          var additionalY = 0;
 
           pdf.setDrawColor(colorPalette.actionOutlineColours[actionsByDancer[followingId][i] as number] ?? colorPalette.lightGrey);
           pdf.setLineWidth(1);
-          pdf.roundedRect(x, memoY, memoWidth / 2 - 2, 30, 5, 5, "S");
+          pdf.roundedRect(memoLeft, memoY, memoWidth, 15, 5, 5, "S");
           
-          additionalY += 5;
-          
+          memoY += 10;
           pdf.setFontSize(8);
           pdf.setFont(font);
-          pdf.setTextColor(colorPalette.grey);
-
-          additionalY += 5;
-          var actionNameDimensions = pdf.getTextDimensions(action.name, {maxWidth: memoWidth/2 - 8});
-          pdf.text(action.name, x + memoWidth/4, memoY + additionalY - (actionNameDimensions.h > 8 ? 3 : 0), {maxWidth: memoWidth/2 - 8, align: "center"});
-          additionalY += 13 + (actionNameDimensions.h > 8 ? 2 : 0);
+          pdf.text(action.name, memoLeft + 5, memoY, {maxWidth: memoWidth});
 
           pdf.setFontSize(14);
           pdf.setFont(boldFont);
-          pdf.setTextColor(colorPalette.black);
-          
-          var timingText = `${assignedTiming ?? "---"}`;
-          pdf.text(timingText, x + memoWidth/4, memoY + additionalY, {maxWidth: memoWidth, align: "center"});
-          additionalY += 12;
 
-          if (i % 2 === 1 || i === section.formation.dancerActions.length - 1) {
-            memoY += 34;
-          }
+          memoY += 1.5;
+          pdf.text(assignedTiming ?? "---", memoLeft + memoWidth - 5, memoY, {maxWidth: memoWidth, align: "right"});
+
+          memoY += 7;
         });
-        memoY += 5;
+        memoY += 2;
+      } else {
+        memoY += 1;
       }
     }
 
@@ -624,17 +616,17 @@ export async function exportToPdf (
       pdf.setFont(font);
       if (memoY > (PDF_METER_PX)) {
         drawLine(pdf, colorPalette.lightGrey, 1, [], memoLeft, memoY, memoLeft + memoWidth, memoY);
-        memoY += pdf.getTextDimensions("O", {maxWidth: memoWidth}).h * 2;
+        memoY += 14;
       }
 
       pdf.text(section.note, memoLeft, memoY, {maxWidth: (memoWidth)});
-      memoY += pdf.getTextDimensions(section.note, {maxWidth: memoWidth}).h;
+      memoY += 8;
     }
 
     if (section.formation.dancerActions.length > 0) {
       if (memoY > (PDF_METER_PX)) {
         drawLine(pdf, colorPalette.lightGrey, 1, [], memoLeft, memoY, memoLeft + memoWidth, memoY);
-        memoY += pdf.getTextDimensions("O", {maxWidth: memoWidth}).h * 2;
+        memoY += 14;
       }
 
       pdf.setFontSize(10);
