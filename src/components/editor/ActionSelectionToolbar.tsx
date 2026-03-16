@@ -43,7 +43,6 @@ function ActionSection ({
   return <div className="flex gap-2">
     <Button
       buttonref={ref}
-      compact
       grey
       fontSize="text-base"
       onClick={() => {
@@ -55,7 +54,7 @@ function ActionSection ({
           setIsExpanded(true);
         }
       }}>
-      <div className="flex flex-row items-center justify-center gap-1 min-w-24 w-max">
+      <div className="flex flex-row items-center justify-center h-6 gap-1 min-w-24 w-max">
         <span className="font-semibold truncate">
           {action.name}
         </span>
@@ -82,7 +81,6 @@ function TimingButton ({timing, selectedTimingId, onSelectTiming}: TimingButtonP
   const ref = useRef<HTMLButtonElement | null>(null);
   return <Button
     key={timing.id}
-    compact
     buttonref={ref}
     primary={strEquals(timing.id, selectedTimingId)}
     fontSize="text-base"
@@ -90,7 +88,7 @@ function TimingButton ({timing, selectedTimingId, onSelectTiming}: TimingButtonP
       onSelectTiming();
       ref.current?.scrollIntoView({"behavior": "smooth", "block": "center", "inline": "center"});
     }}>
-    <div className="flex items-center justify-center gap-1 truncate min-w-16">
+    <div className="flex items-center justify-center h-6 gap-1 truncate min-w-16">
       <span className="truncate">
         {timing.name}
       </span>
