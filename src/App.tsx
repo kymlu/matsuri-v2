@@ -16,7 +16,7 @@ function App() {
   const [dancerNamesByEvent, setDancerNamesByEvent] = useState<Record<string, Record<string, string[]>>>({});
   const [currentChoreo, setCurrentChoreo] = useState<Choreo | undefined>();
   const [name, setName] = useState<string | null>(null);
-  const [buildInfo, setBuildInfo] = useState<string | undefined>("!");
+  const [buildInfo, setBuildInfo] = useState<string | undefined>();
 
   useEffect(() => {
     setName(getUserName());

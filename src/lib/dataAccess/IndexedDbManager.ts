@@ -13,7 +13,7 @@ export class IndexedDBManager {
 
   async init() {
     const request = indexedDB.open(DB_NAME, 1);
-    request.onupgradeneeded = async (event) => {
+    request.onupgradeneeded = (event) => {
       const db = (event.target as IDBOpenDBRequest).result;
       const oldVersion = event.oldVersion;
       const newVersion = event.newVersion;
@@ -24,14 +24,14 @@ export class IndexedDBManager {
       }
     };
 
-  return new Promise<void>((resolve, reject) => {
-    request.onsuccess = () => {
-      console.log("Successfully initialized db")
-      this.db = request.result;
-      resolve();
-    };
-    request.onerror = () => reject(request.error);
-  });
+    return new Promise<void>((resolve, reject) => {
+      request.onsuccess = () => {
+        console.log("Successfully initialized db")
+        this.db = request.result;
+        resolve();
+      };
+      request.onerror = () => reject(request.error);
+    });
   }
 
   _getTransaction(storeName: TableName, mode: IDBTransactionMode = "readwrite") {
