@@ -610,7 +610,7 @@ export async function exportToPdf (
     }
 
     pdf.setTextColor(colorPalette.black);
-    pdf.setFontSize(12);
+    pdf.setFontSize(10);
     // write note
     if (section.note) {
       pdf.setFont(font);
