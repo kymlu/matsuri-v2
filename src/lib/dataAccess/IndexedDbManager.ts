@@ -147,6 +147,21 @@ export class IndexedDBManager {
     })
   }
 
+  async removeItems(storeName: TableName, itemIds: string[]) {
+    const removed: string[] = [];
+
+    for (const id of itemIds) {
+      try {
+        await this.removeItem(storeName, id);
+        removed.push(id);
+      } catch (error) {
+        console.error(`Failed to remove ${id}:`, error);
+      }
+    }
+
+    return removed;
+  }
+
   async deleteAll(storeName: TableName) {
     return new Promise<any>((resolve, reject) => {
       try {

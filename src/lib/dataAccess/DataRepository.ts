@@ -51,6 +51,15 @@ export async function removeItem<T extends TableName>(
   });
 }
 
+export async function removeItems<T extends TableName>(
+  storeName: T,
+  itemIds: string[]
+): Promise<void> {
+  indexedDbManager.removeItems(storeName, itemIds).catch((error) => {
+    console.error(`Error removing some items from store ${storeName}:`, error)
+  });
+}
+
 export async function deleteAll<T extends TableName>(
   storeName: T
 ): Promise<void> {

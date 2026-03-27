@@ -7,7 +7,7 @@ import { readUploadedFile } from "../lib/helpers/uploadHelper"
 import { useEffect, useMemo, useState } from "react"
 import { deleteChoreo, getAllChoreos, saveChoreo, saveChoreos } from "../lib/dataAccess/DataController"
 import { Choreo, ChoreoSchema } from "../models/choreo"
-import { isNullOrUndefinedOrBlank, mapByKey, strCompare, strEquals } from "../lib/helpers/globalHelper"
+import { isNullOrUndefinedOrBlank, indexByKey, mapByKey, strCompare, strEquals } from "../lib/helpers/globalHelper"
 import { downloadLogs } from "../lib/helpers/logHelper"
 import { getDate } from "../lib/helpers/dateHelper"
 import IconButton from "../components/basic/IconButton"
@@ -28,6 +28,7 @@ import UserNameEditDialog from "../components/dialogs/UserNameEditDialog"
 import { Oval } from "react-loader-spinner"
 import { colorPalette } from "../lib/consts/colors"
 import EditChoreoInfoDialog from "../components/dialogs/EditChoreoInfoDialog"
+import SyncChoreoDialog from "../components/dialogs/SyncChoreoDialog"
 import ExpandableSection from "../components/basic/ExpandableSection"
 import AbsentDancersWarningDialog from "../components/dialogs/AbsentDancersWarningDialog"
 
@@ -43,15 +44,20 @@ type HomePageProps = {
   setDancerNamesByEvent: (groupedNames: Record<string, Record<string, string[]>>) => void,
 }
 
+type ChoreoWithStatus = Choreo & {
+  status: "localOnly" | "syncRequired" | "upToDate" | "edited"
+}
+
 export default function HomePage({
   buildInfo, eventList, setEventList,
   goToNewChoreoPage, goToViewPage,
   userName, setUserName,
   dancerNamesByEvent, setDancerNamesByEvent,
 }: HomePageProps) {
-  const [savedChoreos, setSavedChoreos] = useState<Choreo[]>([]);
+  const [savedChoreos, setSavedChoreos] = useState<ChoreoWithStatus[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [choreosFromServer, setChoreosFromServer] = useState<Record<string, Choreo>>({});
   console.log("build", buildInfo)
 
   useEffect(() => {
@@ -60,34 +66,57 @@ export default function HomePage({
 
   const loadChoreos = () => {
     setIsLoading(true);
-    getAllChoreos().then((choreos) => {
-      if(!choreos.find(c => strEquals(c.id, SampleStage.id))) {
-        choreos.push(z.parse(ChoreoSchema, SampleStage));
-      }
-      if(!choreos.find(c => strEquals(c.id, SampleParade.id))) {
-        choreos.push(z.parse(ChoreoSchema, SampleParade));
-      }
-      loadAllForYear("2026").then((choreosForYear) => {
-        choreosForYear.forEach(choreo => {
-          if (!choreos.find(c => strEquals(c.id, choreo.id))) {
-            choreos.push(choreo);
+    Promise.all([
+      getAllChoreos(),
+      loadAllForYear("2026")
+    ]).then(([local, server]) => {
+      server.push(z.parse(ChoreoSchema, SampleParade));
+      server.push(z.parse(ChoreoSchema, SampleStage));
+      const choreos: ChoreoWithStatus[] = [];
+      const choreosFromServer: Record<string, Choreo> = {};
+      const indexedLocal = indexByKey(local, "id");
+      const indexedServer = indexByKey(server, "id");
+      const allIds = new Set([...Object.keys(indexedLocal), ...Object.keys(indexedServer)]);
+      
+      allIds.forEach((id) => {
+        const localChoreo = indexedLocal[id];
+        const serverChoreo = indexedServer[id];
+        if (!localChoreo) {
+          choreos.push({...serverChoreo, status: "upToDate"});
+        } else if (!serverChoreo) {
+          choreos.push({...localChoreo, status: "localOnly"});
+        } else if (serverChoreo.version !== localChoreo.version) {
+          if (localChoreo.isDirty === true || localChoreo.isDirty === undefined) {
+            choreosFromServer[serverChoreo.id] = serverChoreo;
+            choreos.push({...localChoreo, status: "syncRequired"});
+          } else {
+            saveChoreo(serverChoreo, () => {}, false, false);
+            choreos.push({...serverChoreo, status: "upToDate"});
           }
-        });
-        setSavedChoreos(choreos);
-        setDancerNamesByEvent(
-          choreos.reduce((acc, item) => {
-            const names = Object.values(item.dancers).map(d => d.name);
-            return {
-              ...acc,
-              [item.event]: {
-                ...(acc[item.event] ?? {}),
-                [item.id]: names,
-              },
-            };
-          }, {} as Record<string, Record<string, string[]>>)
-        );
-        setIsLoading(false);
+        } else {
+          if (localChoreo.isDirty === true || localChoreo.isDirty === undefined) {
+            choreosFromServer[serverChoreo.id] = serverChoreo;
+            choreos.push({...localChoreo, status: "edited"});
+          } else {
+            choreos.push({...serverChoreo, status: "upToDate"});
+          }
+        }
       });
+      setDancerNamesByEvent(
+        choreos.reduce((acc, item) => {
+          const names = Object.values(item.dancers).map(d => d.name);
+          return {
+            ...acc,
+            [item.event]: {
+              ...(acc[item.event] ?? {}),
+              [item.id]: names,
+            },
+          };
+        }, {} as Record<string, Record<string, string[]>>)
+      );
+      setSavedChoreos(choreos);
+      setChoreosFromServer(choreosFromServer);
+      setIsLoading(false);
     });
   }
 
@@ -102,17 +131,17 @@ export default function HomePage({
     ));
   }, [savedChoreos]);
 
-  const groupChoreos = (choreos: Choreo[]) => {
+  const groupChoreos = (choreos: ChoreoWithStatus[]) => {
     return mapByKey(
       choreos.sort((a, b) => {
-        const eventCmp = strCompare<Choreo>(a, b, "event");
+        const eventCmp = strCompare<ChoreoWithStatus>(a, b, "event");
         if (eventCmp !== 0) return eventCmp;
 
         const dateA = a.lastUpdated ? new Date(a.lastUpdated)?.getTime() : 0;
         const dateB = b.lastUpdated ? new Date(b.lastUpdated)?.getTime() : 0;
         if (dateA !== dateB) return dateB - dateA;
 
-        return strCompare<Choreo>(a, b, "name");
+        return strCompare<ChoreoWithStatus>(a, b, "name");
       }),
       "event"
     )
@@ -136,10 +165,17 @@ export default function HomePage({
     setEventNameDialogOpen(isOpen);
   }
 
+  const [deleteChoreoVerb, setDeleteChoreoVerb] = useState<"削除"| "破棄">("削除");
   const [deleteChoreoDialogOpen, setDeleteChoreoDialogOpen] = useState(false);
   const deleteChoreoDialog = Dialog.createHandle<{}>();
   const handleDeleteChoreoDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setDeleteChoreoDialogOpen(isOpen);
+  };
+
+  const [syncChoreoDialogOpen, setSyncChoreoDialogOpen] = useState(false);
+  const syncChoreoDialog = Dialog.createHandle<{}>();
+  const handleSyncChoreoDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
+    setSyncChoreoDialogOpen(isOpen);
   };
 
   const [uploadErrorMessage, setUploadErrorMessage] = useState<string>("");
@@ -185,7 +221,7 @@ export default function HomePage({
       lastUpdated: new Date().toISOString(),
     } as Choreo;
     saveChoreo(newChoreo, () => {
-      setSavedChoreos(prev => [...prev, newChoreo]);
+      setSavedChoreos(prev => [...prev, {...newChoreo, status: "localOnly"}]);
     });
   }
 
@@ -265,8 +301,18 @@ export default function HomePage({
                   setEditChoreoInfoDialogOpen(true);
                 }}
                 deleteChoreo={(choreo) => {
+                  setDeleteChoreoVerb("削除");
                   setEditingChoreo(choreo);
                   setDeleteChoreoDialogOpen(true);
+                }}
+                revertChoreo={(choreo) => {
+                  setDeleteChoreoVerb("破棄");
+                  setEditingChoreo(choreo);
+                  setDeleteChoreoDialogOpen(true);
+                }}
+                syncChoreo={(choreo) => {
+                  setEditingChoreo(choreo);
+                  setSyncChoreoDialogOpen(true);
                 }}
                 onPdfExport={(choreo) => {
                   setExportingChoreo(choreo);
@@ -392,12 +438,47 @@ export default function HomePage({
           }
         </Dialog.Root>
         <Dialog.Root
+          handle={syncChoreoDialog}
+          open={syncChoreoDialogOpen}
+          onOpenChange={handleSyncChoreoDialogOpen}>
+          <SyncChoreoDialog
+            savedChoreo={editingChoreo}
+            serverChoreo={choreosFromServer[editingChoreo?.id ?? ""]}
+            onClose={() => setSyncChoreoDialogOpen(false)}
+            onOpenSaved={() => {
+              if (editingChoreo) {
+                setSyncChoreoDialogOpen(false);
+                setEditingChoreo(undefined);
+                goToViewPage(editingChoreo);
+              }
+            }}
+            onDuplicate={() => {
+              if(editingChoreo) {
+                duplicateChoreo(editingChoreo);
+                deleteChoreo(editingChoreo.id, () => {
+                  goToViewPage(choreosFromServer[editingChoreo.id]);
+                });
+              }
+            }}
+            onDelete={() => {
+              if (editingChoreo) {
+                deleteChoreo(editingChoreo.id, () => {
+                  syncChoreoDialog.close();
+                  setSyncChoreoDialogOpen(false);
+                  setEditingChoreo(undefined);
+                  goToViewPage(choreosFromServer[editingChoreo.id]);
+                });
+              }
+            }}
+          />
+        </Dialog.Root>
+        <Dialog.Root
           handle={deleteChoreoDialog}
           open={deleteChoreoDialogOpen}
           onOpenChange={handleDeleteChoreoDialogOpen}>
             
           <BaseEditDialog
-            title={`本当に${editingChoreo?.name}を削除しますか？`}
+            title={`${deleteChoreoVerb}確認`}
             actionButtonText="OK"
             onSubmit={() => {
               if (editingChoreo) {
@@ -409,7 +490,8 @@ export default function HomePage({
                 });
               }
             }}>
-            この操作は取り消せません。
+            <p>本当に<b> {editingChoreo?.name} </b>を{deleteChoreoVerb}しますか？</p>
+            <p>この操作は取り消せません。</p>
           </BaseEditDialog>
         </Dialog.Root>
         <Dialog.Root
@@ -451,8 +533,9 @@ export default function HomePage({
               const newChoreo = {
                 ...uploadedChoreo!,
                 id: crypto.randomUUID(),
-                name: `${uploadedChoreo!.name} - コピー`
-              };
+                name: `${uploadedChoreo!.name} - コピー`,
+                isDirty: false,
+              } as Choreo;
               saveChoreo(newChoreo, () => {goToViewPage(newChoreo)});
               setUploadedChoreo(undefined);
               setUploadChoreoDialogOpen(false);
@@ -462,7 +545,8 @@ export default function HomePage({
               const newChoreo = {
                 ...uploadedChoreo!,
                 id: duplicateChoreoId ?? crypto.randomUUID(),
-              };
+                isDirty: true,
+              } as Choreo;
               saveChoreo(newChoreo, () => {goToViewPage(newChoreo)});
               setUploadedChoreo(undefined);
               setUploadChoreoDialogOpen(false);
@@ -476,7 +560,7 @@ export default function HomePage({
 
 type EventSectionProps = {
   eventName: string,
-  choreos: Choreo[],
+  choreos: ChoreoWithStatus[],
   searchTerm: string,
   dancerNamesByFormation?: Record<string, string[]>,
   addEvent: () => void,
@@ -485,18 +569,20 @@ type EventSectionProps = {
   duplicateChoreo: (choreo: Choreo) => void,
   editChoreoName: (choreo: Choreo) => void,
   deleteChoreo: (choreo: Choreo) => void,
+  revertChoreo: (choreo: Choreo) => void,
+  syncChoreo: (choreo: Choreo) => void,
   onPdfExport: (choreo: Choreo) => void,
 }
 
 function EventSection({
   eventName, dancerNamesByFormation, choreos, searchTerm, goToViewPage, addEvent, editEventName,
-  duplicateChoreo, editChoreoName, deleteChoreo, onPdfExport
+  duplicateChoreo, editChoreoName, deleteChoreo, revertChoreo, syncChoreo, onPdfExport
 }: EventSectionProps) {
   const optionsDialog = Dialog.createHandle<Choreo>();
   const [optionsDialogOpen, setOptionsDialogOpen] = React.useState(false);
+  const [selectedChoreo, setSelectedChoreo] = useState<ChoreoWithStatus | undefined>();
   const dancerWarningDialog = Dialog.createHandle<Choreo>();
   const [dancerWarningDialogOpen, setDancerWarningDialogOpen] = React.useState(false);
-  const [selectedChoreo, setSelectedChoreo] = useState<Choreo | undefined>();
 
   const missingNames = useMemo(() => {
     if (dancerNamesByFormation) {
@@ -547,7 +633,14 @@ function EventSection({
               choreo.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
               choreo.event.toLowerCase().includes(searchTerm.toLowerCase())) &&
               <div
-                onClick={() => {goToViewPage(choreo)}}
+                onClick={() => {
+                  const {status, ...c} = choreo;
+                  if (status === "syncRequired") {
+                    syncChoreo(c);
+                  } else {
+                    goToViewPage(c);
+                  }
+                }}
                 className="flex flex-col justify-between h-full p-2 transition-colors bg-white border border-gray-400 rounded-md cursor-pointer">
                 {/* Title */}
                 <div className="relative flex flex-row items-start justify-between gap-2">
@@ -564,6 +657,14 @@ function EventSection({
                       }}>
                         <IconButton asDiv noBorder size="sm" src={ICON.personAlert} colour="primary"/>
                       </Dialog.Trigger>
+                    }
+                    {
+                      choreo.status === "syncRequired" &&
+                      <div className="p-1 text-sm font-semibold text-white border rounded-md text-nowrap bg-primary border-primary">要確認</div>
+                    }
+                    {
+                      (choreo.status === "localOnly" || choreo.status === "edited") &&
+                      <div className="p-1 text-sm text-gray-600 bg-white border border-gray-600 rounded-md text-nowrap">未公開</div>
                     }
                     <Dialog.Trigger id={choreo.id} payload={choreo} handle={optionsDialog} onClick={(e) => {
                       e.stopPropagation();
@@ -658,16 +759,47 @@ function EventSection({
                   onClick={() => onPdfExport(selectedChoreo)}
                   full />
               </Dialog.Close>
+              {
+                selectedChoreo.status === "localOnly" &&
+                <Dialog.Close>
+                  <IconLabelButton
+                    primaryText
+                    icon={ICON.delete}
+                    label="削除"
+                    asDiv
+                    onClick={() => deleteChoreo(selectedChoreo)}
+                    full />
+                </Dialog.Close>
+              }
 
-              <Dialog.Close>
-                <IconLabelButton
-                  primaryText
-                  icon={ICON.delete}
-                  label="削除"
-                  asDiv
-                  onClick={() => deleteChoreo(selectedChoreo)}
-                  full />
-              </Dialog.Close>
+              {
+                selectedChoreo.status === "syncRequired" &&
+                <Dialog.Close>
+                  <IconLabelButton
+                    primaryText
+                    icon={ICON.warning}
+                    label="確認"
+                    asDiv
+                    onClick={() => {
+                      const {status, ...c} = selectedChoreo;
+                      syncChoreo(c);
+                    }}
+                    full />
+                </Dialog.Close>
+              }
+
+              {
+                selectedChoreo.status === "edited" &&
+                <Dialog.Close>
+                  <IconLabelButton
+                    primaryText
+                    icon={ICON.restorePage}
+                    label="変更を破棄"
+                    asDiv
+                    onClick={() => revertChoreo(selectedChoreo)}
+                    full />
+                </Dialog.Close>
+              }
             </div>
           </CustomDialog>
         }

@@ -99,6 +99,7 @@ export const ICON = {
   redo: "redo",
   remove: "remove",
   resize: "resize",
+  restorePage: "restore_page",
   save: "save",
   search: "search",
   selectAll: "select_all",

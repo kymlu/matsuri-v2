@@ -7,6 +7,7 @@ type ButtonProps = {
   primary?: boolean,
   primaryText?: boolean,
   grey?: boolean,
+  greyText?: boolean,
   noBorder?: boolean,
   disabled?: boolean,
   full?: boolean,
@@ -23,9 +24,8 @@ type ButtonProps = {
 
 export default function Button({
   children,
-  primary,
-  primaryText,
-  grey,
+  primary, primaryText,
+  grey, greyText,
   noBorder,
   disabled,
   full,
@@ -47,14 +47,16 @@ export default function Button({
     "px-3 py-1.5": compact !== true,
     "lg:hover:bg-gray-100": !disabled && primary !== true && grey !== true,
     "lg:hover:opacity-70": !disabled && (primary || grey),
-    "border-gray-400 bg-white": primary !== true && grey !== true,
+    "bg-white": primary !== true && grey !== true,
+    "border-gray-400 ": primary !== true && grey !== true && !primaryText,
     "bg-primary text-white border-primary": primary,
     "bg-gray-600 text-white border-gray-600": grey,
     "lg:hover:bg-primary-light": primary && !disabled,
     "cursor-default opacity-50": disabled,
     "cursor-pointer": !disabled,
     "h-full items-center flex justify-center": asDiv,
-    "text-primary": primaryText
+    "text-primary border-primary": primaryText,
+    "text-gray-600": greyText,
   });
 
   return <>
