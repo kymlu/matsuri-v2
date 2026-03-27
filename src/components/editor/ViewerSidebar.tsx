@@ -118,7 +118,7 @@ export default function ViewerSidebar({
       }
       {
         !isNullOrUndefinedOrBlank(note) &&
-        <p className="break-words whitespace-pre-line text-wrap">
+        <p className="pb-5 break-words whitespace-pre-line text-wrap">
           {note}
         </p>
       }
