@@ -5,6 +5,9 @@
 /.pnp
 .pnp.js
 
+# build scripts
+/public/build-info.json
+
 # testing
 /coverage
 
