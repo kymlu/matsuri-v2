@@ -1,6 +1,6 @@
 import { Dialog, Menu } from "@base-ui/react"
 import CustomDialog from "../components/basic/CustomDialog"
-import { ICON, LAST_UPDATED } from "../lib/consts/consts"
+import { ICON } from "../lib/consts/consts"
 import { IconLabelButton } from "../components/basic/Button"
 import Icon from "../components/basic/Icon"
 import { readUploadedFile } from "../lib/helpers/uploadHelper"
@@ -32,6 +32,7 @@ import ExpandableSection from "../components/basic/ExpandableSection"
 import AbsentDancersWarningDialog from "../components/dialogs/AbsentDancersWarningDialog"
 
 type HomePageProps = {
+  buildInfo?: string,
   eventList: string[]
   setEventList: (eventList: string[]) => void,
   goToNewChoreoPage: (eventName?: string) => void,
@@ -43,7 +44,7 @@ type HomePageProps = {
 }
 
 export default function HomePage({
-  eventList, setEventList,
+  buildInfo, eventList, setEventList,
   goToNewChoreoPage, goToViewPage,
   userName, setUserName,
   dancerNamesByEvent, setDancerNamesByEvent,
@@ -51,6 +52,7 @@ export default function HomePage({
   const [savedChoreos, setSavedChoreos] = useState<Choreo[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  console.log("build", buildInfo)
 
   useEffect(() => {
     loadChoreos();
@@ -201,7 +203,7 @@ export default function HomePage({
                 <div className="flex flex-col justify-center gap-2 mb-2">
                   <span className="mb-2 text-center">問題がある場合は、<br/><b>ケイティー</b>まで<br/>問い合わせてください</span>
                   <IconLabelButton label="ログをダウンロード" icon={ICON.download} primary onClick={downloadLogs}/>
-                  <span className="text-center text-gray-600">{LAST_UPDATED}</span>
+                  <span className="text-center text-gray-600">{buildInfo}</span>
                 </div>
               </CustomDialog>
             </Dialog.Root>

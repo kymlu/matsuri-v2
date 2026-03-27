@@ -16,9 +16,18 @@ function App() {
   const [dancerNamesByEvent, setDancerNamesByEvent] = useState<Record<string, Record<string, string[]>>>({});
   const [currentChoreo, setCurrentChoreo] = useState<Choreo | undefined>();
   const [name, setName] = useState<string | null>(null);
+  const [buildInfo, setBuildInfo] = useState<string | undefined>("!");
 
   useEffect(() => {
     setName(getUserName());
+    console.log("getting build info");
+    fetch(`${process.env.PUBLIC_URL}/build-info.json`)
+      .then(r => r.json())
+      .then(info => {
+        var buildDate = info.buildDate;
+        console.log(`Build: ${buildDate}`);
+        setBuildInfo(`更新 ${buildDate}`);
+      });
   }, []);
 
   const setNewName = (newName: string) => {
@@ -34,6 +43,7 @@ function App() {
     <div>
       {mode === "home" && (
         <HomePage
+          buildInfo={buildInfo}
           eventList={eventList}
           setEventList={(eventList) => {
             setEventList(eventList);

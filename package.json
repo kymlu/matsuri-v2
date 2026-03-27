@@ -32,7 +32,7 @@
     "zod": "^4.3.6"
   },
   "scripts": {
-    "predeploy": "npm run build",
+    "predeploy": "node write-build-info.js && npm run build",
     "deploy": "gh-pages -d build",
     "start": "react-scripts start",
     "build": "react-scripts build"

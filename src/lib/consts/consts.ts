@@ -1,4 +1,3 @@
-export const LAST_UPDATED = "更新 3月16日"
 export const METER_PX = 25;
 export const PDF_METER_PX = 20;
 export const PROP_SNAP_SIZE = 0.25;
