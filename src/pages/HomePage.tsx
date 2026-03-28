@@ -659,12 +659,20 @@ function EventSection({
                       </Dialog.Trigger>
                     }
                     {
+                      choreo.version &&
+                      <div className="px-1 py-0.5 text-sm font-semibold flex items-center gap-0.5 bg-white border rounded-md text-primary border-primary text-nowrap">
+                        v{choreo.version}
+                        {choreo.status === "edited" && <Icon src={ICON.edit} colour="primary" size="xs"/>}
+                        {choreo.status === "syncRequired" && <Icon src={ICON.warning} colour="primary" size="xs"/>}
+                      </div>
+                    }
+                    {
                       choreo.status === "syncRequired" &&
-                      <div className="p-1 text-sm font-semibold text-white border rounded-md text-nowrap bg-primary border-primary">要確認</div>
+                      <div className="px-1 py-0.5 text-sm font-semibold text-white border rounded-md text-nowrap bg-primary border-primary">要確認</div>
                     }
                     {
                       (choreo.status === "localOnly" || choreo.status === "edited") &&
-                      <div className="p-1 text-sm text-gray-600 bg-white border border-gray-600 rounded-md text-nowrap">未公開</div>
+                      <div className="px-1 py-0.5 text-sm text-gray-600 bg-white border border-gray-600 rounded-md text-nowrap">未公開</div>
                     }
                     <Dialog.Trigger id={choreo.id} payload={choreo} handle={optionsDialog} onClick={(e) => {
                       e.stopPropagation();
