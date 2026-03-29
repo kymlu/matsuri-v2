@@ -30,10 +30,11 @@ export default function EditDancerColourDialog({
     >
       {
         !propOnly &&
-        <div>
+        <div className="mb-4">
           ダンサーの色変更範囲
-          <div className="flex flex-col gap-2 mb-2 md:flex-row">
+          <div className="flex flex-row gap-2">
             <Button
+              full
               primary={mode === "current"}
               onClick={() => setMode("current")}>
               <span className="font-semibold">
@@ -41,6 +42,7 @@ export default function EditDancerColourDialog({
               </span>
             </Button>
             <Button
+              full
               primary={mode === "currentAndAfter"}
               onClick={() => setMode("currentAndAfter")}>
               <span className="font-semibold">
@@ -48,6 +50,7 @@ export default function EditDancerColourDialog({
               </span>
             </Button>
             <Button
+              full
               primary={mode === "all"}
               onClick={() => setMode("all")}>
               <span className="font-semibold">
@@ -62,11 +65,11 @@ export default function EditDancerColourDialog({
           colorPalette.gridObjectColors().map((color) => 
             <button
               key={color}
-              onClick={() => {setSelectedColour(color)}}
-              style={{"backgroundColor": color}}
-              className={"rounded-full size-8 min-h-8 min-w-8 max-h-8 max-w-8 " + 
+              onClick={() => setSelectedColour(color)}
+              style={{"backgroundColor": color, "color": colorPalette.textContrast[color]}}
+              className={"font-semibold rounded-full size-8 min-h-8 min-w-8 max-h-8 max-w-8 " + 
                 (strEquals(color, selectedColour) ? "border-4 border-primary" : "")
-              }/>
+              }>文</button>
           )
         }
       </div>

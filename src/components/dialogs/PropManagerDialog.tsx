@@ -78,10 +78,10 @@ export function PropManagerDialog({
                                   return [...prev];
                                 });
                               }}
-                              style={{"backgroundColor": color}}
-                              className={"rounded-full size-8 min-h-8 min-w-8 max-h-8 max-w-8 " + 
+                              style={{"backgroundColor": color, "color": colorPalette.textContrast[color]}}
+                              className={"font-semibold rounded-full size-8 min-h-8 min-w-8 max-h-8 max-w-8 " + 
                                 (strEquals(color, prop.color) ? "border border-primary" : "")
-                              }/>
+                              }>文</button>
                           )
                         }
                       </div>
