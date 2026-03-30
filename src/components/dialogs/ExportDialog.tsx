@@ -73,45 +73,48 @@ export default function ExportDialog({
         }}
         isActionButtonDisabled={isExportNameValid}
       >
-        <div className="flex items-center gap-2">
-          <TextInput
-            label="ファイル名"
-            rightLabel=".pdf"
-            maxLength={50}
-            hasError={isExportNameValid}
-            defaultValue={defaultName}
-            restrictFn={(s) => !testInvalidCharacters(s)}
-            onContentChange={(name) => {
-              setExportName(name);
-            }}/>
-        </div>
+        <div className="max-w-full w-[100svw] md:w-max">
+          <div className="flex items-center gap-2">
+            <TextInput
+              label="ファイル名"
+              rightLabel=".pdf"
+              maxLength={50}
+              hasError={isExportNameValid}
+              defaultValue={defaultName}
+              restrictFn={(s) => !testInvalidCharacters(s)}
+              onContentChange={(name) => {
+                setExportName(name);
+              }}/>
+          </div>
 
-        {
-          Object.values(choreo.dancers).length > 0 &&
-          <CustomSelect
-            label="中心人物"
-            items={dancerList}
-            defaultValue={choreo.dancers[selectedId]?.name ?? "未設定"}
-            setSelectValue={(newValue) => {
-              setFollowingId(newValue);
-            }}
+          {
+            Object.values(choreo.dancers).length > 0 &&
+            <CustomSelect
+              label="中心人物"
+              items={dancerList}
+              defaultValue={choreo.dancers[selectedId]?.name ?? "未設定"}
+              setSelectValue={(newValue) => {
+                setFollowingId(newValue);
+              }}
+              />
+          }
+          {
+            <CustomSwitch
+              label="動線表示"
+              disabled={isNullOrUndefinedOrBlank(followingId)}
+              defaultChecked={showPaths === undefined ? false : showPaths}
+              onChange={(checked) => setShowFollowingPath(checked)}
             />
-        }
-        {
-          <CustomSwitch
-            label="動線表示"
-            disabled={isNullOrUndefinedOrBlank(followingId)}
-            defaultChecked={showPaths === undefined ? false : showPaths}
-            onChange={(checked) => setShowFollowingPath(checked)}
-          />
-        }
-        
+          }
+        </div>
       </BaseEditDialog>
     }
     {
       step === "export" &&
       <CustomDialog title="PDF生成中">
-        <b>{choreo.name}</b>のPDFを生成しています。<br/>完了までしばらくお待ちください。<br/>進行状況：{progress}%
+        <p className="max-w-full w-max">
+          <b>{choreo.name}</b>のPDFを生成しています。<br/>完了までしばらくお待ちください。<br/>進行状況：{progress}%
+        </p>
       </CustomDialog>
     }
   </>

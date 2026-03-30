@@ -505,7 +505,7 @@ export default function HomePage({
                 });
               }
             }}>
-            <p>本当に<b> {editingChoreo?.name} </b>を{deleteChoreoVerb}しますか？</p>
+            <p className="max-w-full w-max">本当に<b> {editingChoreo?.name} </b>を{deleteChoreoVerb}しますか？</p>
             <p>この操作は取り消せません。</p>
           </BaseEditDialog>
         </Dialog.Root>
