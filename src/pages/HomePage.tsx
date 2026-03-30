@@ -44,8 +44,9 @@ type HomePageProps = {
   setDancerNamesByEvent: (groupedNames: Record<string, Record<string, string[]>>) => void,
 }
 
+type ChoreoStatus = "localOnly" | "syncRequired" | "upToDate" | "edited";
 type ChoreoWithStatus = Choreo & {
-  status: "localOnly" | "syncRequired" | "upToDate" | "edited"
+  status: ChoreoStatus
 }
 
 export default function HomePage({
@@ -221,7 +222,21 @@ export default function HomePage({
       lastUpdated: new Date().toISOString(),
     } as Choreo;
     saveChoreo(newChoreo, () => {
-      setSavedChoreos(prev => [...prev, {...newChoreo, status: "localOnly"}]);
+      var newChoreos = [...savedChoreos, {...newChoreo, status: "localOnly" as ChoreoStatus}];
+
+      setDancerNamesByEvent(
+        newChoreos.reduce((acc, item) => {
+          const names = Object.values(item.dancers).map(d => d.name);
+          return {
+            ...acc,
+            [item.event]: {
+              ...(acc[item.event] ?? {}),
+              [item.id]: names,
+            },
+          };
+        }, {} as Record<string, Record<string, string[]>>)
+      );
+      setSavedChoreos(newChoreos);
     });
   }
 
