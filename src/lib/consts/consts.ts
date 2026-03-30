@@ -11,7 +11,7 @@ export const MIN_PROP_DIMENSION = 0.5;
 export const MAX_PROP_DIMENSION = 20;
 
 export const MIN_STAGE_MARGIN = 2;
-export const MAX_STAGE_MARGIN = 20;
+export const MAX_STAGE_MARGIN = 10;
 
 export const MIN_ZOOM = 0.3;
 export const MAX_ZOOM = 4;
