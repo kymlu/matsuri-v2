@@ -639,7 +639,7 @@ export function alignVerticalPositions (
 export function distributePositions (
   state: Choreo,
   sectionId: string,
-  positions: StageEntities<PropPosition[], DancerPosition[], Obstacle[]>, // TODO
+  positions: StageEntities<PropPosition[], DancerPosition[], Obstacle[]>,
   type: Distribution
 ): Choreo {
   if (positions.dancers.length === 0 && positions.props.length === 0 && positions.obstacles.length === 0) return {...state};
