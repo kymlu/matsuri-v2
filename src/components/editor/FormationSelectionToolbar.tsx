@@ -181,7 +181,7 @@ function FormationSectionItem (props: {
       asDiv={asDiv}
       full={full}
       >
-      <div className={"flex flex-row items-center w-full h-6 gap-1 min-w-24 " + (full ? "justify-between" : "justify-evenly")}>
+      <div className={"flex flex-row items-center w-full h-6 gap-1 min-w-24 " + (full ? "justify-between" : "gap-2 justify-center")}>
         <span className={"truncate" + (isSelected ? " font-semibold" : " font-medium")}>
           {section.name}
         </span>
