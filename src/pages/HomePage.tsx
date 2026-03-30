@@ -674,6 +674,15 @@ function EventSection({
                       </Dialog.Trigger>
                     }
                     {
+                      choreo.status === "upToDate" &&
+                      <div className="px-1 py-0.5 text-sm font-semibold flex items-center gap-0.5 bg-white border rounded-md text-primary border-primary text-nowrap">
+                        {
+                          choreo.version &&
+                          <span>v{choreo.version}</span>
+                        }
+                      </div>
+                    }
+                    {
                       choreo.status === "syncRequired" &&
                       <div className="px-1 py-0.5 flex items-center gap-0.5 text-sm font-semibold text-white border rounded-md text-nowrap bg-primary border-primary">
                         {
