@@ -68,6 +68,7 @@ export const ICON = {
   formatAlignLeft: "format_align_left",
   formatAlignRight: "format_align_right",
   formatBold: "format_bold",
+  globe: "globe",
   group: "group",
   gridOn: "grid_on",
   height: "height",

@@ -2,14 +2,16 @@ import classNames from "classnames";
 
 export type DividerProps = {
   compact?: boolean,
+  medium?: boolean,
   primary?: boolean,
 }
 
 export default function Divider({
-  compact, primary
+  compact, medium, primary
 }: DividerProps) {
   var classes = classNames("border-none h-0.5", {
-    "my-3": !compact,
+    "my-3": !compact && !medium,
+    "my-1": medium,
     "h-0.5": compact,
     "bg-primary": primary,
     "bg-gray-200": !primary,

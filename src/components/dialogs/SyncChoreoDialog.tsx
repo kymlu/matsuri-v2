@@ -4,6 +4,8 @@ import Button from "../basic/Button";
 import { Choreo } from "../../models/choreo";
 import Divider from "../basic/Divider";
 import { getDate } from "../../lib/helpers/dateHelper";
+import Icon from "../basic/Icon";
+import { ICON } from "../../lib/consts/consts";
 
 type SyncChoreoDialogProps = {
   onClose: () => void,
@@ -23,20 +25,24 @@ export default function SyncChoreoDialog ({
     hasX
     onClose={onClose}
   >
-    <div className="space-y-2">
+    <div className="max-w-full space-y-2 w-max">
       <div>
         <p>この隊列表には公開版とは異なる内容があります。</p>
         <p>現在の変更をどうしますか？</p>
       </div>
       <div className="py-2 bg-gray-100 border border-gray-400 rounded-md">
-        <div className="flex justify-between px-2">
+        <div className="grid grid-cols-[auto,auto,1fr,auto] gap-2 items-center justify-between px-2">
+          <Icon src={ICON.editDocument} size="sm"/>
           <span className="font-semibold text-nowrap">編集版</span>
-          <span className="text-nowrap">{savedChoreo?.lastUpdated ? getDate(new Date(savedChoreo.lastUpdated)) : ""}</span>
+          <span className="text-right text-nowrap">{savedChoreo?.lastUpdated ? getDate(new Date(savedChoreo.lastUpdated)) : ""}</span>
+          <span className="border border-primary rounded-lg py-0.5 px-1.5 text-sm font-semibold text-primary">{savedChoreo?.version ? `v${savedChoreo.version}` : ""}</span>
         </div>
-        <Divider compact/>
-        <div className="flex justify-between px-2">
+        <Divider medium/>
+        <div className="grid grid-cols-[auto,auto,1fr,auto] gap-2 items-center justify-between px-2">
+          <Icon src={ICON.globe} size="sm"/>
           <span className="font-semibold text-nowrap">公開版</span>
-          <span className="text-nowrap">{serverChoreo?.lastUpdated ? getDate(new Date(serverChoreo.lastUpdated)) : ""}</span>
+          <span className="text-right text-nowrap">{serverChoreo?.lastUpdated ? getDate(new Date(serverChoreo.lastUpdated)) : ""}</span>
+          <span className="border border-primary rounded-lg py-0.5 px-1.5 text-sm font-semibold text-primary">{serverChoreo?.version ? `v${serverChoreo.version}` : ""}</span>
         </div>
       </div>
       <div className="space-y-1">
