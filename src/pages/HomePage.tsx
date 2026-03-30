@@ -659,19 +659,27 @@ function EventSection({
                       </Dialog.Trigger>
                     }
                     {
-                      choreo.version &&
-                      <div className="px-1 py-0.5 text-sm font-semibold flex items-center gap-0.5 bg-white border rounded-md text-primary border-primary text-nowrap">
-                        v{choreo.version}
-                        {choreo.status === "edited" && <Icon src={ICON.edit} colour="primary" size="xs"/>}
-                        {choreo.status === "syncRequired" && <Icon src={ICON.warning} colour="primary" size="xs"/>}
+                      choreo.status === "syncRequired" &&
+                      <div className="px-1 py-0.5 flex items-center gap-0.5 text-sm font-semibold text-white border rounded-md text-nowrap bg-primary border-primary">
+                        {
+                          choreo.version &&
+                          <span>v{choreo.version}</span>
+                        }
+                        <Icon src={ICON.warning} colour="white" size="xs"/>
                       </div>
                     }
                     {
-                      choreo.status === "syncRequired" &&
-                      <div className="px-1 py-0.5 text-sm font-semibold text-white border rounded-md text-nowrap bg-primary border-primary">要確認</div>
+                      choreo.status === "edited" &&
+                      <div className="px-1 py-0.5 text-sm font-semibold flex items-center gap-0.5 bg-white border rounded-md text-primary border-primary text-nowrap">
+                        {
+                          choreo.version &&
+                          <span>v{choreo.version}</span>
+                        }
+                        <Icon src={ICON.edit} colour="primary" size="xs"/>
+                      </div>
                     }
                     {
-                      (choreo.status === "localOnly" || choreo.status === "edited") &&
+                      (choreo.status === "localOnly") &&
                       <div className="px-1 py-0.5 text-sm text-gray-600 bg-white border border-gray-600 rounded-md text-nowrap">未公開</div>
                     }
                     <Dialog.Trigger id={choreo.id} payload={choreo} handle={optionsDialog} onClick={(e) => {
