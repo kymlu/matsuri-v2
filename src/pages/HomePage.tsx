@@ -59,9 +59,9 @@ export default function HomePage({
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [choreosFromServer, setChoreosFromServer] = useState<Record<string, Choreo>>({});
-  console.log("build", buildInfo)
 
   useEffect(() => {
+    console.log("build", buildInfo)
     loadChoreos();
   }, []);
 
