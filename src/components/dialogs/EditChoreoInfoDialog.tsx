@@ -29,22 +29,24 @@ export default function EditChoreoInfoDialog({
     onSubmit={() => { onSubmit(name, event) }}
     isActionButtonDisabled={isNullOrUndefinedOrBlank(name)}
     >
-    <TextInput
-      label="名前"
-      required
-      defaultValue={choreo?.name ?? ""}
-      onContentChange={ (newName) => { setName(newName) }}
-      restrictFn={(s) => !testInvalidCharacters(s)}
-      />
+    <div className="w-[100svw] max-w-full md:w-full">
+      <TextInput
+        label="名前"
+        required
+        defaultValue={choreo?.name ?? ""}
+        onContentChange={ (newName) => { setName(newName) }}
+        restrictFn={(s) => !testInvalidCharacters(s)}
+        />
 
-    <CustomAutocomplete
-      defaultValue={choreo?.event ?? ""}
-      options={eventList}
-      onContentChange={newValue => setEvent(newValue)}
-      placeholder="イベント名を入力してください"
-      label="イベント（任意）"
-      clearable
-      // restrictFn={(s) => !testInvalidCharacters(s)} // todo: after pushing the official goen change to restrict
-    />
+      <CustomAutocomplete
+        defaultValue={choreo?.event ?? ""}
+        options={eventList}
+        onContentChange={newValue => setEvent(newValue)}
+        placeholder="イベント名を入力してください"
+        label="イベント（任意）"
+        clearable
+        // restrictFn={(s) => !testInvalidCharacters(s)} // todo: after pushing the official goen change to restrict
+      />
+    </div>
   </BaseEditDialog>
 }
