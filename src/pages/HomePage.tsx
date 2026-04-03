@@ -23,7 +23,7 @@ import React from "react"
 import Divider from "../components/basic/Divider"
 import EditNameDialog from "../components/dialogs/EditNameDialog"
 import TextInput from "../components/inputs/TextInput"
-import { loadAllForYear } from "../lib/dataAccess/FileAccess"
+import { loadAllChoreos } from "../lib/dataAccess/FileAccess"
 import UserNameEditDialog from "../components/dialogs/UserNameEditDialog"
 import { Oval } from "react-loader-spinner"
 import { colorPalette } from "../lib/consts/colors"
@@ -69,7 +69,7 @@ export default function HomePage({
     setIsLoading(true);
     Promise.all([
       getAllChoreos(),
-      loadAllForYear("2026")
+      loadAllChoreos()
     ]).then(([local, server]) => {
       server.push(z.parse(ChoreoSchema, SampleParade));
       server.push(z.parse(ChoreoSchema, SampleStage));
