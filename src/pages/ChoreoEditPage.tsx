@@ -423,7 +423,7 @@ export default function ChoreoEditPage(props: {
   }, [movementUpdateGroup]);
 
   const missingNames = useMemo(() => {
-    const pool = new Set(Object.entries(props.dancerNamesByEvent[history.presentState.state.event])
+    const pool = new Set(Object.entries(props.dancerNamesByEvent[history.presentState.state.event] ?? {})
       .filter(([id]) => id !== history.presentState.state.id)
       .flatMap(([, names]) => names));
     const currentNames = new Set(Object.values(history.presentState.state.dancers).map(x => x.name));
