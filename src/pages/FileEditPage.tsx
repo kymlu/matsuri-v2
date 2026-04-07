@@ -8,6 +8,9 @@ import CustomSwitch from "../components/inputs/CustomSwitch";
 import Button from "../components/basic/Button";
 import { Dialog } from "@base-ui/react";
 import BaseEditDialog from "../components/dialogs/BaseEditDialog";
+import Icon from "../components/basic/Icon";
+import { ICON } from "../lib/consts/consts";
+import { getDate } from "../lib/helpers/dateHelper";
 
 interface FileEditForm {
   name: string,
@@ -84,14 +87,23 @@ export function FileEditPage({
   
   return (
     <div className="flex flex-col h-[100svh] p-4 mx-auto space-y-2 bg-gray-100">
-      <div className="flex justify-between">
-        <h2 className="mb-2 text-xl font-bold">
-          {choreo.name}
-        </h2>
-        
+      <h2 className="text-xl font-bold">
+        {choreo.name}
+      </h2>
+      <div className="flex items-center gap-2 text-sm">
+        {choreo.lastUpdated ? (
+          <div className="flex items-center gap-1">
+            <Icon colour="grey" size="sm" src={ICON.history}/>{getDate(new Date(choreo.lastUpdated))}
+          </div>
+        ) : (
+          <div />
+        )}
+        <div className="py-0.5 px-1 font-semibold border rounded-lg text-primary border-primary">
+          <span className="text-sm">v{choreo.version}</span>
+        </div>
       </div>
-      <span className="text-sm">ID: {choreo.id}</span>
-      <div className="flex justify-between h-12 pt-4">
+      <span className="font-mono text-sm">ID: {choreo.id}</span>
+      <div className="flex justify-between">
         <span className="text-lg font-bold">メタデータ</span>
         {
           hasEdits &&
@@ -115,6 +127,7 @@ export function FileEditPage({
           label="隊列名前"
           restrictFn={(s) => !testInvalidCharacters(s)}
           ref={nameRef}
+          showLength
         />
         <CustomAutocomplete
           defaultValue={form.eventName}
@@ -124,6 +137,7 @@ export function FileEditPage({
           required
           label="イベント（任意）"
           ref={eventRef}
+          showLength
           // restrictFn={(s) => !testInvalidCharacters(s)} // todo: after pushing the official goen change to restrict
         />
         <CustomSwitch
@@ -134,19 +148,15 @@ export function FileEditPage({
         />
       </div>
 
-      <div className="flex justify-between pt-4">
-        <span className="text-lg font-bold">バージョンアップ</span>
+      <div className="flex-1 pt-4">
+        <Button>バージョンアップ</Button>
       </div>
-      <div className="flex-1">
-        <Button>Add a version</Button>
-        {
-          form.choreo &&
-          <div>
-            このバージョンで、公開のバージョンが <b>v{choreo.version}</b> → <b>v{choreo.version + 1}</b> に変更される
-          </div>
-        }
-      </div>
-      
+      {
+        form.choreo &&
+        <div>
+          このバージョンで、公開のバージョンが <b>v{choreo.version}</b> → <b>v{choreo.version + 1}</b> に変更される
+        </div>
+      }
       <div className="flex justify-between gap-4 pb-8">
         <Button
           full

@@ -2,13 +2,12 @@ import React from "react";
 
 type LabelProps = {
   text: string,
-  htmlFor: string
 }
 
 export default function Label({
-  text, htmlFor
+  text
 }: LabelProps) {
-  return <label htmlFor={htmlFor} className="block text-lg font-medium">{text}</label>
+  return <span className="block text-lg font-medium">{text}</span>
 }
 
 type FieldWithLabelProps = {
@@ -25,7 +24,7 @@ export function FieldWithLabel({
   return <div className={full ? "w-full" : ""}>
     {
       label &&
-      <Label htmlFor={id} text={label}/>
+      <Label text={label}/>
     }
     {children}
   </div>
