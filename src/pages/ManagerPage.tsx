@@ -185,8 +185,8 @@ export function ManagerPage({
               }))
             } else {
               setEditsList(prev => {
-                const { [id]: _, ...rest } = prev
-                return rest
+                const { [id]: _, ...rest } = prev;
+                return rest;
               })
             }
           }}

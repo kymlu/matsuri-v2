@@ -92,6 +92,7 @@ export default function CustomAutocomplete({
               maxLength={maxLength ?? 20}
               placeholder={placeholder ?? ""}
               className={inputClasses}
+              value={value}
             />
             <Autocomplete.Portal>
               <Autocomplete.Positioner className="z-50 outline-none" sideOffset={4}>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import TextInput from "../components/inputs/TextInput";
 import { strEquals, testInvalidCharacters } from "../lib/helpers/globalHelper";
 import { Choreo, ChoreoManifest } from "../models/choreo";
@@ -39,6 +39,10 @@ export function FileEditPage({
     setForm({ ...form, [field]: value });
   };
 
+  const nameRef = useRef<any>(null);
+  const eventRef = useRef<any>(null);
+  const isHiddenRef = useRef<any>(null);
+
   const handleSubmit = () => {
     console.log("Saving edits on id:", choreo.id, {
       name: strEquals(choreo.name, form.name) ? "unchanged" : "updated",
@@ -52,9 +56,15 @@ export function FileEditPage({
       name: strEquals(choreo.name, form.name) ? undefined : form.name,
       eventName: strEquals(choreo.event, form.eventName) ? undefined : form.eventName,
       choreo: form.choreo ?? edits?.choreo,
-      isHidden: choreo.isHidden === form.isHidden ? undefined : form.isHidden,
+      isHidden: (choreo.isHidden === form.isHidden || (choreo.isHidden === undefined && form.isHidden === false)) ? undefined : form.isHidden,
     };
-    addEdits(choreo.id, newEdits);
+    var hasEdits =
+      newEdits.name !== undefined ||
+      newEdits.eventName !== undefined ||
+      newEdits.choreo !== undefined ||
+      newEdits.isHidden !== undefined;
+      
+    addEdits(choreo.id, hasEdits ? newEdits : undefined);
     exitPage();
   };
 
@@ -67,6 +77,9 @@ export function FileEditPage({
       eventName: choreo.event,
       isHidden: choreo.isHidden ?? false,
     }));
+    nameRef.current.changeValue(choreo.name);
+    eventRef.current.changeValue(choreo.event);
+    isHiddenRef.current.changeChecked(choreo.isHidden === undefined ? true : !choreo.isHidden);
   }
   
   return (
@@ -87,7 +100,8 @@ export function FileEditPage({
               <Button compact asDiv>破棄</Button>
             </Dialog.Trigger>
             <BaseEditDialog noDetachedTrigger title="確認" actionButtonText="OK" onSubmit={revert}>
-              変更を全て破棄しますか？この操作は取り消せません。
+              <p>変更を全て破棄しますか？</p>
+              <p>この操作は取り消せません。</p>
             </BaseEditDialog>
           </Dialog.Root>
         }
@@ -100,6 +114,7 @@ export function FileEditPage({
           required
           label="隊列名前"
           restrictFn={(s) => !testInvalidCharacters(s)}
+          ref={nameRef}
         />
         <CustomAutocomplete
           defaultValue={form.eventName}
@@ -108,12 +123,14 @@ export function FileEditPage({
           placeholder="イベント名を入力してください"
           required
           label="イベント（任意）"
+          ref={eventRef}
           // restrictFn={(s) => !testInvalidCharacters(s)} // todo: after pushing the official goen change to restrict
         />
         <CustomSwitch
           label="公開する"
-          defaultChecked={!choreo.isHidden}
+          defaultChecked={!form.isHidden}
           onChange={checked => handleChange("isHidden", !checked)}
+          ref={isHiddenRef}
         />
       </div>
 

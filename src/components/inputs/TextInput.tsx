@@ -36,9 +36,6 @@ export default function TextInput({
   showLength, label, rightLabel, restrictFn
 }: TextInputProps) {
   const [value, setValue] = React.useState<string>(defaultValue ?? "");
-  useEffect(() => {
-    setValue(defaultValue ?? "");
-  }, [defaultValue]);
 
   useImperativeHandle(ref, () => ({
     changeValue: (newValue: string) => {
