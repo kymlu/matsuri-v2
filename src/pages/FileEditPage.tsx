@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import TextInput from "../components/inputs/TextInput";
-import { strEquals, testInvalidCharacters } from "../lib/helpers/globalHelper";
+import { isNullOrUndefinedOrBlank, strEquals, testInvalidCharacters } from "../lib/helpers/globalHelper";
 import { Choreo, ChoreoManifest } from "../models/choreo";
 import CustomAutocomplete from "../components/inputs/CustomAutocomplete";
 import { FileEdits } from "./ManagerPage";
@@ -160,6 +160,7 @@ export function FileEditPage({
           primary
           full
           onClick={handleSubmit}
+          disabled={isNullOrUndefinedOrBlank(form.name) || isNullOrUndefinedOrBlank(form.eventName)}
         >
           <span className="font-semibold">
             保存
