@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { loadChoreoManifest } from "../lib/dataAccess/FileAccess";
-import { indexByKey, isNullOrUndefinedOrBlank, mapByKey, strCompare } from "../lib/helpers/globalHelper";
+import { indexByKey, isNullOrUndefinedOrBlank, mapByKey, strCompare, strEquals } from "../lib/helpers/globalHelper";
 import { Choreo, ChoreoManifest } from "../models/choreo";
 import { colorPalette } from "../lib/consts/colors";
 import TextInput from "../components/inputs/TextInput";
@@ -15,6 +15,8 @@ import { FileEditPage } from "./FileEditPage";
 import { getAllChoreos } from "../lib/dataAccess/DataController";
 import BaseEditDialog from "../components/dialogs/BaseEditDialog";
 import { Dialog } from "@base-ui/react";
+import IconButton from "../components/basic/IconButton";
+import EditNameDialog from "../components/dialogs/EditNameDialog";
 
 export interface FileEdits {
   id: string,
@@ -96,6 +98,29 @@ export function ManagerPage({
     ].filter(x => x !== undefined))).sort()
   , [allChoreos, editsList]);
 
+  const editEventName = (name: string, choreos: ChoreoManifest[]) => {
+    if (strEquals(name, choreos[0].event)) return;
+
+    var newEdits = {...editsList}; 
+    choreos.forEach(c => {
+      const edits = newEdits[c.id] ?? {id: c.id} as FileEdits;
+      if (strEquals(originalChoreos[c.id].event, name)) {
+        edits.eventName = undefined;
+      } else {
+        edits.eventName = name;
+      }
+      if (
+        edits.choreo === undefined && edits.eventName === undefined &&
+        edits.isHidden === undefined && edits.name === undefined) {
+        var {[c.id]: _, ...rest} = newEdits;
+        newEdits = rest;
+      } else {
+        newEdits[c.id] = edits;
+      }
+    });
+    setEditsList(newEdits);
+  }
+
   return (
     <div className="bg-gray-50">
       {
@@ -165,6 +190,7 @@ export function ManagerPage({
                   edits={editsList}
                   searchTerm={searchTerm}
                   selectChoreo={setSelectedChoreo}
+                  editEventName={(newName) => editEventName(newName, choreos)}
                 />
               )
             }
@@ -205,32 +231,62 @@ type EventSectionProps = {
   edits: Record<string, FileEdits>
   searchTerm: string,
   selectChoreo: (choreo: ChoreoManifest) => void,
+  editEventName: (newName: string) => void,
 }
 
 function EventSection({
-  eventName, choreos, originalChoreos, edits, searchTerm, selectChoreo
+  eventName, choreos, originalChoreos, edits, searchTerm, selectChoreo, editEventName
 }: EventSectionProps) {
-  return <ExpandableSection
-    title={eventName.length === 0 ? "イベント不明" : eventName}
-  >
-    <div className="flex flex-col gap-2 md:grid md:grid-cols-2">
-      {
-        choreos.map((choreo) =>
-          <React.Fragment key={choreo.id}>
-            {
-              (isNullOrUndefinedOrBlank(searchTerm) ||
-              choreo.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-              choreo.event.toLowerCase().includes(searchTerm.toLowerCase())) &&
-              <ChoreoItem
-                choreo={choreo}
-                edits={edits[choreo.id]}
-                selectChoreo={() => selectChoreo(originalChoreos[choreo.id])}/>
-            }
-          </React.Fragment>
-        )
+  const editNameDialog = Dialog.createHandle<Choreo>();
+  const [editNameDialogOpen, setEditNameDialogOpen] = React.useState(false);
+
+  const handleEditNameDialogOpenChange = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
+    setEditNameDialogOpen(isOpen);
+  };
+
+  return <div>
+    <Dialog.Root
+      open={editNameDialogOpen}
+      onOpenChange={handleEditNameDialogOpenChange}
+      handle={editNameDialog}>
+      <EditNameDialog
+        type="イベント"
+        required
+        name={eventName}
+        onSubmit={(newName) => {
+          editEventName(newName);
+          setEditNameDialogOpen(false);
+        }}
+      />
+    </Dialog.Root>
+    <ExpandableSection
+      title={eventName.length === 0 ? "イベント不明" : eventName}
+      rightButton={
+        <IconButton
+          asDiv src={ICON.edit}
+          size="sm" colour="grey"
+          noBorder onClick={() => setEditNameDialogOpen(true)}/>
       }
-    </div>
-  </ExpandableSection>
+    >
+      <div className="flex flex-col gap-2 md:grid md:grid-cols-2">
+        {
+          choreos.map((choreo) =>
+            <React.Fragment key={choreo.id}>
+              {
+                (isNullOrUndefinedOrBlank(searchTerm) ||
+                choreo.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                choreo.event.toLowerCase().includes(searchTerm.toLowerCase())) &&
+                <ChoreoItem
+                  choreo={choreo}
+                  edits={edits[choreo.id]}
+                  selectChoreo={() => selectChoreo(originalChoreos[choreo.id])}/>
+              }
+            </React.Fragment>
+          )
+        }
+      </div>
+    </ExpandableSection>
+  </div>
 }
 
 type ChoreoItemProps = {

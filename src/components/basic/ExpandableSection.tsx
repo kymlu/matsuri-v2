@@ -1,51 +1,33 @@
 import { useState } from "react";
 import { ICON } from "../../lib/consts/consts";
 import IconButton from "./IconButton";
-import CustomMenu from "../inputs/CustomMenu";
 
 type ExpandableSectionProps = {
   title: React.ReactNode,
-  isExpandable?: boolean,
   children: React.ReactNode,
-  menuContents?: React.ReactNode,
+  rightButton?: React.ReactNode,
 }
 
 export default function ExpandableSection({
-    title, isExpandable, children, menuContents
+    title, children, rightButton
   }: ExpandableSectionProps) {
   const [isExpanded, setIsExpanded] = useState<boolean>(true);
   
   return <div className="space-y-2">
     <div className="flex flex-row justify-between w-full">
       <button onClick={() => {
-        if (isExpandable){
-          setIsExpanded(prev => !prev);
-        }
+        setIsExpanded(prev => !prev);
       }} className='flex flex-row items-center w-full'>
-        {
-          isExpandable &&
-          <IconButton
-            src={isExpanded ? ICON.arrowDropDown : ICON.arrowRight}
-            size="sm"
-            colour="primary"
-            noBorder
-            asDiv />
-        }
+        <IconButton
+          src={isExpanded ? ICON.arrowDropDown : ICON.arrowRight}
+          size="sm"
+          colour="primary"
+          noBorder
+          asDiv />
         <h2 className='text-xl font-bold text-primary'>{title}</h2>
       </button>
       {
-        menuContents && 
-        <CustomMenu trigger={
-          <IconButton
-            src={ICON.moreVert}
-            asDiv
-            noBorder
-            colour="grey"
-            size="sm"
-          />
-        }>
-          {menuContents}
-        </CustomMenu>
+        rightButton && <>{rightButton}</>
       }
     </div>
     {

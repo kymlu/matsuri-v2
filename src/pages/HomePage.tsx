@@ -31,6 +31,7 @@ import EditChoreoInfoDialog from "../components/dialogs/EditChoreoInfoDialog"
 import SyncChoreoDialog from "../components/dialogs/SyncChoreoDialog"
 import ExpandableSection from "../components/basic/ExpandableSection"
 import AbsentDancersWarningDialog from "../components/dialogs/AbsentDancersWarningDialog"
+import CustomMenu from "../components/inputs/CustomMenu"
 
 type HomePageProps = {
   buildInfo?: string,
@@ -624,9 +625,16 @@ function EventSection({
   
   return <ExpandableSection
     title={eventName.length === 0 ? "イベント不明" : eventName}
-    isExpandable
-    menuContents={
-      <>
+    rightButton={
+      <CustomMenu trigger={
+        <IconButton
+          src={ICON.moreVert}
+          asDiv
+          noBorder
+          colour="grey"
+          size="sm"
+        />
+      }>
         <Menu.Item>
           <IconLabelButton full noBorder icon={ICON.add} label="追加" onClick={addEvent}/>
         </Menu.Item>
@@ -638,7 +646,7 @@ function EventSection({
         <Menu.Item>
           <IconLabelButton full noBorder icon={ICON.download} label="共有" onClick={() => exportEvent(choreos, eventName)}/>
         </Menu.Item>
-      </>
+      </CustomMenu>
     }
   >
     <div className="flex flex-col gap-2 md:grid md:grid-cols-2">
