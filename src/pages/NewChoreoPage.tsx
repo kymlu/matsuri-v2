@@ -133,6 +133,7 @@ export function NewChoreoPage({
                 placeholder="名前を入力してください"
                 label="隊列名前"
                 restrictFn={(s) => !testInvalidCharacters(s)}
+                showLength
               />
             </div>
             <div>
@@ -144,6 +145,7 @@ export function NewChoreoPage({
                 label="イベント（任意）"
                 clearable
                 // restrictFn={(s) => !testInvalidCharacters(s)} // todo: after pushing the official goen change to restrict
+                showLength
               />
             </div>
           </div>

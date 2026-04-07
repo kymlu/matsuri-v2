@@ -36,6 +36,7 @@ export default function EditChoreoInfoDialog({
         defaultValue={choreo?.name ?? ""}
         onContentChange={ (newName) => { setName(newName) }}
         restrictFn={(s) => !testInvalidCharacters(s)}
+        showLength
         />
 
       <CustomAutocomplete
@@ -45,6 +46,7 @@ export default function EditChoreoInfoDialog({
         placeholder="イベント名を入力してください"
         label="イベント（任意）"
         clearable
+        showLength
         // restrictFn={(s) => !testInvalidCharacters(s)} // todo: after pushing the official goen change to restrict
       />
     </div>
