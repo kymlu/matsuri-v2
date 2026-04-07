@@ -4,6 +4,14 @@ import { DancerSchema } from "./dancer";
 import { ObstacleSchema, PropSchema } from "./prop";
 import * as z from "zod";
 
+export const ChoreoManifestSchema = BaseModelSchema.extend({
+  event: z.string(),
+  isHidden: z.boolean().optional(),
+  version: z.number(),
+  lastUpdated: z.string().optional(),
+})
+export type ChoreoManifest = z.infer<typeof ChoreoManifestSchema>;
+
 export const StageTypeSchema = z.enum(["stage", "parade"]);
 export type StageType = z.infer<typeof StageTypeSchema>;
 
@@ -37,5 +45,6 @@ export const ChoreoSchema = BaseModelSchema.extend({
   lastUpdated: z.string().optional(),
   version: z.number().optional(),
   isDirty: z.boolean().optional(),
+  isHidden: z.boolean().optional(),
 });
 export type Choreo = z.infer<typeof ChoreoSchema>;

@@ -1,4 +1,4 @@
-import React, { useImperativeHandle } from "react";
+import React, { useEffect, useImperativeHandle } from "react";
 import classNames from "classnames";
 import { ICON } from "../../lib/consts/consts";
 import { isNullOrUndefinedOrBlank } from "../../lib/helpers/globalHelper";
@@ -36,6 +36,9 @@ export default function TextInput({
   showLength, label, rightLabel, restrictFn
 }: TextInputProps) {
   const [value, setValue] = React.useState<string>(defaultValue ?? "");
+  useEffect(() => {
+    setValue(defaultValue ?? "");
+  }, [defaultValue]);
 
   useImperativeHandle(ref, () => ({
     changeValue: (newValue: string) => {

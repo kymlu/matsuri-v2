@@ -22,7 +22,7 @@ export function FieldWithLabel({
 }: FieldWithLabelProps) {
   var id = React.useId();
 
-  return <div className={full ? "w-full h-full" : ""}>
+  return <div className={full ? "w-full" : ""}>
     {
       label &&
       <Label htmlFor={id} text={label}/>

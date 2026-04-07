@@ -1,7 +1,7 @@
 import z from "zod";
-import { Choreo, ChoreoSchema } from "../../models/choreo";
+import { Choreo, ChoreoManifest, ChoreoManifestSchema, ChoreoSchema } from "../../models/choreo";
 
-export async function loadAllChoreos(): Promise<Choreo[]> {
+export async function loadChoreoManifest(): Promise<ChoreoManifest[]> {
   const manifestRes = await fetch(
     `${process.env.PUBLIC_URL}/data/manifest.json`
   );
@@ -10,9 +10,23 @@ export async function loadAllChoreos(): Promise<Choreo[]> {
     throw new Error("Failed to load manifest");
   }
 
-  const manifest: { id: string; name: string; event: string }[] = await manifestRes.json();
+  const manifest = z.parse(ChoreoManifestSchema.array(), await manifestRes.json());
+  return manifest;
+}
 
-  const fetchPromises = manifest.map(async (entry) => {
+export async function loadAllChoreos(excludeHidden?: boolean): Promise<Choreo[]> {
+  const manifestRes = await fetch(
+    `${process.env.PUBLIC_URL}/data/manifest.json`
+  );
+
+  if (!manifestRes.ok) {
+    throw new Error("Failed to load manifest");
+  }
+
+  const manifest = z.parse(ChoreoManifestSchema.array(), await manifestRes.json());
+  const choreosToFetch = excludeHidden === true ? manifest.filter(x => x.isHidden !== true) : manifest;
+
+  const fetchPromises = choreosToFetch.map(async (entry) => {
     const res = await fetch(
       `${process.env.PUBLIC_URL}/data/${entry.id}.json`
     );

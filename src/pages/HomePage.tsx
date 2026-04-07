@@ -38,6 +38,7 @@ type HomePageProps = {
   setEventList: (eventList: string[]) => void,
   goToNewChoreoPage: (eventName?: string) => void,
   goToViewPage: (choreo: Choreo) => void,
+  goToManagePage: () => void,
   userName: string | null,
   setUserName: (newName: string) => void,
   dancerNamesByEvent: Record<string, Record<string, string[]>>,
@@ -51,7 +52,7 @@ type ChoreoWithStatus = Choreo & {
 
 export default function HomePage({
   buildInfo, eventList, setEventList,
-  goToNewChoreoPage, goToViewPage,
+  goToNewChoreoPage, goToViewPage, goToManagePage,
   userName, setUserName,
   dancerNamesByEvent, setDancerNamesByEvent,
 }: HomePageProps) {
@@ -69,7 +70,7 @@ export default function HomePage({
     setIsLoading(true);
     Promise.all([
       getAllChoreos(),
-      loadAllChoreos()
+      loadAllChoreos(true)
     ]).then(([local, server]) => {
       server.push(z.parse(ChoreoSchema, SampleParade));
       server.push(z.parse(ChoreoSchema, SampleStage));
@@ -244,7 +245,7 @@ export default function HomePage({
     <div className="bg-gray-50">
       <div className='grid py-10 px-6 h-[100svh] grid-rows-[auto,auto,auto,1fr] overflow-hide gap-2 w-full mx-auto'>
         <div className="flex items-center justify-between">
-          <h1 className='text-2xl font-bold'>隊列表一覧</h1>
+          <h1 className='text-2xl font-bold' onClick={() => goToManagePage()}>隊列表一覧</h1>
           <div className="flex items-center ">
             <Dialog.Root>
               <Dialog.Trigger>
@@ -623,6 +624,7 @@ function EventSection({
   
   return <ExpandableSection
     title={eventName.length === 0 ? "イベント不明" : eventName}
+    isExpandable
     menuContents={
       <>
         <Menu.Item>

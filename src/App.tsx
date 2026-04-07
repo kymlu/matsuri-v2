@@ -6,8 +6,9 @@ import ChoreoEditPage from './pages/ChoreoEditPage';
 import ChoreoViewPage from './pages/ChoreoViewPage';
 import { Choreo } from './models/choreo';
 import { getUserName, setUserName } from './lib/dataAccess/LocalStorageController';
+import { ManagerPage } from './pages/ManagerPage';
 
-type Mode = "home" | "form" | "edit" | "view";
+type Mode = "home" | "form" | "edit" | "view" | "manage";
 
 function App() {
   const [mode, setMode] = useState<Mode>("home");
@@ -56,6 +57,9 @@ function App() {
             setCurrentChoreo(choreo);
             setMode("view");
           }}
+          goToManagePage={() => {
+            setMode("manage");
+          }}
           userName={name}
           setUserName={(newName) => setNewName(newName)}
           dancerNamesByEvent={dancerNamesByEvent}
@@ -91,6 +95,11 @@ function App() {
           goToHomePage={() => setMode("home")}
           goToEditPage={() => setMode("edit")}
           userName={name}
+        />
+      )}
+      {mode === "manage" && (
+        <ManagerPage
+          exit={() => setMode("home")}
         />
       )}
     </div>

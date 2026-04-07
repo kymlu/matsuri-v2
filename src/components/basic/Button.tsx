@@ -88,7 +88,7 @@ export default function Button({
 }
 
 type IconLabelButtonProps = {
-  onClick: () => void;
+  onClick?: () => void;
   icon: string;
   label: string;
   primaryText?: boolean,
