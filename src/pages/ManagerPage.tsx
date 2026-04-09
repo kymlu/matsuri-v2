@@ -42,7 +42,7 @@ export function ManagerPage({
   const [localChoreos, setLocalChoreos] = useState<Choreo[]>([]);
 
   useEffect(() => {
-    getAllChoreos().then((choreos) => setLocalChoreos(choreos));
+    getAllChoreos().then((choreos) => setLocalChoreos(choreos.sort((a, b) => -strCompare<Choreo>(a, b, "lastUpdated"))));
   }, []);
   
   useEffect(() => {
