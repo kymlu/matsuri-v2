@@ -97,6 +97,7 @@ export function PropManagerDialog({
                           return [...prev];
                         });
                       }}
+                      maxLength={15}
                     />
                   </div>
                   <div className="flex gap-2">

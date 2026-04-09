@@ -67,6 +67,7 @@ export function DancerManagerDialog({
                       return [...prev];
                     });
                   }}
+                  maxLength={15}
                 />
                 <div className="px-2 pt-4">
                   <IconButton

@@ -84,7 +84,9 @@ export default function ExportDialog({
               restrictFn={(s) => !testInvalidCharacters(s)}
               onContentChange={(name) => {
                 setExportName(name);
-              }}/>
+              }}
+              showLength
+              />
           </div>
 
           {

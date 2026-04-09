@@ -26,6 +26,7 @@ export default function UserNameEditDialog ({
     <TextInput
       defaultValue={name ?? ""}
       onContentChange={ (newName) => { setNewName(newName) }}
-      maxLength={15}/>
+      maxLength={15}
+      showLength/>
   </BaseEditDialog>
 }

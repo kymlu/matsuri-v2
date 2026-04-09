@@ -47,7 +47,8 @@ export default function EditNameDialog({
       required={required}
       defaultValue={name ?? ""}
       onContentChange={ (newName) => { setNewName(newName) }}
-      maxLength={15}/>
+      maxLength={type === "イベント" || type === "隊列表" ? 20 : 15}
+      showLength/>
     
     {
       hasDuplicate && <div className="font-bold text-center text-wrap text-primary">

@@ -48,6 +48,7 @@ export default function EditDancerNameDialog({
       onContentChange={ (newName) => { setNewName(newName) }}
       maxLength={15}
       options={missingNames}
+      showLength
     />
     
     {
