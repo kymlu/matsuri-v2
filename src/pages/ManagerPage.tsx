@@ -130,10 +130,11 @@ export function ManagerPage({
             <h1 className='text-2xl font-bold'>管理モード</h1>
             <Dialog.Root>
               <Dialog.Trigger>
-                <IconLabelButton asDiv icon={ICON.arrowLeftAlt} label="ホームに戻る"/>
+                <IconButton src={ICON.logout} colour="primary" noBorder asDiv/>
               </Dialog.Trigger>
               <BaseEditDialog title="確認" onSubmit={exit} actionButtonText="OK">
-                本当にホームに戻りますか？全ての変更が破棄されます。
+                <p>本当にホームに戻りますか？</p>
+                <p>全ての変更が破棄されます。</p>
               </BaseEditDialog>
             </Dialog.Root>
           </div>
