@@ -17,7 +17,7 @@ import BaseEditDialog from "../components/dialogs/BaseEditDialog";
 import { Dialog } from "@base-ui/react";
 import IconButton from "../components/basic/IconButton";
 import EditNameDialog from "../components/dialogs/EditNameDialog";
-import { Tag } from "../components/Tag";
+import { Tag } from "../components/common/Tag";
 
 export interface FileEdits {
   id: string,

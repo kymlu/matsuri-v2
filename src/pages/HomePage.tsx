@@ -32,7 +32,7 @@ import SyncChoreoDialog from "../components/dialogs/SyncChoreoDialog"
 import ExpandableSection from "../components/basic/ExpandableSection"
 import AbsentDancersWarningDialog from "../components/dialogs/AbsentDancersWarningDialog"
 import CustomMenu from "../components/inputs/CustomMenu"
-import { Tag } from "../components/Tag"
+import { Tag } from "../components/common/Tag"
 
 type HomePageProps = {
   buildInfo?: string,

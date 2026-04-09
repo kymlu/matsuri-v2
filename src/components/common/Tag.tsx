@@ -1,5 +1,5 @@
 import classNames from "classnames"
-import Icon from "./basic/Icon"
+import Icon from "../basic/Icon"
 
 type TagProps = {
   type: "primary" | "filled" | "grey",
