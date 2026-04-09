@@ -12,6 +12,9 @@ import Icon from "../components/basic/Icon";
 import { ICON } from "../lib/consts/consts";
 import { getDate } from "../lib/helpers/dateHelper";
 import Divider from "../components/basic/Divider";
+import { SelectChoreoDialog } from "../components/dialogs/SelectChoreoDialog";
+import IconButton from "../components/basic/IconButton";
+import { Tag } from "../components/common/Tag";
 
 interface FileEditForm {
   name: string,
@@ -85,6 +88,22 @@ export function FileEditPage({
     eventRef.current.changeValue(choreo.event);
     isHiddenRef.current.changeChecked(choreo.isHidden === undefined ? true : !choreo.isHidden);
   }
+
+  const selectChoreoDialog = Dialog.createHandle<Choreo>();
+  const [selectChoreoDialogOpen, setSelectChoreoDialogOpen] = useState(false);
+
+  const handleSelectChoreoDialogOpenChange = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
+    setSelectChoreoDialogOpen(isOpen);
+  };
+
+  const versionUp = () => {
+    var local = localChoreos.find(c => strEquals(c.id, choreo.id));
+    if (local) {
+      setForm(prev => ({...prev, choreo: local}));
+    } else {
+      setSelectChoreoDialogOpen(true);
+    }
+  }
   
   return (
     <div className="flex flex-col h-[100svh] p-4 mx-auto space-y-2 bg-gray-100">
@@ -99,9 +118,7 @@ export function FileEditPage({
         ) : (
           <div />
         )}
-        <div className="py-0.5 px-1 font-semibold border rounded-lg text-primary border-primary">
-          <span className="text-sm">v{choreo.version}</span>
-        </div>
+        <Tag text={`v${choreo.version}`} type="primary"/>
       </div>
       <span className="font-mono text-sm">ID: {choreo.id}</span>
       <Divider/>
@@ -150,9 +167,37 @@ export function FileEditPage({
         />
       </div>
 
-      <div className="flex-1 pt-4">
-        <Button>バージョンアップ</Button>
-      </div>
+      {
+        !form.choreo &&
+        <div className="flex-1 pt-4">
+          <Button onClick={() => versionUp()}>
+            バージョンアップ
+          </Button>
+        </div>
+      }
+      {
+        form.choreo &&
+        <div className="flex flex-row gap-2">
+          <div className="flex-1">
+            <small>
+              {form.choreo.event}
+            </small>
+            <p className="truncate">
+              {form.choreo.name}
+            </p>
+            {
+              form.choreo.lastUpdated && 
+              <small>
+                {getDate(new Date(form.choreo.lastUpdated))}
+              </small>
+            }
+          </div>
+          <Button onClick={() => setSelectChoreoDialogOpen(true)}><span className="text-nowrap">再選択</span></Button>
+          <IconButton
+            onClick={() => {setForm(prev => ({...prev, choreo: undefined}))}}
+            size="sm" noBorder colour="primary" src={ICON.delete}/>
+        </div>
+      }
       {
         form.choreo &&
         <div>
@@ -179,6 +224,18 @@ export function FileEditPage({
           </span>
         </Button>
       </div>
+
+      <Dialog.Root
+        open={selectChoreoDialogOpen}
+        onOpenChange={handleSelectChoreoDialogOpenChange}
+        handle={selectChoreoDialog}>
+        <SelectChoreoDialog
+          choreos={localChoreos}
+          onSubmit={() => {
+            setSelectChoreoDialogOpen(false);
+          }}
+        />
+      </Dialog.Root>
     </div>
   );
 }
