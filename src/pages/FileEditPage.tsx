@@ -11,6 +11,7 @@ import BaseEditDialog from "../components/dialogs/BaseEditDialog";
 import Icon from "../components/basic/Icon";
 import { ICON } from "../lib/consts/consts";
 import { getDate } from "../lib/helpers/dateHelper";
+import Divider from "../components/basic/Divider";
 
 interface FileEditForm {
   name: string,
@@ -103,6 +104,7 @@ export function FileEditPage({
         </div>
       </div>
       <span className="font-mono text-sm">ID: {choreo.id}</span>
+      <Divider/>
       <div className="flex justify-between">
         <span className="text-lg font-bold">メタデータ</span>
         {
