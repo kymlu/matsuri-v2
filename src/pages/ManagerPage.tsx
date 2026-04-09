@@ -17,6 +17,7 @@ import BaseEditDialog from "../components/dialogs/BaseEditDialog";
 import { Dialog } from "@base-ui/react";
 import IconButton from "../components/basic/IconButton";
 import EditNameDialog from "../components/dialogs/EditNameDialog";
+import { Tag } from "../components/Tag";
 
 export interface FileEdits {
   id: string,
@@ -321,35 +322,17 @@ function ChoreoItem ({
         <div className="flex flex-row items-center gap-2">
           {
             status === "none" &&
-            <div className="px-1 h-6 text-sm font-semibold flex items-center gap-0.5 border rounded-md text-primary border-primary text-nowrap">
-              {
-                choreo.version &&
-                <span>v{choreo.version}</span>
-              }
-            </div>
+            <Tag type="primary" text={`v${choreo.version}`}/>
           }
           {
             status === "edited" &&
-            <div className="px-1 h-6 text-sm font-semibold flex items-center gap-0.5 border rounded-md text-primary border-primary text-nowrap">
-              {
-                choreo.version &&
-                <span>v{choreo.version}</span>
-              }
-              <Icon size="xs" colour="primary" src={ICON.edit}/>
-            </div>
+            <Tag type="primary" text={`v${choreo.version}`} icon={ICON.edit}/>
           }
           {
             status === "versionUp" &&
-            <div className="px-1 h-6 text-sm font-semibold flex items-center gap-0.5 border rounded-md text-primary border-primary text-nowrap">
-              {
-                choreo.version &&
-                <span>v{choreo.version}→v{choreo.version + 1}</span>
-              }
-            </div>
+            <Tag type="primary" text={`v${choreo.version}→v${choreo.version + 1}`} icon={ICON.edit}/>
           }
-          <div className="px-1 h-6 text-sm font-semibold flex items-center gap-0.5 border rounded-md text-primary border-primary text-nowrap">
-            新
-          </div>
+          <Tag type="primary" text="新" icon={ICON.edit}/>
         </div>
       </div>
       {/* Meta row */}
