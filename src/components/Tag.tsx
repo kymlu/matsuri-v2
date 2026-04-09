@@ -10,7 +10,7 @@ type TagProps = {
 export function Tag ({
   icon, text, type
 }: TagProps) {
-  var tagClasses = classNames("px-1 py-0.5 text-sm font-semibold flex items-center gap-0.5 border rounded-md text-nowrap",
+  var tagClasses = classNames("w-min px-1 py-0.5 text-sm font-semibold flex items-center gap-0.5 border rounded-md text-nowrap",
     {
       "bg-primary text-white border-primary": type === "filled",
       "bg-white text-primary border-primary": type === "primary",
