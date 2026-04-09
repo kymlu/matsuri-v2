@@ -332,7 +332,7 @@ function ChoreoItem ({
             status === "versionUp" &&
             <Tag type="primary" text={`v${choreo.version}→v${choreo.version + 1}`} icon={ICON.edit}/>
           }
-          <Tag type="primary" text="新" icon={ICON.edit}/>
+          <Tag type="primary" text="新"/>
         </div>
       </div>
       {/* Meta row */}

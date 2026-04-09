@@ -78,12 +78,12 @@ export function FileEditPage({
   const hasEdits = form.choreo || !strEquals(form.name, choreo.name) || !strEquals(form.eventName, choreo.event) || form.isHidden !== (choreo.isHidden ?? false)
 
   const revert = () => {
-    setForm(prev => ({
-      ...prev,
+    setForm({
       name: choreo.name,
       eventName: choreo.event,
       isHidden: choreo.isHidden ?? false,
-    }));
+      choreo: undefined,
+    });
     nameRef.current.changeValue(choreo.name);
     eventRef.current.changeValue(choreo.event);
     isHiddenRef.current.changeChecked(choreo.isHidden === undefined ? true : !choreo.isHidden);
@@ -106,7 +106,7 @@ export function FileEditPage({
   }
   
   return (
-    <div className="flex flex-col h-[100svh] p-4 mx-auto space-y-2 bg-gray-100">
+    <div className="flex flex-col h-[100svh] p-4 mx-auto space-y-1.5 bg-gray-100">
       <h2 className="text-xl font-bold">
         {choreo.name}
       </h2>
@@ -122,22 +122,18 @@ export function FileEditPage({
       </div>
       <span className="font-mono text-sm">ID: {choreo.id}</span>
       <Divider/>
-      <div className="flex justify-between">
-        <span className="text-lg font-bold">メタデータ</span>
-        {
-          hasEdits &&
-          <Dialog.Root>
-            <Dialog.Trigger>
-              <Button compact asDiv>破棄</Button>
-            </Dialog.Trigger>
-            <BaseEditDialog noDetachedTrigger title="確認" actionButtonText="OK" onSubmit={revert}>
-              <p>変更を全て破棄しますか？</p>
-              <p>この操作は取り消せません。</p>
-            </BaseEditDialog>
-          </Dialog.Root>
-        }
+      <div className="flex justify-end">
+        <Dialog.Root>
+          <Dialog.Trigger disabled={!hasEdits}>
+            <Button compact asDiv disabled={!hasEdits}>破棄</Button>
+          </Dialog.Trigger>
+          <BaseEditDialog noDetachedTrigger title="確認" actionButtonText="OK" onSubmit={revert}>
+            <p>変更を全て破棄しますか？</p>
+            <p>この操作は取り消せません。</p>
+          </BaseEditDialog>
+        </Dialog.Root>
       </div>
-      <div className="space-y-4">
+      <div className="space-y-3">
         <TextInput
           defaultValue={form.name}
           onContentChange={newValue => handleChange("name", newValue)}
@@ -165,64 +161,68 @@ export function FileEditPage({
           onChange={checked => handleChange("isHidden", !checked)}
           ref={isHiddenRef}
         />
-      </div>
-
-      {
-        !form.choreo &&
-        <div className="flex-1 pt-4">
-          <Button onClick={() => versionUp()}>
-            バージョンアップ
-          </Button>
-        </div>
-      }
-      {
-        form.choreo &&
-        <div className="flex flex-row gap-2">
-          <div className="flex-1">
-            <small>
-              {form.choreo.event}
-            </small>
-            <p className="truncate">
-              {form.choreo.name}
-            </p>
-            {
-              form.choreo.lastUpdated && 
-              <small>
-                {getDate(new Date(form.choreo.lastUpdated))}
-              </small>
-            }
+        {
+          !form.choreo &&
+          <div className="flex-1 pt-4 justify-self-center">
+            <Button onClick={() => versionUp()}>
+              バージョンアップ
+            </Button>
           </div>
-          <Button onClick={() => setSelectChoreoDialogOpen(true)}><span className="text-nowrap">再選択</span></Button>
-          <IconButton
-            onClick={() => {setForm(prev => ({...prev, choreo: undefined}))}}
-            size="sm" noBorder colour="primary" src={ICON.delete}/>
-        </div>
-      }
-      {
-        form.choreo &&
-        <div>
-          このバージョンで、公開のバージョンが <b>v{choreo.version}</b> → <b>v{choreo.version + 1}</b> に変更される
-        </div>
-      }
-      <div className="flex justify-between gap-4 pb-8">
-        <Button
-          full
-          onClick={exitPage}
-        >
-          <span className="font-semibold">
-            キャンセル
-          </span>
+        }
+        {
+          form.choreo &&
+          <div className="grid grid-cols-[1fr,auto,auto] items-center w-full gap-2">
+            <div className="px-2 py-1 bg-white border rounded-lg border-primary">
+              <span className="text-sm font-semibold text-primary">
+                {form.choreo.event}
+              </span>
+              <p className="font-bold text-wrap">
+                {form.choreo.name}
+              </p>
+              {
+                form.choreo.lastUpdated && 
+                <div className="flex items-center text-sm">
+                  <Icon src={ICON.history} size="xs" colour="grey"/>
+                  {getDate(new Date(form.choreo.lastUpdated))}
+                </div>
+              }
+            </div>
+            <IconButton
+              onClick={() => setSelectChoreoDialogOpen(true)}
+              size="sm" noBorder colour="primary" src={ICON.replay}/>
+            <IconButton
+              onClick={() => {setForm(prev => ({...prev, choreo: undefined}))}}
+              size="sm" noBorder colour="primary" src={ICON.delete}/>
+          </div>
+        }
+      </div>
+      <div className="flex flex-col justify-end flex-1 gap-2 pb-8">
+        {
+          form.choreo &&
+          <div className="text-center">
+            公開のバージョンが <span className="underline"><b>v{choreo.version}</b> → <b>v{choreo.version + 1}</b></span> に変更される
+          </div>
+        }
+        <div className="flex justify-between gap-4">
+          <Button
+            full
+            onClick={exitPage}
+          >
+            <span className="font-semibold">
+              キャンセル
+            </span>
+            </Button>
+          <Button
+            primary
+            full
+            onClick={handleSubmit}
+            disabled={isNullOrUndefinedOrBlank(form.name) || isNullOrUndefinedOrBlank(form.eventName)}
+          >
+            <span className="font-semibold">
+              保存
+            </span>
           </Button>
-        <Button
-          primary
-          full
-          onClick={handleSubmit}
-          disabled={isNullOrUndefinedOrBlank(form.name) || isNullOrUndefinedOrBlank(form.eventName)}
-        >
-          <span className="font-semibold">
-            保存
-          </span>
-        </Button>
+        </div>
       </div>
 
       <Dialog.Root

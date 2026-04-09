@@ -103,6 +103,7 @@ export const ICON = {
   podiatry: "podiatry",
   redo: "redo",
   remove: "remove",
+  replay: "replay",
   resize: "resize",
   restorePage: "restore_page",
   save: "save",
