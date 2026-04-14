@@ -152,7 +152,7 @@ export default function HomePage({
   }
 
   const filteredChoreos = useMemo(() => 
-    groupChoreos(savedChoreos.filter(c => c.name.toLowerCase().includes(searchTerm) || c.event.toLowerCase().includes(searchTerm)))
+    groupChoreos(savedChoreos.filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase()) || c.event.toLowerCase().includes(searchTerm.toLowerCase())))
   , [savedChoreos, searchTerm]);
   
   const [editingChoreo, setEditingChoreo] = useState<Choreo | undefined>();

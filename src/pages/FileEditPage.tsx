@@ -148,7 +148,7 @@ export function FileEditPage({
           showLength
         />
         <CustomAutocomplete
-          defaultValue={form.eventName}
+          defaultValue={choreo.event}
           options={eventList}
           onContentChange={newValue => handleChange("eventName", newValue)}
           placeholder="イベント名を入力してください"

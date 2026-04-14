@@ -89,7 +89,7 @@ export function ManagerPage({
   , [allChoreos, editsList]);
 
   const filteredChoreos = useMemo(() => 
-    groupChoreos(choreosWithEdits.filter(c => c.name.toLowerCase().includes(searchTerm) || c.event.toLowerCase().includes(searchTerm)))
+    groupChoreos(choreosWithEdits.filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase()) || c.event.toLowerCase().includes(searchTerm.toLowerCase())))
   , [searchTerm, choreosWithEdits]);
 
   const allEvents = useMemo(() => 
