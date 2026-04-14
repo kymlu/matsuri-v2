@@ -4,6 +4,7 @@ import { getDate } from "../../lib/helpers/dateHelper";
 import { Choreo } from "../../models/choreo";
 import { Tag } from "../common/Tag";
 import BaseEditDialog from "./BaseEditDialog";
+import { isNullOrUndefinedOrBlank, strEquals } from "../../lib/helpers/globalHelper";
 
 type SelectChoreoDialogProps = {
   choreos: Choreo[],
@@ -14,30 +15,33 @@ type SelectChoreoDialogProps = {
 export function SelectChoreoDialog({
   choreos, onSubmit, currentChoreoId
 }: SelectChoreoDialogProps){
-  const [selectedChoreoId, setSelectedChoreoId] = useState(currentChoreoId ?? choreos[0]);
-  // todo:
-  // - select a choreo
-  // - on submit
+  const [selectedChoreoId, setSelectedChoreoId] = useState(currentChoreoId ?? choreos[0].id);
   return <BaseEditDialog
     title="選択"
-    onSubmit={() => onSubmit(choreos[0])}>
-    <div className="max-h-[70svh] space-y-2 overflow-scroll">
+    full
+    onClose={() => setSelectedChoreoId(currentChoreoId ?? choreos[0].id)}
+    onSubmit={() => onSubmit(choreos.find(c => strEquals(c.id, selectedChoreoId))!!)}>
+    <div className="space-y-2 overflow-scroll">
       {
         choreos.map((c) => (
-          <div key={c.id} className="p-2 bg-white border rounded-lg border-primary">
-            <p className="text-sm font-semibold text-primary">{c.event}</p>
+          <button
+            key={c.id}
+            className={"text-start w-full p-2 bg-white border rounded-lg " + (strEquals(c.id, selectedChoreoId) ? "bg-primary/15 " : "border-gray-400 ")}
+            onClick={() => setSelectedChoreoId(c.id)}
+            >
+            <div className="flex justify-between">
+              <p className="text-sm font-semibold text-primary">{isNullOrUndefinedOrBlank(c.event) ? "イベント不明" : c.event}</p>
+              {
+                c.version &&
+                <Tag compact text={`v${c.version}`} icon={ICON.edit} type="primary"/>
+              }
+            </div>
             <p className="font-bold">{c.name}</p>
             {
               c.lastUpdated &&
-              <div>
-                <p className="text-sm">{getDate(new Date(c.lastUpdated))}</p>
-                {
-                  c.version &&
-                  <Tag text={`v${c.version}`} icon={ICON.edit} type="primary"/>
-                }
-              </div>
+              <p className="text-sm">{getDate(new Date(c.lastUpdated))}</p>
             }
-          </div>
+          </button>
         ))
       }
     </div>

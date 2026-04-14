@@ -54,7 +54,7 @@ export default function Button({
     "lg:hover:bg-primary-light": primary && !disabled,
     "cursor-default opacity-50": disabled,
     "cursor-pointer": !disabled,
-    "h-full items-center flex justify-center": asDiv,
+    "items-center flex justify-center": asDiv,
     "text-primary border-primary": primaryText,
     "text-gray-600": greyText,
   });

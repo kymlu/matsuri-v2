@@ -27,7 +27,7 @@ export default function CustomSwitch({
 
   return (
     <div className={"grid gap-2 items-center my-2 mr-2 " + (disabled ? "opacity-50 " : "") + (label ? "grid-cols-[auto,1fr]" : "")}>
-      {label && <label>{label}</label>}
+      {label && <label className="font-medium">{label}</label>}
       <Switch.Root
         disabled={disabled}
         checked={checked}

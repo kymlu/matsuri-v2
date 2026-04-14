@@ -15,7 +15,7 @@ type IconButtonProps = {
 export default function IconButton ({
   src, label, onClick, noBorder, disabled, size, colour, asDiv
 }: IconButtonProps) {
-  var buttonClasses = classNames("flex justify-center items-center rounded-full", {
+  var buttonClasses = classNames("flex cursor-pointer justify-center items-center rounded-full", {
     "border-0": noBorder,
     "border-primary": noBorder !== true && colour === "primary",
     "border-black": noBorder !== true && (colour === undefined || colour === "black"),

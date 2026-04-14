@@ -126,7 +126,7 @@ export function ManagerPage({
     <div className="bg-gray-50">
       {
         selectedChoreo === undefined &&
-        <div className='py-10 px-6 h-[100svh] overflow-hide space-y-2 w-full mx-auto'>
+        <div className='grid py-10 px-6 h-[100svh] grid-rows-[auto,auto,auto,1fr] overflow-hidden space-y-2 w-full mx-auto'>
           <div className="flex items-center justify-between">
             <h1 className='text-2xl font-bold'>管理モード</h1>
             <Dialog.Root>
@@ -135,7 +135,10 @@ export function ManagerPage({
               </Dialog.Trigger>
               <BaseEditDialog title="確認" onSubmit={exit} actionButtonText="OK">
                 <p>本当にホームに戻りますか？</p>
-                <p>全ての変更が破棄されます。</p>
+                {
+                  Object.keys(editsList).length > 0 &&
+                  <p>全ての変更が破棄されます。</p>
+                }
               </BaseEditDialog>
             </Dialog.Root>
           </div>

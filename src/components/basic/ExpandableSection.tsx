@@ -27,7 +27,7 @@ export default function ExpandableSection({
         <h2 className='text-xl font-bold text-primary'>{title}</h2>
       </button>
       {
-        rightButton && <>{rightButton}</>
+        rightButton
       }
     </div>
     {

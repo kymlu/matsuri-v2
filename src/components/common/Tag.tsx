@@ -5,16 +5,19 @@ type TagProps = {
   type: "primary" | "filled" | "grey",
   text: string,
   icon?: string,
+  compact?: boolean,
 }
 
 export function Tag ({
-  icon, text, type
+  icon, text, type, compact
 }: TagProps) {
-  var tagClasses = classNames("w-min px-1 py-0.5 text-sm font-semibold flex items-center gap-0.5 border rounded-md text-nowrap",
+  var tagClasses = classNames("w-min font-semibold flex items-center gap-0.5 border rounded-md text-nowrap",
     {
       "bg-primary text-white border-primary": type === "filled",
-      "bg-white text-primary border-primary": type === "primary",
-      "bg-white text-gray-600 border-gray-600": type === "grey",
+      "bg-transparent text-primary border-primary": type === "primary",
+      "bg-transparent text-gray-600 border-gray-600": type === "grey",
+      "px-0.5 py-0 text-xs": compact === true,
+      "px-1 py-0.5 text-sm ": compact !== true,
     }
   )
   

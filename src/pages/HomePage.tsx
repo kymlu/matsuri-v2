@@ -245,7 +245,7 @@ export default function HomePage({
 
   return (
     <div className="bg-gray-50">
-      <div className='grid py-10 px-6 h-[100svh] grid-rows-[auto,auto,auto,1fr] overflow-hide gap-2 w-full mx-auto'>
+      <div className='grid py-10 px-6 h-[100svh] grid-rows-[auto,auto,auto,1fr] overflow-hidden gap-2 w-full mx-auto'>
         <div className="flex items-center justify-between">
           <h1 className='text-2xl font-bold'>隊列表一覧</h1>
           <div className="flex items-center ">

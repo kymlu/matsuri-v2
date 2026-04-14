@@ -15,6 +15,7 @@ import Divider from "../components/basic/Divider";
 import { SelectChoreoDialog } from "../components/dialogs/SelectChoreoDialog";
 import IconButton from "../components/basic/IconButton";
 import { Tag } from "../components/common/Tag";
+import Label from "../components/inputs/Label";
 
 interface FileEditForm {
   name: string,
@@ -107,33 +108,35 @@ export function FileEditPage({
   
   return (
     <div className="flex flex-col h-[100svh] p-4 mx-auto space-y-1.5 bg-gray-100">
-      <h2 className="text-xl font-bold">
-        {choreo.name}
-      </h2>
-      <div className="flex items-center gap-2 text-sm">
-        {choreo.lastUpdated ? (
-          <div className="flex items-center gap-1">
-            <Icon colour="grey" size="sm" src={ICON.history}/>{getDate(new Date(choreo.lastUpdated))}
+      <div className="flex flex-col space-y-1.5">
+        <h2 className="text-xl font-bold">
+          {choreo.name}
+        </h2>
+        <div className="flex flex-row justify-between">
+          <div className="flex items-center gap-2 text-sm">
+            {choreo.lastUpdated ? (
+              <div className="flex items-center gap-1">
+                <Icon colour="grey" size="sm" src={ICON.history}/>{getDate(new Date(choreo.lastUpdated))}
+              </div>
+            ) : (
+              <div />
+            )}
+            <Tag text={`v${choreo.version}`} type="primary"/>
           </div>
-        ) : (
-          <div />
-        )}
-        <Tag text={`v${choreo.version}`} type="primary"/>
+          <Dialog.Root>
+            <Dialog.Trigger disabled={!hasEdits}>
+              <Button compact asDiv disabled={!hasEdits}>破棄</Button>
+            </Dialog.Trigger>
+            <BaseEditDialog noDetachedTrigger title="確認" actionButtonText="OK" onSubmit={revert}>
+              <p>変更を全て破棄しますか？</p>
+              <p>この操作は取り消せません。</p>
+            </BaseEditDialog>
+          </Dialog.Root>
+        </div>
+        <span className="font-mono text-sm">ID: {choreo.id}</span>
       </div>
-      <span className="font-mono text-sm">ID: {choreo.id}</span>
       <Divider/>
-      <div className="flex justify-end">
-        <Dialog.Root>
-          <Dialog.Trigger disabled={!hasEdits}>
-            <Button compact asDiv disabled={!hasEdits}>破棄</Button>
-          </Dialog.Trigger>
-          <BaseEditDialog noDetachedTrigger title="確認" actionButtonText="OK" onSubmit={revert}>
-            <p>変更を全て破棄しますか？</p>
-            <p>この操作は取り消せません。</p>
-          </BaseEditDialog>
-        </Dialog.Root>
-      </div>
-      <div className="space-y-3">
+      <div className="space-y-3 overflow-y-scroll">
         <TextInput
           defaultValue={form.name}
           onContentChange={newValue => handleChange("name", newValue)}
@@ -171,11 +174,21 @@ export function FileEditPage({
         }
         {
           form.choreo &&
+          <Label text="バージョンアップ"/>
+        }
+        {
+          form.choreo &&
           <div className="grid grid-cols-[1fr,auto,auto] items-center w-full gap-2">
             <div className="px-2 py-1 bg-white border rounded-lg border-primary">
-              <span className="text-sm font-semibold text-primary">
-                {form.choreo.event}
-              </span>
+              <div className="flex flex-row justify-between">
+                <span className="text-sm font-semibold text-primary">
+                  {isNullOrUndefinedOrBlank(form.choreo.event) ? "イベント不明" : form.choreo.event}
+                </span>
+                {
+                  form.choreo.version &&
+                  <Tag compact text={`v${form.choreo.version}`} icon={ICON.edit} type="primary"/>
+                }
+              </div>
               <p className="font-bold text-wrap">
                 {form.choreo.name}
               </p>
@@ -231,9 +244,11 @@ export function FileEditPage({
         handle={selectChoreoDialog}>
         <SelectChoreoDialog
           choreos={localChoreos}
-          onSubmit={() => {
+          onSubmit={(choreo) => {
+            form.choreo = choreo;
             setSelectChoreoDialogOpen(false);
           }}
+          currentChoreoId={form.choreo?.id}
         />
       </Dialog.Root>
     </div>
