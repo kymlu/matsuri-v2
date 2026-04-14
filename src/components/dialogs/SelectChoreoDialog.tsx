@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ICON } from "../../lib/consts/consts";
 import { getDate } from "../../lib/helpers/dateHelper";
 import { Choreo } from "../../models/choreo";
@@ -7,19 +7,26 @@ import BaseEditDialog from "./BaseEditDialog";
 import { isNullOrUndefinedOrBlank, strEquals } from "../../lib/helpers/globalHelper";
 
 type SelectChoreoDialogProps = {
+  title: "更新ファイルを選択" | "公開するファイルを選択",
   choreos: Choreo[],
   onSubmit: (choreo: Choreo) => void,
   currentChoreoId?: string,
+  selectDefault?: boolean
 }
 
 export function SelectChoreoDialog({
-  choreos, onSubmit, currentChoreoId
+  title, choreos, onSubmit, currentChoreoId, selectDefault
 }: SelectChoreoDialogProps){
-  const [selectedChoreoId, setSelectedChoreoId] = useState(currentChoreoId ?? choreos[0].id);
+  const [selectedChoreoId, setSelectedChoreoId] = useState(selectDefault ? (currentChoreoId ?? choreos[0]?.id ?? "") : "");
+
+  useEffect(() => {
+    setSelectedChoreoId(selectDefault ? (currentChoreoId ?? choreos[0]?.id ?? "") : "")
+  }, [currentChoreoId, selectDefault]);
+
   return <BaseEditDialog
-    title="選択"
+    title={title}
     full
-    onClose={() => setSelectedChoreoId(currentChoreoId ?? choreos[0].id)}
+    onClose={() => setSelectedChoreoId(selectDefault ? (currentChoreoId ?? choreos[0].id ?? "") : "")}
     onSubmit={() => onSubmit(choreos.find(c => strEquals(c.id, selectedChoreoId))!!)}>
     <div className="space-y-2 overflow-scroll">
       {

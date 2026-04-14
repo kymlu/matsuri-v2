@@ -165,7 +165,7 @@ export function FileEditPage({
           ref={isHiddenRef}
         />
         {
-          !form.choreo &&
+          choreo.version !== 0 && !form.choreo &&
           <div className="flex-1 pt-4 justify-self-center">
             <Button onClick={() => versionUp()}>
               バージョンアップ
@@ -243,12 +243,14 @@ export function FileEditPage({
         onOpenChange={handleSelectChoreoDialogOpenChange}
         handle={selectChoreoDialog}>
         <SelectChoreoDialog
+          title="更新ファイルを選択"
           choreos={localChoreos}
           onSubmit={(choreo) => {
             form.choreo = choreo;
             setSelectChoreoDialogOpen(false);
           }}
           currentChoreoId={form.choreo?.id}
+          selectDefault
         />
       </Dialog.Root>
     </div>

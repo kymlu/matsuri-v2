@@ -18,6 +18,7 @@ import { Dialog } from "@base-ui/react";
 import IconButton from "../components/basic/IconButton";
 import EditNameDialog from "../components/dialogs/EditNameDialog";
 import { Tag } from "../components/common/Tag";
+import { SelectChoreoDialog } from "../components/dialogs/SelectChoreoDialog";
 
 export interface FileEdits {
   id: string,
@@ -40,6 +41,7 @@ export function ManagerPage({
   const [selectedChoreo, setSelectedChoreo] = useState<ChoreoManifest | undefined>(); 
   const [editsList, setEditsList] = useState<Record<string, FileEdits>>({});
   const [localChoreos, setLocalChoreos] = useState<Choreo[]>([]);
+  const [newChoreoList, setNewChoreoList] = useState<Choreo[]>([]);
 
   useEffect(() => {
     getAllChoreos().then((choreos) => setLocalChoreos(choreos.sort((a, b) => -strCompare<Choreo>(a, b, "lastUpdated"))));
@@ -54,6 +56,14 @@ export function ManagerPage({
   }, []);
 
   const originalChoreos = useMemo(() => indexByKey(allChoreos, "id"), [allChoreos]);
+  const newChoreos = useMemo(() => indexByKey(newChoreoList.map(x => ({
+    id: x.id,
+    name: x.name,
+    event: x.event,
+    version: x.version,
+    lastUpdated: x.lastUpdated,
+    isHidden: x.isHidden,
+  } as ChoreoManifest)), "id"), [newChoreoList]);
   
   const groupChoreos = (choreos: ChoreoManifest[]) => {
     return mapByKey(
@@ -70,8 +80,16 @@ export function ManagerPage({
     )
   }
 
-  const choreosWithEdits = useMemo(() => 
-    allChoreos.map(x => {
+  const choreosWithEdits = useMemo(() => {
+    var newManifests = newChoreoList.map((c) => ({
+          id: c.id,
+          name: c.name,
+          event: c.event,
+          isHidden: c.isHidden,
+          lastUpdated: c.lastUpdated,
+          version: c.version,
+        } as ChoreoManifest));
+    var existingManifests = allChoreos.map(x => {
       const edit = editsList[x.id];
       if (edit) {
         return {
@@ -85,8 +103,9 @@ export function ManagerPage({
       } else {
         return x;
       }
-    })
-  , [allChoreos, editsList]);
+    });
+    return [...newManifests, ...existingManifests]
+  }, [allChoreos, editsList, newChoreoList]);
 
   const filteredChoreos = useMemo(() => 
     groupChoreos(choreosWithEdits.filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase()) || c.event.toLowerCase().includes(searchTerm.toLowerCase())))
@@ -122,6 +141,18 @@ export function ManagerPage({
     setEditsList(newEdits);
   }
 
+  const selectChoreoDialog = Dialog.createHandle<Choreo>();
+  const [selectChoreoDialogOpen, setSelectChoreoDialogOpen] = useState(false);
+
+  const handleSelectChoreoDialogOpenChange = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
+    setSelectChoreoDialogOpen(isOpen);
+  };
+
+  const selectableLocalChoreos = useMemo(() => {
+    var ids = new Set([...newChoreoList.map(x => x.id), ...allChoreos.map(x => x.id)]);
+    return localChoreos.filter(x => !ids.has(x.id));
+  }, [localChoreos, newChoreoList, allChoreos]);
+
   return (
     <div className="bg-gray-50">
       {
@@ -136,19 +167,34 @@ export function ManagerPage({
               <BaseEditDialog title="確認" onSubmit={exit} actionButtonText="OK">
                 <p>本当にホームに戻りますか？</p>
                 {
-                  Object.keys(editsList).length > 0 &&
+                  (Object.keys(editsList).length > 0 || newChoreoList.length > 0) &&
                   <p>全ての変更が破棄されます。</p>
                 }
               </BaseEditDialog>
             </Dialog.Root>
           </div>
           {
-            Object.keys(editsList).length > 0 &&
+            (Object.keys(editsList).length > 0 || newChoreoList.length > 0) &&
             <div className="flex items-center justify-between p-2 border-2 rounded-lg border-primary">
-              <div>You have changes.</div>
+              <div>
+                <b>未公開の変更あり：</b>
+                {
+                  Object.keys(editsList).length > 0 &&
+                  <span>編集{Object.keys(editsList).length}件</span>
+                }
+                {
+                  Object.keys(editsList).length > 0 &&
+                  newChoreoList.length > 0 &&
+                  <span>・</span>
+                }
+                {
+                  newChoreoList.length > 0 &&
+                  <span>新規：{newChoreoList.length}件</span>
+                }
+              </div>
               <Dialog.Root>
                 <Dialog.Trigger>
-                  <Button asDiv>確認</Button>
+                  <Button primary compact asDiv>確認</Button>
                 </Dialog.Trigger>
                 <BaseEditDialog title="確認" onSubmit={() => {/** TODO */}} actionButtonText="OK">
                   A summary of edits
@@ -160,9 +206,11 @@ export function ManagerPage({
             <IconLabelButton
               full
               primary
-              label="追加"
+              label="ファイルを公開"
               icon={ICON.add}
-              onClick={() => {}}
+              onClick={() => {
+                setSelectChoreoDialogOpen(true);
+              }}
               />
           </div>
           <TextInput
@@ -192,6 +240,7 @@ export function ManagerPage({
                   eventName={eventName}
                   choreos={choreos}
                   originalChoreos={originalChoreos}
+                  newChoreos={newChoreos}
                   edits={editsList}
                   searchTerm={searchTerm}
                   selectChoreo={setSelectedChoreo}
@@ -200,6 +249,30 @@ export function ManagerPage({
               )
             }
           </div>
+          <Dialog.Root
+            open={selectChoreoDialogOpen}
+            onOpenChange={handleSelectChoreoDialogOpenChange}
+            handle={selectChoreoDialog}>
+            <SelectChoreoDialog
+              title="公開するファイルを選択"
+              choreos={selectableLocalChoreos}
+              onSubmit={(choreo) => {
+                choreo.version = 0;
+                choreo.isDirty = undefined;
+                choreo.isHidden = false;
+                setNewChoreoList(prev => [...prev, choreo]);
+                setSelectedChoreo({
+                  id: choreo.id,
+                  name: choreo.name,
+                  event: choreo.event,
+                  version: choreo.version,
+                  isHidden: choreo.isHidden,
+                  lastUpdated: choreo.lastUpdated,
+                } as ChoreoManifest);
+                setSelectChoreoDialogOpen(false);
+              }}
+            />
+          </Dialog.Root>
         </div>
       }
       {
@@ -209,16 +282,30 @@ export function ManagerPage({
           edits={editsList[selectedChoreo.id]}
           eventList={allEvents}
           addEdits={(id, edits) => {
-            if (edits) {
-              setEditsList(prev => ({
-                ...prev,
-                [id]: edits
-              }))
+            var newChoreo = newChoreoList.find(c => strEquals(c.id, id));
+            if (newChoreo) {
+              setNewChoreoList(prev => {
+                var filtered = prev.filter(c => !strEquals(c.id, id));
+                var edited = {
+                  ...newChoreo,
+                  event: edits?.eventName ?? newChoreo?.event,
+                  name: edits?.name ?? newChoreo?.name,
+                  isHidden: edits?.isHidden ?? newChoreo?.isHidden,
+                } as Choreo;
+                return [...filtered, edited];
+              });
             } else {
-              setEditsList(prev => {
-                const { [id]: _, ...rest } = prev;
-                return rest;
-              })
+              if (edits) {
+                setEditsList(prev => ({
+                  ...prev,
+                  [id]: edits
+                }))
+              } else {
+                setEditsList(prev => {
+                  const { [id]: _, ...rest } = prev;
+                  return rest;
+                })
+              }
             }
           }}
           exitPage={() => setSelectedChoreo(undefined)}
@@ -232,7 +319,8 @@ export function ManagerPage({
 type EventSectionProps = {
   eventName: string,
   choreos: ChoreoManifest[],
-  originalChoreos: Record<string, ChoreoManifest>
+  originalChoreos: Record<string, ChoreoManifest>,
+  newChoreos: Record<string, ChoreoManifest>,
   edits: Record<string, FileEdits>
   searchTerm: string,
   selectChoreo: (choreo: ChoreoManifest) => void,
@@ -240,7 +328,7 @@ type EventSectionProps = {
 }
 
 function EventSection({
-  eventName, choreos, originalChoreos, edits, searchTerm, selectChoreo, editEventName
+  eventName, choreos, originalChoreos, newChoreos, edits, searchTerm, selectChoreo, editEventName
 }: EventSectionProps) {
   const editNameDialog = Dialog.createHandle<Choreo>();
   const [editNameDialogOpen, setEditNameDialogOpen] = React.useState(false);
@@ -284,7 +372,7 @@ function EventSection({
                 <ChoreoItem
                   choreo={choreo}
                   edits={edits[choreo.id]}
-                  selectChoreo={() => selectChoreo(originalChoreos[choreo.id])}/>
+                  selectChoreo={() => selectChoreo(originalChoreos[choreo.id] ?? newChoreos[choreo.id])}/>
               }
             </React.Fragment>
           )
@@ -303,7 +391,8 @@ type ChoreoItemProps = {
 function ChoreoItem ({
   choreo, edits, selectChoreo
 }: ChoreoItemProps) {
-  const status = edits?.choreo ? "versionUp" :
+  const status = choreo.version === 0 ? "new":
+    edits?.choreo ? "versionUp" :
     (edits?.eventName || edits?.name || edits?.isHidden !== undefined) ? "edited" :
     "none";
     
@@ -335,7 +424,10 @@ function ChoreoItem ({
             status === "versionUp" &&
             <Tag type="primary" text={`v${choreo.version}→v${choreo.version + 1}`} icon={ICON.edit}/>
           }
-          <Tag type="primary" text="新"/>
+          {
+            status === "new" &&
+            <Tag type="primary" text="新"/>
+          }
         </div>
       </div>
       {/* Meta row */}
