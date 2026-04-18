@@ -1,4 +1,4 @@
-name: Deploy on File Intake
+name: 隊列表更新
 
 on:
   push:
@@ -24,11 +24,11 @@ jobs:
           node-version: 'lts/*'
           cache: 'npm'
 
-      - name: Install dependencies
+      - name: 依存関係をインストール
         run: npm ci
 
-      - name: Manage files
+      - name: ファイル整理
         run: npm run manage
 
-      - name: Deploy site
+      - name: サイトをデプロイ
         run: npm run deploy
