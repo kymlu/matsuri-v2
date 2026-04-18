@@ -3,7 +3,7 @@ name: Deploy on File Intake
 on:
   push:
     branches:
-      - main
+      - master
     paths:
       - 'intake/**'
 
