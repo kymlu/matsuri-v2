@@ -35,3 +35,9 @@ jobs:
         run: npm run deploy
         env:
           CI: false
+          
+      - name: 変更をコミットしてプッシュ
+        run: |
+          git add public/data/ intake/
+          git commit -m "自動更新: intake処理" || echo "変更なし"
+          git push
