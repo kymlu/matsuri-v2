@@ -30,7 +30,7 @@ const dataFiles = fs.readdirSync(dataDir).filter(f => f.endsWith(".json") && f !
 for (const id of dataFiles) {
   const data = JSON.parse(fs.readFileSync(path.join(dataDir, `${id}.json`)));
   manifest.push({ id: data.id, name: data.name, event: data.event });
-  console.log(`Added file to manifest: ${id}`);
+  console.log(`Added existing file to manifest: id=${id} name=${data.name} event=${data.event}`);
 }
 
 // Process incoming files from intake folder
@@ -48,19 +48,17 @@ for (const filename of intakeFiles) {
     if (fs.existsSync(existingFilePath)) {
       const existing = JSON.parse(fs.readFileSync(existingFilePath, "utf-8"));
       fs.writeFileSync(existingFilePath, JSON.stringify({ ...incoming, version: existing.version + 1 }));
-      console.log(`Updated: ${incoming.id} (version ${existing.version + 1})`);
+      console.log(`Updated the following from ${existing.version} to ${existing.version + 1}: id=${incoming.id} name=${incoming.name} event=${incoming.event}`);
     } else {
       fs.writeFileSync(path.join(dataDir, `${incoming.id}.json`), JSON.stringify({ ...incoming, version: 1 }));
-      console.log(`Created: ${incoming.id}`);
+      console.log(`Added new file: id=${incoming.id} name=${incoming.name} event=${incoming.event}`);
     }
 
     if (existingInManifest) {
       existingInManifest.name = incoming.name;
       existingInManifest.event = incoming.event;
-      console.log(`Manifest updated: ${incoming.id}`);
     } else {
       manifest.push({ id: incoming.id, name: incoming.name, event: incoming.event });
-      console.log(`Manifest added: ${incoming.id}`);
     }
 
     fs.unlinkSync(path.join(intakeDir, filename));
