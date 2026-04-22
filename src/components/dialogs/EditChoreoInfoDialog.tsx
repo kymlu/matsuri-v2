@@ -26,8 +26,10 @@ export default function EditChoreoInfoDialog({
   return <BaseEditDialog
     title="隊列情報変更"
     onClose={onClose}
-    onSubmit={() => { onSubmit(name, event) }}
-    isActionButtonDisabled={isNullOrUndefinedOrBlank(name)}
+    onSubmit={() => {
+      onSubmit(name.trim(), event.trim())
+    }}
+    isActionButtonDisabled={isNullOrUndefinedOrBlank(name.trim())}
     >
     <div className="w-[100svw] max-w-full md:w-full">
       <TextInput

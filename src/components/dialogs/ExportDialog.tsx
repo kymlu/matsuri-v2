@@ -26,7 +26,7 @@ export default function ExportDialog({
   const [progress, setProgress] = useState<number>(0);
 
   const isExportNameValid = useMemo(() => {
-    return !isNullOrUndefinedOrBlank(exportName) && RegExp(/[<>:"/\\|?*\u0000-\u001F]|[. ]$/g).test(exportName);
+    return !isNullOrUndefinedOrBlank(exportName.trim()) && RegExp(/[<>:"/\\|?*]|[. ]$/g).test(exportName.trim());
   }, [exportName]);
 
   const dancerList = useMemo(() => {
@@ -77,6 +77,7 @@ export default function ExportDialog({
           <div className="flex items-center gap-2">
             <TextInput
               label="ファイル名"
+              required
               rightLabel=".pdf"
               maxLength={100}
               hasError={isExportNameValid}

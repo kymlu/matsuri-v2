@@ -31,11 +31,11 @@ export function PropManagerDialog({
   useEffect(() => {
     if (propList.length === 0) return;
     
-    const names = propList.map(x => x.name);
+    const names = propList.map(x => x.name.trim());
     const nameSet = new Set(names);
     
     setPropNames(Array.from(nameSet).reduce((acc, item) => {
-      acc[item] = propList.filter(x => strEquals(x.name, item)).length;
+      acc[item] = propList.filter(x => strEquals(x.name.trim(), item)).length;
       return acc;}
     , {} as Record<string, number>));
   }, [propList]);
@@ -53,7 +53,10 @@ export function PropManagerDialog({
         setPropList([...Object.values(props)].sort((a, b) => {
           return strCompare<Prop>(a, b, "name");
         }));}}
-      onSubmit={() => {onSubmit(propList, deletedPropIds)}}>
+      onSubmit={() => {
+        var trimmedProps: Prop[] = propList.map(x => ({...x, name: x.name.trim()}))
+        onSubmit(trimmedProps, deletedPropIds);
+      }}>
       <div className="max-h-full grid grid-rows-[1fr,auto]">
         <div className="justify-center max-h-full overflow-scroll grid grid-cols-[1fr,auto] gap-2">
           {
@@ -90,7 +93,7 @@ export function PropManagerDialog({
                       label="道具名"
                       required
                       defaultValue={prop.name}
-                      hasError={propNames[prop.name] > 1}
+                      hasError={propNames[prop.name.trim()] > 1}
                       onContentChange={(newName) => {
                         setPropList(prev => {
                           prev[i].name = newName;
