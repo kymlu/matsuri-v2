@@ -5,7 +5,7 @@ import { Choreo, StageGeometry } from "../../models/choreo";
 import FormationLayer from "./layers/FormationLayer";
 import { ChoreoSection } from "../../models/choreoSection";
 import { DancerPosition } from "../../models/dancer";
-import { pxToStageMeters, snapCoordsToGrid } from "../../lib/helpers/editorCalculationHelper";
+import { pxToStageMeters, snapCoordsToGrid, stageMetersToPx } from "../../lib/helpers/editorCalculationHelper";
 import { DEFAULT_PROP_LENGTH, MAX_ZOOM, METER_PX, MIN_ZOOM } from "../../lib/consts/consts";
 import { AppSetting } from "../../models/appSettings";
 import Konva from "konva";
@@ -13,6 +13,7 @@ import { PropPosition } from "../../models/prop";
 import { StageEntities } from "../../models/history";
 import GhostLayer from "./layers/GhostLayer";
 import NextDirectionLayer from "./layers/NextDirectionLayer";
+import { Coordinates } from "../../models/base";
 
 Konva.hitOnDragEnabled = true;
 
@@ -98,7 +99,28 @@ export default function MainStage({
     return () => observer.disconnect();
   }, []);
 
-  const [stagePos, setStagePos] = useState<any>({ x: 0, y: 0 });
+  const [stagePos, setStagePos] = useState<Coordinates>({ x: 0, y: 0 });
+  const stageRef = useRef<Konva.Stage>(null);
+
+  useEffect(() => {
+    if (stageGeometry && stageGeometry.yAxis === "bottom-up") {
+      var frontmostY = Math.max(
+        ...Object.values(currentSection.formation.dancerPositions).map(x => x.y),
+        ...Object.values(currentSection.formation.propPositions).map(x => x.y)
+      );
+      var newPosition = {x: stagePos.x, y: -stageMetersToPx({x: 0, y: frontmostY + 2}, stageGeometry, METER_PX).y};
+      if (newPosition.y !== stagePos.y) {
+        stageRef?.current?.to({
+          x: newPosition.x,
+          y: newPosition.y,
+          duration: 1,
+          easing: Konva.Easings.EaseInOut,
+          onFinish: () => {setStagePos(newPosition)}
+        });
+      }
+    }
+  }, [stageRef, currentSection, stageGeometry]);
+
   const [stageScale, setStageScale] = useState<any>({ x: 1, y: 1 });
   const [lastCenter, setLastCenter] = useState<any>(null);
   const [lastDist, setLastDist] = useState(0);
@@ -235,6 +257,7 @@ export default function MainStage({
     {
       stageGeometry && 
       <Stage
+        ref={stageRef}
         onPointerDown={(e) => {
           setClickedOnEmpty(e.target === e.target.getStage());
         }}
