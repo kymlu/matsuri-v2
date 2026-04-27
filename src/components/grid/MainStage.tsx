@@ -14,6 +14,7 @@ import { StageEntities } from "../../models/history";
 import GhostLayer from "./layers/GhostLayer";
 import NextDirectionLayer from "./layers/NextDirectionLayer";
 import { Coordinates } from "../../models/base";
+import { strEquals } from "../../lib/helpers/globalHelper";
 
 Konva.hitOnDragEnabled = true;
 
@@ -101,9 +102,11 @@ export default function MainStage({
 
   const [stagePos, setStagePos] = useState<Coordinates>({ x: 0, y: 0 });
   const stageRef = useRef<Konva.Stage>(null);
+  const [stagePosSectionId, setStagePosSectionId] = useState<string>("");
 
   useEffect(() => {
-    if (stageGeometry && stageGeometry.yAxis === "bottom-up") {
+    if (stageGeometry && stageGeometry.yAxis === "bottom-up" && !strEquals(stagePosSectionId, currentSection.id)) {
+      setStagePosSectionId(currentSection.id);
       var frontmostY = Math.max(
         ...Object.values(currentSection.formation.dancerPositions).map(x => x.y),
         ...Object.values(currentSection.formation.propPositions).map(x => x.y)
