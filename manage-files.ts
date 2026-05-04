@@ -45,7 +45,7 @@ for (const id of dataFiles) {
     lastUpdated: data.lastUpdated,
     isHidden: data.isHidden,
   });
-  console.log(`Added file to manifest: ${id}`);
+  console.log(`Added existing file to manifest: id=${id} name=${data.name} event=${data.event}`);
 }
 
 // Process incoming files from intake folder
@@ -65,10 +65,10 @@ for (const filename of intakeFiles) {
       const existing = JSON.parse(fs.readFileSync(existingFilePath, "utf-8"));
       version = existing.version + 1;
       fs.writeFileSync(existingFilePath, JSON.stringify({ ...incoming, version: version }));
-      console.log(`Updated: ${incoming.id} (version ${version})`);
+      console.log(`Updated the following from ${existing.version} to ${version}: id=${incoming.id} name=${incoming.name} event=${incoming.event}`);
     } else {
       fs.writeFileSync(path.join(dataDir, `${incoming.id}.json`), JSON.stringify({ ...incoming, version: version }));
-      console.log(`Created: ${incoming.id}`);
+      console.log(`Added new file: id=${incoming.id} name=${incoming.name} event=${incoming.event}`);
     }
 
     if (existingInManifest) {

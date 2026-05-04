@@ -22,6 +22,7 @@ export function ActionManagerDialog({
   section, onSubmit
 }: ActionManagerDialogProps) {
   const [actions, setActions] = useState<DancerAction[]>([]);
+  const [actionNames, setActionNames] = useState<Record<string, number>>({});
   const [errorMessage, setErrorMessage] = useState<string | null>();
 
   useEffect(() => {
@@ -71,10 +72,21 @@ export function ActionManagerDialog({
     );
   };
 
+  useEffect(() => {
+    if (actions.length === 0) return;
+    
+    const names = actions.map(x => x.name.trim());
+    const nameSet = new Set(names);
+    setActionNames(Array.from(nameSet).reduce((acc, item) => {
+      acc[item] = actions.filter(x => strEquals(x.name.trim(), item)).length;
+      return acc;}
+    , {} as Record<string, number>));
+  }, [actions]);
+
   const canSubmit = useMemo(() => {
     if (actions.length === 0) return true;
     
-    const names = actions.map(x => x.name);
+    const names = actions.map(x => x.name.trim());
     const nameSet = new Set(names);
     if (names.length !== nameSet.size) {
       setErrorMessage("重複のアクション名がある。");
@@ -85,7 +97,7 @@ export function ActionManagerDialog({
     }
 
     for (const action of actions) {
-      const timingNames = action.timings.map(x => x.name);
+      const timingNames = action.timings.map(x => x.name.trim());
       const timingNameSet = new Set(timingNames);
       if (timingNames.length !== timingNameSet.size){
         setErrorMessage("重複のタイミング名がある。");
@@ -138,6 +150,7 @@ export function ActionManagerDialog({
                   <SortableActionSection
                     key={action.id}
                     action={action}
+                    actionNames={actionNames}
                     onRenameAction={(name) => {
                       var newActions = [...actions];
                       newActions[i].name = name;
@@ -166,6 +179,7 @@ export function ActionManagerDialog({
 
 type SortableActionSectionProps = {
   action: DancerAction,
+  actionNames: Record<string, number>,
   onRenameAction: (name: string) => void,
   onDeleteAction: () => void,
   onAddTiming: () => void,
@@ -174,7 +188,8 @@ type SortableActionSectionProps = {
 }
 
 function SortableActionSection ({
-  action, onRenameAction, onDeleteAction, onAddTiming, onRenameTiming, onDeleteTiming
+  action, actionNames, 
+  onRenameAction, onDeleteAction, onAddTiming, onRenameTiming, onDeleteTiming
 }: SortableActionSectionProps) {
   const {
     attributes,
@@ -189,12 +204,31 @@ function SortableActionSection ({
     transition,
   };
 
+  const [timingNames, setTimingNames] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    if (action.timings.length === 0) return;
+    
+    const names = action.timings.map(x => x.name.trim());
+    const nameSet = new Set(names);
+    setTimingNames(Array.from(nameSet).reduce((acc, item) => {
+      acc[item] = action.timings.filter(x => strEquals(x.name.trim(), item)).length;
+      return acc;}
+    , {} as Record<string, number>));
+  }, [action]);
+
   return <div className="relative flex flex-row items-start gap-2 p-4 bg-white border border-gray-400 rounded-md" style={style} ref={setNodeRef}>
     <div {...attributes} {...listeners}>
       <Icon src={ICON.dragHandle}/>
     </div>
     <div className="flex-1">
-      <TextInput required maxLength={10} label="アクション名" defaultValue={action.name} onContentChange={(newName) => {onRenameAction(newName)}}/>
+      <TextInput
+        required
+        hasError={actionNames[action.name.trim()] > 1}
+        maxLength={10}
+        label="アクション名"
+        defaultValue={action.name}
+        onContentChange={(newName) => {onRenameAction(newName)}}/>
       <span className="font-semibold">カウント（重複不可）</span>
       <div className="flex flex-wrap gap-4">
         {
@@ -202,6 +236,7 @@ function SortableActionSection ({
             <TimingItem
               key={timing.id}
               timing={timing}
+              timingNames={timingNames}
               onRenameTiming={(name) => {
                 var newTimings = [...action.timings];
                 newTimings[i].name = name;
@@ -226,16 +261,23 @@ function SortableActionSection ({
 
 type TimingItemProps = {
   timing: DancerActionTiming,
+  timingNames: Record<string, number>,
   onRenameTiming: (name: string) => void,
   onDeleteTiming: () => void,
   showDeleteButton: boolean,
 }
 
 function TimingItem ({
-  timing, onRenameTiming, onDeleteTiming, showDeleteButton}: TimingItemProps
+  timing, timingNames, onRenameTiming, onDeleteTiming, showDeleteButton}: TimingItemProps
 ) {
   return <div className="flex items-center">
-    <TextInput required maxLength={5} compact short defaultValue={timing.name} onContentChange={(newName) => {onRenameTiming(newName)}}/>
+    <TextInput 
+      required
+      hasError={timingNames[timing.name.trim()] > 1}
+      maxLength={5}
+      compact short
+      defaultValue={timing.name}
+      onContentChange={(newName) => {onRenameTiming(newName)}}/>
     <Icon size="sm" src={ICON.group}/>
     <span>{timing.dancerIds.length}</span>
     {showDeleteButton && <IconButton colour="primary" size="sm" noBorder src={ICON.delete} onClick={() => {onDeleteTiming()}}/>}

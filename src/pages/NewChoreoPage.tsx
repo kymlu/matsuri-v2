@@ -77,8 +77,8 @@ export function NewChoreoPage({
     }
     var choreo: Choreo = {
       id: crypto.randomUUID(),
-      name: form.name,
-      event: form.eventName,
+      name: form.name.trim(),
+      event: form.eventName.trim(),
       stageType: form.stageType,
       stageGeometry: {
         stageLength: form.stageLength,
@@ -251,7 +251,7 @@ export function NewChoreoPage({
             primary
             full
             onClick={nextStep}
-            disabled={step === 1 && isNullOrUndefinedOrBlank(form.name)}
+            disabled={step === 1 && isNullOrUndefinedOrBlank(form.name.trim())}
           >
           <span className="font-semibold">
             次へ

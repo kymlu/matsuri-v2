@@ -34,14 +34,14 @@ export default function EditDancerNameDialog({
   }, [otherNames]);
 
   const hasDuplicate = useMemo(() => {
-    return nameCounts && nameCounts[newName] !== null && nameCounts[newName] > 0;
+    return nameCounts && nameCounts[newName.trim()] !== null && nameCounts[newName.trim()] > 0;
   }, [nameCounts, newName]);
 
   return <BaseEditDialog
     title={`ダンサー名`}
-    onSubmit={() => { onSubmit(newName) }}
+    onSubmit={() => { onSubmit(newName.trim()) }}
     onClose={() => onClose?.()}
-    isActionButtonDisabled={required && isNullOrUndefinedOrBlank(newName)}
+    isActionButtonDisabled={required && isNullOrUndefinedOrBlank(newName.trim())}
     >
     <CustomAutocomplete
       defaultValue={name ?? ""}

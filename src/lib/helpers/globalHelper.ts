@@ -86,7 +86,8 @@ export function testFilename(fileName: string) {
 }
 
 export function getSafeFileName(fileName: string) {
-  return fileName.replace(/[\\/:*?"<>|]/g, "_");
+  var safeName = fileName.replace(/[\\/:*?"<>|]/g, "_").trim();
+  return safeName;
 }
 
 export function getDefaultFileName(choreo: Choreo): string {

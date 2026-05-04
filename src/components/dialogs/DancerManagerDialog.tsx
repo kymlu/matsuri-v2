@@ -28,10 +28,10 @@ export function DancerManagerDialog({
   useEffect(() => {
     if (dancerList.length === 0) return;
     
-    const names = dancerList.map(x => x.name);
+    const names = dancerList.map(x => x.name.trim());
     const nameSet = new Set(names);
     setDancerNames(Array.from(nameSet).reduce((acc, item) => {
-      acc[item] = dancerList.filter(x => strEquals(x.name, item)).length;
+      acc[item] = dancerList.filter(x => strEquals(x.name.trim(), item)).length;
       return acc;}
     , {} as Record<string, number>));
   }, [dancerList]);
@@ -50,7 +50,10 @@ export function DancerManagerDialog({
           return strCompare<Dancer>(a, b, "name");
         }));
       }}
-      onSubmit={() => {onSubmit(dancerList, deletedDancerIds)}}>
+      onSubmit={() => {
+        var trimmedDancers: Dancer[] = dancerList.map(x => ({id: x.id, name: x.name.trim()} as Dancer));
+        onSubmit(trimmedDancers, deletedDancerIds);
+      }}>
       <div className="max-h-full grid grid-rows-[1fr,auto]">
         <div className="justify-center max-h-full space-y-2 overflow-scroll md:flex md:flex-wrap md:gap-4">
           {
@@ -60,7 +63,7 @@ export function DancerManagerDialog({
                   label="ダンサー名"
                   required
                   defaultValue={dancer.name}
-                  hasError={dancerNames[dancer.name] > 1}
+                  hasError={dancerNames[dancer.name.trim()] > 1}
                   onContentChange={(newName) => {
                     setDancerList(prev => {
                       prev[i].name = newName;

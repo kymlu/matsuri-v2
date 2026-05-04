@@ -28,20 +28,20 @@ export default function EditNameDialog({
         
     const nameSet = new Set(otherNames);
     return Array.from(nameSet).reduce((acc, item) => {
-      acc[item] = otherNames.filter(x => strEquals(x, item)).length - (strEquals(item, name) ? 1 : 0);
+      acc[item] = otherNames.filter(x => strEquals(x, item)).length - (strEquals(item, name?.trim()) ? 1 : 0);
       return acc;
     }, {} as Record<string, number>);
   }, [otherNames]);
 
   const hasDuplicate = useMemo(() => {
-    return nameCounts && nameCounts[newName] !== null && nameCounts[newName] > 0;
+    return nameCounts && nameCounts[newName.trim()] !== null && nameCounts[newName.trim()] > 0;
   }, [nameCounts, newName]);
 
   return <BaseEditDialog
     title={`${type}名`}
-    onSubmit={() => { onSubmit(newName) }}
+    onSubmit={() => { onSubmit(newName.trim()) }}
     onClose={() => onClose?.()}
-    isActionButtonDisabled={required && isNullOrUndefinedOrBlank(newName)}
+    isActionButtonDisabled={required && isNullOrUndefinedOrBlank(newName.trim())}
     >
     <TextInput
       required={required}

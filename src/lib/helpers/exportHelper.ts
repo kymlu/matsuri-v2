@@ -3,7 +3,7 @@ import { Choreo } from "../../models/choreo";
 import { colorPalette } from "../consts/colors";
 import { getDefaultFileName, getSafeFileName, isNullOrUndefined, isNullOrUndefinedOrBlank, roundToTenth, strEquals } from "./globalHelper";
 import { stageMetersToPx } from "./editorCalculationHelper";
-import { Coordinates } from "../../models/base";
+import { BaseModel, Coordinates } from "../../models/base";
 import JSZip from "jszip";
 import { Obstacle } from "../../models/prop";
 import { PDF_METER_PX, STRIPES_PER_METRE } from "../consts/consts";
@@ -11,6 +11,7 @@ import { PDF_METER_PX, STRIPES_PER_METRE } from "../consts/consts";
 const README_TEXT =
   "このZIPには本アプリ用のデータが含まれています。\n" +
   "ZIPファイル、または中の .mtr ファイルを本アプリで読み込んでください。\n\n" +
+  "複数 .mtr ファイルが存在する場合、manifest.txtでどのファイルがどの隊列表がわかります。" +
   "一部のアプリでは .mtr ファイルを送信できない場合があります。\n" +
   "その場合は、このZIPファイルをそのまま共有してください。";
 
@@ -54,7 +55,7 @@ export async function exportChoreo(choreo: Choreo) {
 
   const fileName = getDefaultFileName(choreo);  
   zip.file(
-    `${fileName}.mtr`,
+    `${choreo.id}.mtr`,
     JSON.stringify(choreo)
   );
   zip.file("README.txt", README_TEXT);
@@ -67,15 +68,18 @@ export async function exportEvent(
   eventName = "隊列表"
 ) {
   const zip = new JSZip();
+  var list: BaseModel[] = [];
 
   choreoList.forEach(choreo => {
     zip.file(
-      `${getSafeFileName(choreo.name)}.mtr`,
+      `${choreo.id}.mtr`,
       JSON.stringify(choreo)
     );
+    list.push({id: choreo.id, name: choreo.name});
   });
 
   zip.file("README.txt", README_TEXT);
+  zip.file("manifest.txt", JSON.stringify(list, undefined, 2));
 
   await downloadZip(zip, isNullOrUndefinedOrBlank(eventName) ? "隊列表" : eventName);
 }

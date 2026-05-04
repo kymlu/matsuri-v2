@@ -13,13 +13,13 @@ export default function UserNameEditDialog ({
   const [newName, setNewName] = useState("");
 
   useEffect(() => {
-    setNewName(name ?? "");
+    setNewName(name.trim() ?? "");
   }, [name]);
   
   return <BaseEditDialog
     title="あなたの名前"
     onClose={() => setNewName(name ?? "")}
-    onSubmit={() => onSubmit(newName)}
+    onSubmit={() => onSubmit(newName.trim())}
     noDetachedTrigger
     >
     <p className="max-w-full w-max">名前を入力すると、隊列内に同じ名前があれば自動で選択されます。</p>
