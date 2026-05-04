@@ -111,7 +111,7 @@ export default function MainStage({
         ...Object.values(currentSection.formation.dancerPositions).map(x => x.y),
         ...Object.values(currentSection.formation.propPositions).map(x => x.y)
       );
-      var newPosition = {x: stagePos.x, y: -stageMetersToPx({x: 0, y: frontmostY + 2}, stageGeometry, METER_PX).y};
+      var newPosition = {x: stagePos.x, y: -stageMetersToPx({x: 0, y: frontmostY + 2}, stageGeometry, METER_PX).y * stageScale.y};
       if (newPosition.y !== stagePos.y) {
         stageRef?.current?.to({
           x: newPosition.x,
