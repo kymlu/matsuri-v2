@@ -121,7 +121,14 @@ export function FileEditPage({
             ) : (
               <div />
             )}
-            <Tag text={`v${choreo.version}`} type="primary"/>
+            {
+              choreo.version > 0 &&
+              <Tag text={`v${choreo.version}`} type="primary"/>
+            }
+            {
+              choreo.version === 0 &&
+              <Tag text="新" type="primary"/>
+            }
           </div>
           <Dialog.Root>
             <Dialog.Trigger disabled={!hasEdits}>

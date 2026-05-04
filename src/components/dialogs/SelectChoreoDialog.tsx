@@ -26,6 +26,7 @@ export function SelectChoreoDialog({
   return <BaseEditDialog
     title={title}
     full
+    actionButtonText="選択"
     onClose={() => setSelectedChoreoId(selectDefault ? (currentChoreoId ?? choreos[0].id ?? "") : "")}
     onSubmit={() => onSubmit(choreos.find(c => strEquals(c.id, selectedChoreoId))!!)}>
     <div className="space-y-2 overflow-scroll">
@@ -33,7 +34,7 @@ export function SelectChoreoDialog({
         choreos.map((c) => (
           <button
             key={c.id}
-            className={"text-start w-full p-2 bg-white border rounded-lg " + (strEquals(c.id, selectedChoreoId) ? "bg-primary/15 " : "border-gray-400 ")}
+            className={"text-start w-full p-2 border rounded-lg " + (strEquals(c.id, selectedChoreoId) ? "bg-primary/15 " : "bg-white border-gray-400 ")}
             onClick={() => setSelectedChoreoId(c.id)}
             >
             <div className="flex justify-between">

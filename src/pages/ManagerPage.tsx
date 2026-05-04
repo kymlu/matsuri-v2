@@ -189,7 +189,7 @@ export function ManagerPage({
                 }
                 {
                   newChoreoList.length > 0 &&
-                  <span>新規：{newChoreoList.length}件</span>
+                  <span>新規{newChoreoList.length}件</span>
                 }
               </div>
               <Dialog.Root>
