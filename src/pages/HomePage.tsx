@@ -31,6 +31,7 @@ import EditChoreoInfoDialog from "../components/dialogs/EditChoreoInfoDialog"
 import SyncChoreoDialog from "../components/dialogs/SyncChoreoDialog"
 import ExpandableSection from "../components/basic/ExpandableSection"
 import AbsentDancersWarningDialog from "../components/dialogs/AbsentDancersWarningDialog"
+import BeginnersDialog from "../components/dialogs/BeginnersDialog"
 
 type HomePageProps = {
   buildInfo?: string,
@@ -342,6 +343,15 @@ export default function HomePage({
             )
           }
         </div>
+
+        <Dialog.Root>
+          <Dialog.Trigger>
+            <div className="fixed flex items-center p-1.5 bg-white border-2 rounded-full bottom-12 right-8 size-10 border-primary">
+              <img className="" src={`${process.env.PUBLIC_URL}/img/beginner.svg`}/>
+            </div>
+          </Dialog.Trigger>
+          <BeginnersDialog/>
+        </Dialog.Root>
 
         <input
           className='hidden'
