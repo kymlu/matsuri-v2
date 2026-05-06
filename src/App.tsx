@@ -4,15 +4,16 @@ import HomePage from './pages/HomePage';
 import { NewChoreoPage } from './pages/NewChoreoPage';
 import ChoreoEditPage from './pages/ChoreoEditPage';
 import ChoreoViewPage from './pages/ChoreoViewPage';
-import { Choreo } from './models/choreo';
+import { Choreo, EventDetails } from './models/choreo';
 import { getUserName, setUserName } from './lib/dataAccess/LocalStorageController';
 
 type Mode = "home" | "form" | "edit" | "view";
 
 function App() {
   const [mode, setMode] = useState<Mode>("home");
-  const [selectedEvent, setSelectedEventName] = useState<string | undefined>();
-  const [eventList, setEventList] = useState<string[]>([]);
+  // TODO: fix
+  const [selectedEvent, setSelectedEvent] = useState<[string | undefined, string | undefined]>();
+  const [eventList, setEventList] = useState<EventDetails[]>([]);
   const [dancerNamesByEvent, setDancerNamesByEvent] = useState<Record<string, Record<string, string[]>>>({});
   const [currentChoreo, setCurrentChoreo] = useState<Choreo | undefined>();
   const [name, setName] = useState<string | null>(null);
@@ -48,8 +49,8 @@ function App() {
           setEventList={(eventList) => {
             setEventList(eventList);
           }}
-          goToNewChoreoPage={(event) => {
-            setSelectedEventName(event);
+          goToNewChoreoPage={(event, date) => {
+            setSelectedEvent([event, date]);
             setMode("form");
           }}
           goToViewPage={(choreo: Choreo) => {
@@ -70,7 +71,8 @@ function App() {
             setMode("edit");
           }}
           eventList={eventList}
-          eventName={selectedEvent}
+          eventName={selectedEvent?.[0]}
+          startDate={selectedEvent?.[1]}
         />
       )}
       {mode === "edit" && (

@@ -12,13 +12,14 @@ export type DateInputProps = {
   short?: boolean,
   centered?: boolean,
   required?: boolean,
+  disabled?: boolean,
   hasError?: boolean,
   ref?: React.Ref<any>,
   label?: string,
 }
 
 export default function DateInput({
-  name, defaultValue, onDateChange, compact, tall, short, centered, required, hasError, ref, label
+  name, defaultValue, onDateChange, compact, tall, short, centered, required, disabled, hasError, ref, label
 }: DateInputProps) {
   const [value, setValue] = React.useState<string | undefined>(defaultValue ?? undefined);
 
@@ -34,12 +35,13 @@ export default function DateInput({
   }
 
   var inputClasses = classNames(
-    "w-full col-start-1 row-start-1 px-2 text-black border border-gray-400 rounded-md focus-within:border-primary focus:outline-none",
+    "w-full col-start-1 row-start-1 px-2 py-3 text-black border border-gray-400 rounded-md focus-within:border-primary focus:outline-none",
     {
       "h-10": tall,
       "h-6": short,
       "text-center": centered,
-      "border-primary bg-primary-lighter text-primary-darker": required && isNullOrUndefinedOrBlank(value) || hasError,
+      "bg-gray-200": disabled,
+      "border-primary bg-primary/20 text-primary-darker": (required && isNullOrUndefinedOrBlank(value)) || hasError,
     },)
 
   var wrapperClasses = classNames(
@@ -52,6 +54,7 @@ export default function DateInput({
     <FieldWithLabel label={label}>
       <div className={wrapperClasses}>
         <input
+          disabled={disabled}
           type="date"
           name={name}
           value={value}

@@ -8,6 +8,7 @@ import { downloadLogs } from "../../lib/helpers/logHelper";
 import CustomMenu from "../inputs/CustomMenu";
 import { IconLabelButton } from "../basic/Button";
 import Divider from "../basic/Divider";
+import { formatDateRange } from "../../lib/helpers/dateHelper";
 
 type HeaderProps = {
   returnHome: () => void;
@@ -130,6 +131,7 @@ export default function Header({
           <Sidebar
             choreoName={currentChoreo.name}
             choreoEvent={currentChoreo.event}
+            choreoDates={formatDateRange(currentChoreo.startDate, currentChoreo.endDate)}
             editName={editName}
             editSize={editSize}
             showManageDancers={showManageDancers}
@@ -143,7 +145,6 @@ export default function Header({
             appSettings={appSettings}
             changeShowPrevious={changeShowPrevious}
           />
-          {/* todo: add functions to the sidebar */}
         </Dialog.Root>
       }
     </div>

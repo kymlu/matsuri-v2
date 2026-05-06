@@ -82,6 +82,7 @@ export const ICON = {
   height: "height",
   help: "help",
   history: "history",
+  historyOff: "history_off",
   home: "home",
   horizontalDistribute: "horizontal_distribute",
   horizontalRule: "horizontal_rule",

@@ -4,11 +4,11 @@ import FormationSelectionToolbar from "../components/editor/FormationSelectionTo
 import UndoRedoToolbar from "../components/editor/UndoRedoToolbar";
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { historyReducer } from "../lib/editor/historyReducer";
-import { Choreo } from "../models/choreo";
+import { Choreo, EventDetails } from "../models/choreo";
 import { EditHistory, StageEntities } from "../models/history";
 import { addSection, assignDancersToTiming, duplicateSection, editDancerActions, editSectionNote, removeSection, renameSection, reorderSections } from "../lib/editor/commands/sectionCommands";
 import { ChoreoSection } from "../models/choreoSection";
-import { debounce, indexByKey, isNullOrUndefinedOrBlank, strEquals } from "../lib/helpers/globalHelper";
+import { debounce, indexByKey, isNullOrUndefinedOrBlank, strEquals, stringifyEvent } from "../lib/helpers/globalHelper";
 import MainStage from "../components/grid/MainStage";
 import { Dialog } from "@base-ui/react";
 import EditChoreoSizeDialog from "../components/dialogs/EditChoreoSizeDialog";
@@ -58,7 +58,7 @@ export default function ChoreoEditPage(props: {
   goToHomePage: () => void,
   currentChoreo: Choreo,
   goToViewPage: (newChoreo: Choreo) => void,
-  eventList: string[],
+  eventList: EventDetails[],
   dancerNamesByEvent: Record<string, Record<string, string[]>>,
 }) {
   const [currentSection, setCurrentSection] = useState<ChoreoSection>(props.currentChoreo.sections[0]);
@@ -423,12 +423,12 @@ export default function ChoreoEditPage(props: {
   }, [movementUpdateGroup]);
 
   const missingNames = useMemo(() => {
-    const pool = new Set(Object.entries(props.dancerNamesByEvent[history.presentState.state.event] ?? {})
+    const pool = new Set(Object.entries(props.dancerNamesByEvent[stringifyEvent(history.presentState.state)] ?? {})
       .filter(([id]) => id !== history.presentState.state.id)
       .flatMap(([, names]) => names));
     const currentNames = new Set(Object.values(history.presentState.state.dancers).map(x => x.name));
     return Array.from(new Set(pool).difference(currentNames)).sort();
-  }, [props.dancerNamesByEvent, history.presentState.state.dancers, history.presentState.state.event]);
+  }, [props.dancerNamesByEvent, history.presentState.state.dancers, history.presentState.state.event, history.presentState.state.startDate, history.presentState.state.endDate]);
 
   return (
     <div className='flex flex-col justify-between w-screen h-[100svh] max-h-[100svh]'>
@@ -800,10 +800,10 @@ export default function ChoreoEditPage(props: {
         <EditChoreoInfoDialog
           choreo={history.presentState.state}
           eventList={props.eventList}
-          onSubmit={(name, event) => {
+          onSubmit={(name, event, startDate, endDate) => {
             dispatch({
               type: "SET_STATE",
-              newState: renameChoreo(history.presentState.state, name, event),
+              newState: renameChoreo(history.presentState.state, name, event, startDate, endDate),
               currentSectionId: currentSection.id,
               commit: true});
             editChoreoInfoDialog.close();

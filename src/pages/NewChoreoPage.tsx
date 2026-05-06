@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import NumberInput from "../components/inputs/NumberInput";
 import TextInput from "../components/inputs/TextInput";
 import { isNullOrUndefinedOrBlank, testInvalidCharacters } from "../lib/helpers/globalHelper";
-import { Choreo, StageType } from "../models/choreo";
+import { Choreo, EventDetails, StageType } from "../models/choreo";
 import { Dancer, DancerPosition } from "../models/dancer";
 import { colorPalette } from "../lib/consts/colors";
 import { LONG_NAME_LENGTH, MAX_STAGE_DIMENSION, MAX_STAGE_MARGIN, MIN_STAGE_DIMENSION, MIN_STAGE_MARGIN } from "../lib/consts/consts";
@@ -10,10 +10,15 @@ import { saveChoreo } from "../lib/dataAccess/DataController";
 import GridPreview from "../components/grid/GridPreview";
 import Button from "../components/basic/Button";
 import CustomAutocomplete from "../components/inputs/CustomAutocomplete";
+import DateInput from "../components/inputs/DateInput";
+import { Autocomplete } from "@base-ui/react";
+import { formatDateRange } from "../lib/helpers/dateHelper";
 
 interface FormationForm {
   name: string;
   eventName: string;
+  startDate: string;
+  endDate: string;
   stageType: StageType;
   stageWidth: number;
   stageLength: number;
@@ -25,17 +30,21 @@ interface FormationForm {
 type NewChoreoPageProps = {
   goToHomePage: () => void,
   goToEditPage: (choreo: Choreo) => void,
-  eventList: string[],
+  eventList: EventDetails[],
   eventName?: string,
+  startDate?: string,
+  endDate?: string,
 }
 
 export function NewChoreoPage({
-  goToEditPage, goToHomePage, eventList, eventName
+  goToEditPage, goToHomePage, eventList, eventName, startDate, endDate
 }: NewChoreoPageProps) {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState<FormationForm>({
     name: "",
     eventName: "",
+    startDate: "",
+    endDate: "",
     stageType: "stage",
     stageWidth: 10,
     stageLength: 10,
@@ -44,9 +53,24 @@ export function NewChoreoPage({
     yMargin: 2,
   });
 
+  const hasDateError = (!isNullOrUndefinedOrBlank(form.startDate) &&
+    !isNullOrUndefinedOrBlank(form.endDate) &&
+    new Date(form.startDate) > new Date(form.endDate)) || 
+    (
+      isNullOrUndefinedOrBlank(form.startDate) &&
+      !isNullOrUndefinedOrBlank(form.endDate)
+    );
+
+  const eventNames = useMemo(() => eventList.map(item => JSON.stringify(item)), [eventList]);
+  const startDateRef = useRef<any>(null);
+  const endDateRef = useRef<any>(null);
+
+  // todo: fix to incorporate dates
   useEffect(() => {
     setForm(prev => ({...prev, eventName: eventName ?? ""}));
   }, [eventName]);
+
+  const hasEventName = !isNullOrUndefinedOrBlank(form.eventName.trim());
 
   const nextStep = () => setStep(s => Math.min(s + 1, 3));
   const prevStep = () => setStep(s => Math.max(s - 1, 1));
@@ -79,6 +103,8 @@ export function NewChoreoPage({
       id: crypto.randomUUID(),
       name: form.name.trim(),
       event: form.eventName.trim(),
+      startDate: hasEventName ? form.startDate : undefined,
+      endDate: hasEventName ? form.endDate : undefined,
       stageType: form.stageType,
       stageGeometry: {
         stageLength: form.stageLength,
@@ -140,16 +166,52 @@ export function NewChoreoPage({
             <div>
               <CustomAutocomplete
                 defaultValue={eventName}
-                options={eventList}
+                options={eventNames} // TODO: sort by desc event dates
                 onContentChange={newValue => handleChange("eventName", newValue)}
                 placeholder="イベント名を入力してください"
                 label="イベント（任意）"
                 clearable
                 // restrictFn={(s) => !testInvalidCharacters(s)} // todo: after pushing the official goen change to restrict
                 showLength
+                itemToStringValueFunc={(item) => {
+                  try {
+                    const eventDetails = JSON.parse(item) as EventDetails;
+                    return eventDetails.event ?? "";
+                  } catch {
+                    return item;
+                  }
+                }}
+                listItemFormat={(item) => <EventListItem
+                  item={item}
+                  setStartAndEndDate={(start, end) => {
+                    setForm(prev => ({...prev, startDate: start, endDate: end}));
+                    startDateRef?.current?.changeValue(start);
+                    endDateRef?.current?.changeValue(end);
+                  }}
+                  />}
                 maxLength={LONG_NAME_LENGTH}
               />
             </div>
+            {
+              <div className={"flex gap-2 " + (hasEventName ? "" : "opacity-0 select-none pointer-events-none")}>
+                <DateInput
+                  label="開始日"
+                  ref={startDateRef}
+                  onDateChange={newValue => handleChange("startDate", newValue)}
+                  defaultValue={startDate ?? undefined}
+                  hasError={hasDateError}
+                  disabled={!hasEventName}
+                />
+                <DateInput
+                  label="最終日（任意）"
+                  ref={endDateRef}
+                  onDateChange={newValue => handleChange("endDate", newValue)}
+                  defaultValue={endDate ?? undefined}
+                  hasError={hasDateError}
+                  disabled={!hasEventName}
+                />
+              </div>
+            }
           </div>
         )}
 
@@ -253,7 +315,7 @@ export function NewChoreoPage({
             primary
             full
             onClick={nextStep}
-            disabled={step === 1 && isNullOrUndefinedOrBlank(form.name.trim())}
+            disabled={step === 1 &&(isNullOrUndefinedOrBlank(form.name.trim()) || hasDateError)}
           >
           <span className="font-semibold">
             次へ
@@ -274,4 +336,32 @@ export function NewChoreoPage({
       </div>
     </div>
   );
+}
+
+type EventListItemProps = {
+  item: string,
+  setStartAndEndDate: (startDate: string, endDate: string) => void,
+}
+
+export function EventListItem ({
+  item, setStartAndEndDate
+}: EventListItemProps) {
+  const eventDetails = useMemo(() => {
+    return JSON.parse(item) as EventDetails
+  }, [item]);
+  
+  return <Autocomplete.Item
+    value={item}
+    onClick={() => {
+      setStartAndEndDate(eventDetails.startDate ?? "", eventDetails.endDate ?? "")
+    }}
+    className="flex cursor-default items-center gap-2 py-2 pr-8 pl-4 text-base leading-4 outline-none select-none data-[highlighted]:relative data-[highlighted]:z-0 data-[highlighted]:text-gray-50 data-[highlighted]:before:absolute data-[highlighted]:before:inset-x-2 data-[highlighted]:before:inset-y-0 data-[highlighted]:before:z-[-1] data-[highlighted]:before:rounded-md data-[highlighted]:before:bg-primary data-[highlighted]:before:text-white">
+    <span>{eventDetails.event}</span>
+    {
+      (eventDetails.startDate || eventDetails.endDate) &&
+      <span className="text-xs font-bold">
+        {formatDateRange(eventDetails.startDate, eventDetails.endDate)}
+      </span>
+    }
+  </Autocomplete.Item>
 }

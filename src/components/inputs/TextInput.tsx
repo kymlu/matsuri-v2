@@ -51,7 +51,7 @@ export default function TextInput({
   }
 
   var inputClasses = classNames(
-    "col-start-1 border row-start-1 text-black p-3 border-gray-400 rounded-md focus-within:border-primary focus:outline-none",
+    "col-start-1 border row-start-1 text-black py-3 border-gray-400 rounded-md focus-within:border-primary focus:outline-none",
     {
       "pr-6": clearable,
       "pr-2": !clearable,
@@ -63,7 +63,7 @@ export default function TextInput({
       "bg-gray-200": disabled,
       "w-full": !compact,
       "min-w-32": compact,
-      "border-primary bg-primary bg-opacity-20 placeholder:text-primary": (required && isNullOrUndefinedOrBlank(value?.trim())) || hasError,
+      "border-primary bg-primary/20 placeholder:text-primary": (required && isNullOrUndefinedOrBlank(value?.trim())) || hasError,
     },);
 
   var wrapperClasses = classNames(

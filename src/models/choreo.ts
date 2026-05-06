@@ -28,6 +28,8 @@ export type StageGeometry = z.infer<typeof StageGeometrySchema>;
 
 export const ChoreoSchema = BaseModelSchema.extend({
   event: z.string(),
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
   stageType: StageTypeSchema,
   stageGeometry: StageGeometrySchema,
   sections: z.array(ChoreoSectionSchema),
@@ -39,3 +41,11 @@ export const ChoreoSchema = BaseModelSchema.extend({
   isDirty: z.boolean().optional(),
 });
 export type Choreo = z.infer<typeof ChoreoSchema>;
+
+export const EventDetailsSchema = z.object({
+  event: z.string().optional(),
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
+})
+
+export type EventDetails = z.infer<typeof EventDetailsSchema>;

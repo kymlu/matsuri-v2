@@ -11,6 +11,8 @@ export type CustomAutocompleteProps = {
   name?: string,
   defaultValue?: string,
   options: string[],
+  itemToStringValueFunc?: (item: string) => string,
+  listItemFormat?: (item: string) => React.ReactNode,
   onContentChange: (newContent: string) => void,
   placeholder?: string,
   search?: boolean,
@@ -31,7 +33,7 @@ export type CustomAutocompleteProps = {
 }
 
 export default function CustomAutocomplete({
-  name, options, defaultValue, onContentChange, placeholder,
+  name, options, listItemFormat, itemToStringValueFunc, defaultValue, onContentChange, placeholder,
   search, clearable, compact, tall, short, centered,
   required, hasError, disabled, ref, maxLength,
   showLength, label, rightLabel, restrictFn
@@ -84,6 +86,7 @@ export default function CustomAutocomplete({
             onValueChange={(newValue: string) => handleChange(newValue)}
             filter={(item: string, query: string) => {return item.toLowerCase().includes(query.toLowerCase())}}
             highlightItemOnHover
+            itemToStringValue={itemToStringValueFunc}
           >
             <Autocomplete.Input
               disabled={disabled}
@@ -98,7 +101,10 @@ export default function CustomAutocomplete({
                 <Autocomplete.Popup className="rounded-md border-primary border overflow-y-auto scroll-py-[0.5rem] py-2 overscroll-contain max-h-[min(23rem,var(--available-height))] data-[empty]:hidden w-[var(--anchor-width)] max-w-[var(--available-width)] bg-[canvas] shadow-lg shadow-gray-200 outline-1 outline-gray-200 dark:shadow-none dark:-outline-offset-1 dark:outline-gray-300">
                   <Autocomplete.List>
                     {(item: string) => (
-                      <AutocompleteItem key={item} item={item}/>
+                      <React.Fragment key={item}>
+                        {!listItemFormat && <AutocompleteItem item={item}/>}
+                        {listItemFormat && listItemFormat(item) }
+                      </React.Fragment>
                     )}
                   </Autocomplete.List>
                 </Autocomplete.Popup>
