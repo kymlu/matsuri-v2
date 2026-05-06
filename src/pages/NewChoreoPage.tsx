@@ -5,7 +5,7 @@ import { isNullOrUndefinedOrBlank, testInvalidCharacters } from "../lib/helpers/
 import { Choreo, StageType } from "../models/choreo";
 import { Dancer, DancerPosition } from "../models/dancer";
 import { colorPalette } from "../lib/consts/colors";
-import { MAX_STAGE_DIMENSION, MAX_STAGE_MARGIN, MIN_STAGE_DIMENSION, MIN_STAGE_MARGIN } from "../lib/consts/consts";
+import { LONG_NAME_LENGTH, MAX_STAGE_DIMENSION, MAX_STAGE_MARGIN, MIN_STAGE_DIMENSION, MIN_STAGE_MARGIN } from "../lib/consts/consts";
 import { saveChoreo } from "../lib/dataAccess/DataController";
 import GridPreview from "../components/grid/GridPreview";
 import Button from "../components/basic/Button";
@@ -134,6 +134,7 @@ export function NewChoreoPage({
                 label="隊列名前"
                 restrictFn={(s) => !testInvalidCharacters(s)}
                 showLength
+                maxLength={LONG_NAME_LENGTH}
               />
             </div>
             <div>
@@ -146,6 +147,7 @@ export function NewChoreoPage({
                 clearable
                 // restrictFn={(s) => !testInvalidCharacters(s)} // todo: after pushing the official goen change to restrict
                 showLength
+                maxLength={LONG_NAME_LENGTH}
               />
             </div>
           </div>

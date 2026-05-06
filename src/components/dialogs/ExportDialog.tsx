@@ -8,6 +8,7 @@ import CustomDialog from "../basic/CustomDialog"
 import { Choreo } from "../../models/choreo"
 import { exportToPdf } from "../../lib/helpers/exportHelper"
 import CustomSwitch from "../inputs/CustomSwitch"
+import { EXPORT_NAME_LENGTH } from "../../lib/consts/consts"
 
 type ExportDialogProps = {
   choreo: Choreo,
@@ -79,7 +80,7 @@ export default function ExportDialog({
               label="ファイル名"
               required
               rightLabel=".pdf"
-              maxLength={100}
+              maxLength={EXPORT_NAME_LENGTH}
               hasError={isExportNameValid}
               defaultValue={defaultName}
               restrictFn={(s) => !testInvalidCharacters(s)}

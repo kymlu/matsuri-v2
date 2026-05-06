@@ -1,6 +1,6 @@
 import React, { useImperativeHandle } from "react";
 import classNames from "classnames";
-import { ICON } from "../../lib/consts/consts";
+import { DEFAULT_NAME_LENGTH, ICON } from "../../lib/consts/consts";
 import { isNullOrUndefinedOrBlank } from "../../lib/helpers/globalHelper";
 import { FieldWithLabel } from "./Label";
 import IconButton from "../basic/IconButton";
@@ -80,7 +80,7 @@ export default function TextInput({
             disabled={disabled}
             type="text"
             name={name}
-            maxLength={maxLength ?? 20}
+            maxLength={maxLength ?? DEFAULT_NAME_LENGTH}
             placeholder={placeholder ?? ""}
             value={value ?? ""}
             onInput={(event) => handleChange(event.currentTarget.value)}

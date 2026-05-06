@@ -4,6 +4,7 @@ import { isNullOrUndefinedOrBlank, testInvalidCharacters } from "../../lib/helpe
 import BaseEditDialog from "./BaseEditDialog";
 import { Choreo } from "../../models/choreo";
 import CustomAutocomplete from "../inputs/CustomAutocomplete";
+import { LONG_NAME_LENGTH } from "../../lib/consts/consts";
 
 type EditChoreoInfoDialogProps = {
   choreo?: Choreo,
@@ -39,6 +40,7 @@ export default function EditChoreoInfoDialog({
         onContentChange={ (newName) => { setName(newName) }}
         restrictFn={(s) => !testInvalidCharacters(s)}
         showLength
+        maxLength={LONG_NAME_LENGTH}
         />
 
       <CustomAutocomplete
@@ -50,6 +52,7 @@ export default function EditChoreoInfoDialog({
         clearable
         showLength
         // restrictFn={(s) => !testInvalidCharacters(s)} // todo: after pushing the official goen change to restrict
+        maxLength={LONG_NAME_LENGTH}
       />
     </div>
   </BaseEditDialog>

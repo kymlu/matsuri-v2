@@ -4,7 +4,7 @@ import BaseEditDialog from "./BaseEditDialog";
 import { strCompare, strEquals } from "../../lib/helpers/globalHelper";
 import TextInput from "../inputs/TextInput";
 import IconButton from "../basic/IconButton";
-import { ICON } from "../../lib/consts/consts";
+import { ICON, SHORT_NAME_LENGTH } from "../../lib/consts/consts";
 
 type DancerManagerDialogProps = {
   dancers: Record<string, Dancer>,
@@ -70,7 +70,7 @@ export function DancerManagerDialog({
                       return [...prev];
                     });
                   }}
-                  maxLength={15}
+                  maxLength={SHORT_NAME_LENGTH}
                 />
                 <div className="px-2 pt-4">
                   <IconButton

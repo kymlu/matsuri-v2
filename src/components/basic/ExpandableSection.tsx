@@ -10,8 +10,8 @@ type ExpandableSectionProps = {
 }
 
 export default function ExpandableSection({
-    title, children, menuContents
-  }: ExpandableSectionProps) {
+  title, children, menuContents
+}: ExpandableSectionProps) {
   const [isExpanded, setIsExpanded] = useState<boolean>(true);
   
   return <div className="space-y-2">

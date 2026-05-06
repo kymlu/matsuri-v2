@@ -1,6 +1,6 @@
 import { Dialog, Menu } from "@base-ui/react"
 import CustomDialog from "../components/basic/CustomDialog"
-import { ICON } from "../lib/consts/consts"
+import { ICON, LONG_NAME_LENGTH, SEARCH_NAME_LENGTH } from "../lib/consts/consts"
 import { IconLabelButton } from "../components/basic/Button"
 import Icon from "../components/basic/Icon"
 import { readUploadedFile } from "../lib/helpers/uploadHelper"
@@ -219,7 +219,7 @@ export default function HomePage({
     const newChoreo = {
       ...choreo,
       id: crypto.randomUUID(),
-      name: `${choreo.name}のコピー`,
+      name: `${choreo.name}のコピー`.slice(0, LONG_NAME_LENGTH),
       lastUpdated: new Date().toISOString(),
     } as Choreo;
     saveChoreo(newChoreo, () => {

@@ -18,6 +18,14 @@ export const MAX_ZOOM = 4;
 
 export const STRIPES_PER_METRE = 10;
 
+export const DEFAULT_NAME_LENGTH = 20;
+export const LONG_NAME_LENGTH = 30;
+export const SHORT_NAME_LENGTH = 15;
+export const ACTION_NAME_LENGTH = 10;
+export const COUNT_NAME_LENGTH = 5;
+export const EXPORT_NAME_LENGTH = 100;
+export const SEARCH_NAME_LENGTH = 100;
+
 export enum CUSTOM_EVENT {
 }
 

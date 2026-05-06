@@ -30,7 +30,7 @@ export default function BeginnersDialog() {
           <Button primary={step === "dialog"} onClick={() => setStep("dialog")}>エクスポート</Button>
           <Button primary={step === "pdf"} onClick={() => setStep("pdf")}>PDF</Button>
         </div>
-        <img src={`${process.env.PUBLIC_URL}/img/${step}.png`}/>
+        <img alt={step} src={`${process.env.PUBLIC_URL}/img/${step}.png`}/>
       </div>
   </CustomDialog>
 }
