@@ -654,7 +654,7 @@ export default function HomePage({
               const newChoreo = {
                 ...uploadedChoreo!,
                 id: crypto.randomUUID(),
-                name: `${uploadedChoreo!.name} - コピー`,
+                name: `${uploadedChoreo!.name}のコピー`,
                 isDirty: false,
               } as Choreo;
               saveChoreo(newChoreo, () => {goToViewPage(newChoreo)});
