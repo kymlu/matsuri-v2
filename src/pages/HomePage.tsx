@@ -373,7 +373,14 @@ export default function HomePage({
           {
             showPast && !isLoading &&
             <>
-              <Divider/>
+              <div className="sticky top-0 z-10 bg-gray-50">
+                <div className="w-full py-1.5">
+                  <Divider/>
+                </div>
+                <div className="absolute top-0 flex justify-center w-full">
+                  <span className="p-2 font-medium text-gray-600 bg-gray-50">開催済み</span>
+                </div>
+              </div>
               {
                 Array.from(filteredPastChoreos).map(([eventName, choreos]) =>
                   <EventSection
@@ -421,7 +428,7 @@ export default function HomePage({
 
         <Dialog.Root>
           <Dialog.Trigger>
-            <div className="fixed flex items-center p-1.5 bg-white border-2 rounded-full bottom-12 right-8 size-10 border-primary">
+            <div className="z-20 fixed flex items-center p-1.5 bg-white border-2 rounded-full bottom-12 right-8 size-10 border-primary">
               <img className="" src={`${process.env.PUBLIC_URL}/img/beginner.svg`}/>
             </div>
           </Dialog.Trigger>
@@ -756,7 +763,7 @@ function EventSection({
                     goToViewPage(c);
                   }
                 }}
-                className={"flex flex-col justify-between h-full p-2 transition-colors border border-gray-400 rounded-md cursor-pointer" + (grey ? " bg-gray-200" : " bg-white")}>
+                className={"flex flex-col justify-between h-full p-2 transition-colors border border-gray-400 rounded-md cursor-pointer" + (grey ? " bg-gray-100" : " bg-white")}>
                 {/* Title */}
                 <div className="relative flex flex-row items-start justify-between gap-2">
                   <span className="text-lg font-medium text-left break-words text-wrap">
