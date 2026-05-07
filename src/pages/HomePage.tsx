@@ -21,7 +21,6 @@ import BaseErrorDialog from "../components/dialogs/BaseErrorDialog"
 import ExportDialog from "../components/dialogs/ExportDialog"
 import React from "react"
 import Divider from "../components/basic/Divider"
-import EditNameDialog from "../components/dialogs/EditNameDialog"
 import TextInput from "../components/inputs/TextInput"
 import { loadAllChoreos } from "../lib/dataAccess/FileAccess"
 import UserNameEditDialog from "../components/dialogs/UserNameEditDialog"
@@ -32,6 +31,7 @@ import SyncChoreoDialog from "../components/dialogs/SyncChoreoDialog"
 import ExpandableSection from "../components/basic/ExpandableSection"
 import AbsentDancersWarningDialog from "../components/dialogs/AbsentDancersWarningDialog"
 import BeginnersDialog from "../components/dialogs/BeginnersDialog"
+import EditEventInfoDialog from "../components/dialogs/EditEventInfoDialog"
 
 type HomePageProps = {
   buildInfo?: string,
@@ -147,23 +147,41 @@ export default function HomePage({
 
   const groupChoreos = (choreos: ChoreoWithStatus[], isDescDate: boolean) => {
     return choreos.sort((a, b) => {
-      const aHasDate = !isNullOrUndefinedOrBlank(a.startDate) || !isNullOrUndefinedOrBlank(a.endDate);
-      const bHasDate = !isNullOrUndefinedOrBlank(b.startDate) || !isNullOrUndefinedOrBlank(b.endDate);
+      const aHasStart = !isNullOrUndefinedOrBlank(a.startDate);
+      const bHasStart = !isNullOrUndefinedOrBlank(b.startDate);
+      const aHasEnd = !isNullOrUndefinedOrBlank(a.endDate);
+      const bHasEnd = !isNullOrUndefinedOrBlank(b.endDate);
+      const aHasAny = aHasStart || aHasEnd;
+      const bHasAny = bHasStart || bHasEnd;
 
-      if (aHasDate !== bHasDate) return aHasDate ? -1 : 1;
+      // No dates at all go last
+      if (aHasAny !== bHasAny) return aHasAny ? -1 : 1;
 
-      if (aHasDate && bHasDate) {
-        const dateA = isNullOrUndefinedOrBlank(a.endDate) ? (isNullOrUndefinedOrBlank(a.startDate) ? null : new Date(a.startDate!!)) : new Date(a.endDate!!);
-        const dateB = isNullOrUndefinedOrBlank(b.endDate) ? (isNullOrUndefinedOrBlank(b.startDate) ? null : new Date(b.startDate!!)) : new Date(b.endDate!!);
-        const dateCmp = (dateA?.getTime() ?? 0) - (dateB?.getTime() ?? 0);
-        if (dateCmp !== 0) return isDescDate ? -dateCmp : dateCmp;
+      if (aHasAny && bHasAny) {
+        // No start date goes before those with a start date
+        if (aHasStart !== bHasStart) return aHasStart ? 1 : -1;
+
+        // Both have start dates, compare them
+        if (aHasStart && bHasStart) {
+          const startCmp = new Date(a.startDate!).getTime() - new Date(b.startDate!).getTime();
+          if (startCmp !== 0) return isDescDate ? -startCmp : startCmp;
+        }
+
+        // No end date goes before those with an end date
+        if (aHasEnd !== bHasEnd) return aHasEnd ? 1 : -1;
+
+        // Both have end dates, compare them
+        if (aHasEnd && bHasEnd) {
+          const endCmp = new Date(a.endDate!).getTime() - new Date(b.endDate!).getTime();
+          if (endCmp !== 0) return isDescDate ? -endCmp : endCmp;
+        }
       }
 
       const eventCmp = strCompare<ChoreoWithStatus>(a, b, "event");
       if (eventCmp !== 0) return eventCmp;
 
-      const dateA = a.lastUpdated ? new Date(a.lastUpdated)?.getTime() : 0;
-      const dateB = b.lastUpdated ? new Date(b.lastUpdated)?.getTime() : 0;
+      const dateA = a.lastUpdated ? new Date(a.lastUpdated).getTime() : 0;
+      const dateB = b.lastUpdated ? new Date(b.lastUpdated).getTime() : 0;
       if (dateA !== dateB) return dateB - dateA;
 
       return strCompare<ChoreoWithStatus>(a, b, "name");
@@ -526,14 +544,19 @@ export default function HomePage({
           onOpenChange={handleEventNameDialogOpen}>
             
             {/* {todo: have new edit event dialog with the dates included. currently broken} */}
-          <EditNameDialog
-            name={(JSON.parse(editingEventName ?? "{}") as EventDetails).event}
-            required={false}
-            type="イベント"
+          <EditEventInfoDialog
+            eventInfo={JSON.parse(editingEventName ?? "{}") as EventDetails}
+            eventList={eventList}
             onClose={() => {setEditingEventName(undefined)}}
-            onSubmit={(name) => {
+            onSubmit={(name, startDate, endDate) => {
               saveChoreos(
-                savedChoreos.filter(c => strEquals(c.event, editingEventName ?? "")).map(c => {return {...c, event: name}}),
+                savedChoreos.filter(c => strEquals(stringifyEvent(c), editingEventName ?? ""))
+                  .map(c => {return {
+                    ...c,
+                    event: name,
+                    startDate: startDate,
+                    endDate: endDate
+                  }}),
                 () => {
                   setEventNameDialogOpen(false);
                   loadChoreos();
@@ -750,7 +773,7 @@ function EventSection({
         </Menu.Item>
         <Divider compact/>
         <Menu.Item>
-          <IconLabelButton full noBorder icon={ICON.edit} label="名前変更" onClick={editEventName}/>
+          <IconLabelButton full noBorder icon={ICON.edit} label="情報変更" onClick={editEventName}/>
         </Menu.Item>
         <Divider compact/>
         <Menu.Item>

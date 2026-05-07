@@ -355,11 +355,12 @@ export function EventListItem ({
     onClick={() => {
       setStartAndEndDate(eventDetails.event ?? "", eventDetails.startDate ?? "", eventDetails.endDate ?? "")
     }}
-    className="flex cursor-default items-center gap-2 py-2 pr-8 pl-4 text-base leading-4 outline-none select-none data-[highlighted]:relative data-[highlighted]:z-0 data-[highlighted]:text-gray-50 data-[highlighted]:before:absolute data-[highlighted]:before:inset-x-2 data-[highlighted]:before:inset-y-0 data-[highlighted]:before:z-[-1] data-[highlighted]:before:rounded-md data-[highlighted]:before:bg-primary data-[highlighted]:before:text-white">
-    <span>{eventDetails.event}</span>
+    className="cursor-default items-center py-2 pr-8 pl-4 text-base leading-4 outline-none select-none data-[highlighted]:relative data-[highlighted]:z-0 data-[highlighted]:text-gray-50 data-[highlighted]:before:absolute data-[highlighted]:before:inset-x-2 data-[highlighted]:before:inset-y-0 data-[highlighted]:before:z-[-1] data-[highlighted]:before:rounded-md data-[highlighted]:before:bg-primary data-[highlighted]:before:text-white">
+    <span className="font-medium">{eventDetails.event}</span>
+    <br/>
     {
       (eventDetails.startDate || eventDetails.endDate) &&
-      <span className="text-xs font-bold">
+      <span className="text-xs opacity-85">
         {formatDateRange(eventDetails.startDate, eventDetails.endDate)}
       </span>
     }
