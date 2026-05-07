@@ -92,7 +92,7 @@ export function getSafeFileName(fileName: string) {
 
 export function getDefaultFileName(choreo: Choreo): string {
   return getSafeFileName(isNullOrUndefinedOrBlank(choreo.event) ?
-    choreo.name : `${choreo.event} - ${choreo.name}`);
+    choreo.name : `${choreo.name} - ${choreo.event}`);
 }
 
 export function testInvalidCharacters(text: string) {
