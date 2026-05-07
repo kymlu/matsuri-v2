@@ -32,6 +32,7 @@ import SyncChoreoDialog from "../components/dialogs/SyncChoreoDialog"
 import ExpandableSection from "../components/basic/ExpandableSection"
 import AbsentDancersWarningDialog from "../components/dialogs/AbsentDancersWarningDialog"
 import BeginnersDialog from "../components/dialogs/BeginnersDialog"
+import SiteInfoDialog from "../components/dialogs/SiteInfoDialog"
 
 type HomePageProps = {
   buildInfo?: string,
@@ -251,13 +252,7 @@ export default function HomePage({
               <Dialog.Trigger>
                 <IconButton src={ICON.info} colour="primary" noBorder asDiv/>
               </Dialog.Trigger>
-              <CustomDialog title="サイト情報" hasX>
-                <div className="flex flex-col justify-center gap-2 mb-2">
-                  <span className="mb-2 text-center">問題がある場合は、<br/><b>ケイティー</b>まで<br/>問い合わせてください</span>
-                  <IconLabelButton label="ログをダウンロード" icon={ICON.download} primary onClick={downloadLogs}/>
-                  <span className="text-center text-gray-600">{buildInfo}</span>
-                </div>
-              </CustomDialog>
+              <SiteInfoDialog buildInfo={buildInfo}/>
             </Dialog.Root>
             <Dialog.Root>
               <Dialog.Trigger>
