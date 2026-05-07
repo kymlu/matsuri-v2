@@ -55,7 +55,7 @@ export function NewChoreoPage({
 
   const hasDateError = (!isNullOrUndefinedOrBlank(form.startDate) &&
     !isNullOrUndefinedOrBlank(form.endDate) &&
-    new Date(form.startDate) > new Date(form.endDate)) || 
+    new Date(form.startDate) >= new Date(form.endDate)) || 
     (
       isNullOrUndefinedOrBlank(form.startDate) &&
       !isNullOrUndefinedOrBlank(form.endDate)
@@ -104,7 +104,7 @@ export function NewChoreoPage({
       name: form.name.trim(),
       event: form.eventName.trim(),
       startDate: hasEventName ? form.startDate : undefined,
-      endDate: hasEventName ? form.endDate : undefined,
+      endDate: (hasEventName && new Date(form.startDate).getTime() !== new Date(form.endDate).getTime()) ? form.endDate : undefined,
       stageType: form.stageType,
       stageGeometry: {
         stageLength: form.stageLength,

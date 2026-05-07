@@ -127,8 +127,21 @@ export default function HomePage({
   useEffect(() => {
     setEventList(
       Array.from(new Set(savedChoreos.map(x => stringifyEvent(x))))
-      .sort()
-      .map(x => JSON.parse(x))
+        .map(x => JSON.parse(x) as EventDetails)
+        .filter(x => !isNullOrUndefinedOrBlank(x.event))
+        .sort((a, b) => {
+          const eventCmp = strCompare<EventDetails>(a, b, "event");
+          if (eventCmp !== 0) return eventCmp;
+          const aHasDate = !isNullOrUndefinedOrBlank(a.startDate) || !isNullOrUndefinedOrBlank(a.endDate);
+          const bHasDate = !isNullOrUndefinedOrBlank(b.startDate) || !isNullOrUndefinedOrBlank(b.endDate);
+
+          if (aHasDate !== bHasDate) return aHasDate ? -1 : 1;
+
+          const dateA = isNullOrUndefinedOrBlank(a.endDate) ? (isNullOrUndefinedOrBlank(a.startDate) ? null : new Date(a.startDate!!)) : new Date(a.endDate!!);
+          const dateB = isNullOrUndefinedOrBlank(b.endDate) ? (isNullOrUndefinedOrBlank(b.startDate) ? null : new Date(b.startDate!!)) : new Date(b.endDate!!);
+          const dateCmp = (dateA?.getTime() ?? 0) - (dateB?.getTime() ?? 0);
+          return -dateCmp;
+        })
     );
   }, [savedChoreos]);
 

@@ -39,7 +39,7 @@ export default function EditChoreoInfoDialog({
 
   const hasDateError = (!isNullOrUndefinedOrBlank(startDate) &&
     !isNullOrUndefinedOrBlank(endDate) &&
-    new Date(startDate) > new Date(endDate)) || 
+    new Date(startDate) >= new Date(endDate)) || 
     (
       isNullOrUndefinedOrBlank(startDate) &&
       !isNullOrUndefinedOrBlank(endDate)
@@ -53,7 +53,7 @@ export default function EditChoreoInfoDialog({
         name.trim(),
         event.trim(),
         hasEventName ? startDate : undefined,
-        hasEventName ? endDate : undefined)
+        (hasEventName && new Date(startDate).getTime() !== new Date(endDate).getTime()) ? endDate : undefined)
     }}
     isActionButtonDisabled={isNullOrUndefinedOrBlank(name.trim()) || (hasEventName && hasDateError)}
     >
