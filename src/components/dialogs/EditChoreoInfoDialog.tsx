@@ -107,7 +107,7 @@ export default function EditChoreoInfoDialog({
             disabled={!hasEventName}
           />
           <DateInput
-            label="最終日（任意）"
+            label="終了日（任意）"
             ref={endDateRef}
             onDateChange={newValue => setEndDate(newValue)}
             defaultValue={endDate ?? undefined}
