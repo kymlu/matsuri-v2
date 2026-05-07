@@ -350,7 +350,7 @@ export default function HomePage({
         </div>
         <div className="h-full space-y-4 overflow-scroll">
           {
-            !isLoading && filteredChoreos.size === 0 &&
+            !isLoading && filteredChoreos.size === 0 && filteredPastChoreos.size === 0 &&
             <div className="mt-4 text-center">隊列表はありません</div>
           }
           {
@@ -404,14 +404,17 @@ export default function HomePage({
           {
             showPast && !isLoading &&
             <>
-              <div className="sticky top-0 z-10 bg-gray-50">
-                <div className="w-full py-1.5">
-                  <Divider/>
+              {
+                isNullOrUndefinedOrBlank(searchTerm) &&
+                <div className="sticky top-0 z-10 bg-gray-50">
+                  <div className="w-full py-1.5">
+                    <Divider/>
+                  </div>
+                  <div className="absolute top-0 flex justify-center w-full">
+                    <span className="p-2 font-medium text-gray-600 bg-gray-50">開催済み</span>
+                  </div>
                 </div>
-                <div className="absolute top-0 flex justify-center w-full">
-                  <span className="p-2 font-medium text-gray-600 bg-gray-50">開催済み</span>
-                </div>
-              </div>
+              }
               {
                 Array.from(filteredPastChoreos).map(([eventName, choreos]) =>
                   <EventSection
