@@ -55,7 +55,7 @@ export default function EditChoreoInfoDialog({
         hasEventName ? startDate : undefined,
         hasEventName ? endDate : undefined)
     }}
-    isActionButtonDisabled={isNullOrUndefinedOrBlank(name.trim()) || hasDateError}
+    isActionButtonDisabled={isNullOrUndefinedOrBlank(name.trim()) || (hasEventName && hasDateError)}
     >
     <div className="w-[100svw] max-w-full md:w-full">
       <TextInput
@@ -87,7 +87,8 @@ export default function EditChoreoInfoDialog({
         // restrictFn={(s) => !testInvalidCharacters(s)} // todo: after pushing the official goen change to restrict
         listItemFormat={(item) => <EventListItem
           item={item}
-          setStartAndEndDate={(start, end) => {
+          setStartAndEndDate={(event, start, end) => {
+            setEvent(event);
             setStartDate(start);
             startDateRef?.current?.changeValue(start);
             setEndDate(end);

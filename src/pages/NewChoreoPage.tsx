@@ -76,7 +76,7 @@ export function NewChoreoPage({
   const prevStep = () => setStep(s => Math.max(s - 1, 1));
 
   const handleChange = (field: keyof FormationForm, value: any) => {
-    setForm({ ...form, [field]: value });
+    setForm(prev => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = () => {
@@ -165,7 +165,7 @@ export function NewChoreoPage({
             </div>
             <div>
               <CustomAutocomplete
-                defaultValue={eventName}
+                defaultValue={form.eventName}
                 options={eventNames} // TODO: sort by desc event dates
                 onContentChange={newValue => handleChange("eventName", newValue)}
                 placeholder="イベント名を入力してください"
@@ -183,8 +183,8 @@ export function NewChoreoPage({
                 }}
                 listItemFormat={(item) => <EventListItem
                   item={item}
-                  setStartAndEndDate={(start, end) => {
-                    setForm(prev => ({...prev, startDate: start, endDate: end}));
+                  setStartAndEndDate={(event, start, end) => {
+                    setForm(prev => ({...prev, eventName: event, startDate: start, endDate: end}));
                     startDateRef?.current?.changeValue(start);
                     endDateRef?.current?.changeValue(end);
                   }}
@@ -198,7 +198,7 @@ export function NewChoreoPage({
                   label="開始日"
                   ref={startDateRef}
                   onDateChange={newValue => handleChange("startDate", newValue)}
-                  defaultValue={startDate ?? undefined}
+                  defaultValue={form.startDate ?? undefined}
                   hasError={hasDateError}
                   disabled={!hasEventName}
                 />
@@ -206,7 +206,7 @@ export function NewChoreoPage({
                   label="最終日（任意）"
                   ref={endDateRef}
                   onDateChange={newValue => handleChange("endDate", newValue)}
-                  defaultValue={endDate ?? undefined}
+                  defaultValue={form.endDate ?? undefined}
                   hasError={hasDateError}
                   disabled={!hasEventName}
                 />
@@ -315,7 +315,7 @@ export function NewChoreoPage({
             primary
             full
             onClick={nextStep}
-            disabled={step === 1 &&(isNullOrUndefinedOrBlank(form.name.trim()) || hasDateError)}
+            disabled={step === 1 &&(isNullOrUndefinedOrBlank(form.name.trim()) || (hasEventName && hasDateError))}
           >
           <span className="font-semibold">
             次へ
@@ -340,7 +340,7 @@ export function NewChoreoPage({
 
 type EventListItemProps = {
   item: string,
-  setStartAndEndDate: (startDate: string, endDate: string) => void,
+  setStartAndEndDate: (event: string, startDate: string, endDate: string) => void,
 }
 
 export function EventListItem ({
@@ -353,7 +353,7 @@ export function EventListItem ({
   return <Autocomplete.Item
     value={item}
     onClick={() => {
-      setStartAndEndDate(eventDetails.startDate ?? "", eventDetails.endDate ?? "")
+      setStartAndEndDate(eventDetails.event ?? "", eventDetails.startDate ?? "", eventDetails.endDate ?? "")
     }}
     className="flex cursor-default items-center gap-2 py-2 pr-8 pl-4 text-base leading-4 outline-none select-none data-[highlighted]:relative data-[highlighted]:z-0 data-[highlighted]:text-gray-50 data-[highlighted]:before:absolute data-[highlighted]:before:inset-x-2 data-[highlighted]:before:inset-y-0 data-[highlighted]:before:z-[-1] data-[highlighted]:before:rounded-md data-[highlighted]:before:bg-primary data-[highlighted]:before:text-white">
     <span>{eventDetails.event}</span>
