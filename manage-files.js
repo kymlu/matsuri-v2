@@ -29,8 +29,8 @@ const manifest = [];
 const dataFiles = fs.readdirSync(dataDir).filter(f => f.endsWith(".json") && f !== "manifest.json").map(f => path.basename(f, ".json"));
 for (const id of dataFiles) {
   const data = JSON.parse(fs.readFileSync(path.join(dataDir, `${id}.json`)));
-  manifest.push({ id: data.id, name: data.name, event: data.event });
-  console.log(`Added existing file to manifest: id=${id} name=${data.name} event=${data.event}`);
+  manifest.push({ id: data.id, name: data.name, event: data.event, startDate: data.startDate, endDate: data.endDate });
+  console.log(`Added existing file to manifest: id=${id} name=${data.name} event=${data.event} startDate=${data.startDate} endDate=${data.endDate}`);
 }
 
 // Process incoming files from intake folder
@@ -48,17 +48,19 @@ for (const filename of intakeFiles) {
     if (fs.existsSync(existingFilePath)) {
       const existing = JSON.parse(fs.readFileSync(existingFilePath, "utf-8"));
       fs.writeFileSync(existingFilePath, JSON.stringify({ ...incoming, version: existing.version + 1 }));
-      console.log(`Updated the following from ${existing.version} to ${existing.version + 1}: id=${incoming.id} name=${incoming.name} event=${incoming.event}`);
+      console.log(`Updated the following from ${existing.version} to ${existing.version + 1}: id=${incoming.id} name=${incoming.name} event=${incoming.event} startDate=${incoming.startDate} endDate=${incoming.endDate}`);
     } else {
       fs.writeFileSync(path.join(dataDir, `${incoming.id}.json`), JSON.stringify({ ...incoming, version: 1 }));
-      console.log(`Added new file: id=${incoming.id} name=${incoming.name} event=${incoming.event}`);
+      console.log(`Added new file: id=${incoming.id} name=${incoming.name} event=${incoming.event} startDate=${incoming.startDate} endDate=${incoming.endDate}`);
     }
 
     if (existingInManifest) {
       existingInManifest.name = incoming.name;
       existingInManifest.event = incoming.event;
+      existingInManifest.startDate = incoming.startDate;
+      existingInManifest.endDate = incoming.endDate;
     } else {
-      manifest.push({ id: incoming.id, name: incoming.name, event: incoming.event });
+      manifest.push({ id: incoming.id, name: incoming.name, event: incoming.event, startDate: incoming.startDate, endDate: incoming.endDate });
     }
 
     fs.unlinkSync(path.join(intakeDir, filename));
