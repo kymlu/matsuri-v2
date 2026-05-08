@@ -761,7 +761,7 @@ function EventSection({
                 className="flex flex-col justify-between h-full p-2 transition-colors bg-white border border-gray-400 rounded-md cursor-pointer">
                 {/* Title */}
                 <div className="relative flex flex-row items-start justify-between gap-2">
-                  <span className="text-lg font-medium text-left break-words text-wrap">
+                  <span className="font-medium text-left break-words text-wrap">
                     {choreo.name}
                   </span>
                   <div className="flex flex-row items-center gap-2">
