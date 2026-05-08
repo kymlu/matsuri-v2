@@ -718,7 +718,7 @@ function EventSection({
           {event.event?.length === 0 ? "イベント不明" : event.event}
         </div>
         {
-          event.startDate &&
+          (event.startDate || event.endDate) && (event.event?.length ?? 0) === 0 &&
           <div className="p-0 m-0 text-sm font-bold text-gray-600">
             {formatDateRange(event.startDate, event.endDate, false)}
           </div>
