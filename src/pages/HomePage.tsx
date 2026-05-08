@@ -8,8 +8,7 @@ import { useEffect, useMemo, useState } from "react"
 import { deleteChoreo, getAllChoreos, saveChoreo, saveChoreos } from "../lib/dataAccess/DataController"
 import { Choreo, ChoreoSchema, EventDetails } from "../models/choreo"
 import { isNullOrUndefinedOrBlank, indexByKey, strCompare, strEquals, stringifyEvent } from "../lib/helpers/globalHelper"
-import { downloadLogs } from "../lib/helpers/logHelper"
-import { formatDateRange, getDate, isPast } from "../lib/helpers/dateHelper"
+import { formatDateRange, getDate } from "../lib/helpers/dateHelper"
 import IconButton from "../components/basic/IconButton"
 import SampleStage from "../lib/samples/SampleStageFormation.json"
 import SampleParade from "../lib/samples/SampleParadeFormation.json"
@@ -60,7 +59,6 @@ export default function HomePage({
   const [savedChoreos, setSavedChoreos] = useState<ChoreoWithStatus[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [showPast, setShowPast] = useState<boolean>(false);
   const [choreosFromServer, setChoreosFromServer] = useState<Record<string, Choreo>>({});
 
   useEffect(() => {
@@ -197,14 +195,7 @@ export default function HomePage({
   // todo: add filter to show all/show current and future only
   const filteredChoreos = useMemo(() => 
     groupChoreos(savedChoreos.filter(c => 
-      !isPast(c.startDate, c.endDate) && 
-      (c.name.toLowerCase().includes(searchTerm) || c.event.toLowerCase().includes(searchTerm))), false)
-  , [savedChoreos, searchTerm]);
-
-  const filteredPastChoreos = useMemo(() => 
-    groupChoreos(savedChoreos.filter(c => 
-      isPast(c.startDate, c.endDate) &&
-      (c.name.toLowerCase().includes(searchTerm) || c.event.toLowerCase().includes(searchTerm))), true)
+      c.name.toLowerCase().includes(searchTerm) || c.event.toLowerCase().includes(searchTerm)), false)
   , [savedChoreos, searchTerm]);
 
   const [editingChoreo, setEditingChoreo] = useState<Choreo | undefined>();
@@ -339,13 +330,10 @@ export default function HomePage({
             search
             maxLength={SEARCH_NAME_LENGTH}
             clearable/>
-          <div className="pb-2">
-            <IconButton src={showPast ? ICON.historyOff : ICON.history} onClick={() => setShowPast(prev => !prev)} colour="primary" noBorder/>
-          </div>
         </div>
         <div className="h-full space-y-4 overflow-scroll">
           {
-            !isLoading && filteredChoreos.size === 0 && filteredPastChoreos.size === 0 &&
+            !isLoading && filteredChoreos.size === 0 &&
             <div className="mt-4 text-center">隊列表はありません</div>
           }
           {
@@ -396,7 +384,7 @@ export default function HomePage({
               />
             )
           }
-          {
+          {/* {
             showPast && !isLoading &&
             <>
               {
@@ -410,49 +398,8 @@ export default function HomePage({
                   </div>
                 </div>
               }
-              {
-                Array.from(filteredPastChoreos).map(([eventName, choreos]) =>
-                  <EventSection
-                    key={eventName}
-                    eventInfo={eventName}
-                    dancerNamesByFormation={dancerNamesByEvent[eventName]}
-                    choreos={choreos}
-                    searchTerm={searchTerm}
-                    goToViewPage={goToViewPage}
-                    duplicateChoreo={duplicateChoreo}
-                    editChoreoName={(choreo) => {
-                      setEditingChoreo(choreo);
-                      setEditChoreoInfoDialogOpen(true);
-                    }}
-                    deleteChoreo={(choreo) => {
-                      setDeleteChoreoVerb("削除");
-                      setEditingChoreo(choreo);
-                      setDeleteChoreoDialogOpen(true);
-                    }}
-                    revertChoreo={(choreo) => {
-                      setDeleteChoreoVerb("破棄");
-                      setEditingChoreo(choreo);
-                      setDeleteChoreoDialogOpen(true);
-                    }}
-                    syncChoreo={(choreo) => {
-                      setEditingChoreo(choreo);
-                      setSyncChoreoDialogOpen(true);
-                    }}
-                    onPdfExport={(choreo) => {
-                      setExportingChoreo(choreo);
-                      setPdfExportDialogOpen(true);
-                    }}
-                    addEvent={() => {goToNewChoreoPage(eventName, choreos[0].startDate)}}
-                    editEventName={() => {
-                      setEditingEventName(eventName);
-                      setEventNameDialogOpen(true);
-                    }}
-                    grey
-                  />
-                )
-              }
             </>
-          }
+          } */}
         </div>
 
         <Dialog.Root>
@@ -714,12 +661,11 @@ type EventSectionProps = {
   revertChoreo: (choreo: Choreo) => void,
   syncChoreo: (choreo: Choreo) => void,
   onPdfExport: (choreo: Choreo) => void,
-  grey?: boolean,
 }
 
 function EventSection({
   eventInfo, dancerNamesByFormation, choreos, searchTerm, goToViewPage, addEvent, editEventName,
-  duplicateChoreo, editChoreoName, deleteChoreo, revertChoreo, syncChoreo, onPdfExport, grey
+  duplicateChoreo, editChoreoName, deleteChoreo, revertChoreo, syncChoreo, onPdfExport
 }: EventSectionProps) {
   const optionsDialog = Dialog.createHandle<Choreo>();
   const [optionsDialogOpen, setOptionsDialogOpen] = React.useState(false);
@@ -797,7 +743,7 @@ function EventSection({
                     goToViewPage(c);
                   }
                 }}
-                className={"flex flex-col justify-between h-full p-2 transition-colors border border-gray-400 rounded-md cursor-pointer" + (grey ? " bg-gray-100" : " bg-white")}>
+                className="flex flex-col justify-between h-full p-2 transition-colors bg-white border border-gray-400 rounded-md cursor-pointer">
                 {/* Title */}
                 <div className="relative flex flex-row items-start justify-between gap-2">
                   <span className="text-lg font-medium text-left break-words text-wrap">
