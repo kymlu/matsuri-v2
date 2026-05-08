@@ -12,7 +12,7 @@ type Mode = "home" | "form" | "edit" | "view";
 function App() {
   const [mode, setMode] = useState<Mode>("home");
   // TODO: fix
-  const [selectedEvent, setSelectedEvent] = useState<[string | undefined, string | undefined]>();
+  const [selectedEvent, setSelectedEvent] = useState<EventDetails>();
   const [eventList, setEventList] = useState<EventDetails[]>([]);
   const [dancerNamesByEvent, setDancerNamesByEvent] = useState<Record<string, Record<string, string[]>>>({});
   const [currentChoreo, setCurrentChoreo] = useState<Choreo | undefined>();
@@ -49,8 +49,8 @@ function App() {
           setEventList={(eventList) => {
             setEventList(eventList);
           }}
-          goToNewChoreoPage={(event, date) => {
-            setSelectedEvent([event, date]);
+          goToNewChoreoPage={(event) => {
+            setSelectedEvent(event);
             setMode("form");
           }}
           goToViewPage={(choreo: Choreo) => {
@@ -71,8 +71,7 @@ function App() {
             setMode("edit");
           }}
           eventList={eventList}
-          eventName={selectedEvent?.[0]}
-          startDate={selectedEvent?.[1]}
+          selectedEvent={selectedEvent}
         />
       )}
       {mode === "edit" && (

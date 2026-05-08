@@ -31,20 +31,18 @@ type NewChoreoPageProps = {
   goToHomePage: () => void,
   goToEditPage: (choreo: Choreo) => void,
   eventList: EventDetails[],
-  eventName?: string,
-  startDate?: string,
-  endDate?: string,
+  selectedEvent?: EventDetails,
 }
 
 export function NewChoreoPage({
-  goToEditPage, goToHomePage, eventList, eventName, startDate, endDate
+  goToEditPage, goToHomePage, eventList, selectedEvent
 }: NewChoreoPageProps) {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState<FormationForm>({
     name: "",
-    eventName: "",
-    startDate: "",
-    endDate: "",
+    eventName: selectedEvent?.event ?? "",
+    startDate: selectedEvent?.endDate ?? "",
+    endDate: selectedEvent?.endDate ?? "",
     stageType: "stage",
     stageWidth: 10,
     stageLength: 10,
@@ -65,10 +63,10 @@ export function NewChoreoPage({
   const startDateRef = useRef<any>(null);
   const endDateRef = useRef<any>(null);
 
-  // todo: fix to incorporate dates
   useEffect(() => {
-    setForm(prev => ({...prev, eventName: eventName ?? ""}));
-  }, [eventName]);
+    startDateRef?.current?.changeValue(selectedEvent?.startDate);
+    endDateRef?.current?.changeValue(selectedEvent?.endDate);
+  }, [selectedEvent]);
 
   const hasEventName = !isNullOrUndefinedOrBlank(form.eventName.trim());
 
@@ -166,7 +164,7 @@ export function NewChoreoPage({
             <div>
               <CustomAutocomplete
                 defaultValue={form.eventName}
-                options={eventNames} // TODO: sort by desc event dates
+                options={eventNames}
                 onContentChange={newValue => handleChange("eventName", newValue)}
                 placeholder="イベント名を入力してください"
                 label="イベント（任意）"
@@ -198,7 +196,7 @@ export function NewChoreoPage({
                   label="開始日"
                   ref={startDateRef}
                   onDateChange={newValue => handleChange("startDate", newValue)}
-                  defaultValue={form.startDate ?? undefined}
+                  defaultValue={form.startDate}
                   hasError={hasDateError}
                   disabled={!hasEventName}
                 />
@@ -206,7 +204,7 @@ export function NewChoreoPage({
                   label="終了日（任意）"
                   ref={endDateRef}
                   onDateChange={newValue => handleChange("endDate", newValue)}
-                  defaultValue={form.endDate ?? undefined}
+                  defaultValue={form.endDate}
                   hasError={hasDateError}
                   disabled={!hasEventName}
                 />

@@ -37,7 +37,7 @@ type HomePageProps = {
   buildInfo?: string,
   eventList: EventDetails[],
   setEventList: (eventList: EventDetails[]) => void,
-  goToNewChoreoPage: (eventName?: string, eventDate?: string) => void,
+  goToNewChoreoPage: (eventDetails?: EventDetails) => void,
   goToViewPage: (choreo: Choreo) => void,
   userName: string | null,
   setUserName: (newName: string) => void,
@@ -345,11 +345,11 @@ export default function HomePage({
           }
           {
             !isLoading &&
-            Array.from(filteredChoreos).map(([eventName, choreos]) =>
+            Array.from(filteredChoreos).map(([eventDetails, choreos]) =>
               <EventSection
-                key={eventName}
-                eventInfo={eventName}
-                dancerNamesByFormation={dancerNamesByEvent[eventName]}
+                key={eventDetails}
+                eventInfo={eventDetails}
+                dancerNamesByFormation={dancerNamesByEvent[eventDetails]}
                 choreos={choreos}
                 searchTerm={searchTerm}
                 goToViewPage={goToViewPage}
@@ -376,9 +376,11 @@ export default function HomePage({
                   setExportingChoreo(choreo);
                   setPdfExportDialogOpen(true);
                 }}
-                addEvent={() => {goToNewChoreoPage(eventName, choreos[0].startDate)}}
+                addEvent={() => {
+                  goToNewChoreoPage(JSON.parse(eventDetails) as EventDetails);
+                }}
                 editEventName={() => {
-                  setEditingEventName(eventName);
+                  setEditingEventName(eventDetails);
                   setEventNameDialogOpen(true);
                 }}
               />
