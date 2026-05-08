@@ -22,10 +22,12 @@ export function getDate(date?: Date): string {
   return `${yyyy}/${mm}/${dd} ${hh}:${min}`;
 }
 
-export function formatDateRange (startDate?: string, endDate?: string): string {
+export function formatDateRange(startDate?: string, endDate?: string, showYear: boolean = true): string {
   const fmt = (date: string) => {
     const d = new Date(date);
-    return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
+    return showYear
+      ? `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`
+      : `${d.getMonth() + 1}月${d.getDate()}日`;
   };
 
   if (startDate && endDate) {
@@ -33,21 +35,21 @@ export function formatDateRange (startDate?: string, endDate?: string): string {
     const e = new Date(endDate);
 
     if (s.getFullYear() === e.getFullYear() && s.getMonth() === e.getMonth() && s.getDate() === e.getDate()) {
-      return `${s.getFullYear()}年${s.getMonth() + 1}月${s.getDate()}日`;
+      return fmt(startDate);
     }
     if (s.getFullYear() === e.getFullYear() && s.getMonth() === e.getMonth()) {
-      return `${s.getFullYear()}年${s.getMonth() + 1}月${s.getDate()}日〜${e.getDate()}日`;
+      return `${fmt(startDate)}〜${e.getDate()}日`;
     }
     if (s.getFullYear() === e.getFullYear()) {
-      return `${s.getFullYear()}年${s.getMonth() + 1}月${s.getDate()}日〜${e.getMonth() + 1}月${e.getDate()}日`;
+      return `${fmt(startDate)}〜${e.getMonth() + 1}月${e.getDate()}日`;
     }
     return `${fmt(startDate)}〜${fmt(endDate)}`;
   }
 
-  if (startDate) return `${fmt(startDate)}`;
-  if (endDate) return `${fmt(endDate)}`;
+  if (startDate) return fmt(startDate);
+  if (endDate) return fmt(endDate);
   return "日程未定";
-};
+}
 
 export function isPast(startDate?: string, endDate?: string): boolean {
   const dateStr = isNullOrUndefinedOrBlank(endDate) ? (isNullOrUndefinedOrBlank(startDate) ? null : startDate) : endDate;

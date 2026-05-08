@@ -123,7 +123,7 @@ export function IconLabelButton({
     >
     <div className="flex items-center justify-center gap-2">
       <Icon colour={primaryText ? "primary" : primary ? "white" : "black"} src={icon} size={iconSize}/>
-      <div className='font-semibold'>
+      <div className={primary ? "font-bold" : 'font-semibold'}>
         {label}
       </div>
     </div>

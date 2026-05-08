@@ -144,8 +144,8 @@ export default function HomePage({
     );
   }, [savedChoreos]);
 
-  const groupChoreos = (choreos: ChoreoWithStatus[], isDescDate: boolean) => {
-    return choreos.sort((a, b) => {
+  const groupChoreos = (choreos: ChoreoWithStatus[]) => {
+    const byEvent = choreos.sort((a, b) => {
       const aHasStart = !isNullOrUndefinedOrBlank(a.startDate);
       const bHasStart = !isNullOrUndefinedOrBlank(b.startDate);
       const aHasEnd = !isNullOrUndefinedOrBlank(a.endDate);
@@ -163,7 +163,7 @@ export default function HomePage({
         // Both have start dates, compare them
         if (aHasStart && bHasStart) {
           const startCmp = new Date(a.startDate!).getTime() - new Date(b.startDate!).getTime();
-          if (startCmp !== 0) return isDescDate ? -startCmp : startCmp;
+          if (startCmp !== 0) return -startCmp;
         }
 
         // No end date goes before those with an end date
@@ -172,7 +172,7 @@ export default function HomePage({
         // Both have end dates, compare them
         if (aHasEnd && bHasEnd) {
           const endCmp = new Date(a.endDate!).getTime() - new Date(b.endDate!).getTime();
-          if (endCmp !== 0) return isDescDate ? -endCmp : endCmp;
+          if (endCmp !== 0) return -endCmp;
         }
       }
 
@@ -190,12 +190,22 @@ export default function HomePage({
       acc.get(key)!.push(item);
       return acc;
     }, new Map<string, ChoreoWithStatus[]>());
+
+    return Array.from(byEvent.entries()).reduce((acc, [key, items]) => {
+      const parsed = JSON.parse(key) as EventDetails;
+      const year = parsed.startDate
+        ? new Date(parsed.startDate).getFullYear().toString()
+        : "日程不明";
+
+      if (!acc.has(year)) acc.set(year, new Map());
+      acc.get(year)!.set(key, items);
+      return acc;
+    }, new Map<string, Map<string, ChoreoWithStatus[]>>());
   }
 
   // todo: add filter to show all/show current and future only
   const filteredChoreos = useMemo(() => 
-    groupChoreos(savedChoreos.filter(c => 
-      c.name.toLowerCase().includes(searchTerm) || c.event.toLowerCase().includes(searchTerm)), false)
+    groupChoreos(savedChoreos.filter(c => c.name.toLowerCase().includes(searchTerm) || c.event.toLowerCase().includes(searchTerm)))
   , [savedChoreos, searchTerm]);
 
   const [editingChoreo, setEditingChoreo] = useState<Choreo | undefined>();
@@ -345,63 +355,62 @@ export default function HomePage({
           }
           {
             !isLoading &&
-            Array.from(filteredChoreos).map(([eventDetails, choreos]) =>
-              <EventSection
-                key={eventDetails}
-                eventInfo={eventDetails}
-                dancerNamesByFormation={dancerNamesByEvent[eventDetails]}
-                choreos={choreos}
-                searchTerm={searchTerm}
-                goToViewPage={goToViewPage}
-                duplicateChoreo={duplicateChoreo}
-                editChoreoName={(choreo) => {
-                  setEditingChoreo(choreo);
-                  setEditChoreoInfoDialogOpen(true);
-                }}
-                deleteChoreo={(choreo) => {
-                  setDeleteChoreoVerb("削除");
-                  setEditingChoreo(choreo);
-                  setDeleteChoreoDialogOpen(true);
-                }}
-                revertChoreo={(choreo) => {
-                  setDeleteChoreoVerb("破棄");
-                  setEditingChoreo(choreo);
-                  setDeleteChoreoDialogOpen(true);
-                }}
-                syncChoreo={(choreo) => {
-                  setEditingChoreo(choreo);
-                  setSyncChoreoDialogOpen(true);
-                }}
-                onPdfExport={(choreo) => {
-                  setExportingChoreo(choreo);
-                  setPdfExportDialogOpen(true);
-                }}
-                addEvent={() => {
-                  goToNewChoreoPage(JSON.parse(eventDetails) as EventDetails);
-                }}
-                editEventName={() => {
-                  setEditingEventName(eventDetails);
-                  setEventNameDialogOpen(true);
-                }}
-              />
+            Array.from(filteredChoreos).map(([year, events], yearIndex) =>
+              <React.Fragment key={year}>
+                <ExpandableSection title={year} level={1} defaultExpanded={!isNullOrUndefinedOrBlank(searchTerm) || yearIndex == 0}>
+                  {
+                    Array.from(events).map(([eventDetails, choreos], choreoIndex) =>
+                    <React.Fragment key={eventDetails}>
+                      <EventSection
+                        key={eventDetails}
+                        eventInfo={eventDetails}
+                        dancerNamesByFormation={dancerNamesByEvent[eventDetails]}
+                        choreos={choreos}
+                        searchTerm={searchTerm}
+                        goToViewPage={goToViewPage}
+                        duplicateChoreo={duplicateChoreo}
+                        editChoreoName={(choreo) => {
+                          setEditingChoreo(choreo);
+                          setEditChoreoInfoDialogOpen(true);
+                        }}
+                        deleteChoreo={(choreo) => {
+                          setDeleteChoreoVerb("削除");
+                          setEditingChoreo(choreo);
+                          setDeleteChoreoDialogOpen(true);
+                        }}
+                        revertChoreo={(choreo) => {
+                          setDeleteChoreoVerb("破棄");
+                          setEditingChoreo(choreo);
+                          setDeleteChoreoDialogOpen(true);
+                        }}
+                        syncChoreo={(choreo) => {
+                          setEditingChoreo(choreo);
+                          setSyncChoreoDialogOpen(true);
+                        }}
+                        onPdfExport={(choreo) => {
+                          setExportingChoreo(choreo);
+                          setPdfExportDialogOpen(true);
+                        }}
+                        addEvent={() => {
+                          goToNewChoreoPage(JSON.parse(eventDetails) as EventDetails);
+                        }}
+                        editEventName={() => {
+                          setEditingEventName(eventDetails);
+                          setEventNameDialogOpen(true);
+                        }}
+                        isExpandedByDefault={!isNullOrUndefinedOrBlank(searchTerm) || (yearIndex === 0 && choreoIndex === 0)}
+                      />
+                      {
+                        choreoIndex < events.size - 1 &&
+                        <Divider/>
+                      }
+                    </React.Fragment>
+                    )
+                  }
+                </ExpandableSection>
+              </React.Fragment>
             )
           }
-          {/* {
-            showPast && !isLoading &&
-            <>
-              {
-                isNullOrUndefinedOrBlank(searchTerm) &&
-                <div className="sticky top-0 z-10 bg-gray-50">
-                  <div className="w-full py-1.5">
-                    <Divider/>
-                  </div>
-                  <div className="absolute top-0 flex justify-center w-full">
-                    <span className="p-2 font-medium text-gray-600 bg-gray-50">開催済み</span>
-                  </div>
-                </div>
-              }
-            </>
-          } */}
         </div>
 
         <Dialog.Root>
@@ -663,11 +672,12 @@ type EventSectionProps = {
   revertChoreo: (choreo: Choreo) => void,
   syncChoreo: (choreo: Choreo) => void,
   onPdfExport: (choreo: Choreo) => void,
+  isExpandedByDefault?: boolean,
 }
 
 function EventSection({
   eventInfo, dancerNamesByFormation, choreos, searchTerm, goToViewPage, addEvent, editEventName,
-  duplicateChoreo, editChoreoName, deleteChoreo, revertChoreo, syncChoreo, onPdfExport
+  duplicateChoreo, editChoreoName, deleteChoreo, revertChoreo, syncChoreo, onPdfExport, isExpandedByDefault
 }: EventSectionProps) {
   const optionsDialog = Dialog.createHandle<Choreo>();
   const [optionsDialogOpen, setOptionsDialogOpen] = React.useState(false);
@@ -700,6 +710,8 @@ function EventSection({
   };
   
   return <ExpandableSection
+    defaultExpanded={isExpandedByDefault ?? true}
+    level={2}
     title={
       <div className="text-left">
         <div>
@@ -707,7 +719,7 @@ function EventSection({
         </div>
         {
           <div className="p-0 m-0 text-sm font-bold text-gray-600">
-            {formatDateRange(event.startDate, event.endDate)}
+            {formatDateRange(event.startDate, event.endDate, false)}
           </div>
         }
       </div>

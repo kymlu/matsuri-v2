@@ -41,7 +41,7 @@ export function NewChoreoPage({
   const [form, setForm] = useState<FormationForm>({
     name: "",
     eventName: selectedEvent?.event ?? "",
-    startDate: selectedEvent?.endDate ?? "",
+    startDate: selectedEvent?.startDate ?? "",
     endDate: selectedEvent?.endDate ?? "",
     stageType: "stage",
     stageWidth: 10,
