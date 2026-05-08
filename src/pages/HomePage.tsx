@@ -402,7 +402,7 @@ export default function HomePage({
                       />
                       {
                         choreoIndex < events.size - 1 &&
-                        <Divider/>
+                        <Divider compact/>
                       }
                     </React.Fragment>
                     )
