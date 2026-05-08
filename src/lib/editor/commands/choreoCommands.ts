@@ -5,8 +5,8 @@ export function renameChoreo(state: Choreo, newName: string, newEvent?: string, 
     ...state,
     name: newName,
     event: newEvent ?? state.event,
-    startDate: newStartDate ?? state.startDate,
-    endDate: newEndDate ?? state.endDate
+    startDate: newStartDate,
+    endDate: newEndDate,
   }
 }
 
