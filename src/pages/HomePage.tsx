@@ -194,7 +194,7 @@ export default function HomePage({
     return Array.from(byEvent.entries()).reduce((acc, [key, items]) => {
       const parsed = JSON.parse(key) as EventDetails;
       const year = parsed.startDate
-        ? new Date(parsed.startDate).getFullYear().toString()
+        ? `${new Date(parsed.startDate).getFullYear().toString()}年`
         : "日程不明";
 
       if (!acc.has(year)) acc.set(year, new Map());
@@ -718,7 +718,7 @@ function EventSection({
           {event.event?.length === 0 ? "イベント不明" : event.event}
         </div>
         {
-          (event.startDate || event.endDate) && (event.event?.length ?? 0) === 0 &&
+          (event.startDate || event.endDate) && (event.event?.length ?? 0) > 0 &&
           <div className="p-0 m-0 text-sm font-bold text-gray-600">
             {formatDateRange(event.startDate, event.endDate, false)}
           </div>
