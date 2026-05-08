@@ -341,7 +341,7 @@ export default function HomePage({
             maxLength={SEARCH_NAME_LENGTH}
             clearable/>
         </div>
-        <div className="h-full space-y-4 overflow-scroll">
+        <div className="h-full space-y-2 overflow-scroll">
           {
             !isLoading && filteredChoreos.size === 0 &&
             <div className="mt-4 text-center">隊列表はありません</div>
