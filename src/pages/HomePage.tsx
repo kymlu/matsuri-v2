@@ -719,7 +719,7 @@ function EventSection({
         </div>
         {
           (event.startDate || event.endDate) && (event.event?.length ?? 0) > 0 &&
-          <div className="p-0 m-0 text-sm font-bold text-gray-600">
+          <div className="text-sm font-bold text-gray-600">
             {formatDateRange(event.startDate, event.endDate, false)}
           </div>
         }
