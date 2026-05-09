@@ -51,7 +51,7 @@ export default function DateInput({
     },)
 
   return (
-    <FieldWithLabel label={label}>
+    <FieldWithLabel label={label} full={!compact}>
       <div className={wrapperClasses}>
         <input
           disabled={disabled}
