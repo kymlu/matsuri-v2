@@ -35,13 +35,16 @@ export default function DateInput({
   }
 
   var inputClasses = classNames(
-    "w-full col-start-1 row-start-1 px-2 py-3 text-black border border-gray-400 rounded-md focus-within:border-primary focus:outline-none",
+    "col-start-1 row-start-1 px-2 py-3 text-black border border-gray-400 rounded-md focus-within:border-primary focus:outline-none",
     {
       "h-10": tall,
       "h-6": short,
       "text-center": centered,
       "bg-gray-200": disabled,
+      "w-full": !compact,
+      "min-w-32": compact,
       "border-primary bg-primary/20 text-primary-darker": (required && isNullOrUndefinedOrBlank(value)) || hasError,
+      "bg-white": !(required && isNullOrUndefinedOrBlank(value)) && !hasError && !disabled,
     },)
 
   var wrapperClasses = classNames(
