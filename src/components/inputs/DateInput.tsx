@@ -48,7 +48,7 @@ export default function DateInput({
     "grid items-center w-full grid-cols-1",
     {
       "mb-2": !compact,
-    },)
+    })
 
   return (
     <FieldWithLabel label={label} full={!compact}>

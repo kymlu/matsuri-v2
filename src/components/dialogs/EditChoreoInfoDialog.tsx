@@ -97,7 +97,7 @@ export default function EditChoreoInfoDialog({
         maxLength={LONG_NAME_LENGTH}
       />
       {
-        <div className={"flex gap-2 " + (hasEventName ? "" : "opacity-50 select-none pointer-events-none")}>
+        <div className={"grid grid-cols-2 gap-2 w-full max-w-full " + (hasEventName ? "" : "opacity-50 select-none pointer-events-none")}>
           <DateInput
             label="開始日"
             ref={startDateRef}
