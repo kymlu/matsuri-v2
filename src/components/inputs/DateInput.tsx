@@ -63,16 +63,11 @@ export default function DateInput({
       "mb-2": !compact,
     });
 
-  const pickerRef = useRef<HTMLInputElement>(null);
-
-  const openPicker = () => {pickerRef?.current?.showPicker()}
-
   return (
     <FieldWithLabel label={label} full={!compact}>
       <div className={wrapperClasses}>
         <input
           type="text"
-          name={name}
           value={displayValue}
           className={inputClasses}/>
         <div className="absolute right-2">
@@ -80,17 +75,15 @@ export default function DateInput({
             size="sm"
             colour={disabled ? "grey" : "primary"}
             noBorder
-            src={ICON.calendarToday}
-            onClick={openPicker}/>
+            src={ICON.calendarToday}/>
         </div>
         <input
-          ref={pickerRef}
           disabled={disabled}
           type="date"
           name={name}
           value={value}
           onInput={(event) => handleChange(event.currentTarget.value)}
-          className="hidden"/>
+          className="absolute inset-0 z-10 w-full h-full opacity-0"/>
       </div>
     </FieldWithLabel>
   )
