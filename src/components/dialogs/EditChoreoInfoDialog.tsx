@@ -73,7 +73,7 @@ export default function EditChoreoInfoDialog({
         options={eventNames}
         onContentChange={newValue => setEvent(newValue)} // TODO: sort by desc event date
         placeholder="イベント名を入力してください"
-        label="イベント（任意）"
+        label="イベント"
         clearable
         showLength
         itemToStringValueFunc={(item) => {
@@ -97,7 +97,7 @@ export default function EditChoreoInfoDialog({
         maxLength={LONG_NAME_LENGTH}
       />
       {
-        <div className={"grid grid-cols-2 gap-2 w-full max-w-full " + (hasEventName ? "" : "opacity-50 select-none pointer-events-none")}>
+        <div className={"grid grid-rows-2 md:grid-rows-1 md:grid-cols-2 gap-2 w-full max-w-full " + (hasEventName ? "" : "opacity-50 select-none pointer-events-none")}>
           <DateInput
             label="開始日"
             ref={startDateRef}

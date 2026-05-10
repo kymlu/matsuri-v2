@@ -45,6 +45,7 @@ export const ICON = {
   arrowRange: "arrow_range",
   arrowRight: "arrow_right",
   arrowRightAlt: "arrow_right_alt",
+  calendarToday: "calendar_today",
   category: "category",
   check: "check",
   chevronBackward: "chevron_backward",

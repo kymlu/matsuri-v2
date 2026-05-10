@@ -72,7 +72,7 @@ export default function CustomAutocomplete({
   var wrapperClasses = classNames(
     "grid items-center w-full grid-cols-1",
     {
-      "mb-2": !compact,
+      "mb-2": !compact && !showLength,
     },);
 
   return (
