@@ -45,7 +45,7 @@ export default function DateInput({
   }
 
   var inputClasses = classNames(
-    "col-start-1 row-start-1 px-2 py-3 text-black border border-gray-400 rounded-md focus-within:border-primary focus:outline-none",
+    "col-start-1 pointer-events-none row-start-1 px-2 py-3 text-black border border-gray-400 rounded-md focus-within:border-primary focus:outline-none",
     {
       "h-10": tall,
       "h-6": short,
@@ -71,7 +71,6 @@ export default function DateInput({
     <FieldWithLabel label={label} full={!compact}>
       <div className={wrapperClasses}>
         <input
-          disabled={true}
           type="text"
           name={name}
           value={displayValue}
