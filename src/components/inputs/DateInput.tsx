@@ -83,9 +83,9 @@ export default function DateInput({
             noBorder
             src={ICON.calendarToday}/>
         </div>
-        <div 
-          className="absolute w-full h-full"
-          onPointerDown={openPicker}/>
+        <button
+          className="absolute w-full h-full opacity-0"
+          onClick={openPicker}/>
         <input
           ref={pickerRef}
           disabled={disabled}
