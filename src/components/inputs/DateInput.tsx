@@ -54,7 +54,7 @@ export default function DateInput({
       "w-full": !compact,
       "min-w-32": compact,
       "border-primary bg-primary/20 text-primary-darker": (required && isNullOrUndefinedOrBlank(value)) || hasError,
-      "bg-white": !(required && isNullOrUndefinedOrBlank(value)) && !hasError && !disabled,
+      "bg-white disabled:bg-white disabled:text-black": !(required && isNullOrUndefinedOrBlank(value)) && !hasError && !disabled,
     },)
 
   var wrapperClasses = classNames(
