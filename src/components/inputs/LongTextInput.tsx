@@ -73,7 +73,7 @@ export default function LongTextInput({
     },);
 
   return (
-    <FieldWithLabel full label={label}>
+    <FieldWithLabel full label={label} fullHeight>
       <div className={wrapperClasses}>
         <textarea
           disabled={disabled}

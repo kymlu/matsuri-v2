@@ -85,7 +85,7 @@ export default function DateInput({
         </div>
         <div 
           className="absolute w-full h-full"
-          onClick={openPicker}/>
+          onPointerDown={openPicker}/>
         <input
           ref={pickerRef}
           disabled={disabled}
