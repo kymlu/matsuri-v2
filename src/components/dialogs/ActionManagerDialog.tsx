@@ -7,7 +7,7 @@ import { restrictToParentElement } from "@dnd-kit/modifiers";
 import TextInput from "../inputs/TextInput";
 import { strEquals } from "../../lib/helpers/globalHelper";
 import Icon from "../basic/Icon";
-import { ICON } from "../../lib/consts/consts";
+import { ACTION_NAME_LENGTH, COUNT_NAME_LENGTH, ICON } from "../../lib/consts/consts";
 import IconButton from "../basic/IconButton";
 import BaseEditDialog from "./BaseEditDialog";
 import { ChoreoSection } from "../../models/choreoSection";
@@ -225,7 +225,7 @@ function SortableActionSection ({
       <TextInput
         required
         hasError={actionNames[action.name.trim()] > 1}
-        maxLength={10}
+        maxLength={ACTION_NAME_LENGTH}
         label="アクション名"
         defaultValue={action.name}
         onContentChange={(newName) => {onRenameAction(newName)}}/>
@@ -274,7 +274,7 @@ function TimingItem ({
     <TextInput 
       required
       hasError={timingNames[timing.name.trim()] > 1}
-      maxLength={5}
+      maxLength={COUNT_NAME_LENGTH}
       compact short
       defaultValue={timing.name}
       onContentChange={(newName) => {onRenameTiming(newName)}}/>

@@ -6,15 +6,16 @@ type ExpandableSectionProps = {
   title: React.ReactNode,
   children: React.ReactNode,
   rightButton?: React.ReactNode,
+  defaultExpanded ?: boolean,
+  level: 1 | 2,
 }
 
 export default function ExpandableSection({
-    title, children, rightButton
-  }: ExpandableSectionProps) {
-  const [isExpanded, setIsExpanded] = useState<boolean>(true);
-  
+  title, children, rightButton, defaultExpanded, level
+}: ExpandableSectionProps) {
+  const [isExpanded, setIsExpanded] = useState<boolean>(defaultExpanded ?? true);
   return <div className="space-y-2">
-    <div className="flex flex-row justify-between w-full">
+    <div className={"sticky flex flex-row justify-between w-full" + (level === 1 ? (" top-0 z-20 py-1 bg-gray-200 " + (isExpanded ? "rounded-t-lg" : "rounded-lg")) : " z-10 bg-gray-50")}>
       <button onClick={() => {
         setIsExpanded(prev => !prev);
       }} className='flex flex-row items-center w-full'>
@@ -24,7 +25,7 @@ export default function ExpandableSection({
           colour="primary"
           noBorder
           asDiv />
-        <h2 className='text-xl font-bold text-primary'>{title}</h2>
+        <h2 className={'font-bold text-primary ' + (level === 1 ? "text-xl" : "text-lg")}>{title}</h2>
       </button>
       {
         rightButton

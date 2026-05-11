@@ -1,24 +1,22 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import TextInput from "../inputs/TextInput";
-import { isNullOrUndefinedOrBlank, testInvalidCharacters } from "../../lib/helpers/globalHelper";
+import { isNullOrUndefinedOrBlank } from "../../lib/helpers/globalHelper";
 import BaseEditDialog from "./BaseEditDialog";
-import { Choreo, EventDetails } from "../../models/choreo";
+import { EventDetails } from "../../models/choreo";
 import CustomAutocomplete from "../inputs/CustomAutocomplete";
 import DateInput from "../inputs/DateInput";
 import { EventListItem } from "../../pages/NewChoreoPage";
 import { LONG_NAME_LENGTH } from "../../lib/consts/consts";
 
-type EditChoreoInfoDialogProps = {
-  choreo?: Choreo,
+type EditEventInfoDialogProps = {
+  eventInfo?: EventDetails,
   eventList: EventDetails[],
   onClose?: () => void,
-  onSubmit: (name: string, event: string, startDate?: string, endDate?: string) => void,
+  onSubmit: (event: string, startDate?: string, endDate?: string) => void,
 }
 
-export default function EditChoreoInfoDialog({
-  choreo, eventList, onClose, onSubmit
-}: EditChoreoInfoDialogProps) {
-  const [name, setName] = useState("");
+export default function EditEventInfoDialog({
+  eventInfo, eventList, onClose, onSubmit
+}: EditEventInfoDialogProps) {
   const [event, setEvent] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -26,11 +24,10 @@ export default function EditChoreoInfoDialog({
   const eventNames = useMemo(() => eventList.map(item => JSON.stringify(item)), [eventList]);
 
   useEffect(() => {
-    setName(choreo?.name ?? "");
-    setEvent(choreo?.event ?? "");
-    setStartDate(choreo?.startDate ?? "");
-    setEndDate(choreo?.endDate ?? "");
-  }, [choreo]);
+    setEvent(eventInfo?.event ?? "");
+    setStartDate(eventInfo?.startDate ?? "");
+    setEndDate(eventInfo?.endDate ?? "");
+  }, [eventInfo]);
   
   const startDateRef = useRef<any>(null);
   const endDateRef = useRef<any>(null);
@@ -46,30 +43,19 @@ export default function EditChoreoInfoDialog({
     );
 
   return <BaseEditDialog
-    title="隊列情報変更"
+    title="イベント情報変更"
     onClose={onClose}
     onSubmit={() => {
       onSubmit(
-        name.trim(),
         event.trim(),
         hasEventName ? startDate : undefined,
         (hasEventName && new Date(startDate).getTime() !== new Date(endDate).getTime()) ? endDate : undefined)
     }}
-    isActionButtonDisabled={isNullOrUndefinedOrBlank(name.trim()) || (hasEventName && hasDateError)}
+    isActionButtonDisabled={hasEventName && hasDateError}
     >
     <div className="w-[100svw] max-w-full md:w-full">
-      <TextInput
-        label="名前"
-        required
-        defaultValue={choreo?.name ?? ""}
-        onContentChange={ (newName) => { setName(newName) }}
-        restrictFn={(s) => !testInvalidCharacters(s)}
-        showLength
-        maxLength={LONG_NAME_LENGTH}
-        />
-
       <CustomAutocomplete
-        defaultValue={choreo?.event ?? ""}
+        defaultValue={eventInfo?.event ?? ""}
         options={eventNames}
         onContentChange={newValue => setEvent(newValue)} // TODO: sort by desc event date
         placeholder="イベント名を入力してください"

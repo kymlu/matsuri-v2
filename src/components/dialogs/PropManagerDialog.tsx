@@ -4,7 +4,7 @@ import BaseEditDialog from "./BaseEditDialog";
 import { strCompare, strEquals } from "../../lib/helpers/globalHelper";
 import TextInput from "../inputs/TextInput";
 import IconButton from "../basic/IconButton";
-import { ICON, MAX_PROP_DIMENSION, MIN_PROP_DIMENSION } from "../../lib/consts/consts";
+import { ICON, MAX_PROP_DIMENSION, MIN_PROP_DIMENSION, SHORT_NAME_LENGTH } from "../../lib/consts/consts";
 import NumberInput from "../inputs/NumberInput";
 import CustomMenu from "../inputs/CustomMenu";
 import { colorPalette } from "../../lib/consts/colors";
@@ -100,7 +100,7 @@ export function PropManagerDialog({
                           return [...prev];
                         });
                       }}
-                      maxLength={15}
+                      maxLength={SHORT_NAME_LENGTH}
                     />
                   </div>
                   <div className="flex gap-2">

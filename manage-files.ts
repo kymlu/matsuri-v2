@@ -41,11 +41,13 @@ for (const id of dataFiles) {
     id: data.id,
     name: data.name,
     event: data.event,
+    startDate: data.startDate,
+    endDate: data.endDate,
     version: data.version,
     lastUpdated: data.lastUpdated,
     isHidden: data.isHidden,
   });
-  console.log(`Added existing file to manifest: id=${id} name=${data.name} event=${data.event}`);
+  console.log(`Added existing file to manifest: id=${id} name=${data.name} event=${data.event} startDate=${data.startDate} endDate=${data.endDate}`);
 }
 
 // Process incoming files from intake folder
@@ -65,10 +67,10 @@ for (const filename of intakeFiles) {
       const existing = JSON.parse(fs.readFileSync(existingFilePath, "utf-8"));
       version = existing.version + 1;
       fs.writeFileSync(existingFilePath, JSON.stringify({ ...incoming, version: version }));
-      console.log(`Updated the following from ${existing.version} to ${version}: id=${incoming.id} name=${incoming.name} event=${incoming.event}`);
+      console.log(`Updated the following from ${existing.version} to ${version}: id=${incoming.id} name=${incoming.name} event=${incoming.event} startDate=${incoming.startDate} endDate=${incoming.endDate}`);
     } else {
       fs.writeFileSync(path.join(dataDir, `${incoming.id}.json`), JSON.stringify({ ...incoming, version: version }));
-      console.log(`Added new file: id=${incoming.id} name=${incoming.name} event=${incoming.event}`);
+      console.log(`Added new file: id=${incoming.id} name=${incoming.name} event=${incoming.event} startDate=${incoming.startDate} endDate=${incoming.endDate}`);
     }
 
     if (existingInManifest) {
@@ -76,12 +78,16 @@ for (const filename of intakeFiles) {
       existingInManifest.event = incoming.event;
       existingInManifest.version = version;
       existingInManifest.lastUpdated = incoming.lastUpdated;
+      existingInManifest.startDate = incoming.startDate;
+      existingInManifest.endDate = incoming.endDate;
       console.log(`Manifest updated: ${incoming.id}`);
     } else {
       manifest.push({
         id: incoming.id,
         name: incoming.name,
         event: incoming.event,
+        startDate: incoming.startDate,
+        endDate: incoming.endDate,
         version: version,
         lastUpdated: incoming.lastUpdated,
       });

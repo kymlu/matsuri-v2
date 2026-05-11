@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import TextInput from "../inputs/TextInput";
 import { isNullOrUndefinedOrBlank, strEquals } from "../../lib/helpers/globalHelper";
 import BaseEditDialog from "./BaseEditDialog";
+import { LONG_NAME_LENGTH, SHORT_NAME_LENGTH } from "../../lib/consts/consts";
 
 type EditNameDialogProps = {
   name?: string,
@@ -47,7 +48,7 @@ export default function EditNameDialog({
       required={required}
       defaultValue={name ?? ""}
       onContentChange={ (newName) => { setNewName(newName) }}
-      maxLength={type === "イベント" || type === "隊列表" ? 20 : 15}
+      maxLength={type === "イベント" || type === "隊列表" ? LONG_NAME_LENGTH : SHORT_NAME_LENGTH}
       showLength/>
     
     {

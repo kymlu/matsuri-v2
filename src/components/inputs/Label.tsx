@@ -1,3 +1,4 @@
+import classNames from "classnames";
 import React from "react";
 
 type LabelProps = {
@@ -12,16 +13,24 @@ export default function Label({
 
 type FieldWithLabelProps = {
   label?: string,
-  full?: boolean
+  full?: boolean,
+  fullHeight?: boolean,
   children: React.ReactNode
 }
 
 export function FieldWithLabel({
-  label, full, children
+  label, full, fullHeight, children
 }: FieldWithLabelProps) {
   var id = React.useId();
 
-  return <div className={full ? "w-full" : ""}>
+  var classes = classNames(
+    "",
+    {
+      "w-full": full,
+      "h-full": fullHeight,
+    });
+
+  return <div className={classes}>
     {
       label &&
       <Label text={label}/>

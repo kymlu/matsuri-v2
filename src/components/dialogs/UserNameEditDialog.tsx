@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import BaseEditDialog from "./BaseEditDialog";
 import TextInput from "../inputs/TextInput";
+import { SHORT_NAME_LENGTH } from "../../lib/consts/consts";
 
 type UserNameEditDialogProps = {
   name: string,
@@ -26,7 +27,7 @@ export default function UserNameEditDialog ({
     <TextInput
       defaultValue={name ?? ""}
       onContentChange={ (newName) => { setNewName(newName) }}
-      maxLength={15}
+      maxLength={SHORT_NAME_LENGTH}
       showLength/>
   </BaseEditDialog>
 }

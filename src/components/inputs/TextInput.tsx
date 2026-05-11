@@ -1,6 +1,6 @@
 import React, { useEffect, useImperativeHandle } from "react";
 import classNames from "classnames";
-import { ICON } from "../../lib/consts/consts";
+import { DEFAULT_NAME_LENGTH, ICON } from "../../lib/consts/consts";
 import { isNullOrUndefinedOrBlank } from "../../lib/helpers/globalHelper";
 import { FieldWithLabel } from "./Label";
 import IconButton from "../basic/IconButton";
@@ -51,7 +51,7 @@ export default function TextInput({
   }
 
   var inputClasses = classNames(
-    "col-start-1 border row-start-1 text-black p-3 border-gray-400 rounded-md focus-within:border-primary focus:outline-none",
+    "col-start-1 border row-start-1 text-black py-3 border-gray-400 rounded-md focus-within:border-primary focus:outline-none",
     {
       "pr-6": clearable,
       "pr-2": !clearable,
@@ -63,13 +63,13 @@ export default function TextInput({
       "bg-gray-200": disabled,
       "w-full": !compact,
       "min-w-32": compact,
-      "border-primary bg-primary bg-opacity-20 placeholder:text-primary": (required && isNullOrUndefinedOrBlank(value?.trim())) || hasError,
+      "border-primary bg-primary/20 placeholder:text-primary": (required && isNullOrUndefinedOrBlank(value?.trim())) || hasError,
     },);
 
   var wrapperClasses = classNames(
     "grid items-center w-full grid-cols-1",
     {
-      "mb-2": !compact,
+      "mb-2": !compact && !showLength,
     },);
 
   return (
@@ -80,7 +80,7 @@ export default function TextInput({
             disabled={disabled}
             type="text"
             name={name}
-            maxLength={maxLength ?? 20}
+            maxLength={maxLength ?? DEFAULT_NAME_LENGTH}
             placeholder={placeholder ?? ""}
             value={value ?? ""}
             onInput={(event) => handleChange(event.currentTarget.value)}

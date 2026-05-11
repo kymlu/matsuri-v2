@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { isNullOrUndefinedOrBlank, strEquals } from "../../lib/helpers/globalHelper";
 import BaseEditDialog from "./BaseEditDialog";
 import CustomAutocomplete from "../inputs/CustomAutocomplete";
+import { SHORT_NAME_LENGTH } from "../../lib/consts/consts";
 
 type EditDancerNameDialogProps = {
   name?: string,
@@ -46,7 +47,7 @@ export default function EditDancerNameDialog({
     <CustomAutocomplete
       defaultValue={name ?? ""}
       onContentChange={ (newName) => { setNewName(newName) }}
-      maxLength={15}
+      maxLength={SHORT_NAME_LENGTH}
       options={missingNames}
       showLength
     />

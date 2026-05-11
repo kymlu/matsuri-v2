@@ -1,4 +1,4 @@
-import { Choreo } from "../../models/choreo";
+import { Choreo, EventDetails } from "../../models/choreo";
 
 export function strEquals(str1: string | null | undefined, str2: string | null | undefined) {
   return !isNullOrUndefined(str1) && !isNullOrUndefined(str2) && str1?.localeCompare?.(str2!) === 0
@@ -92,7 +92,7 @@ export function getSafeFileName(fileName: string) {
 
 export function getDefaultFileName(choreo: Choreo): string {
   return getSafeFileName(isNullOrUndefinedOrBlank(choreo.event) ?
-    choreo.name : `${choreo.event} - ${choreo.name}`);
+    choreo.name : `${choreo.name} - ${choreo.event}`);
 }
 
 export function testInvalidCharacters(text: string) {
@@ -108,4 +108,12 @@ export function incrementBracketSuffix(str: string) {
   const num = parseInt(match[2], 10);
 
   return `${base}(${num + 1})`;
+}
+
+export function stringifyEvent(choreo: Choreo): string {
+  return JSON.stringify({
+    event: choreo.event ?? "",
+    startDate: choreo.startDate ?? "",
+    endDate: choreo.endDate ?? ""
+  } as EventDetails);
 }

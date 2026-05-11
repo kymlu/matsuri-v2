@@ -10,6 +10,7 @@ import { isNullOrUndefinedOrBlank } from "../../lib/helpers/globalHelper";
 type SidebarProps = {
   choreoName: string;
   choreoEvent?: string;
+  choreoDates?: string;
 
   editName?: () => void;
   editSize?: () => void;
@@ -30,6 +31,7 @@ type SidebarProps = {
 export function Sidebar({
   choreoName,
   choreoEvent,
+  choreoDates,
   editName,
   editSize,
   showManageDancers,
@@ -54,6 +56,12 @@ export function Sidebar({
             </span>
             <span className="text-gray-400">
               {isNullOrUndefinedOrBlank(choreoEvent) ? "イベント不明" : choreoEvent}
+              {
+                !isNullOrUndefinedOrBlank(choreoDates) &&
+                <span className="pl-2 text-sm">
+                  ({choreoDates})
+                </span>
+              }
             </span>
           </div>
           <div>

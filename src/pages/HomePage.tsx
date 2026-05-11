@@ -1,15 +1,14 @@
 import { Dialog, Menu } from "@base-ui/react"
 import CustomDialog from "../components/basic/CustomDialog"
-import { ICON } from "../lib/consts/consts"
+import { ICON, LONG_NAME_LENGTH, SEARCH_NAME_LENGTH } from "../lib/consts/consts"
 import { IconLabelButton } from "../components/basic/Button"
 import Icon from "../components/basic/Icon"
 import { readUploadedFile } from "../lib/helpers/uploadHelper"
 import { useEffect, useMemo, useState } from "react"
 import { deleteChoreo, getAllChoreos, saveChoreo, saveChoreos } from "../lib/dataAccess/DataController"
-import { Choreo, ChoreoSchema } from "../models/choreo"
-import { isNullOrUndefinedOrBlank, indexByKey, mapByKey, strCompare, strEquals } from "../lib/helpers/globalHelper"
-import { downloadLogs } from "../lib/helpers/logHelper"
-import { getDate } from "../lib/helpers/dateHelper"
+import { Choreo, ChoreoSchema, EventDetails } from "../models/choreo"
+import { isNullOrUndefinedOrBlank, indexByKey, strCompare, strEquals, stringifyEvent } from "../lib/helpers/globalHelper"
+import { formatDateRange, getDate } from "../lib/helpers/dateHelper"
 import IconButton from "../components/basic/IconButton"
 import SampleStage from "../lib/samples/SampleStageFormation.json"
 import SampleParade from "../lib/samples/SampleParadeFormation.json"
@@ -21,7 +20,6 @@ import BaseErrorDialog from "../components/dialogs/BaseErrorDialog"
 import ExportDialog from "../components/dialogs/ExportDialog"
 import React from "react"
 import Divider from "../components/basic/Divider"
-import EditNameDialog from "../components/dialogs/EditNameDialog"
 import TextInput from "../components/inputs/TextInput"
 import { loadAllChoreos } from "../lib/dataAccess/FileAccess"
 import UserNameEditDialog from "../components/dialogs/UserNameEditDialog"
@@ -31,14 +29,17 @@ import EditChoreoInfoDialog from "../components/dialogs/EditChoreoInfoDialog"
 import SyncChoreoDialog from "../components/dialogs/SyncChoreoDialog"
 import ExpandableSection from "../components/basic/ExpandableSection"
 import AbsentDancersWarningDialog from "../components/dialogs/AbsentDancersWarningDialog"
+import BeginnersDialog from "../components/dialogs/BeginnersDialog"
+import EditEventInfoDialog from "../components/dialogs/EditEventInfoDialog"
+import SiteInfoDialog from "../components/dialogs/SiteInfoDialog"
 import CustomMenu from "../components/inputs/CustomMenu"
 import { Tag } from "../components/common/Tag"
 
 type HomePageProps = {
   buildInfo?: string,
-  eventList: string[]
-  setEventList: (eventList: string[]) => void,
-  goToNewChoreoPage: (eventName?: string) => void,
+  eventList: EventDetails[],
+  setEventList: (eventList: EventDetails[]) => void,
+  goToNewChoreoPage: (eventDetails?: EventDetails) => void,
   goToViewPage: (choreo: Choreo) => void,
   goToManagePage: () => void,
   userName: string | null,
@@ -109,10 +110,11 @@ export default function HomePage({
       setDancerNamesByEvent(
         choreos.reduce((acc, item) => {
           const names = Object.values(item.dancers).map(d => d.name);
+          const stringifiedEvent = stringifyEvent(item);
           return {
             ...acc,
-            [item.event]: {
-              ...(acc[item.event] ?? {}),
+            [stringifiedEvent]: {
+              ...(acc[stringifiedEvent] ?? {}),
               [item.id]: names,
             },
           };
@@ -125,36 +127,90 @@ export default function HomePage({
   }
 
   useEffect(() => {
-    setEventList(Array.from(
-      new Set(
-        savedChoreos
-          .map(x => x.event)
-          .filter(x => !isNullOrUndefinedOrBlank(x))
-          .sort()
-      )
-    ));
+    setEventList(
+      Array.from(new Set(savedChoreos.map(x => stringifyEvent(x))))
+        .map(x => JSON.parse(x) as EventDetails)
+        .filter(x => !isNullOrUndefinedOrBlank(x.event))
+        .sort((a, b) => {
+          const eventCmp = strCompare<EventDetails>(a, b, "event");
+          if (eventCmp !== 0) return eventCmp;
+          const aHasDate = !isNullOrUndefinedOrBlank(a.startDate) || !isNullOrUndefinedOrBlank(a.endDate);
+          const bHasDate = !isNullOrUndefinedOrBlank(b.startDate) || !isNullOrUndefinedOrBlank(b.endDate);
+
+          if (aHasDate !== bHasDate) return aHasDate ? -1 : 1;
+
+          const dateA = isNullOrUndefinedOrBlank(a.endDate) ? (isNullOrUndefinedOrBlank(a.startDate) ? null : new Date(a.startDate!!)) : new Date(a.endDate!!);
+          const dateB = isNullOrUndefinedOrBlank(b.endDate) ? (isNullOrUndefinedOrBlank(b.startDate) ? null : new Date(b.startDate!!)) : new Date(b.endDate!!);
+          const dateCmp = (dateA?.getTime() ?? 0) - (dateB?.getTime() ?? 0);
+          return -dateCmp;
+        })
+    );
   }, [savedChoreos]);
 
   const groupChoreos = (choreos: ChoreoWithStatus[]) => {
-    return mapByKey(
-      choreos.sort((a, b) => {
-        const eventCmp = strCompare<ChoreoWithStatus>(a, b, "event");
-        if (eventCmp !== 0) return eventCmp;
+    const byEvent = choreos.sort((a, b) => {
+      const aHasStart = !isNullOrUndefinedOrBlank(a.startDate);
+      const bHasStart = !isNullOrUndefinedOrBlank(b.startDate);
+      const aHasEnd = !isNullOrUndefinedOrBlank(a.endDate);
+      const bHasEnd = !isNullOrUndefinedOrBlank(b.endDate);
+      const aHasAny = aHasStart || aHasEnd;
+      const bHasAny = bHasStart || bHasEnd;
 
-        const dateA = a.lastUpdated ? new Date(a.lastUpdated)?.getTime() : 0;
-        const dateB = b.lastUpdated ? new Date(b.lastUpdated)?.getTime() : 0;
-        if (dateA !== dateB) return dateB - dateA;
+      // No dates at all go last
+      if (aHasAny !== bHasAny) return aHasAny ? -1 : 1;
 
-        return strCompare<ChoreoWithStatus>(a, b, "name");
-      }),
-      "event"
-    )
+      if (aHasAny && bHasAny) {
+        // No start date goes before those with a start date
+        if (aHasStart !== bHasStart) return aHasStart ? 1 : -1;
+
+        // Both have start dates, compare them
+        if (aHasStart && bHasStart) {
+          const startCmp = new Date(a.startDate!).getTime() - new Date(b.startDate!).getTime();
+          if (startCmp !== 0) return -startCmp;
+        }
+
+        // No end date goes before those with an end date
+        if (aHasEnd !== bHasEnd) return aHasEnd ? 1 : -1;
+
+        // Both have end dates, compare them
+        if (aHasEnd && bHasEnd) {
+          const endCmp = new Date(a.endDate!).getTime() - new Date(b.endDate!).getTime();
+          if (endCmp !== 0) return -endCmp;
+        }
+      }
+
+      const eventCmp = strCompare<ChoreoWithStatus>(a, b, "event");
+      if (eventCmp !== 0) return eventCmp;
+
+      const dateA = a.lastUpdated ? new Date(a.lastUpdated).getTime() : 0;
+      const dateB = b.lastUpdated ? new Date(b.lastUpdated).getTime() : 0;
+      if (dateA !== dateB) return dateB - dateA;
+
+      return strCompare<ChoreoWithStatus>(a, b, "name");
+    }).reduce((acc, item) => {
+      const key = stringifyEvent(item);
+      if (!acc.has(key)) acc.set(key, []);
+      acc.get(key)!.push(item);
+      return acc;
+    }, new Map<string, ChoreoWithStatus[]>());
+
+    return Array.from(byEvent.entries()).reduce((acc, [key, items]) => {
+      const parsed = JSON.parse(key) as EventDetails;
+      const year = parsed.startDate
+        ? `${new Date(parsed.startDate).getFullYear().toString()}年`
+        : "日程不明";
+
+      if (!acc.has(year)) acc.set(year, new Map());
+      acc.get(year)!.set(key, items);
+      return acc;
+    }, new Map<string, Map<string, ChoreoWithStatus[]>>());
   }
 
+  // todo: add filter to show all/show current and future only
   const filteredChoreos = useMemo(() => 
     groupChoreos(savedChoreos.filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase()) || c.event.toLowerCase().includes(searchTerm.toLowerCase())))
   , [savedChoreos, searchTerm]);
-  
+
   const [editingChoreo, setEditingChoreo] = useState<Choreo | undefined>();
   const [editChoreoInfoDialogOpen, setEditChoreoInfoDialogOpen] = useState(false);
   const editChoreoInfoDialog = Dialog.createHandle<{}>();
@@ -221,7 +277,7 @@ export default function HomePage({
     const newChoreo = {
       ...choreo,
       id: crypto.randomUUID(),
-      name: `${choreo.name}のコピー`,
+      name: `${choreo.name}のコピー`.slice(0, LONG_NAME_LENGTH),
       lastUpdated: new Date().toISOString(),
     } as Choreo;
     saveChoreo(newChoreo, () => {
@@ -230,10 +286,11 @@ export default function HomePage({
       setDancerNamesByEvent(
         newChoreos.reduce((acc, item) => {
           const names = Object.values(item.dancers).map(d => d.name);
+          const stringifiedEvent = stringifyEvent(item);
           return {
             ...acc,
-            [item.event]: {
-              ...(acc[item.event] ?? {}),
+            [stringifiedEvent]: {
+              ...(acc[stringifiedEvent] ?? {}),
               [item.id]: names,
             },
           };
@@ -245,21 +302,15 @@ export default function HomePage({
 
   return (
     <div className="bg-gray-50">
-      <div className='grid py-10 px-6 h-[100svh] grid-rows-[auto,auto,auto,1fr] overflow-hidden gap-2 w-full mx-auto'>
-        <div className="flex items-center justify-between">
+      <div className='grid py-10 px-6 h-[100svh] grid-rows-[auto,auto,auto,1fr] overflow-hidden w-full mx-auto'>
+        <div className="flex items-center justify-between pb-1">
           <h1 className='text-2xl font-bold'>隊列表一覧</h1>
           <div className="flex items-center ">
             <Dialog.Root>
               <Dialog.Trigger>
                 <IconButton src={ICON.info} colour="primary" noBorder asDiv/>
               </Dialog.Trigger>
-              <CustomDialog title="サイト情報" hasX>
-                <div className="flex flex-col justify-center gap-2 mb-2">
-                  <span className="mb-2 text-center">問題がある場合は、<br/><b>ケイティー</b>まで<br/>問い合わせてください</span>
-                  <IconLabelButton label="ログをダウンロード" icon={ICON.download} primary onClick={downloadLogs}/>
-                  <span className="text-center text-gray-600">{buildInfo}</span>
-                </div>
-              </CustomDialog>
+              <SiteInfoDialog buildInfo={buildInfo}/>
             </Dialog.Root>
             <Dialog.Root>
               <Dialog.Trigger>
@@ -285,14 +336,16 @@ export default function HomePage({
             onClick={triggerUpload}
             />
         </div>
-        <TextInput
-          defaultValue={searchTerm}
-          placeholder="隊列表、イベントを探す"
-          onContentChange={(newSearchTerm) => setSearchTerm(newSearchTerm)}
-          search
-          maxLength={100}
-          clearable/>
-        <div className="h-full space-y-4 overflow-scroll">
+        <div className="flex items-center gap-2">
+          <TextInput
+            defaultValue={searchTerm}
+            placeholder="隊列表、イベントを探す"
+            onContentChange={(newSearchTerm) => setSearchTerm(newSearchTerm)}
+            search
+            maxLength={SEARCH_NAME_LENGTH}
+            clearable/>
+        </div>
+        <div className="h-full space-y-2 overflow-scroll">
           {
             !isLoading && filteredChoreos.size === 0 &&
             <div className="mt-4 text-center">隊列表はありません</div>
@@ -306,46 +359,72 @@ export default function HomePage({
           }
           {
             !isLoading &&
-            Array.from(filteredChoreos).map(([eventName, choreos]) =>
-              <EventSection
-                key={eventName}
-                eventName={eventName}
-                dancerNamesByFormation={dancerNamesByEvent[eventName]}
-                choreos={choreos}
-                searchTerm={searchTerm}
-                goToViewPage={goToViewPage}
-                duplicateChoreo={duplicateChoreo}
-                editChoreoName={(choreo) => {
-                  setEditingChoreo(choreo);
-                  setEditChoreoInfoDialogOpen(true);
-                }}
-                deleteChoreo={(choreo) => {
-                  setDeleteChoreoVerb("削除");
-                  setEditingChoreo(choreo);
-                  setDeleteChoreoDialogOpen(true);
-                }}
-                revertChoreo={(choreo) => {
-                  setDeleteChoreoVerb("破棄");
-                  setEditingChoreo(choreo);
-                  setDeleteChoreoDialogOpen(true);
-                }}
-                syncChoreo={(choreo) => {
-                  setEditingChoreo(choreo);
-                  setSyncChoreoDialogOpen(true);
-                }}
-                onPdfExport={(choreo) => {
-                  setExportingChoreo(choreo);
-                  setPdfExportDialogOpen(true);
-                }}
-                addEvent={() => {goToNewChoreoPage(eventName)}}
-                editEventName={() => {
-                  setEditingEventName(eventName);
-                  setEventNameDialogOpen(true);
-                }}
-              />
+            Array.from(filteredChoreos).map(([year, events], yearIndex) =>
+              <React.Fragment key={year}>
+                <ExpandableSection title={year} level={1} defaultExpanded={!isNullOrUndefinedOrBlank(searchTerm) || yearIndex == 0}>
+                  {
+                    Array.from(events).map(([eventDetails, choreos], choreoIndex) =>
+                    <React.Fragment key={eventDetails}>
+                      <EventSection
+                        key={eventDetails}
+                        eventInfo={eventDetails}
+                        dancerNamesByFormation={dancerNamesByEvent[eventDetails]}
+                        choreos={choreos}
+                        searchTerm={searchTerm}
+                        goToViewPage={goToViewPage}
+                        duplicateChoreo={duplicateChoreo}
+                        editChoreoName={(choreo) => {
+                          setEditingChoreo(choreo);
+                          setEditChoreoInfoDialogOpen(true);
+                        }}
+                        deleteChoreo={(choreo) => {
+                          setDeleteChoreoVerb("削除");
+                          setEditingChoreo(choreo);
+                          setDeleteChoreoDialogOpen(true);
+                        }}
+                        revertChoreo={(choreo) => {
+                          setDeleteChoreoVerb("破棄");
+                          setEditingChoreo(choreo);
+                          setDeleteChoreoDialogOpen(true);
+                        }}
+                        syncChoreo={(choreo) => {
+                          setEditingChoreo(choreo);
+                          setSyncChoreoDialogOpen(true);
+                        }}
+                        onPdfExport={(choreo) => {
+                          setExportingChoreo(choreo);
+                          setPdfExportDialogOpen(true);
+                        }}
+                        addEvent={() => {
+                          goToNewChoreoPage(JSON.parse(eventDetails) as EventDetails);
+                        }}
+                        editEventName={() => {
+                          setEditingEventName(eventDetails);
+                          setEventNameDialogOpen(true);
+                        }}
+                        isExpandedByDefault={!isNullOrUndefinedOrBlank(searchTerm) || (yearIndex === 0 && choreoIndex === 0)}
+                      />
+                      {
+                        choreoIndex < events.size - 1 &&
+                        <Divider compact/>
+                      }
+                    </React.Fragment>
+                    )
+                  }
+                </ExpandableSection>
+              </React.Fragment>
             )
           }
         </div>
+
+        <Dialog.Root>
+          <Dialog.Trigger>
+            <div className="z-20 fixed flex items-center p-1.5 bg-white border-2 rounded-full bottom-12 right-8 size-10 border-primary">
+              <img className="" src={`${process.env.PUBLIC_URL}/img/beginner.svg`}/>
+            </div>
+          </Dialog.Trigger>
+          <BeginnersDialog/>
+        </Dialog.Root>
 
         <input
           className='hidden'
@@ -407,9 +486,9 @@ export default function HomePage({
             choreo={editingChoreo}
             eventList={eventList}
             onClose={() => {setEditingChoreo(undefined)}}
-            onSubmit={(name: string, event: string) => {
+            onSubmit={(name: string, event: string, startDate?: string, endDate?: string) => {
               if (editingChoreo) {
-                saveChoreo({...editingChoreo, name, event}, () => {
+                saveChoreo({...editingChoreo, name, event, startDate, endDate}, () => {
                   editChoreoInfoDialog.close();
                   setEditChoreoInfoDialogOpen(false);
                   setEditingChoreo(undefined);
@@ -424,14 +503,20 @@ export default function HomePage({
           open={editEventNameDialogOpen}
           onOpenChange={handleEventNameDialogOpen}>
             
-          <EditNameDialog
-            name={editingEventName}
-            required={false}
-            type="イベント"
+            {/* {todo: have new edit event dialog with the dates included. currently broken} */}
+          <EditEventInfoDialog
+            eventInfo={JSON.parse(editingEventName ?? "{}") as EventDetails}
+            eventList={eventList}
             onClose={() => {setEditingEventName(undefined)}}
-            onSubmit={(name) => {
+            onSubmit={(name, startDate, endDate) => {
               saveChoreos(
-                savedChoreos.filter(c => strEquals(c.event, editingEventName ?? "")).map(c => {return {...c, event: name}}),
+                savedChoreos.filter(c => strEquals(stringifyEvent(c), editingEventName ?? ""))
+                  .map(c => {return {
+                    ...c,
+                    event: name,
+                    startDate: startDate,
+                    endDate: endDate
+                  }}),
                 () => {
                   setEventNameDialogOpen(false);
                   loadChoreos();
@@ -552,7 +637,7 @@ export default function HomePage({
               const newChoreo = {
                 ...uploadedChoreo!,
                 id: crypto.randomUUID(),
-                name: `${uploadedChoreo!.name} - コピー`,
+                name: `${uploadedChoreo!.name}のコピー`,
                 isDirty: false,
               } as Choreo;
               saveChoreo(newChoreo, () => {goToViewPage(newChoreo)});
@@ -578,7 +663,7 @@ export default function HomePage({
 }
 
 type EventSectionProps = {
-  eventName: string,
+  eventInfo: string,
   choreos: ChoreoWithStatus[],
   searchTerm: string,
   dancerNamesByFormation?: Record<string, string[]>,
@@ -591,17 +676,20 @@ type EventSectionProps = {
   revertChoreo: (choreo: Choreo) => void,
   syncChoreo: (choreo: Choreo) => void,
   onPdfExport: (choreo: Choreo) => void,
+  isExpandedByDefault?: boolean,
 }
 
 function EventSection({
-  eventName, dancerNamesByFormation, choreos, searchTerm, goToViewPage, addEvent, editEventName,
-  duplicateChoreo, editChoreoName, deleteChoreo, revertChoreo, syncChoreo, onPdfExport
+  eventInfo, dancerNamesByFormation, choreos, searchTerm, goToViewPage, addEvent, editEventName,
+  duplicateChoreo, editChoreoName, deleteChoreo, revertChoreo, syncChoreo, onPdfExport, isExpandedByDefault
 }: EventSectionProps) {
   const optionsDialog = Dialog.createHandle<Choreo>();
   const [optionsDialogOpen, setOptionsDialogOpen] = React.useState(false);
   const [selectedChoreo, setSelectedChoreo] = useState<ChoreoWithStatus | undefined>();
   const dancerWarningDialog = Dialog.createHandle<Choreo>();
   const [dancerWarningDialogOpen, setDancerWarningDialogOpen] = React.useState(false);
+
+  const event = JSON.parse(eventInfo) as EventDetails;
 
   const missingNames = useMemo(() => {
     if (dancerNamesByFormation) {
@@ -626,7 +714,21 @@ function EventSection({
   };
   
   return <ExpandableSection
-    title={eventName.length === 0 ? "イベント不明" : eventName}
+    defaultExpanded={isExpandedByDefault ?? true}
+    level={2}
+    title={
+      <div className="text-left">
+        <div>
+          {event.event?.length === 0 ? "イベント不明" : event.event}
+        </div>
+        {
+          (event.startDate || event.endDate) && (event.event?.length ?? 0) > 0 &&
+          <div className="text-sm font-bold text-gray-600">
+            {formatDateRange(event.startDate, event.endDate, false)}
+          </div>
+        }
+      </div>
+    }
     rightButton={
       <CustomMenu trigger={
         <IconButton
@@ -642,11 +744,11 @@ function EventSection({
         </Menu.Item>
         <Divider compact/>
         <Menu.Item>
-          <IconLabelButton full noBorder icon={ICON.edit} label="名前変更" onClick={editEventName}/>
+          <IconLabelButton full noBorder icon={ICON.edit} label="情報変更" onClick={editEventName}/>
         </Menu.Item>
         <Divider compact/>
         <Menu.Item>
-          <IconLabelButton full noBorder icon={ICON.download} label="共有" onClick={() => exportEvent(choreos, eventName)}/>
+          <IconLabelButton full noBorder icon={ICON.download} label="共有" onClick={() => exportEvent(choreos, event.event)}/>
         </Menu.Item>
       </CustomMenu>
     }
@@ -668,15 +770,15 @@ function EventSection({
                     goToViewPage(c);
                   }
                 }}
-                className="flex flex-col justify-between h-full p-2 transition-colors bg-white border border-gray-400 rounded-md cursor-pointer">
+                className="flex flex-col justify-between h-full p-2 mx-[11px] transition-colors bg-white border border-gray-400 rounded-md cursor-pointer">
                 {/* Title */}
                 <div className="relative flex flex-row items-start justify-between gap-2">
-                  <span className="text-lg font-medium text-left break-words text-wrap">
+                  <span className="font-medium text-left break-words text-wrap">
                     {choreo.name}
                   </span>
                   <div className="flex flex-row items-center gap-2">
                     {
-                      eventName.length > 0 && missingNames[choreo.id]?.size > 0 &&
+                      event.event && event.event.length > 0 && missingNames[choreo.id]?.size > 0 &&
                       <Dialog.Trigger handle={dancerWarningDialog} onClick={(e) => {
                         e.stopPropagation();
                         setSelectedChoreo(choreo);
@@ -719,28 +821,32 @@ function EventSection({
                 {/* Meta row */}
                 <div className="items-center justify-between text-sm text-gray-500 md:flex">
                   {choreo.lastUpdated ? (
-                    <div className="flex items-center gap-1">
-                      <Icon colour="grey" size="sm" src={ICON.history}/>{getDate(new Date(choreo.lastUpdated))}
+                    <div className="flex items-center gap-0.5">
+                      <Icon
+                        colour="grey"
+                        size="xs"
+                        src={ICON.history}/>
+                      {getDate(new Date(choreo.lastUpdated))}
                     </div>
                   ) : (
                     <div />
                   )}
 
                   <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-0.5">
                       <Icon
                         src={ICON.resize}
                         colour="grey"
-                        size="sm"
+                        size="xs"
                       />
                       <span>幅{choreo.stageGeometry.stageWidth}m 縦{choreo.stageGeometry.stageLength}m</span>
                     </div>
 
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-0.5">
                       <Icon
                         src={ICON.group}
                         colour="grey"
-                        size="sm"
+                        size="xs"
                       />
                       <span>{Object.keys(choreo.dancers).length}人</span>
                     </div>
