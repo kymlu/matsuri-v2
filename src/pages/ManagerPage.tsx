@@ -24,7 +24,6 @@ export interface FileEdits {
   id: string,
   name?: string,
   eventName?: string,
-  isHidden?: boolean,
   choreo?: Choreo,
 }
 
@@ -62,7 +61,6 @@ export function ManagerPage({
     event: x.event,
     version: x.version,
     lastUpdated: x.lastUpdated,
-    isHidden: x.isHidden,
   } as ChoreoManifest)), "id"), [newChoreoList]);
   
   const groupChoreos = (choreos: ChoreoManifest[]) => {
@@ -70,10 +68,6 @@ export function ManagerPage({
       choreos.sort((a, b) => {
         const eventCmp = strCompare<ChoreoManifest>(a, b, "event");
         if (eventCmp !== 0) return eventCmp;
-        if (a.isHidden !== b.isHidden) {
-          if (a.isHidden) return 1;
-          return -1;
-        }
         return strCompare<ChoreoManifest>(a, b, "name");
       }),
       "event"
@@ -85,7 +79,6 @@ export function ManagerPage({
           id: c.id,
           name: c.name,
           event: c.event,
-          isHidden: c.isHidden,
           lastUpdated: c.lastUpdated,
           version: c.version,
         } as ChoreoManifest));
@@ -96,7 +89,6 @@ export function ManagerPage({
           id: x.id,
           name: edit.name ?? x.name,
           event: edit.eventName ?? x.event,
-          isHidden: edit.isHidden === undefined ? x.isHidden : edit.isHidden,
           lastUpdated: x.lastUpdated,
           version: x.version,
         } as ChoreoManifest
@@ -129,9 +121,7 @@ export function ManagerPage({
       } else {
         edits.eventName = name;
       }
-      if (
-        edits.choreo === undefined && edits.eventName === undefined &&
-        edits.isHidden === undefined && edits.name === undefined) {
+      if (edits.choreo === undefined && edits.eventName === undefined) {
         var {[c.id]: _, ...rest} = newEdits;
         newEdits = rest;
       } else {
@@ -259,14 +249,12 @@ export function ManagerPage({
               onSubmit={(choreo) => {
                 choreo.version = 0;
                 choreo.isDirty = undefined;
-                choreo.isHidden = false;
                 setNewChoreoList(prev => [...prev, choreo]);
                 setSelectedChoreo({
                   id: choreo.id,
                   name: choreo.name,
                   event: choreo.event,
                   version: choreo.version,
-                  isHidden: choreo.isHidden,
                   lastUpdated: choreo.lastUpdated,
                 } as ChoreoManifest);
                 setSelectChoreoDialogOpen(false);
@@ -290,7 +278,6 @@ export function ManagerPage({
                   ...newChoreo,
                   event: edits?.eventName ?? newChoreo?.event,
                   name: edits?.name ?? newChoreo?.name,
-                  isHidden: edits?.isHidden ?? newChoreo?.isHidden,
                 } as Choreo;
                 return [...filtered, edited];
               });
@@ -353,6 +340,7 @@ function EventSection({
       />
     </Dialog.Root>
     <ExpandableSection
+      level={2}
       title={eventName.length === 0 ? "イベント不明" : eventName}
       rightButton={
         <IconButton
@@ -393,23 +381,18 @@ function ChoreoItem ({
 }: ChoreoItemProps) {
   const status = choreo.version === 0 ? "new":
     edits?.choreo ? "versionUp" :
-    (edits?.eventName || edits?.name || edits?.isHidden !== undefined) ? "edited" :
+    (edits?.eventName || edits?.name) ? "edited" :
     "none";
     
   return (
     <div
       onClick={selectChoreo}
-      className={"flex flex-col justify-between h-full p-2 transition-colors rounded-md cursor-pointer " +
-        (choreo.isHidden ? "bg-gray-200 " : "bg-white ") +
+      className={"flex flex-col justify-between h-full p-2 bg-white transition-colors rounded-md cursor-pointer " +
         (edits ? "border-2 border-primary" : "border border-gray-400")}>
       {/* Title */}
       <div className="relative flex flex-row items-start justify-between gap-2">
         <div className={"flex items-center gap-1 text-lg text-left break-words text-wrap " + (edits?.name ? "text-primary font-bold" : "font-medium text-black")}>
           {choreo.name}
-          {
-            choreo.isHidden &&
-            <Icon src={ICON.globeOff} size="xs" colour={edits?.isHidden ? "primary" : "grey"}/>
-          }
         </div>
         <div className="flex flex-row items-center gap-2">
           {

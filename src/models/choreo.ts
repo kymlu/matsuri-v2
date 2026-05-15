@@ -6,7 +6,6 @@ import * as z from "zod";
 
 export const ChoreoManifestSchema = BaseModelSchema.extend({
   event: z.string(),
-  isHidden: z.boolean().optional(),
   version: z.number(),
   lastUpdated: z.string().optional(),
 })
@@ -47,7 +46,6 @@ export const ChoreoSchema = BaseModelSchema.extend({
   lastUpdated: z.string().optional(),
   version: z.number().optional(),
   isDirty: z.boolean().optional(),
-  isHidden: z.boolean().optional(),
 });
 export type Choreo = z.infer<typeof ChoreoSchema>;
 

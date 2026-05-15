@@ -27,7 +27,8 @@ type Manifest = {
   id: string,
   name: string,
   event: string,
-  isHidden?: boolean,
+  startDate: string,
+  endDate: string,
   version: number,
   lastUpdated?: string
 }
@@ -45,7 +46,6 @@ for (const id of dataFiles) {
     endDate: data.endDate,
     version: data.version,
     lastUpdated: data.lastUpdated,
-    isHidden: data.isHidden,
   });
   console.log(`Added existing file to manifest: id=${id} name=${data.name} event=${data.event} startDate=${data.startDate} endDate=${data.endDate}`);
 }

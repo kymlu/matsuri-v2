@@ -73,7 +73,7 @@ export default function HomePage({
     setIsLoading(true);
     Promise.all([
       getAllChoreos(),
-      loadAllChoreos(true)
+      loadAllChoreos()
     ]).then(([local, server]) => {
       server.push(z.parse(ChoreoSchema, SampleParade));
       server.push(z.parse(ChoreoSchema, SampleStage));

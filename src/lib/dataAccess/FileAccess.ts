@@ -14,7 +14,7 @@ export async function loadChoreoManifest(): Promise<ChoreoManifest[]> {
   return manifest;
 }
 
-export async function loadAllChoreos(excludeHidden?: boolean): Promise<Choreo[]> {
+export async function loadAllChoreos(): Promise<Choreo[]> {
   const manifestRes = await fetch(
     `${process.env.PUBLIC_URL}/data/manifest.json`
   );
@@ -23,8 +23,7 @@ export async function loadAllChoreos(excludeHidden?: boolean): Promise<Choreo[]>
     throw new Error("Failed to load manifest");
   }
 
-  const manifest = z.parse(ChoreoManifestSchema.array(), await manifestRes.json());
-  const choreosToFetch = excludeHidden === true ? manifest.filter(x => x.isHidden !== true) : manifest;
+  const choreosToFetch = z.parse(ChoreoManifestSchema.array(), await manifestRes.json());
 
   const fetchPromises = choreosToFetch.map(async (entry) => {
     const res = await fetch(

@@ -4,7 +4,6 @@ import { isNullOrUndefinedOrBlank, strEquals, testInvalidCharacters } from "../l
 import { Choreo, ChoreoManifest } from "../models/choreo";
 import CustomAutocomplete from "../components/inputs/CustomAutocomplete";
 import { FileEdits } from "./ManagerPage";
-import CustomSwitch from "../components/inputs/CustomSwitch";
 import Button from "../components/basic/Button";
 import { Dialog } from "@base-ui/react";
 import BaseEditDialog from "../components/dialogs/BaseEditDialog";
@@ -20,7 +19,6 @@ import Label from "../components/inputs/Label";
 interface FileEditForm {
   name: string,
   eventName: string,
-  isHidden: boolean,
   choreo?: Choreo,
 }
 
@@ -39,7 +37,6 @@ export function FileEditPage({
   const [form, setForm] = useState<FileEditForm>({
     name: edits?.name ?? choreo.name,
     eventName: edits?.eventName ?? choreo.event,
-    isHidden: edits?.isHidden ?? choreo.isHidden ?? false,
     choreo: edits?.choreo,
   });
 
@@ -49,13 +46,11 @@ export function FileEditPage({
 
   const nameRef = useRef<any>(null);
   const eventRef = useRef<any>(null);
-  const isHiddenRef = useRef<any>(null);
 
   const handleSubmit = () => {
     console.log("Saving edits on id:", choreo.id, {
       name: strEquals(choreo.name, form.name) ? "unchanged" : "updated",
       eventName: strEquals(choreo.event, form.eventName) ? "unchanged" : "updated",
-      isHidden: choreo.isHidden === form.isHidden ? "unchanged" : "updated",
       choreo: form.choreo || edits?.choreo ? "updated" : "unchanged",
     });
 
@@ -64,30 +59,26 @@ export function FileEditPage({
       name: strEquals(choreo.name, form.name) ? undefined : form.name,
       eventName: strEquals(choreo.event, form.eventName) ? undefined : form.eventName,
       choreo: form.choreo ?? edits?.choreo,
-      isHidden: (choreo.isHidden === form.isHidden || (choreo.isHidden === undefined && form.isHidden === false)) ? undefined : form.isHidden,
     };
     var hasEdits =
       newEdits.name !== undefined ||
       newEdits.eventName !== undefined ||
-      newEdits.choreo !== undefined ||
-      newEdits.isHidden !== undefined;
+      newEdits.choreo !== undefined;
       
     addEdits(choreo.id, hasEdits ? newEdits : undefined);
     exitPage();
   };
 
-  const hasEdits = form.choreo || !strEquals(form.name, choreo.name) || !strEquals(form.eventName, choreo.event) || form.isHidden !== (choreo.isHidden ?? false)
+  const hasEdits = form.choreo || !strEquals(form.name, choreo.name) || !strEquals(form.eventName, choreo.event)
 
   const revert = () => {
     setForm({
       name: choreo.name,
       eventName: choreo.event,
-      isHidden: choreo.isHidden ?? false,
       choreo: undefined,
     });
     nameRef.current.changeValue(choreo.name);
     eventRef.current.changeValue(choreo.event);
-    isHiddenRef.current.changeChecked(choreo.isHidden === undefined ? true : !choreo.isHidden);
   }
 
   const selectChoreoDialog = Dialog.createHandle<Choreo>();
@@ -164,12 +155,6 @@ export function FileEditPage({
           ref={eventRef}
           showLength
           // restrictFn={(s) => !testInvalidCharacters(s)} // todo: after pushing the official goen change to restrict
-        />
-        <CustomSwitch
-          label="公開する"
-          defaultChecked={!form.isHidden}
-          onChange={checked => handleChange("isHidden", !checked)}
-          ref={isHiddenRef}
         />
         {
           choreo.version !== 0 && !form.choreo &&
