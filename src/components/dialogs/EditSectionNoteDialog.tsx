@@ -25,7 +25,7 @@ export default function EditSectionNoteDialog({
     title="ノート変更"
     onSubmit={onSubmitBtnClicked}
     >
-    <div className="w-[50svw] h-[50svh]">
+    <div className="w-[70svw] md:w-[50svw] h-[50svh]">
       <LongTextInput
         name="Note Editor"
         defaultValue={section?.note ?? ""}
