@@ -44,7 +44,8 @@ export default function GridPreview (props: GridPreviewProps) {
         stageGeometry &&
         <GridLayer
           stageGeometry={stageGeometry}
-          showGridLines={true}
+          showGridLines
+          showBorder
         />
       }
     </Stage>

@@ -8,12 +8,14 @@ interface GridLayerProps {
   stageGeometry: StageGeometry,
   gridSize?: number,
   showGridLines: boolean,
+  showBorder?: boolean,
 }
 
 export default function GridLayer({
   stageGeometry,
   gridSize,
   showGridLines,
+  showBorder,
 }: GridLayerProps) {
   const [elements, setElements] = useState<any[]>([]);
   const gridSizePx = gridSize ?? METER_PX;
@@ -225,6 +227,22 @@ export default function GridLayer({
           </Group>
         );
       }
+    }
+
+    if (showBorder) {
+      elements.push(
+        <Rect
+          key={"outline"}
+          width={totalWidthPx-2}
+          height={totalHeightPx-2}
+          x={1}
+          y={1}
+          cornerRadius={METER_PX/2}
+          strokeEnabled
+          strokeWidth={1}
+          stroke={colorPalette.primary}
+          />
+      );
     }
     setElements(elements);
   }, [stageGeometry, showGridLines]);
