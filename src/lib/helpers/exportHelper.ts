@@ -679,6 +679,67 @@ export async function exportToPdf (
 
     pdf.setFont(boldFont);
 
+    // have a semi-transparent layer for the numberings in case there is overlap with items that are out of bounds
+    pdf.saveGraphicsState();
+    const gState = new GState({ opacity: 0.5 });
+    pdf.setGState(gState);
+    // Horizontal grid lines + right labels
+    for (let m = 0; m <= totalLengthM; m++) {
+      const y = m * PDF_METER_PX;
+      // Right-side meter labels
+      // if stage, 0 at top of stage
+      // if parade, 0 at bottom of stage
+
+      const txtY = y + 3 + titleBuffer - startingPointDelta;
+      if (txtY >= stageTopPx && y <= stageBottomPx && txtY <= (visualDiagramHeightPx + titleBuffer)) {
+        const meterFromTop =
+          stage.yAxis === "top-down" ? 
+          (y - stageTopPx) / PDF_METER_PX :
+          (stageBottomPx - y) / PDF_METER_PX;
+        
+        
+        if (meterFromTop >= 0) {
+          pdf.setFontSize(12);
+          pdf.setLineWidth(0.2);
+          pdf.setDrawColor(colorPalette.white);
+          pdf.setTextColor(colorPalette.black);
+          pdf.text(`${meterFromTop}m`, stageRightPx + 8, txtY, {renderingMode: "fillThenStroke"});
+        }
+      }
+    }
+    pdf.restoreGraphicsState();
+
+    // Top numbering relative to center
+    for (let m = 1; m < totalWidthM; m++) {
+      const x = m * PDF_METER_PX + gridOffsetPx - pageMargin;
+    
+      const isCenter = x === centerX;
+      if (
+        x >= stageLeftPx &&
+        x <= stageRightPx &&
+        !isCenter
+      ) {
+        const meterFromCenter = Math.abs(x - centerX) / PDF_METER_PX;
+
+        if (meterFromCenter % 2 !== 0) continue;
+    
+        const radius = PDF_METER_PX * 0.3;
+        const cx = x;
+        const cy = stageTopPx - PDF_METER_PX * (startingPoint ? 1.5 : 1);
+
+        pdf.setFontSize(8);
+        pdf.setFillColor(colorPalette.primary);
+        pdf.setDrawColor(colorPalette.primary);
+        pdf.setTextColor(colorPalette.white);
+        pdf.saveGraphicsState();
+        const gState = new GState({ opacity: 0.5 });
+        pdf.setGState(gState);
+        pdf.circle(cx, cy + titleBuffer, radius, "F");
+        pdf.restoreGraphicsState();
+        pdf.text(`${meterFromCenter}`, cx, cy - 3 + titleBuffer, {align: "center", baseline: "top", maxWidth: PDF_METER_PX});
+      }
+    }
+
     updateProgress(Math.round(((i + 2) / (choreo.sections.length + 1)) * 100));
 
     if (i < choreo.sections.length - 1) {

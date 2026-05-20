@@ -15,6 +15,7 @@ import GhostLayer from "./layers/GhostLayer";
 import NextDirectionLayer from "./layers/NextDirectionLayer";
 import { Coordinates } from "../../models/base";
 import { strEquals } from "../../lib/helpers/globalHelper";
+import MarkingsLayer from "./layers/MarkingsLayer";
 
 Konva.hitOnDragEnabled = true;
 
@@ -361,6 +362,9 @@ export default function MainStage({
             nextPosition={selectedDancerMovement.next}
           />
         }
+        <MarkingsLayer
+          stageGeometry={stageGeometry}
+        />
       </Stage>
     }
   </div>
