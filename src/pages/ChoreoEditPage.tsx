@@ -96,6 +96,12 @@ export default function ChoreoEditPage(props: {
     []
   );
 
+  const entityCount = useMemo(() => ({
+    props: Object.keys(history.presentState.state.props).length,
+    dancers: Object.keys(history.presentState.state.dancers).length,
+    obstacles: history.presentState.state.obstacles ? Object.keys(history.presentState.state.obstacles).length : 0,
+  } as StageEntities<number>), [history.presentState.state.dancers, history.presentState.state.props, history.presentState.state.obstacles]);
+
   useEffect(() => {
     hasInitialized.current = false;
   }, [props.currentChoreo]);
@@ -440,9 +446,9 @@ export default function ChoreoEditPage(props: {
         editName={() => {setEditChoreoInfoDialogOpen(true)}}
         editSize={() => {setResizeDialogOpen(true);}}
         onDownload={() => setExportDialogOpen(true)}
-        showManageDancers={Object.keys(history.presentState.state.dancers).length > 0}
+        showManageDancers={entityCount.dancers > 0}
         manageDancers={() => {setDancerManagerDialogOpen(true);}}
-        showManageProps={Object.keys(history.presentState.state.props).length > 0}
+        showManageProps={entityCount.props > 0}
         manageProps={() => {setPropManagerDialogOpen(true);}}
         manageSections={() => {console.log("TODO: implement Manage Sections")}}
         exportChoreo={() => {
@@ -657,9 +663,16 @@ export default function ChoreoEditPage(props: {
           var currentColours = new Set(positions.filter(x => selectedIds.dancers.includes(x[0])).map(x => x[1].color));
           setSelectedIds(prev => ({...prev, dancers: positions.filter(x => currentColours.has(x[1].color)).map(x => x[0])}));
         }}
-        onSelectType={() => {
-          setSelectedIds({props: [], dancers: Object.keys(history.presentState.state.dancers), obstacles: []});
+        onSelectType={(selectDancers: boolean, selectProps: boolean) => {
+          setSelectedIds({
+            props: selectProps ? Object.keys(history.presentState.state.props) : [],
+            dancers: selectDancers ? Object.keys(history.presentState.state.dancers) : [],
+            obstacles: []
+          });
         }}
+        showSelectDancersButton={entityCount.dancers > 0 && entityCount.dancers > selectedIds.dancers.length}
+        showSelectPropsButton={entityCount.props > 0 && entityCount.props > selectedIds.props.length}
+        showSelectAllButton={entityCount.dancers > selectedIds.dancers.length || entityCount.props > selectedIds.props.length}
         onDeselect={resetSelectedIds}
         showDistribute={(selectedIds.dancers.length + selectedIds.props.length + selectedIds.obstacles.length) >= 3}
         onDistribute={(distribution) => {
@@ -733,7 +746,7 @@ export default function ChoreoEditPage(props: {
             commit: true});
           setSelectedIds({props: [], dancers: [], obstacles: newIds});
         }}
-        showLockObstacle={(Object.keys(history.presentState.state.obstacles ?? {})?.length ?? 0) > 0}
+        showLockObstacle={entityCount.obstacles > 0}
         areObstaclesLocked={areObstaclesLocked}
         onToggleObstacleLock={() => {setAreObstaclesLocked(prev => !prev)}}
       />

@@ -1,8 +1,10 @@
 import classNames from "classnames"
 import Icon from "./Icon";
+import { useMemo } from "react";
 
 type IconButtonProps = {
   src: string,
+  subIconSrc?: string,
   label?: string,
   onClick?: () => void,
   noBorder?: boolean,
@@ -13,9 +15,9 @@ type IconButtonProps = {
 }
 
 export default function IconButton ({
-  src, label, onClick, noBorder, disabled, size, colour, asDiv
+  src, subIconSrc, label, onClick, noBorder, disabled, size, colour, asDiv
 }: IconButtonProps) {
-  var buttonClasses = classNames("flex justify-center items-center rounded-full", {
+  var buttonClasses = classNames("relative flex justify-center items-center rounded-full", {
     "border-0": noBorder,
     "border-primary": noBorder !== true && colour === "primary",
     "border-black": noBorder !== true && (colour === undefined || colour === "black"),
@@ -28,9 +30,25 @@ export default function IconButton ({
     "min-w-8 min-h-8 size-8 max-w-8 max-h-8": noBorder !== true && size === "sm",
   });
 
+  const subIconSize = useMemo(() => 
+    (size === undefined || size === "md") ? "sm" : size === "lg" ? "md" : "xs",
+    [size]
+  );
+
   var labelClasses = classNames("text-sm text-nowrap font-semibold", {
     "opacity-30": disabled
   })
+
+  const icons = (
+    <div className="relative flex items-center justify-center">
+      <Icon src={src} size={size} colour={colour}/>
+      {subIconSrc && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Icon src={subIconSrc} size={subIconSize} colour={colour}/>
+        </div>
+      )}
+    </div>
+  );
 
   return <div className="flex flex-col items-center justify-center">
     {
@@ -39,7 +57,7 @@ export default function IconButton ({
         className={buttonClasses}
         disabled={disabled}
         onClick={onClick}>
-        <Icon src={src} size={size} colour={colour}/>
+        {icons}
       </button>
     }
     {
@@ -51,7 +69,7 @@ export default function IconButton ({
             onClick?.();
           }
         }}>
-        <Icon src={src} size={size} colour={colour}/>
+        {icons}
       </div>
     }
     {label && <div className={labelClasses}>{label}</div>}

@@ -113,6 +113,7 @@ export const ICON = {
   restorePage: "restore_page",
   save: "save",
   search: "search",
+  select: "select",
   selectAll: "select_all",
   settings: "settings",
   straighten: "straighten",
