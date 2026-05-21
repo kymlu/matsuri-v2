@@ -12,10 +12,14 @@ type IconButtonProps = {
   size?: "sm" | "md" | "lg",
   colour?: "primary" | "black" | "grey" | "white",
   asDiv?: boolean,
+  crossedOut?: boolean,
+  vertFlip?: boolean,
 }
 
 export default function IconButton ({
-  src, subIconSrc, label, onClick, noBorder, disabled, size, colour, asDiv
+  src, subIconSrc, label, onClick,
+  noBorder, disabled, size, colour, asDiv,
+  crossedOut, vertFlip,
 }: IconButtonProps) {
   var buttonClasses = classNames("relative flex justify-center items-center rounded-full", {
     "border-0": noBorder,
@@ -41,7 +45,7 @@ export default function IconButton ({
 
   const icons = (
     <div className="relative flex items-center justify-center">
-      <Icon src={src} size={size} colour={colour}/>
+      <Icon src={src} size={size} colour={colour} crossedOut={crossedOut} vertFlip={vertFlip}/>
       {subIconSrc && (
         <div className="absolute inset-0 flex items-center justify-center">
           <Icon src={subIconSrc} size={subIconSize} colour={colour}/>

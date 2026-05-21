@@ -94,10 +94,12 @@ export default function Header({
         toggleShowPath &&
         <IconButton
           colour="black"
-          src={showPath ? ICON.doNotStep : ICON.podiatry}
+          src={ICON.step}
           noBorder
           onClick={toggleShowPath}
           disabled={isShowPathBtnDisabled}
+          crossedOut={showPath}
+          vertFlip
           />
       }
       {

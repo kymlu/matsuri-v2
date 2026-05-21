@@ -13,6 +13,7 @@ import { PropPosition } from "../models/prop";
 import ExportDialog from "../components/dialogs/ExportDialog";
 import { Dialog } from "@base-ui/react";
 import { exportChoreo } from "../lib/helpers/exportHelper";
+import InstructionMessage from "../components/basic/InstructionMessage";
 
 export default function ChoreoViewPage(props: {
   goToHomePage: () => void
@@ -25,7 +26,9 @@ export default function ChoreoViewPage(props: {
   const [selectedIds, setSelectedIds] = useState<StageEntities<string[]>>({props: [], dancers: [], obstacles: []});
   const [selectedTimingId, setSelectedTimingId] = useState<string | undefined>();
   const [selectedObjects, setSelectedObjects] = useState<StageEntities<PropPosition[], DancerPosition[]>>({dancers: [], props: [], obstacles: []});
-  const [showPaths, setShowPaths] = useState<boolean>(false);
+  const [showPaths, setShowPaths] = useState<boolean>(true);
+  const [showHint, setShowHint] = useState<boolean>(false);
+  const [hintManuallyClosed, setHintManuallyClosed] = useState<boolean>(false);
   const [appSettings, setAppSettings] = useState<AppSetting>({
     snapToGrid: true,
     showGrid: true,
@@ -34,12 +37,15 @@ export default function ChoreoViewPage(props: {
   });
 
   useEffect(() => {
+    setHintManuallyClosed(false);
     if (!isNullOrUndefinedOrBlank(props.userName)) {
       const dancer = Object.values(props.currentChoreo.dancers).find(x => strEquals(x.name, props.userName));
       if (dancer) {
         setSelectedIds({dancers: [dancer.id], props: [], obstacles: []});
+        setShowHint(false);
       } else {
         resetSelectedIds();
+        setShowHint(true);
       }
     }
   }, [props.currentChoreo, props.userName]);
@@ -96,7 +102,12 @@ export default function ChoreoViewPage(props: {
             selectedObjects.props.length === 0 &&
             props.currentChoreo.dancers[selectedIds.dancers[0]] !== undefined
           }
-          deselectPosition={resetSelectedIds}
+          deselectPosition={() => {
+            resetSelectedIds();
+            if (!hintManuallyClosed) {
+              setShowHint(true);
+            }
+          }}
           onSelectTiming={(timing) => {
             if (timing) {
               setSelectedIds({props: [], dancers: timing.dancerIds, obstacles: []});
@@ -144,8 +155,21 @@ export default function ChoreoViewPage(props: {
              } :
             undefined
           }
+          onDancerSelected={() => {
+            if (showHint) setShowHint(false);
+          }}
         />
       </div>
+
+      {
+        showHint &&
+        <InstructionMessage
+          instruction="名前をタップすると、位置情報が表示されます。"
+          onClose={() => {
+            setShowHint(false);
+            setHintManuallyClosed(true);
+          }}/>
+      }
       
       <Dialog.Root
         handle={exportDialog}

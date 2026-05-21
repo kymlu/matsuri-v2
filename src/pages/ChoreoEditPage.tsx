@@ -38,6 +38,7 @@ import CustomDialog from "../components/basic/CustomDialog";
 import { IconLabelButton } from "../components/basic/Button";
 import EditDancerNameDialog from "../components/dialogs/EditDancerNameDialog";
 import AbsentDancersWarningDialog from "../components/dialogs/AbsentDancersWarningDialog";
+import InstructionMessage from "../components/basic/InstructionMessage";
 
 const resizeDialog = Dialog.createHandle<Choreo>();
 const editChoreoInfoDialog = Dialog.createHandle<string>();
@@ -1105,23 +1106,4 @@ export default function ChoreoEditPage(props: {
       </Dialog.Root>
     </div>
   )
-}
-
-type InstructionMessageProps = {
-  instruction: React.ReactNode,
-  onClose: () => void,
-}
-
-function InstructionMessage({
-  instruction, onClose
-}: InstructionMessageProps) {
-  return <div className="absolute items-center w-max rounded-md flex gap-2 p-2 top-20 left-1/2 translate-x-[-50%] bg-white border border-primary">
-    <span>
-      {instruction}
-    </span>
-    <IconButton
-      src={ICON.clear}
-      size="sm"
-      onClick={onClose}/>
-  </div>
 }

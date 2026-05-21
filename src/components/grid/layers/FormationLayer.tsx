@@ -36,6 +36,7 @@ type FormationLayerProps = {
   snapToGrid?: boolean,
   dancerDisplayType: DancerDisplayType,
   isDraggingOnEmpty?: boolean,
+  onDancerSelected?: () => void,
 };
 
 export default function FormationLayer({
@@ -60,7 +61,8 @@ export default function FormationLayer({
   snapToGrid,
   hideTransformerBorder,
   dancerDisplayType,
-  isDraggingOnEmpty
+  isDraggingOnEmpty,
+  onDancerSelected
 }: FormationLayerProps) {
 	const transformerRef = useRef<Konva.Transformer>(null);
 
@@ -190,7 +192,10 @@ export default function FormationLayer({
             position={dancerPosition}
             stageGeometry={geometry}
             updatePosition={(x, y) => updateDancerPosition?.(x, y, dancerPosition.dancerId)}
-            onClick={(isAdditive) => {toggleDancerSelect(dancerPosition.dancerId, isAdditive)}}
+            onClick={(isAdditive) => {
+              toggleDancerSelect(dancerPosition.dancerId, isAdditive);
+              onDancerSelected?.();
+            }}
             isSelected={selectedIds.dancers.includes(dancerPosition.dancerId)}
             isTransformerActive={isTransformerActive}
             registerNode={registerNode}

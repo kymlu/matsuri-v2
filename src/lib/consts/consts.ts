@@ -116,6 +116,7 @@ export const ICON = {
   select: "select",
   selectAll: "select_all",
   settings: "settings",
+  step: "step",
   straighten: "straighten",
   sortByAlpha: "sort_by_alpha",
   speakerNotes: "speaker_notes",

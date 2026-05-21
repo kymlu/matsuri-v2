@@ -44,6 +44,7 @@ type MainStageProps = {
   appSettings: AppSetting,
   previousSection?: ChoreoSection,
   selectedDancerMovement?: {current?: DancerPosition, next?: DancerPosition},
+  onDancerSelected?: () => void,
 }
 
 export default function MainStage({
@@ -53,7 +54,8 @@ export default function MainStage({
   hideTransformerBorder, currentChoreo, currentSection,
   updateDancerPosition, updatePropPosition, updateObstaclePosition,
   updatePropSizeAndRotate, updateObstacleSizeAndRotate, selectedIds, setSelectedIds,
-  addDancer, addProp, addObstacle, appSettings, previousSection, selectedDancerMovement
+  addDancer, addProp, addObstacle, appSettings, previousSection, selectedDancerMovement,
+  onDancerSelected,
 }: MainStageProps) {
   const [dancerPositions, setDancerPositions] = useState<DancerPosition[]>([]);
   const [propPositions, setPropPositions] = useState<PropPosition[]>([]);
@@ -353,6 +355,7 @@ export default function MainStage({
           snapToGrid={appSettings.snapToGrid}
           dancerDisplayType={appSettings.dancerDisplayType}
           isDraggingOnEmpty={isDraggingOnEmpty}
+          onDancerSelected={onDancerSelected}
           />
         {
           selectedDancerMovement &&
