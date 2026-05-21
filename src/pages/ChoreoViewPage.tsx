@@ -164,7 +164,7 @@ export default function ChoreoViewPage(props: {
       {
         showHint &&
         <InstructionMessage
-          instruction="名前をタップすると、位置情報が表示されます。"
+          instruction={<div className="text-center"><span>名前をタップすると、</span><br/><span>位置情報が表示されます。</span></div>}
           onClose={() => {
             setShowHint(false);
             setHintManuallyClosed(true);
