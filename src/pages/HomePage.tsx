@@ -32,6 +32,7 @@ import AbsentDancersWarningDialog from "../components/dialogs/AbsentDancersWarni
 import BeginnersDialog from "../components/dialogs/BeginnersDialog"
 import EditEventInfoDialog from "../components/dialogs/EditEventInfoDialog"
 import SiteInfoDialog from "../components/dialogs/SiteInfoDialog"
+import { Tag } from "../components/common/Tag"
 
 type HomePageProps = {
   buildInfo?: string,
@@ -777,36 +778,19 @@ function EventSection({
                     }
                     {
                       choreo.status === "upToDate" &&
-                      <div className="px-1 py-0.5 text-sm font-semibold flex items-center gap-0.5 border rounded-md text-primary border-primary text-nowrap">
-                        {
-                          choreo.version &&
-                          <span>v{choreo.version}</span>
-                        }
-                      </div>
+                      <Tag type="primary" text={`v${choreo.version}`}/>
                     }
                     {
                       choreo.status === "syncRequired" &&
-                      <div className="px-1 py-0.5 flex items-center gap-0.5 text-sm font-semibold text-white border rounded-md text-nowrap bg-primary border-primary">
-                        {
-                          choreo.version &&
-                          <span>v{choreo.version}</span>
-                        }
-                        <Icon src={ICON.warning} colour="white" size="xs"/>
-                      </div>
+                      <Tag type="filled" text={`v${choreo.version}`} icon={ICON.warning}/>
                     }
                     {
                       choreo.status === "edited" &&
-                      <div className="px-1 py-0.5 text-sm font-semibold flex items-center gap-0.5 border rounded-md text-primary border-primary text-nowrap">
-                        {
-                          choreo.version &&
-                          <span>v{choreo.version}</span>
-                        }
-                        <Icon src={ICON.edit} colour="primary" size="xs"/>
-                      </div>
+                      <Tag type="primary" text={`v${choreo.version}`} icon={ICON.edit}/>
                     }
                     {
                       (choreo.status === "localOnly") &&
-                      <div className="px-1 py-0.5 text-sm text-gray-600 border border-gray-600 rounded-md text-nowrap">未公開</div>
+                      <Tag type="grey" text="未公開"/>
                     }
                     <Dialog.Trigger id={choreo.id} payload={choreo} handle={optionsDialog} onClick={(e) => {
                       e.stopPropagation();
