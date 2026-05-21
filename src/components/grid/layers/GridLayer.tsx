@@ -152,8 +152,9 @@ export default function GridLayer({
       <Text
         key={"frontText"}
         text="前"
-        x={centerX - gridSizePx/4}
+        x={centerX - gridSizePx * 0.7}
         y={stageTopPx - gridSizePx}
+        width={gridSizePx * 1.4}
         align="center"
         fill="white"
         fontStyle="bold"

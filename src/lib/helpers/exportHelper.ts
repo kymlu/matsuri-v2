@@ -267,18 +267,19 @@ export async function exportToPdf (
         centerX - PDF_METER_PX * 0.7, stageTopPx - PDF_METER_PX * 1.2 + titleBuffer,
         centerX + PDF_METER_PX * 0.7, stageTopPx - PDF_METER_PX * 1.2 + titleBuffer,
         "FD"
-      )
+      );
+      pdf.setTextColor("white");
+      pdf.text("前", centerX, stageTopPx + PDF_METER_PX * 0.85, {maxWidth: PDF_METER_PX * 1.4, align: "center"});
     } else {
       pdf.triangle(
-        centerX, titleBuffer + PDF_METER_PX * 0.5,
-        centerX - PDF_METER_PX * 0.25, titleBuffer,
-        centerX + PDF_METER_PX * 0.25, titleBuffer,
+        centerX, titleBuffer + PDF_METER_PX * 0.9,
+        centerX - PDF_METER_PX * 0.7, titleBuffer,
+        centerX + PDF_METER_PX * 0.7, titleBuffer,
         "FD"
-      )
+      );
+      pdf.setTextColor("white");
+      pdf.text("前", centerX, titleBuffer + PDF_METER_PX * 0.5, {maxWidth: PDF_METER_PX * 1.4, align: "center"});
     }
-
-    pdf.setTextColor("white");
-    pdf.text("前", centerX - PDF_METER_PX/4, stageTopPx + PDF_METER_PX * 0.85);
 
     pdf.setLineDashPattern([], 0);
     pdf.setFontSize(8);
