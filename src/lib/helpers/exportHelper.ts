@@ -252,16 +252,20 @@ export async function exportToPdf (
       }
     }
 
+    // Center line
+    drawLine(pdf, colorPalette.midGrey, 1, [10, 6], centerX, titleBuffer, centerX, visualDiagramHeightPx + titleBuffer);
+
+
     // centre triangle
     pdf.setLineDashPattern([], 0);
     pdf.setLineWidth(0);
-    pdf.setDrawColor(colorPalette.primary);
-    pdf.setFillColor(colorPalette.primary);
+    pdf.setDrawColor(colorPalette.grey);
+    pdf.setFillColor(colorPalette.grey);
     if (isNullOrUndefined(startingPoint)) {
       pdf.triangle(
-        centerX, stageTopPx - PDF_METER_PX * 0.3 + titleBuffer,
-        centerX - PDF_METER_PX * 0.5, stageTopPx - PDF_METER_PX * 1.2 + titleBuffer,
-        centerX + PDF_METER_PX * 0.5, stageTopPx - PDF_METER_PX * 1.2 + titleBuffer,
+        centerX, stageTopPx - PDF_METER_PX * 0.2 + titleBuffer,
+        centerX - PDF_METER_PX * 0.7, stageTopPx - PDF_METER_PX * 1.2 + titleBuffer,
+        centerX + PDF_METER_PX * 0.7, stageTopPx - PDF_METER_PX * 1.2 + titleBuffer,
         "FD"
       )
     } else {
@@ -272,8 +276,9 @@ export async function exportToPdf (
         "FD"
       )
     }
-    // Center line
-    drawLine(pdf, colorPalette.primary, 1.25, [10, 6], centerX, titleBuffer, centerX, visualDiagramHeightPx + titleBuffer);
+
+    pdf.setTextColor("white");
+    pdf.text("前", centerX - PDF_METER_PX/4, stageTopPx + PDF_METER_PX * 0.85);
 
     pdf.setLineDashPattern([], 0);
     pdf.setFontSize(8);
@@ -358,8 +363,8 @@ export async function exportToPdf (
     pdf.text(section.name, centerX, PDF_METER_PX, {maxWidth: diagramWidthPx, align: "center"});
 
     // main stage border
-    pdf.setDrawColor(colorPalette.primary);
-    pdf.setLineWidth(1.25);
+    pdf.setDrawColor(colorPalette.grey);
+    pdf.setLineWidth(1);
     pdf.rect(stageLeftPx, (startingPoints[i] ? 0 : stageTopPx) + titleBuffer, stageWidthPx, startingPoints[i] ? visualDiagramHeightPx : stageHeightPx)
 
     pdf.setFontSize(8);

@@ -125,8 +125,8 @@ export default function GridLayer({
         <Line
           key="center-line"
           points={[centerX, 0, centerX, totalHeightPx]}
-          stroke={colorPalette.primary}
-          strokeWidth={2}
+          stroke={colorPalette.midGrey}
+          strokeWidth={1.5}
           dash={[10, 6]}
         />
       );
@@ -138,13 +138,26 @@ export default function GridLayer({
         key={"triangle"}
         sceneFunc={(context, shape) => {
           context.beginPath();
-          context.moveTo(centerX, stageTopPx - gridSizePx * 0.3);
-          context.lineTo(centerX - gridSizePx * 0.5, stageTopPx - gridSizePx * 1.2);
-          context.lineTo(centerX + gridSizePx * 0.5, stageTopPx - gridSizePx * 1.2);
+          context.moveTo(centerX, stageTopPx - gridSizePx * 0.2);
+          context.lineTo(centerX - gridSizePx * 0.7, stageTopPx - gridSizePx * 1.2);
+          context.lineTo(centerX + gridSizePx * 0.7, stageTopPx - gridSizePx * 1.2);
           context.closePath();
           context.fillStrokeShape(shape);
         }}
-        fill={colorPalette.primary}
+        fill={colorPalette.grey}
+      />
+    )
+
+    elements.push(
+      <Text
+        key={"frontText"}
+        text="前"
+        x={centerX - gridSizePx/4}
+        y={stageTopPx - gridSizePx}
+        align="center"
+        fill="white"
+        fontStyle="bold"
+        fontSize={12}
       />
     )
     
@@ -182,8 +195,8 @@ export default function GridLayer({
         y={stageTopPx}
         width={stageWidthPx}
         height={stageHeightPx}
-        stroke={colorPalette.primary}
-        strokeWidth={2}
+        stroke={colorPalette.grey}
+        strokeWidth={1.5}
       />
     );
     
