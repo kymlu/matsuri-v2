@@ -65,7 +65,8 @@ export default function MarkingsLayer({
             fill="black"
             perfectDrawEnabled={false}
             strokeEnabled
-            strokeWidth={0.6}
+            fillAfterStrokeEnabled
+            strokeWidth={3}
             stroke="white"
             opacity={0.5}
           />
