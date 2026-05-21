@@ -77,7 +77,6 @@ export default function ChoreoViewPage(props: {
         returnHome={props.goToHomePage}
         currentChoreo={props.currentChoreo}
         onDownload={() => {setExportDialogOpen(true)}}
-        exportChoreo={() => exportChoreo(props.currentChoreo)}
         changeShowGrid={() => {
           setAppSettings(prev => {return {...prev, showGrid: !prev.showGrid}})
         }}

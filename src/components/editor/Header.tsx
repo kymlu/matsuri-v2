@@ -9,6 +9,7 @@ import CustomMenu from "../inputs/CustomMenu";
 import { IconLabelButton } from "../basic/Button";
 import Divider from "../basic/Divider";
 import { formatDateRange } from "../../lib/helpers/dateHelper";
+import Icon from "../basic/Icon";
 
 type HeaderProps = {
   returnHome: () => void;
@@ -23,7 +24,7 @@ type HeaderProps = {
   showManageProps?: boolean;
   manageProps?: () => void;
   manageSections?: () => void;
-  exportChoreo: () => void;
+  exportChoreo?: () => void;
   changeSnap?: () => void;
   changeShowGrid?: () => void;
   changeShowPrevious?: () => void;
@@ -103,7 +104,7 @@ export default function Header({
           />
       }
       {
-        onDownload &&
+        onDownload && exportChoreo &&
         <CustomMenu trigger={
           <IconButton
             src={ICON.download}
@@ -120,6 +121,10 @@ export default function Header({
             </Menu.Item>
           </div>
         </CustomMenu>
+      }
+      {
+        onDownload && !exportChoreo &&
+        <IconButton noBorder src={ICON.pictureAsPdf} onClick={onDownload}/>
       }
       {
         hasSidebar &&
