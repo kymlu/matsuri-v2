@@ -5,6 +5,7 @@ module.exports = {
     extend: {
       colors: {
         primary: '#AB1010',
+        lightGrey: "#CDCDCD",
       },
       fontFamily: {
         icon: 'Material Symbols Rounded',

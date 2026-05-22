@@ -245,14 +245,14 @@ export async function exportToPdf (
         
         
         if (meterFromTop >= 0) {
-          pdf.setFontSize(12);
-          pdf.setTextColor(colorPalette.black);
-          pdf.text(`${meterFromTop}m`, stageRightPx + 8, txtY);
+          pdf.setFontSize(11);
+          pdf.setTextColor(colorPalette.grey);
+          pdf.text(`${meterFromTop}`, memoLeft - pageMargin * 1.5, txtY, {maxWidth: PDF_METER_PX, align: "right"});
         }
       }
     }
 
-    // Center line
+    // Centre line
     drawLine(pdf, colorPalette.midGrey, 1, [10, 6], centerX, titleBuffer, centerX, visualDiagramHeightPx + titleBuffer);
 
 
@@ -705,11 +705,13 @@ export async function exportToPdf (
         
         
         if (meterFromTop >= 0) {
-          pdf.setFontSize(12);
+          pdf.setFontSize(11);
           pdf.setLineWidth(0.2);
           pdf.setDrawColor(colorPalette.white);
           pdf.setTextColor(colorPalette.black);
-          pdf.text(`${meterFromTop}m`, stageRightPx + 8, txtY, {renderingMode: "fillThenStroke"});
+          pdf.setFillColor(colorPalette.black);
+          pdf.text(`${meterFromTop}`, memoLeft - pageMargin * 1.5, txtY, {renderingMode: "fillThenStroke", maxWidth: PDF_METER_PX, align: "right"});
+          pdf.text(`${meterFromTop}`, memoLeft - pageMargin * 1.5, txtY, {maxWidth: PDF_METER_PX, align: "right"});
         }
       }
     }

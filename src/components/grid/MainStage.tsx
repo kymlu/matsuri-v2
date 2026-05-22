@@ -1,6 +1,6 @@
 import { Stage } from "react-konva";
 import GridLayer from "./layers/GridLayer";
-import { useState, useCallback, useEffect, useRef, SetStateAction } from "react";
+import { useState, useCallback, useEffect, useRef, SetStateAction, useMemo } from "react";
 import { Choreo, StageGeometry } from "../../models/choreo";
 import FormationLayer from "./layers/FormationLayer";
 import { ChoreoSection } from "../../models/choreoSection";
@@ -16,6 +16,7 @@ import NextDirectionLayer from "./layers/NextDirectionLayer";
 import { Coordinates } from "../../models/base";
 import { strEquals } from "../../lib/helpers/globalHelper";
 import MarkingsLayer from "./layers/MarkingsLayer";
+import FloatingGridLayer from "./layers/FloatingGridLayer";
 
 Konva.hitOnDragEnabled = true;
 
@@ -63,7 +64,6 @@ export default function MainStage({
 
   const [clickedOnEmpty, setClickedOnEmpty] = useState<boolean>(false);
   const [isDraggingOnEmpty, setIsDraggingOnEmpty] = useState<boolean | undefined>(undefined);
-
   useEffect(() => {
     var newGeometry = currentChoreo.stageGeometry;
     if (stageGeometry !== undefined &&
@@ -107,27 +107,35 @@ export default function MainStage({
   const stageRef = useRef<Konva.Stage>(null);
   const [stagePosSectionId, setStagePosSectionId] = useState<string>("");
 
+  const [rulerPos, setRulerPos] = useState<Coordinates>({x: 0, y: 0});
+  const [isSelectingNewSection, setIsSelectingNewSection] = useState<boolean>(false);
+
   useEffect(() => {
     if (stageGeometry && stageGeometry.yAxis === "bottom-up" && !strEquals(stagePosSectionId, currentSection.id)) {
+      setIsSelectingNewSection(true);
       setStagePosSectionId(currentSection.id);
       var frontmostY = Math.max(
         ...Object.values(currentSection.formation.dancerPositions).map(x => x.y),
         ...Object.values(currentSection.formation.propPositions).map(x => x.y)
       );
       var newPosition = {x: stagePos.x, y: -stageMetersToPx({x: 0, y: frontmostY + 2}, stageGeometry, METER_PX).y * stageScale.y};
+      setRulerPos(newPosition)
       if (newPosition.y !== stagePos.y) {
         stageRef?.current?.to({
           x: newPosition.x,
           y: newPosition.y,
           duration: 1,
           easing: Konva.Easings.EaseInOut,
-          onFinish: () => {setStagePos(newPosition)}
+          onFinish: () => {
+            setIsSelectingNewSection(false);
+            setStagePos(newPosition);
+          }
         });
       }
     }
   }, [stageRef, currentSection, stageGeometry]);
 
-  const [stageScale, setStageScale] = useState<any>({ x: 1, y: 1 });
+  const [stageScale, setStageScale] = useState<Coordinates>({ x: 1, y: 1 });
   const [lastCenter, setLastCenter] = useState<any>(null);
   const [lastDist, setLastDist] = useState(0);
   const [dragStopped, setDragStopped] = useState(false);
@@ -258,6 +266,20 @@ export default function MainStage({
     const stage = e.target.getStage();
     setStagePos({ x: stage.x(), y: stage.y() });
   };
+
+  const verticalGridIncrement = useMemo(() => {
+    const pixelsPerMeter = METER_PX * stageScale.y;
+    
+    if (pixelsPerMeter < 10) {
+      return 10;
+    } else if (pixelsPerMeter < 20) {
+      return 5;
+    } else if (pixelsPerMeter < 40) {
+      return 2;
+    } else {
+      return 1;
+    }
+  }, [stageScale])
   
   return <div ref={containerRef} className="w-full h-full overflow-scroll">
     {
@@ -269,6 +291,11 @@ export default function MainStage({
         }}
         onDragStart={(e) => {
           setIsDraggingOnEmpty(clickedOnEmpty);
+        }}
+        onDragMove={(e) => {
+          if (e.target === e.target.getStage()) {
+            setRulerPos({x: e.target.x(), y: e.target.y()})
+          }
         }}
         onPointerUp={(e) => {
           if (clickedOnEmpty && isDraggingOnEmpty === undefined) {
@@ -320,6 +347,8 @@ export default function MainStage({
         <GridLayer
           stageGeometry={stageGeometry}
           showGridLines={appSettings.showGrid}
+          verticalGridIncrement={verticalGridIncrement}
+          scale={stageScale}
           />
         {
           appSettings.showPreviousSection &&
@@ -367,8 +396,20 @@ export default function MainStage({
         }
         <MarkingsLayer
           stageGeometry={stageGeometry}
+          verticalGridIncrement={verticalGridIncrement}
+          scale={stageScale}
         />
       </Stage>
+    }
+    {
+      stageGeometry && 
+      <FloatingGridLayer
+        stageGeometry={stageGeometry}
+        position={rulerPos}
+        verticalGridIncrement={verticalGridIncrement}
+        scale={stageScale}
+        isSelectingNewSection={isSelectingNewSection}
+      />
     }
   </div>
 }

@@ -1,14 +1,17 @@
-import { Circle, Group, Layer, Line, Rect, Shape, Text } from "react-konva";
+import { Group, Layer, Line, Rect, Shape, Text } from "react-konva";
 import { StageGeometry, StageMargins, YAxisDirection } from "../../../models/choreo";
 import { colorPalette } from "../../../lib/consts/colors";
 import { METER_PX } from "../../../lib/consts/consts";
 import { useEffect, useState } from "react";
+import { Coordinates } from "../../../models/base";
 
 interface GridLayerProps {
   stageGeometry: StageGeometry,
   gridSize?: number,
   showGridLines: boolean,
   showBorder?: boolean,
+  verticalGridIncrement: number,
+  scale: Coordinates,
 }
 
 export default function GridLayer({
@@ -16,6 +19,8 @@ export default function GridLayer({
   gridSize,
   showGridLines,
   showBorder,
+  verticalGridIncrement,
+  scale,
 }: GridLayerProps) {
   const [elements, setElements] = useState<any[]>([]);
   const gridSizePx = gridSize ?? METER_PX;
@@ -76,7 +81,7 @@ export default function GridLayer({
         />
     );
     
-    if(showGridLines){
+    if (showGridLines){
       // Horizontal grid lines
       for (let m = 0; m <= margins.topMargin + length + margins.bottomMargin; m++) {
         const y = m * gridSizePx;
@@ -126,7 +131,7 @@ export default function GridLayer({
           key="center-line"
           points={[centerX, 0, centerX, totalHeightPx]}
           stroke={colorPalette.midGrey}
-          strokeWidth={1.5}
+          strokeWidth={1.2}
           dash={[10, 6]}
         />
       );
@@ -173,16 +178,20 @@ export default function GridLayer({
           yAxis === "top-down" ? 
           (y - stageTopPx) / gridSizePx :
           (stageBottomPx - y) / gridSizePx;
+
+        if (meterFromTop % verticalGridIncrement !== 0 && meterFromTop !== length) continue;
     
         elements.push(
           <Text
             key={`hr-${m}`}
-            x={stageRightPx + 8}
-            y={y - 6}
-            text={`${meterFromTop}m`}
+            x={totalWidthPx - gridSizePx * 1.2}
+            y={y - 5}
+            text={`${meterFromTop}`}
             fontSize={12}
+            align="right"
+            width={gridSizePx}
             fontStyle="bold"
-            fill="black"
+            fill={colorPalette.black}
           />
         );
       }
@@ -197,7 +206,7 @@ export default function GridLayer({
         width={stageWidthPx}
         height={stageHeightPx}
         stroke={colorPalette.grey}
-        strokeWidth={1.5}
+        strokeWidth={1.2}
       />
     );
     
@@ -218,23 +227,17 @@ export default function GridLayer({
     
         const radius = gridSizePx*0.4;
         const cx = x;
-        const cy = stageTopPx - 20;
+        const cy = stageTopPx - gridSizePx;
     
         elements.push(
           <Group key={`vt-${m}`} x={cx} y={cy}>
-            <Circle
-              radius={radius}
-              fill={colorPalette.primary}
-            />
             <Text
               text={`${meterFromCenter}`}
-              fill="white"
+              fill={colorPalette.grey}
               fontStyle="bold"
-              fontSize={12}
+              fontSize={11}
               width={radius * 2}
-              height={radius * 2}
               offsetX={radius}
-              offsetY={radius}
               align="center"
               verticalAlign="middle"
             />
@@ -254,12 +257,12 @@ export default function GridLayer({
           cornerRadius={METER_PX/2}
           strokeEnabled
           strokeWidth={1}
-          stroke={colorPalette.primary}
+          stroke={colorPalette.grey}
           />
       );
     }
     setElements(elements);
-  }, [stageGeometry, showGridLines]);
+  }, [stageGeometry, showGridLines, verticalGridIncrement]);
 
 
   return <Layer listening={false}>{elements}</Layer>;

@@ -1,17 +1,22 @@
-import { Circle, Group, Layer, Text } from "react-konva";
+import { Group, Layer, Text } from "react-konva";
 import { StageGeometry, StageMargins, YAxisDirection } from "../../../models/choreo";
 import { colorPalette } from "../../../lib/consts/colors";
 import { METER_PX } from "../../../lib/consts/consts";
 import { useEffect, useState } from "react";
+import { Coordinates } from "@dnd-kit/utilities";
 
 interface MarkingsLayerProps {
   stageGeometry: StageGeometry,
   gridSize?: number,
+  verticalGridIncrement: number,
+  scale: Coordinates,
 }
 
 export default function MarkingsLayer({
   stageGeometry,
   gridSize,
+  verticalGridIncrement,
+  scale,
 }: MarkingsLayerProps) {
   const [elements, setElements] = useState<any[]>([]);
   const gridSizePx = gridSize ?? METER_PX;
@@ -24,6 +29,9 @@ export default function MarkingsLayer({
 
     const stageWidthPx = width * gridSizePx;
     const stageHeightPx = length * gridSizePx;
+
+    const totalWidthPx =
+      (margins.leftMargin + width + margins.rightMargin) * gridSizePx;
     
     const stageLeftPx = margins.leftMargin * gridSizePx;
     const stageRightPx = stageLeftPx + stageWidthPx;
@@ -53,19 +61,23 @@ export default function MarkingsLayer({
           yAxis === "top-down" ? 
           (y - stageTopPx) / gridSizePx :
           (stageBottomPx - y) / gridSizePx;
+
+        if (meterFromTop % verticalGridIncrement !== 0 && meterFromTop !== length) continue;
     
         newElements.push(
           <Text
             key={`hr-2-${m}`}
-            x={stageRightPx + 8}
-            y={y - 6}
-            text={`${meterFromTop}m`}
+            x={totalWidthPx - gridSizePx * 1.2}
+            y={y - 5}
+            text={`${meterFromTop}`}
             fontSize={12}
             fontStyle="bold"
-            fill="black"
+            fill={colorPalette.black}
             perfectDrawEnabled={false}
             strokeEnabled
             fillAfterStrokeEnabled
+            align="right"
+            width={gridSizePx}
             strokeWidth={3}
             stroke="white"
             opacity={0.5}
@@ -91,24 +103,17 @@ export default function MarkingsLayer({
     
         const radius = gridSizePx*0.4;
         const cx = x;
-        const cy = stageTopPx - 20;
+        const cy = stageTopPx - gridSizePx;
     
         newElements.push(
           <Group key={`vt-2-${m}`} x={cx} y={cy}>
-            <Circle
-              opacity={0.7}
-              radius={radius}
-              fill={colorPalette.primary}
-            />
             <Text
               text={`${meterFromCenter}`}
-              fill="white"
+              fill={colorPalette.grey}
               fontStyle="bold"
-              fontSize={12}
+              fontSize={11}
               width={radius * 2}
-              height={radius * 2}
               offsetX={radius}
-              offsetY={radius}
               align="center"
               verticalAlign="middle"
             />
@@ -117,7 +122,7 @@ export default function MarkingsLayer({
       }
     }
     setElements(newElements);
-  }, [stageGeometry]);
+  }, [stageGeometry, scale, verticalGridIncrement]);
 
 
   return <Layer listening={false}>{elements}</Layer>;
