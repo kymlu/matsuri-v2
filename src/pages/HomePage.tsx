@@ -828,7 +828,7 @@ function EventSection({
                         colour="grey"
                         size="xs"
                       />
-                      <span>幅{choreo.stageGeometry.stageWidth}m 縦{choreo.stageGeometry.stageLength}m</span>
+                      <span>縦{choreo.stageGeometry.stageLength}m 幅{choreo.stageGeometry.stageWidth}m</span>
                     </div>
 
                     <div className="flex items-center gap-0.5">
