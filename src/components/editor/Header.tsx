@@ -10,6 +10,9 @@ import { IconLabelButton } from "../basic/Button";
 import Divider from "../basic/Divider";
 import { formatDateRange } from "../../lib/helpers/dateHelper";
 import Icon from "../basic/Icon";
+import { ChoreoStatus } from "../../pages/HomePage";
+import { Tag } from "../common/Tag";
+import { isNullOrUndefinedOrBlank } from "../../lib/helpers/globalHelper";
 
 type HeaderProps = {
   returnHome: () => void;
@@ -36,6 +39,12 @@ type HeaderProps = {
   showPath?: boolean,
   isShowPathBtnDisabled?: boolean,
   showDancerWarningMessage?: () => void;
+  dancerCount: number,
+  propCount: number,
+  stageWidth: number,
+  stageLength: number,
+  version?: number,
+  choreoStatus: ChoreoStatus,
 };
 
 export default function Header({
@@ -52,108 +61,160 @@ export default function Header({
   appSettings,
   goToEdit, goToView,
   toggleShowPath, showPath, isShowPathBtnDisabled,
-  showDancerWarningMessage
+  showDancerWarningMessage,
+  dancerCount, propCount, stageLength, stageWidth, version, choreoStatus,
 }: HeaderProps) {
-  return <header className="flex items-center justify-between w-screen gap-2 p-2 border-b-2 select-none from-white to-transparent ">
-    <div className="flex">
-      <IconButton
-        src={ICON.home}
-        noBorder
-        onClick={() => {
-          onSave?.();
-          returnHome();
-        }}/>
-    </div>
-    <div
-      className="w-full text-center truncate"
-      onDoubleClick={downloadLogs}>
-      <p className="text-sm text-gray-400">{currentChoreo.event}</p>
-      <p className="font-bold">{currentChoreo.name}</p>
-    </div>
-    <div className="flex justify-end gap-2">
-      <IconButton
-        colour="primary"
-        src={goToEdit ? ICON.edit : ICON.visibility}
-        noBorder
-        onClick={() => {
-          if (goToEdit) {
-            goToEdit();
-          } else if (goToView) {
-            goToView();
-          } }}
-        />
-      {
-        showDancerWarningMessage &&
+  return <header className="py-2 space-y-1.5 border-b-2 select-none from-white to-transparent">
+    <div className="flex items-center justify-between w-screen gap-2 px-2">
+      <div className="flex">
+        <IconButton
+          src={ICON.home}
+          noBorder
+          onClick={() => {
+            onSave?.();
+            returnHome();
+          }}/>
+      </div>
+      <div
+        className="w-full text-center truncate"
+        onDoubleClick={downloadLogs}>
+        <p className="text-sm text-gray-400">{isNullOrUndefinedOrBlank(currentChoreo.event) ? "イベント不明" : currentChoreo.event}</p>
+        <p className="font-bold">{currentChoreo.name}</p>
+      </div>
+      <div className="flex justify-end gap-2">
         <IconButton
           colour="primary"
-          src={ICON.personAlert}
+          src={goToEdit ? ICON.edit : ICON.visibility}
           noBorder
-          onClick={showDancerWarningMessage}
-        />
-      }
-      {
-        toggleShowPath &&
-        <IconButton
-          colour="black"
-          src={ICON.step}
-          noBorder
-          onClick={toggleShowPath}
-          disabled={isShowPathBtnDisabled}
-          crossedOut={showPath}
-          vertFlip
+          onClick={() => {
+            if (goToEdit) {
+              goToEdit();
+            } else if (goToView) {
+              goToView();
+            } }}
           />
-      }
-      {
-        onDownload && exportChoreo &&
-        <CustomMenu trigger={
+        {
+          showDancerWarningMessage &&
           <IconButton
-            src={ICON.download}
+            colour="primary"
+            src={ICON.personAlert}
             noBorder
-            asDiv/>
-        }>
-          <div className="space-y-2">
-            <Menu.Item>
-              <IconLabelButton full noBorder icon={ICON.fileExport} label="共有用" onClick={exportChoreo}/>
-            </Menu.Item>
-            <Divider compact/>
-            <Menu.Item>
-              <IconLabelButton full noBorder icon={ICON.pictureAsPdf} label="PDF" onClick={onDownload}/>
-            </Menu.Item>
-          </div>
-        </CustomMenu>
-      }
-      {
-        onDownload && !exportChoreo &&
-        <IconButton noBorder src={ICON.pictureAsPdf} onClick={onDownload}/>
-      }
-      {
-        hasSidebar &&
-        <Dialog.Root>
-          <Dialog.Trigger>
+            onClick={showDancerWarningMessage}
+          />
+        }
+        {
+          toggleShowPath &&
+          <IconButton
+            colour="black"
+            src={ICON.step}
+            noBorder
+            onClick={toggleShowPath}
+            disabled={isShowPathBtnDisabled}
+            crossedOut={showPath}
+            vertFlip
+            />
+        }
+        {
+          onDownload && exportChoreo &&
+          <CustomMenu trigger={
             <IconButton
-              src={ICON.settings}
+              src={ICON.download}
               noBorder
               asDiv/>
-          </Dialog.Trigger>
-          <Sidebar
-            choreoName={currentChoreo.name}
-            choreoEvent={currentChoreo.event}
-            choreoDates={formatDateRange(currentChoreo.startDate, currentChoreo.endDate)}
-            editName={editName}
-            editSize={editSize}
-            showManageDancers={showManageDancers}
-            manageDancers={manageDancers}
-            showManageProps={showManageProps}
-            manageProps={manageProps}
-            manageSections={manageSections}
-            changeSnap={changeSnap}
-            changeShowGrid={changeShowGrid}
-            changeDancerSize={changeDancerSize}
-            appSettings={appSettings}
-            changeShowPrevious={changeShowPrevious}
+          }>
+            <div className="space-y-2">
+              <Menu.Item>
+                <IconLabelButton full noBorder icon={ICON.fileExport} label="共有用" onClick={exportChoreo}/>
+              </Menu.Item>
+              <Divider compact/>
+              <Menu.Item>
+                <IconLabelButton full noBorder icon={ICON.pictureAsPdf} label="PDF" onClick={onDownload}/>
+              </Menu.Item>
+            </div>
+          </CustomMenu>
+        }
+        {
+          onDownload && !exportChoreo &&
+          <IconButton noBorder src={ICON.pictureAsPdf} onClick={onDownload}/>
+        }
+        {
+          hasSidebar &&
+          <Dialog.Root>
+            <Dialog.Trigger>
+              <IconButton
+                src={ICON.settings}
+                noBorder
+                asDiv/>
+            </Dialog.Trigger>
+            <Sidebar
+              choreoName={currentChoreo.name}
+              choreoEvent={currentChoreo.event}
+              choreoDates={formatDateRange(currentChoreo.startDate, currentChoreo.endDate)}
+              editName={editName}
+              editSize={editSize}
+              showManageDancers={showManageDancers}
+              manageDancers={manageDancers}
+              showManageProps={showManageProps}
+              manageProps={manageProps}
+              manageSections={manageSections}
+              changeSnap={changeSnap}
+              changeShowGrid={changeShowGrid}
+              changeDancerSize={changeDancerSize}
+              appSettings={appSettings}
+              changeShowPrevious={changeShowPrevious}
+            />
+          </Dialog.Root>
+        }
+      </div>
+    </div>
+    <div className="flex items-center justify-between px-3 text-sm text-gray-500">
+      <div className="flex gap-1">
+        <div className="flex items-center gap-0.5">
+          <Icon
+            src={ICON.resize}
+            colour="grey"
+            size="xs"
           />
-        </Dialog.Root>
-      }
+          <span>{stageLength}m×{stageWidth}m</span>
+        </div>
+
+        {
+          dancerCount > 0 &&
+          <div className="flex items-center gap-0.5">
+            <Icon
+              src={ICON.group}
+              colour="grey"
+              size="xs"
+            />
+            <span>{dancerCount}人</span>
+          </div>
+        }
+        {
+          propCount > 0 &&
+          <div className="flex items-center gap-0.5">
+            <Icon
+              src={ICON.flag}
+              colour="grey"
+              size="xs"
+            />
+            <span>{propCount}</span>
+          </div>
+        }
+      </div>
+      <div>
+        {
+          choreoStatus === "upToDate" &&
+          <Tag compact type="grey" text={`v${version}`}/>
+        }
+        {
+          choreoStatus === "edited" &&
+          <Tag compact type="grey" text={`v${version}`} icon={ICON.edit}/>
+        }
+        {
+          (choreoStatus === "localOnly") &&
+          <Tag compact type="grey" text="未公開"/>
+        }
+      </div>
     </div>
   </header>
 }

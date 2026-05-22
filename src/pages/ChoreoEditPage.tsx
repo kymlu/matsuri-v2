@@ -14,7 +14,6 @@ import { Dialog } from "@base-ui/react";
 import EditChoreoSizeDialog from "../components/dialogs/EditChoreoSizeDialog";
 import { exportChoreo } from "../lib/helpers/exportHelper";
 import { saveChoreo } from "../lib/dataAccess/DataController";
-import IconButton from "../components/basic/IconButton";
 import { DEFAULT_PROP_LENGTH, DEFAULT_PROP_WIDTH, ICON } from "../lib/consts/consts";
 import { AppSetting } from "../models/appSettings";
 import { changeStageGeometryAndType, renameChoreo } from "../lib/editor/commands/choreoCommands";
@@ -39,6 +38,7 @@ import { IconLabelButton } from "../components/basic/Button";
 import EditDancerNameDialog from "../components/dialogs/EditDancerNameDialog";
 import AbsentDancersWarningDialog from "../components/dialogs/AbsentDancersWarningDialog";
 import InstructionMessage from "../components/basic/InstructionMessage";
+import { ChoreoStatus } from "./HomePage";
 
 const resizeDialog = Dialog.createHandle<Choreo>();
 const editChoreoInfoDialog = Dialog.createHandle<string>();
@@ -58,9 +58,11 @@ const dancerWarningDialog = Dialog.createHandle<Choreo>();
 export default function ChoreoEditPage(props: {
   goToHomePage: () => void,
   currentChoreo: Choreo,
+  currentChoreoStatus: ChoreoStatus,
   goToViewPage: (newChoreo: Choreo) => void,
   eventList: EventDetails[],
   dancerNamesByEvent: Record<string, Record<string, string[]>>,
+  onChoreoEdited: () => void,
 }) {
   const [currentSection, setCurrentSection] = useState<ChoreoSection>(props.currentChoreo.sections[0]);
   const [currentAction, setCurrentAction] = useState<DancerAction | undefined>();
@@ -249,6 +251,7 @@ export default function ChoreoEditPage(props: {
 
   const onSave = useCallback(() => {
     if (isDirty.current) {
+      props.onChoreoEdited();
       saveChoreo(history.presentState.state, () => { isDirty.current = false }, true);
     }
   }, [history.presentState.state]);
@@ -470,6 +473,12 @@ export default function ChoreoEditPage(props: {
         appSettings={appSettings}
         goToView={() => {props.goToViewPage(history.presentState.state)}}
         showDancerWarningMessage={missingNames.length > 0 ? () => {setDancerWarningDialogOpen(true)} : undefined}
+        dancerCount={entityCount.dancers}
+        propCount={entityCount.props}
+        stageWidth={history.presentState.state.stageGeometry.stageWidth}
+        stageLength={history.presentState.state.stageGeometry.stageLength}
+        version={props.currentChoreo.version}
+        choreoStatus={props.currentChoreoStatus}
         />
       <div className="relative flex-1">
         <MainStage

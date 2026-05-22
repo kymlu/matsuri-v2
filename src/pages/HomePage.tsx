@@ -39,14 +39,14 @@ type HomePageProps = {
   eventList: EventDetails[],
   setEventList: (eventList: EventDetails[]) => void,
   goToNewChoreoPage: (eventDetails?: EventDetails) => void,
-  goToViewPage: (choreo: Choreo) => void,
+  goToViewPage: (choreo: Choreo, status: ChoreoStatus) => void,
   userName: string | null,
   setUserName: (newName: string) => void,
   dancerNamesByEvent: Record<string, Record<string, string[]>>,
   setDancerNamesByEvent: (groupedNames: Record<string, Record<string, string[]>>) => void,
 }
 
-type ChoreoStatus = "localOnly" | "syncRequired" | "upToDate" | "edited";
+export type ChoreoStatus = "localOnly" | "syncRequired" | "upToDate" | "edited";
 type ChoreoWithStatus = Choreo & {
   status: ChoreoStatus
 }
@@ -444,7 +444,7 @@ export default function HomePage({
                     setUploadedChoreo(newChoreo);
                   } else {
                     newChoreo.id = crypto.randomUUID();
-                    saveChoreo(newChoreo, () => {goToViewPage(newChoreo)});
+                    saveChoreo(newChoreo, () => {goToViewPage(newChoreo, "localOnly")});
                   }
                 },
                 (newChoreos: Choreo[], errorMessage?: string) => {
@@ -550,14 +550,14 @@ export default function HomePage({
               if (editingChoreo) {
                 setSyncChoreoDialogOpen(false);
                 setEditingChoreo(undefined);
-                goToViewPage(editingChoreo);
+                goToViewPage(editingChoreo, "edited");
               }
             }}
             onDuplicate={() => {
               if(editingChoreo) {
                 duplicateChoreo(editingChoreo);
                 deleteChoreo(editingChoreo.id, () => {
-                  goToViewPage(choreosFromServer[editingChoreo.id]);
+                  goToViewPage(choreosFromServer[editingChoreo.id], "localOnly");
                 });
               }
             }}
@@ -567,7 +567,7 @@ export default function HomePage({
                   syncChoreoDialog.close();
                   setSyncChoreoDialogOpen(false);
                   setEditingChoreo(undefined);
-                  goToViewPage(choreosFromServer[editingChoreo.id]);
+                  goToViewPage(choreosFromServer[editingChoreo.id], "upToDate");
                 });
               }
             }}
@@ -637,7 +637,7 @@ export default function HomePage({
                 name: `${uploadedChoreo!.name}のコピー`,
                 isDirty: false,
               } as Choreo;
-              saveChoreo(newChoreo, () => {goToViewPage(newChoreo)});
+              saveChoreo(newChoreo, () => {goToViewPage(newChoreo, "localOnly")});
               setUploadedChoreo(undefined);
               setUploadChoreoDialogOpen(false);
             }}
@@ -648,7 +648,7 @@ export default function HomePage({
                 id: duplicateChoreoId ?? crypto.randomUUID(),
                 isDirty: true,
               } as Choreo;
-              saveChoreo(newChoreo, () => {goToViewPage(newChoreo)});
+              saveChoreo(newChoreo, () => {goToViewPage(newChoreo, "localOnly")});
               setUploadedChoreo(undefined);
               setUploadChoreoDialogOpen(false);
             }}
@@ -666,7 +666,7 @@ type EventSectionProps = {
   dancerNamesByFormation?: Record<string, string[]>,
   addEvent: () => void,
   editEventName: () => void,
-  goToViewPage: (choreo: Choreo) => void,
+  goToViewPage: (choreo: Choreo, status: ChoreoStatus) => void,
   duplicateChoreo: (choreo: Choreo) => void,
   editChoreoName: (choreo: Choreo) => void,
   deleteChoreo: (choreo: Choreo) => void,
@@ -756,7 +756,7 @@ function EventSection({
                   if (status === "syncRequired") {
                     syncChoreo(c);
                   } else {
-                    goToViewPage(c);
+                    goToViewPage(c, status);
                   }
                 }}
                 className="flex flex-col justify-between h-full p-2 mx-[11px] transition-colors bg-white border border-gray-400 rounded-md cursor-pointer">

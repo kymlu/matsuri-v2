@@ -1,6 +1,6 @@
 import Header from "../components/editor/Header"
 import FormationSelectionToolbar from "../components/editor/FormationSelectionToolbar";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Choreo } from "../models/choreo";
 import { ChoreoSection } from "../models/choreoSection";
 import MainStage from "../components/grid/MainStage";
@@ -12,12 +12,13 @@ import { DancerPosition } from "../models/dancer";
 import { PropPosition } from "../models/prop";
 import ExportDialog from "../components/dialogs/ExportDialog";
 import { Dialog } from "@base-ui/react";
-import { exportChoreo } from "../lib/helpers/exportHelper";
 import InstructionMessage from "../components/basic/InstructionMessage";
+import { ChoreoStatus } from "./HomePage";
 
 export default function ChoreoViewPage(props: {
   goToHomePage: () => void
   currentChoreo: Choreo,
+  currentChoreoStatus: ChoreoStatus,
   goToEditPage: () => void,
   userName: string | null,
 }) {
@@ -35,6 +36,12 @@ export default function ChoreoViewPage(props: {
     showPreviousSection: false,
     dancerDisplayType: "large",
   });
+
+  const entityCount = useMemo(() => ({
+    props: Object.keys(props.currentChoreo.props).length,
+    dancers: Object.keys(props.currentChoreo.dancers).length,
+    obstacles: props.currentChoreo.obstacles ? Object.keys(props.currentChoreo.obstacles).length : 0,
+  } as StageEntities<number>), [props.currentChoreo.dancers, props.currentChoreo.props, props.currentChoreo.obstacles]);
 
   useEffect(() => {
     setHintManuallyClosed(false);
@@ -85,6 +92,12 @@ export default function ChoreoViewPage(props: {
         toggleShowPath={() => setShowPaths(prev => !prev)}
         showPath={showPaths}
         isShowPathBtnDisabled={selectedIds.dancers.length !== 1 || selectedTimingId !== undefined}
+        stageLength={props.currentChoreo.stageGeometry.stageLength}
+        stageWidth={props.currentChoreo.stageGeometry.stageWidth}
+        dancerCount={entityCount.dancers}
+        propCount={entityCount.props}
+        version={props.currentChoreo.version}
+        choreoStatus={props.currentChoreoStatus}
         />
       <div className="relative flex-1 overflow-hidden border-b-2 md:flex">
         <ViewerSidebar
