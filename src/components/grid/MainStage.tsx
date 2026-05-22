@@ -244,11 +244,13 @@ export default function MainStage({
       // calculate new position of the stage
       const dx = newCenter.x - lastCenter.x;
       const dy = newCenter.y - lastCenter.y;
-
-      setStagePos({
+      const newPosition: Coordinates = {
         x: newCenter.x - pointTo.x * scale + dx,
         y: newCenter.y - pointTo.y * scale + dy,
-      });
+      };
+
+      setStagePos({...newPosition});
+      setRulerPos({...newPosition});
 
       setLastDist(dist);
       setLastCenter(newCenter);
