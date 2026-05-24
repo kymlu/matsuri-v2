@@ -23,8 +23,13 @@ export default function LoginDialog({
   return <BaseEditDialog
     title="ログイン"
     actionButtonText="ログイン"
+    isActionButtonDisabled={username.length === 0 || password.length === 0}
     onSubmit={onSubmitBtnClicked}
     showCloseButton={false}
+    onClose={() => {
+      setUsername("");
+      setPassword("");
+    }}
     >
     <TextInput
       label="ユーザー名"
