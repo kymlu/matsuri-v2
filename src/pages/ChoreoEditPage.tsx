@@ -39,6 +39,7 @@ import EditDancerNameDialog from "../components/dialogs/EditDancerNameDialog";
 import AbsentDancersWarningDialog from "../components/dialogs/AbsentDancersWarningDialog";
 import InstructionMessage from "../components/basic/InstructionMessage";
 import { ChoreoStatus } from "./HomePage";
+import LoginDialog from "../components/dialogs/LoginDialog";
 
 const resizeDialog = Dialog.createHandle<Choreo>();
 const editChoreoInfoDialog = Dialog.createHandle<string>();
@@ -54,6 +55,7 @@ const renameSectionDialog = Dialog.createHandle<ChoreoSection>();
 const addNoteToSectionDialog = Dialog.createHandle<ChoreoSection>();
 const deleteSectionDialog = Dialog.createHandle<ChoreoSection>();
 const dancerWarningDialog = Dialog.createHandle<Choreo>();
+const loginDialog = Dialog.createHandle<null>();
 
 export default function ChoreoEditPage(props: {
   goToHomePage: () => void,
@@ -338,6 +340,7 @@ export default function ChoreoEditPage(props: {
   const [addNoteToSectionDialogOpen, setAddNoteToSectionDialogOpen] = useState(false);
   const [deleteSectionDialogOpen, setDeleteSectionDialogOpen] = useState(false);
   const [dancerWarningDialogOpen, setDancerWarningDialogOpen] = useState(false);
+  const [loginDialogOpen, setLoginDialogOpen] = useState(false);
   
   const handleRenameSectionDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setRenameSectionDialogOpen(isOpen);
@@ -393,6 +396,10 @@ export default function ChoreoEditPage(props: {
 
   const handleDancerWarningDialogOpenChange = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setDancerWarningDialogOpen(isOpen);
+  };
+
+  const handleLoginDialogOpenChange = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
+    setLoginDialogOpen(isOpen);
   };
   
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
@@ -479,6 +486,8 @@ export default function ChoreoEditPage(props: {
         stageLength={history.presentState.state.stageGeometry.stageLength}
         version={props.currentChoreo.version}
         choreoStatus={props.currentChoreoStatus}
+        showUpload={history.presentState.state.isDirty}
+        upload={() => {setLoginDialogOpen(true)}}
         />
       <div className="relative flex-1">
         <MainStage
@@ -1111,6 +1120,14 @@ export default function ChoreoEditPage(props: {
           choreoName={history.presentState.state?.name}
           eventName={history.presentState.state?.event}
           dancerNames={missingNames}
+        />
+      </Dialog.Root>
+      <Dialog.Root
+        open={loginDialogOpen}
+        onOpenChange={handleLoginDialogOpenChange}
+        handle={loginDialog}>
+        <LoginDialog
+          onClose={() => setLoginDialogOpen(false)}
         />
       </Dialog.Root>
     </div>

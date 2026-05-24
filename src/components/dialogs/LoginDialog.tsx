@@ -4,11 +4,11 @@ import TextInput from "../inputs/TextInput";
 import { PASSWORD_LENGTH, USERNAME_LENGTH } from "../../lib/consts/consts";
 
 type LoginDialogProps = {
-
+  onClose: () => void,
 }
 
 export default function LoginDialog({
-  
+  onClose
 }: LoginDialogProps) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -16,11 +16,15 @@ export default function LoginDialog({
 
   const onSubmitBtnClicked = () => {
     // todo
+    onClose();
+    setError("none");
   }
 
   return <BaseEditDialog
     title="ログイン"
+    actionButtonText="ログイン"
     onSubmit={onSubmitBtnClicked}
+    showCloseButton={false}
     >
     <TextInput
       label="ユーザー名"
@@ -29,12 +33,11 @@ export default function LoginDialog({
     <TextInput
       label="パスワード"
       onContentChange={ (newValue) => { setPassword(newValue) }}
-      maxLength={PASSWORD_LENGTH}/>
+      maxLength={PASSWORD_LENGTH}
+      type="password"
+      />
     {
-      <span className="font-semibold text-primary">
-        {
-          error === "none" && ""
-        }
+      <span className="w-full font-semibold text-center text-primary">
         {
           error === "notExists" && "ユーザー名は存在しません"
         }
