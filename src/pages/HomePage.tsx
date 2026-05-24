@@ -4,7 +4,7 @@ import { ICON, LONG_NAME_LENGTH, SEARCH_NAME_LENGTH } from "../lib/consts/consts
 import { IconLabelButton } from "../components/basic/Button"
 import Icon from "../components/basic/Icon"
 import { readUploadedFile } from "../lib/helpers/uploadHelper"
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { deleteChoreo, getAllChoreos, saveChoreo, saveChoreos } from "../lib/dataAccess/DataController"
 import { Choreo, ChoreoSchema, EventDetails } from "../models/choreo"
 import { isNullOrUndefinedOrBlank, indexByKey, strCompare, strEquals, stringifyEvent } from "../lib/helpers/globalHelper"
@@ -39,7 +39,7 @@ type HomePageProps = {
   eventList: EventDetails[],
   setEventList: (eventList: EventDetails[]) => void,
   goToNewChoreoPage: (eventDetails?: EventDetails) => void,
-  goToViewPage: (choreo: Choreo, status: ChoreoStatus) => void,
+  goToViewPage: (choreo: Choreo, status: ChoreoStatus, serverChoreo?: Choreo) => void,
   userName: string | null,
   setUserName: (newName: string) => void,
   dancerNamesByEvent: Record<string, Record<string, string[]>>,
@@ -76,7 +76,6 @@ export default function HomePage({
       server.push(z.parse(ChoreoSchema, SampleParade));
       server.push(z.parse(ChoreoSchema, SampleStage));
       const choreos: ChoreoWithStatus[] = [];
-      const choreosFromServer: Record<string, Choreo> = {};
       const indexedLocal = indexByKey(local, "id");
       const indexedServer = indexByKey(server, "id");
       const allIds = new Set([...Object.keys(indexedLocal), ...Object.keys(indexedServer)]);
@@ -90,7 +89,6 @@ export default function HomePage({
           choreos.push({...localChoreo, status: "localOnly"});
         } else if (serverChoreo.version !== localChoreo.version) {
           if (localChoreo.isDirty === true || localChoreo.isDirty === undefined) {
-            choreosFromServer[serverChoreo.id] = serverChoreo;
             choreos.push({...localChoreo, status: "syncRequired"});
           } else {
             saveChoreo(serverChoreo, () => {}, false, false);
@@ -98,7 +96,6 @@ export default function HomePage({
           }
         } else {
           if (localChoreo.isDirty === true || localChoreo.isDirty === undefined) {
-            choreosFromServer[serverChoreo.id] = serverChoreo;
             choreos.push({...localChoreo, status: "edited"});
           } else {
             choreos.push({...serverChoreo, status: "upToDate"});
@@ -119,10 +116,14 @@ export default function HomePage({
         }, {} as Record<string, Record<string, string[]>>)
       );
       setSavedChoreos(choreos);
-      setChoreosFromServer(choreosFromServer);
+      setChoreosFromServer(indexedServer);
       setIsLoading(false);
     });
   }
+
+  const onSelectChoreo = useCallback((choreo: Choreo, choreoStatus: ChoreoStatus) => {
+    goToViewPage(choreo, choreoStatus, choreosFromServer[choreo.id]);
+  }, [choreosFromServer]);
 
   useEffect(() => {
     setEventList(
@@ -368,7 +369,7 @@ export default function HomePage({
                         dancerNamesByFormation={dancerNamesByEvent[eventDetails]}
                         choreos={choreos}
                         searchTerm={searchTerm}
-                        goToViewPage={goToViewPage}
+                        onSelectChoreo={onSelectChoreo}
                         duplicateChoreo={duplicateChoreo}
                         editChoreoName={(choreo) => {
                           setEditingChoreo(choreo);
@@ -444,7 +445,7 @@ export default function HomePage({
                     setUploadedChoreo(newChoreo);
                   } else {
                     newChoreo.id = crypto.randomUUID();
-                    saveChoreo(newChoreo, () => {goToViewPage(newChoreo, "localOnly")});
+                    saveChoreo(newChoreo, () => {onSelectChoreo(newChoreo, "localOnly")});
                   }
                 },
                 (newChoreos: Choreo[], errorMessage?: string) => {
@@ -550,14 +551,14 @@ export default function HomePage({
               if (editingChoreo) {
                 setSyncChoreoDialogOpen(false);
                 setEditingChoreo(undefined);
-                goToViewPage(editingChoreo, "edited");
+                onSelectChoreo(editingChoreo, "edited");
               }
             }}
             onDuplicate={() => {
               if(editingChoreo) {
                 duplicateChoreo(editingChoreo);
                 deleteChoreo(editingChoreo.id, () => {
-                  goToViewPage(choreosFromServer[editingChoreo.id], "localOnly");
+                  onSelectChoreo(choreosFromServer[editingChoreo.id], "localOnly");
                 });
               }
             }}
@@ -567,7 +568,7 @@ export default function HomePage({
                   syncChoreoDialog.close();
                   setSyncChoreoDialogOpen(false);
                   setEditingChoreo(undefined);
-                  goToViewPage(choreosFromServer[editingChoreo.id], "upToDate");
+                  onSelectChoreo(choreosFromServer[editingChoreo.id], "upToDate");
                 });
               }
             }}
@@ -637,7 +638,7 @@ export default function HomePage({
                 name: `${uploadedChoreo!.name}のコピー`,
                 isDirty: false,
               } as Choreo;
-              saveChoreo(newChoreo, () => {goToViewPage(newChoreo, "localOnly")});
+              saveChoreo(newChoreo, () => {onSelectChoreo(newChoreo, "localOnly")});
               setUploadedChoreo(undefined);
               setUploadChoreoDialogOpen(false);
             }}
@@ -648,7 +649,7 @@ export default function HomePage({
                 id: duplicateChoreoId ?? crypto.randomUUID(),
                 isDirty: true,
               } as Choreo;
-              saveChoreo(newChoreo, () => {goToViewPage(newChoreo, "localOnly")});
+              saveChoreo(newChoreo, () => {onSelectChoreo(newChoreo, "localOnly")});
               setUploadedChoreo(undefined);
               setUploadChoreoDialogOpen(false);
             }}
@@ -666,7 +667,7 @@ type EventSectionProps = {
   dancerNamesByFormation?: Record<string, string[]>,
   addEvent: () => void,
   editEventName: () => void,
-  goToViewPage: (choreo: Choreo, status: ChoreoStatus) => void,
+  onSelectChoreo: (choreo: Choreo, status: ChoreoStatus) => void,
   duplicateChoreo: (choreo: Choreo) => void,
   editChoreoName: (choreo: Choreo) => void,
   deleteChoreo: (choreo: Choreo) => void,
@@ -677,7 +678,7 @@ type EventSectionProps = {
 }
 
 function EventSection({
-  eventInfo, dancerNamesByFormation, choreos, searchTerm, goToViewPage, addEvent, editEventName,
+  eventInfo, dancerNamesByFormation, choreos, searchTerm, onSelectChoreo, addEvent, editEventName,
   duplicateChoreo, editChoreoName, deleteChoreo, revertChoreo, syncChoreo, onPdfExport, isExpandedByDefault
 }: EventSectionProps) {
   const optionsDialog = Dialog.createHandle<Choreo>();
@@ -756,7 +757,7 @@ function EventSection({
                   if (status === "syncRequired") {
                     syncChoreo(c);
                   } else {
-                    goToViewPage(c, status);
+                    onSelectChoreo(c, status);
                   }
                 }}
                 className="flex flex-col justify-between h-full p-2 mx-[11px] transition-colors bg-white border border-gray-400 rounded-md cursor-pointer">

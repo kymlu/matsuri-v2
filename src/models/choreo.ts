@@ -46,6 +46,36 @@ export const EventDetailsSchema = z.object({
   event: z.string().optional(),
   startDate: z.string().optional(),
   endDate: z.string().optional(),
-})
+});
 
 export type EventDetails = z.infer<typeof EventDetailsSchema>;
+
+export const BasicChoreoDetailsSchema = BaseModelSchema.extend({
+  event: z.string().optional(),
+  startDate: z.string().optional(),
+  endDate: z.string().optional(),
+  lastUpdated: z.string().optional(),
+  version: z.number().optional(),
+  stageWidth: z.number(),
+  stageLength: z.number(),
+  dancerCount: z.number(),
+  propCount: z.number(),
+});
+
+export type BasicChoreoDetails = z.infer<typeof BasicChoreoDetailsSchema>;
+
+export function getBasicChoreoDetails(choreo: Choreo): BasicChoreoDetails {
+  return {
+    id: choreo.id,
+    name: choreo.name,
+    event: choreo.event,
+    startDate: choreo.startDate,
+    endDate: choreo.endDate,
+    lastUpdated: choreo.lastUpdated,
+    version: choreo.version,
+    stageLength: choreo.stageGeometry.stageLength,
+    stageWidth: choreo.stageGeometry.stageWidth,
+    dancerCount: Object.keys(choreo.dancers).length,
+    propCount: Object.keys(choreo.props).length,
+  } as BasicChoreoDetails;
+}

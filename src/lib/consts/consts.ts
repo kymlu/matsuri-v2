@@ -90,6 +90,7 @@ export const ICON = {
   horizontalDistribute: "horizontal_distribute",
   horizontalRule: "horizontal_rule",
   info: "info",
+  label: "label",
   leftClick: "left_click",
   lineCurve: "line_curve",
   lineEndArrowNotch: "line_end_arrow_notch",

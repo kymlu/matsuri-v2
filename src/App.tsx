@@ -15,6 +15,7 @@ function App() {
   const [selectedEvent, setSelectedEvent] = useState<EventDetails>();
   const [eventList, setEventList] = useState<EventDetails[]>([]);
   const [dancerNamesByEvent, setDancerNamesByEvent] = useState<Record<string, Record<string, string[]>>>({});
+  const [serverChoreo, setServerChoreo] = useState<Choreo | undefined>();
   const [currentChoreo, setCurrentChoreo] = useState<Choreo | undefined>();
   const [currentChoreoStatus, setCurrentChoreoStatus] = useState<ChoreoStatus>();
   const [name, setName] = useState<string | null>(null);
@@ -54,7 +55,8 @@ function App() {
             setSelectedEvent(event);
             setMode("form");
           }}
-          goToViewPage={(choreo: Choreo, status: ChoreoStatus) => {
+          goToViewPage={(choreo: Choreo, status: ChoreoStatus, serverChoreo?: Choreo) => {
+            setServerChoreo(serverChoreo);
             setCurrentChoreo(choreo);
             setCurrentChoreoStatus(status);
             setMode("view");
@@ -93,6 +95,7 @@ function App() {
               setCurrentChoreoStatus("edited");
             }
           }}
+          serverChoreo={serverChoreo}
         />
       )}
       {mode === "view" && (
