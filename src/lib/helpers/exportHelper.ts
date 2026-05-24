@@ -245,35 +245,41 @@ export async function exportToPdf (
         
         
         if (meterFromTop >= 0) {
-          pdf.setFontSize(12);
-          pdf.setTextColor(colorPalette.black);
-          pdf.text(`${meterFromTop}m`, stageRightPx + 8, txtY);
+          pdf.setFontSize(11);
+          pdf.setTextColor(colorPalette.grey);
+          pdf.text(`${meterFromTop}`, memoLeft - pageMargin * 1.5, txtY, {maxWidth: PDF_METER_PX, align: "right"});
         }
       }
     }
 
+    // Centre line
+    drawLine(pdf, colorPalette.midGrey, 1, [10, 6], centerX, titleBuffer, centerX, visualDiagramHeightPx + titleBuffer);
+
+
     // centre triangle
     pdf.setLineDashPattern([], 0);
     pdf.setLineWidth(0);
-    pdf.setDrawColor(colorPalette.primary);
-    pdf.setFillColor(colorPalette.primary);
+    pdf.setDrawColor(colorPalette.grey);
+    pdf.setFillColor(colorPalette.grey);
     if (isNullOrUndefined(startingPoint)) {
       pdf.triangle(
-        centerX, stageTopPx - PDF_METER_PX * 0.3 + titleBuffer,
-        centerX - PDF_METER_PX * 0.5, stageTopPx - PDF_METER_PX * 1.2 + titleBuffer,
-        centerX + PDF_METER_PX * 0.5, stageTopPx - PDF_METER_PX * 1.2 + titleBuffer,
+        centerX, stageTopPx - PDF_METER_PX * 0.2 + titleBuffer,
+        centerX - PDF_METER_PX * 0.7, stageTopPx - PDF_METER_PX * 1.2 + titleBuffer,
+        centerX + PDF_METER_PX * 0.7, stageTopPx - PDF_METER_PX * 1.2 + titleBuffer,
         "FD"
-      )
+      );
+      pdf.setTextColor("white");
+      pdf.text("前", centerX, stageTopPx + PDF_METER_PX * 0.85, {maxWidth: PDF_METER_PX * 1.4, align: "center"});
     } else {
       pdf.triangle(
-        centerX, titleBuffer + PDF_METER_PX * 0.5,
-        centerX - PDF_METER_PX * 0.25, titleBuffer,
-        centerX + PDF_METER_PX * 0.25, titleBuffer,
+        centerX, titleBuffer + PDF_METER_PX * 0.9,
+        centerX - PDF_METER_PX * 0.7, titleBuffer,
+        centerX + PDF_METER_PX * 0.7, titleBuffer,
         "FD"
-      )
+      );
+      pdf.setTextColor("white");
+      pdf.text("前", centerX, titleBuffer + PDF_METER_PX * 0.5, {maxWidth: PDF_METER_PX * 1.4, align: "center"});
     }
-    // Center line
-    drawLine(pdf, colorPalette.primary, 1.25, [10, 6], centerX, titleBuffer, centerX, visualDiagramHeightPx + titleBuffer);
 
     pdf.setLineDashPattern([], 0);
     pdf.setFontSize(8);
@@ -358,8 +364,8 @@ export async function exportToPdf (
     pdf.text(section.name, centerX, PDF_METER_PX, {maxWidth: diagramWidthPx, align: "center"});
 
     // main stage border
-    pdf.setDrawColor(colorPalette.primary);
-    pdf.setLineWidth(1.25);
+    pdf.setDrawColor(colorPalette.grey);
+    pdf.setLineWidth(1);
     pdf.rect(stageLeftPx, (startingPoints[i] ? 0 : stageTopPx) + titleBuffer, stageWidthPx, startingPoints[i] ? visualDiagramHeightPx : stageHeightPx)
 
     pdf.setFontSize(8);
@@ -678,6 +684,69 @@ export async function exportToPdf (
     }
 
     pdf.setFont(boldFont);
+
+    // have a semi-transparent layer for the numberings in case there is overlap with items that are out of bounds
+    pdf.saveGraphicsState();
+    const gState = new GState({ opacity: 0.5 });
+    pdf.setGState(gState);
+    // Horizontal grid lines + right labels
+    for (let m = 0; m <= totalLengthM; m++) {
+      const y = m * PDF_METER_PX;
+      // Right-side meter labels
+      // if stage, 0 at top of stage
+      // if parade, 0 at bottom of stage
+
+      const txtY = y + 3 + titleBuffer - startingPointDelta;
+      if (txtY >= stageTopPx && y <= stageBottomPx && txtY <= (visualDiagramHeightPx + titleBuffer)) {
+        const meterFromTop =
+          stage.yAxis === "top-down" ? 
+          (y - stageTopPx) / PDF_METER_PX :
+          (stageBottomPx - y) / PDF_METER_PX;
+        
+        
+        if (meterFromTop >= 0) {
+          pdf.setFontSize(11);
+          pdf.setLineWidth(0.2);
+          pdf.setDrawColor(colorPalette.white);
+          pdf.setTextColor(colorPalette.black);
+          pdf.setFillColor(colorPalette.black);
+          pdf.text(`${meterFromTop}`, memoLeft - pageMargin * 1.5, txtY, {renderingMode: "fillThenStroke", maxWidth: PDF_METER_PX, align: "right"});
+          pdf.text(`${meterFromTop}`, memoLeft - pageMargin * 1.5, txtY, {maxWidth: PDF_METER_PX, align: "right"});
+        }
+      }
+    }
+    pdf.restoreGraphicsState();
+
+    // Top numbering relative to center
+    for (let m = 1; m < totalWidthM; m++) {
+      const x = m * PDF_METER_PX + gridOffsetPx - pageMargin;
+    
+      const isCenter = x === centerX;
+      if (
+        x >= stageLeftPx &&
+        x <= stageRightPx &&
+        !isCenter
+      ) {
+        const meterFromCenter = Math.abs(x - centerX) / PDF_METER_PX;
+
+        if (meterFromCenter % 2 !== 0) continue;
+    
+        const radius = PDF_METER_PX * 0.3;
+        const cx = x;
+        const cy = stageTopPx - PDF_METER_PX * (startingPoint ? 1.5 : 1);
+
+        pdf.setFontSize(8);
+        pdf.setFillColor(colorPalette.primary);
+        pdf.setDrawColor(colorPalette.primary);
+        pdf.setTextColor(colorPalette.white);
+        pdf.saveGraphicsState();
+        const gState = new GState({ opacity: 0.5 });
+        pdf.setGState(gState);
+        pdf.circle(cx, cy + titleBuffer, radius, "F");
+        pdf.restoreGraphicsState();
+        pdf.text(`${meterFromCenter}`, cx, cy - 3 + titleBuffer, {align: "center", baseline: "top", maxWidth: PDF_METER_PX});
+      }
+    }
 
     updateProgress(Math.round(((i + 2) / (choreo.sections.length + 1)) * 100));
 

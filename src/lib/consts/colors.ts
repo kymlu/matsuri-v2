@@ -19,6 +19,7 @@ export const colorPalette = {
   black: "#000000",
   offWhite: "#F2F2F2",
   grey: "#666666",
+  midGrey: "#999999",
   lightGrey: "#CDCDCD",
   paleGrey: "#D4D4D4",
   primary: "#AB1010",

@@ -1,6 +1,6 @@
 import Header from "../components/editor/Header"
 import FormationSelectionToolbar from "../components/editor/FormationSelectionToolbar";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Choreo } from "../models/choreo";
 import { ChoreoSection } from "../models/choreoSection";
 import MainStage from "../components/grid/MainStage";
@@ -12,11 +12,13 @@ import { DancerPosition } from "../models/dancer";
 import { PropPosition } from "../models/prop";
 import ExportDialog from "../components/dialogs/ExportDialog";
 import { Dialog } from "@base-ui/react";
-import { exportChoreo } from "../lib/helpers/exportHelper";
+import InstructionMessage from "../components/basic/InstructionMessage";
+import { ChoreoStatus } from "./HomePage";
 
 export default function ChoreoViewPage(props: {
   goToHomePage: () => void
   currentChoreo: Choreo,
+  currentChoreoStatus: ChoreoStatus,
   goToEditPage: () => void,
   userName: string | null,
 }) {
@@ -25,7 +27,9 @@ export default function ChoreoViewPage(props: {
   const [selectedIds, setSelectedIds] = useState<StageEntities<string[]>>({props: [], dancers: [], obstacles: []});
   const [selectedTimingId, setSelectedTimingId] = useState<string | undefined>();
   const [selectedObjects, setSelectedObjects] = useState<StageEntities<PropPosition[], DancerPosition[]>>({dancers: [], props: [], obstacles: []});
-  const [showPaths, setShowPaths] = useState<boolean>(false);
+  const [showPaths, setShowPaths] = useState<boolean>(true);
+  const [showHint, setShowHint] = useState<boolean>(false);
+  const [hintManuallyClosed, setHintManuallyClosed] = useState<boolean>(false);
   const [appSettings, setAppSettings] = useState<AppSetting>({
     snapToGrid: true,
     showGrid: true,
@@ -33,13 +37,22 @@ export default function ChoreoViewPage(props: {
     dancerDisplayType: "large",
   });
 
+  const entityCount = useMemo(() => ({
+    props: Object.keys(props.currentChoreo.props).length,
+    dancers: Object.keys(props.currentChoreo.dancers).length,
+    obstacles: props.currentChoreo.obstacles ? Object.keys(props.currentChoreo.obstacles).length : 0,
+  } as StageEntities<number>), [props.currentChoreo.dancers, props.currentChoreo.props, props.currentChoreo.obstacles]);
+
   useEffect(() => {
+    setHintManuallyClosed(false);
     if (!isNullOrUndefinedOrBlank(props.userName)) {
       const dancer = Object.values(props.currentChoreo.dancers).find(x => strEquals(x.name, props.userName));
       if (dancer) {
         setSelectedIds({dancers: [dancer.id], props: [], obstacles: []});
+        setShowHint(false);
       } else {
         resetSelectedIds();
+        setShowHint(true);
       }
     }
   }, [props.currentChoreo, props.userName]);
@@ -71,7 +84,6 @@ export default function ChoreoViewPage(props: {
         returnHome={props.goToHomePage}
         currentChoreo={props.currentChoreo}
         onDownload={() => {setExportDialogOpen(true)}}
-        exportChoreo={() => exportChoreo(props.currentChoreo)}
         changeShowGrid={() => {
           setAppSettings(prev => {return {...prev, showGrid: !prev.showGrid}})
         }}
@@ -80,6 +92,12 @@ export default function ChoreoViewPage(props: {
         toggleShowPath={() => setShowPaths(prev => !prev)}
         showPath={showPaths}
         isShowPathBtnDisabled={selectedIds.dancers.length !== 1 || selectedTimingId !== undefined}
+        stageLength={props.currentChoreo.stageGeometry.stageLength}
+        stageWidth={props.currentChoreo.stageGeometry.stageWidth}
+        dancerCount={entityCount.dancers}
+        propCount={entityCount.props}
+        version={props.currentChoreo.version}
+        choreoStatus={props.currentChoreoStatus}
         />
       <div className="relative flex-1 overflow-hidden border-b-2 md:flex">
         <ViewerSidebar
@@ -96,7 +114,12 @@ export default function ChoreoViewPage(props: {
             selectedObjects.props.length === 0 &&
             props.currentChoreo.dancers[selectedIds.dancers[0]] !== undefined
           }
-          deselectPosition={resetSelectedIds}
+          deselectPosition={() => {
+            resetSelectedIds();
+            if (!hintManuallyClosed) {
+              setShowHint(true);
+            }
+          }}
           onSelectTiming={(timing) => {
             if (timing) {
               setSelectedIds({props: [], dancers: timing.dancerIds, obstacles: []});
@@ -144,8 +167,21 @@ export default function ChoreoViewPage(props: {
              } :
             undefined
           }
+          onDancerSelected={() => {
+            if (showHint) setShowHint(false);
+          }}
         />
       </div>
+
+      {
+        showHint &&
+        <InstructionMessage
+          instruction={<div className="text-center"><span>名前をタップすると、</span><br/><span>位置情報が表示されます。</span></div>}
+          onClose={() => {
+            setShowHint(false);
+            setHintManuallyClosed(true);
+          }}/>
+      }
       
       <Dialog.Root
         handle={exportDialog}

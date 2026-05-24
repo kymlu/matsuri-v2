@@ -104,16 +104,6 @@ export default function EditChoreoSizeDialog({
             ステージ
           </Button>
           <NumberInput
-            name="幅"
-            defaultValue={form.stageWidth}
-            min={MIN_STAGE_DIMENSION}
-            max={MAX_STAGE_DIMENSION}
-            baseStep={1}
-            buttonStep={1}
-            onChange={(newValue) => {handleChange("stageWidth", Number(newValue))}}
-            label="幅 (m)"
-          />
-          <NumberInput
             name="縦"
             defaultValue={form.stageLength}
             min={MIN_STAGE_DIMENSION}
@@ -122,6 +112,16 @@ export default function EditChoreoSizeDialog({
             buttonStep={1}
             onChange={(newValue) => {handleChange("stageLength", Number(newValue))}}
             label="縦 (m)"
+          />
+          <NumberInput
+            name="幅"
+            defaultValue={form.stageWidth}
+            min={MIN_STAGE_DIMENSION}
+            max={MAX_STAGE_DIMENSION}
+            baseStep={1}
+            buttonStep={1}
+            onChange={(newValue) => {handleChange("stageWidth", Number(newValue))}}
+            label="幅 (m)"
           />
           <NumberInput
             name="xMargin"

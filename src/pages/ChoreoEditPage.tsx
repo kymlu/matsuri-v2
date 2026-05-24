@@ -14,7 +14,6 @@ import { Dialog } from "@base-ui/react";
 import EditChoreoSizeDialog from "../components/dialogs/EditChoreoSizeDialog";
 import { exportChoreo } from "../lib/helpers/exportHelper";
 import { saveChoreo } from "../lib/dataAccess/DataController";
-import IconButton from "../components/basic/IconButton";
 import { DEFAULT_PROP_LENGTH, DEFAULT_PROP_WIDTH, ICON } from "../lib/consts/consts";
 import { AppSetting } from "../models/appSettings";
 import { changeStageGeometryAndType, renameChoreo } from "../lib/editor/commands/choreoCommands";
@@ -38,6 +37,8 @@ import CustomDialog from "../components/basic/CustomDialog";
 import { IconLabelButton } from "../components/basic/Button";
 import EditDancerNameDialog from "../components/dialogs/EditDancerNameDialog";
 import AbsentDancersWarningDialog from "../components/dialogs/AbsentDancersWarningDialog";
+import InstructionMessage from "../components/basic/InstructionMessage";
+import { ChoreoStatus } from "./HomePage";
 
 const resizeDialog = Dialog.createHandle<Choreo>();
 const editChoreoInfoDialog = Dialog.createHandle<string>();
@@ -57,9 +58,11 @@ const dancerWarningDialog = Dialog.createHandle<Choreo>();
 export default function ChoreoEditPage(props: {
   goToHomePage: () => void,
   currentChoreo: Choreo,
+  currentChoreoStatus: ChoreoStatus,
   goToViewPage: (newChoreo: Choreo) => void,
   eventList: EventDetails[],
   dancerNamesByEvent: Record<string, Record<string, string[]>>,
+  onChoreoEdited: () => void,
 }) {
   const [currentSection, setCurrentSection] = useState<ChoreoSection>(props.currentChoreo.sections[0]);
   const [currentAction, setCurrentAction] = useState<DancerAction | undefined>();
@@ -95,6 +98,12 @@ export default function ChoreoEditPage(props: {
       }, 1000),
     []
   );
+
+  const entityCount = useMemo(() => ({
+    props: Object.keys(history.presentState.state.props).length,
+    dancers: Object.keys(history.presentState.state.dancers).length,
+    obstacles: history.presentState.state.obstacles ? Object.keys(history.presentState.state.obstacles).length : 0,
+  } as StageEntities<number>), [history.presentState.state.dancers, history.presentState.state.props, history.presentState.state.obstacles]);
 
   useEffect(() => {
     hasInitialized.current = false;
@@ -242,6 +251,7 @@ export default function ChoreoEditPage(props: {
 
   const onSave = useCallback(() => {
     if (isDirty.current) {
+      props.onChoreoEdited();
       saveChoreo(history.presentState.state, () => { isDirty.current = false }, true);
     }
   }, [history.presentState.state]);
@@ -440,9 +450,9 @@ export default function ChoreoEditPage(props: {
         editName={() => {setEditChoreoInfoDialogOpen(true)}}
         editSize={() => {setResizeDialogOpen(true);}}
         onDownload={() => setExportDialogOpen(true)}
-        showManageDancers={Object.keys(history.presentState.state.dancers).length > 0}
+        showManageDancers={entityCount.dancers > 0}
         manageDancers={() => {setDancerManagerDialogOpen(true);}}
-        showManageProps={Object.keys(history.presentState.state.props).length > 0}
+        showManageProps={entityCount.props > 0}
         manageProps={() => {setPropManagerDialogOpen(true);}}
         manageSections={() => {console.log("TODO: implement Manage Sections")}}
         exportChoreo={() => {
@@ -463,6 +473,12 @@ export default function ChoreoEditPage(props: {
         appSettings={appSettings}
         goToView={() => {props.goToViewPage(history.presentState.state)}}
         showDancerWarningMessage={missingNames.length > 0 ? () => {setDancerWarningDialogOpen(true)} : undefined}
+        dancerCount={entityCount.dancers}
+        propCount={entityCount.props}
+        stageWidth={history.presentState.state.stageGeometry.stageWidth}
+        stageLength={history.presentState.state.stageGeometry.stageLength}
+        version={props.currentChoreo.version}
+        choreoStatus={props.currentChoreoStatus}
         />
       <div className="relative flex-1">
         <MainStage
@@ -657,9 +673,16 @@ export default function ChoreoEditPage(props: {
           var currentColours = new Set(positions.filter(x => selectedIds.dancers.includes(x[0])).map(x => x[1].color));
           setSelectedIds(prev => ({...prev, dancers: positions.filter(x => currentColours.has(x[1].color)).map(x => x[0])}));
         }}
-        onSelectType={() => {
-          setSelectedIds({props: [], dancers: Object.keys(history.presentState.state.dancers), obstacles: []});
+        onSelectType={(selectDancers: boolean, selectProps: boolean) => {
+          setSelectedIds({
+            props: selectProps ? Object.keys(history.presentState.state.props) : [],
+            dancers: selectDancers ? Object.keys(history.presentState.state.dancers) : [],
+            obstacles: []
+          });
         }}
+        showSelectDancersButton={entityCount.dancers > 0 && entityCount.dancers > selectedIds.dancers.length}
+        showSelectPropsButton={entityCount.props > 0 && entityCount.props > selectedIds.props.length}
+        showSelectAllButton={entityCount.dancers > selectedIds.dancers.length || entityCount.props > selectedIds.props.length}
         onDeselect={resetSelectedIds}
         showDistribute={(selectedIds.dancers.length + selectedIds.props.length + selectedIds.obstacles.length) >= 3}
         onDistribute={(distribution) => {
@@ -733,7 +756,7 @@ export default function ChoreoEditPage(props: {
             commit: true});
           setSelectedIds({props: [], dancers: [], obstacles: newIds});
         }}
-        showLockObstacle={(Object.keys(history.presentState.state.obstacles ?? {})?.length ?? 0) > 0}
+        showLockObstacle={entityCount.obstacles > 0}
         areObstaclesLocked={areObstaclesLocked}
         onToggleObstacleLock={() => {setAreObstaclesLocked(prev => !prev)}}
       />
@@ -1092,23 +1115,4 @@ export default function ChoreoEditPage(props: {
       </Dialog.Root>
     </div>
   )
-}
-
-type InstructionMessageProps = {
-  instruction: React.ReactNode,
-  onClose: () => void,
-}
-
-function InstructionMessage({
-  instruction, onClose
-}: InstructionMessageProps) {
-  return <div className="absolute items-center w-max rounded-md flex gap-2 p-2 top-20 left-1/2 translate-x-[-50%] bg-white border border-primary">
-    <span>
-      {instruction}
-    </span>
-    <IconButton
-      src={ICON.clear}
-      size="sm"
-      onClick={onClose}/>
-  </div>
 }

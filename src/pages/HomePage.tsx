@@ -40,7 +40,7 @@ type HomePageProps = {
   eventList: EventDetails[],
   setEventList: (eventList: EventDetails[]) => void,
   goToNewChoreoPage: (eventDetails?: EventDetails) => void,
-  goToViewPage: (choreo: Choreo) => void,
+  goToViewPage: (choreo: Choreo, status: ChoreoStatus) => void,
   goToManagePage: () => void,
   userName: string | null,
   setUserName: (newName: string) => void,
@@ -48,7 +48,7 @@ type HomePageProps = {
   setDancerNamesByEvent: (groupedNames: Record<string, Record<string, string[]>>) => void,
 }
 
-type ChoreoStatus = "localOnly" | "syncRequired" | "upToDate" | "edited";
+export type ChoreoStatus = "localOnly" | "syncRequired" | "upToDate" | "edited";
 type ChoreoWithStatus = Choreo & {
   status: ChoreoStatus
 }
@@ -304,7 +304,7 @@ export default function HomePage({
     <div className="bg-gray-50">
       <div className='grid py-10 px-6 h-[100svh] grid-rows-[auto,auto,auto,1fr] overflow-hidden w-full mx-auto'>
         <div className="flex items-center justify-between pb-1">
-          <h1 className='text-2xl font-bold'>隊列表一覧</h1>
+          <h1 className='text-2xl font-bold text-nowrap'>隊列表一覧</h1>
           <div className="flex items-center ">
             <Dialog.Root>
               <Dialog.Trigger>
@@ -447,7 +447,7 @@ export default function HomePage({
                     setUploadedChoreo(newChoreo);
                   } else {
                     newChoreo.id = crypto.randomUUID();
-                    saveChoreo(newChoreo, () => {goToViewPage(newChoreo)});
+                    saveChoreo(newChoreo, () => {goToViewPage(newChoreo, "localOnly")});
                   }
                 },
                 (newChoreos: Choreo[], errorMessage?: string) => {
@@ -553,14 +553,14 @@ export default function HomePage({
               if (editingChoreo) {
                 setSyncChoreoDialogOpen(false);
                 setEditingChoreo(undefined);
-                goToViewPage(editingChoreo);
+                goToViewPage(editingChoreo, "edited");
               }
             }}
             onDuplicate={() => {
               if(editingChoreo) {
                 duplicateChoreo(editingChoreo);
                 deleteChoreo(editingChoreo.id, () => {
-                  goToViewPage(choreosFromServer[editingChoreo.id]);
+                  goToViewPage(choreosFromServer[editingChoreo.id], "localOnly");
                 });
               }
             }}
@@ -570,7 +570,7 @@ export default function HomePage({
                   syncChoreoDialog.close();
                   setSyncChoreoDialogOpen(false);
                   setEditingChoreo(undefined);
-                  goToViewPage(choreosFromServer[editingChoreo.id]);
+                  goToViewPage(choreosFromServer[editingChoreo.id], "upToDate");
                 });
               }
             }}
@@ -640,7 +640,7 @@ export default function HomePage({
                 name: `${uploadedChoreo!.name}のコピー`,
                 isDirty: false,
               } as Choreo;
-              saveChoreo(newChoreo, () => {goToViewPage(newChoreo)});
+              saveChoreo(newChoreo, () => {goToViewPage(newChoreo, "localOnly")});
               setUploadedChoreo(undefined);
               setUploadChoreoDialogOpen(false);
             }}
@@ -651,7 +651,7 @@ export default function HomePage({
                 id: duplicateChoreoId ?? crypto.randomUUID(),
                 isDirty: true,
               } as Choreo;
-              saveChoreo(newChoreo, () => {goToViewPage(newChoreo)});
+              saveChoreo(newChoreo, () => {goToViewPage(newChoreo, "localOnly")});
               setUploadedChoreo(undefined);
               setUploadChoreoDialogOpen(false);
             }}
@@ -669,7 +669,7 @@ type EventSectionProps = {
   dancerNamesByFormation?: Record<string, string[]>,
   addEvent: () => void,
   editEventName: () => void,
-  goToViewPage: (choreo: Choreo) => void,
+  goToViewPage: (choreo: Choreo, status: ChoreoStatus) => void,
   duplicateChoreo: (choreo: Choreo) => void,
   editChoreoName: (choreo: Choreo) => void,
   deleteChoreo: (choreo: Choreo) => void,
@@ -767,7 +767,7 @@ function EventSection({
                   if (status === "syncRequired") {
                     syncChoreo(c);
                   } else {
-                    goToViewPage(c);
+                    goToViewPage(c, status);
                   }
                 }}
                 className="flex flex-col justify-between h-full p-2 mx-[11px] transition-colors bg-white border border-gray-400 rounded-md cursor-pointer">
@@ -839,7 +839,7 @@ function EventSection({
                         colour="grey"
                         size="xs"
                       />
-                      <span>幅{choreo.stageGeometry.stageWidth}m 縦{choreo.stageGeometry.stageLength}m</span>
+                      <span>縦{choreo.stageGeometry.stageLength}m 幅{choreo.stageGeometry.stageWidth}m</span>
                     </div>
 
                     <div className="flex items-center gap-0.5">

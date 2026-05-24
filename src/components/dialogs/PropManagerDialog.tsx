@@ -105,20 +105,6 @@ export function PropManagerDialog({
                   </div>
                   <div className="flex gap-2">
                     <NumberInput
-                      label="幅"
-                      defaultValue={prop.width}
-                      min={MIN_PROP_DIMENSION}
-                      max={MAX_PROP_DIMENSION}
-                      baseStep={0.1}
-                      buttonStep={0.5}
-                      onChange={(number) => {
-                        setPropList(prev => {
-                          prev[i].width = number ?? MIN_PROP_DIMENSION;
-                          return [...prev];
-                        })
-                      }}
-                    />
-                    <NumberInput
                       label="縦"
                       defaultValue={prop.length}
                       min={MIN_PROP_DIMENSION}
@@ -128,6 +114,20 @@ export function PropManagerDialog({
                       onChange={(number) => {
                         setPropList(prev => {
                           prev[i].length = number ?? MIN_PROP_DIMENSION;
+                          return [...prev];
+                        })
+                      }}
+                    />
+                    <NumberInput
+                      label="幅"
+                      defaultValue={prop.width}
+                      min={MIN_PROP_DIMENSION}
+                      max={MAX_PROP_DIMENSION}
+                      baseStep={0.1}
+                      buttonStep={0.5}
+                      onChange={(number) => {
+                        setPropList(prev => {
+                          prev[i].width = number ?? MIN_PROP_DIMENSION;
                           return [...prev];
                         })
                       }}

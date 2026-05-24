@@ -16,7 +16,10 @@ type ToolbarProps = {
   // selection / attributes
   showSelectDancer: boolean;
   onSelectColor: () => void;
-  onSelectType: () => void;
+  onSelectType: (selectDancers: boolean, selectProps: boolean) => void;
+  showSelectDancersButton: boolean;
+  showSelectPropsButton: boolean;
+  showSelectAllButton: boolean;
   onDeselect: () => void;
 
   // colour
@@ -75,6 +78,9 @@ export default function Toolbar({
   showSelectDancer,
   onSelectColor,
   onSelectType,
+  showSelectDancersButton,
+  showSelectPropsButton,
+  showSelectAllButton,
   onDeselect,
 
   showChangeColour,
@@ -133,7 +139,7 @@ export default function Toolbar({
     }
    }, [areSelectionActionsActivated]);
 
-  return <div className="flex items-center w-screen gap-2 px-4 pt-4 pb-8 overflow-y-scroll border-t-2 border-gray-400">
+  return <div className="z-10 flex items-center w-screen gap-2 px-4 pt-4 pb-8 overflow-y-scroll bg-white border-t-2 border-gray-400">
     {
       !isSubmenuOpen &&
       <>
@@ -160,9 +166,15 @@ export default function Toolbar({
         {showSwapPosition && <IconButton src={ICON.swapHoriz} label="位置交換" onClick={() => {onSwapPosition()}} />}
         {showDuplicateObstacle && <IconButton src={ICON.contentCopy} label="複製" onClick={() => {onDuplicateObstacle()}} />}
         {showDeleteObjects && <IconButton src={ICON.delete} label="削除" onClick={()=>{onDeleteObjects()}}/>}
-        <IconButton src={ICON.selectAll} label="全員選択" onClick={() => {onSelectType()}} />
-        {showSelectDancer && <IconButton src={ICON.selectAll} label="同色選択" onClick={() => {onSelectColor()}} />}
-        {showLockObstacle && <IconButton src={areObstaclesLocked ? ICON.lockOpen : ICON.lock} label={ areObstaclesLocked ? "障害物解除" : "障害物固定"} onClick={() => {onToggleObstacleLock()}} />}
+        {showSelectDancer && showSelectDancersButton && <IconButton src={ICON.select} subIconSrc={ICON.colors} label="同色選択" onClick={() => {onSelectColor()}} />}
+        {showSelectDancersButton && <IconButton src={ICON.select} subIconSrc={ICON.person} label="全員選択" onClick={() => {onSelectType(true,  false)}} />}
+        {showSelectPropsButton && <IconButton src={ICON.select} subIconSrc={ICON.flag} label="道具選択" onClick={() => {onSelectType(false, true)}} />}
+        {showSelectAllButton && <IconButton src={ICON.selectAll} label="全部選択" onClick={() => {onSelectType(true, true)}} />}
+        {
+          !areSelectionActionsActivated && <>
+            {showLockObstacle && <IconButton src={areObstaclesLocked ? ICON.lockOpen : ICON.lock} label={ areObstaclesLocked ? "障害物解除" : "障害物固定"} onClick={() => {onToggleObstacleLock()}} />}
+          </>
+        }
       </>
     }
     {
