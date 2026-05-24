@@ -25,6 +25,8 @@ export const ACTION_NAME_LENGTH = 10;
 export const COUNT_NAME_LENGTH = 5;
 export const EXPORT_NAME_LENGTH = 100;
 export const SEARCH_NAME_LENGTH = 100;
+export const USERNAME_LENGTH = 25;
+export const PASSWORD_LENGTH = 50;
 
 export enum CUSTOM_EVENT {
 }
