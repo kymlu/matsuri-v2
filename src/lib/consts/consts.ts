@@ -28,6 +28,9 @@ export const SEARCH_NAME_LENGTH = 100;
 export const USERNAME_LENGTH = 25;
 export const PASSWORD_LENGTH = 50;
 
+export const SAMPLE_STAGE_ID = "0a002caf-611a-40aa-9989-a690e6791e0a";
+export const SAMPLE_PARADE_ID = "41221ff9-2647-4255-8189-fa4008bef93a";
+
 export enum CUSTOM_EVENT {
 }
 
