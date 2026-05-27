@@ -3,7 +3,6 @@ import { StageGeometry, StageMargins, YAxisDirection } from "../../../models/cho
 import { colorPalette } from "../../../lib/consts/colors";
 import { METER_PX } from "../../../lib/consts/consts";
 import { useEffect, useState } from "react";
-import { Coordinates } from "../../../models/base";
 
 interface GridLayerProps {
   stageGeometry: StageGeometry,
@@ -11,7 +10,6 @@ interface GridLayerProps {
   showGridLines: boolean,
   showBorder?: boolean,
   verticalGridIncrement: number,
-  scale: Coordinates,
 }
 
 export default function GridLayer({
@@ -20,7 +18,6 @@ export default function GridLayer({
   showGridLines,
   showBorder,
   verticalGridIncrement,
-  scale,
 }: GridLayerProps) {
   const [elements, setElements] = useState<any[]>([]);
   const gridSizePx = gridSize ?? METER_PX;
@@ -34,22 +31,18 @@ export default function GridLayer({
     const stageWidthPx = width * gridSizePx;
     const stageHeightPx = length * gridSizePx;
     
-    const totalWidthPx =
-      (margins.leftMargin + width + margins.rightMargin) * gridSizePx;
-    const totalHeightPx =
-      (margins.topMargin + length + margins.bottomMargin) * gridSizePx;
+    const totalWidthMeters = margins.leftMargin + width + margins.rightMargin;
+    const totalWidthPx = totalWidthMeters * gridSizePx;
+    const totalHeightPx = (margins.topMargin + length + margins.bottomMargin) * gridSizePx;
     
     const stageLeftPx = margins.leftMargin * gridSizePx;
-    const stageRightPx = stageLeftPx + stageWidthPx;
     const stageTopPx = margins.topMargin * gridSizePx;
-    const stageBottomPx = stageTopPx + stageHeightPx;
     
+    const center = width / 2;
     const centerX = stageLeftPx + stageWidthPx / 2;
     
-    const totalMeters =
-    margins.leftMargin + width + margins.rightMargin;
     
-    const isOddTotal = totalMeters % 2 === 1;
+    const isOddTotal = totalWidthMeters % 2 === 1;
     
     const gridOffsetMeters = isOddTotal ? 0.5 : 0;
     const gridOffsetPx = gridOffsetMeters * gridSizePx;
@@ -136,6 +129,19 @@ export default function GridLayer({
         />
       );
     }
+
+    // Draw main stage border
+    elements.push(
+      <Rect
+        key="stage-border"
+        x={stageLeftPx}
+        y={stageTopPx}
+        width={stageWidthPx}
+        height={stageHeightPx}
+        stroke={colorPalette.grey}
+        strokeWidth={1.2}
+      />
+    );
     
     // Centre triangle marker
     elements.push(
@@ -166,27 +172,15 @@ export default function GridLayer({
         fontSize={12}
       />
     )
-    
-    // Right-side meter labels
-    for (let m = 0; m <= margins.topMargin + length + margins.bottomMargin; m++) {
-        const y = m * gridSizePx;
 
-      // if stage, 0 at top of stage
-      // if parade, 0 at bottom of stage
-      if (y >= stageTopPx && y <= stageBottomPx) {
-        const meterFromTop =
-          yAxis === "top-down" ? 
-          (y - stageTopPx) / gridSizePx :
-          (stageBottomPx - y) / gridSizePx;
-
-        if (meterFromTop % verticalGridIncrement !== 0 && meterFromTop !== length) continue;
-    
+    const pushVerticalElement = (m: number, y: number) => {
+      if (y > 0 && y < totalHeightPx) {
         elements.push(
           <Text
             key={`hr-${m}`}
             x={totalWidthPx - gridSizePx * 1.2}
             y={y - 5}
-            text={`${meterFromTop}`}
+            text={`${m}`}
             fontSize={12}
             align="right"
             width={gridSizePx}
@@ -197,54 +191,111 @@ export default function GridLayer({
       }
     }
 
-    // Draw main stage border
-    elements.push(
-      <Rect
-        key="stage-border"
-        x={stageLeftPx}
-        y={stageTopPx}
-        width={stageWidthPx}
-        height={stageHeightPx}
-        stroke={colorPalette.grey}
-        strokeWidth={1.2}
-      />
-    );
-    
-    for (let m = 0; m <= margins.leftMargin + width + margins.rightMargin; m++) {
-      const x = m * gridSizePx + gridOffsetPx;
-    
-      const isCenter = x === centerX;
-      // Top numbering relative to center (stage only)
-      if (
-        x >= stageLeftPx &&
-        x <= stageRightPx &&
-        !isCenter
-      ) {
-        const meterFromCenter =
-        Math.abs(x - centerX) / gridSizePx;
-
-        if (meterFromCenter % 2 !== 0) continue;
-    
-        const radius = gridSizePx*0.4;
-        const cx = x;
-        const cy = stageTopPx - gridSizePx;
-    
-        elements.push(
-          <Group key={`vt-${m}`} x={cx} y={cy}>
-            <Text
-              text={`${meterFromCenter}`}
-              fill={colorPalette.grey}
-              fontStyle="bold"
-              fontSize={11}
-              width={radius * 2}
-              offsetX={radius}
-              align="center"
-              verticalAlign="middle"
-            />
-          </Group>
-        );
+    if (yAxis === "top-down") {
+      for (let m = -(margins.topMargin); m <= length + margins.bottomMargin; m++) {
+        if (m % verticalGridIncrement !== 0) continue;
+        const y = (m + margins.topMargin) * gridSizePx;
+        pushVerticalElement(m, y);
+      }
+    } else {
+      for (let m = length + margins.bottomMargin; m >= -(margins.topMargin) ; m--) {
+        if (m % verticalGridIncrement !== 0) continue;
+        const y = (length + margins.bottomMargin - m) * gridSizePx;
+        pushVerticalElement(m, y);
       }
     }
+    
+    const radius = gridSizePx*0.4;
+    const cy = stageTopPx - gridSizePx;
+
+    for (let m = -(margins.leftMargin); m <= width + margins.rightMargin; m++) {
+      const meterFromCenter = Math.abs(center - m - gridOffsetMeters);
+      const cx = (m + margins.leftMargin) * gridSizePx + gridOffsetPx;
+
+      if (meterFromCenter % 2 !== 0 || meterFromCenter === 0) continue;
+      if (cx >= totalWidthPx - gridSizePx * 1.2) continue;
+      
+      elements.push(
+        <Group key={`vt-${m}`} x={cx} y={cy}>
+          <Text
+            text={`${meterFromCenter}`}
+            fill={colorPalette.grey}
+            fontStyle="bold"
+            fontSize={11}
+            width={radius * 2}
+            offsetX={radius}
+            align="center"
+            verticalAlign="middle"
+          />
+        </Group>
+      );
+    }
+    
+    // // Right-side meter labels
+    // for (let m = 0; m <= margins.topMargin + length + margins.bottomMargin; m++) {
+    //     const y = m * gridSizePx;
+
+    //   // if stage, 0 at top of stage
+    //   // if parade, 0 at bottom of stage
+    //   if (y >= stageTopPx && y <= stageBottomPx) {
+    //     const meterFromTop =
+    //       yAxis === "top-down" ? 
+    //       (y - stageTopPx) / gridSizePx :
+    //       (stageBottomPx - y) / gridSizePx;
+
+    //     if (meterFromTop % verticalGridIncrement !== 0 && meterFromTop !== length) continue;
+    
+    //     elements.push(
+    //       <Text
+    //         key={`hr-${m}`}
+    //         x={totalWidthPx - gridSizePx * 1.2}
+    //         y={y - 5}
+    //         text={`${meterFromTop}`}
+    //         fontSize={12}
+    //         align="right"
+    //         width={gridSizePx}
+    //         fontStyle="bold"
+    //         fill={colorPalette.black}
+    //       />
+    //     );
+    //   }
+    // }
+    
+    // for (let m = 0; m <= margins.leftMargin + width + margins.rightMargin; m++) {
+    //   const x = m * gridSizePx + gridOffsetPx;
+    
+    //   const isCenter = x === centerX;
+    //   // Top numbering relative to center (stage only)
+    //   if (
+    //     x >= stageLeftPx &&
+    //     x <= stageRightPx &&
+    //     !isCenter
+    //   ) {
+    //     const meterFromCenter =
+    //     Math.abs(x - centerX) / gridSizePx;
+
+    //     if (meterFromCenter % 2 !== 0) continue;
+    
+    //     const radius = gridSizePx*0.4;
+    //     const cx = x;
+    //     const cy = stageTopPx - gridSizePx;
+    
+    //     elements.push(
+    //       <Group key={`vt-${m}`} x={cx} y={cy}>
+    //         <Text
+    //           text={`${meterFromCenter}`}
+    //           fill={colorPalette.grey}
+    //           fontStyle="bold"
+    //           fontSize={11}
+    //           width={radius * 2}
+    //           offsetX={radius}
+    //           align="center"
+    //           verticalAlign="middle"
+    //         />
+    //       </Group>
+    //     );
+    //   }
+    // }
 
     if (showBorder) {
       elements.push(

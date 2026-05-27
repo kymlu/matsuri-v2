@@ -16,7 +16,7 @@ import NextDirectionLayer from "./layers/NextDirectionLayer";
 import { Coordinates } from "../../models/base";
 import { strEquals } from "../../lib/helpers/globalHelper";
 import MarkingsLayer from "./layers/MarkingsLayer";
-import FloatingGridLayer from "./layers/FloatingGridLayer";
+import RulerLayer from "./layers/RulerLayer";
 
 Konva.hitOnDragEnabled = true;
 
@@ -350,7 +350,6 @@ export default function MainStage({
           stageGeometry={stageGeometry}
           showGridLines={appSettings.showGrid}
           verticalGridIncrement={verticalGridIncrement}
-          scale={stageScale}
           />
         {
           appSettings.showPreviousSection &&
@@ -405,7 +404,7 @@ export default function MainStage({
     }
     {
       stageGeometry && 
-      <FloatingGridLayer
+      <RulerLayer
         stageGeometry={stageGeometry}
         position={rulerPos}
         verticalGridIncrement={verticalGridIncrement}
