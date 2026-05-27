@@ -6,7 +6,7 @@ import Icon from "../components/basic/Icon"
 import { readUploadedFile } from "../lib/helpers/uploadHelper"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { deleteChoreo, getAllChoreos, saveChoreo, saveChoreos } from "../lib/dataAccess/DataController"
-import { Choreo, ChoreoSchema, EventDetails } from "../models/choreo"
+import { BasicChoreoDetails, Choreo, ChoreoSchema, EventDetails, getBasicChoreoDetails } from "../models/choreo"
 import { isNullOrUndefinedOrBlank, indexByKey, strCompare, strEquals, stringifyEvent } from "../lib/helpers/globalHelper"
 import { formatDateRange, getDate } from "../lib/helpers/dateHelper"
 import IconButton from "../components/basic/IconButton"
@@ -21,7 +21,7 @@ import ExportDialog from "../components/dialogs/ExportDialog"
 import React from "react"
 import Divider from "../components/basic/Divider"
 import TextInput from "../components/inputs/TextInput"
-import { loadAllChoreos } from "../lib/dataAccess/FileAccess"
+import { loadAllChoreos, loadChoreoById } from "../lib/dataAccess/FileAccess"
 import UserNameEditDialog from "../components/dialogs/UserNameEditDialog"
 import { Oval } from "react-loader-spinner"
 import { colorPalette } from "../lib/consts/colors"
@@ -39,7 +39,7 @@ type HomePageProps = {
   eventList: EventDetails[],
   setEventList: (eventList: EventDetails[]) => void,
   goToNewChoreoPage: (eventDetails?: EventDetails) => void,
-  goToViewPage: (choreo: Choreo, status: ChoreoStatus, serverChoreo?: Choreo) => void,
+  goToViewPage: (choreo: Choreo, status: ChoreoStatus, serverChoreo?: BasicChoreoDetails) => void,
   userName: string | null,
   setUserName: (newName: string) => void,
   dancerNamesByEvent: Record<string, Record<string, string[]>>,
@@ -47,8 +47,9 @@ type HomePageProps = {
 }
 
 export type ChoreoStatus = "localOnly" | "syncRequired" | "upToDate" | "edited";
-type ChoreoWithStatus = Choreo & {
-  status: ChoreoStatus
+type ChoreoWithStatus = BasicChoreoDetails & {
+  status: ChoreoStatus,
+  isDirty?: boolean,
 }
 
 export default function HomePage({
@@ -60,7 +61,30 @@ export default function HomePage({
   const [savedChoreos, setSavedChoreos] = useState<ChoreoWithStatus[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [choreosFromServer, setChoreosFromServer] = useState<Record<string, Choreo>>({});
+  // const [choreosFromServer, setChoreosFromServer] = useState<Record<string, Choreo>>({});
+  const [serverChoreoDetails, setServerChoreoDetails] = useState<Record<string, BasicChoreoDetails>>({});
+  const [localChoreos, setLocalChoreos] = useState<Record<string, Choreo>>({});
+
+  const getChoreoFromServer = async (
+    id: string
+  ): Promise<Choreo | undefined> => {
+    return loadChoreoById(id).catch(() => {
+      console.error("Failed to load choreo with id", id);
+      return undefined;
+    });
+  };
+
+  const getChoreo = async (
+    id: string
+  ): Promise<Choreo | undefined> => {
+    const local = localChoreos[id];
+
+    if (local) {
+      return local;
+    }
+
+    return await getChoreoFromServer(id);
+  };
 
   useEffect(() => {
     console.log("build", buildInfo)
@@ -73,8 +97,8 @@ export default function HomePage({
       getAllChoreos(),
       loadAllChoreos()
     ]).then(([local, server]) => {
-      server.push(z.parse(ChoreoSchema, SampleParade));
-      server.push(z.parse(ChoreoSchema, SampleStage));
+      server.push(getBasicChoreoDetails(z.parse(ChoreoSchema, SampleParade)));
+      server.push(getBasicChoreoDetails(z.parse(ChoreoSchema, SampleStage)));
       const choreos: ChoreoWithStatus[] = [];
       const indexedLocal = indexByKey(local, "id");
       const indexedServer = indexByKey(server, "id");
@@ -85,45 +109,49 @@ export default function HomePage({
         const serverChoreo = indexedServer[id];
         if (!localChoreo) {
           choreos.push({...serverChoreo, status: "upToDate"});
-        } else if (!serverChoreo) {
-          choreos.push({...localChoreo, status: "localOnly"});
-        } else if (serverChoreo.version !== localChoreo.version) {
-          if (localChoreo.isDirty === true || localChoreo.isDirty === undefined) {
-            choreos.push({...localChoreo, status: "syncRequired"});
-          } else {
-            saveChoreo(serverChoreo, () => {}, false, false);
-            choreos.push({...serverChoreo, status: "upToDate"});
-          }
         } else {
-          if (localChoreo.isDirty === true || localChoreo.isDirty === undefined) {
-            choreos.push({...localChoreo, status: "edited"});
+          const localChoreoDetails = getBasicChoreoDetails(localChoreo);
+          if (!serverChoreo) {
+            choreos.push({...localChoreoDetails, status: "localOnly"});
+          } else if (serverChoreo.version !== localChoreo.version) {
+            if (localChoreo.isDirty === true || localChoreo.isDirty === undefined) {
+              choreos.push({...localChoreoDetails, status: "syncRequired"});
+            // } else {
+            //   saveChoreo(serverChoreo, () => {}, false, false);
+            //   choreos.push({...serverChoreo, status: "upToDate"});
+            }
           } else {
-            choreos.push({...serverChoreo, status: "upToDate"});
+            if (localChoreo.isDirty === true || localChoreo.isDirty === undefined) {
+              choreos.push({...localChoreoDetails, status: "edited"});
+            } else {
+              choreos.push({...serverChoreo, status: "upToDate"});
+            }
           }
         }
       });
-      setDancerNamesByEvent(
-        choreos.reduce((acc, item) => {
-          const names = Object.values(item.dancers).map(d => d.name);
-          const stringifiedEvent = stringifyEvent(item);
-          return {
-            ...acc,
-            [stringifiedEvent]: {
-              ...(acc[stringifiedEvent] ?? {}),
-              [item.id]: names,
-            },
-          };
-        }, {} as Record<string, Record<string, string[]>>)
-      );
+      // setDancerNamesByEvent(
+      //   choreos.reduce((acc, item) => {
+      //     const names = Object.values(item.dancers).map(d => d.name);
+      //     const stringifiedEvent = stringifyEvent(item);
+      //     return {
+      //       ...acc,
+      //       [stringifiedEvent]: {
+      //         ...(acc[stringifiedEvent] ?? {}),
+      //         [item.id]: names,
+      //       },
+      //     };
+      //   }, {} as Record<string, Record<string, string[]>>)
+      // );
       setSavedChoreos(choreos);
-      setChoreosFromServer(indexedServer);
+      setServerChoreoDetails(indexedServer);
+      setLocalChoreos(indexedLocal);
       setIsLoading(false);
     });
   }
 
   const onSelectChoreo = useCallback((choreo: Choreo, choreoStatus: ChoreoStatus) => {
-    goToViewPage(choreo, choreoStatus, choreosFromServer[choreo.id]);
-  }, [choreosFromServer]);
+    goToViewPage(choreo, choreoStatus, serverChoreoDetails[choreo.id]);
+  }, [serverChoreoDetails]);
 
   useEffect(() => {
     setEventList(
@@ -207,10 +235,10 @@ export default function HomePage({
 
   // todo: add filter to show all/show current and future only
   const filteredChoreos = useMemo(() => 
-    groupChoreos(savedChoreos.filter(c => c.name.toLowerCase().includes(searchTerm) || c.event.toLowerCase().includes(searchTerm)))
+    groupChoreos(savedChoreos.filter(c => c.name.toLowerCase().includes(searchTerm) || c.event?.toLowerCase().includes(searchTerm)))
   , [savedChoreos, searchTerm]);
 
-  const [editingChoreo, setEditingChoreo] = useState<Choreo | undefined>();
+  const [editingChoreo, setEditingChoreo] = useState<ChoreoWithStatus | undefined>();
   const [editChoreoInfoDialogOpen, setEditChoreoInfoDialogOpen] = useState(false);
   const editChoreoInfoDialog = Dialog.createHandle<{}>();
   const handleEditChoreoInfoDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
@@ -218,6 +246,7 @@ export default function HomePage({
   };
 
   const [editingEventName, setEditingEventName] = useState<string | undefined>();
+  const [editingEventNameIds, setEditingEventNameIds] = useState<string[] | undefined>();
   const [editEventNameDialogOpen, setEventNameDialogOpen] = useState(false);
   const editEventNameDialog = Dialog.createHandle<{}>();
   const handleEventNameDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
@@ -280,21 +309,21 @@ export default function HomePage({
       lastUpdated: new Date().toISOString(),
     } as Choreo;
     saveChoreo(newChoreo, () => {
-      var newChoreos = [...savedChoreos, {...newChoreo, status: "localOnly" as ChoreoStatus}];
+      var newChoreos = [...savedChoreos, {...getBasicChoreoDetails(newChoreo), status: "localOnly" as ChoreoStatus}];
 
-      setDancerNamesByEvent(
-        newChoreos.reduce((acc, item) => {
-          const names = Object.values(item.dancers).map(d => d.name);
-          const stringifiedEvent = stringifyEvent(item);
-          return {
-            ...acc,
-            [stringifiedEvent]: {
-              ...(acc[stringifiedEvent] ?? {}),
-              [item.id]: names,
-            },
-          };
-        }, {} as Record<string, Record<string, string[]>>)
-      );
+      // setDancerNamesByEvent(
+      //   newChoreos.reduce((acc, item) => {
+      //     const names = Object.values(item.dancers).map(d => d.name);
+      //     const stringifiedEvent = stringifyEvent(item);
+      //     return {
+      //       ...acc,
+      //       [stringifiedEvent]: {
+      //         ...(acc[stringifiedEvent] ?? {}),
+      //         [item.id]: names,
+      //       },
+      //     };
+      //   }, {} as Record<string, Record<string, string[]>>)
+      // );
       setSavedChoreos(newChoreos);
     });
   }
@@ -369,8 +398,20 @@ export default function HomePage({
                         dancerNamesByFormation={dancerNamesByEvent[eventDetails]}
                         choreos={choreos}
                         searchTerm={searchTerm}
-                        onSelectChoreo={onSelectChoreo}
-                        duplicateChoreo={duplicateChoreo}
+                        onSelectChoreo={(id, status) => {
+                          getChoreo(id).then(c => {
+                            if (c) {
+                              onSelectChoreo(c, status);
+                            }
+                          });
+                        }}
+                        duplicateChoreo={choreo => {
+                          getChoreo(choreo.id).then(c => {
+                            if (c) {
+                              duplicateChoreo(c);
+                            }
+                          });
+                        }}
                         editChoreoName={(choreo) => {
                           setEditingChoreo(choreo);
                           setEditChoreoInfoDialogOpen(true);
@@ -390,14 +431,32 @@ export default function HomePage({
                           setSyncChoreoDialogOpen(true);
                         }}
                         onPdfExport={(choreo) => {
-                          setExportingChoreo(choreo);
-                          setPdfExportDialogOpen(true);
+                          getChoreo(choreo.id).then(c => {
+                            setExportingChoreo(c);
+                            setPdfExportDialogOpen(true);
+                          })
+                        }}
+                        onExport={(id) => {
+                          getChoreo(id).then((choreo) => {
+                            if (choreo) {
+                              exportChoreo(choreo);
+                            }
+                          })
+                        }}
+                        onExportEvent={() => {
+                          Promise.all(choreos.map((c) => getChoreo(c.id))).then((choreos) => {
+                            exportEvent(
+                              choreos.filter(c => !!c), 
+                              (JSON.parse(eventDetails) as EventDetails)?.event
+                            );
+                          });
                         }}
                         addEvent={() => {
                           goToNewChoreoPage(JSON.parse(eventDetails) as EventDetails);
                         }}
                         editEventName={() => {
                           setEditingEventName(eventDetails);
+                          setEditingEventNameIds(choreos.map(x => x.id));
                           setEventNameDialogOpen(true);
                         }}
                         isExpandedByDefault={!isNullOrUndefinedOrBlank(searchTerm) || (yearIndex === 0 && choreoIndex === 0)}
@@ -486,11 +545,15 @@ export default function HomePage({
             onClose={() => {setEditingChoreo(undefined)}}
             onSubmit={(name: string, event: string, startDate?: string, endDate?: string) => {
               if (editingChoreo) {
-                saveChoreo({...editingChoreo, name, event, startDate, endDate}, () => {
-                  editChoreoInfoDialog.close();
-                  setEditChoreoInfoDialogOpen(false);
-                  setEditingChoreo(undefined);
-                  loadChoreos();
+                getChoreo(editingChoreo.id).then(choreo => {
+                  if (choreo) {
+                    saveChoreo({...choreo, name, event, startDate, endDate}, () => {
+                      editChoreoInfoDialog.close();
+                      setEditChoreoInfoDialogOpen(false);
+                      setEditingChoreo(undefined);
+                      loadChoreos();
+                    });
+                  }
                 });
               }
             }}
@@ -501,25 +564,28 @@ export default function HomePage({
           open={editEventNameDialogOpen}
           onOpenChange={handleEventNameDialogOpen}>
             
-            {/* {todo: have new edit event dialog with the dates included. currently broken} */}
           <EditEventInfoDialog
             eventInfo={JSON.parse(editingEventName ?? "{}") as EventDetails}
             eventList={eventList}
             onClose={() => {setEditingEventName(undefined)}}
             onSubmit={(name, startDate, endDate) => {
-              saveChoreos(
-                savedChoreos.filter(c => strEquals(stringifyEvent(c), editingEventName ?? ""))
-                  .map(c => {return {
-                    ...c,
-                    event: name,
-                    startDate: startDate,
-                    endDate: endDate
-                  }}),
-                () => {
-                  setEventNameDialogOpen(false);
-                  loadChoreos();
-                }
-              );
+              // get choreos either local or server
+              if (editingEventNameIds) {
+                Promise.all(editingEventNameIds.map((id) => getChoreo(id))).then((choreos) => {
+                  saveChoreos(
+                    choreos.filter(c => !!c).map(c => {return {
+                      ...c,
+                      event: name,
+                      startDate: startDate,
+                      endDate: endDate
+                    }}), 
+                    () => {
+                      setEventNameDialogOpen(false);
+                      loadChoreos();
+                    }
+                  );
+                });
+              }
             }}/>
         </Dialog.Root>
         <Dialog.Root
@@ -545,30 +611,42 @@ export default function HomePage({
           onOpenChange={handleSyncChoreoDialogOpen}>
           <SyncChoreoDialog
             savedChoreo={editingChoreo}
-            serverChoreo={choreosFromServer[editingChoreo?.id ?? ""]}
+            serverChoreo={serverChoreoDetails[editingChoreo?.id ?? ""]}
             onClose={() => setSyncChoreoDialogOpen(false)}
             onOpenSaved={() => {
               if (editingChoreo) {
-                setSyncChoreoDialogOpen(false);
-                setEditingChoreo(undefined);
-                onSelectChoreo(editingChoreo, "edited");
+                getChoreo(editingChoreo.id).then((choreo) => {
+                  if (choreo) {
+                    setSyncChoreoDialogOpen(false);
+                    onSelectChoreo(choreo, "edited");
+                    setEditingChoreo(undefined);
+                  }
+                });
               }
             }}
             onDuplicate={() => {
-              if(editingChoreo) {
-                duplicateChoreo(editingChoreo);
-                deleteChoreo(editingChoreo.id, () => {
-                  onSelectChoreo(choreosFromServer[editingChoreo.id], "localOnly");
+              if (editingChoreo) {
+                getChoreo(editingChoreo.id).then((choreo) => {
+                  if (choreo) {
+                    duplicateChoreo(choreo);
+                    deleteChoreo(editingChoreo.id, async () => {
+                      await getChoreoFromServer(editingChoreo.id).then((choreo) => {
+                        if (choreo) onSelectChoreo(choreo, "localOnly");
+                      });
+                    });
+                  }
                 });
               }
             }}
             onDelete={() => {
               if (editingChoreo) {
-                deleteChoreo(editingChoreo.id, () => {
+                deleteChoreo(editingChoreo.id, async () => {
                   syncChoreoDialog.close();
                   setSyncChoreoDialogOpen(false);
                   setEditingChoreo(undefined);
-                  onSelectChoreo(choreosFromServer[editingChoreo.id], "upToDate");
+                  await getChoreoFromServer(editingChoreo.id).then((choreo) => {
+                    if (choreo) onSelectChoreo(choreo, "upToDate");
+                  });
                 });
               }
             }}
@@ -667,21 +745,23 @@ type EventSectionProps = {
   dancerNamesByFormation?: Record<string, string[]>,
   addEvent: () => void,
   editEventName: () => void,
-  onSelectChoreo: (choreo: Choreo, status: ChoreoStatus) => void,
-  duplicateChoreo: (choreo: Choreo) => void,
-  editChoreoName: (choreo: Choreo) => void,
-  deleteChoreo: (choreo: Choreo) => void,
-  revertChoreo: (choreo: Choreo) => void,
-  syncChoreo: (choreo: Choreo) => void,
-  onPdfExport: (choreo: Choreo) => void,
+  onSelectChoreo: (id: string, status: ChoreoStatus) => void,
+  duplicateChoreo: (choreo: ChoreoWithStatus) => void,
+  editChoreoName: (choreo: ChoreoWithStatus) => void,
+  deleteChoreo: (choreo: ChoreoWithStatus) => void,
+  revertChoreo: (choreo: ChoreoWithStatus) => void,
+  syncChoreo: (choreo: ChoreoWithStatus) => void,
+  onPdfExport: (choreo: ChoreoWithStatus) => void,
+  onExport: (id: string) => void,
+  onExportEvent: () => void,
   isExpandedByDefault?: boolean,
 }
 
 function EventSection({
   eventInfo, dancerNamesByFormation, choreos, searchTerm, onSelectChoreo, addEvent, editEventName,
-  duplicateChoreo, editChoreoName, deleteChoreo, revertChoreo, syncChoreo, onPdfExport, isExpandedByDefault
+  duplicateChoreo, editChoreoName, deleteChoreo, revertChoreo, syncChoreo, onPdfExport, onExport, onExportEvent, isExpandedByDefault
 }: EventSectionProps) {
-  const optionsDialog = Dialog.createHandle<Choreo>();
+  const optionsDialog = Dialog.createHandle<ChoreoWithStatus>();
   const [optionsDialogOpen, setOptionsDialogOpen] = React.useState(false);
   const [selectedChoreo, setSelectedChoreo] = useState<ChoreoWithStatus | undefined>();
   const dancerWarningDialog = Dialog.createHandle<Choreo>();
@@ -738,7 +818,7 @@ function EventSection({
         </Menu.Item>
         <Divider compact/>
         <Menu.Item>
-          <IconLabelButton full noBorder icon={ICON.download} label="共有" onClick={() => exportEvent(choreos, event.event)}/>
+          <IconLabelButton full noBorder icon={ICON.download} label="共有" onClick={() => onExportEvent()}/>
         </Menu.Item>
       </>
     }
@@ -750,14 +830,13 @@ function EventSection({
             {
               (isNullOrUndefinedOrBlank(searchTerm) ||
               choreo.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-              choreo.event.toLowerCase().includes(searchTerm.toLowerCase())) &&
+              choreo.event?.toLowerCase().includes(searchTerm.toLowerCase())) &&
               <div
                 onClick={() => {
-                  const {status, ...c} = choreo;
-                  if (status === "syncRequired") {
-                    syncChoreo(c);
+                  if (choreo.status === "syncRequired") {
+                    syncChoreo(choreo);
                   } else {
-                    onSelectChoreo(c, status);
+                    onSelectChoreo(choreo.id, choreo.status);
                   }
                 }}
                 className="flex flex-col justify-between h-full p-2 mx-[11px] transition-colors bg-white border border-gray-400 rounded-md cursor-pointer">
@@ -829,7 +908,7 @@ function EventSection({
                         colour="grey"
                         size="xs"
                       />
-                      <span>縦{choreo.stageGeometry.stageLength}m 幅{choreo.stageGeometry.stageWidth}m</span>
+                      <span>縦{choreo.stageLength}m 幅{choreo.stageWidth}m</span>
                     </div>
 
                     <div className="flex items-center gap-0.5">
@@ -838,7 +917,7 @@ function EventSection({
                         colour="grey"
                         size="xs"
                       />
-                      <span>{Object.keys(choreo.dancers).length}人</span>
+                      <span>{Object.keys(choreo.dancerCount).length}人</span>
                     </div>
                   </div>
                 </div>
@@ -878,7 +957,7 @@ function EventSection({
                   icon={ICON.fileExport}
                   label="共有用エクスポート"
                   asDiv
-                  onClick={() => exportChoreo(selectedChoreo)}
+                  onClick={() => {onExport(selectedChoreo.id)}}
                   full />
               </Dialog.Close>
               
@@ -912,8 +991,7 @@ function EventSection({
                     label="確認"
                     asDiv
                     onClick={() => {
-                      const {status, ...c} = selectedChoreo;
-                      syncChoreo(c);
+                      syncChoreo(selectedChoreo);
                     }}
                     full />
                 </Dialog.Close>
@@ -935,7 +1013,7 @@ function EventSection({
           </CustomDialog>
         }
       </Dialog.Root>
-      <Dialog.Root
+      {/* <Dialog.Root
         open={dancerWarningDialogOpen}
         onOpenChange={handleDancerWarningDialogOpenChange}
         handle={dancerWarningDialog}>
@@ -944,7 +1022,7 @@ function EventSection({
           eventName={selectedChoreo?.event}
           dancerNames={selectedChoreo ? Array.from(missingNames[selectedChoreo.id]): []}
         />
-      </Dialog.Root>
+      </Dialog.Root> */}
     </div>
   </ExpandableSection>
 }

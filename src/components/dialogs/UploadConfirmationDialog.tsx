@@ -4,7 +4,6 @@ import { strEquals } from "../../lib/helpers/globalHelper";
 import { BasicChoreoDetails } from "../../models/choreo";
 import Divider from "../basic/Divider";
 import Icon from "../basic/Icon";
-import { Tag } from "../common/Tag";
 import BaseEditDialog from "./BaseEditDialog";
 import { useCallback, useMemo } from "react";
 

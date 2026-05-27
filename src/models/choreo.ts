@@ -60,6 +60,7 @@ export const BasicChoreoDetailsSchema = BaseModelSchema.extend({
   stageLength: z.number(),
   dancerCount: z.number(),
   propCount: z.number(),
+  isDirty: z.boolean().optional(),
 });
 
 export type BasicChoreoDetails = z.infer<typeof BasicChoreoDetailsSchema>;
@@ -77,5 +78,6 @@ export function getBasicChoreoDetails(choreo: Choreo): BasicChoreoDetails {
     stageWidth: choreo.stageGeometry.stageWidth,
     dancerCount: Object.keys(choreo.dancers).length,
     propCount: Object.keys(choreo.props).length,
+    isDirty: choreo.isDirty,
   } as BasicChoreoDetails;
 }

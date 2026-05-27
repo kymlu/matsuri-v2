@@ -67,7 +67,7 @@ export default function ChoreoEditPage(props: {
   eventList: EventDetails[],
   dancerNamesByEvent: Record<string, Record<string, string[]>>,
   onChoreoEdited: () => void,
-  serverChoreo?: Choreo,
+  serverChoreo?: BasicChoreoDetails,
 }) {
   const [currentSection, setCurrentSection] = useState<ChoreoSection>(props.currentChoreo.sections[0]);
   const [currentAction, setCurrentAction] = useState<DancerAction | undefined>();
@@ -103,10 +103,6 @@ export default function ChoreoEditPage(props: {
       }, 1000),
     []
   );
-
-  const serverChoreoDetails = useMemo(() =>
-    props.serverChoreo ? getBasicChoreoDetails(props.serverChoreo) : undefined,
-  [props.serverChoreo]);
 
   const entityCount = useMemo(() => ({
     props: Object.keys(history.presentState.state.props).length,
@@ -868,7 +864,7 @@ export default function ChoreoEditPage(props: {
         open={editChoreoInfoDialogOpen}
         onOpenChange={handleEditChoreoInfoDialogOpen}>
         <EditChoreoInfoDialog
-          choreo={history.presentState.state}
+          choreo={getBasicChoreoDetails(history.presentState.state)}
           eventList={props.eventList}
           onSubmit={(name, event, startDate, endDate) => {
             dispatch({
@@ -1177,7 +1173,7 @@ export default function ChoreoEditPage(props: {
         handle={uploadConfirmationDialog}>
         <UploadConfirmationDialog
           onClose={() => {}}
-          oldVersion={serverChoreoDetails}
+          oldVersion={props.serverChoreo}
           currentVersion={currentChoreoDetails}
         />
       </Dialog.Root>
