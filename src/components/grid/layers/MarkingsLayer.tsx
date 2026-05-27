@@ -27,49 +27,29 @@ export default function MarkingsLayer({
     const margins: StageMargins = stageGeometry.margin;
     const yAxis: YAxisDirection = stageGeometry.yAxis;
 
-    const stageWidthPx = width * gridSizePx;
-    const stageHeightPx = length * gridSizePx;
-
-    const totalWidthPx =
-      (margins.leftMargin + width + margins.rightMargin) * gridSizePx;
+    const totalWidthMeters = margins.leftMargin + width + margins.rightMargin;
+    const totalWidthPx = totalWidthMeters * gridSizePx;
+    const totalHeightPx = (margins.topMargin + length + margins.bottomMargin) * gridSizePx;
     
-    const stageLeftPx = margins.leftMargin * gridSizePx;
-    const stageRightPx = stageLeftPx + stageWidthPx;
     const stageTopPx = margins.topMargin * gridSizePx;
-    const stageBottomPx = stageTopPx + stageHeightPx;
     
-    const centerX = stageLeftPx + stageWidthPx / 2;
+    const center = width / 2;
     
-    const totalMeters =
-    margins.leftMargin + width + margins.rightMargin;
-    
-    const isOddTotal = totalMeters % 2 === 1;
+    const isOddTotal = totalWidthMeters % 2 === 1;
     
     const gridOffsetMeters = isOddTotal ? 0.5 : 0;
     const gridOffsetPx = gridOffsetMeters * gridSizePx;
     
     const newElements = [];
-    
-    // Right-side meter labels
-    for (let m = 0; m <= margins.topMargin + length + margins.bottomMargin; m++) {
-        const y = m * gridSizePx;
 
-      // if stage, 0 at top of stage
-      // if parade, 0 at bottom of stage
-      if (y >= stageTopPx && y <= stageBottomPx) {
-        const meterFromTop =
-          yAxis === "top-down" ? 
-          (y - stageTopPx) / gridSizePx :
-          (stageBottomPx - y) / gridSizePx;
-
-        if (meterFromTop % verticalGridIncrement !== 0 && meterFromTop !== length) continue;
-    
+    const pushVerticalElement = (m: number, y: number) => {
+      if (y > 0 && y < totalHeightPx) {
         newElements.push(
           <Text
             key={`hr-2-${m}`}
             x={totalWidthPx - gridSizePx * 1.2}
             y={y - 5}
-            text={`${meterFromTop}`}
+            text={`${m}`}
             fontSize={12}
             fontStyle="bold"
             fill={colorPalette.black}
@@ -85,41 +65,45 @@ export default function MarkingsLayer({
         );
       }
     }
-    
-    for (let m = 0; m <= margins.leftMargin + width + margins.rightMargin; m++) {
-      const x = m * gridSizePx + gridOffsetPx;
-    
-      const isCenter = x === centerX;
-      // Top numbering relative to center (stage only)
-      if (
-        x >= stageLeftPx &&
-        x <= stageRightPx &&
-        !isCenter
-      ) {
-        const meterFromCenter =
-        Math.abs(x - centerX) / gridSizePx;
 
-        if (meterFromCenter % 2 !== 0) continue;
-    
-        const radius = gridSizePx*0.4;
-        const cx = x;
-        const cy = stageTopPx - gridSizePx;
-    
-        newElements.push(
-          <Group key={`vt-2-${m}`} x={cx} y={cy}>
-            <Text
-              text={`${meterFromCenter}`}
-              fill={colorPalette.grey}
-              fontStyle="bold"
-              fontSize={11}
-              width={radius * 2}
-              offsetX={radius}
-              align="center"
-              verticalAlign="middle"
-            />
-          </Group>
-        );
+    if (yAxis === "top-down") {
+      for (let m = -(margins.topMargin); m <= length + margins.bottomMargin; m++) {
+        if (m % verticalGridIncrement !== 0) continue;
+        const y = (m + margins.topMargin) * gridSizePx;
+        pushVerticalElement(m, y);
       }
+    } else {
+      for (let m = length + margins.bottomMargin; m >= -(margins.topMargin) ; m--) {
+        if (m % verticalGridIncrement !== 0) continue;
+        const y = (length + margins.bottomMargin - m) * gridSizePx;
+        pushVerticalElement(m, y);
+      }
+    }
+    
+    const radius = gridSizePx*0.4;
+    const cy = stageTopPx - gridSizePx;
+
+    for (let m = -(margins.leftMargin); m <= width + margins.rightMargin; m++) {
+      const meterFromCenter = Math.abs(center - m - gridOffsetMeters);
+      const cx = (m + margins.leftMargin) * gridSizePx + gridOffsetPx;
+
+      if (meterFromCenter % 2 !== 0 || meterFromCenter === 0) continue;
+      if (cx >= totalWidthPx - gridSizePx * 1.2) continue;
+      
+      newElements.push(
+        <Group key={`vt-2-${m}`} x={cx} y={cy}>
+          <Text
+            text={`${meterFromCenter}`}
+            fill={colorPalette.grey}
+            fontStyle="bold"
+            fontSize={11}
+            width={radius * 2}
+            offsetX={radius}
+            align="center"
+            verticalAlign="middle"
+          />
+        </Group>
+      );
     }
     setElements(newElements);
   }, [stageGeometry, scale, verticalGridIncrement]);

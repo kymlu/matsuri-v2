@@ -237,18 +237,15 @@ export async function exportToPdf (
       // if parade, 0 at bottom of stage
 
       const txtY = y + 3 + titleBuffer - startingPointDelta;
-      if (txtY >= stageTopPx && y <= stageBottomPx && txtY <= (visualDiagramHeightPx + titleBuffer)) {
+      if (txtY > (titleBuffer + PDF_METER_PX) && txtY <= (titleBuffer + visualDiagramHeightPx)) {
         const meterFromTop =
           stage.yAxis === "top-down" ? 
           (y - stageTopPx) / PDF_METER_PX :
           (stageBottomPx - y) / PDF_METER_PX;
         
-        
-        if (meterFromTop >= 0) {
-          pdf.setFontSize(11);
-          pdf.setTextColor(colorPalette.grey);
-          pdf.text(`${meterFromTop}`, memoLeft - pageMargin * 1.5, txtY, {maxWidth: PDF_METER_PX, align: "right"});
-        }
+        pdf.setFontSize(11);
+        pdf.setTextColor(colorPalette.grey);
+        pdf.text(`${meterFromTop}`, memoLeft - pageMargin * 1.5, txtY, {maxWidth: PDF_METER_PX, align: "right"});
       }
     }
 
@@ -697,22 +694,20 @@ export async function exportToPdf (
       // if parade, 0 at bottom of stage
 
       const txtY = y + 3 + titleBuffer - startingPointDelta;
-      if (txtY >= stageTopPx && y <= stageBottomPx && txtY <= (visualDiagramHeightPx + titleBuffer)) {
+      if (txtY >= (titleBuffer + PDF_METER_PX) && txtY <= (titleBuffer + visualDiagramHeightPx)) {
         const meterFromTop =
           stage.yAxis === "top-down" ? 
           (y - stageTopPx) / PDF_METER_PX :
           (stageBottomPx - y) / PDF_METER_PX;
         
         
-        if (meterFromTop >= 0) {
-          pdf.setFontSize(11);
-          pdf.setLineWidth(0.2);
-          pdf.setDrawColor(colorPalette.white);
-          pdf.setTextColor(colorPalette.black);
-          pdf.setFillColor(colorPalette.black);
-          pdf.text(`${meterFromTop}`, memoLeft - pageMargin * 1.5, txtY, {renderingMode: "fillThenStroke", maxWidth: PDF_METER_PX, align: "right"});
-          pdf.text(`${meterFromTop}`, memoLeft - pageMargin * 1.5, txtY, {maxWidth: PDF_METER_PX, align: "right"});
-        }
+        pdf.setFontSize(11);
+        pdf.setLineWidth(0.2);
+        pdf.setDrawColor(colorPalette.white);
+        pdf.setTextColor(colorPalette.black);
+        pdf.setFillColor(colorPalette.black);
+        pdf.text(`${meterFromTop}`, memoLeft - pageMargin * 1.5, txtY, {renderingMode: "fillThenStroke", maxWidth: PDF_METER_PX, align: "right"});
+        pdf.text(`${meterFromTop}`, memoLeft - pageMargin * 1.5, txtY, {maxWidth: PDF_METER_PX, align: "right"});
       }
     }
     pdf.restoreGraphicsState();
