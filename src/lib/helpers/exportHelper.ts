@@ -339,7 +339,7 @@ export async function exportToPdf (
     
         const radius = PDF_METER_PX * 0.3;
         const cx = x;
-        const cy = stageTopPx - PDF_METER_PX * (startingPoint ? 1.5 : 1);
+        const cy = (startingPoint ? (titleBuffer + PDF_METER_PX / 2) : stageTopPx) - PDF_METER_PX * (startingPoint ? 1.5 : 1);
 
         pdf.setFontSize(8);
         pdf.setFillColor(colorPalette.primary);
@@ -728,7 +728,7 @@ export async function exportToPdf (
     
         const radius = PDF_METER_PX * 0.3;
         const cx = x;
-        const cy = stageTopPx - PDF_METER_PX * (startingPoint ? 1.5 : 1);
+        const cy = (startingPoint ? (titleBuffer + PDF_METER_PX / 2) : stageTopPx) - PDF_METER_PX * (startingPoint ? 1.5 : 1);
 
         pdf.setFontSize(8);
         pdf.setFillColor(colorPalette.primary);
