@@ -6,10 +6,11 @@ type TagProps = {
   text: string,
   icon?: string,
   compact?: boolean,
+  dottedLine?: boolean,
 }
 
 export function Tag ({
-  icon, text, type, compact
+  icon, text, type, compact, dottedLine
 }: TagProps) {
   var tagClasses = classNames("w-min font-semibold flex items-center gap-0.5 border rounded-md text-nowrap",
     {
@@ -18,6 +19,7 @@ export function Tag ({
       "bg-transparent text-gray-600 border-gray-600": type === "grey",
       "px-0.5 py-0 text-xs": compact === true,
       "px-1 py-0.5 text-sm ": compact !== true,
+      "border-dashed": dottedLine && type !== "filled"
     }
   )
   
