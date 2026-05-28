@@ -119,13 +119,18 @@ export default function UploadConfirmationDialog({
                     {row.icon && <Icon src={row.icon} colour="grey" size="sm" />}
                   </td>
                   {isUpdate && (
-                    <td className={`py-0.5 pr-2 align-middle ${hasChange ? "line-through text-gray-400" : ""}`}>
+                    <td
+                      colSpan={!hasChange ? 2 : 1}
+                      className={`py-0.5 pr-2 align-middle line-through text-gray-400`}>
                       {row.old}
                     </td>
                   )}
-                  <td className={`py-0.5 align-middle ${hasChange ? "font-semibold" : ""}`}>
-                    {row.new}
-                  </td>
+                  {
+                    hasChange &&
+                    <td className={`py-0.5 align-middle ${hasChange ? "font-semibold" : ""}`}>
+                      {row.new}
+                    </td>
+                  }
                 </tr>
               );
             })}
