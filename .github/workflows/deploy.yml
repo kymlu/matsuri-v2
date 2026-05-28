@@ -35,6 +35,7 @@ jobs:
         run: npm run deploy
         env:
           CI: false
+          REACT_APP_API_URL: ${{ vars.REACT_APP_API_URL }}
           
       - name: 変更をコミットしてプッシュ
         run: |
