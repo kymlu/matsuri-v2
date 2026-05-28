@@ -1,7 +1,7 @@
 import { Dialog } from "@base-ui/react";
 import CustomDialog from "../basic/CustomDialog";
 import Button from "../basic/Button";
-import { Choreo } from "../../models/choreo";
+import { BasicChoreoDetails } from "../../models/choreo";
 import Divider from "../basic/Divider";
 import { getDate } from "../../lib/helpers/dateHelper";
 import Icon from "../basic/Icon";
@@ -12,8 +12,8 @@ type SyncChoreoDialogProps = {
   onOpenSaved: () => void,
   onDuplicate: () => void,
   onDelete: () => void,
-  savedChoreo?: Choreo,
-  serverChoreo?: Choreo,
+  savedChoreo?: BasicChoreoDetails,
+  serverChoreo?: BasicChoreoDetails,
 }
 
 export default function SyncChoreoDialog ({

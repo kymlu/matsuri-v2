@@ -8,13 +8,18 @@ type BaseEditDialogProps = {
   actionButtonText?: string,
   noDetachedTrigger?: boolean,
   full?: boolean,
+  showCloseButton?: boolean,
   onClose?: () => void,
   onSubmit: () => void,
   children: React.ReactNode,
 }
 
 export default function BaseEditDialog({
-  title, isActionButtonDisabled, actionButtonText, noDetachedTrigger, full, onClose, onSubmit, children
+  title,
+  isActionButtonDisabled, actionButtonText,
+  noDetachedTrigger, full,
+  onClose, showCloseButton = true,
+  onSubmit, children
 }: BaseEditDialogProps) {
   return <CustomDialog
     hasX
@@ -23,20 +28,23 @@ export default function BaseEditDialog({
     onClose={onClose}
     footer={
       <div className="flex w-full gap-2 mt-4">
-        <Dialog.Close
-          onClick={() => {
-            onClose?.();
-          }}
-          className="w-full">
-          <Button
-            asDiv
-            full
-            >
-            <span className="font-semibold text-nowrap">
-              キャンセル
-            </span>
-          </Button>
-        </Dialog.Close>
+        {
+          showCloseButton &&
+          <Dialog.Close
+            onClick={() => {
+              onClose?.();
+            }}
+            className="w-full">
+            <Button
+              asDiv
+              full
+              >
+              <span className="font-semibold text-nowrap">
+                キャンセル
+              </span>
+            </Button>
+          </Dialog.Close>
+        }
         {
           !noDetachedTrigger &&
           <Button

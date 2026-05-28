@@ -28,11 +28,13 @@
     "react-konva": "^19.0.7",
     "react-loader-spinner": "^8.0.2",
     "react-scripts": "5.0.1",
+    "tsx": "^4.22.3",
     "web-vitals": "^2.1.4",
+    "wrangler": "^4.95.0",
     "zod": "^4.3.6"
   },
   "scripts": {
-    "manage": "node manage-files.js",
+    "manage": "tsx manage-files.js",
     "predeploy": "npm run manage && node write-build-info.js && npm run build",
     "deploy": "gh-pages -d build",
     "start": "react-scripts start",

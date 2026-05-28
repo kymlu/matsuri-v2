@@ -2,14 +2,14 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import TextInput from "../inputs/TextInput";
 import { isNullOrUndefinedOrBlank, testInvalidCharacters } from "../../lib/helpers/globalHelper";
 import BaseEditDialog from "./BaseEditDialog";
-import { Choreo, EventDetails } from "../../models/choreo";
+import { BasicChoreoDetails, EventDetails } from "../../models/choreo";
 import CustomAutocomplete from "../inputs/CustomAutocomplete";
 import DateInput from "../inputs/DateInput";
 import { EventListItem } from "../../pages/NewChoreoPage";
 import { LONG_NAME_LENGTH } from "../../lib/consts/consts";
 
 type EditChoreoInfoDialogProps = {
-  choreo?: Choreo,
+  choreo?: BasicChoreoDetails,
   eventList: EventDetails[],
   onClose?: () => void,
   onSubmit: (name: string, event: string, startDate?: string, endDate?: string) => void,
