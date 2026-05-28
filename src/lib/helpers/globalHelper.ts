@@ -1,4 +1,4 @@
-import { Choreo, EventDetails } from "../../models/choreo";
+import { BasicChoreoDetails, Choreo, EventDetails } from "../../models/choreo";
 
 export function strEquals(str1: string | null | undefined, str2: string | null | undefined) {
   return !isNullOrUndefined(str1) && !isNullOrUndefined(str2) && str1?.localeCompare?.(str2!) === 0
@@ -110,7 +110,7 @@ export function incrementBracketSuffix(str: string) {
   return `${base}(${num + 1})`;
 }
 
-export function stringifyEvent(choreo: Choreo): string {
+export function stringifyEvent(choreo: BasicChoreoDetails | Choreo): string {
   return JSON.stringify({
     event: choreo.event ?? "",
     startDate: choreo.startDate ?? "",

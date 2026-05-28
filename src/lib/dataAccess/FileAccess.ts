@@ -1,7 +1,7 @@
 import z from "zod";
-import { Choreo, ChoreoSchema } from "../../models/choreo";
+import { BasicChoreoDetails, BasicChoreoDetailsSchema, Choreo, ChoreoSchema } from "../../models/choreo";
 
-export async function loadAllChoreos(): Promise<Choreo[]> {
+export async function loadAllChoreos(): Promise<BasicChoreoDetails[]> {
   const manifestRes = await fetch(
     `${process.env.PUBLIC_URL}/data/manifest.json`
   );
@@ -10,19 +10,23 @@ export async function loadAllChoreos(): Promise<Choreo[]> {
     throw new Error("Failed to load manifest");
   }
 
-  const manifest: { id: string; name: string; event: string }[] = await manifestRes.json();
+  try {
+    const manifest: BasicChoreoDetails[] = z.array(BasicChoreoDetailsSchema).parse(await manifestRes.json());
+    return manifest;
+  } catch {
+    throw new Error("Failed to parse manifest");
+  }
 
-  const fetchPromises = manifest.map(async (entry) => {
-    const res = await fetch(
-      `${process.env.PUBLIC_URL}/data/${entry.id}.json`
-    );
+}
 
-    if (!res.ok) {
-      throw new Error(`Failed loading ${entry.id}`);
-    }
+export async function loadChoreoById(id: string): Promise<Choreo> {
+  const res = await fetch(
+    `${process.env.PUBLIC_URL}/data/${id}.json`
+  );
 
-    return z.parse(ChoreoSchema, await res.json());
-  });
+  if (!res.ok) {
+    throw new Error(`Failed loading ${id}`);
+  }
 
-  return Promise.all(fetchPromises);
+  return z.parse(ChoreoSchema, await res.json());
 }

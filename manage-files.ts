@@ -3,7 +3,7 @@ const path = require("path");
 
 const REQUIRED_FIELDS = ["id", "name", "event", "stageType", "stageGeometry", "sections", "dancers"];
 
-function validate(data, filename) {
+function validate(data: any, filename: string) {
   if (typeof data !== "object" || data === null) {
     throw new Error(`${filename}: not a valid object`);
   }
@@ -23,18 +23,43 @@ const dataDir = "public/data";
 const manifestPath = "public/data/manifest.json";
 
 // Load existing manifest or start fresh
-const manifest = [];
+type Manifest = {
+  id: string,
+  name: string,
+  event: string,
+  startDate: string,
+  endDate: string,
+  version: number,
+  lastUpdated?: string,
+  stageLength: number,
+  stageWidth: number,
+  dancerCount: number,
+  propCount: number,
+}
+const manifest: Manifest[] = [];
 
 // Remove manifest entries whose data file no longer exists
-const dataFiles = fs.readdirSync(dataDir).filter(f => f.endsWith(".json") && f !== "manifest.json").map(f => path.basename(f, ".json"));
+const dataFiles = fs.readdirSync(dataDir).filter((f: any) => f.endsWith(".json") && f !== "manifest.json").map((f: any) => path.basename(f, ".json"));
 for (const id of dataFiles) {
   const data = JSON.parse(fs.readFileSync(path.join(dataDir, `${id}.json`)));
-  manifest.push({ id: data.id, name: data.name, event: data.event, startDate: data.startDate, endDate: data.endDate });
+  manifest.push({
+    id: data.id,
+    name: data.name,
+    event: data.event,
+    startDate: data.startDate,
+    endDate: data.endDate,
+    version: data.version,
+    lastUpdated: data.lastUpdated,
+    stageLength: data.stageGeometry.stageLength,
+    stageWidth: data.stageGeometry.stageWidth,
+    dancerCount: Object.keys(data.dancers).length,
+    propCount: Object.keys(data.props).length,
+  });
   console.log(`Added existing file to manifest: id=${id} name=${data.name} event=${data.event} startDate=${data.startDate} endDate=${data.endDate}`);
 }
 
 // Process incoming files from intake folder
-const intakeFiles = fs.readdirSync(intakeDir).filter(f => f.endsWith(".mtr"));
+const intakeFiles = fs.readdirSync(intakeDir).filter((f: any) => f.endsWith(".mtr"));
 console.log(`Found ${intakeFiles.length} file(s) in intake`);
 
 for (const filename of intakeFiles) {
@@ -44,38 +69,50 @@ for (const filename of intakeFiles) {
 
     const existingFilePath = path.join(dataDir, `${incoming.id}.json`);
     const existingInManifest = manifest.find(m => m.id === incoming.id);
+    var version = 1;
 
     if (fs.existsSync(existingFilePath)) {
       const existing = JSON.parse(fs.readFileSync(existingFilePath, "utf-8"));
-      fs.writeFileSync(existingFilePath, JSON.stringify({ ...incoming, version: existing.version + 1 }));
-      console.log(`Updated the following from ${existing.version} to ${existing.version + 1}: id=${incoming.id} name=${incoming.name} event=${incoming.event} startDate=${incoming.startDate} endDate=${incoming.endDate}`);
+      version = existing.version + 1;
+      fs.writeFileSync(existingFilePath, JSON.stringify({ ...incoming, version: version }));
+      console.log(`Updated the following from ${existing.version} to ${version}: id=${incoming.id} name=${incoming.name} event=${incoming.event} startDate=${incoming.startDate} endDate=${incoming.endDate}`);
     } else {
-      fs.writeFileSync(path.join(dataDir, `${incoming.id}.json`), JSON.stringify({ ...incoming, version: 1 }));
+      fs.writeFileSync(path.join(dataDir, `${incoming.id}.json`), JSON.stringify({ ...incoming, version: version }));
       console.log(`Added new file: id=${incoming.id} name=${incoming.name} event=${incoming.event} startDate=${incoming.startDate} endDate=${incoming.endDate}`);
     }
 
     if (existingInManifest) {
       existingInManifest.name = incoming.name;
       existingInManifest.event = incoming.event;
+      existingInManifest.version = version;
+      existingInManifest.lastUpdated = incoming.lastUpdated;
       existingInManifest.startDate = incoming.startDate;
       existingInManifest.endDate = incoming.endDate;
+      console.log(`Manifest updated: ${incoming.id}`);
     } else {
-      manifest.push({ id: incoming.id, name: incoming.name, event: incoming.event, startDate: incoming.startDate, endDate: incoming.endDate });
+      manifest.push({
+        id: incoming.id,
+        name: incoming.name,
+        event: incoming.event,
+        startDate: incoming.startDate,
+        endDate: incoming.endDate,
+        version: version,
+        lastUpdated: incoming.lastUpdated,
+        stageLength: incoming.stageGeometry.stageLength,
+        stageWidth: incoming.stageGeometry.stageWidth,
+        dancerCount: Object.keys(incoming.dancers).length,
+        propCount: Object.keys(incoming.props).length,
+      });
+      console.log(`Manifest added: ${incoming.id}`);
     }
 
     fs.unlinkSync(path.join(intakeDir, filename));
     console.log(`Deleted from intake: ${filename}`);
 
-  } catch (err) {
+  } catch (err: any) {
     console.error(`Skipped ${filename}: ${err.message}`);
   }
 }
-
-// Sort manifest by category then name
-manifest.sort((a, b) => {
-  if (a.category !== b.category) return a.category.localeCompare(b.category);
-  return a.name.localeCompare(b.name);
-});
 
 // Write updated manifest
 fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2));
