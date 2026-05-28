@@ -55,10 +55,16 @@ export default {
       const JWKS = jose.createRemoteJWKSet(
         new URL(`https://${CLOUDFLARE_CONFIG.team}.cloudflareaccess.com/cdn-cgi/access/certs`)
       );
-      await jose.jwtVerify(token, JWKS, {
+      const verified = await jose.jwtVerify(token, JWKS, {
         issuer: `https://${CLOUDFLARE_CONFIG.team}.cloudflareaccess.com`,
         audience: CLOUDFLARE_CONFIG.audience,
       });
+			const payload = verified.payload;
+			console.log({
+				email: payload.email ?? "",
+				user: payload.name ?? "",
+				subject: payload.sub ?? "",
+			});
     } catch {
       return new Response('Unauthorized', { status: 401 });
     }
