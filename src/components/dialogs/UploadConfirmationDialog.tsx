@@ -1,17 +1,18 @@
 import { ICON } from "../../lib/consts/consts";
 import { formatDateRange, getJpDate } from "../../lib/helpers/dateHelper";
+import { uploadChoreo } from "../../lib/helpers/githubHelper";
 import { strEquals } from "../../lib/helpers/globalHelper";
-import { BasicChoreoDetails } from "../../models/choreo";
+import { BasicChoreoDetails, Choreo } from "../../models/choreo";
 import Divider from "../basic/Divider";
 import Icon from "../basic/Icon";
 import BaseEditDialog from "./BaseEditDialog";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 type UploadConfirmationDialogProps = {
   onClose: () => void,
   currentVersion: BasicChoreoDetails,
   oldVersion?: BasicChoreoDetails,
-  uploadChoreo?: () => void,
+  getChoreo: () => Choreo,
 }
 
 type Row = {
@@ -21,11 +22,30 @@ type Row = {
 }
 
 export default function UploadConfirmationDialog({
-  onClose, currentVersion, oldVersion, uploadChoreo,
+  onClose, currentVersion, oldVersion, getChoreo,
 }: UploadConfirmationDialogProps) {
+  const [error, setError] = useState<"none" | "error">("none");
+  
   const upload = useCallback(() => {
-    uploadChoreo?.();
-    onClose();
+    try {
+      uploadChoreo(
+        getChoreo(),
+        () => {
+          onClose(); // todo have a separate dialog that says that it was successful and will be updated in a little bit. close and reopen the app
+          setError("none");
+        },
+        (status) => {
+          setError("error");
+        }
+      );
+    } catch (e: any) {
+      setError("error");
+      if (e instanceof Error) {
+        console.error(e.message);
+      } else {
+        console.error("An error has occurred", e);
+      }
+    }
   }, [uploadChoreo]);
 
   const isUpdate = !!oldVersion;
@@ -83,7 +103,10 @@ export default function UploadConfirmationDialog({
       title="アップロード確認"
       actionButtonText="アップロード"
       onSubmit={upload}
-      onClose={onClose}
+      onClose={() => {
+        onClose();
+        setError("none");
+      }}
     >
       <div className={`flex flex-col gap-2 ${isUpdate ? "w-[70svw]" : ""}`}>
         <table className="w-full text-sm">
@@ -123,6 +146,12 @@ export default function UploadConfirmationDialog({
         <span>
           {isUpdate ? "新バージョンをアップロードしますか？" : "新しいファイルとしてアップロードしますか？"}
         </span>
+        {
+          error === "error" && 
+          <span className="w-full font-semibold text-center text-primary">
+            処理中にエラーが発生しました
+          </span>
+        }
       </div>
     </BaseEditDialog>
   );

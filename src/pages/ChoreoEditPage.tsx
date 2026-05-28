@@ -14,7 +14,7 @@ import { Dialog } from "@base-ui/react";
 import EditChoreoSizeDialog from "../components/dialogs/EditChoreoSizeDialog";
 import { exportChoreo } from "../lib/helpers/exportHelper";
 import { saveChoreo } from "../lib/dataAccess/DataController";
-import { DEFAULT_PROP_LENGTH, DEFAULT_PROP_WIDTH, ICON, SAMPLE_PARADE_ID, SAMPLE_STAGE_ID } from "../lib/consts/consts";
+import { DEFAULT_PROP_LENGTH, DEFAULT_PROP_WIDTH, ICON, SAMPLE_PARADE_ID, SAMPLE_STAGE_ID, TEST_ID } from "../lib/consts/consts";
 import { AppSetting } from "../models/appSettings";
 import { changeStageGeometryAndType, renameChoreo } from "../lib/editor/commands/choreoCommands";
 import EditChoreoInfoDialog from "../components/dialogs/EditChoreoInfoDialog";
@@ -39,7 +39,6 @@ import EditDancerNameDialog from "../components/dialogs/EditDancerNameDialog";
 import AbsentDancersWarningDialog from "../components/dialogs/AbsentDancersWarningDialog";
 import InstructionMessage from "../components/basic/InstructionMessage";
 import { ChoreoStatus } from "./HomePage";
-import LoginDialog from "../components/dialogs/LoginDialog";
 import UploadConfirmationDialog from "../components/dialogs/UploadConfirmationDialog";
 
 const resizeDialog = Dialog.createHandle<Choreo>();
@@ -56,7 +55,6 @@ const renameSectionDialog = Dialog.createHandle<ChoreoSection>();
 const addNoteToSectionDialog = Dialog.createHandle<ChoreoSection>();
 const deleteSectionDialog = Dialog.createHandle<ChoreoSection>();
 const dancerWarningDialog = Dialog.createHandle<Choreo>();
-const loginDialog = Dialog.createHandle<null>();
 const uploadConfirmationDialog = Dialog.createHandle<null>();
 
 export default function ChoreoEditPage(props: {
@@ -365,8 +363,7 @@ export default function ChoreoEditPage(props: {
   const [addNoteToSectionDialogOpen, setAddNoteToSectionDialogOpen] = useState(false);
   const [deleteSectionDialogOpen, setDeleteSectionDialogOpen] = useState(false);
   const [dancerWarningDialogOpen, setDancerWarningDialogOpen] = useState(false);
-  const [loginDialogOpen, setLoginDialogOpen] = useState(false);
-  const [uploadConfirmationDialogOpen, setUploadConfirmationDialog] = useState(false);
+  const [uploadConfirmationDialogOpen, setUploadConfirmationDialogOpen] = useState(false);
   
   const handleRenameSectionDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setRenameSectionDialogOpen(isOpen);
@@ -424,12 +421,8 @@ export default function ChoreoEditPage(props: {
     setDancerWarningDialogOpen(isOpen);
   };
 
-  const handleLoginDialogOpenChange = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
-    setLoginDialogOpen(isOpen);
-  };
-
   const handleUploadConfirmationDialogOpenChange = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
-    setUploadConfirmationDialog(isOpen);
+    setUploadConfirmationDialogOpen(isOpen);
   };
   
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
@@ -519,9 +512,10 @@ export default function ChoreoEditPage(props: {
         showUpload={
           !strEquals(history.presentState.state.id, SAMPLE_PARADE_ID) &&
           !strEquals(history.presentState.state.id, SAMPLE_STAGE_ID) &&
+          strEquals(history.presentState.state.id, TEST_ID) &&
           history.presentState.state.isDirty
         }
-        upload={() => {setLoginDialogOpen(true)}}
+        upload={() => {setUploadConfirmationDialogOpen(true)}}
         />
       <div className="relative flex-1">
         <MainStage
@@ -1157,24 +1151,14 @@ export default function ChoreoEditPage(props: {
         />
       </Dialog.Root>
       <Dialog.Root
-        open={loginDialogOpen}
-        onOpenChange={handleLoginDialogOpenChange}
-        handle={loginDialog}>
-        <LoginDialog
-          onClose={() => {
-            setLoginDialogOpen(false);
-            setUploadConfirmationDialog(true);
-          }}
-        />
-      </Dialog.Root>
-      <Dialog.Root
         open={uploadConfirmationDialogOpen}
         onOpenChange={handleUploadConfirmationDialogOpenChange}
         handle={uploadConfirmationDialog}>
         <UploadConfirmationDialog
-          onClose={() => {}}
+          onClose={() => {setUploadConfirmationDialogOpen(false)}}
           oldVersion={props.serverChoreo}
           currentVersion={currentChoreoDetails}
+          getChoreo={() => {return history.presentState.state}}
         />
       </Dialog.Root>
     </div>

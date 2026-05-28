@@ -30,6 +30,7 @@ export const PASSWORD_LENGTH = 50;
 
 export const SAMPLE_STAGE_ID = "0a002caf-611a-40aa-9989-a690e6791e0a";
 export const SAMPLE_PARADE_ID = "41221ff9-2647-4255-8189-fa4008bef93a";
+export const TEST_ID = "1048ecf9-a1a1-4e47-9173-23b00368f32c";
 
 export enum CUSTOM_EVENT {
 }
