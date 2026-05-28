@@ -233,7 +233,6 @@ export default function HomePage({
     }, new Map<string, Map<string, ChoreoWithStatus[]>>());
   }
 
-  // todo: add filter to show all/show current and future only
   const filteredChoreos = useMemo(() => 
     groupChoreos(savedChoreos.filter(c => c.name.toLowerCase().includes(searchTerm) || c.event?.toLowerCase().includes(searchTerm)))
   , [savedChoreos, searchTerm]);
