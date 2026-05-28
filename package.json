@@ -35,7 +35,7 @@
   },
   "scripts": {
     "manage": "tsx manage-files.js",
-    "predeploy": "npm run manage && node write-build-info.js && npm run build",
+    "writeBuild": "node write-build-info.js",
     "deploy": "gh-pages -d build",
     "start": "react-scripts start",
     "build": "react-scripts build"

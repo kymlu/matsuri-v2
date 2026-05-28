@@ -25,6 +25,18 @@ jobs:
       - name: 依存関係をインストール
         run: npm ci
 
+      - name: ファイルを整理する
+        run: npm run manage
+
+      - name: ビルド情報更新
+        run: npm run writeBuild
+      
+      - name: ビルド
+        run: npm run build
+        env:
+          CI: false
+          REACT_APP_API_URL: ${{ vars.REACT_APP_API_URL }}  
+
       - name: Gitの設定
         run: |
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
@@ -33,9 +45,6 @@ jobs:
 
       - name: サイトをデプロイ
         run: npm run deploy
-        env:
-          CI: false
-          REACT_APP_API_URL: ${{ vars.REACT_APP_API_URL }}
           
       - name: 変更をコミットしてプッシュ
         run: |
