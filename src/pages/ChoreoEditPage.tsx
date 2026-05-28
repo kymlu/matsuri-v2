@@ -4,7 +4,7 @@ import FormationSelectionToolbar from "../components/editor/FormationSelectionTo
 import UndoRedoToolbar from "../components/editor/UndoRedoToolbar";
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { historyReducer } from "../lib/editor/historyReducer";
-import { Choreo, EventDetails } from "../models/choreo";
+import { BasicChoreoDetails, Choreo, EventDetails, getBasicChoreoDetails } from "../models/choreo";
 import { EditHistory, StageEntities } from "../models/history";
 import { addSection, assignDancersToTiming, duplicateSection, editDancerActions, editSectionNote, removeSection, renameSection, reorderSections } from "../lib/editor/commands/sectionCommands";
 import { ChoreoSection } from "../models/choreoSection";
@@ -14,7 +14,7 @@ import { Dialog } from "@base-ui/react";
 import EditChoreoSizeDialog from "../components/dialogs/EditChoreoSizeDialog";
 import { exportChoreo } from "../lib/helpers/exportHelper";
 import { saveChoreo } from "../lib/dataAccess/DataController";
-import { DEFAULT_PROP_LENGTH, DEFAULT_PROP_WIDTH, ICON } from "../lib/consts/consts";
+import { DEFAULT_PROP_LENGTH, DEFAULT_PROP_WIDTH, ICON, SAMPLE_PARADE_ID, SAMPLE_STAGE_ID, TEST_ID } from "../lib/consts/consts";
 import { AppSetting } from "../models/appSettings";
 import { changeStageGeometryAndType, renameChoreo } from "../lib/editor/commands/choreoCommands";
 import EditChoreoInfoDialog from "../components/dialogs/EditChoreoInfoDialog";
@@ -39,6 +39,7 @@ import EditDancerNameDialog from "../components/dialogs/EditDancerNameDialog";
 import AbsentDancersWarningDialog from "../components/dialogs/AbsentDancersWarningDialog";
 import InstructionMessage from "../components/basic/InstructionMessage";
 import { ChoreoStatus } from "./HomePage";
+import UploadConfirmationDialog from "../components/dialogs/UploadConfirmationDialog";
 
 const resizeDialog = Dialog.createHandle<Choreo>();
 const editChoreoInfoDialog = Dialog.createHandle<string>();
@@ -54,6 +55,7 @@ const renameSectionDialog = Dialog.createHandle<ChoreoSection>();
 const addNoteToSectionDialog = Dialog.createHandle<ChoreoSection>();
 const deleteSectionDialog = Dialog.createHandle<ChoreoSection>();
 const dancerWarningDialog = Dialog.createHandle<Choreo>();
+const uploadConfirmationDialog = Dialog.createHandle<null>();
 
 export default function ChoreoEditPage(props: {
   goToHomePage: () => void,
@@ -63,6 +65,7 @@ export default function ChoreoEditPage(props: {
   eventList: EventDetails[],
   dancerNamesByEvent: Record<string, Record<string, string[]>>,
   onChoreoEdited: () => void,
+  serverChoreo?: BasicChoreoDetails,
 }) {
   const [currentSection, setCurrentSection] = useState<ChoreoSection>(props.currentChoreo.sections[0]);
   const [currentAction, setCurrentAction] = useState<DancerAction | undefined>();
@@ -118,6 +121,28 @@ export default function ChoreoEditPage(props: {
     }
   }, [history.presentState.state]);
 
+  const currentChoreoDetails = useMemo(() =>
+    {
+      return {
+        id: history.presentState.state.id,
+        name: history.presentState.state.name,
+        event: history.presentState.state.event,
+        startDate: history.presentState.state.startDate,
+        endDate: history.presentState.state.endDate,
+        dancerCount: entityCount.dancers,
+        propCount: entityCount.props,
+        lastUpdated: history.presentState.state.lastUpdated,
+        stageLength: history.presentState.state.stageGeometry.stageLength,
+        stageWidth: history.presentState.state.stageGeometry.stageWidth,
+      } as BasicChoreoDetails
+    }
+  , [history.presentState.state.name,
+    history.presentState.state.event,
+    history.presentState.state.startDate,
+    history.presentState.state.endDate,
+    history.presentState.state.dancers,
+    history.presentState.state.props,
+    history.presentState.state.stageGeometry]);
 
   const [prevSection, setPrevSection] = useState<ChoreoSection | undefined>();
   useEffect(() => {
@@ -338,6 +363,7 @@ export default function ChoreoEditPage(props: {
   const [addNoteToSectionDialogOpen, setAddNoteToSectionDialogOpen] = useState(false);
   const [deleteSectionDialogOpen, setDeleteSectionDialogOpen] = useState(false);
   const [dancerWarningDialogOpen, setDancerWarningDialogOpen] = useState(false);
+  const [uploadConfirmationDialogOpen, setUploadConfirmationDialogOpen] = useState(false);
   
   const handleRenameSectionDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setRenameSectionDialogOpen(isOpen);
@@ -393,6 +419,10 @@ export default function ChoreoEditPage(props: {
 
   const handleDancerWarningDialogOpenChange = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setDancerWarningDialogOpen(isOpen);
+  };
+
+  const handleUploadConfirmationDialogOpenChange = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
+    setUploadConfirmationDialogOpen(isOpen);
   };
   
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
@@ -479,6 +509,13 @@ export default function ChoreoEditPage(props: {
         stageLength={history.presentState.state.stageGeometry.stageLength}
         version={props.currentChoreo.version}
         choreoStatus={props.currentChoreoStatus}
+        showUpload={
+          !strEquals(history.presentState.state.id, SAMPLE_PARADE_ID) &&
+          !strEquals(history.presentState.state.id, SAMPLE_STAGE_ID) &&
+          strEquals(history.presentState.state.id, TEST_ID) &&
+          history.presentState.state.isDirty
+        }
+        upload={() => {setUploadConfirmationDialogOpen(true)}}
         />
       <div className="relative flex-1">
         <MainStage
@@ -821,7 +858,7 @@ export default function ChoreoEditPage(props: {
         open={editChoreoInfoDialogOpen}
         onOpenChange={handleEditChoreoInfoDialogOpen}>
         <EditChoreoInfoDialog
-          choreo={history.presentState.state}
+          choreo={getBasicChoreoDetails(history.presentState.state)}
           eventList={props.eventList}
           onSubmit={(name, event, startDate, endDate) => {
             dispatch({
@@ -1111,6 +1148,17 @@ export default function ChoreoEditPage(props: {
           choreoName={history.presentState.state?.name}
           eventName={history.presentState.state?.event}
           dancerNames={missingNames}
+        />
+      </Dialog.Root>
+      <Dialog.Root
+        open={uploadConfirmationDialogOpen}
+        onOpenChange={handleUploadConfirmationDialogOpenChange}
+        handle={uploadConfirmationDialog}>
+        <UploadConfirmationDialog
+          onClose={() => {setUploadConfirmationDialogOpen(false)}}
+          oldVersion={props.serverChoreo}
+          currentVersion={currentChoreoDetails}
+          getChoreo={() => {return history.presentState.state}}
         />
       </Dialog.Root>
     </div>
