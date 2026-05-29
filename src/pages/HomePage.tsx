@@ -1,6 +1,6 @@
 import { Dialog, Menu } from "@base-ui/react"
 import CustomDialog from "../components/basic/CustomDialog"
-import { ICON, LONG_NAME_LENGTH, SEARCH_NAME_LENGTH } from "../lib/consts/consts"
+import { ICON, LONG_NAME_LENGTH, SAMPLE_PARADE_ID, SAMPLE_STAGE_ID, SEARCH_NAME_LENGTH } from "../lib/consts/consts"
 import { IconLabelButton } from "../components/basic/Button"
 import Icon from "../components/basic/Icon"
 import { readUploadedFile } from "../lib/helpers/uploadHelper"
@@ -81,6 +81,12 @@ export default function HomePage({
 
     if (local) {
       return local;
+    }
+
+    if (strEquals(id, SAMPLE_PARADE_ID)) {
+      return SampleParade as Choreo;
+    } else if (strEquals(id, SAMPLE_STAGE_ID)) {
+      return SampleStage as Choreo;
     }
 
     return await getChoreoFromServer(id);
@@ -916,7 +922,7 @@ function EventSection({
                         colour="grey"
                         size="xs"
                       />
-                      <span>{Object.keys(choreo.dancerCount).length}人</span>
+                      <span>{choreo.dancerCount}人</span>
                     </div>
                   </div>
                 </div>
