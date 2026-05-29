@@ -6,8 +6,10 @@ const allowedOrigins = [
 ];
 
 function getCorsHeaders(origin: string | null) {
-  const allowed = origin && allowedOrigins.includes(origin);
-	console.log("Origin received:", origin);
+  const allowed = origin && (
+		allowedOrigins.includes(origin) ||
+    /^https:\/\/[a-z0-9-]+\.matsuri-v2\.pages\.dev$/.test(origin)
+	);
 
   return {
     "Access-Control-Allow-Origin": allowed ? origin : "",
