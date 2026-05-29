@@ -33,6 +33,8 @@ import BeginnersDialog from "../components/dialogs/BeginnersDialog"
 import EditEventInfoDialog from "../components/dialogs/EditEventInfoDialog"
 import SiteInfoDialog from "../components/dialogs/SiteInfoDialog"
 import { Tag } from "../components/common/Tag"
+import { checkLogin } from "../lib/helpers/apiHelper"
+import CheckLoginDialog from "../components/dialogs/CheckLoginDialog"
 
 type HomePageProps = {
   buildInfo?: string,
@@ -44,6 +46,8 @@ type HomePageProps = {
   setUserName: (newName: string) => void,
   dancerNamesByEvent: Record<string, Record<string, string[]>>,
   setDancerNamesByEvent: (groupedNames: Record<string, Record<string, string[]>>) => void,
+  isLoggedIn: boolean,
+  setIsLoggedIn: (value: boolean) => void,
 }
 
 export type ChoreoStatus = "localOnly" | "syncRequired" | "upToDate" | "edited";
@@ -57,6 +61,7 @@ export default function HomePage({
   goToNewChoreoPage, goToViewPage,
   userName, setUserName,
   dancerNamesByEvent, setDancerNamesByEvent,
+  isLoggedIn, setIsLoggedIn
 }: HomePageProps) {
   const [savedChoreos, setSavedChoreos] = useState<ChoreoWithStatus[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -95,6 +100,14 @@ export default function HomePage({
   useEffect(() => {
     console.log("build", buildInfo)
     loadChoreos();
+  }, []);
+
+  useEffect(() => {
+    checkLogin(() => {
+      setIsLoggedIn(true);
+    }, () => {
+      setIsLoggedIn(false);
+    });
   }, []);
 
   const loadChoreos = () => {
@@ -351,6 +364,19 @@ export default function HomePage({
               </Dialog.Trigger>
               <UserNameEditDialog name={userName ?? ""} onSubmit={(name) => setUserName(name)}/>
             </Dialog.Root>
+            {
+              !isLoggedIn &&
+              <Dialog.Root>
+                <Dialog.Trigger>
+                  <IconButton src={ICON.shieldLock} colour="primary" noBorder asDiv/>
+                </Dialog.Trigger>
+                <CheckLoginDialog/>
+              </Dialog.Root>
+            }
+            {
+              isLoggedIn &&
+              <IconButton src={ICON.verifiedUser} colour="primary" noBorder/>
+            }
           </div>
         </div>
         <div className="flex gap-2 mb-2">

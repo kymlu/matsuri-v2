@@ -16,6 +16,7 @@ function getCorsHeaders(origin: string | null) {
     "Access-Control-Max-Age": "86400",
     "Vary": "Origin",
     "Content-Type": "application/json",
+		"Access-Control-Allow-Credentials": "true",
   };
 }
 
@@ -49,8 +50,13 @@ export default {
 		// Verify Cloudflare Access JWT
     const token = request.headers.get('Cf-Access-Jwt-Assertion');
     if (!token) {
-      return new Response('Unauthorized', { status: 401, headers: corsHeaders });
+      return new Response(
+				JSON.stringify({error: "Unauthorized"}),
+				{ status: 401, headers: corsHeaders }
+			);
     }
+
+		var payload: jose.JWTPayload | null = null;
 
 		try {
       const JWKS = jose.createRemoteJWKSet(
@@ -60,17 +66,27 @@ export default {
         issuer: `https://${CLOUDFLARE_CONFIG.team}.cloudflareaccess.com`,
         audience: CLOUDFLARE_CONFIG.audience,
       });
-			const payload = verified.payload;
+			payload = verified.payload;
 			console.log({
 				email: payload.email ?? "",
 				user: payload.name ?? "",
 				subject: payload.sub ?? "",
 			});
     } catch {
-      return new Response('Unauthorized', { status: 401, headers: corsHeaders });
+      return new Response(
+				JSON.stringify({error: "Unauthorized"}),
+				{ status: 401, headers: corsHeaders }
+			);
     }
 
     const url = new URL(request.url);
+
+		if (url.pathname === "/api/verify-user" && request.method === "GET") {
+			return new Response(JSON.stringify({ email: payload.email ?? "", user: payload.name ?? "" }), {
+				status: 200,
+				headers: { ...corsHeaders, "Content-Type": "application/json" },
+			});
+		}
 
 		if (url.pathname === "/api/push-file" && request.method === "POST") {
 			try {

@@ -1,6 +1,6 @@
 import { ICON } from "../../lib/consts/consts";
 import { formatDateRange, getJpDate } from "../../lib/helpers/dateHelper";
-import { uploadChoreo } from "../../lib/helpers/githubHelper";
+import { uploadChoreo } from "../../lib/helpers/apiHelper";
 import { strEquals } from "../../lib/helpers/globalHelper";
 import { BasicChoreoDetails, Choreo } from "../../models/choreo";
 import Divider from "../basic/Divider";

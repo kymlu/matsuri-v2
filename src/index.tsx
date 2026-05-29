@@ -5,6 +5,7 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { DBProvider } from './lib/dataAccess/DBProvider';
 import { RequireDB } from './lib/dataAccess/RequireDb';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -13,7 +14,12 @@ root.render(
   <React.StrictMode>
     <DBProvider>
       <RequireDB>
-        <App />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/admin" element={<div>ログイン成功</div>} />
+            <Route path="*" element={<App />} />
+          </Routes>
+        </BrowserRouter>
       </RequireDB>
     </DBProvider>
   </React.StrictMode>

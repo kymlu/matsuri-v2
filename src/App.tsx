@@ -19,6 +19,7 @@ function App() {
   const [currentChoreoStatus, setCurrentChoreoStatus] = useState<ChoreoStatus>();
   const [name, setName] = useState<string | null>(null);
   const [buildInfo, setBuildInfo] = useState<string | undefined>();
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
 
   useEffect(() => {
     setName(getUserName());
@@ -64,6 +65,8 @@ function App() {
           setUserName={(newName) => setNewName(newName)}
           dancerNamesByEvent={dancerNamesByEvent}
           setDancerNamesByEvent={(groupedNames) => setDancerNamesByEvent(groupedNames)}
+          isLoggedIn={isLoggedIn}
+          setIsLoggedIn={setIsLoggedIn}
         />
       )}
       {mode === "form" && (
