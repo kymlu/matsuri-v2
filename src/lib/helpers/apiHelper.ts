@@ -9,19 +9,24 @@ export const checkLogin = async(
   onSuccess: () => void,
   onFailure: (status: number) => void
 ) => {
-  const response = await fetch(getApiUrl("verify-user"), {
-    credentials: "include",
-  });
-
-  const data = await response.json() as { message?: string; error?: string };
+  try {
+    const response = await fetch(getApiUrl("verify-user"), {
+      credentials: "include",
+    });
   
-  if (!response.ok) {
-    console.error(`Status: ${response.status} data: ${data}`);
-    onFailure(response.status);
-    return;
+    const data = await response.json() as { message?: string; error?: string };
+    
+    if (!response.ok) {
+      console.error(`Status: ${response.status} data: ${data}`);
+      onFailure(response.status);
+      return;
+    }
+  
+    onSuccess();
+  } catch (e: any) {
+    console.error((e as Error)?.message);
+    onFailure(400);
   }
-
-  onSuccess();
 }
 
 export const uploadChoreo = async (
@@ -38,24 +43,29 @@ const handleUpload = async (
   onSuccess: () => void,
   onFailure: (status: number) => void
 ) => {
-  const response = await fetch(getApiUrl("push-file"), {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      fileName: fileName,
-      fileContent: fileContents,
-      commitMessage: `Upload ${fileName}`
-    }),
-    credentials: "include"
-  });
+  try {
+    const response = await fetch(getApiUrl("push-file"), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fileName: fileName,
+        fileContent: fileContents,
+        commitMessage: `Upload ${fileName}`
+      }),
+      credentials: "include"
+    });
 
-  const data = await response.json() as { message?: string; error?: string };
+    const data = await response.json() as { message?: string; error?: string };
 
-  if (!response.ok) {
-    console.error(`Failed to upload to Github. Status: ${response.status} data: ${data}`);
-    onFailure(response.status);
-    return;
+    if (!response.ok) {
+      console.error(`Failed to upload to Github. Status: ${response.status} data: ${data}`);
+      onFailure(response.status);
+      return;
+    }
+
+    onSuccess();
+  } catch (e: any) {
+    console.error((e as Error)?.message);
+    onFailure(400);
   }
-
-  onSuccess();
 };
