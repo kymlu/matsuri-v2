@@ -7,6 +7,7 @@ const allowedOrigins = [
 
 function getCorsHeaders(origin: string | null) {
   const allowed = origin && allowedOrigins.includes(origin);
+	console.log("Origin received:", origin);
 
   return {
     "Access-Control-Allow-Origin": allowed ? origin : "",
