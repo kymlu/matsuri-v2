@@ -49,7 +49,7 @@ export default {
 		// Verify Cloudflare Access JWT
     const token = request.headers.get('Cf-Access-Jwt-Assertion');
     if (!token) {
-      return new Response('Unauthorized', { status: 401 });
+      return new Response('Unauthorized', { status: 401, headers: corsHeaders });
     }
 
 		try {
@@ -67,7 +67,7 @@ export default {
 				subject: payload.sub ?? "",
 			});
     } catch {
-      return new Response('Unauthorized', { status: 401 });
+      return new Response('Unauthorized', { status: 401, headers: corsHeaders });
     }
 
     const url = new URL(request.url);
@@ -77,7 +77,10 @@ export default {
 				const { fileName, fileContent, commitMessage } = await request.json() as any;
 
 				if (!fileName || !fileContent) {
-					return new Response(JSON.stringify({ error: "Missing fileName or fileContent" }), { status: 400, headers: corsHeaders });
+					return new Response(
+						JSON.stringify({ error: "Missing fileName or fileContent" }),
+						{ status: 400, headers: corsHeaders }
+					);
 				}
 
 				// 1. Sanitize the filename to prevent folder escape attacks (e.g. "../../../etc")
@@ -140,7 +143,10 @@ export default {
 
 				if (!githubResponse.ok) {
 					console.error(githubData.message);
-					return new Response(JSON.stringify({ error: githubData.message || "GitHub API Error" }), { status: githubResponse.status, headers: corsHeaders });
+					return new Response(
+						JSON.stringify({ error: githubData.message || "GitHub API Error" }),
+						{ status: githubResponse.status, headers: corsHeaders }
+					);
 				}
 
 				return new Response(JSON.stringify({ 
@@ -149,7 +155,10 @@ export default {
 				}), { status: 200, headers: corsHeaders });
 
 			} catch (err) {
-				return new Response(JSON.stringify({ error: "Failed to process push request" }), { status: 500, headers: corsHeaders });
+				return new Response(
+					JSON.stringify({ error: "Failed to process push request" }),
+					{ status: 500, headers: corsHeaders }
+				);
 			}
 		}
 
