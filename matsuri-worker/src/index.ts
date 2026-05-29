@@ -2,7 +2,7 @@ import * as jose from "jose"
 
 const allowedOrigins = [
   "http://localhost:3000",
-  "https://kymlu.github.io",
+  "https://matsuri-v2.pages.dev",
 ];
 
 function getCorsHeaders(origin: string | null) {
