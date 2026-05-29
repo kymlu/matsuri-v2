@@ -121,7 +121,7 @@ export default function UploadConfirmationDialog({
                   {isUpdate && (
                     <td
                       colSpan={!hasChange ? 2 : 1}
-                      className={`py-0.5 pr-2 align-middle line-through text-gray-400`}>
+                      className={`py-0.5 pr-2 align-middle ${!hasChange ? "line-through text-gray-400" : ""}`}>
                       {row.old}
                     </td>
                   )}
