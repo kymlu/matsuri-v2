@@ -8,5 +8,8 @@ export default function AdminPage() {
     return () => clearTimeout(timer);
   }, []);
 
-  return <div>ログイン成功</div>;
+  return <div className="w-full h-full text-center">
+    <p>ログイン成功!</p>
+    <p>3秒後ホームページに戻ります。</p>
+  </div>;
 }

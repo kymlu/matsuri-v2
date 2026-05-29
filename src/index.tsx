@@ -6,6 +6,7 @@ import reportWebVitals from './reportWebVitals';
 import { DBProvider } from './lib/dataAccess/DBProvider';
 import { RequireDB } from './lib/dataAccess/RequireDb';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import AdminPage from './pages/AdminPage';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -16,7 +17,7 @@ root.render(
       <RequireDB>
         <BrowserRouter>
           <Routes>
-            <Route path="/admin" element={<div>ログイン成功</div>} />
+            <Route path="/admin" element={<AdminPage/>} />
             <Route path="*" element={<App />} />
           </Routes>
         </BrowserRouter>
