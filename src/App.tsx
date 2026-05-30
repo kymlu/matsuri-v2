@@ -22,6 +22,14 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("loggedIn") === "true") {
+      console.log("Logged in!")
+      window.history.replaceState({}, "", "/");
+    }
+  }, []);
+
+  useEffect(() => {
     setName(getUserName());
     console.log("getting build info");
     fetch(`${process.env.PUBLIC_URL}/build-info.json`)

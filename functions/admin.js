@@ -1,4 +1,6 @@
 export function onRequest() {
-  console.log("Reached the admin page.")
-  return new Response("OK");
+  const url = new URL(context.request.url);
+  url.pathname = "/";
+  url.searchParams.set("loggedIn", "true");
+  return Response.redirect(url.toString(), 302);
 }
