@@ -4,8 +4,14 @@ export async function onRequest(context) {
     .find(c => c.trim().startsWith("CF_Authorization="))
     ?.split("=")[1]?.trim();
 
+  console.log("token:", token);
+  console.log("cookie:", cookie);
+
   const url = new URL(context.request.url);
-  url.hostname = "matsuri-worker.katherine-ym-lu.workers.dev";
+  const apiUrl = process.env.REACT_APP_API_URL;
+  url.hostname = apiUrl;
+
+  console.log(url);
 
   const response = await fetch(url.toString(), {
     method: context.request.method,
