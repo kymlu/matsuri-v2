@@ -2,7 +2,7 @@ import { Choreo } from "../../models/choreo";
 
 const getApiUrl = (endpoint: "verify-user" | "push-file") => {
   const apiUrl = process.env.REACT_APP_API_URL;
-  return `${apiUrl}/api/${endpoint}`
+  return `/api/${endpoint}`
 }
 
 export const checkLogin = async(
@@ -11,7 +11,6 @@ export const checkLogin = async(
 ) => {
   try {
     const response = await fetch(getApiUrl("verify-user"), {
-      credentials: "include",
     });
   
     const data = await response.json() as { message?: string; error?: string };
@@ -52,7 +51,6 @@ const handleUpload = async (
         fileContent: fileContents,
         commitMessage: `Upload ${fileName}`
       }),
-      credentials: "include"
     });
 
     const data = await response.json() as { message?: string; error?: string };
