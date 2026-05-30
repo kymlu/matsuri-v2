@@ -1,4 +1,4 @@
-name: 隊列表更新
+name: 隊列表更新 (cloudflare)
 
 on:
   push:
