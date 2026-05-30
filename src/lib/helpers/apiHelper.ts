@@ -17,7 +17,7 @@ export const checkLogin = async(
     const data = await response.json() as { message?: string; error?: string };
     
     if (!response.ok) {
-      console.error(`Status: ${response.status} data: ${data}`);
+      console.error(`Status: ${response.status} message: ${data.message} error: ${data.error}`);
       onFailure(response.status);
       return;
     }
@@ -58,7 +58,7 @@ const handleUpload = async (
     const data = await response.json() as { message?: string; error?: string };
 
     if (!response.ok) {
-      console.error(`Failed to upload to Github. Status: ${response.status} data: ${data}`);
+      console.error(`Failed to upload to Github. Status: ${response.status} message: ${data.message} error: ${data.error}`);
       onFailure(response.status);
       return;
     }
