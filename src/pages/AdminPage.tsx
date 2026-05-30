@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import Button from "../components/basic/Button";
 
 export default function AdminPage() {
   useEffect(() => {
@@ -10,6 +11,11 @@ export default function AdminPage() {
 
   return <div className="w-full h-full text-center">
     <p>ログイン成功!</p>
-    <p>3秒後ホームページに戻ります。</p>
+    <Button
+      onClick={() => {
+        window.location.href = "/";
+      }}>
+      ホームページに戻る
+    </Button>
   </div>;
 }

@@ -3,7 +3,7 @@ name: 隊列表更新
 on:
   push:
     branches:
-      - master
+      - cloudflare-test
 
 jobs:
   deploy:
@@ -29,23 +29,11 @@ jobs:
       - name: ファイルを整理する
         run: npm run manage
 
-      - name: ビルド情報更新
-        run: npm run writeBuild
-      
-      - name: ビルド
-        run: npm run build
-        env:
-          CI: false
-          REACT_APP_API_URL: ${{ vars.REACT_APP_API_URL }}  
-
       - name: Gitの設定
         run: |
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
-
-      - name: サイトをデプロイ
-        run: npm run deploy
           
       - name: 変更をコミットしてプッシュ
         run: |
