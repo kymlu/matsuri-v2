@@ -1,13 +1,14 @@
-name: 隊列表更新
+name: 隊列表更新 (cloudflare)
 
 on:
   push:
     branches:
-      - master
+      - cloudflare-test
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment: github-pages
 
     permissions:
       contents: write
@@ -25,16 +26,14 @@ jobs:
       - name: 依存関係をインストール
         run: npm ci
 
+      - name: ファイルを整理する
+        run: npm run manage
+
       - name: Gitの設定
         run: |
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
-
-      - name: サイトをデプロイ
-        run: npm run deploy
-        env:
-          CI: false
           
       - name: 変更をコミットしてプッシュ
         run: |
