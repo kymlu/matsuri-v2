@@ -6,9 +6,8 @@ on:
       - cloudflare-test
 
 jobs:
-  deploy:
+  manage:
     runs-on: ubuntu-latest
-    environment: github-pages
 
     permissions:
       contents: write
