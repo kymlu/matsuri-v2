@@ -70,8 +70,7 @@ export default function UploadConfirmationDialog({
           old: oldVersion ? formatDateRange(oldVersion.startDate, oldVersion.endDate) : undefined,
         });
       }
-      rowList = [...rowList, ...
-        [
+      rowList = [...rowList, ...[
           {
             icon: ICON.resize,
             new: `${currentVersion.stageLength}m×${currentVersion.stageWidth}m`,

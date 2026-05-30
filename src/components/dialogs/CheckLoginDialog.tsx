@@ -2,9 +2,8 @@ import { useNavigate } from "react-router-dom";
 import BaseEditDialog from "./BaseEditDialog";
 
 export default function CheckLoginDialog() {
-  const navigate = useNavigate();
   const checkAuth = async () => {
-    navigate("/admin");
+    window.location.href = "/admin";
   };
 
   return <BaseEditDialog
