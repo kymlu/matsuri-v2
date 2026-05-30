@@ -53,7 +53,7 @@ export default {
     const token = request.headers.get('Cf-Access-Jwt-Assertion');
     if (!token) {
       return new Response(
-				JSON.stringify({error: "Unauthorized"}),
+				JSON.stringify({error: "No access token provided. Please log in."}),
 				{ status: 401, headers: corsHeaders }
 			);
     }
@@ -76,7 +76,7 @@ export default {
 			});
     } catch {
       return new Response(
-				JSON.stringify({error: "Unauthorized"}),
+				JSON.stringify({error: "Invalid or expired access token. Please log in again."}),
 				{ status: 401, headers: corsHeaders }
 			);
     }
@@ -96,7 +96,7 @@ export default {
 
 				if (!fileName || !fileContent) {
 					return new Response(
-						JSON.stringify({ error: "Missing fileName or fileContent" }),
+						JSON.stringify({ error: "Missing fileName or fileContent." }),
 						{ status: 400, headers: corsHeaders }
 					);
 				}
@@ -106,14 +106,14 @@ export default {
 
 				if (!safeFileName || safeFileName.includes("..")) {
 					return new Response(
-						JSON.stringify({ error: "Invalid filename" }),
+						JSON.stringify({ error: "Invalid filename." }),
 						{ status: 400, headers: corsHeaders }
 					);
 				}
 
 				if (safeFileName.length > 120) {
 					return new Response(
-						JSON.stringify({ error: "Filename too long" }),
+						JSON.stringify({ error: "Filename too long." }),
 						{ status: 400, headers: corsHeaders }
 					);
 				}
@@ -126,7 +126,7 @@ export default {
 
 				if (bytes.length > MAX_FILE_SIZE) {
 					return new Response(
-						JSON.stringify({ error: "File exceeds 1 MB limit" }),
+						JSON.stringify({ error: "File exceeds 1 MB limit." }),
 						{ status: 413, headers: corsHeaders }
 					);
 				}
@@ -174,12 +174,15 @@ export default {
 
 			} catch (err) {
 				return new Response(
-					JSON.stringify({ error: "Failed to process push request" }),
+					JSON.stringify({ error: "Failed to process push request." }),
 					{ status: 500, headers: corsHeaders }
 				);
 			}
 		}
 
-		return new Response("Not Found", { status: 404, headers: corsHeaders });
+		return new Response(
+			JSON.stringify({ error: "Endpoint not found." }),
+			{ status: 404, headers: corsHeaders }
+		);
   }
 };
