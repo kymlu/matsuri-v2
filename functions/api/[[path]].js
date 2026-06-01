@@ -4,16 +4,10 @@ export async function onRequest(context) {
     .find(c => c.trim().startsWith("CF_Authorization="))
     ?.split("=")[1]?.trim();
 
-  console.log("token:", token);
-  console.log("cookie:", cookie);
+  const originalUrl = new URL(context.request.url);
+  const workerUrl = `https://${context.env.API_URL}${originalUrl.pathname}${originalUrl.search}`;
 
-  const url = new URL(context.request.url);
-  const apiUrl = context.env.API_URL;
-  url.hostname = apiUrl;
-
-  console.log(url);
-
-  const response = await fetch(url.toString(), {
+  const response = await fetch(workerUrl.toString(), {
     method: context.request.method,
     headers: {
       "Content-Type": "application/json",
