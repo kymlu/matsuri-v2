@@ -8,7 +8,7 @@ export async function onRequest(context) {
   console.log("cookie:", cookie);
 
   const url = new URL(context.request.url);
-  const apiUrl = process.env.REACT_APP_API_URL;
+  const apiUrl = context.env.API_URL;
   url.hostname = apiUrl;
 
   console.log(url);
