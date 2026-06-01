@@ -56,8 +56,8 @@
     "event": "YOSAKOIソーラン祭り",
     "startDate": "2026-06-13",
     "endDate": "2026-06-14",
-    "version": 3,
-    "lastUpdated": "2026-05-30T10:13:54.435Z",
+    "version": 4,
+    "lastUpdated": "2026-06-01T15:01:12.122Z",
     "stageLength": 100,
     "stageWidth": 8,
     "dancerCount": 36,
@@ -141,6 +141,19 @@
     "propCount": 1
   },
   {
+    "id": "fce23534-0607-4f9e-841a-f94d3564ffb9",
+    "name": "宮の沢ステージ　25×15",
+    "event": "YOSAKOIソーラン祭り",
+    "startDate": "2026-06-13",
+    "endDate": "2026-06-14",
+    "version": 1,
+    "lastUpdated": "2026-06-01T07:10:35.071Z",
+    "stageLength": 15,
+    "stageWidth": 25,
+    "dancerCount": 36,
+    "propCount": 20
+  },
+  {
     "id": "fdae19e6-17bf-419a-aa1d-c15142968041",
     "name": "【ご縁祭り】13×10 ステージ　33人",
     "event": "ご縁祭り",
@@ -164,18 +177,5 @@
     "stageWidth": 17,
     "dancerCount": 22,
     "propCount": 0
-  },
-  {
-    "id": "fce23534-0607-4f9e-841a-f94d3564ffb9",
-    "name": "宮の沢ステージ　25×15",
-    "event": "YOSAKOIソーラン祭り",
-    "startDate": "2026-06-13",
-    "endDate": "2026-06-14",
-    "version": 1,
-    "lastUpdated": "2026-06-01T07:10:35.071Z",
-    "stageLength": 15,
-    "stageWidth": 25,
-    "dancerCount": 36,
-    "propCount": 20
   }
 ]
