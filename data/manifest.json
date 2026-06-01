@@ -69,8 +69,8 @@
     "event": "YOSAKOIソーラン祭り",
     "startDate": "2026-06-13",
     "endDate": "2026-06-14",
-    "version": 4,
-    "lastUpdated": "2026-06-01T06:53:13.104Z",
+    "version": 5,
+    "lastUpdated": "2026-06-01T07:19:39.067Z",
     "stageLength": 18,
     "stageWidth": 31,
     "dancerCount": 36,
@@ -164,5 +164,18 @@
     "stageWidth": 17,
     "dancerCount": 22,
     "propCount": 0
+  },
+  {
+    "id": "fce23534-0607-4f9e-841a-f94d3564ffb9",
+    "name": "宮の沢ステージ　25×15",
+    "event": "YOSAKOIソーラン祭り",
+    "startDate": "2026-06-13",
+    "endDate": "2026-06-14",
+    "version": 1,
+    "lastUpdated": "2026-06-01T07:10:35.071Z",
+    "stageLength": 15,
+    "stageWidth": 25,
+    "dancerCount": 36,
+    "propCount": 20
   }
 ]
