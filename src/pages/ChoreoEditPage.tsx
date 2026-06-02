@@ -68,6 +68,7 @@ export default function ChoreoEditPage(props: {
   dancerNamesByEvent: Record<string, Record<string, string[]>>,
   onChoreoEdited: () => void,
   serverChoreo?: BasicChoreoDetails,
+  isLoggedIn: boolean,
 }) {
   const [currentSection, setCurrentSection] = useState<ChoreoSection>(props.currentChoreo.sections[0]);
   const [currentAction, setCurrentAction] = useState<DancerAction | undefined>();
@@ -518,6 +519,7 @@ export default function ChoreoEditPage(props: {
         version={props.currentChoreo.version}
         choreoStatus={props.currentChoreoStatus}
         showPublish={
+          props.isLoggedIn &&
           !strEquals(history.presentState.state.id, SAMPLE_PARADE_ID) &&
           !strEquals(history.presentState.state.id, SAMPLE_STAGE_ID) &&
           strEquals(history.presentState.state.id, TEST_ID) &&

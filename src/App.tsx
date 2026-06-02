@@ -106,6 +106,7 @@ function App() {
             }
           }}
           serverChoreo={serverChoreo}
+          isLoggedIn={isLoggedIn}
         />
       )}
       {mode === "view" && (
