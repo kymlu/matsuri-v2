@@ -144,6 +144,7 @@ export default function ChoreoEditPage(props: {
     history.presentState.state.endDate,
     history.presentState.state.dancers,
     history.presentState.state.props,
+    history.presentState.state.lastUpdated,
     history.presentState.state.stageGeometry]);
 
   const [prevSection, setPrevSection] = useState<ChoreoSection | undefined>();
