@@ -14,7 +14,7 @@ export async function onRequest(context) {
     method: context.request.method,
     headers: {
       "Content-Type": "application/json",
-      "Cf-Access-Jwt-Assertion": token ?? "",
+      "X-Matsuri-Access-Token": token ?? "",
     },
     body: context.request.method !== "GET" ? context.request.body : undefined,
   });

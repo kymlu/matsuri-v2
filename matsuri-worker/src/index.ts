@@ -14,7 +14,7 @@ function getCorsHeaders(origin: string | null) {
   return {
     "Access-Control-Allow-Origin": allowed ? origin : "",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization, Cf-Access-Jwt-Assertion",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Matsuri-Access-Token",
     "Access-Control-Max-Age": "86400",
     "Vary": "Origin",
     "Content-Type": "application/json",
@@ -50,7 +50,8 @@ export default {
     }
 
 		// Verify Cloudflare Access JWT
-    const token = request.headers.get('Cf-Access-Jwt-Assertion');
+    const token = request.headers.get('X-Matsuri-Access-Token');
+		console.log("headers:", Object.fromEntries(request.headers.entries()));
     if (!token) {
       return new Response(
 				JSON.stringify({error: "No access token provided. Please log in."}),
