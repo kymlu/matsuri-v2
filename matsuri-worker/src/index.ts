@@ -75,7 +75,8 @@ export default {
 				user: payload.name ?? "",
 				subject: payload.sub ?? "",
 			});
-    } catch {
+    } catch (e: any) {
+			console.error(e);
       return new Response(
 				JSON.stringify({error: "Invalid or expired access token. Please log in again."}),
 				{ status: 401, headers: corsHeaders }
