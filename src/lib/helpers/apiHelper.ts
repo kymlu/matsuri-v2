@@ -11,6 +11,7 @@ export const checkLogin = async(
 ) => {
   try {
     const response = await fetch(getApiUrl("verify-user"), {
+      credentials: "include",
     });
   
     const data = await response.json() as { message?: string; error?: string };
@@ -51,6 +52,7 @@ const handleUpload = async (
         fileContent: fileContents,
         commitMessage: `Upload ${fileName}`
       }),
+      credentials: "include",
     });
 
     const data = await response.json() as { message?: string; error?: string };
