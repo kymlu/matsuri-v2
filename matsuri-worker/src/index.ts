@@ -30,7 +30,7 @@ interface Env {
 
 const CLOUDFLARE_CONFIG = {
 	team: "matsuri-dance-time",
-	audience: "aa95fc36f4c76b797500e467fdbbf43273d72bf1888cfb8de6363663cc2f0904"
+	audience: "f4fb4edffaf2dfc45b755d82ede9655be780d7d5418e9785ef08e5a21b69745c"
 }
 
 const GIT_CONFIG = {
