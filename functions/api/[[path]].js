@@ -4,6 +4,9 @@ export async function onRequest(context) {
     .find(c => c.trim().startsWith("CF_Authorization="))
     ?.split("=")[1]?.trim();
 
+  console.debug("cookie", cookie);
+  console.debug("token", token);
+
   const originalUrl = new URL(context.request.url);
   const workerUrl = `https://${context.env.API_URL}${originalUrl.pathname}${originalUrl.search}`;
 
