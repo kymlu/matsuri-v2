@@ -45,8 +45,8 @@ type HeaderProps = {
   stageLength: number,
   version?: number,
   choreoStatus: ChoreoStatus,
-  showUpload?: boolean;
-  upload?: () => void;
+  showPublish?: boolean;
+  publish?: () => void;
 };
 
 export default function Header({
@@ -65,7 +65,7 @@ export default function Header({
   toggleShowPath, showPath, isShowPathBtnDisabled,
   showDancerWarningMessage,
   dancerCount, propCount, stageLength, stageWidth, version, choreoStatus,
-  showUpload, upload,
+  showPublish, publish,
 }: HeaderProps) {
   return <header className="py-2 space-y-1.5 border-b-2 select-none from-white to-transparent">
     <div className="flex items-center justify-between w-screen gap-2 px-2">
@@ -165,8 +165,8 @@ export default function Header({
               changeDancerSize={changeDancerSize}
               appSettings={appSettings}
               changeShowPrevious={changeShowPrevious}
-              showUpload={showUpload}
-              upload={upload}
+              showPublish={showPublish}
+              publish={publish}
             />
           </Dialog.Root>
         }

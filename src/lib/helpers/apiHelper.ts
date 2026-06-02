@@ -1,7 +1,6 @@
 import { Choreo } from "../../models/choreo";
 
 const getApiUrl = (endpoint: "verify-user" | "push-file") => {
-  const apiUrl = process.env.REACT_APP_API_URL;
   return `/api/${endpoint}`
 }
 

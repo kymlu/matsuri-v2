@@ -27,8 +27,8 @@ type SidebarProps = {
   
   appSettings: AppSetting;
 
-  showUpload?: boolean;
-  upload?: () => void;
+  showPublish?: boolean;
+  publish?: () => void;
 };
 
 export function Sidebar({
@@ -42,7 +42,7 @@ export function Sidebar({
   changeDancerSize,
   changeShowPrevious,
   appSettings,
-  showUpload, upload,
+  showPublish, publish,
 }: SidebarProps) {
   return <Dialog.Portal>
     <Dialog.Backdrop className="fixed inset-0 bg-black transition-all duration-150 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 opacity-20 z-20" />
@@ -122,13 +122,14 @@ export function Sidebar({
           <CustomSwitch label="大きいダンサー" defaultChecked={appSettings.dancerDisplayType === "large"} onChange={changeDancerSize}/>
         }
         {
-          showUpload && upload &&
+          showPublish && publish &&
           <>
             <Divider/>
             <IconLabelButton
-              onClick={upload}
-              label="アップロード"
-              full icon={ICON.upload}/>
+              onClick={publish}
+              label="公開する"
+              full
+              icon={ICON.globe}/>
           </>
         }
       </div>

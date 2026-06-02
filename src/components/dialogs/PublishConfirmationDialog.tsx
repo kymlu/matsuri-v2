@@ -8,7 +8,7 @@ import Icon from "../basic/Icon";
 import BaseEditDialog from "./BaseEditDialog";
 import { useCallback, useMemo, useState } from "react";
 
-type UploadConfirmationDialogProps = {
+type PublishConfirmationDialogProps = {
   onClose: () => void,
   currentVersion: BasicChoreoDetails,
   oldVersion?: BasicChoreoDetails,
@@ -21,9 +21,9 @@ type Row = {
   new: string;
 }
 
-export default function UploadConfirmationDialog({
+export default function PublishConfirmationDialog({
   onClose, currentVersion, oldVersion, getChoreo,
-}: UploadConfirmationDialogProps) {
+}: PublishConfirmationDialogProps) {
   const [error, setError] = useState<"none" | "error">("none");
   
   const upload = useCallback(() => {
@@ -99,8 +99,8 @@ export default function UploadConfirmationDialog({
 
   return (
     <BaseEditDialog
-      title="アップロード確認"
-      actionButtonText="アップロード"
+      title="公開確認"
+      actionButtonText="公開する"
       onSubmit={upload}
       onClose={() => {
         onClose();
@@ -136,7 +136,7 @@ export default function UploadConfirmationDialog({
             {isUpdate && (
               <tr>
                 <td className="py-0.5 pr-2 w-4" />
-                <td className="py-0.5 pr-2 text-gray-400">
+                <td className="py-0.5 pr-2 line-through text-gray-400">
                   v{oldVersion.version}
                 </td>
                 <td className="py-0.5 font-semibold">

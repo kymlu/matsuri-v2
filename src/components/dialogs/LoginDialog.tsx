@@ -1,7 +1,6 @@
-import { useNavigate } from "react-router-dom";
 import BaseEditDialog from "./BaseEditDialog";
 
-export default function CheckLoginDialog() {
+export default function LoginDialog() {
   const checkAuth = async () => {
     window.location.href = "/admin";
   };
@@ -12,6 +11,6 @@ export default function CheckLoginDialog() {
     showCloseButton={false}
     onSubmit={checkAuth}
   >
-    ファイルのアップロードには、メール認証が必要です。
+    隊列表を公開するには、メール認証が必要です。
   </BaseEditDialog>
 }

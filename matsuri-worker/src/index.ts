@@ -37,7 +37,7 @@ const GIT_CONFIG = {
   owner: "kymlu",
   repo: "matsuri-v2",
   folderPath: "intake",
-  branch: "master" 
+  branch: "cloudflare-test" 
 };
 
 export default {

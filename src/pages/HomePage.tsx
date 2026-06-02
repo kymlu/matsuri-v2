@@ -34,7 +34,8 @@ import EditEventInfoDialog from "../components/dialogs/EditEventInfoDialog"
 import SiteInfoDialog from "../components/dialogs/SiteInfoDialog"
 import { Tag } from "../components/common/Tag"
 import { checkLogin } from "../lib/helpers/apiHelper"
-import CheckLoginDialog from "../components/dialogs/CheckLoginDialog"
+import LoginDialog from "../components/dialogs/LoginDialog"
+import LoggedInDialog from "../components/dialogs/LoggedInDialog"
 
 type HomePageProps = {
   buildInfo?: string,
@@ -368,14 +369,19 @@ export default function HomePage({
               !isLoggedIn &&
               <Dialog.Root>
                 <Dialog.Trigger>
-                  <IconButton src={ICON.shieldLock} colour="primary" noBorder asDiv/>
+                  <IconButton src={ICON.shieldLock} colour="grey" noBorder asDiv/>
                 </Dialog.Trigger>
-                <CheckLoginDialog/>
+                <LoginDialog/>
               </Dialog.Root>
             }
             {
               isLoggedIn &&
-              <IconButton src={ICON.verifiedUser} colour="primary" noBorder/>
+              <Dialog.Root>
+                <Dialog.Trigger>
+                  <IconButton src={ICON.verifiedUser} colour="primary" noBorder/>
+                </Dialog.Trigger>
+                <LoggedInDialog/>
+              </Dialog.Root>
             }
           </div>
         </div>
@@ -893,7 +899,7 @@ function EventSection({
                     }
                     {
                       choreo.status === "syncRequired" &&
-                      <Tag type="filled" text={`v${choreo.version}`} icon={ICON.warning}/>
+                      <Tag type="filled" text={`v${choreo.version ?? "0"}`} icon={ICON.warning}/>
                     }
                     {
                       choreo.status === "edited" &&
