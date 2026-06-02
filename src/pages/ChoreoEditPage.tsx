@@ -40,6 +40,7 @@ import AbsentDancersWarningDialog from "../components/dialogs/AbsentDancersWarni
 import InstructionMessage from "../components/basic/InstructionMessage";
 import { ChoreoStatus } from "./HomePage";
 import PublishConfirmationDialog from "../components/dialogs/PublishConfirmationDialog";
+import BaseErrorDialog from "../components/dialogs/BaseErrorDialog";
 
 const resizeDialog = Dialog.createHandle<Choreo>();
 const editChoreoInfoDialog = Dialog.createHandle<string>();
@@ -56,6 +57,7 @@ const addNoteToSectionDialog = Dialog.createHandle<ChoreoSection>();
 const deleteSectionDialog = Dialog.createHandle<ChoreoSection>();
 const dancerWarningDialog = Dialog.createHandle<Choreo>();
 const publishConfirmationDialog = Dialog.createHandle<null>();
+const publishSuccessDialog = Dialog.createHandle<null>();
 
 export default function ChoreoEditPage(props: {
   goToHomePage: () => void,
@@ -364,6 +366,7 @@ export default function ChoreoEditPage(props: {
   const [deleteSectionDialogOpen, setDeleteSectionDialogOpen] = useState(false);
   const [dancerWarningDialogOpen, setDancerWarningDialogOpen] = useState(false);
   const [publishConfirmationDialogOpen, setPublishConfirmationDialogOpen] = useState(false);
+  const [publishSuccessDialogOpen, setPublishSuccessDialogOpen] = useState(false);
   
   const handleRenameSectionDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setRenameSectionDialogOpen(isOpen);
@@ -423,6 +426,10 @@ export default function ChoreoEditPage(props: {
 
   const handlePublishConfirmationDialogOpenChange = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setPublishConfirmationDialogOpen(isOpen);
+  };
+
+  const handlePublishSuccessDialogOpenChange = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
+    setPublishSuccessDialogOpen(isOpen);
   };
   
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
@@ -1155,11 +1162,25 @@ export default function ChoreoEditPage(props: {
         onOpenChange={handlePublishConfirmationDialogOpenChange}
         handle={publishConfirmationDialog}>
         <PublishConfirmationDialog
-          onClose={() => {setPublishConfirmationDialogOpen(false)}}
+          onClose={() => {
+            publishConfirmationDialog.close();
+            setPublishConfirmationDialogOpen(false);
+          }}
           oldVersion={props.serverChoreo}
           currentVersion={currentChoreoDetails}
           getChoreo={() => {return history.presentState.state}}
         />
+      </Dialog.Root>
+      <Dialog.Root
+        open={publishSuccessDialogOpen}
+        onOpenChange={handlePublishSuccessDialogOpenChange}
+        handle={publishSuccessDialog}
+      >
+        <BaseErrorDialog
+          title="公開成功">
+            <p>隊列表の公開が完了しました。</p>
+            <p>※アプリに反映されるまで最大5分ほどかかる場合があります。反映されない場合は、アプリを再起動してください。</p>
+        </BaseErrorDialog>
       </Dialog.Root>
     </div>
   )
