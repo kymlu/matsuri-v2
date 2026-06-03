@@ -1195,7 +1195,7 @@ export default function ChoreoEditPage(props: {
         open={publishSuccessDialogOpen}
         onOpenChange={handlePublishSuccessDialogOpenChange}
         handle={publishSuccessDialog}
-        modal
+        disablePointerDismissal
       >
         <BaseEditDialog
           title="公開成功"
