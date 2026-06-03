@@ -98,6 +98,12 @@ export default function ChoreoEditPage(props: {
       redoStack: [],
     } as EditHistory<Choreo>);
 
+
+  const currentStateRef = useRef(history.presentState.state);
+  useEffect(() => {
+    currentStateRef.current = history.presentState.state;
+  }, [history.presentState.state]);
+
   const debouncedSave = useMemo(
     () =>
       debounce(async () => {
@@ -1191,7 +1197,7 @@ export default function ChoreoEditPage(props: {
           onSave={() => onSaveAfterPublishRef.current()}
           oldVersion={props.serverChoreo}
           currentVersion={currentChoreoDetails}
-          choreo={history.presentState.state}
+          getChoreo={() => currentStateRef.current}
         />
       </Dialog.Root>
       <Dialog.Root
