@@ -135,9 +135,9 @@ export default function PublishConfirmationDialog({
                     )
                   }
                   {
-                    !isUpdate &&
+                    (!isUpdate || hasChange) &&
                     <td
-                      colSpan={!hasChange ? 2 : 1}
+                      colSpan={isUpdate ? 1 : 2}
                       className={`py-0.5 align-middle ${hasChange ? "font-semibold" : ""}`}>
                       {row.new}
                     </td>
