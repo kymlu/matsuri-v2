@@ -1,15 +1,15 @@
 [
   {
     "id": "1048ecf9-a1a1-4e47-9173-23b00368f32c",
-    "name": "Katie test v14",
-    "event": "New Event v14",
-    "startDate": "2026-07-02",
+    "name": "Katie added prop and obstacle",
+    "event": "New Event v15",
+    "startDate": "2026-07-03",
     "endDate": "",
-    "version": 14,
-    "lastUpdated": "2026-06-03T14:20:24.791Z",
+    "version": 15,
+    "lastUpdated": "2026-06-03T14:25:42.855Z",
     "stageLength": 10,
     "stageWidth": 10,
-    "dancerCount": 9,
+    "dancerCount": 7,
     "propCount": 0
   },
   {
