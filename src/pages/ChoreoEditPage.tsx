@@ -546,7 +546,6 @@ export default function ChoreoEditPage(props: {
             props.isLoggedIn &&
             !strEquals(history.presentState.state.id, SAMPLE_PARADE_ID) &&
             !strEquals(history.presentState.state.id, SAMPLE_STAGE_ID) &&
-            strEquals(history.presentState.state.id, TEST_ID) &&
             history.presentState.state.isDirty
           )
         }
