@@ -294,9 +294,9 @@ export default function ChoreoEditPage(props: {
 
   const onSaveAfterPublish = useCallback(() => {
     var newState = {
-      ...history.presentState.state,
+      ...currentStateRef.current,
       isPending: true,
-      expectedVersion: (history.presentState.state.version ?? 0) + 1,
+      expectedVersion: (currentStateRef.current.version ?? 0) + 1,
     } as Choreo;
 
     saveChoreo(newState, () => {
