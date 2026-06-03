@@ -8,7 +8,7 @@ const allowedOrigins = [
 function getCorsHeaders(origin: string | null) {
   const allowed = origin && (
 		allowedOrigins.includes(origin) ||
-    /^https:\/\/[a-z0-9-]+\.matsuri-v2\.pages\.dev$/.test(origin)
+    /^https:\/\/([a-z0-9-]+\.)?sitename\.pages\.dev$/.test(origin)
 	);
 
   return {
