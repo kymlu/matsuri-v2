@@ -67,6 +67,7 @@ export default function ChoreoEditPage(props: {
   eventList: EventDetails[],
   dancerNamesByEvent: Record<string, Record<string, string[]>>,
   onChoreoEdited: () => void,
+  onChoreoPublished: () => void,
   serverChoreo?: BasicChoreoDetails,
   isLoggedIn: boolean,
 }) {
@@ -89,6 +90,7 @@ export default function ChoreoEditPage(props: {
   });
   const isDirty = useRef(false);
   const hasInitialized = useRef(false);
+  const isPublishing = useRef(false);
 
   const [history, dispatch] = useReducer(historyReducer,
     {
@@ -116,11 +118,13 @@ export default function ChoreoEditPage(props: {
   }, [props.currentChoreo]);
 
   useEffect(() => {
-    if (hasInitialized.current) {
+    if (hasInitialized.current && !isPublishing.current) {
       isDirty.current = true;
       debouncedSave()
-    } else {
+    } else if (!hasInitialized.current) {
       hasInitialized.current = true;
+    } else {
+      onPostPublishSaveRef.current();
     }
   }, [history.presentState.state]);
 
@@ -285,6 +289,14 @@ export default function ChoreoEditPage(props: {
     }
   }, [history.presentState.state]);
 
+  const postPublishSave = useCallback(() => {
+    if (isPublishing.current) {
+      props.onChoreoPublished();
+      saveChoreo(history.presentState.state, () => { }, false, false);
+      isPublishing.current = false;
+    }
+  }, [history.presentState.state]);
+
   const onCopy = useCallback(() => {
     if ((selectedIds.dancers.length + selectedIds.props.length) === 0) {
       copyBuffer.current = ({props: {}, dancers: {}, obstacles: {}});
@@ -332,6 +344,7 @@ export default function ChoreoEditPage(props: {
   ]);
 
   const onSaveRef = useRef(onSave);
+  const onPostPublishSaveRef = useRef(postPublishSave);
   const onCopyRef = useRef(onCopy);
   const onPasteRef = useRef(onPaste);
   const selectedIdsRef = useRef(selectedIds);
@@ -525,6 +538,7 @@ export default function ChoreoEditPage(props: {
           strEquals(history.presentState.state.id, TEST_ID) &&
           history.presentState.state.isDirty
         }
+        disablePublish={ props.currentChoreoStatus === "publishPendingEdited" }
         publish={() => {setPublishConfirmationDialogOpen(true)}}
         />
       <div className="relative flex-1">
@@ -1166,6 +1180,9 @@ export default function ChoreoEditPage(props: {
         handle={publishConfirmationDialog}>
         <PublishConfirmationDialog
           onClose={() => {
+            isPublishing.current = true;
+            history.presentState.state.isPending = true;
+            history.presentState.state.expectedVersion = (history.presentState.state.version ?? 0) + 1;
             publishConfirmationDialog.close();
             setPublishConfirmationDialogOpen(false);
           }}

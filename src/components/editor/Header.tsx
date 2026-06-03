@@ -46,6 +46,7 @@ type HeaderProps = {
   version?: number,
   choreoStatus: ChoreoStatus,
   showPublish?: boolean;
+  disablePublish?: boolean;
   publish?: () => void;
 };
 
@@ -65,7 +66,7 @@ export default function Header({
   toggleShowPath, showPath, isShowPathBtnDisabled,
   showDancerWarningMessage,
   dancerCount, propCount, stageLength, stageWidth, version, choreoStatus,
-  showPublish, publish,
+  showPublish, disablePublish, publish,
 }: HeaderProps) {
   return <header className="py-2 space-y-1.5 border-b-2 select-none from-white to-transparent">
     <div className="flex items-center justify-between w-screen gap-2 px-2">
@@ -166,6 +167,7 @@ export default function Header({
               appSettings={appSettings}
               changeShowPrevious={changeShowPrevious}
               showPublish={showPublish}
+              disablePublish={disablePublish}
               publish={publish}
             />
           </Dialog.Root>

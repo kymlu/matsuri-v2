@@ -7,7 +7,7 @@ import { readUploadedFile } from "../lib/helpers/uploadHelper"
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { deleteChoreo, getAllChoreos, saveChoreo, saveChoreos } from "../lib/dataAccess/DataController"
 import { BasicChoreoDetails, Choreo, ChoreoSchema, EventDetails, getBasicChoreoDetails } from "../models/choreo"
-import { isNullOrUndefinedOrBlank, indexByKey, strCompare, strEquals, stringifyEvent } from "../lib/helpers/globalHelper"
+import { isNullOrUndefinedOrBlank, indexByKey, strCompare, strEquals, stringifyEvent, removeKey } from "../lib/helpers/globalHelper"
 import { formatDateRange, getDate } from "../lib/helpers/dateHelper"
 import IconButton from "../components/basic/IconButton"
 import SampleStage from "../lib/samples/SampleStageFormation.json"
@@ -120,7 +120,7 @@ export default function HomePage({
       server.push(getBasicChoreoDetails(z.parse(ChoreoSchema, SampleParade)));
       server.push(getBasicChoreoDetails(z.parse(ChoreoSchema, SampleStage)));
       const choreos: ChoreoWithStatus[] = [];
-      const indexedLocal = indexByKey(local, "id");
+      let indexedLocal = indexByKey(local, "id");
       const indexedServer = indexByKey(server, "id");
       const allIds = new Set([...Object.keys(indexedLocal), ...Object.keys(indexedServer)]);
       
@@ -134,17 +134,34 @@ export default function HomePage({
           if (!serverChoreo) {
             choreos.push({...localChoreoDetails, status: "localOnly"});
           } else if (serverChoreo.version !== localChoreo.version) {
-            if (localChoreo.isDirty === true || localChoreo.isDirty === undefined) {
+            if (serverChoreo.version === localChoreo.expectedVersion) {
+              if (localChoreo.isDirty === true || localChoreo.isDirty === undefined) {
+                const updatedLocalChoreo = {...localChoreo, version: serverChoreo.version, expectedVersion: undefined, isPending: undefined};
+                indexedLocal[id] = updatedLocalChoreo;
+                saveChoreo(updatedLocalChoreo, () => {}, false);
+                choreos.push({...localChoreoDetails, version: serverChoreo.version, expectedVersion: undefined, isPending: undefined, status: "edited"});
+              } else {
+                choreos.push({...serverChoreo, status: "upToDate"});
+                indexedLocal = {...removeKey(indexedLocal, id)};
+                deleteChoreo(id, () => {});
+              }
+            } else {
               choreos.push({...localChoreoDetails, status: "syncRequired"});
-            // } else {
-            //   saveChoreo(serverChoreo, () => {}, false, false);
-            //   choreos.push({...serverChoreo, status: "upToDate"});
             }
           } else {
-            if (localChoreo.isDirty === true || localChoreo.isDirty === undefined) {
-              choreos.push({...localChoreoDetails, status: "edited"});
+            if (localChoreo.isPending === true) {
+              if (localChoreo.isDirty === true || localChoreo.isDirty === undefined) {
+                choreos.push({...localChoreoDetails, status: "publishPendingEdited"});
+              } else {
+                choreos.push({...serverChoreo, status: "publishPending"});
+              }
             } else {
-              choreos.push({...serverChoreo, status: "upToDate"});
+              if (localChoreo.isDirty === true || localChoreo.isDirty === undefined) {
+                choreos.push({...localChoreoDetails, status: "edited"});
+              } else {
+                choreos.push({...serverChoreo, status: "upToDate"});
+                deleteChoreo(id, () => {});
+              }
             }
           }
         }
@@ -166,6 +183,9 @@ export default function HomePage({
       setServerChoreoDetails(indexedServer);
       setLocalChoreos(indexedLocal);
       setIsLoading(false);
+    }, () => {
+      setIsLoading(false);
+      // TODO: Implement error dialog
     });
   }
 

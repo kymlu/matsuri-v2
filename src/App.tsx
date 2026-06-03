@@ -101,8 +101,15 @@ function App() {
           eventList={eventList}
           dancerNamesByEvent={dancerNamesByEvent}
           onChoreoEdited={() => {
-            if(currentChoreoStatus === "upToDate") {
+            if (currentChoreoStatus === "upToDate") {
               setCurrentChoreoStatus("edited");
+            } else if (currentChoreoStatus === "publishPending") {
+              setCurrentChoreoStatus("publishPendingEdited");
+            }
+          }}
+          onChoreoPublished={() => {
+            if (currentChoreoStatus === "edited") {
+              setCurrentChoreoStatus("publishPending");
             }
           }}
           serverChoreo={serverChoreo}

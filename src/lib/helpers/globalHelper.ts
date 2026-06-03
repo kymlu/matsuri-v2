@@ -81,6 +81,14 @@ export function indexByKey<T extends Record<string, any>, K extends keyof T>(
   }, {} as Record<string, T>);
 }
 
+export function removeKey<T extends Record<string, any>>(
+  record: Record<string, T>,
+  key: string
+): Record<string, T> {
+  const { [key]: _, ...rest } = record;
+  return rest;
+}
+
 export function testFilename(fileName: string) {
   return RegExp(/[<>:"/\\|?*]|[. ]$/g).test(fileName);
 }
