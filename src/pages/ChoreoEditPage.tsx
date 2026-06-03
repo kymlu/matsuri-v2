@@ -14,7 +14,7 @@ import { Dialog } from "@base-ui/react";
 import EditChoreoSizeDialog from "../components/dialogs/EditChoreoSizeDialog";
 import { exportChoreo } from "../lib/helpers/exportHelper";
 import { saveChoreo } from "../lib/dataAccess/DataController";
-import { DEFAULT_PROP_LENGTH, DEFAULT_PROP_WIDTH, ICON, SAMPLE_PARADE_ID, SAMPLE_STAGE_ID, TEST_ID } from "../lib/consts/consts";
+import { DEFAULT_PROP_LENGTH, DEFAULT_PROP_WIDTH, ICON, SAMPLE_PARADE_ID, SAMPLE_STAGE_ID } from "../lib/consts/consts";
 import { AppSetting } from "../models/appSettings";
 import { changeStageGeometryAndType, renameChoreo } from "../lib/editor/commands/choreoCommands";
 import EditChoreoInfoDialog from "../components/dialogs/EditChoreoInfoDialog";
