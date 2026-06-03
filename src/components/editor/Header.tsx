@@ -208,7 +208,7 @@ export default function Header({
           </div>
         }
       </div>
-      <ChoreoStatusTag choreoStatus={choreoStatus} version={version}/>
+      <ChoreoStatusTag compact choreoStatus={choreoStatus} version={version}/>
     </div>
   </header>
 }

@@ -40,36 +40,37 @@ export function Tag ({
 type ChoreoStatusTagProps = {
   choreoStatus: ChoreoStatus,
   version?: number,
+  compact?: boolean,
 }
 
 export function ChoreoStatusTag ({
-  choreoStatus, version = 0
+  choreoStatus, version = 0, compact = false,
 }: ChoreoStatusTagProps) {
 
   return <>
     {
       choreoStatus === "upToDate" &&
-      <Tag compact type="grey" text={`v${version}`}/>
+      <Tag compact={compact} type="grey" text={`v${version}`}/>
     }
     {
       choreoStatus === "edited" &&
-      <Tag compact type="grey" text={`v${version}`} icon={ICON.edit}/>
+      <Tag compact={compact} type="grey" text={`v${version}`} icon={ICON.edit}/>
     }
     {
       choreoStatus === "syncRequired" &&
-      <Tag type="filled" text={`v${version}`} icon={ICON.warning}/>
+      <Tag compact={compact} type="filled" text={`v${version}`} icon={ICON.warning}/>
     }
     {
       (choreoStatus === "localOnly") &&
-      <Tag compact type="grey" text="未公開"/>
+      <Tag compact={compact} type="grey" text="未公開"/>
     }
     {
       (choreoStatus === "publishPending") &&
-      <Tag compact type="grey" dottedLine text={`v${version}→${(version) + 1}`}/>
+      <Tag compact={compact} type="grey" dottedLine text={`v${version}→${(version) + 1}`}/>
     }
     {
       (choreoStatus === "publishPendingEdited") &&
-      <Tag compact type="grey" dottedLine text={`v${version}→${(version) + 1}`} icon={ICON.edit}/>
+      <Tag compact={compact} type="grey" dottedLine text={`v${version}→${(version) + 1}`} icon={ICON.edit}/>
     }
   </>
 }
