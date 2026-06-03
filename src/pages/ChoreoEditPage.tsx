@@ -286,6 +286,21 @@ export default function ChoreoEditPage(props: {
     }
   }, [history.presentState.state]);
 
+  const onSaveAfterPublish = useCallback(() => {
+    var newState = {
+      ...history.presentState.state,
+      isPending: true,
+      isDirty: false,
+      expectedVersion: (history.presentState.state.version ?? 0) + 1,
+    } as Choreo;
+
+    saveChoreo(newState, () => {
+      publishConfirmationDialog.close();
+      setPublishConfirmationDialogOpen(false);
+      setPublishSuccessDialogOpen(true);
+    });
+  }, [history.presentState.state]);
+
   const onCopy = useCallback(() => {
     if ((selectedIds.dancers.length + selectedIds.props.length) === 0) {
       copyBuffer.current = ({props: {}, dancers: {}, obstacles: {}});
@@ -1170,19 +1185,7 @@ export default function ChoreoEditPage(props: {
           onClose={() => {
             setPublishConfirmationDialogOpen(false);
           }}
-          onSave={() => {
-            var newState = {
-              ...history.presentState.state,
-              isPending: true,
-              expectedVersion: (history.presentState.state.version ?? 0) + 1,
-            } as Choreo;
-
-            saveChoreo(newState, () => {
-              publishConfirmationDialog.close();
-              setPublishConfirmationDialogOpen(false);
-              setPublishSuccessDialogOpen(true);
-            });
-          }}
+          onSave={onSaveAfterPublish}
           oldVersion={props.serverChoreo}
           currentVersion={currentChoreoDetails}
           getChoreo={() => {return history.presentState.state}}

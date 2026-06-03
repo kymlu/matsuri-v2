@@ -26,25 +26,30 @@ export default function PublishConfirmationDialog({
   onClose, onSave, currentVersion, oldVersion, getChoreo,
 }: PublishConfirmationDialogProps) {
   const [error, setError] = useState<"none" | "error">("none");
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
   
   const upload = useCallback(() => {
-    try {
-      uploadChoreo(
-        getChoreo(),
-        () => {
-          onSave();
-          setError("none");
-        },
-        (status) => {
-          setError("error");
+    if (!isProcessing) {
+      setIsProcessing(true);
+      try {
+        uploadChoreo(
+          getChoreo(),
+          () => {
+            onSave();
+            setError("none");
+          },
+          (status) => {
+            setError("error");
+          }
+        );
+      } catch (e: any) {
+        setError("error");
+        if (e instanceof Error) {
+          console.error(e.message);
+        } else {
+          console.error("An error has occurred", e);
         }
-      );
-    } catch (e: any) {
-      setError("error");
-      if (e instanceof Error) {
-        console.error(e.message);
-      } else {
-        console.error("An error has occurred", e);
+        setIsProcessing(false);
       }
     }
   }, [uploadChoreo]);
@@ -102,6 +107,7 @@ export default function PublishConfirmationDialog({
     <BaseEditDialog
       title="公開確認"
       actionButtonText="公開する"
+      isActionButtonDisabled={isProcessing}
       onSubmit={upload}
       onClose={() => {
         onClose();
@@ -151,6 +157,12 @@ export default function PublishConfirmationDialog({
         <span>
           {isUpdate ? "新バージョンをアップロードしますか？" : "新しいファイルとしてアップロードしますか？"}
         </span>
+        {
+          isProcessing &&
+          <span className="w-full font-semibold text-center text-primary">
+            処理中。。。
+          </span>
+        }
         {
           error === "error" && 
           <span className="w-full font-semibold text-center text-primary">
