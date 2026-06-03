@@ -6,6 +6,7 @@ import Divider from "../basic/Divider";
 import { getDate } from "../../lib/helpers/dateHelper";
 import Icon from "../basic/Icon";
 import { ICON } from "../../lib/consts/consts";
+import { ChoreoStatusTag } from "../common/Tag";
 
 type SyncChoreoDialogProps = {
   onClose: () => void,
@@ -35,14 +36,24 @@ export default function SyncChoreoDialog ({
           <Icon src={ICON.editDocument} size="sm"/>
           <span className="font-semibold text-nowrap">編集版</span>
           <span className="text-right text-nowrap">{savedChoreo?.lastUpdated ? getDate(new Date(savedChoreo.lastUpdated)) : ""}</span>
-          <span className="border border-primary rounded-lg py-0.5 px-1.5 text-sm font-semibold text-primary">{savedChoreo?.version ? `v${savedChoreo.version}` : ""}</span>
+          {
+            savedChoreo?.version === undefined &&
+            <ChoreoStatusTag choreoStatus="localOnly"/>
+          }
+          {
+            savedChoreo?.version !== undefined &&
+            <ChoreoStatusTag choreoStatus="upToDate" version={savedChoreo?.version}/>
+          }
         </div>
         <Divider medium/>
         <div className="grid grid-cols-[auto,auto,1fr,auto] gap-2 items-center justify-between px-2">
           <Icon src={ICON.globe} size="sm"/>
           <span className="font-semibold text-nowrap">公開版</span>
           <span className="text-right text-nowrap">{serverChoreo?.lastUpdated ? getDate(new Date(serverChoreo.lastUpdated)) : ""}</span>
-          <span className="border border-primary rounded-lg py-0.5 px-1.5 text-sm font-semibold text-primary">{serverChoreo?.version ? `v${serverChoreo.version}` : ""}</span>
+          {
+            serverChoreo?.version !== undefined &&
+            <ChoreoStatusTag choreoStatus="upToDate" version={serverChoreo?.version ?? 0}/>
+          }
         </div>
       </div>
       <div className="space-y-1">

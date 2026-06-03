@@ -40,6 +40,7 @@ export default function PublishConfirmationDialog({
           },
           (status) => {
             setError("error");
+            setIsProcessing(false);
           }
         );
       } catch (e: any) {
@@ -111,6 +112,7 @@ export default function PublishConfirmationDialog({
       onSubmit={upload}
       onClose={() => {
         onClose();
+        setIsProcessing(false);
         setError("none");
       }}
     >
@@ -124,16 +126,19 @@ export default function PublishConfirmationDialog({
                   <td className="w-4 pt-2 pr-2 text-gray-400 align-middle">
                     {row.icon && <Icon src={row.icon} colour="grey" size="sm" />}
                   </td>
-                  {isUpdate && (
+                  {
+                    isUpdate && (
+                      <td
+                        className={`py-0.5 pr-2 align-middle ${hasChange ? "line-through text-gray-400" : ""}`}>
+                        {row.old}
+                      </td>
+                    )
+                  }
+                  {
+                    !isUpdate &&
                     <td
                       colSpan={!hasChange ? 2 : 1}
-                      className={`py-0.5 pr-2 align-middle ${hasChange ? "line-through text-gray-400" : ""}`}>
-                      {row.old}
-                    </td>
-                  )}
-                  {
-                    hasChange &&
-                    <td className={`py-0.5 align-middle ${hasChange ? "font-semibold" : ""}`}>
+                      className={`py-0.5 align-middle ${hasChange ? "font-semibold" : ""}`}>
                       {row.new}
                     </td>
                   }
@@ -160,7 +165,7 @@ export default function PublishConfirmationDialog({
         {
           isProcessing &&
           <span className="w-full font-semibold text-center text-primary">
-            処理中。。。
+            処理中...
           </span>
         }
         {

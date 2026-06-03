@@ -535,11 +535,14 @@ export default function ChoreoEditPage(props: {
         version={props.currentChoreo.version}
         choreoStatus={props.currentChoreoStatus}
         showPublish={
-          props.isLoggedIn &&
-          !strEquals(history.presentState.state.id, SAMPLE_PARADE_ID) &&
-          !strEquals(history.presentState.state.id, SAMPLE_STAGE_ID) &&
-          strEquals(history.presentState.state.id, TEST_ID) &&
-          history.presentState.state.isDirty
+          process.env.NODE_ENV === "development" ||
+          (
+            props.isLoggedIn &&
+            !strEquals(history.presentState.state.id, SAMPLE_PARADE_ID) &&
+            !strEquals(history.presentState.state.id, SAMPLE_STAGE_ID) &&
+            strEquals(history.presentState.state.id, TEST_ID) &&
+            history.presentState.state.isDirty
+          )
         }
         disablePublish={ props.currentChoreoStatus === "publishPendingEdited" }
         publish={() => {setPublishConfirmationDialogOpen(true)}}
