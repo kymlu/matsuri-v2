@@ -13,7 +13,7 @@ type PublishConfirmationDialogProps = {
   onSave: () => void,
   currentVersion: BasicChoreoDetails,
   oldVersion?: BasicChoreoDetails,
-  getChoreo: () => Choreo,
+  choreo: Choreo,
 }
 
 type Row = {
@@ -23,7 +23,7 @@ type Row = {
 }
 
 export default function PublishConfirmationDialog({
-  onClose, onSave, currentVersion, oldVersion, getChoreo,
+  onClose, onSave, currentVersion, oldVersion, choreo,
 }: PublishConfirmationDialogProps) {
   const [error, setError] = useState<"none" | "error">("none");
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
@@ -33,7 +33,7 @@ export default function PublishConfirmationDialog({
       setIsProcessing(true);
       try {
         uploadChoreo(
-          getChoreo(),
+          choreo,
           () => {
             onSave();
             setError("none");

@@ -347,6 +347,7 @@ export default function ChoreoEditPage(props: {
   ]);
 
   const onSaveRef = useRef(onSave);
+  const onSaveAfterPublishRef = useRef(onSaveAfterPublish);
   const onCopyRef = useRef(onCopy);
   const onPasteRef = useRef(onPaste);
   const selectedIdsRef = useRef(selectedIds);
@@ -1184,10 +1185,10 @@ export default function ChoreoEditPage(props: {
           onClose={() => {
             setPublishConfirmationDialogOpen(false);
           }}
-          onSave={onSaveAfterPublish}
+          onSave={() => onSaveAfterPublishRef.current()}
           oldVersion={props.serverChoreo}
           currentVersion={currentChoreoDetails}
-          getChoreo={() => {return history.presentState.state}}
+          choreo={history.presentState.state}
         />
       </Dialog.Root>
       <Dialog.Root
