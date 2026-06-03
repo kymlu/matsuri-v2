@@ -11,7 +11,7 @@ import Divider from "../basic/Divider";
 import { formatDateRange } from "../../lib/helpers/dateHelper";
 import Icon from "../basic/Icon";
 import { ChoreoStatus } from "../../pages/HomePage";
-import { Tag } from "../common/Tag";
+import { ChoreoStatusTag } from "../common/Tag";
 import { isNullOrUndefinedOrBlank } from "../../lib/helpers/globalHelper";
 
 type HeaderProps = {
@@ -206,20 +206,7 @@ export default function Header({
           </div>
         }
       </div>
-      <div>
-        {
-          choreoStatus === "upToDate" &&
-          <Tag compact type="grey" text={`v${version}`}/>
-        }
-        {
-          choreoStatus === "edited" &&
-          <Tag compact type="grey" text={`v${version}`} icon={ICON.edit}/>
-        }
-        {
-          (choreoStatus === "localOnly") &&
-          <Tag compact type="grey" text="未公開"/>
-        }
-      </div>
+      <ChoreoStatusTag choreoStatus={choreoStatus} version={version}/>
     </div>
   </header>
 }

@@ -1,5 +1,7 @@
 import classNames from "classnames"
 import Icon from "../basic/Icon"
+import { ICON } from "../../lib/consts/consts"
+import { ChoreoStatus } from "../../pages/HomePage"
 
 type TagProps = {
   type: "primary" | "filled" | "grey",
@@ -33,4 +35,41 @@ export function Tag ({
         size="xs"/>
     }
   </div>
+}
+
+type ChoreoStatusTagProps = {
+  choreoStatus: ChoreoStatus,
+  version?: number,
+}
+
+export function ChoreoStatusTag ({
+  choreoStatus, version = 0
+}: ChoreoStatusTagProps) {
+
+  return <>
+    {
+      choreoStatus === "upToDate" &&
+      <Tag compact type="grey" text={`v${version}`}/>
+    }
+    {
+      choreoStatus === "edited" &&
+      <Tag compact type="grey" text={`v${version}`} icon={ICON.edit}/>
+    }
+    {
+      choreoStatus === "syncRequired" &&
+      <Tag type="filled" text={`v${version}`} icon={ICON.warning}/>
+    }
+    {
+      (choreoStatus === "localOnly") &&
+      <Tag compact type="grey" text="未公開"/>
+    }
+    {
+      (choreoStatus === "publishPending") &&
+      <Tag compact type="grey" dottedLine text={`v${version}→${(version) + 1}`}/>
+    }
+    {
+      (choreoStatus === "publishPendingEdited") &&
+      <Tag compact type="grey" dottedLine text={`v${version}→${(version) + 1}`} icon={ICON.edit}/>
+    }
+  </>
 }

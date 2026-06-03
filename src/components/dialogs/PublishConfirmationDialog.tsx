@@ -31,7 +31,7 @@ export default function PublishConfirmationDialog({
       uploadChoreo(
         getChoreo(),
         () => {
-          onClose(); // todo have a separate dialog that says that it was successful and will be updated in a little bit. close and reopen the app
+          onClose();
           setError("none");
         },
         (status) => {

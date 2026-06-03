@@ -32,7 +32,7 @@ import AbsentDancersWarningDialog from "../components/dialogs/AbsentDancersWarni
 import BeginnersDialog from "../components/dialogs/BeginnersDialog"
 import EditEventInfoDialog from "../components/dialogs/EditEventInfoDialog"
 import SiteInfoDialog from "../components/dialogs/SiteInfoDialog"
-import { Tag } from "../components/common/Tag"
+import { ChoreoStatusTag } from "../components/common/Tag"
 import { checkLogin } from "../lib/helpers/apiHelper"
 import LoginDialog from "../components/dialogs/LoginDialog"
 import LoggedInDialog from "../components/dialogs/LoggedInDialog"
@@ -51,7 +51,7 @@ type HomePageProps = {
   setIsLoggedIn: (value: boolean) => void,
 }
 
-export type ChoreoStatus = "localOnly" | "syncRequired" | "upToDate" | "edited";
+export type ChoreoStatus = "localOnly" | "syncRequired" | "upToDate" | "edited" | "publishPending" | "publishPendingEdited";
 type ChoreoWithStatus = BasicChoreoDetails & {
   status: ChoreoStatus,
   isDirty?: boolean,
@@ -893,22 +893,7 @@ function EventSection({
                         <IconButton asDiv noBorder size="sm" src={ICON.personAlert} colour="primary"/>
                       </Dialog.Trigger>
                     }
-                    {
-                      choreo.status === "upToDate" &&
-                      <Tag type="primary" text={`v${choreo.version}`}/>
-                    }
-                    {
-                      choreo.status === "syncRequired" &&
-                      <Tag type="filled" text={`v${choreo.version ?? "0"}`} icon={ICON.warning}/>
-                    }
-                    {
-                      choreo.status === "edited" &&
-                      <Tag type="primary" text={`v${choreo.version}`} icon={ICON.edit}/>
-                    }
-                    {
-                      (choreo.status === "localOnly") &&
-                      <Tag type="grey" text="未公開"/>
-                    }
+                    <ChoreoStatusTag choreoStatus={choreo.status} version={choreo.version}/>
                     <Dialog.Trigger id={choreo.id} payload={choreo} handle={optionsDialog} onClick={(e) => {
                       e.stopPropagation();
                       setSelectedChoreo(choreo);
