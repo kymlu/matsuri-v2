@@ -16,6 +16,7 @@ export default function LoginDialog() {
   return <BaseEditDialog
     title="管理者ログイン"
     actionButtonText="ログイン"
+    isActionButtonDisabled={isProcessing}
     showCloseButton={false}
     onSubmit={checkAuth}
   >

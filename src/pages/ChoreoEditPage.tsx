@@ -1204,7 +1204,7 @@ export default function ChoreoEditPage(props: {
           actionButtonText="ホーム画面へ戻る"
           showCloseButton={false}>
             <p>隊列表の公開が完了しました。</p>
-            <p>※アプリに反映されるまで最大5分ほどかかる場合があります。反映されない場合は、アプリを再起動してください。</p>
+            <p className="text-sm text-gray-500">アプリに反映されるまで最大5分ほどかかる場合があります。<br/>反映されない場合は、アプリを再起動してください。</p>
         </BaseEditDialog>
       </Dialog.Root>
     </div>
