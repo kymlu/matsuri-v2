@@ -153,7 +153,7 @@ export default function HomePage({
               if (localChoreo.isDirty === true || localChoreo.isDirty === undefined) {
                 choreos.push({...localChoreoDetails, status: "publishPendingEdited"});
               } else {
-                choreos.push({...serverChoreo, status: "publishPending"});
+                choreos.push({...localChoreoDetails, status: "publishPending"});
               }
             } else {
               if (localChoreo.isDirty === true || localChoreo.isDirty === undefined) {
