@@ -10,6 +10,7 @@ import { useCallback, useMemo, useState } from "react";
 
 type PublishConfirmationDialogProps = {
   onClose: () => void,
+  onSave: () => void,
   currentVersion: BasicChoreoDetails,
   oldVersion?: BasicChoreoDetails,
   getChoreo: () => Choreo,
@@ -22,7 +23,7 @@ type Row = {
 }
 
 export default function PublishConfirmationDialog({
-  onClose, currentVersion, oldVersion, getChoreo,
+  onClose, onSave, currentVersion, oldVersion, getChoreo,
 }: PublishConfirmationDialogProps) {
   const [error, setError] = useState<"none" | "error">("none");
   
@@ -31,7 +32,7 @@ export default function PublishConfirmationDialog({
       uploadChoreo(
         getChoreo(),
         () => {
-          onClose();
+          onSave();
           setError("none");
         },
         (status) => {

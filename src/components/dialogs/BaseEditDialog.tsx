@@ -12,6 +12,7 @@ type BaseEditDialogProps = {
   onClose?: () => void,
   onSubmit: () => void,
   children: React.ReactNode,
+  hasX?: boolean,
 }
 
 export default function BaseEditDialog({
@@ -19,10 +20,10 @@ export default function BaseEditDialog({
   isActionButtonDisabled, actionButtonText,
   noDetachedTrigger, full,
   onClose, showCloseButton = true,
-  onSubmit, children
+  onSubmit, children, hasX = true
 }: BaseEditDialogProps) {
   return <CustomDialog
-    hasX
+    hasX={hasX}
     full={full}
     title={title}
     onClose={onClose}

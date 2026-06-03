@@ -40,7 +40,7 @@ import AbsentDancersWarningDialog from "../components/dialogs/AbsentDancersWarni
 import InstructionMessage from "../components/basic/InstructionMessage";
 import { ChoreoStatus } from "./HomePage";
 import PublishConfirmationDialog from "../components/dialogs/PublishConfirmationDialog";
-import BaseErrorDialog from "../components/dialogs/BaseErrorDialog";
+import BaseEditDialog from "../components/dialogs/BaseEditDialog";
 
 const resizeDialog = Dialog.createHandle<Choreo>();
 const editChoreoInfoDialog = Dialog.createHandle<string>();
@@ -90,7 +90,6 @@ export default function ChoreoEditPage(props: {
   });
   const isDirty = useRef(false);
   const hasInitialized = useRef(false);
-  const isPublishing = useRef(false);
 
   const [history, dispatch] = useReducer(historyReducer,
     {
@@ -118,13 +117,11 @@ export default function ChoreoEditPage(props: {
   }, [props.currentChoreo]);
 
   useEffect(() => {
-    if (hasInitialized.current && !isPublishing.current) {
+    if (hasInitialized.current) {
       isDirty.current = true;
       debouncedSave()
-    } else if (!hasInitialized.current) {
-      hasInitialized.current = true;
     } else {
-      onPostPublishSaveRef.current();
+      hasInitialized.current = true;
     }
   }, [history.presentState.state]);
 
@@ -289,14 +286,6 @@ export default function ChoreoEditPage(props: {
     }
   }, [history.presentState.state]);
 
-  const postPublishSave = useCallback(() => {
-    if (isPublishing.current) {
-      props.onChoreoPublished();
-      saveChoreo(history.presentState.state, () => { }, false, false);
-      isPublishing.current = false;
-    }
-  }, [history.presentState.state]);
-
   const onCopy = useCallback(() => {
     if ((selectedIds.dancers.length + selectedIds.props.length) === 0) {
       copyBuffer.current = ({props: {}, dancers: {}, obstacles: {}});
@@ -344,7 +333,6 @@ export default function ChoreoEditPage(props: {
   ]);
 
   const onSaveRef = useRef(onSave);
-  const onPostPublishSaveRef = useRef(postPublishSave);
   const onCopyRef = useRef(onCopy);
   const onPasteRef = useRef(onPaste);
   const selectedIdsRef = useRef(selectedIds);
@@ -1180,11 +1168,20 @@ export default function ChoreoEditPage(props: {
         handle={publishConfirmationDialog}>
         <PublishConfirmationDialog
           onClose={() => {
-            isPublishing.current = true;
-            history.presentState.state.isPending = true;
-            history.presentState.state.expectedVersion = (history.presentState.state.version ?? 0) + 1;
-            publishConfirmationDialog.close();
             setPublishConfirmationDialogOpen(false);
+          }}
+          onSave={() => {
+            var newState = {
+              ...history.presentState.state,
+              isPending: true,
+              expectedVersion: (history.presentState.state.version ?? 0) + 1,
+            } as Choreo;
+
+            saveChoreo(newState, () => {
+              publishConfirmationDialog.close();
+              setPublishConfirmationDialogOpen(false);
+              setPublishSuccessDialogOpen(true);
+            });
           }}
           oldVersion={props.serverChoreo}
           currentVersion={currentChoreoDetails}
@@ -1195,12 +1192,17 @@ export default function ChoreoEditPage(props: {
         open={publishSuccessDialogOpen}
         onOpenChange={handlePublishSuccessDialogOpenChange}
         handle={publishSuccessDialog}
+        modal
       >
-        <BaseErrorDialog
-          title="公開成功">
+        <BaseEditDialog
+          title="公開成功"
+          hasX={false}
+          onSubmit={props.goToHomePage}
+          actionButtonText="ホーム画面へ戻る"
+          showCloseButton={false}>
             <p>隊列表の公開が完了しました。</p>
             <p>※アプリに反映されるまで最大5分ほどかかる場合があります。反映されない場合は、アプリを再起動してください。</p>
-        </BaseErrorDialog>
+        </BaseEditDialog>
       </Dialog.Root>
     </div>
   )
