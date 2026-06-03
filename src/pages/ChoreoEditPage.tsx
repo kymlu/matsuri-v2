@@ -290,7 +290,6 @@ export default function ChoreoEditPage(props: {
     var newState = {
       ...history.presentState.state,
       isPending: true,
-      isDirty: false,
       expectedVersion: (history.presentState.state.version ?? 0) + 1,
     } as Choreo;
 
@@ -298,7 +297,7 @@ export default function ChoreoEditPage(props: {
       publishConfirmationDialog.close();
       setPublishConfirmationDialogOpen(false);
       setPublishSuccessDialogOpen(true);
-    });
+    }, false, false);
   }, [history.presentState.state]);
 
   const onCopy = useCallback(() => {
