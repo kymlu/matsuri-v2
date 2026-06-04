@@ -136,6 +136,23 @@ export default {
 						{ status: 500, headers: corsHeaders }
 					);
 				}
+			} else if (url.pathname === "/api/choreos/file/current-version") {
+				try {
+					const choreoId = url.searchParams.get("choreo_id");
+					const row = await env.DB.prepare(
+						"SELECT version FROM choreo_files WHERE choreo_id = ? AND is_current = 1"
+					).bind(choreoId).first<{ version: number }>();
+	
+					return Response.json(
+						{ version: row?.version ?? 0 },
+						{ status: 200, headers: corsHeaders }
+					);
+				} catch (e: any) {
+					return new Response(
+						JSON.stringify({ error: "Internal server error" }),
+						{ status: 500, headers: corsHeaders }
+					);
+				}
 			}
     }
 
@@ -178,6 +195,87 @@ export default {
 				status: 200,
 				headers: { ...corsHeaders, "Content-Type": "application/json" },
 			});
+		}
+
+		if (request.method === "POST" && url.pathname === "/api/choreos/publish") {
+			try {
+				const formData = await request.formData();
+				const file = formData.get("file") as File;
+				const choreoId = formData.get("choreo_id") as string;
+				const isNew = formData.get("is_new") === "true";
+				const name = formData.get("name") as string;
+				const eventName = formData.get("event_name") as string | null;
+				const eventStartDate = formData.get("event_start_date") as string | null;
+				const eventEndDate = formData.get("event_end_date") as string | null;
+				const stageWidth = Number(formData.get("stage_width"));
+				const stageLength = Number(formData.get("stage_length"));
+				const dancerCount = Number(formData.get("dancer_count"));
+				const propCount = Number(formData.get("prop_count"));
+				const uploadedBy = (payload.email as String).split("@")[0];
+
+				if (!file || !choreoId || !name) {
+					return new Response(
+						JSON.stringify({ error: "file, choreo_id, and name are required" }),
+						{ status: 400, headers: corsHeaders }
+					);
+				}
+
+				// get next version number
+				let version = 1;
+				if (!isNew) {
+					const current = await env.DB.prepare(
+						"SELECT version FROM choreo_files WHERE choreo_id = ? AND is_current = 1"
+					).bind(choreoId).first<{ version: number }>();
+
+					if (!current) {
+						return new Response(
+							JSON.stringify({ error: "Choreo not found" }),
+							{ status: 404, headers: corsHeaders }
+						);
+					}
+
+					version = current.version + 1;
+
+					// mark old version as not current
+					await env.DB.prepare(
+						"UPDATE choreo_files SET is_current = 0 WHERE choreo_id = ? AND is_current = 1"
+					).bind(choreoId).run();
+				}
+
+				// upload to R2
+				const r2Key = getFileName(choreoId, version.toString());
+				await env.BUCKET.put(r2Key, file.stream(), {
+					httpMetadata: { contentType: "application/json" }
+				});
+
+				// upsert choreo
+				await env.DB.prepare(
+					`INSERT INTO choreos (id, name, event_name, event_start_date, event_end_date)
+					VALUES (?, ?, ?, ?, ?)
+					ON CONFLICT(id) DO UPDATE SET
+						name = excluded.name,
+						event_name = excluded.event_name,
+						event_start_date = excluded.event_start_date,
+						event_end_date = excluded.event_end_date`
+				).bind(choreoId, name, eventName, eventStartDate, eventEndDate).run();
+
+				// insert new choreo_file row
+				const fileId = crypto.randomUUID();
+				await env.DB.prepare(
+					`INSERT INTO choreo_files (id, choreo_id, version, is_current, stage_width, stage_length, dancer_count, prop_count, uploaded_by)
+					VALUES (?, ?, ?, 1, ?, ?, ?, ?, ?)`
+				).bind(fileId, choreoId, version, stageWidth, stageLength, dancerCount, propCount, uploadedBy).run();
+
+				return Response.json(
+					{ id: choreoId, version },
+					{ status: isNew ? 201 : 200, headers: corsHeaders }
+				);
+			} catch (e) {
+				return new Response(
+					JSON.stringify({ error: "Internal server error" }),
+					{ status: 500, headers: corsHeaders }
+				);
+			}
 		}
 
 		if (url.pathname === "/api/push-file" && request.method === "POST") {

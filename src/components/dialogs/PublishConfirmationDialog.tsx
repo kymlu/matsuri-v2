@@ -1,6 +1,6 @@
 import { ICON } from "../../lib/consts/consts";
 import { formatDateRange, getJpDate } from "../../lib/helpers/dateHelper";
-import { publishChoreo } from "../../lib/helpers/apiHelper";
+import { findCurrentVersion, publishChoreo } from "../../lib/helpers/apiHelper";
 import { strEquals } from "../../lib/helpers/globalHelper";
 import { BasicChoreoDetails, Choreo } from "../../models/choreo";
 import Divider from "../basic/Divider";
@@ -25,24 +25,33 @@ type Row = {
 export default function PublishConfirmationDialog({
   onClose, onSave, currentVersion, oldVersion, getChoreo,
 }: PublishConfirmationDialogProps) {
-  const [error, setError] = useState<"none" | "error">("none");
+  const [error, setError] = useState<"none" | "error" | "versionError">("none");
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   
-  const upload = useCallback(() => {
+  const isUpdate = !!oldVersion;
+
+  const upload = useCallback(async () => {
     if (!isProcessing) {
       setIsProcessing(true);
       try {
-        publishChoreo(
-          getChoreo(),
-          () => {
-            onSave();
-            setError("none");
-          },
-          (status) => {
-            setError("error");
-            setIsProcessing(false);
-          }
-        );
+        const serverVersion = await findCurrentVersion(currentVersion.id);
+        if (serverVersion.version !== oldVersion?.version) {
+          setError("versionError");
+          setIsProcessing(false);
+        } else {
+          publishChoreo(
+            getChoreo(),
+            !isUpdate,
+            () => {
+              onSave();
+              setError("none");
+            },
+            (status) => {
+              setError("error");
+              setIsProcessing(false);
+            }
+          );
+        }
       } catch (e: any) {
         setError("error");
         if (e instanceof Error) {
@@ -54,8 +63,6 @@ export default function PublishConfirmationDialog({
       }
     }
   }, [publishChoreo]);
-
-  const isUpdate = !!oldVersion;
 
   const rows = useMemo(() => {
     var rowList: Row[] = [];
@@ -172,6 +179,12 @@ export default function PublishConfirmationDialog({
           error === "error" && 
           <span className="w-full font-semibold text-center text-primary">
             処理中にエラーが発生しました
+          </span>
+        }
+        {
+          error === "versionError" && 
+          <span className="w-full font-semibold text-center text-primary">
+            他のユーザーによって更新されました。ホームに戻って最新バージョンをご確認ください。
           </span>
         }
       </div>
