@@ -1,16 +1,29 @@
 [
   {
     "id": "1048ecf9-a1a1-4e47-9173-23b00368f32c",
-    "name": "Katie added prop and obstacle",
-    "event": "New Event v15",
-    "startDate": "2026-07-03",
+    "name": "post event fix stays",
+    "event": "New Event v16",
+    "startDate": "2026-07-02",
     "endDate": "",
-    "version": 15,
-    "lastUpdated": "2026-06-03T14:25:42.855Z",
+    "version": 16,
+    "lastUpdated": "2026-06-04T11:55:15.455Z",
     "stageLength": 10,
     "stageWidth": 10,
     "dancerCount": 7,
     "propCount": 1
+  },
+  {
+    "id": "138004e4-ecdb-44b3-8a53-9fd0e6171f81",
+    "name": "brand new",
+    "event": "brand new event",
+    "startDate": "",
+    "endDate": "",
+    "version": 1,
+    "lastUpdated": "2026-06-04T11:54:08.506Z",
+    "stageLength": 10,
+    "stageWidth": 10,
+    "dancerCount": 10,
+    "propCount": 0
   },
   {
     "id": "26c02eaf-60e1-4abc-a582-a0ab11b5dbe9",
@@ -176,19 +189,6 @@
     "stageLength": 8,
     "stageWidth": 17,
     "dancerCount": 22,
-    "propCount": 0
-  },
-  {
-    "id": "138004e4-ecdb-44b3-8a53-9fd0e6171f81",
-    "name": "brand new",
-    "event": "brand new event",
-    "startDate": "",
-    "endDate": "",
-    "version": 1,
-    "lastUpdated": "2026-06-04T11:54:08.506Z",
-    "stageLength": 10,
-    "stageWidth": 10,
-    "dancerCount": 10,
     "propCount": 0
   }
 ]
