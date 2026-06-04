@@ -42,6 +42,8 @@ const GIT_CONFIG = {
   branch: "cloudflare-test" 
 };
 
+const getFileName = (id: string, version: string) => {return `${id}_v${version}.json`};
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
 		const origin = request.headers.get("Origin");
@@ -53,33 +55,88 @@ export default {
 
     const url = new URL(request.url);
 
-    if (request.method === "GET" && url.pathname === "/api/choreos/summary") {
-			console.log("summary");
-    	const { results } = await env.DB.prepare(
-				`
-				SELECT
-					c.id AS id,
-					c.name AS name,
-					c.event_name AS event,
-					c.event_start_date AS startDate,
-					c.event_end_date AS endDate,
-					cf.uploaded_at AS lastUpdated,
-					cf.version AS version,
-					cf.stage_length AS stageLength,
-					cf.stage_width AS stageWidth,
-					cf.dancer_count AS dancerCount,
-					cf.prop_count AS propCount
-				FROM choreos c
-				JOIN choreo_files cf
-					ON cf.choreo_id = c.id
-				WHERE cf.is_current = 1
-				ORDER BY cf.uploaded_at DESC;
-				`
-			).all();
+    if (request.method === "GET") {
+			if (url.pathname === "/api/choreos/summary") {
+				try {
+					const { results } = await env.DB.prepare(
+						`
+						SELECT
+							c.id AS id,
+							c.name AS name,
+							c.event_name AS event,
+							c.event_start_date AS startDate,
+							c.event_end_date AS endDate,
+							cf.uploaded_at AS lastUpdated,
+							cf.version AS version,
+							cf.stage_length AS stageLength,
+							cf.stage_width AS stageWidth,
+							cf.dancer_count AS dancerCount,
+							cf.prop_count AS propCount
+						FROM choreos c
+						JOIN choreo_files cf
+							ON cf.choreo_id = c.id
+						WHERE cf.is_current = 1
+						ORDER BY cf.uploaded_at DESC;
+						`
+					).all();
+	
+					return Response.json(results, {
+						status: 200,
+						headers: corsHeaders,
+					});
+				} catch (e: any) {
+					return new Response(
+						JSON.stringify({ error: "Internal server error" }),
+						{ status: 500, headers: corsHeaders }
+					);
+				}
+			} else if (url.pathname === "/api/choreos/file") {
+				const choreoId = url.searchParams.get("choreo_id");
+				const version = url.searchParams.get("version");
+				
+				if (choreoId === null) {
+					return new Response(
+						JSON.stringify({error: "Choreo id must not be null"}),
+						{ status: 400, headers: corsHeaders }
+					);
+				}
 
-			return Response.json(results, {
-				headers: corsHeaders,
-			});
+				if (version === null) {
+					return new Response(
+						JSON.stringify({error: "Version must not be null"}),
+						{ status: 400, headers: corsHeaders }
+					);
+				} else {
+					if (!Number.isInteger(Number(version))) {
+						return new Response(
+							JSON.stringify({error: "Version must be an int"}),
+							{ status: 400, headers: corsHeaders }
+						);
+					}
+				}
+
+				try {
+					const r2Key = getFileName(choreoId, version);
+					const object = await env.BUCKET.get(r2Key);
+	
+					if (!object) {
+						return new Response(
+							JSON.stringify({error: "Not found"}),
+							{ status: 404, headers: corsHeaders }
+						);
+					}
+	
+					return new Response(object.body, {
+						status: 200,
+						headers: { ...corsHeaders, "Content-Type": "application/json" }
+					});
+				} catch (e: any) {
+					return new Response(
+						JSON.stringify({ error: "Internal server error" }),
+						{ status: 500, headers: corsHeaders }
+					);
+				}
+			}
     }
 
 		// Verify Cloudflare Access JWT

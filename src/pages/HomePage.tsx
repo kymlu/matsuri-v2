@@ -33,7 +33,7 @@ import BeginnersDialog from "../components/dialogs/BeginnersDialog"
 import EditEventInfoDialog from "../components/dialogs/EditEventInfoDialog"
 import SiteInfoDialog from "../components/dialogs/SiteInfoDialog"
 import { ChoreoStatusTag } from "../components/common/Tag"
-import { checkLogin, getChoreoSummary } from "../lib/helpers/apiHelper"
+import { checkLogin, getChoreoFile, getChoreoSummary } from "../lib/helpers/apiHelper"
 import LoginDialog from "../components/dialogs/LoginDialog"
 import LoggedInDialog from "../components/dialogs/LoggedInDialog"
 
@@ -74,10 +74,12 @@ export default function HomePage({
   const getChoreoFromServer = async (
     id: string
   ): Promise<Choreo | undefined> => {
-    return loadChoreoById(id).catch(() => {
+    try {
+      return await getChoreoFile(id, serverChoreoDetails[id].version ?? 0);
+    } catch (e: any) {
       console.error("Failed to load choreo with id", id);
       return undefined;
-    });
+    }
   };
 
   const getChoreo = async (
@@ -493,8 +495,10 @@ export default function HomePage({
                         }}
                         onPdfExport={(choreo) => {
                           getChoreo(choreo.id).then(c => {
-                            setExportingChoreo(c);
-                            setPdfExportDialogOpen(true);
+                            if (c) {
+                              setExportingChoreo(c);
+                              setPdfExportDialogOpen(true);
+                            }
                           })
                         }}
                         onExport={(id) => {

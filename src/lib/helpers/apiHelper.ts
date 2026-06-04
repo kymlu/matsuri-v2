@@ -18,6 +18,22 @@ export const getChoreoSummary = async (): Promise<BasicChoreoDetails[]> => {
   }
 }
 
+export const getChoreoFile = async (choreoId: string, version: number): Promise<Choreo> => {
+  try {
+    const response = await fetch(`https://your-worker.workers.dev/choreos/file?choreo_id=${choreoId}&version=${version}`);
+    if (response.status === 200) {
+      return await response.json() as Choreo;
+    } else {
+      const data = await response.json() as { message?: string; error?: string };
+      console.error(`getChoreoFile failed: ${response.status} message: ${data.message} error: ${data.error}`);
+      throw Error;
+    }
+  } catch (e: any) {
+    console.error("getChoreoFile failed:", (e as Error)?.message);
+    throw e;
+  }
+}
+
 export const checkLogin = async(
   onSuccess: () => void,
   onFailure: (status: number) => void
