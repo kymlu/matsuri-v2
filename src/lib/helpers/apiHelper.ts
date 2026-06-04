@@ -80,14 +80,6 @@ export const findCurrentVersion = async (
   }
 }
 
-// export const publishChoreo = async (
-//   choreo: Choreo,
-//   onSuccess: () => void,
-//   onFailure: (status: number) => void
-// ) => {
-//   handlePublish(`${choreo.id}.mtr`, JSON.stringify(choreo), onSuccess, onFailure);
-// }
-
 export const publishChoreo = async (
   choreo: Choreo,
   isNew: boolean,
@@ -95,24 +87,24 @@ export const publishChoreo = async (
   onFailure: (status: number) => void
 ) => {
   try {
-    const formData = new FormData();
-    formData.append("file", JSON.stringify(choreo)); // File object
-    formData.append("choreo_id", choreo.id);
-    formData.append("is_new", isNew.toString());
-    formData.append("name", choreo.name);
-    formData.append("event_name", choreo.event ?? "");
-    formData.append("event_start_date", choreo.startDate ?? "");
-    formData.append("event_end_date", choreo.endDate ?? "");
-    formData.append("stage_width", choreo.stageGeometry.stageWidth.toString());
-    formData.append("stage_length", choreo.stageGeometry.stageLength.toString());
-    formData.append("dancer_count", Object.keys(choreo.dancers).length.toString());
-    formData.append("prop_count", Object.keys(choreo.props).length.toString());
-    formData.append("version", (isNew ? 0 : (choreo.version ?? 0)).toString());
-  
     const response = await fetch(getApiUrl("choreos/file"), {
       method: "POST",
       credentials: "include",
-      body: formData,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        file: choreo,
+        choreo_id: choreo.id,
+        is_new: isNew,
+        name: choreo.name,
+        event_name: choreo.event ?? "",
+        event_start_date: choreo.startDate ?? "",
+        event_end_date: choreo.endDate ?? "",
+        stage_width: choreo.stageGeometry.stageWidth,
+        stage_length: choreo.stageGeometry.stageLength,
+        dancer_count: Object.keys(choreo.dancers).length,
+        prop_count: Object.keys(choreo.props).length,
+        version: isNew ? 0 : (choreo.version ?? 0),
+      }),
     });
   
     const data = await response.json();
@@ -128,36 +120,3 @@ export const publishChoreo = async (
     onFailure(400);
   }
 }
-
-// const handlePublish = async (
-//   fileName: string,
-//   fileContents: string,
-//   onSuccess: () => void,
-//   onFailure: (status: number) => void
-// ) => {
-//   try {
-//     const response = await fetch(getApiUrl("push-file"), {
-//       method: 'POST',
-//       headers: { 'Content-Type': 'application/json' },
-//       body: JSON.stringify({
-//         fileName: fileName,
-//         fileContent: fileContents,
-//         commitMessage: `Upload ${fileName}`
-//       }),
-//       credentials: "include",
-//     });
-
-//     const data = await response.json() as { message?: string; error?: string };
-
-//     if (!response.ok) {
-//       console.error(`Failed to upload to Github. Status: ${response.status} message: ${data.message} error: ${data.error}`);
-//       onFailure(response.status);
-//       return;
-//     }
-
-//     onSuccess();
-//   } catch (e: any) {
-//     console.error((e as Error)?.message);
-//     onFailure(400);
-//   }
-// };

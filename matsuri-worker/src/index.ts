@@ -198,21 +198,19 @@ export default {
 
 		if (request.method === "POST" && url.pathname === "/api/choreos/file") {
 			try {
-				console.log("starting POST choreos/file api");
-				const formData = await request.formData();
-				console.log("got form data");
-				const file = formData.get("file") as File;
-				const choreoId = formData.get("choreo_id") as string;
-				const isNew = formData.get("is_new") === "true";
-				const name = formData.get("name") as string;
-				const eventName = formData.get("event_name") as string | null;
-				const eventStartDate = formData.get("event_start_date") as string | null;
-				const eventEndDate = formData.get("event_end_date") as string | null;
-				const stageWidth = Number(formData.get("stage_width"));
-				const stageLength = Number(formData.get("stage_length"));
-				const dancerCount = Number(formData.get("dancer_count"));
-				const propCount = Number(formData.get("prop_count"));
-				const uploadedBy = (payload.email as String).split("@")[0];
+				const data = await request.json() as any;
+				const file = data.file;
+				const choreoId = data.choreo_id as string;
+				const isNew = data.is_new as boolean;
+				const name = data.name as string;
+				const eventName = data.event_name as string | null;
+				const eventStartDate = data.event_start_date as string | null;
+				const eventEndDate = data.event_end_date as string | null;
+				const stageWidth = data.stage_width as number;
+				const stageLength = data.stage_length as number;
+				const dancerCount = data.dancer_count as number;
+				const propCount = data.prop_count as number;
+				const uploadedBy = (payload.email as string).split("@")[0];
 
 				if (!file || !choreoId || !name) {
 					return new Response(
