@@ -13,6 +13,19 @@
 	"upload_source_maps": true,
 	"compatibility_flags": [
 		"nodejs_compat"
+	],
+	"d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "matsuri-db",
+      "database_id": "ed62c56d-54c5-4152-96fd-d453cdc5079f"
+    }
+  ],
+	"r2_buckets": [
+		{
+			"binding": "BUCKET",
+			"bucket_name": "matsuri"
+		}
 	]
 	/**
 	 * Smart Placement

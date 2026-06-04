@@ -1,7 +1,21 @@
-import { Choreo } from "../../models/choreo";
+import { BasicChoreoDetails, Choreo } from "../../models/choreo";
 
-const getApiUrl = (endpoint: "verify-user" | "push-file") => {
+const getApiUrl = (endpoint: "verify-user" | "push-file" | "choreos/summary") => {
   return `/api/${endpoint}`
+}
+
+export const getChoreoSummary = async (): Promise<BasicChoreoDetails[]> => {
+  try {
+    const response = await fetch(getApiUrl("choreos/summary"), {
+      method: "GET",
+      credentials: "include",
+    });
+    const data = await response.json() as BasicChoreoDetails[];
+    return data;
+  } catch (e: any) {
+    console.error("getchoreoSummary failed:", (e as Error)?.message);
+    return [] as BasicChoreoDetails[];
+  }
 }
 
 export const checkLogin = async(
@@ -28,15 +42,15 @@ export const checkLogin = async(
   }
 }
 
-export const uploadChoreo = async (
+export const publishChoreo = async (
   choreo: Choreo,
   onSuccess: () => void,
   onFailure: (status: number) => void
 ) => {
-  handleUpload(`${choreo.id}.mtr`, JSON.stringify(choreo), onSuccess, onFailure);
+  handlePublish(`${choreo.id}.mtr`, JSON.stringify(choreo), onSuccess, onFailure);
 }
 
-const handleUpload = async (
+const handlePublish = async (
   fileName: string,
   fileContents: string,
   onSuccess: () => void,

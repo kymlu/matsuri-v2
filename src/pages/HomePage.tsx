@@ -33,7 +33,7 @@ import BeginnersDialog from "../components/dialogs/BeginnersDialog"
 import EditEventInfoDialog from "../components/dialogs/EditEventInfoDialog"
 import SiteInfoDialog from "../components/dialogs/SiteInfoDialog"
 import { ChoreoStatusTag } from "../components/common/Tag"
-import { checkLogin } from "../lib/helpers/apiHelper"
+import { checkLogin, getChoreoSummary } from "../lib/helpers/apiHelper"
 import LoginDialog from "../components/dialogs/LoginDialog"
 import LoggedInDialog from "../components/dialogs/LoggedInDialog"
 
@@ -115,7 +115,7 @@ export default function HomePage({
     setIsLoading(true);
     Promise.all([
       getAllChoreos(),
-      loadAllChoreos()
+      getChoreoSummary()
     ]).then(([local, server]) => {
       server.push(getBasicChoreoDetails(z.parse(ChoreoSchema, SampleParade)));
       server.push(getBasicChoreoDetails(z.parse(ChoreoSchema, SampleStage)));

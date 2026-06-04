@@ -26,6 +26,8 @@ const MAX_FILE_SIZE = 1_000_000; // 1 MB
 
 interface Env {
 	GITHUB_TOKEN: string;
+	DB: D1Database;
+	BUCKET: R2Bucket;
 }
 
 const CLOUDFLARE_CONFIG = {
@@ -47,6 +49,37 @@ export default {
 
 		if (request.method === "OPTIONS") {
       return new Response(null, { headers: corsHeaders });
+    }
+
+    const url = new URL(request.url);
+
+    if (request.method === "GET" && url.pathname === "/api/choreos/summary") {
+			console.log("summary");
+    	const { results } = await env.DB.prepare(
+				`
+				SELECT
+					c.id AS id,
+					c.name AS name,
+					c.event_name AS event,
+					c.event_start_date AS startDate,
+					c.event_end_date AS endDate,
+					cf.uploaded_at AS lastUpdated,
+					cf.version AS version,
+					cf.stage_length AS stageLength,
+					cf.stage_width AS stageWidth,
+					cf.dancer_count AS dancerCount,
+					cf.prop_count AS propCount
+				FROM choreos c
+				JOIN choreo_files cf
+					ON cf.choreo_id = c.id
+				WHERE cf.is_current = 1
+				ORDER BY cf.uploaded_at DESC;
+				`
+			).all();
+
+			return Response.json(results, {
+				headers: corsHeaders,
+			});
     }
 
 		// Verify Cloudflare Access JWT
@@ -82,8 +115,6 @@ export default {
 				{ status: 401, headers: corsHeaders }
 			);
     }
-
-    const url = new URL(request.url);
 
 		if (url.pathname === "/api/verify-user" && request.method === "GET") {
 			return new Response(JSON.stringify({ email: payload.email ?? "", user: payload.name ?? "" }), {

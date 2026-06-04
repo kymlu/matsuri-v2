@@ -1,6 +1,6 @@
 import { ICON } from "../../lib/consts/consts";
 import { formatDateRange, getJpDate } from "../../lib/helpers/dateHelper";
-import { uploadChoreo } from "../../lib/helpers/apiHelper";
+import { publishChoreo } from "../../lib/helpers/apiHelper";
 import { strEquals } from "../../lib/helpers/globalHelper";
 import { BasicChoreoDetails, Choreo } from "../../models/choreo";
 import Divider from "../basic/Divider";
@@ -32,7 +32,7 @@ export default function PublishConfirmationDialog({
     if (!isProcessing) {
       setIsProcessing(true);
       try {
-        uploadChoreo(
+        publishChoreo(
           getChoreo(),
           () => {
             onSave();
@@ -53,7 +53,7 @@ export default function PublishConfirmationDialog({
         setIsProcessing(false);
       }
     }
-  }, [uploadChoreo]);
+  }, [publishChoreo]);
 
   const isUpdate = !!oldVersion;
 
