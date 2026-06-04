@@ -190,5 +190,18 @@
     "stageWidth": 17,
     "dancerCount": 22,
     "propCount": 0
+  },
+  {
+    "id": "52c29116-4f31-4764-9931-9cf1441b1607",
+    "name": "new event",
+    "event": "upload local",
+    "startDate": "2026-06-18",
+    "endDate": "",
+    "version": 1,
+    "lastUpdated": "2026-06-04T12:35:37.434Z",
+    "stageLength": 10,
+    "stageWidth": 10,
+    "dancerCount": 10,
+    "propCount": 0
   }
 ]
