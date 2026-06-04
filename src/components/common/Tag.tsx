@@ -64,13 +64,5 @@ export function ChoreoStatusTag ({
       (choreoStatus === "localOnly") &&
       <Tag compact={compact} type="grey" text="未公開"/>
     }
-    {
-      (choreoStatus === "publishPending") &&
-      <Tag compact={compact} type="grey" dottedLine text={`v${version}→${(version) + 1}`}/>
-    }
-    {
-      (choreoStatus === "publishPendingEdited") &&
-      <Tag compact={compact} type="grey" dottedLine text={`v${version}→${(version) + 1}`} icon={ICON.edit}/>
-    }
   </>
 }

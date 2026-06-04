@@ -51,7 +51,7 @@ type HomePageProps = {
   setIsLoggedIn: (value: boolean) => void,
 }
 
-export type ChoreoStatus = "localOnly" | "syncRequired" | "upToDate" | "edited" | "publishPending" | "publishPendingEdited";
+export type ChoreoStatus = "localOnly" | "syncRequired" | "upToDate" | "edited";
 type ChoreoWithStatus = BasicChoreoDetails & {
   status: ChoreoStatus,
   isDirty?: boolean,
@@ -133,37 +133,22 @@ export default function HomePage({
           choreos.push({...serverChoreo, status: "upToDate"});
         } else {
           const localChoreoDetails = getBasicChoreoDetails(localChoreo);
-          if (localChoreoDetails.isPending) {
+          if (!serverChoreo) {
+            choreos.push({...localChoreoDetails, status: "localOnly"});
+          } else if (serverChoreo.version !== localChoreo.version) {
             if (localChoreo.isDirty === true || localChoreo.isDirty === undefined) {
-              choreos.push({...localChoreoDetails, status: "publishPendingEdited"});
+              choreos.push({...localChoreoDetails, status: "syncRequired"});
             } else {
-              choreos.push({...localChoreoDetails, status: "publishPending"});
+              choreos.push({...serverChoreo, status: "upToDate"});
+              indexedLocal = {...removeKey(indexedLocal, id)};
+              deleteChoreo(id, () => {}); // TODO: should delete here or after they upload?
             }
           } else {
-            if (!serverChoreo) {
-              choreos.push({...localChoreoDetails, status: "localOnly"});
-            } else if (serverChoreo.version !== localChoreo.version) {
-              if (serverChoreo.version === localChoreo.expectedVersion) {
-                if (localChoreo.isDirty === true || localChoreo.isDirty === undefined) {
-                  const updatedLocalChoreo = {...localChoreo, version: serverChoreo.version, expectedVersion: undefined, isPending: undefined};
-                  indexedLocal[id] = updatedLocalChoreo;
-                  saveChoreo(updatedLocalChoreo, () => {}, false);
-                  choreos.push({...localChoreoDetails, version: serverChoreo.version, expectedVersion: undefined, isPending: undefined, status: "edited"});
-                } else {
-                  choreos.push({...serverChoreo, status: "upToDate"});
-                  indexedLocal = {...removeKey(indexedLocal, id)};
-                  deleteChoreo(id, () => {});
-                }
-              } else {
-                choreos.push({...localChoreoDetails, status: "syncRequired"});
-              }
+            if (localChoreo.isDirty === true || localChoreo.isDirty === undefined) {
+              choreos.push({...localChoreoDetails, status: "edited"});
             } else {
-              if (localChoreo.isDirty === true || localChoreo.isDirty === undefined) {
-                choreos.push({...localChoreoDetails, status: "edited"});
-              } else {
-                choreos.push({...serverChoreo, status: "upToDate"});
-                deleteChoreo(id, () => {});
-              }
+              choreos.push({...serverChoreo, status: "upToDate"});
+              deleteChoreo(id, () => {});
             }
           }
         }
@@ -348,8 +333,6 @@ export default function HomePage({
       id: crypto.randomUUID(),
       name: `${choreo.name}のコピー`.slice(0, LONG_NAME_LENGTH),
       lastUpdated: new Date().toISOString(),
-      isPending: undefined,
-      expectedVersion: undefined,
       version: undefined
     } as Choreo;
     saveChoreo(newChoreo, () => {
@@ -451,7 +434,7 @@ export default function HomePage({
             !isLoading &&
             Array.from(filteredChoreos).map(([year, events], yearIndex) =>
               <React.Fragment key={year}>
-                <ExpandableSection title={year} level={1} defaultExpanded={!isNullOrUndefinedOrBlank(searchTerm) || yearIndex == 0}>
+                <ExpandableSection title={year} level={1} defaultExpanded={!isNullOrUndefinedOrBlank(searchTerm) || yearIndex === 0}>
                   {
                     Array.from(events).map(([eventDetails, choreos], choreoIndex) =>
                     <React.Fragment key={eventDetails}>

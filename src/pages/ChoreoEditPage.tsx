@@ -67,7 +67,6 @@ export default function ChoreoEditPage(props: {
   eventList: EventDetails[],
   dancerNamesByEvent: Record<string, Record<string, string[]>>,
   onChoreoEdited: () => void,
-  onChoreoPublished: () => void,
   serverChoreo?: BasicChoreoDetails,
   isLoggedIn: boolean,
 }) {
@@ -295,8 +294,6 @@ export default function ChoreoEditPage(props: {
   const onSaveAfterPublish = useCallback(() => {
     var newState = {
       ...currentStateRef.current,
-      isPending: true,
-      expectedVersion: (currentStateRef.current.version ?? 0) + 1,
     } as Choreo;
 
     saveChoreo(newState, () => {
@@ -549,7 +546,7 @@ export default function ChoreoEditPage(props: {
             history.presentState.state.isDirty
           )
         }
-        disablePublish={ props.currentChoreoStatus === "publishPendingEdited" }
+        disablePublish={history.presentState.state.isDirty}
         publish={() => {setPublishConfirmationDialogOpen(true)}}
         />
       <div className="relative flex-1">

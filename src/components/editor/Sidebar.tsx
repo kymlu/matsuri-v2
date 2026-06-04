@@ -134,7 +134,7 @@ export function Sidebar({
               icon={ICON.globe}/>
             {
               disablePublish &&
-              <p className="text-xs text-center text-gray-400">前回の公開が処理中です。アプリを再起動してから再度お試しください。</p>
+              <p className="text-xs text-center text-gray-400">公開する内容がありません</p>
             }
           </>
         }
