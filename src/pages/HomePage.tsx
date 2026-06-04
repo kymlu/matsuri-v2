@@ -131,29 +131,29 @@ export default function HomePage({
           choreos.push({...serverChoreo, status: "upToDate"});
         } else {
           const localChoreoDetails = getBasicChoreoDetails(localChoreo);
-          if (!serverChoreo) {
-            choreos.push({...localChoreoDetails, status: "localOnly"});
-          } else if (serverChoreo.version !== localChoreo.version) {
-            if (serverChoreo.version === localChoreo.expectedVersion) {
-              if (localChoreo.isDirty === true || localChoreo.isDirty === undefined) {
-                const updatedLocalChoreo = {...localChoreo, version: serverChoreo.version, expectedVersion: undefined, isPending: undefined};
-                indexedLocal[id] = updatedLocalChoreo;
-                saveChoreo(updatedLocalChoreo, () => {}, false);
-                choreos.push({...localChoreoDetails, version: serverChoreo.version, expectedVersion: undefined, isPending: undefined, status: "edited"});
-              } else {
-                choreos.push({...serverChoreo, status: "upToDate"});
-                indexedLocal = {...removeKey(indexedLocal, id)};
-                deleteChoreo(id, () => {});
-              }
+          if (localChoreoDetails.isPending) {
+            if (localChoreo.isDirty === true || localChoreo.isDirty === undefined) {
+              choreos.push({...localChoreoDetails, status: "publishPendingEdited"});
             } else {
-              choreos.push({...localChoreoDetails, status: "syncRequired"});
+              choreos.push({...localChoreoDetails, status: "publishPending"});
             }
           } else {
-            if (localChoreo.isPending === true) {
-              if (localChoreo.isDirty === true || localChoreo.isDirty === undefined) {
-                choreos.push({...localChoreoDetails, status: "publishPendingEdited"});
+            if (!serverChoreo) {
+              choreos.push({...localChoreoDetails, status: "localOnly"});
+            } else if (serverChoreo.version !== localChoreo.version) {
+              if (serverChoreo.version === localChoreo.expectedVersion) {
+                if (localChoreo.isDirty === true || localChoreo.isDirty === undefined) {
+                  const updatedLocalChoreo = {...localChoreo, version: serverChoreo.version, expectedVersion: undefined, isPending: undefined};
+                  indexedLocal[id] = updatedLocalChoreo;
+                  saveChoreo(updatedLocalChoreo, () => {}, false);
+                  choreos.push({...localChoreoDetails, version: serverChoreo.version, expectedVersion: undefined, isPending: undefined, status: "edited"});
+                } else {
+                  choreos.push({...serverChoreo, status: "upToDate"});
+                  indexedLocal = {...removeKey(indexedLocal, id)};
+                  deleteChoreo(id, () => {});
+                }
               } else {
-                choreos.push({...localChoreoDetails, status: "publishPending"});
+                choreos.push({...localChoreoDetails, status: "syncRequired"});
               }
             } else {
               if (localChoreo.isDirty === true || localChoreo.isDirty === undefined) {
