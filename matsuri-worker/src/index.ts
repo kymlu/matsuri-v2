@@ -241,15 +241,17 @@ export default {
 					console.log("set old choreo to not current");
 					await env.DB.prepare(
 						"UPDATE choreo_files SET is_current = 0 WHERE choreo_id = ? AND is_current = 1"
-					).bind(choreoId).run();
+					).bind(choreoId).run()
+					.catch(e => { throw new Error(`Failed to mark old version as not current: ${e}`) });
 				}
 
 				// upload to R2
 				const r2Key = getFileName(choreoId, version.toString());
 				console.log("upload choreo file");
-				await env.BUCKET.put(r2Key, file.stream(), {
+				await env.BUCKET.put(r2Key, JSON.stringify(file), {
 					httpMetadata: { contentType: "application/json" }
-				});
+				})
+				.catch(e => { throw new Error(`Failed to upload file to r2: ${e}`) });
 
 				// upsert choreo
 				console.log("upsert choreo");
@@ -261,7 +263,8 @@ export default {
 						event_name = excluded.event_name,
 						event_start_date = excluded.event_start_date,
 						event_end_date = excluded.event_end_date`
-				).bind(choreoId, name, eventName, eventStartDate, eventEndDate).run();
+				).bind(choreoId, name, eventName, eventStartDate, eventEndDate).run()
+				.catch(e => { throw new Error(`Failed to upsert choreo info into db: ${e}`) });
 
 				// insert new choreo_file row
 				const fileId = crypto.randomUUID();
@@ -269,7 +272,8 @@ export default {
 				await env.DB.prepare(
 					`INSERT INTO choreo_files (id, choreo_id, version, is_current, stage_width, stage_length, dancer_count, prop_count, uploaded_by)
 					VALUES (?, ?, ?, 1, ?, ?, ?, ?, ?)`
-				).bind(fileId, choreoId, version, stageWidth, stageLength, dancerCount, propCount, uploadedBy).run();
+				).bind(fileId, choreoId, version, stageWidth, stageLength, dancerCount, propCount, uploadedBy).run()
+				.catch(e => { throw new Error(`Failed to insert choreo file info into db: ${e}`) });
 
 				return Response.json(
 					{ id: choreoId, version },
