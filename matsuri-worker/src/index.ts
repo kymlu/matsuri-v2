@@ -197,7 +197,7 @@ export default {
 			});
 		}
 
-		if (request.method === "POST" && url.pathname === "/api/choreos/publish") {
+		if (request.method === "POST" && url.pathname === "/api/choreos/file") {
 			try {
 				const formData = await request.formData();
 				const file = formData.get("file") as File;

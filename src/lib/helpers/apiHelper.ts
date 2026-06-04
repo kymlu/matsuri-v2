@@ -2,11 +2,9 @@ import { BasicChoreoDetails, Choreo } from "../../models/choreo";
 
 const getApiUrl = (endpoint: 
   "verify-user" | 
-  "push-file" | 
   "choreos/summary" | 
   "choreos/file" | 
-  "choreos/publish" |
-  "file/current-version") => {
+  "choreos/file/current-version") => {
   return `/api/${endpoint}`
 }
 
@@ -68,7 +66,7 @@ export const findCurrentVersion = async (
   choreoId: string
 ) => {
   try {
-    const response = await fetch(`${getApiUrl("file/current-version")}?choreo_id=${choreoId}`);
+    const response = await fetch(`${getApiUrl("choreos/file/current-version")}?choreo_id=${choreoId}`);
     if (response.ok) {
       return await response.json() as {version: number};
     } else {
@@ -111,7 +109,7 @@ export const publishChoreo = async (
     formData.append("prop_count", Object.keys(choreo.props).length.toString());
     formData.append("version", (isNew ? 0 : (choreo.version ?? 0)).toString());
   
-    const response = await fetch(getApiUrl("choreos/publish"), {
+    const response = await fetch(getApiUrl("choreos/file"), {
       method: "POST",
       headers: { 'Content-Type': 'application/json' },
       credentials: "include",
