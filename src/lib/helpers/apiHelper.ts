@@ -111,7 +111,6 @@ export const publishChoreo = async (
   
     const response = await fetch(getApiUrl("choreos/file"), {
       method: "POST",
-      headers: { 'Content-Type': 'application/json' },
       credentials: "include",
       body: formData,
     });
