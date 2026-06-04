@@ -346,8 +346,12 @@ export default function HomePage({
       id: crypto.randomUUID(),
       name: `${choreo.name}のコピー`.slice(0, LONG_NAME_LENGTH),
       lastUpdated: new Date().toISOString(),
+      isPending: undefined,
+      expectedVersion: undefined,
+      version: undefined
     } as Choreo;
     saveChoreo(newChoreo, () => {
+      setLocalChoreos(prev => ({...prev, [newChoreo.id]: newChoreo}))
       var newChoreos = [...savedChoreos, {...getBasicChoreoDetails(newChoreo), status: "localOnly" as ChoreoStatus}];
 
       // setDancerNamesByEvent(
