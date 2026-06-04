@@ -198,7 +198,9 @@ export default {
 
 		if (request.method === "POST" && url.pathname === "/api/choreos/file") {
 			try {
+				console.log("starting POST choreos/file api");
 				const formData = await request.formData();
+				console.log("got form data");
 				const file = formData.get("file") as File;
 				const choreoId = formData.get("choreo_id") as string;
 				const isNew = formData.get("is_new") === "true";
