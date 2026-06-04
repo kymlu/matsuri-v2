@@ -35,7 +35,7 @@ export default function PublishConfirmationDialog({
       setIsProcessing(true);
       try {
         const serverVersion = await findCurrentVersion(currentVersion.id);
-        if (serverVersion.version !== oldVersion?.version) {
+        if (serverVersion.version !== (oldVersion?.version ?? 0)) {
           setError("versionError");
           setIsProcessing(false);
         } else {
