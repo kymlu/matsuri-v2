@@ -1,6 +1,6 @@
 import { BasicChoreoDetails, Choreo } from "../../models/choreo";
 
-const getApiUrl = (endpoint: "verify-user" | "push-file" | "choreos/summary") => {
+const getApiUrl = (endpoint: "verify-user" | "push-file" | "choreos/summary" | "choreos/file") => {
   return `/api/${endpoint}`
 }
 
@@ -20,7 +20,7 @@ export const getChoreoSummary = async (): Promise<BasicChoreoDetails[]> => {
 
 export const getChoreoFile = async (choreoId: string, version: number): Promise<Choreo> => {
   try {
-    const response = await fetch(`https://your-worker.workers.dev/choreos/file?choreo_id=${choreoId}&version=${version}`);
+    const response = await fetch(`${getApiUrl("choreos/file")}?choreo_id=${choreoId}&version=${version}`);
     if (response.status === 200) {
       return await response.json() as Choreo;
     } else {
