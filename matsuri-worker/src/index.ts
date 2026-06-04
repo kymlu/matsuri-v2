@@ -158,7 +158,6 @@ export default {
 
 		// Verify Cloudflare Access JWT
     const token = request.headers.get('X-Matsuri-Access-Token');
-		console.log("headers:", Object.fromEntries(request.headers.entries()));
     if (!token) {
       return new Response(
 				JSON.stringify({error: "No access token provided. Please log in."}),
@@ -223,11 +222,13 @@ export default {
 				// get next version number
 				let version = 1;
 				if (!isNew) {
+					console.log("getting version number");
 					const current = await env.DB.prepare(
 						"SELECT version FROM choreo_files WHERE choreo_id = ? AND is_current = 1"
 					).bind(choreoId).first<{ version: number }>();
 
 					if (!current) {
+						console.log(`choreo not found: ${choreoId}`);
 						return new Response(
 							JSON.stringify({ error: "Choreo not found" }),
 							{ status: 404, headers: corsHeaders }
@@ -237,6 +238,7 @@ export default {
 					version = current.version + 1;
 
 					// mark old version as not current
+					console.log("set old choreo to not current");
 					await env.DB.prepare(
 						"UPDATE choreo_files SET is_current = 0 WHERE choreo_id = ? AND is_current = 1"
 					).bind(choreoId).run();
@@ -244,11 +246,13 @@ export default {
 
 				// upload to R2
 				const r2Key = getFileName(choreoId, version.toString());
+				console.log("upload choreo file");
 				await env.BUCKET.put(r2Key, file.stream(), {
 					httpMetadata: { contentType: "application/json" }
 				});
 
 				// upsert choreo
+				console.log("upsert choreo");
 				await env.DB.prepare(
 					`INSERT INTO choreos (id, name, event_name, event_start_date, event_end_date)
 					VALUES (?, ?, ?, ?, ?)
@@ -261,6 +265,7 @@ export default {
 
 				// insert new choreo_file row
 				const fileId = crypto.randomUUID();
+				console.log("insert choreo file");
 				await env.DB.prepare(
 					`INSERT INTO choreo_files (id, choreo_id, version, is_current, stage_width, stage_length, dancer_count, prop_count, uploaded_by)
 					VALUES (?, ?, ?, 1, ?, ?, ?, ?, ?)`
@@ -271,8 +276,9 @@ export default {
 					{ status: isNew ? 201 : 200, headers: corsHeaders }
 				);
 			} catch (e) {
+				console.log(e);
 				return new Response(
-					JSON.stringify({ error: "Internal server error" }),
+					JSON.stringify({ error: `Internal server error: ${e}` }),
 					{ status: 500, headers: corsHeaders }
 				);
 			}
