@@ -153,7 +153,7 @@ export default {
 						"Content-Type": "application/json"
 					},
 					body: JSON.stringify({
-						message: `${commitMessage} by ${(payload.email as String).split("@")[0]}` || `Automated upload: ${safeFileName}`,
+						message: `[Skip-CI] ${commitMessage} by ${(payload.email as String).split("@")[0]}` || `[Skip-CI] Automated upload: ${safeFileName}`,
 						content: base64Content,
 						branch: GIT_CONFIG.branch
 					})
