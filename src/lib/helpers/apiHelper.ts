@@ -83,7 +83,7 @@ export const findCurrentVersion = async (
 export const publishChoreo = async (
   choreo: Choreo,
   isNew: boolean,
-  onSuccess: () => void,
+  onSuccess: (newChoreo: Choreo) => void,
   onFailure: (status: number) => void
 ) => {
   try {
@@ -110,7 +110,8 @@ export const publishChoreo = async (
     const data = await response.json();
   
     if (response.ok) {
-      onSuccess();
+      var result = data.newFile as Choreo;
+      onSuccess(result);
     } else {
       console.error(`Failed to save file. Status: ${response.status} message: ${data.message} error: ${data.error}`);
       onFailure(response.status);

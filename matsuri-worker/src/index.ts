@@ -248,6 +248,7 @@ export default {
 				// upload to R2
 				const r2Key = getFileName(choreoId, version.toString());
 				console.log("upload choreo file");
+				file["version"] = version;
 				await env.BUCKET.put(r2Key, JSON.stringify(file), {
 					httpMetadata: { contentType: "application/json" }
 				})
@@ -276,7 +277,7 @@ export default {
 				.catch(e => { throw new Error(`Failed to insert choreo file info into db: ${e}`) });
 
 				return Response.json(
-					{ id: choreoId, version },
+					{ newFile: file },
 					{ status: isNew ? 201 : 200, headers: corsHeaders }
 				);
 			} catch (e) {

@@ -291,11 +291,7 @@ export default function ChoreoEditPage(props: {
     }
   }, [history.presentState.state]);
 
-  const onSaveAfterPublish = useCallback(() => {
-    var newState = {
-      ...currentStateRef.current,
-    } as Choreo;
-
+  const onSaveAfterPublish = useCallback((newState: Choreo) => {
     saveChoreo(newState, () => {
       publishConfirmationDialog.close();
       setPublishConfirmationDialogOpen(false);
@@ -1185,12 +1181,13 @@ export default function ChoreoEditPage(props: {
       <Dialog.Root
         open={publishConfirmationDialogOpen}
         onOpenChange={handlePublishConfirmationDialogOpenChange}
+        disablePointerDismissal
         handle={publishConfirmationDialog}>
         <PublishConfirmationDialog
           onClose={() => {
             setPublishConfirmationDialogOpen(false);
           }}
-          onSave={() => onSaveAfterPublishRef.current()}
+          onSave={(newChoreo: Choreo) => onSaveAfterPublishRef.current(newChoreo)}
           oldVersion={props.serverChoreo}
           currentVersion={currentChoreoDetails}
           getChoreo={() => currentStateRef.current}

@@ -141,7 +141,7 @@ export default function HomePage({
             } else {
               choreos.push({...serverChoreo, status: "upToDate"});
               indexedLocal = {...removeKey(indexedLocal, id)};
-              deleteChoreo(id, () => {}); // TODO: should delete here or after they upload?
+              deleteChoreo(id, () => {});
             }
           } else {
             if (localChoreo.isDirty === true || localChoreo.isDirty === undefined) {

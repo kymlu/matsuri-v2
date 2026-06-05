@@ -10,7 +10,7 @@ import { useCallback, useMemo, useState } from "react";
 
 type PublishConfirmationDialogProps = {
   onClose: () => void,
-  onSave: () => void,
+  onSave: (newChoreo: Choreo) => void,
   currentVersion: BasicChoreoDetails,
   oldVersion?: BasicChoreoDetails,
   getChoreo: () => Choreo,
@@ -39,11 +39,13 @@ export default function PublishConfirmationDialog({
           setError("versionError");
           setIsProcessing(false);
         } else {
+          let choreo = {...getChoreo()};
+          choreo.isDirty = undefined;
           publishChoreo(
-            getChoreo(),
+            choreo,
             !isUpdate,
-            () => {
-              onSave();
+            (newChoreo: Choreo) => {
+              onSave(newChoreo);
               setError("none");
             },
             (status) => {
