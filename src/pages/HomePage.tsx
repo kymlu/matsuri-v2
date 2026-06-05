@@ -21,7 +21,6 @@ import ExportDialog from "../components/dialogs/ExportDialog"
 import React from "react"
 import Divider from "../components/basic/Divider"
 import TextInput from "../components/inputs/TextInput"
-import { loadAllChoreos, loadChoreoById } from "../lib/dataAccess/FileAccess"
 import UserNameEditDialog from "../components/dialogs/UserNameEditDialog"
 import { Oval } from "react-loader-spinner"
 import { colorPalette } from "../lib/consts/colors"
@@ -75,6 +74,7 @@ export default function HomePage({
     id: string
   ): Promise<Choreo | undefined> => {
     try {
+      console.log(`Getting choreo from server with id ${id}`);
       return await getChoreoFile(id, serverChoreoDetails[id].version ?? 0);
     } catch (e: any) {
       console.error("Failed to load choreo with id", id);
@@ -88,12 +88,15 @@ export default function HomePage({
     const local = localChoreos[id];
 
     if (local) {
+      console.log(`Getting local choreo with ${id}`);
       return local;
     }
 
     if (strEquals(id, SAMPLE_PARADE_ID)) {
+      console.log("using sample parade");
       return SampleParade as Choreo;
     } else if (strEquals(id, SAMPLE_STAGE_ID)) {
+      console.log("using sample stage");
       return SampleStage as Choreo;
     }
 
@@ -148,6 +151,7 @@ export default function HomePage({
               choreos.push({...localChoreoDetails, status: "edited"});
             } else {
               choreos.push({...serverChoreo, status: "upToDate"});
+              indexedLocal = {...removeKey(indexedLocal, id)};
               deleteChoreo(id, () => {});
             }
           }
