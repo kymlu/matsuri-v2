@@ -542,7 +542,7 @@ export default function ChoreoEditPage(props: {
             history.presentState.state.isDirty
           )
         }
-        disablePublish={history.presentState.state.isDirty}
+        disablePublish={!history.presentState.state.isDirty}
         publish={() => {setPublishConfirmationDialogOpen(true)}}
         />
       <div className="relative flex-1">

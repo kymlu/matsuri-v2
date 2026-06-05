@@ -15,8 +15,8 @@ export default function LoggedInDialog() {
   >
     <p>ログインのまま、ファイルを公開できます。</p>
     <ol>
-      <li className="flex items-center">編集モード（<Icon src={ICON.edit} colour="primary" size="xs"/>）に切り替える</li>
-      <li className="flex items-center">設定（<Icon src={ICON.settings} colour="primary" size="xs"/>）アイコンをタップする</li>
+      <li className="inline-flex items-center">編集モード（<Icon src={ICON.edit} colour="primary" size="xs"/>）に切り替える</li>
+      <li className="inline-flex items-center">設定（<Icon src={ICON.settings} colour="primary" size="xs"/>）アイコンをタップする</li>
       <li>「公開する」を選択する</li>
       <li>内容を確認し、「公開する」をタップする</li>
     </ol>
