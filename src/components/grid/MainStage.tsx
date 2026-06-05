@@ -105,6 +105,11 @@ export default function MainStage({
 
   const [stagePos, setStagePos] = useState<Coordinates>({ x: 0, y: 0 });
   const stageRef = useRef<Konva.Stage>(null);
+  useEffect(() => {
+    return () => {
+      stageRef.current?.destroy();
+    };
+  }, []);
   const [stagePosSectionId, setStagePosSectionId] = useState<string>("");
 
   const [rulerPos, setRulerPos] = useState<Coordinates>({x: 0, y: 0});

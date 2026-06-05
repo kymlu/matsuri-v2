@@ -86,30 +86,30 @@ export default function PublishConfirmationDialog({
           old: oldVersion ? formatDateRange(oldVersion.startDate, oldVersion.endDate) : undefined,
         });
       }
-      rowList = [...rowList, ...[
-          {
-            icon: ICON.resize,
-            new: `${currentVersion.stageLength}m×${currentVersion.stageWidth}m`,
-            old: oldVersion ? `${oldVersion.stageLength}m×${oldVersion.stageWidth}m` : undefined,
-          },
-          {
-            icon: ICON.group,
-            new: `${currentVersion.dancerCount}人`,
-            old: oldVersion ? `${oldVersion.dancerCount}人` : undefined,
-          },
-          {
-            icon: ICON.flag,
-            new: `${currentVersion.propCount}`,
-            old: oldVersion ? `${oldVersion.propCount}` : undefined,
-          },
-          {
-            icon: ICON.history,
-            new: currentVersion.lastUpdated ? getJpDate(new Date(currentVersion.lastUpdated)) : "",
-            old: oldVersion?.lastUpdated ? getJpDate(new Date(oldVersion.lastUpdated)) : undefined,
-          },
-        ]
-      ];
     }
+    rowList = [...rowList, ...[
+        {
+          icon: ICON.resize,
+          new: `${currentVersion.stageLength}m×${currentVersion.stageWidth}m`,
+          old: oldVersion ? `${oldVersion.stageLength}m×${oldVersion.stageWidth}m` : undefined,
+        },
+        {
+          icon: ICON.group,
+          new: `${currentVersion.dancerCount}人`,
+          old: oldVersion ? `${oldVersion.dancerCount}人` : undefined,
+        },
+        {
+          icon: ICON.flag,
+          new: `${currentVersion.propCount}`,
+          old: oldVersion ? `${oldVersion.propCount}` : undefined,
+        },
+        {
+          icon: ICON.history,
+          new: currentVersion.lastUpdated ? getJpDate(new Date(currentVersion.lastUpdated)) : "",
+          old: oldVersion?.lastUpdated ? getJpDate(new Date(oldVersion.lastUpdated)) : undefined,
+        },
+      ]
+    ];
     return rowList;
   }, [currentVersion, oldVersion])
 

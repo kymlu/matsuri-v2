@@ -133,7 +133,7 @@ export class IndexedDBManager {
       try {
         const request = this._getStore(storeName).delete(itemId);
         request.onsuccess = () => {
-          console.log(`successfully completed removeItem ${storeName}: ${request.result}`);
+          console.log(`successfully completed removeItem ${storeName}: ${itemId}`);
           resolve(request.result);
         };
         request.onerror = () => {
