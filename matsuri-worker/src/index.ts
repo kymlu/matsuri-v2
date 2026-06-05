@@ -271,9 +271,9 @@ export default {
 				const fileId = crypto.randomUUID();
 				console.log("insert choreo file");
 				await env.DB.prepare(
-					`INSERT INTO choreo_files (id, choreo_id, version, is_current, stage_width, stage_length, dancer_count, prop_count, uploaded_by)
-					VALUES (?, ?, ?, 1, ?, ?, ?, ?, ?)`
-				).bind(fileId, choreoId, version, stageWidth, stageLength, dancerCount, propCount, uploadedBy).run()
+					`INSERT INTO choreo_files (id, choreo_id, version, is_current, stage_width, stage_length, dancer_count, prop_count, uploaded_by, uploaded_at)
+					VALUES (?, ?, ?, 1, ?, ?, ?, ?, ?, ?)`
+				).bind(fileId, choreoId, version, stageWidth, stageLength, dancerCount, propCount, uploadedBy, new Date().toISOString()).run()
 				.catch(e => { throw new Error(`Failed to insert choreo file info into db: ${e}`) });
 
 				return Response.json(
