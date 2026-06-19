@@ -189,5 +189,18 @@
     "stageWidth": 17,
     "dancerCount": 22,
     "propCount": 0
+  },
+  {
+    "id": "41db0af8-4677-495d-bf37-d483497789e1",
+    "name": "ステージ　22×15",
+    "event": "Sailing KOBE",
+    "startDate": "2026-07-04",
+    "endDate": "",
+    "version": 1,
+    "lastUpdated": "2026-06-19T06:03:08.548Z",
+    "stageLength": 15,
+    "stageWidth": 22,
+    "dancerCount": 44,
+    "propCount": 19
   }
 ]
