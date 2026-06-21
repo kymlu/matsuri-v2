@@ -18,6 +18,7 @@ root.render(
         <BrowserRouter>
           <Routes>
             <Route path="/:teamSlug" element={<App />} />
+            <Route path="*" element={<App />} />
           </Routes>
         </BrowserRouter>
       </RequireDB>

@@ -144,6 +144,7 @@ export default function ChoreoEditPage(props: {
         lastUpdated: history.presentState.state.lastUpdated,
         stageLength: history.presentState.state.stageGeometry.stageLength,
         stageWidth: history.presentState.state.stageGeometry.stageWidth,
+        isDirty: history.presentState.state.isDirty,
       } as BasicChoreoDetails
     }
   , [history.presentState.state.name,
@@ -540,7 +541,7 @@ export default function ChoreoEditPage(props: {
             props.isLoggedIn &&
             !strEquals(history.presentState.state.id, SAMPLE_PARADE_ID) &&
             !strEquals(history.presentState.state.id, SAMPLE_STAGE_ID) &&
-            history.presentState.state.isDirty
+            !isNullOrUndefinedOrBlank(props.teamId)
           )
         }
         disablePublish={!history.presentState.state.isDirty}
@@ -1185,6 +1186,7 @@ export default function ChoreoEditPage(props: {
         disablePointerDismissal
         handle={publishConfirmationDialog}>
         <PublishConfirmationDialog
+          teamId={props.teamId!}
           onClose={() => {
             setPublishConfirmationDialogOpen(false);
           }}

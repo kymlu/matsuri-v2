@@ -174,6 +174,12 @@ export default function PublishConfirmationDialog({
           {isUpdate ? "新バージョンをアップロードしますか？" : "新しいファイルとしてアップロードしますか？"}
         </span>
         {
+          !currentVersion.isDirty &&
+          <span className="w-full font-semibold text-center text-primary">
+            編集はありません
+          </span>
+        }
+        {
           isProcessing &&
           <span className="w-full font-semibold text-center text-primary">
             処理中...
