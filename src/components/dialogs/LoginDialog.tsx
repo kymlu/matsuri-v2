@@ -51,8 +51,19 @@ export default function LoginDialog({
     onClose={close}
     onSubmit={login}
   >
-    <TextInput label="メールアドレス" name="メールアドレス" defaultValue="" onContentChange={(value) => setEmail(value)}/>
-    <TextInput label="パスワード" name="パスワード" type="password" defaultValue="" onContentChange={(value) => setPassword(value)}/>
+    <TextInput
+      label="メールアドレス"
+      name="メールアドレス"
+      defaultValue=""
+      maxLength={254}
+      onContentChange={(value) => setEmail(value)}/>
+    <TextInput
+      label="パスワード"
+      name="パスワード"
+      type="password"
+      defaultValue=""
+      maxLength={150}
+      onContentChange={(value) => setPassword(value)}/>
     {
       error === "error" &&
       <span className="w-full font-semibold text-center text-primary">
