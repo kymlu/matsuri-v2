@@ -394,7 +394,7 @@ export default function HomePage({
             </Dialog.Root>
             {
               !isLoggedIn && team?.id &&
-              <IconButton src={ICON.login} colour="grey" noBorder asDiv onClick={() => setLoginDialogOpen(true)}/>
+              <IconButton src={ICON.login} colour="grey" noBorder onClick={() => setLoginDialogOpen(true)}/>
             }
             {
               isLoggedIn && team?.id &&

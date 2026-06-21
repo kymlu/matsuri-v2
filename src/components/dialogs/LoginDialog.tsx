@@ -31,11 +31,13 @@ export default function LoginDialog({
         } else {
           setError("error");
         }
+        setIsProcessing(false);
       });
     }
   };
 
   const close = () => {
+    setError("none");
     setEmail("");
     setPassword("");
     onClose();
