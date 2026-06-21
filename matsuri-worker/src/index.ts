@@ -223,6 +223,33 @@ export default {
 			}
     }
 
+		if (url.pathname === "/api/auth/verify-team" && request.method === "GET") {
+			const teamSlug = url.searchParams.get("team_slug");
+
+			if (!teamSlug) {
+				return new Response(
+					JSON.stringify({ error: "team_slug is required" }),
+					{ status: 400, headers: corsHeaders }
+				);
+			}
+
+			const team = await env.DB.prepare(
+				"SELECT id, name, slug FROM teams WHERE slug = ?"
+			).bind(teamSlug).first();
+
+			if (!team) {
+				return new Response(
+					JSON.stringify({ error: "Team not found" }),
+					{ status: 404, headers: corsHeaders }
+				);
+			}
+
+			return new Response(JSON.stringify(team), {
+				status: 200,
+				headers: { ...corsHeaders, "Content-Type": "application/json" },
+			});
+		}
+
 		if (url.pathname === "/api/auth/set-password" && request.method === "POST") {
 			const body = await request.json() as { email: string; password: string };
 

@@ -18,7 +18,8 @@
     {
       "binding": "DB",
       "database_name": "matsuri-db",
-      "database_id": "ed62c56d-54c5-4152-96fd-d453cdc5079f"
+      "database_id": "ed62c56d-54c5-4152-96fd-d453cdc5079f",
+			"preview_database_id": "DB"
     }
   ],
 	"r2_buckets": [
