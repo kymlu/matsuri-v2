@@ -32,10 +32,10 @@ import BeginnersDialog from "../components/dialogs/BeginnersDialog"
 import EditEventInfoDialog from "../components/dialogs/EditEventInfoDialog"
 import SiteInfoDialog from "../components/dialogs/SiteInfoDialog"
 import { ChoreoStatusTag } from "../components/common/Tag"
-import { checkLogin, getChoreoFile, getChoreoSummary } from "../lib/helpers/apiHelper"
+import { checkLogin, getChoreoFile, getChoreoSummary, logoutUserFromTeam } from "../lib/helpers/apiHelper"
 import LoginDialog from "../components/dialogs/LoginDialog"
-import LoggedInDialog from "../components/dialogs/LoggedInDialog"
 import { Team } from "../models/team"
+import CustomMenu from "../components/inputs/CustomMenu"
 
 type HomePageProps = {
   buildInfo?: string,
@@ -332,6 +332,12 @@ export default function HomePage({
     setUploadChoreoDialogOpen(isOpen);
   };
 
+  const [loginDialogOpen, setLoginDialogOpen] = useState(false);
+  const loginDialog = Dialog.createHandle<{}>();
+  const handleLoginDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
+    setLoginDialogOpen(isOpen);
+  };
+
   const triggerUpload = () => {
     const uploadFileElement = document.getElementById("uploadFileInput");
     if (uploadFileElement){
@@ -388,21 +394,24 @@ export default function HomePage({
             </Dialog.Root>
             {
               !isLoggedIn && team?.id &&
-              <Dialog.Root>
-                <Dialog.Trigger>
-                  <IconButton src={ICON.shieldLock} colour="grey" noBorder asDiv/>
-                </Dialog.Trigger>
-                <LoginDialog teamId={team.id}/>
-              </Dialog.Root>
+              <IconButton src={ICON.login} colour="grey" noBorder asDiv onClick={() => setLoginDialogOpen(true)}/>
             }
             {
               isLoggedIn && team?.id &&
-              <Dialog.Root>
-                <Dialog.Trigger>
-                  <IconButton src={ICON.verifiedUser} colour="primary" noBorder/>
-                </Dialog.Trigger>
-                <LoggedInDialog/>
-              </Dialog.Root>
+              <CustomMenu
+                trigger={
+                  <IconButton asDiv src={ICON.verifiedUser} colour="primary" noBorder/>
+                }>
+                <div className="space-y-2">
+                  <Menu.Item>
+                    <IconLabelButton full noBorder icon={ICON.password} label="パスワード変更" onClick={()=>{}}/>
+                  </Menu.Item>
+                  <Divider compact/>
+                  <Menu.Item>
+                    <IconLabelButton full noBorder icon={ICON.logout} label="PDF" onClick={()=>{logoutUserFromTeam()}}/>
+                  </Menu.Item>
+                </div>
+              </CustomMenu>
             }
           </div>
         </div>
@@ -792,6 +801,17 @@ export default function HomePage({
               setUploadChoreoDialogOpen(false);
             }}
           />
+        </Dialog.Root>
+        <Dialog.Root
+          handle={loginDialog}
+          open={loginDialogOpen}
+          onOpenChange={handleLoginDialogOpen}>
+          <LoginDialog
+            onLogin={() => setIsLoggedIn(true)}
+            onClose={() => {
+              setLoginDialogOpen(false);
+            }}
+            teamId={team!.id}/>
         </Dialog.Root>
       </div>
     </div>

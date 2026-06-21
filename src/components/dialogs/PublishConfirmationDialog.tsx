@@ -175,7 +175,7 @@ export default function PublishConfirmationDialog({
         </span>
         {
           !currentVersion.isDirty &&
-          <span className="w-full font-semibold text-center text-primary">
+          <span className="w-full font-semibold text-center text-gray-600">
             編集はありません
           </span>
         }

@@ -3,6 +3,8 @@ import { Team } from "../../models/team";
 
 const getApiUrl = (endpoint: 
   "auth/login" | 
+  "auth/logout" | 
+  "auth/set-password" | 
   "auth/verify-team" | 
   "auth/verify-user" | 
   "choreos/summary" | 
@@ -11,7 +13,13 @@ const getApiUrl = (endpoint:
   return `/api/${endpoint}`
 }
 
-export const loginUserToTeam = async (teamId: string, email: string, password: string): Promise<void> => {
+export const loginUserToTeam = async (
+  teamId: string,
+  email: string,
+  password: string,
+  onSuccess: () => void,
+  onFailure: (status: number) => void
+): Promise<void> => {
   try {
     const response = await fetch(getApiUrl("auth/login"), {
       method: "POST",
@@ -20,6 +28,26 @@ export const loginUserToTeam = async (teamId: string, email: string, password: s
       body: JSON.stringify({ email, password, team_id: teamId }),
     });
 
+    const data = await response.json() as { message?: string; error?: string };
+
+    if (!response.ok) {
+      console.error(`Login failed: ${response.status} message: ${data.message} error: ${data.error}`);
+      onFailure(response.status);
+    } else {
+      onSuccess();
+    }
+  } catch (e: any) {
+    console.error("login failed:", (e as Error)?.message);
+    onFailure(400);
+  }
+}
+
+export const logoutUserFromTeam = async (): Promise<void> => {
+  try {
+    const response = await fetch(getApiUrl("auth/logout"), {
+      method: "POST",
+      credentials: "include"
+    });
     const data = await response.json() as { message?: string; error?: string };
 
     if (!response.ok) {

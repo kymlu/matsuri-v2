@@ -6,21 +6,40 @@ import { loginUserToTeam } from "../../lib/helpers/apiHelper";
 
 export type LoginDialogProps = {
   teamId: string,
+  onLogin: () => void,
+  onClose: () => void,
 }
 
 export default function LoginDialog({
-  teamId
+  teamId, onLogin, onClose
 }: LoginDialogProps) {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [error, setError] = useState<"none" | "error" | "loginError" | "notOnTeamError">("none");
   
   const login = async () => {
     if (!isProcessing) {
       setIsProcessing(true);
-    } else {
-      loginUserToTeam(teamId, email, password);
+      loginUserToTeam(teamId, email, password, () => {
+        onLogin();
+        close();
+      }, (status) => {
+        if (status === 401) {
+          setError("loginError");
+        } else if (status === 403) {
+          setError("notOnTeamError");
+        } else {
+          setError("error");
+        }
+      });
     }
   };
+
+  const close = () => {
+    setEmail("");
+    setPassword("");
+    onClose();
+  }
 
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
@@ -29,9 +48,28 @@ export default function LoginDialog({
     actionButtonText="ログイン"
     isActionButtonDisabled={isNullOrUndefinedOrBlank(email) || isNullOrUndefinedOrBlank(password) || isProcessing}
     showCloseButton={false}
+    onClose={close}
     onSubmit={login}
   >
-    <TextInput name="メールアドレス" defaultValue="" onContentChange={(value) => setEmail(value)}/>
-    <TextInput name="パスワード" type="password" defaultValue="" onContentChange={(value) => setPassword(value)}/>
+    <TextInput label="メールアドレス" name="メールアドレス" defaultValue="" onContentChange={(value) => setEmail(value)}/>
+    <TextInput label="パスワード" name="パスワード" type="password" defaultValue="" onContentChange={(value) => setPassword(value)}/>
+    {
+      error === "error" &&
+      <span className="w-full font-semibold text-center text-primary">
+        ログインに問題がありました
+      </span>
+    }
+    {
+      error === "loginError" &&
+      <span className="w-full font-semibold text-center text-primary">
+        メールアドレス、またはパスワードは正しくない
+      </span>
+    }
+    {
+      error === "notOnTeamError" &&
+      <span className="w-full font-semibold text-center text-primary">
+        このアカウントはこのチームに編集の権限がありません。
+      </span>
+    }
   </BaseEditDialog>
 }

@@ -338,6 +338,23 @@ export default {
 			);
 		}
 
+		if (url.pathname === "/api/auth/logout" && request.method === "POST") {
+			if (token) {
+				await env.DB.prepare(
+					"DELETE FROM sessions WHERE token = ?"
+				).bind(token).run();
+			}
+
+			return new Response(JSON.stringify({ success: true }), {
+				status: 200,
+				headers: {
+					...corsHeaders,
+					"Content-Type": "application/json",
+					"Set-Cookie": "token=; HttpOnly; Secure; SameSite=Strict; Max-Age=0",
+				},
+			});
+		}
+
 		// Look up session in D1
 		const session = await env.DB.prepare(`
 			SELECT s.*, u.email, tm.id AS team_member_id, tm.name, tm.role
