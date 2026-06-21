@@ -28,7 +28,6 @@ type SidebarProps = {
   appSettings: AppSetting;
 
   showPublish?: boolean;
-  disablePublish?: boolean;
   publish?: () => void;
 };
 
@@ -43,7 +42,7 @@ export function Sidebar({
   changeDancerSize,
   changeShowPrevious,
   appSettings,
-  showPublish, disablePublish,  publish,
+  showPublish,  publish,
 }: SidebarProps) {
   return <Dialog.Portal>
     <Dialog.Backdrop className="fixed inset-0 bg-black transition-all duration-150 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 opacity-20 z-20" />
@@ -127,15 +126,10 @@ export function Sidebar({
           <>
             <Divider/>
             <IconLabelButton
-              disabled={disablePublish}
               onClick={publish}
               label="公開する"
               full
               icon={ICON.globe}/>
-            {
-              disablePublish &&
-              <p className="text-xs text-center text-gray-400">公開する内容がありません</p>
-            }
           </>
         }
       </div>

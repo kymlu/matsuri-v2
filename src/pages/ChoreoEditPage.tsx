@@ -544,7 +544,6 @@ export default function ChoreoEditPage(props: {
             !isNullOrUndefinedOrBlank(props.teamId)
           )
         }
-        disablePublish={!history.presentState.state.isDirty}
         publish={() => {setPublishConfirmationDialogOpen(true)}}
         />
       <div className="relative flex-1">
