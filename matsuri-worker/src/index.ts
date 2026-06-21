@@ -329,7 +329,9 @@ export default {
 
 		// Verify session token from cookie
 		const cookie = request.headers.get('cookie');
+		console.log("cookie header:", cookie);
 		const token = cookie?.split(';').map(c => c.trim()).find(c => c.startsWith('token='))?.split('=')[1];
+		console.log("extracted token:", token);
 
 		if (!token) {
 			return new Response(
