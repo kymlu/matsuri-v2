@@ -27,13 +27,14 @@ export type TextInputProps = {
   label?: string,
   rightLabel?: string,
   restrictFn?: (s: string) => boolean,
+  type?: "text" | "password",
 }
 
 export default function TextInput({
   name, defaultValue, onContentChange, placeholder,
   search, clearable, compact, tall, short, centered,
   required, hasError, errorMsg, disabled, ref, maxLength,
-  showLength, label, rightLabel, restrictFn
+  showLength, label, rightLabel, restrictFn, type = "text"
 }: TextInputProps) {
   const [value, setValue] = React.useState<string>(defaultValue ?? "");
 
@@ -78,7 +79,7 @@ export default function TextInput({
         <div className="relative flex items-center gap-2">
           <input
             disabled={disabled}
-            type="text"
+            type={type}
             name={name}
             maxLength={maxLength ?? DEFAULT_NAME_LENGTH}
             placeholder={placeholder ?? ""}

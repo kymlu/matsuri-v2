@@ -35,6 +35,7 @@ import { ChoreoStatusTag } from "../components/common/Tag"
 import { checkLogin, getChoreoFile, getChoreoSummary } from "../lib/helpers/apiHelper"
 import LoginDialog from "../components/dialogs/LoginDialog"
 import LoggedInDialog from "../components/dialogs/LoggedInDialog"
+import { Team } from "../models/team"
 
 type HomePageProps = {
   buildInfo?: string,
@@ -48,6 +49,7 @@ type HomePageProps = {
   setDancerNamesByEvent: (groupedNames: Record<string, Record<string, string[]>>) => void,
   isLoggedIn: boolean,
   setIsLoggedIn: (value: boolean) => void,
+  team?: Team,
 }
 
 export type ChoreoStatus = "localOnly" | "syncRequired" | "upToDate" | "edited";
@@ -61,7 +63,8 @@ export default function HomePage({
   goToNewChoreoPage, goToViewPage,
   userName, setUserName,
   dancerNamesByEvent, setDancerNamesByEvent,
-  isLoggedIn, setIsLoggedIn
+  isLoggedIn, setIsLoggedIn,
+  team
 }: HomePageProps) {
   const [savedChoreos, setSavedChoreos] = useState<ChoreoWithStatus[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -74,8 +77,12 @@ export default function HomePage({
     id: string
   ): Promise<Choreo | undefined> => {
     try {
-      console.log(`Getting choreo from server with id ${id}`);
-      return await getChoreoFile(id, serverChoreoDetails[id].version ?? 0);
+      if (team?.id) {
+        console.log(`Getting choreo from server with id ${id}`);
+        return await getChoreoFile(team?.id, id, serverChoreoDetails[id].version ?? 0);
+      } else {
+        return undefined
+      }
     } catch (e: any) {
       console.error("Failed to load choreo with id", id);
       return undefined;
@@ -109,7 +116,8 @@ export default function HomePage({
   }, []);
 
   useEffect(() => {
-    checkLogin(() => {
+    checkLogin(team?.id!,
+      () => {
       setIsLoggedIn(true);
     }, () => {
       setIsLoggedIn(false);
@@ -120,7 +128,7 @@ export default function HomePage({
     setIsLoading(true);
     Promise.all([
       getAllChoreos(),
-      getChoreoSummary()
+      getChoreoSummary(team?.id)
     ]).then(([local, server]) => {
       server.push(getBasicChoreoDetails(z.parse(ChoreoSchema, SampleParade)));
       server.push(getBasicChoreoDetails(z.parse(ChoreoSchema, SampleStage)));
@@ -379,16 +387,16 @@ export default function HomePage({
               <UserNameEditDialog name={userName ?? ""} onSubmit={(name) => setUserName(name)}/>
             </Dialog.Root>
             {
-              !isLoggedIn &&
+              !isLoggedIn && team?.id &&
               <Dialog.Root>
                 <Dialog.Trigger>
                   <IconButton src={ICON.shieldLock} colour="grey" noBorder asDiv/>
                 </Dialog.Trigger>
-                <LoginDialog/>
+                <LoginDialog teamId={team.id}/>
               </Dialog.Root>
             }
             {
-              isLoggedIn &&
+              isLoggedIn && team?.id &&
               <Dialog.Root>
                 <Dialog.Trigger>
                   <IconButton src={ICON.verifiedUser} colour="primary" noBorder/>

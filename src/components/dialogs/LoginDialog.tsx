@@ -1,32 +1,37 @@
 import { useState } from "react";
 import BaseEditDialog from "./BaseEditDialog";
-import { Oval } from "react-loader-spinner";
-import { colorPalette } from "../../lib/consts/colors";
+import TextInput from "../inputs/TextInput";
+import { isNullOrUndefinedOrBlank } from "../../lib/helpers/globalHelper";
+import { loginUserToTeam } from "../../lib/helpers/apiHelper";
 
-export default function LoginDialog() {
-  const checkAuth = async () => {
+export type LoginDialogProps = {
+  teamId: string,
+}
+
+export default function LoginDialog({
+  teamId
+}: LoginDialogProps) {
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  
+  const login = async () => {
     if (!isProcessing) {
       setIsProcessing(true);
-      window.location.href = "/admin";
+    } else {
+      loginUserToTeam(teamId, email, password);
     }
   };
 
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
   return <BaseEditDialog
-    title="管理者ログイン"
+    title="ログイン"
     actionButtonText="ログイン"
-    isActionButtonDisabled={isProcessing}
+    isActionButtonDisabled={isNullOrUndefinedOrBlank(email) || isNullOrUndefinedOrBlank(password) || isProcessing}
     showCloseButton={false}
-    onSubmit={checkAuth}
+    onSubmit={login}
   >
-    隊列表を公開するには、メール認証が必要です。
-    {
-      isProcessing &&
-      <Oval
-        wrapperClass="mt-4 justify-self-center"
-        color={colorPalette.primary}
-        secondaryColor={colorPalette.rainbow.red[2]}/>
-    }
+    <TextInput name="メールアドレス" defaultValue="" onContentChange={(value) => setEmail(value)}/>
+    <TextInput name="パスワード" type="password" defaultValue="" onContentChange={(value) => setPassword(value)}/>
   </BaseEditDialog>
 }

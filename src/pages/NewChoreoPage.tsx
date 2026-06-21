@@ -32,10 +32,11 @@ type NewChoreoPageProps = {
   goToEditPage: (choreo: Choreo) => void,
   eventList: EventDetails[],
   selectedEvent?: EventDetails,
+  teamId?: string,
 }
 
 export function NewChoreoPage({
-  goToEditPage, goToHomePage, eventList, selectedEvent
+  goToEditPage, goToHomePage, eventList, selectedEvent, teamId
 }: NewChoreoPageProps) {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState<FormationForm>({

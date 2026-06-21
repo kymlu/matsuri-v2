@@ -14,6 +14,7 @@ type PublishConfirmationDialogProps = {
   currentVersion: BasicChoreoDetails,
   oldVersion?: BasicChoreoDetails,
   getChoreo: () => Choreo,
+  teamId: string
 }
 
 type Row = {
@@ -23,7 +24,7 @@ type Row = {
 }
 
 export default function PublishConfirmationDialog({
-  onClose, onSave, currentVersion, oldVersion, getChoreo,
+  onClose, onSave, currentVersion, oldVersion, getChoreo, teamId
 }: PublishConfirmationDialogProps) {
   const [error, setError] = useState<"none" | "error" | "versionError">("none");
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
@@ -34,7 +35,7 @@ export default function PublishConfirmationDialog({
     if (!isProcessing) {
       setIsProcessing(true);
       try {
-        const serverVersion = await findCurrentVersion(currentVersion.id);
+        const serverVersion = await findCurrentVersion(teamId, currentVersion.id);
         if (serverVersion.version !== (oldVersion?.version ?? 0)) {
           setError("versionError");
           setIsProcessing(false);
@@ -42,6 +43,7 @@ export default function PublishConfirmationDialog({
           let choreo = {...getChoreo()};
           choreo.isDirty = undefined;
           publishChoreo(
+            teamId,
             choreo,
             !isUpdate,
             (newChoreo: Choreo) => {

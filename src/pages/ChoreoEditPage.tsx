@@ -69,6 +69,7 @@ export default function ChoreoEditPage(props: {
   onChoreoEdited: () => void,
   serverChoreo?: BasicChoreoDetails,
   isLoggedIn: boolean,
+  teamId?: string,
 }) {
   const [currentSection, setCurrentSection] = useState<ChoreoSection>(props.currentChoreo.sections[0]);
   const [currentAction, setCurrentAction] = useState<DancerAction | undefined>();

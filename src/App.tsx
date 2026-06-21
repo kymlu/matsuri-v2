@@ -6,6 +6,9 @@ import ChoreoEditPage from './pages/ChoreoEditPage';
 import ChoreoViewPage from './pages/ChoreoViewPage';
 import { BasicChoreoDetails, Choreo, EventDetails } from './models/choreo';
 import { getUserName, setUserName } from './lib/dataAccess/LocalStorageController';
+import { useParams } from 'react-router-dom';
+import { Team } from './models/team';
+import { verifyTeam } from './lib/helpers/apiHelper';
 
 type Mode = "home" | "form" | "edit" | "view";
 
@@ -20,13 +23,17 @@ function App() {
   const [name, setName] = useState<string | null>(null);
   const [buildInfo, setBuildInfo] = useState<string | undefined>();
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [isProcessing, setIsProcessing] = useState<boolean>(true);
+
+  const { teamSlug } = useParams();
+
+  const [team, setTeam] = useState<Team | undefined>(undefined);
 
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("loggedIn") === "true") {
-      console.log("Logged in!")
-      window.history.replaceState({}, "", "/");
-    }
+    verifyTeam(teamSlug ?? "", (t) => {
+      setTeam(t);
+      setIsProcessing(false);
+    }, () => {});
   }, []);
 
   useEffect(() => {
@@ -52,7 +59,7 @@ function App() {
 
   return (
     <div>
-      {mode === "home" && (
+      {!isProcessing && mode === "home" && (
         <HomePage
           buildInfo={buildInfo}
           eventList={eventList}
@@ -75,6 +82,7 @@ function App() {
           setDancerNamesByEvent={(groupedNames) => setDancerNamesByEvent(groupedNames)}
           isLoggedIn={isLoggedIn}
           setIsLoggedIn={setIsLoggedIn}
+          team={team}
         />
       )}
       {mode === "form" && (
@@ -87,6 +95,7 @@ function App() {
           }}
           eventList={eventList}
           selectedEvent={selectedEvent}
+          teamId={team?.id}
         />
       )}
       {mode === "edit" && (
@@ -107,6 +116,7 @@ function App() {
           }}
           serverChoreo={serverChoreo}
           isLoggedIn={isLoggedIn}
+          teamId={team?.id}
         />
       )}
       {mode === "view" && (
@@ -116,6 +126,7 @@ function App() {
           goToHomePage={() => setMode("home")}
           goToEditPage={() => setMode("edit")}
           userName={name}
+          teamId={team?.id}
         />
       )}
     </div>

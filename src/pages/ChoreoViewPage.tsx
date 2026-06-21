@@ -21,6 +21,7 @@ export default function ChoreoViewPage(props: {
   currentChoreoStatus: ChoreoStatus,
   goToEditPage: () => void,
   userName: string | null,
+  teamId?: string,
 }) {
   const [currentSection, setCurrentSection] = useState<ChoreoSection>(props.currentChoreo.sections[0]);
   const [nextSection, setNextSection] = useState<ChoreoSection | undefined>();

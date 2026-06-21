@@ -1,5 +1,3 @@
-import * as jose from "jose"
-
 const allowedOrigins = [
   "http://localhost:3000",
   "https://matsuri-v2.pages.dev",
@@ -13,8 +11,8 @@ function getCorsHeaders(origin: string | null) {
 
   return {
     "Access-Control-Allow-Origin": allowed ? origin : "",
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Matsuri-Access-Token",
+		"Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
     "Access-Control-Max-Age": "86400",
     "Vary": "Origin",
     "Content-Type": "application/json",
@@ -22,27 +20,45 @@ function getCorsHeaders(origin: string | null) {
   };
 }
 
-const MAX_FILE_SIZE = 1_000_000; // 1 MB
+export const hashPassword = async (password: string): Promise<string> => {
+  const encoder = new TextEncoder();
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const keyMaterial = await crypto.subtle.importKey(
+    "raw", encoder.encode(password), "PBKDF2", false, ["deriveBits"]
+  );
+  const hash = await crypto.subtle.deriveBits(
+    { name: "PBKDF2", salt, iterations: 100000, hash: "SHA-256" },
+    keyMaterial,
+    256
+  );
+  const saltHex = Array.from(salt).map(b => b.toString(16).padStart(2, '0')).join('');
+  const hashHex = Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+  return `${saltHex}:${hashHex}`;
+};
+
+export const verifyPassword = async (password: string, stored: string): Promise<boolean> => {
+  const [saltHex, hashHex] = stored.split(':');
+  const salt = new Uint8Array(saltHex.match(/.{2}/g)!.map(b => parseInt(b, 16)));
+  const encoder = new TextEncoder();
+  const keyMaterial = await crypto.subtle.importKey(
+    "raw", encoder.encode(password), "PBKDF2", false, ["deriveBits"]
+  );
+  const hash = await crypto.subtle.deriveBits(
+    { name: "PBKDF2", salt, iterations: 100000, hash: "SHA-256" },
+    keyMaterial,
+    256
+  );
+  const newHashHex = Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+  return newHashHex === hashHex;
+};
 
 interface Env {
-	GITHUB_TOKEN: string;
 	DB: D1Database;
 	BUCKET: R2Bucket;
 }
 
-const CLOUDFLARE_CONFIG = {
-	team: "matsuri-dance-time",
-	audience: "f4fb4edffaf2dfc45b755d82ede9655be780d7d5418e9785ef08e5a21b69745c"
-}
-
-const GIT_CONFIG = {
-  owner: "kymlu",
-  repo: "matsuri-v2",
-  folderPath: "intake",
-  branch: "cloudflare-test" 
-};
-
 const getFileName = (id: string, version: string) => {return `${id}_v${version}.json`};
+const setSessionCookie = (token: string) => `token=${token}; HttpOnly; Secure; SameSite=Strict; Max-Age=2592000`;
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -54,8 +70,16 @@ export default {
     }
 
     const url = new URL(request.url);
+		const teamId = url.searchParams.get("team_id");
 
     if (request.method === "GET") {
+			if (!teamId) {
+				return new Response(
+					JSON.stringify({ error: "team_id is required" }),
+					{ status: 400, headers: corsHeaders }
+				);
+			}
+
 			if (url.pathname === "/api/choreos/summary") {
 				try {
 					const { results } = await env.DB.prepare(
@@ -75,10 +99,10 @@ export default {
 						FROM choreos c
 						JOIN choreo_files cf
 							ON cf.choreo_id = c.id
-						WHERE cf.is_current = 1
+						WHERE cf.is_current = 1 AND c.team_id = ?
 						ORDER BY cf.uploaded_at DESC;
 						`
-					).all();
+					).bind(teamId).all();
 	
 					return Response.json(results, {
 						status: 200,
@@ -91,6 +115,13 @@ export default {
 					);
 				}
 			} else if (url.pathname === "/api/choreos/file") {
+				if (!teamId) {
+					return new Response(
+						JSON.stringify({ error: "team_id is required" }),
+						{ status: 400, headers: corsHeaders }
+					);
+				}
+				
 				const choreoId = url.searchParams.get("choreo_id");
 				const version = url.searchParams.get("version");
 				
@@ -113,6 +144,17 @@ export default {
 							{ status: 400, headers: corsHeaders }
 						);
 					}
+				}
+
+				const choreoCheck = await env.DB.prepare(
+					"SELECT id FROM choreos WHERE id = ? AND team_id = ?"
+				).bind(choreoId, teamId).first();
+
+				if (!choreoCheck) {
+					return new Response(
+						JSON.stringify({ error: "Choreo not found" }),
+						{ status: 404, headers: corsHeaders }
+					);
 				}
 
 				try {
@@ -139,6 +181,31 @@ export default {
 			} else if (url.pathname === "/api/choreos/file/current-version") {
 				try {
 					const choreoId = url.searchParams.get("choreo_id");
+					if (!choreoId) {
+						return new Response(
+							JSON.stringify({ error: "choreo_id is required" }),
+							{ status: 400, headers: corsHeaders }
+						);
+					}
+
+					if (!teamId) {
+						return new Response(
+							JSON.stringify({ error: "team_id is required" }),
+							{ status: 400, headers: corsHeaders }
+						);
+					}
+
+					const choreoCheck = await env.DB.prepare(
+						"SELECT id FROM choreos WHERE id = ? AND team_id = ?"
+					).bind(choreoId, teamId).first();
+
+					if (!choreoCheck) {
+						return new Response(
+							JSON.stringify({ error: "Choreo not found" }),
+							{ status: 404, headers: corsHeaders }
+						);
+					}
+
 					const row = await env.DB.prepare(
 						"SELECT version FROM choreo_files WHERE choreo_id = ? AND is_current = 1"
 					).bind(choreoId).first<{ version: number }>();
@@ -156,43 +223,117 @@ export default {
 			}
     }
 
-		// Verify Cloudflare Access JWT
-    const token = request.headers.get('X-Matsuri-Access-Token');
-    if (!token) {
-      return new Response(
-				JSON.stringify({error: "No access token provided. Please log in."}),
-				{ status: 401, headers: corsHeaders }
-			);
-    }
+		if (url.pathname === "/api/auth/set-password" && request.method === "POST") {
+			const body = await request.json() as { email: string; password: string };
 
-		var payload: jose.JWTPayload | null = null;
+			const user = await env.DB.prepare(`
+				SELECT * FROM users WHERE email = ?
+			`).bind(body.email).first();
 
-		try {
-      const JWKS = jose.createRemoteJWKSet(
-        new URL(`https://${CLOUDFLARE_CONFIG.team}.cloudflareaccess.com/cdn-cgi/access/certs`)
-      );
-      const verified = await jose.jwtVerify(token, JWKS, {
-        issuer: `https://${CLOUDFLARE_CONFIG.team}.cloudflareaccess.com`,
-        audience: CLOUDFLARE_CONFIG.audience,
-      });
-			payload = verified.payload;
-			console.log({
-				email: payload.email ?? "",
-				user: payload.name ?? "",
-				subject: payload.sub ?? "",
-			});
-    } catch (e: any) {
-			console.error(e);
-      return new Response(
-				JSON.stringify({error: "Invalid or expired access token. Please log in again."}),
-				{ status: 401, headers: corsHeaders }
-			);
-    }
+			if (!user) {
+				return new Response(
+					JSON.stringify({ error: "User not found" }),
+					{ status: 404, headers: corsHeaders }
+				);
+			}
 
-		if (url.pathname === "/api/verify-user" && request.method === "GET") {
-			return new Response(JSON.stringify({ email: payload.email ?? "", user: payload.name ?? "" }), {
+			const hash = await hashPassword(body.password);
+
+			await env.DB.prepare(`
+				UPDATE users SET password_hash = ?, updated_at = datetime('now') WHERE id = ?
+			`).bind(hash, user.id).run();
+
+			return new Response(JSON.stringify({ success: true }), {
 				status: 200,
 				headers: { ...corsHeaders, "Content-Type": "application/json" },
+			});
+		}
+
+		if (url.pathname === "/api/auth/login" && request.method === "POST") {
+			const body = await request.json() as { email: string; password: string, team_id: string };
+
+			const user = await env.DB.prepare(`
+				SELECT * FROM users WHERE email = ?
+			`).bind(body.email).first();
+
+			if (!user) {
+				return new Response(
+					JSON.stringify({ error: "Invalid email or password" }),
+					{ status: 401, headers: corsHeaders }
+				);
+			}
+
+			const passwordMatch = await verifyPassword(body.password, user.password_hash as string);
+
+			if (!passwordMatch) {
+				return new Response(
+					JSON.stringify({ error: "Invalid email or password" }),
+					{ status: 401, headers: corsHeaders }
+				);
+			}
+
+			const teamMember = await env.DB.prepare(`
+				SELECT * FROM team_members WHERE user_id = ? AND team_id = ? AND deleted = 0
+			`).bind(user.id, body.team_id).first();
+
+			if (!teamMember) {
+				return new Response(
+					JSON.stringify({ error: "User does not belong to this team" }),
+					{ status: 403, headers: corsHeaders }
+				);
+			}
+
+			const token = crypto.randomUUID();
+
+			await env.DB.prepare(`
+				INSERT INTO sessions (id, user_id, team_id, token, expires_at, created_at)
+				VALUES (?, ?, ?, ?, datetime('now', '+30 days'), datetime('now'))
+			`).bind(crypto.randomUUID(), user.id, teamMember.team_id, token).run();
+
+			return new Response(JSON.stringify({ success: true }), {
+				status: 200,
+				headers: {
+					...corsHeaders,
+					"Content-Type": "application/json",
+					"Set-Cookie": setSessionCookie(token),
+				},
+			});
+		}
+
+		// Verify session token from cookie
+		const cookie = request.headers.get('cookie');
+		const token = cookie?.split(';').map(c => c.trim()).find(c => c.startsWith('token='))?.split('=')[1];
+
+		if (!token) {
+			return new Response(
+				JSON.stringify({ error: "No session token provided. Please log in." }),
+				{ status: 401, headers: corsHeaders }
+			);
+		}
+
+		// Look up session in D1
+		const session = await env.DB.prepare(`
+			SELECT s.*, u.email, tm.id AS team_member_id, tm.name, tm.role
+			FROM sessions s
+			JOIN users u ON s.user_id = u.id
+			JOIN team_members tm ON s.user_id = tm.user_id AND s.team_id = tm.team_id
+			WHERE s.token = ? AND s.expires_at > datetime('now')
+		`).bind(token).first();
+
+		if (!session) {
+			return new Response(
+				JSON.stringify({ error: "Invalid or expired session. Please log in again." }),
+				{ status: 401, headers: corsHeaders }
+			);
+		}
+
+		if (url.pathname === "/api/auth/verify-user" && request.method === "GET") {
+			await env.DB.prepare(`
+				UPDATE sessions SET expires_at = datetime('now', '+30 days') WHERE token = ?
+			`).bind(token).run();
+			return new Response("", {
+				status: 200,
+				headers: { ...corsHeaders, "Content-Type": "application/json", "Set-Cookie": setSessionCookie(token) },
 			});
 		}
 
@@ -210,7 +351,7 @@ export default {
 				const stageLength = data.stage_length as number;
 				const dancerCount = data.dancer_count as number;
 				const propCount = data.prop_count as number;
-				const uploadedBy = (payload.email as string).split("@")[0];
+				const uploadedBy = (session.team_member_id as string);
 
 				if (!file || !choreoId || !name) {
 					return new Response(
@@ -284,96 +425,6 @@ export default {
 				console.log(e);
 				return new Response(
 					JSON.stringify({ error: `Internal server error: ${e}` }),
-					{ status: 500, headers: corsHeaders }
-				);
-			}
-		}
-
-		if (url.pathname === "/api/push-file" && request.method === "POST") {
-			try {
-				const { fileName, fileContent, commitMessage } = await request.json() as any;
-
-				if (!fileName || !fileContent) {
-					return new Response(
-						JSON.stringify({ error: "Missing fileName or fileContent." }),
-						{ status: 400, headers: corsHeaders }
-					);
-				}
-
-				// 1. Sanitize the filename to prevent folder escape attacks (e.g. "../../../etc")
-				const safeFileName = fileName.split("/").pop()?.split("\\").pop();
-
-				if (!safeFileName || safeFileName.includes("..")) {
-					return new Response(
-						JSON.stringify({ error: "Invalid filename." }),
-						{ status: 400, headers: corsHeaders }
-					);
-				}
-
-				if (safeFileName.length > 120) {
-					return new Response(
-						JSON.stringify({ error: "Filename too long." }),
-						{ status: 400, headers: corsHeaders }
-					);
-				}
-
-				// 2. Build the exact restricted file path location
-				const fullFilePath = `${GIT_CONFIG.folderPath}/${safeFileName}`;
-
-				// 3. Convert content string to base64
-				const bytes = new TextEncoder().encode(fileContent);
-
-				if (bytes.length > MAX_FILE_SIZE) {
-					return new Response(
-						JSON.stringify({ error: "File exceeds 1 MB limit." }),
-						{ status: 413, headers: corsHeaders }
-					);
-				}
-				
-				let binary = "";
-				for (const byte of bytes) {
-					binary += String.fromCharCode(byte);
-				}
-
-				const base64Content = btoa(binary);
-
-				// 4. Assemble the destination URL
-				const githubUrl = `https://api.github.com/repos/${GIT_CONFIG.owner}/${GIT_CONFIG.repo}/contents/${fullFilePath}`;
-
-				// 5. Send request securely to GitHub
-				const githubResponse = await fetch(githubUrl, {
-					method: "PUT",
-					headers: {
-						"Authorization": `Bearer ${env.GITHUB_TOKEN}`,
-						"Accept": "application/vnd.github+json",
-						"User-Agent": "Cloudflare-Worker-App",
-						"Content-Type": "application/json"
-					},
-					body: JSON.stringify({
-						message: `[Skip-CI] ${commitMessage} by ${(payload.email as String).split("@")[0]}` || `[Skip-CI] Automated upload: ${safeFileName}`,
-						content: base64Content,
-						branch: GIT_CONFIG.branch
-					})
-				});
-
-				const githubData = await githubResponse.json() as any;
-
-				if (!githubResponse.ok) {
-					console.error(githubData.message);
-					return new Response(
-						JSON.stringify({ error: githubData.message || "GitHub API Error" }),
-						{ status: githubResponse.status, headers: corsHeaders }
-					);
-				}
-
-				return new Response(JSON.stringify({ 
-					message: "Successfully saved to target location!", 
-					path: fullFilePath 
-				}), { status: 200, headers: corsHeaders });
-
-			} catch (err) {
-				return new Response(
-					JSON.stringify({ error: "Failed to process push request." }),
 					{ status: 500, headers: corsHeaders }
 				);
 			}
