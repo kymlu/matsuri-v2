@@ -142,9 +142,9 @@ export const checkLogin = async(
       credentials: "include",
     });
   
-    const data = await response.json() as { message?: string; error?: string };
     
     if (!response.ok) {
+      const data = await response.json() as { message?: string; error?: string };
       console.error(`Status: ${response.status} message: ${data.message} error: ${data.error}`);
       onFailure(response.status);
       return;

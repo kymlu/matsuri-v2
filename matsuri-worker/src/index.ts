@@ -377,7 +377,7 @@ export default {
 			await env.DB.prepare(`
 				UPDATE sessions SET expires_at = datetime('now', '+30 days') WHERE token = ?
 			`).bind(token).run();
-			return new Response("", {
+			return new Response("{}", {
 				status: 200,
 				headers: { ...corsHeaders, "Content-Type": "application/json", "Set-Cookie": setSessionCookie(token) },
 			});
