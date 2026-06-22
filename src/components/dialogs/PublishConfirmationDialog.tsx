@@ -41,7 +41,13 @@ export default function PublishConfirmationDialog({
   const isUpdate = !!oldVersion;
 
   useEffect(() => {
-    setPassword(svrPassword ?? "");
+    if (svrPassword) {
+      setPassword(svrPassword);
+      setHasPassword(true);
+    } else {
+      setPassword("");
+      setHasPassword(false);
+    }
   }, [svrPassword]);
 
   const upload = useCallback(async () => {

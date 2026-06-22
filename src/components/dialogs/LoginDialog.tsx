@@ -24,6 +24,7 @@ export default function LoginDialog({
       loginUserToTeam(teamId, email, password, (name) => {
         onLogin(name);
         close();
+        setIsProcessing(false);
       }, (status) => {
         if (status === 401) {
           setError("loginError");

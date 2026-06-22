@@ -8,7 +8,7 @@ import { BasicChoreoDetails, Choreo, EventDetails } from './models/choreo';
 import { getUserName, setUserName } from './lib/dataAccess/LocalStorageController';
 import { useParams } from 'react-router-dom';
 import { Team } from './models/team';
-import { verifyTeam } from './lib/helpers/apiHelper';
+import { checkLogin, verifyTeam } from './lib/helpers/apiHelper';
 
 type Mode = "home" | "form" | "edit" | "view";
 
@@ -32,6 +32,12 @@ function App() {
   useEffect(() => {
     verifyTeam(teamSlug ?? "", (t) => {
       setTeam(t);
+      checkLogin(t?.id!,
+        () => {
+        setIsLoggedIn(true);
+      }, () => {
+        setIsLoggedIn(false);
+      });
       setIsProcessing(false);
     }, () => {
       setIsProcessing(false);

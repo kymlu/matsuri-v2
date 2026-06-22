@@ -116,15 +116,6 @@ export default function HomePage({
     loadChoreos();
   }, []);
 
-  useEffect(() => {
-    checkLogin(team?.id!,
-      () => {
-      setIsLoggedIn(true);
-    }, () => {
-      setIsLoggedIn(false);
-    });
-  }, []);
-
   const loadChoreos = () => {
     setIsLoading(true);
     Promise.all([
@@ -378,10 +369,14 @@ export default function HomePage({
   return (
     <div className="bg-gray-50">
       <div className='grid py-10 px-6 h-[100svh] grid-rows-[auto,auto,auto,1fr] overflow-hide w-full mx-auto'>
-        {
-          team &&
-          <div className="text-sm text-primary"><b>{team.name}</b>の</div>
-        }
+        <div className="text-sm text-primary">
+          {
+            team &&
+            <>
+              <b>{team.name}</b><span>の</span>
+            </>
+          }
+        </div>
         <div className="flex items-center justify-between pb-1">
           <h1 className='text-2xl font-bold text-nowrap'>隊列表一覧</h1>
           <div className="flex items-center ">
@@ -955,7 +950,7 @@ function EventSection({
                 {/* Title */}
                 <div className="relative flex flex-row items-start justify-between gap-2">
                   <span className="font-medium text-left break-words text-wrap">
-                    {choreo.hasPassword && <Icon src={isLoggedIn ? ICON.lockOpen : ICON.lock} colour="primary" size="md"/>}{choreo.name}
+                    {choreo.hasPassword ? <Icon src={isLoggedIn ? ICON.lockOpen : ICON.lock} colour="primary" size="md"/> : <></>}{choreo.name}
                   </span>
                   <div className="flex flex-row items-center gap-2">
                     {
