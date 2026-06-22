@@ -87,7 +87,7 @@ export default function PublishConfirmationDialog({
         setIsProcessing(false);
       }
     }
-  }, [publishChoreo]);
+  }, [publishChoreo, teamId, hasPassword, password, onSave, onClose, isUpdate, oldVersion?.version]);
 
   const rows = useMemo(() => {
     var rowList: Row[] = [];
@@ -192,6 +192,7 @@ export default function PublishConfirmationDialog({
         </table>
         <CustomSwitch
           label="パスワード"
+          defaultChecked={hasPassword}
           onChange={(checked) => setHasPassword(checked)}/>
         <TextInput
           defaultValue={password}
