@@ -107,6 +107,10 @@ export function testInvalidCharacters(text: string) {
   return RegExp(/[<>:"/\\|?*]$/g).test(text);
 }
 
+export function testAlphanumeric(text: string) {
+  return /^[a-zA-Z0-9]+$/.test(text);
+}
+
 export function incrementBracketSuffix(str: string) {
   const match = str.match(/^(.*)\((\d+)\)$/);
 

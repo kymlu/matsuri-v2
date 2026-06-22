@@ -17,7 +17,7 @@ export const loginUserToTeam = async (
   teamId: string,
   email: string,
   password: string,
-  onSuccess: () => void,
+  onSuccess: (name: string) => void,
   onFailure: (status: number) => void
 ): Promise<void> => {
   try {
@@ -28,13 +28,14 @@ export const loginUserToTeam = async (
       body: JSON.stringify({ email, password, team_id: teamId }),
     });
 
-    const data = await response.json() as { message?: string; error?: string };
-
+    
     if (!response.ok) {
+      const data = await response.json() as { message?: string; error?: string };
       console.error(`Login failed: ${response.status} message: ${data.message} error: ${data.error}`);
       onFailure(response.status);
     } else {
-      onSuccess();
+      const data = await response.json() as { success?: boolean; name?: string };
+      onSuccess(data.name ?? "");
     }
   } catch (e: any) {
     console.error("login failed:", (e as Error)?.message);
@@ -42,17 +43,21 @@ export const loginUserToTeam = async (
   }
 }
 
-export const logoutUserFromTeam = async (): Promise<void> => {
+export const logoutUserFromTeam = async (
+  onSuccess: () => void
+): Promise<void> => {
   try {
     const response = await fetch(getApiUrl("auth/logout"), {
       method: "POST",
       credentials: "include"
     });
-    const data = await response.json() as { message?: string; error?: string };
-
+    
     if (!response.ok) {
+      const data = await response.json() as { message?: string; error?: string };
       console.error(`Login failed: ${response.status} message: ${data.message} error: ${data.error}`);
       throw new Error(data.message ?? "Login failed");
+    } else {
+      onSuccess();
     }
   } catch (e: any) {
     console.error("login failed:", (e as Error)?.message);
@@ -181,7 +186,8 @@ export const publishChoreo = async (
   choreo: Choreo,
   isNew: boolean,
   onSuccess: (newChoreo: Choreo) => void,
-  onFailure: (status: number) => void
+  onFailure: (status: number) => void,
+  password?: string
 ) => {
   try {
     const response = await fetch(getApiUrl("choreos/file"), {
@@ -202,6 +208,7 @@ export const publishChoreo = async (
         dancer_count: Object.keys(choreo.dancers).length,
         prop_count: Object.keys(choreo.props).length,
         version: isNew ? 0 : (choreo.version ?? 0),
+        password: password,
       }),
     });
   

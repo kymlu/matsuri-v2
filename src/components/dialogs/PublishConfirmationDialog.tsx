@@ -1,12 +1,14 @@
 import { ICON } from "../../lib/consts/consts";
 import { formatDateRange, getJpDate } from "../../lib/helpers/dateHelper";
 import { findCurrentVersion, publishChoreo } from "../../lib/helpers/apiHelper";
-import { strEquals } from "../../lib/helpers/globalHelper";
+import { strEquals, testAlphanumeric } from "../../lib/helpers/globalHelper";
 import { BasicChoreoDetails, Choreo } from "../../models/choreo";
 import Divider from "../basic/Divider";
 import Icon from "../basic/Icon";
 import BaseEditDialog from "./BaseEditDialog";
 import { useCallback, useMemo, useState } from "react";
+import CustomSwitch from "../inputs/CustomSwitch";
+import TextInput from "../inputs/TextInput";
 
 type PublishConfirmationDialogProps = {
   onClose: () => void,
@@ -28,12 +30,19 @@ export default function PublishConfirmationDialog({
 }: PublishConfirmationDialogProps) {
   const [error, setError] = useState<"none" | "error" | "versionError">("none");
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const [hasPassword, setHasPassword] = useState<boolean>(false);
+  const [password, setPassword] = useState<string>("");
+  // TODO: fetch password hash
+  // to test: not checked -> null
+  // to test: checked -> no value -> null
+  // to test: checked -> value
   
   const isUpdate = !!oldVersion;
 
   const upload = useCallback(async () => {
     if (!isProcessing) {
       setIsProcessing(true);
+      setError("none");
       try {
         const serverVersion = await findCurrentVersion(teamId, currentVersion.id);
         if (serverVersion.version !== (oldVersion?.version ?? 0)) {
@@ -53,7 +62,8 @@ export default function PublishConfirmationDialog({
             (status) => {
               setError("error");
               setIsProcessing(false);
-            }
+            },
+            hasPassword ? password : undefined
           );
         }
       } catch (e: any) {
@@ -169,6 +179,14 @@ export default function PublishConfirmationDialog({
             )}
           </tbody>
         </table>
+        <CustomSwitch
+          label="パスワード"
+          onChange={(checked) => setHasPassword(checked)}/>
+        <TextInput // todo: limit to alphanumeric
+          defaultValue={password}
+          disabled={!hasPassword}
+          restrictFn={(s) => testAlphanumeric(s)}
+          onContentChange={(newContent) => setPassword(newContent)}/>
         <Divider />
         <span>
           {isUpdate ? "新バージョンをアップロードしますか？" : "新しいファイルとしてアップロードしますか？"}

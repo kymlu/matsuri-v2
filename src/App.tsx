@@ -33,7 +33,9 @@ function App() {
     verifyTeam(teamSlug ?? "", (t) => {
       setTeam(t);
       setIsProcessing(false);
-    }, () => {});
+    }, () => {
+      setIsProcessing(false);
+    });
   }, []);
 
   useEffect(() => {
@@ -76,8 +78,8 @@ function App() {
             setCurrentChoreoStatus(status);
             setMode("view");
           }}
-          userName={name}
-          setUserName={(newName) => setNewName(newName)}
+          savedDancerName={name}
+          setSavedDancerName={(newName) => setNewName(newName)}
           dancerNamesByEvent={dancerNamesByEvent}
           setDancerNamesByEvent={(groupedNames) => setDancerNamesByEvent(groupedNames)}
           isLoggedIn={isLoggedIn}
@@ -125,7 +127,7 @@ function App() {
           currentChoreoStatus={currentChoreoStatus!!}
           goToHomePage={() => setMode("home")}
           goToEditPage={() => setMode("edit")}
-          userName={name}
+          savedDancerName={name}
           teamId={team?.id}
         />
       )}

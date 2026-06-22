@@ -1,8 +1,9 @@
 import { Choreo } from "../../models/choreo";
+import { strEquals } from "../helpers/globalHelper";
 import { getAll, getById, removeItem, removeItems, upsertItem, upsertList } from "./DataRepository";
 
-export async function getAllChoreos(): Promise<Choreo[]> {
-  return await getAll("choreo");
+export async function getAllChoreos(teamId?: string): Promise<Choreo[]> {
+  return (await getAll("choreo")).filter(c => strEquals(c.teamId, teamId));
 }
 
 export async function getChoreoById(id: string): Promise<Choreo | null> {

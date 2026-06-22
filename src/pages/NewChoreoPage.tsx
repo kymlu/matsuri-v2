@@ -100,6 +100,7 @@ export function NewChoreoPage({
     }
     var choreo: Choreo = {
       id: crypto.randomUUID(),
+      teamId: teamId,
       name: form.name.trim(),
       event: form.eventName.trim(),
       startDate: hasEventName ? form.startDate : undefined,

@@ -122,7 +122,8 @@ export default {
 							cf.stage_length AS stageLength,
 							cf.stage_width AS stageWidth,
 							cf.dancer_count AS dancerCount,
-							cf.prop_count AS propCount
+							cf.prop_count AS propCount,
+							(c.password IS NOT NULL) AS hasPassword
 						FROM choreos c
 						JOIN choreo_files cf
 							ON cf.choreo_id = c.id
@@ -317,7 +318,7 @@ export default {
 				VALUES (?, ?, ?, ?, datetime('now', '+30 days'), datetime('now'))
 			`).bind(crypto.randomUUID(), user.id, teamMember.team_id, token).run();
 
-			return new Response(JSON.stringify({ success: true }), {
+			return new Response(JSON.stringify({ success: true, name: teamMember.name }), {
 				status: 200,
 				headers: {
 					...corsHeaders,
@@ -397,7 +398,10 @@ export default {
 				const stageLength = data.stage_length as number;
 				const dancerCount = data.dancer_count as number;
 				const propCount = data.prop_count as number;
-				const uploadedBy = (session.team_member_id as string);
+				const password = data.password as string | null | undefined;
+				const uploadedBy = session.team_member_id as string;
+				
+				const passwordHash = password ? await hashPassword(password) : null;
 
 				if (!file || !choreoId || !name) {
 					return new Response(
@@ -444,14 +448,14 @@ export default {
 				// upsert choreo
 				console.log("upsert choreo");
 				await env.DB.prepare(
-					`INSERT INTO choreos (id, name, event_name, event_start_date, event_end_date)
-					VALUES (?, ?, ?, ?, ?)
+					`INSERT INTO choreos (id, name, event_name, event_start_date, event_end_date, team_id, password_hash)
+					VALUES (?, ?, ?, ?, ?, ?, ?)
 					ON CONFLICT(id) DO UPDATE SET
 						name = excluded.name,
 						event_name = excluded.event_name,
 						event_start_date = excluded.event_start_date,
 						event_end_date = excluded.event_end_date`
-				).bind(choreoId, name, eventName, eventStartDate, eventEndDate).run()
+				).bind(choreoId, name, eventName, eventStartDate, eventEndDate, teamId, passwordHash).run()
 				.catch(e => { throw new Error(`Failed to upsert choreo info into db: ${e}`) });
 
 				// insert new choreo_file row

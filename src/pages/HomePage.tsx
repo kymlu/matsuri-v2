@@ -43,8 +43,8 @@ type HomePageProps = {
   setEventList: (eventList: EventDetails[]) => void,
   goToNewChoreoPage: (eventDetails?: EventDetails) => void,
   goToViewPage: (choreo: Choreo, status: ChoreoStatus, serverChoreo?: BasicChoreoDetails) => void,
-  userName: string | null,
-  setUserName: (newName: string) => void,
+  savedDancerName: string | null,
+  setSavedDancerName: (newName: string) => void,
   dancerNamesByEvent: Record<string, Record<string, string[]>>,
   setDancerNamesByEvent: (groupedNames: Record<string, Record<string, string[]>>) => void,
   isLoggedIn: boolean,
@@ -61,7 +61,7 @@ type ChoreoWithStatus = BasicChoreoDetails & {
 export default function HomePage({
   buildInfo, eventList, setEventList,
   goToNewChoreoPage, goToViewPage,
-  userName, setUserName,
+  savedDancerName, setSavedDancerName,
   dancerNamesByEvent, setDancerNamesByEvent,
   isLoggedIn, setIsLoggedIn,
   team
@@ -394,7 +394,7 @@ export default function HomePage({
               <Dialog.Trigger>
                 <IconButton src={ICON.personEdit} colour="primary" noBorder asDiv/>
               </Dialog.Trigger>
-              <UserNameEditDialog name={userName ?? ""} onSubmit={(name) => setUserName(name)}/>
+              <UserNameEditDialog name={savedDancerName ?? ""} onSubmit={(name) => setSavedDancerName(name)}/>
             </Dialog.Root>
             {
               !isLoggedIn && team?.id &&
@@ -412,7 +412,17 @@ export default function HomePage({
                   </Menu.Item>
                   <Divider compact/>
                   <Menu.Item>
-                    <IconLabelButton full noBorder icon={ICON.logout} label="PDF" onClick={()=>{logoutUserFromTeam()}}/>
+                    <IconLabelButton
+                      full noBorder
+                      icon={ICON.logout}
+                      label="ログアウト"
+                      onClick={()=>{
+                        logoutUserFromTeam(() => {
+                          // todo: add isprocessingflag to prevent double tap
+                          // todo: on fail, show failed dialog
+                          setIsLoggedIn(false);
+                        });
+                      }}/>
                   </Menu.Item>
                 </div>
               </CustomMenu>
@@ -670,7 +680,7 @@ export default function HomePage({
             exportingChoreo &&
             <ExportDialog
               choreo={exportingChoreo!}
-              selectedId={Object.values(exportingChoreo.dancers).find(d => strEquals(d.name, userName))?.id ?? ""}
+              selectedId={Object.values(exportingChoreo.dancers).find(d => strEquals(d.name, savedDancerName))?.id ?? ""}
               onClose={() => {
                 setPdfExportDialogOpen(false);
                 setExportingChoreo(undefined);
@@ -891,7 +901,7 @@ function EventSection({
         }
       </div>
     }
-    menuContents={
+    menuContents={ // todo: add a feature to see the upload history
       <>
         <Menu.Item>
           <IconLabelButton full noBorder icon={ICON.add} label="追加" onClick={addEvent}/>

@@ -20,7 +20,7 @@ export default function ChoreoViewPage(props: {
   currentChoreo: Choreo,
   currentChoreoStatus: ChoreoStatus,
   goToEditPage: () => void,
-  userName: string | null,
+  savedDancerName: string | null,
   teamId?: string,
 }) {
   const [currentSection, setCurrentSection] = useState<ChoreoSection>(props.currentChoreo.sections[0]);
@@ -46,8 +46,8 @@ export default function ChoreoViewPage(props: {
 
   useEffect(() => {
     setHintManuallyClosed(false);
-    if (!isNullOrUndefinedOrBlank(props.userName)) {
-      const dancer = Object.values(props.currentChoreo.dancers).find(x => strEquals(x.name, props.userName));
+    if (!isNullOrUndefinedOrBlank(props.savedDancerName)) {
+      const dancer = Object.values(props.currentChoreo.dancers).find(x => strEquals(x.name, props.savedDancerName));
       if (dancer) {
         setSelectedIds({dancers: [dancer.id], props: [], obstacles: []});
         setShowHint(false);
@@ -56,7 +56,7 @@ export default function ChoreoViewPage(props: {
         setShowHint(true);
       }
     }
-  }, [props.currentChoreo, props.userName]);
+  }, [props.currentChoreo, props.savedDancerName]);
   
   useEffect(() => {
     setSelectedObjects({

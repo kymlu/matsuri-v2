@@ -6,7 +6,7 @@ import { loginUserToTeam } from "../../lib/helpers/apiHelper";
 
 export type LoginDialogProps = {
   teamId: string,
-  onLogin: () => void,
+  onLogin: (name: string) => void,
   onClose: () => void,
 }
 
@@ -19,9 +19,10 @@ export default function LoginDialog({
   
   const login = async () => {
     if (!isProcessing) {
+      setError("none");
       setIsProcessing(true);
-      loginUserToTeam(teamId, email, password, () => {
-        onLogin();
+      loginUserToTeam(teamId, email, password, (name) => {
+        onLogin(name);
         close();
       }, (status) => {
         if (status === 401) {
@@ -81,7 +82,7 @@ export default function LoginDialog({
     {
       error === "notOnTeamError" &&
       <span className="w-full font-semibold text-center text-primary">
-        このアカウントはこのチームに編集の権限がありません。
+        編集権限がありません
       </span>
     }
   </BaseEditDialog>

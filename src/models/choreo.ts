@@ -39,6 +39,7 @@ export const ChoreoSchema = BaseModelSchema.extend({
   lastUpdated: z.string().optional(),
   version: z.number().optional(),
   isDirty: z.boolean().optional(),
+  teamId: z.string().optional(),
 });
 export type Choreo = z.infer<typeof ChoreoSchema>;
 
@@ -61,11 +62,13 @@ export const BasicChoreoDetailsSchema = BaseModelSchema.extend({
   dancerCount: z.number(),
   propCount: z.number(),
   isDirty: z.boolean().optional(),
+  hasPassword: z.boolean().optional(),
+  teamId: z.string().optional(),
 });
 
 export type BasicChoreoDetails = z.infer<typeof BasicChoreoDetailsSchema>;
 
-export function getBasicChoreoDetails(choreo: Choreo): BasicChoreoDetails {
+export function getBasicChoreoDetails(choreo: Choreo, teamId?: string): BasicChoreoDetails {
   return {
     id: choreo.id,
     name: choreo.name,
@@ -79,5 +82,6 @@ export function getBasicChoreoDetails(choreo: Choreo): BasicChoreoDetails {
     dancerCount: Object.keys(choreo.dancers).length,
     propCount: Object.keys(choreo.props).length,
     isDirty: choreo.isDirty,
+    teamId: teamId,
   } as BasicChoreoDetails;
 }
