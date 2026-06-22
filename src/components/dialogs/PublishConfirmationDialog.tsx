@@ -146,6 +146,13 @@ export default function PublishConfirmationDialog({
         onClose();
         setIsProcessing(false);
         setError("none");
+        if (svrPassword) {
+          setPassword(svrPassword);
+          setHasPassword(true);
+        } else {
+          setPassword("");
+          setHasPassword(false);
+        }
       }}
     >
       <div className={`flex flex-col gap-2 ${isUpdate ? "w-[70svw]" : ""}`}>
@@ -202,13 +209,13 @@ export default function PublishConfirmationDialog({
         <Divider />
         <span>
           {isUpdate ? "新バージョンをアップロードしますか？" : "新しいファイルとしてアップロードしますか？"}
+          {
+            !currentVersion.isDirty &&
+            <span className="w-full font-semibold text-center text-gray-600">
+              編集はありません。
+            </span>
+          }
         </span>
-        {
-          !currentVersion.isDirty &&
-          <span className="w-full font-semibold text-center text-gray-600">
-            編集はありません
-          </span>
-        }
         {
           isProcessing &&
           <span className="w-full font-semibold text-center text-primary">
