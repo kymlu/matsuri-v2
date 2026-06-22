@@ -1214,7 +1214,13 @@ export default function ChoreoEditPage(props: {
         <BaseEditDialog
           title="公開成功"
           hasX={false}
-          onSubmit={() => {window.location.reload()}}
+          onSubmit={() => {
+            props.goToHomePage();
+            setPublishSuccessDialogOpen(false);
+          }}
+          onClose={() => {
+            setPublishSuccessDialogOpen(false);
+          }}
           actionButtonText="ホーム画面へ戻る"
           showCloseButton={false}>
           隊列表の公開が完了しました。
