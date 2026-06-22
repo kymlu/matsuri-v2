@@ -41,6 +41,7 @@ import InstructionMessage from "../components/basic/InstructionMessage";
 import { ChoreoStatus } from "./HomePage";
 import PublishConfirmationDialog from "../components/dialogs/PublishConfirmationDialog";
 import BaseEditDialog from "../components/dialogs/BaseEditDialog";
+import { getChoreoPassword } from "../lib/helpers/apiHelper";
 
 const resizeDialog = Dialog.createHandle<Choreo>();
 const editChoreoInfoDialog = Dialog.createHandle<string>();
@@ -82,6 +83,7 @@ export default function ChoreoEditPage(props: {
   const [isAddingObstacles, setIsAddingObstacles] = useState<boolean>(false);
   const [isAssigningActions, setIsAssigningActions] = useState<boolean>(false);
   const [areObstaclesLocked, setAreObstaclesLocked] = useState<boolean>(true);
+  const [password, setPassword] = useState<string | undefined>();
   const [appSettings, setAppSettings] = useState<AppSetting>({
     snapToGrid: true,
     showGrid: true,
@@ -544,7 +546,14 @@ export default function ChoreoEditPage(props: {
             !isNullOrUndefinedOrBlank(props.teamId)
           )
         }
-        publish={() => {setPublishConfirmationDialogOpen(true)}}
+        publish={() => {
+          if (props.teamId) {
+            getChoreoPassword(props.teamId, props.currentChoreo.id, (svrPassword) => {
+              setPublishConfirmationDialogOpen(true);
+              setPassword(svrPassword);
+            }, () => {}); // todo: on failure
+          }
+        }}
         />
       <div className="relative flex-1">
         <MainStage
@@ -1193,6 +1202,7 @@ export default function ChoreoEditPage(props: {
           oldVersion={props.serverChoreo}
           currentVersion={currentChoreoDetails}
           getChoreo={() => currentStateRef.current}
+          svrPassword={password}
         />
       </Dialog.Root>
       <Dialog.Root

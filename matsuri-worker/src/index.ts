@@ -328,6 +328,29 @@ export default {
 			});
 		}
 
+		if (url.pathname === "/api/choreos/verify" && request.method === "POST") {
+			const body = await request.json() as { choreo_id: string; password: string, team_id: string };
+			const password = await env.DB.prepare(`
+				SELECT c.password
+				FROM choreos c
+				WHERE c.id = ? AND c.team_id = ?
+			`).bind(body.choreo_id, body.team_id).first<{password: string}>();
+
+			const passwordMatch = body.password === (password?.password ?? "");
+
+			if (!passwordMatch) {
+				return new Response(
+					JSON.stringify({ error: "Invalid password" }),
+					{ status: 401, headers: corsHeaders }
+				);
+			} else {
+				return new Response("{}", {
+					status: 200,
+					headers: { ...corsHeaders, "Content-Type": "application/json" },
+				});
+			}
+		}
+
 		// Verify session token from cookie
 		const cookie = request.headers.get('cookie');
 		console.log("cookie header:", cookie);
@@ -383,6 +406,26 @@ export default {
 				headers: { ...corsHeaders, "Content-Type": "application/json", "Set-Cookie": setSessionCookie(token) },
 			});
 		}
+		if (url.pathname === "/api/choreos/get-password" && request.method === "POST") {
+			try {
+				const data = await request.json() as any;
+				const password = await env.DB.prepare(`
+					SELECT c.password
+					FROM choreos c
+					WHERE c.id = ? AND c.team_id = ?
+				`).bind(data.choreo_id as string, data.team_id as string).first<{password: string | null}>();
+				return new Response(JSON.stringify(password), {
+					status: 200,
+					headers: { ...corsHeaders, "Content-Type": "application/json", "Set-Cookie": setSessionCookie(token) },
+				});
+			} catch (e) {
+				console.log(e);
+				return new Response(
+					JSON.stringify({ error: `Internal server error: ${e}` }),
+					{ status: 500, headers: corsHeaders }
+				);
+			}
+		}
 
 		if (request.method === "POST" && url.pathname === "/api/choreos/file") {
 			try {
@@ -400,8 +443,6 @@ export default {
 				const propCount = data.prop_count as number;
 				const password = data.password as string | null | undefined;
 				const uploadedBy = session.team_member_id as string;
-				
-				const passwordHash = password ? await hashPassword(password) : null;
 
 				if (!file || !choreoId || !name) {
 					return new Response(
@@ -448,14 +489,14 @@ export default {
 				// upsert choreo
 				console.log("upsert choreo");
 				await env.DB.prepare(
-					`INSERT INTO choreos (id, name, event_name, event_start_date, event_end_date, team_id, password_hash)
+					`INSERT INTO choreos (id, name, event_name, event_start_date, event_end_date, team_id, password)
 					VALUES (?, ?, ?, ?, ?, ?, ?)
 					ON CONFLICT(id) DO UPDATE SET
 						name = excluded.name,
 						event_name = excluded.event_name,
 						event_start_date = excluded.event_start_date,
 						event_end_date = excluded.event_end_date`
-				).bind(choreoId, name, eventName, eventStartDate, eventEndDate, teamId, passwordHash).run()
+				).bind(choreoId, name, eventName, eventStartDate, eventEndDate, teamId, password ?? null).run()
 				.catch(e => { throw new Error(`Failed to upsert choreo info into db: ${e}`) });
 
 				// insert new choreo_file row

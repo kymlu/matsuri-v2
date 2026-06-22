@@ -8,6 +8,8 @@ const getApiUrl = (endpoint:
   "auth/verify-team" | 
   "auth/verify-user" | 
   "choreos/summary" | 
+  "choreos/verify" |
+  "choreos/get-password" |
   "choreos/file" | 
   "choreos/file/current-version") => {
   return `/api/${endpoint}`
@@ -92,6 +94,63 @@ export const getChoreoSummary = async (teamId?: string): Promise<BasicChoreoDeta
   } catch (e: any) {
     console.error("getchoreoSummary failed:", (e as Error)?.message);
     return [] as BasicChoreoDetails[];
+  }
+}
+
+export const verifyChoreoPassword = async (
+  teamId: string,
+  choreoId: string,
+  password: string,
+  onSuccess: () => void,
+  onFailure: (status: number) => void
+): Promise<void> => {
+  try {
+    const response = await fetch(getApiUrl("choreos/verify"), {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password, choreo_id: choreoId, team_id: teamId }),
+    });
+
+    if (!response.ok) {
+      const data = await response.json() as { message?: string; error?: string };
+      console.error(`Choreo password validation failed: ${response.status} message: ${data.message} error: ${data.error}`);
+      onFailure(response.status);
+    } else {
+      onSuccess();
+    }
+  } catch (e: any) {
+    console.error("login failed:", (e as Error)?.message);
+    throw e;
+  }
+}
+
+
+export const getChoreoPassword = async (
+  teamId: string,
+  choreoId: string,
+  onSuccess: (password?: string) => void,
+  onFailure: (status: number) => void
+): Promise<void> => {
+  try {
+    const response = await fetch(getApiUrl("choreos/get-password"), {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ choreo_id: choreoId, team_id: teamId }),
+    });
+
+    if (!response.ok) {
+      const data = await response.json() as { message?: string; error?: string };
+      console.error(`Choreo password validation failed: ${response.status} message: ${data.message} error: ${data.error}`);
+      onFailure(response.status);
+    } else {
+      const data = await response.json() as { password?: string };
+      onSuccess(data.password);
+    }
+  } catch (e: any) {
+    console.error("login failed:", (e as Error)?.message);
+    throw e;
   }
 }
 

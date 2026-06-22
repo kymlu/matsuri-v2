@@ -6,7 +6,7 @@ import { BasicChoreoDetails, Choreo } from "../../models/choreo";
 import Divider from "../basic/Divider";
 import Icon from "../basic/Icon";
 import BaseEditDialog from "./BaseEditDialog";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import CustomSwitch from "../inputs/CustomSwitch";
 import TextInput from "../inputs/TextInput";
 
@@ -16,7 +16,8 @@ type PublishConfirmationDialogProps = {
   currentVersion: BasicChoreoDetails,
   oldVersion?: BasicChoreoDetails,
   getChoreo: () => Choreo,
-  teamId: string
+  teamId: string,
+  svrPassword?: string
 }
 
 type Row = {
@@ -26,7 +27,7 @@ type Row = {
 }
 
 export default function PublishConfirmationDialog({
-  onClose, onSave, currentVersion, oldVersion, getChoreo, teamId
+  onClose, onSave, currentVersion, oldVersion, getChoreo, teamId, svrPassword
 }: PublishConfirmationDialogProps) {
   const [error, setError] = useState<"none" | "error" | "versionError">("none");
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
@@ -38,6 +39,10 @@ export default function PublishConfirmationDialog({
   // to test: checked -> value
   
   const isUpdate = !!oldVersion;
+
+  useEffect(() => {
+    setPassword(svrPassword ?? "");
+  }, [svrPassword]);
 
   const upload = useCallback(async () => {
     if (!isProcessing) {

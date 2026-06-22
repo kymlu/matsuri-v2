@@ -36,6 +36,7 @@ import { checkLogin, getChoreoFile, getChoreoSummary, logoutUserFromTeam } from 
 import LoginDialog from "../components/dialogs/LoginDialog"
 import { Team } from "../models/team"
 import CustomMenu from "../components/inputs/CustomMenu"
+import ChoreoPasswordEntryDialog from "../components/dialogs/ChoreoPasswordEntryDialog"
 
 type HomePageProps = {
   buildInfo?: string,
@@ -543,6 +544,8 @@ export default function HomePage({
                           setEventNameDialogOpen(true);
                         }}
                         isExpandedByDefault={!isNullOrUndefinedOrBlank(searchTerm) || (yearIndex === 0 && choreoIndex === 0)}
+                        isLoggedIn={isLoggedIn}
+                        teamId={team?.id}
                       />
                       {
                         choreoIndex < events.size - 1 &&
@@ -849,17 +852,23 @@ type EventSectionProps = {
   onExport: (id: string) => void,
   onExportEvent: () => void,
   isExpandedByDefault?: boolean,
+  isLoggedIn: boolean,
+  teamId?: string,
 }
 
 function EventSection({
   eventInfo, dancerNamesByFormation, choreos, searchTerm, onSelectChoreo, addEvent, editEventName,
-  duplicateChoreo, editChoreoName, deleteChoreo, revertChoreo, syncChoreo, onPdfExport, onExport, onExportEvent, isExpandedByDefault
+  duplicateChoreo, editChoreoName, deleteChoreo, revertChoreo, syncChoreo,
+  onPdfExport, onExport, onExportEvent, isExpandedByDefault, isLoggedIn, teamId
 }: EventSectionProps) {
   const optionsDialog = Dialog.createHandle<ChoreoWithStatus>();
   const [optionsDialogOpen, setOptionsDialogOpen] = React.useState(false);
   const [selectedChoreo, setSelectedChoreo] = useState<ChoreoWithStatus | undefined>();
+  const [postPasswordAction, setPostPasswordAction] = useState<"none" | "open" | "rename" | "duplicate" | "export" | "pdf">("none");
   const dancerWarningDialog = Dialog.createHandle<Choreo>();
   const [dancerWarningDialogOpen, setDancerWarningDialogOpen] = React.useState(false);
+  const choreoPasswordEntryDialog = Dialog.createHandle<Choreo>();
+  const [choreoPasswordEntryDialogOpen, setChoreoPasswordEntryDialogOpen] = React.useState(false);
 
   const event = JSON.parse(eventInfo) as EventDetails;
 
@@ -883,6 +892,9 @@ function EventSection({
   };
   const handleDancerWarningDialogOpenChange = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setDancerWarningDialogOpen(isOpen);
+  };
+  const handleChoreoPasswordEntryDialogOpenChange = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
+    setChoreoPasswordEntryDialogOpen(isOpen);
   };
   
   return <ExpandableSection
@@ -930,14 +942,20 @@ function EventSection({
                   if (choreo.status === "syncRequired") {
                     syncChoreo(choreo);
                   } else {
-                    onSelectChoreo(choreo.id, choreo.status);
+                    if (choreo.hasPassword && !isLoggedIn) {
+                      setSelectedChoreo(choreo);
+                      setPostPasswordAction("open");
+                      setChoreoPasswordEntryDialogOpen(true);
+                    } else {
+                      onSelectChoreo(choreo.id, choreo.status);
+                    }
                   }
                 }}
                 className="flex flex-col justify-between h-full p-2 mx-[11px] transition-colors bg-white border border-gray-400 rounded-md cursor-pointer">
                 {/* Title */}
                 <div className="relative flex flex-row items-start justify-between gap-2">
                   <span className="font-medium text-left break-words text-wrap">
-                    {choreo.name}
+                    {choreo.hasPassword && <Icon src={isLoggedIn ? ICON.lockOpen : ICON.lock} colour="primary" size="md"/>}{choreo.name}
                   </span>
                   <div className="flex flex-row items-center gap-2">
                     {
@@ -1018,7 +1036,14 @@ function EventSection({
                   icon={ICON.edit}
                   label="隊列情報変更"
                   asDiv
-                  onClick={() => editChoreoName(selectedChoreo)}
+                  onClick={() => {
+                    if (!isLoggedIn && selectedChoreo.hasPassword) {
+                      setPostPasswordAction("rename");
+                      setChoreoPasswordEntryDialogOpen(true);
+                    } else {
+                      editChoreoName(selectedChoreo);
+                    }
+                  }}
                   full />
               </Dialog.Close>
               
@@ -1027,7 +1052,14 @@ function EventSection({
                   icon={ICON.fileCopy}
                   label="複製"
                   asDiv
-                  onClick={() => duplicateChoreo(selectedChoreo)}
+                  onClick={() => {
+                    if (!isLoggedIn && selectedChoreo.hasPassword) {
+                      setPostPasswordAction("duplicate");
+                      setChoreoPasswordEntryDialogOpen(true);
+                    } else {
+                      duplicateChoreo(selectedChoreo);
+                    }
+                  }}
                   full />
               </Dialog.Close>
 
@@ -1036,7 +1068,14 @@ function EventSection({
                   icon={ICON.fileExport}
                   label="共有用エクスポート"
                   asDiv
-                  onClick={() => {onExport(selectedChoreo.id)}}
+                  onClick={() => {
+                    if (!isLoggedIn && selectedChoreo.hasPassword) {
+                      setPostPasswordAction("export");
+                      setChoreoPasswordEntryDialogOpen(true);
+                    } else {
+                      onExport(selectedChoreo.id);
+                    }
+                  }}
                   full />
               </Dialog.Close>
               
@@ -1045,7 +1084,14 @@ function EventSection({
                   icon={ICON.pictureAsPdf}
                   label="PDFをダウンロード"
                   asDiv
-                  onClick={() => onPdfExport(selectedChoreo)}
+                  onClick={() => {
+                    if (!isLoggedIn && selectedChoreo.hasPassword) {
+                      setPostPasswordAction("pdf");
+                      setChoreoPasswordEntryDialogOpen(true);
+                    } else {
+                      onPdfExport(selectedChoreo);
+                    }
+                  }}
                   full />
               </Dialog.Close>
               {
@@ -1102,6 +1148,49 @@ function EventSection({
           dancerNames={selectedChoreo ? Array.from(missingNames[selectedChoreo.id]): []}
         />
       </Dialog.Root> */}
+      <Dialog.Root
+        open={choreoPasswordEntryDialogOpen}
+        onOpenChange={handleChoreoPasswordEntryDialogOpenChange}
+        handle={choreoPasswordEntryDialog}>
+        <ChoreoPasswordEntryDialog
+          choreoId={selectedChoreo?.id}
+          choreoName={selectedChoreo?.name}
+          teamId={teamId!}
+          onSuccess={() => {
+              if (selectedChoreo) {
+                switch (postPasswordAction) {
+                  case "open":
+                    onSelectChoreo(selectedChoreo.id, selectedChoreo.status);
+                    break;
+                  case "duplicate":
+                    duplicateChoreo(selectedChoreo);
+                    break;
+                  case "export":
+                    onExport(selectedChoreo.id);
+                    break;
+                  case "rename":
+                    editChoreoName(selectedChoreo);
+                    break;
+                  case "pdf":
+                    onPdfExport(selectedChoreo);
+                    break;
+                
+                  default:
+                    break;
+                }
+                if (postPasswordAction === "open") {
+                } else if (postPasswordAction === "duplicate") {
+                  duplicateChoreo(selectedChoreo);
+                }
+              }
+            }
+          }
+          onClose={() => {
+            setPostPasswordAction("none");
+            setChoreoPasswordEntryDialogOpen(false);
+          }}
+        />
+      </Dialog.Root>
     </div>
   </ExpandableSection>
 }

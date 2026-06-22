@@ -1,0 +1,76 @@
+import { useState } from "react";
+import BaseEditDialog from "./BaseEditDialog";
+import TextInput from "../inputs/TextInput";
+import { isNullOrUndefinedOrBlank } from "../../lib/helpers/globalHelper";
+import { verifyChoreoPassword } from "../../lib/helpers/apiHelper";
+
+export type ChoreoPasswordEntryDialogProps = {
+  teamId: string,
+  choreoId?: string,
+  choreoName?: string,
+  onSuccess: () => void,
+  onClose: () => void,
+}
+
+export default function ChoreoPasswordEntryDialog({
+  teamId, choreoId, choreoName, onSuccess, onClose
+}: ChoreoPasswordEntryDialogProps) {
+  const [password, setPassword] = useState<string>("");
+  const [error, setError] = useState<"none" | "error" | "incorrect">("none");
+  
+  const login = async () => {
+    if (!isProcessing && choreoId) {
+      setError("none");
+      setIsProcessing(true);
+      verifyChoreoPassword(teamId, choreoId, password, () => {
+        onSuccess();
+        close();
+      }, (status) => {
+        if (status === 401) {
+          setError("incorrect");
+        } else {
+          setError("error");
+        }
+        setIsProcessing(false);
+      });
+    }
+  };
+
+  const close = () => {
+    setError("none");
+    setPassword("");
+    onClose();
+  }
+
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
+
+  return <BaseEditDialog
+    title="パスワード入力"
+    actionButtonText="確認"
+    isActionButtonDisabled={isNullOrUndefinedOrBlank(password) || isProcessing}
+    showCloseButton={false}
+    onClose={close}
+    onSubmit={login}
+  >
+    <span><b>{choreoName}</b>を見るにはパスワードがあります</span>
+    <TextInput
+      label="パスワード"
+      name="パスワード"
+      type="password"
+      defaultValue=""
+      maxLength={150}
+      onContentChange={(value) => setPassword(value)}/>
+    {
+      error === "error" &&
+      <span className="w-full font-semibold text-center text-primary">
+        処理中にエラーが発生しました
+      </span>
+    }
+    {
+      error === "incorrect" &&
+      <span className="w-full font-semibold text-center text-primary">
+        パスワードが違っています
+      </span>
+    }
+  </BaseEditDialog>
+}
