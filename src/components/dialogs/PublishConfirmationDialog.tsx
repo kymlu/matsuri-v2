@@ -1,7 +1,7 @@
 import { ICON } from "../../lib/consts/consts";
 import { formatDateRange, getJpDate } from "../../lib/helpers/dateHelper";
 import { findCurrentVersion, publishChoreo } from "../../lib/helpers/apiHelper";
-import { strEquals, testAlphanumeric } from "../../lib/helpers/globalHelper";
+import { isNullOrUndefinedOrBlank, strEquals, testAlphanumeric } from "../../lib/helpers/globalHelper";
 import { BasicChoreoDetails, Choreo } from "../../models/choreo";
 import Divider from "../basic/Divider";
 import Icon from "../basic/Icon";
@@ -74,7 +74,7 @@ export default function PublishConfirmationDialog({
               setError("error");
               setIsProcessing(false);
             },
-            hasPassword ? password : undefined
+            (hasPassword && !isNullOrUndefinedOrBlank(password)) ? password : undefined
           );
         }
       } catch (e: any) {

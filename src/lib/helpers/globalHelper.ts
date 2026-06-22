@@ -108,7 +108,7 @@ export function testInvalidCharacters(text: string) {
 }
 
 export function testAlphanumeric(text: string) {
-  return /^[a-zA-Z0-9]+$/.test(text);
+  return /^[a-zA-Z0-9]*$/.test(text);
 }
 
 export function incrementBracketSuffix(str: string) {
