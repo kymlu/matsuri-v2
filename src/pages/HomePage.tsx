@@ -953,8 +953,8 @@ function EventSection({
                 className="flex flex-col justify-between h-full p-2 mx-[11px] transition-colors bg-white border border-gray-400 rounded-md cursor-pointer">
                 {/* Title */}
                 <div className="relative flex flex-row items-start justify-between gap-2">
-                  <span className="flex items-center font-medium text-left break-words text-wrap">
-                    {choreo.hasPassword ? <Icon src={isLoggedIn ? ICON.lockOpen : ICON.lock} colour="primary" size="sm"/> : <></>}
+                  <span className="flex items-center gap-0.5 font-medium text-left break-words text-wrap">
+                    {choreo.hasPassword ? <Icon src={isLoggedIn ? ICON.lockOpen : ICON.lock} colour="primary" size="xs"/> : <></>}
                     <span>{choreo.name}</span>
                   </span>
                   <div className="flex flex-row items-center gap-2">
