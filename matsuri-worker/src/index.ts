@@ -58,7 +58,7 @@ interface Env {
 }
 
 const getFileName = (id: string, version: string) => {return `${id}_v${version}.json`};
-const setSessionCookie = (token: string) => `token=${token}; HttpOnly; Secure; SameSite=None; Max-Age=2592000`;
+const setSessionCookie = (token: string) => `token=${token}; HttpOnly; Secure; SameSite=None; Max-Age=2592000; Path=/`;
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -352,7 +352,7 @@ export default {
 				headers: {
 					...corsHeaders,
 					"Content-Type": "application/json",
-					"Set-Cookie": "token=; HttpOnly; Secure; SameSite=None; Max-Age=0",
+					"Set-Cookie": "token=; HttpOnly; Secure; SameSite=None; Max-Age=0; Path=/",
 				},
 			});
 		}
