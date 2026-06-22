@@ -495,7 +495,8 @@ export default {
 						name = excluded.name,
 						event_name = excluded.event_name,
 						event_start_date = excluded.event_start_date,
-						event_end_date = excluded.event_end_date`
+						event_end_date = excluded.event_end_date,
+						password = excluded.password`
 				).bind(choreoId, name, eventName, eventStartDate, eventEndDate, teamId, password ?? null).run()
 				.catch(e => { throw new Error(`Failed to upsert choreo info into db: ${e}`) });
 
