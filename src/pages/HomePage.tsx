@@ -97,6 +97,9 @@ export default function HomePage({
 
     if (local) {
       console.log(`Getting local choreo with ${id}`);
+      if (local.teamId === undefined && team?.id) {
+        local.teamId = team.id;
+      }
       return local;
     }
 
@@ -119,7 +122,7 @@ export default function HomePage({
   const loadChoreos = () => {
     setIsLoading(true);
     Promise.all([
-      getAllChoreos(),
+      getAllChoreos(team?.id),
       getChoreoSummary(team?.id)
     ]).then(([local, server]) => {
       server.push(getBasicChoreoDetails(z.parse(ChoreoSchema, SampleParade)));
@@ -577,6 +580,7 @@ export default function HomePage({
               readUploadedFile(
                 file,
                 (newChoreo: Choreo) => {
+                  newChoreo.teamId = team?.id;
                   const existingChoreos = Object.values(savedChoreos).flat();
                   const duplicateChoreo = existingChoreos.find(c => strEquals(c.name, newChoreo.name) && strEquals(c.event, newChoreo.event));
                   if (duplicateChoreo) {
