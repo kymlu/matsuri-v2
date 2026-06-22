@@ -368,7 +368,7 @@ export default function HomePage({
 
   return (
     <div className="bg-gray-50">
-      <div className='grid py-10 px-6 h-[100svh] grid-rows-[auto,auto,auto,1fr] overflow-hide w-full mx-auto'>
+      <div className='grid py-10 px-6 h-[100svh] grid-rows-[auto,auto,auto,auto,1fr] overflow-hide w-full mx-auto'>
         <div className="text-sm text-primary">
           {
             team &&
