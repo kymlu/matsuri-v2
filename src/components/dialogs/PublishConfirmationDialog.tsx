@@ -182,7 +182,7 @@ export default function PublishConfirmationDialog({
         <CustomSwitch
           label="パスワード"
           onChange={(checked) => setHasPassword(checked)}/>
-        <TextInput // todo: limit to alphanumeric
+        <TextInput
           defaultValue={password}
           disabled={!hasPassword}
           restrictFn={(s) => testAlphanumeric(s)}
