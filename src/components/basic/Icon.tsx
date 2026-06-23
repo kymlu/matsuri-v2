@@ -15,11 +15,11 @@ export default function Icon({
   crossedOut = false,
   vertFlip = false,
 }: IconProps) {
-  var iconClasses = classNames("font-icon", {
-    "text-6xl": size === "lg",
-    "text-4xl": size === "md",
-    "text-2xl": size === "sm",
-    "text-lg": size === "xs",
+  var iconClasses = classNames("font-icon leading-none", {
+    "text-6xl max-w-16": size === "lg",
+    "text-4xl max-w-8": size === "md",
+    "text-2xl max-w-6": size === "sm",
+    "text-lg max-w-4": size === "xs",
     "text-white": colour === "white",
     "text-primary": colour === "primary",
     "text-black": colour === "black",
@@ -28,8 +28,8 @@ export default function Icon({
   });
 
   return (
-    <span className="relative inline-flex items-center justify-center leading-none rota">
-      <span className={iconClasses + " leading-none"}>
+    <span className="relative inline-flex items-center justify-center leading-none">
+      <span className={iconClasses}>
         {src}
       </span>
       {crossedOut && (
