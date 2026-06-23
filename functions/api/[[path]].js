@@ -2,6 +2,8 @@ export async function onRequest(context) {
   const originalUrl = new URL(context.request.url);
   const workerUrl = `https://${context.env.API_URL}${originalUrl.pathname}${originalUrl.search}`;
 
+  console.log(`${originalUrl} to ${workerUrl}`)
+
   const response = await fetch(workerUrl.toString(), {
     method: context.request.method,
     headers: {
