@@ -407,10 +407,6 @@ export default function HomePage({
                 }>
                 <div className="space-y-2">
                   <Menu.Item>
-                    <IconLabelButton full noBorder icon={ICON.password} label="パスワード変更" onClick={()=>{}}/>
-                  </Menu.Item>
-                  <Divider compact/>
-                  <Menu.Item>
                     <IconLabelButton
                       full noBorder
                       icon={ICON.logout}
