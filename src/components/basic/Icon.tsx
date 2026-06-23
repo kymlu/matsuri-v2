@@ -16,8 +16,8 @@ export default function Icon({
   vertFlip = false,
 }: IconProps) {
   var iconClasses = classNames("font-icon leading-none", {
-    "text-6xl max-w-16": size === "lg",
-    "text-4xl max-w-8": size === "md",
+    "text-6xl max-w-[3.75rem]": size === "lg",
+    "text-4xl max-w-[2.25rem]": size === "md",
     "text-2xl max-w-6": size === "sm",
     "text-lg max-w-4": size === "xs",
     "text-white": colour === "white",
