@@ -155,7 +155,7 @@ export default function PublishConfirmationDialog({
       }}
     >
       <div className={`space-y-2 ${isUpdate ? "w-[70svw]" : ""}`}>
-        <div className="space-y-2 max-h-[70svh]">
+        <div className="space-y-2 max-h-[50svh]">
           <table className="w-full text-sm">
             <tbody>
               {rows.map((row, i) => {
@@ -199,21 +199,15 @@ export default function PublishConfirmationDialog({
             onContentChange={(newContent) => setPassword(newContent)}/>
         </div>
         <Divider />
-        <p>最終編集日時：{currentVersion.lastUpdated}</p>
+        <p>最終編集日時：{currentVersion.lastUpdated ? getJpDate(new Date(currentVersion.lastUpdated)) : ""}</p>
         {
           !hasChanges &&
-          <p>
+          <p className="w-full font-semibold text-center text-primary">
             編集はありません。
           </p>
         }
-        {
-          hasChanges &&
-          <>
-            { isUpdate && <p>公開バージョン：{oldVersion.version!! + 1}</p>}
-            <p>
-              {isUpdate ? "新バージョンをアップロードしますか？" : "新しいファイルとしてアップロードしますか？"}
-            </p>
-          </>
+        { hasChanges && isUpdate &&
+          <p>公開バージョン：{oldVersion.version!! + 1}</p>
         }
         {
           isProcessing &&
