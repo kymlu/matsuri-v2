@@ -291,14 +291,22 @@ export default {
 
 			await env.DB.prepare(`
 				INSERT INTO password_reset_tokens (id, user_id, code_hash, expires_at, created_at)
-				VALUES (?, ?, ?, datetime('now', '+15 minutes'), datetime('now'))
+				VALUES (?, ?, ?, datetime('now', '+10 minutes'), datetime('now'))
 			`).bind(crypto.randomUUID(), user.id, codeHash).run();
 
 			const { data, error } = await resend.emails.send({
 				from: '隊列表作成アプリ <noreply@tairetsu.app>',
 				to: body.email,
-				subject: 'パスワード忘れた方へ',
-				html: `<p>認証コード：${code}</p>`,
+				subject: 'パスワード再設定',
+				html: `<p>パスワード再設定のリクエストを受け付けました。</p>
+					<p>以下の認証コードを入力してください。</p>
+					<p>${code}</p>
+					<p>この認証コードの有効期限は10分です。</p>
+					<br/>
+			    <p>この操作に心当たりがない場合は、このメールを無視してください。</p>
+					<br/>
+			    <p>※このメールは自動送信されています。返信には対応しておりませんのでご了承ください。</p>
+				`,
 			});
 
 			return new Response(JSON.stringify({ success: true }), {

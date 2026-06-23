@@ -28,7 +28,6 @@ export default function LoginDialog({
         break;
 
       case "forgot":
-        // todo: call api and on success go to verification code
         onForgotPassword();
         break;
         
@@ -64,7 +63,8 @@ export default function LoginDialog({
       setIsProcessing(true);
       setError("none");
       sendPasswordResetRequest(email, teamId, () => {
-        
+        setMode("resetPassword");
+        setIsProcessing(false);
       }, (status) => {
         if (status === 404) {
           setError("notFound");
@@ -73,7 +73,7 @@ export default function LoginDialog({
         } else {
           setError("error");
         }
-        setIsProcessing(true);
+        setIsProcessing(false);
       });
     }
   }
@@ -97,7 +97,7 @@ export default function LoginDialog({
         } else {
           setError("error");
         }
-        setIsProcessing(true);
+        setIsProcessing(false);
       });
     }
   }
@@ -124,9 +124,20 @@ export default function LoginDialog({
     }
   }, [email, password, isProcessing]);
 
+  const actionButtonText = useMemo(() => {
+    switch (mode) {
+      case "login":
+        return "ログイン";
+      case "forgot":
+        return "認証コードを送信";
+      case "resetPassword":
+        return "リセット";
+    }
+  }, [mode]);
+
   return <BaseEditDialog
     title="ログイン"
-    actionButtonText="ログイン"
+    actionButtonText={actionButtonText}
     isActionButtonDisabled={isActionButtonDisabled}
     showCloseButton={false}
     onClose={close}
@@ -160,7 +171,10 @@ export default function LoginDialog({
             編集権限がありません
           </span>
         }
-        <button onClick={() => setMode("forgot")}>
+        <button onClick={() => {
+          setMode("forgot");
+          setPassword("");
+        }}>
           <span className="w-full font-semibold text-center underline">
             パスワード忘れた
           </span>
