@@ -15,11 +15,11 @@ export default function Icon({
   crossedOut = false,
   vertFlip = false,
 }: IconProps) {
-  var iconClasses = classNames("font-icon leading-none", {
+  var iconClasses = classNames("font-icon leading-none overflow-hidden", {
     "text-6xl max-w-[3.75rem]": size === "lg",
     "text-4xl max-w-[2.25rem]": size === "md",
-    "text-2xl max-w-6": size === "sm",
-    "text-lg max-w-4": size === "xs",
+    "text-2xl max-w-[1.5rem]": size === "sm",
+    "text-lg max-w-[1.125rem]": size === "xs",
     "text-white": colour === "white",
     "text-primary": colour === "primary",
     "text-black": colour === "black",
