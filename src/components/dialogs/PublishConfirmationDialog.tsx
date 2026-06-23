@@ -126,21 +126,20 @@ export default function PublishConfirmationDialog({
           new: `${currentVersion.propCount}`,
           old: oldVersion ? `${oldVersion.propCount}` : undefined,
         },
-        {
-          icon: ICON.history,
-          new: currentVersion.lastUpdated ? getJpDate(new Date(currentVersion.lastUpdated)) : "",
-          old: oldVersion?.lastUpdated ? getJpDate(new Date(oldVersion.lastUpdated)) : undefined,
-        },
       ]
     ];
     return rowList;
-  }, [currentVersion, oldVersion])
+  }, [currentVersion, oldVersion]);
+
+  const hasChanges = useMemo(()=> {
+    return currentVersion.isDirty || !strEquals(svrPassword, password) || hasPassword !== !isNullOrUndefinedOrBlank(svrPassword);
+  }, [currentVersion.isDirty]);
 
   return (
     <BaseEditDialog
       title="公開確認"
       actionButtonText="公開する"
-      isActionButtonDisabled={isProcessing}
+      isActionButtonDisabled={!hasChanges}
       onSubmit={upload}
       onClose={() => {
         onClose();
@@ -155,86 +154,84 @@ export default function PublishConfirmationDialog({
         }
       }}
     >
-      <div className={`flex flex-col gap-2 ${isUpdate ? "w-[70svw]" : ""}`}>
-        <table className="w-full text-sm">
-          <tbody>
-            {rows.map((row, i) => {
-              const hasChange = isUpdate && row.old !== undefined && !strEquals(row.old, row.new);
-              return (
-                <tr key={i}>
-                  <td className="w-4 pt-2 pr-2 text-gray-400 align-middle">
-                    {row.icon && <Icon src={row.icon} colour="grey" size="sm" />}
-                  </td>
-                  {
-                    isUpdate && (
-                      <td
-                        className={`py-0.5 pr-2 align-middle ${hasChange ? "line-through text-gray-400" : ""}`}>
-                        {row.old}
-                      </td>
-                    )
-                  }
-                  {
-                    (!isUpdate || hasChange) &&
-                    <td
-                      colSpan={isUpdate ? 1 : 2}
-                      className={`py-0.5 align-middle ${hasChange ? "font-semibold" : ""}`}>
-                      {row.new}
+      <div className={`space-y-2 ${isUpdate ? "w-[70svw]" : ""}`}>
+        <div className="space-y-2 max-h-[70svh]">
+          <table className="w-full text-sm">
+            <tbody>
+              {rows.map((row, i) => {
+                const hasChange = isUpdate && row.old !== undefined && !strEquals(row.old, row.new);
+                return (
+                  <tr key={i}>
+                    <td className="w-4 pt-2 pr-2 text-gray-400 align-middle">
+                      {row.icon && <Icon src={row.icon} colour="grey" size="sm" />}
                     </td>
-                  }
-                </tr>
-              );
-            })}
-            {isUpdate && (
-              <tr>
-                <td className="py-0.5 pr-2 w-4" />
-                <td className="py-0.5 pr-2 line-through text-gray-400">
-                  v{oldVersion.version}
-                </td>
-                <td className="py-0.5 font-semibold">
-                  v{oldVersion.version!! + 1}
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-        <CustomSwitch
-          label="パスワード（英数字のみ）"
-          defaultChecked={hasPassword}
-          onChange={(checked) => setHasPassword(checked)}/>
-        <TextInput
-          showLength
-          defaultValue={password}
-          disabled={!hasPassword}
-          maxLength={PASSWORD_LENGTH}
-          restrictFn={(s) => testAlphanumeric(s)}
-          onContentChange={(newContent) => setPassword(newContent)}/>
+                    {
+                      isUpdate && (
+                        <td
+                          className={`py-0.5 pr-2 align-middle ${hasChange ? "line-through text-gray-400" : ""}`}>
+                          {row.old}
+                        </td>
+                      )
+                    }
+                    {
+                      (!isUpdate || hasChange) &&
+                      <td
+                        colSpan={isUpdate ? 1 : 2}
+                        className={`py-0.5 align-middle ${hasChange ? "font-semibold" : ""}`}>
+                        {row.new}
+                      </td>
+                    }
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+          <CustomSwitch
+            label="パスワード（英数字のみ）"
+            defaultChecked={hasPassword}
+            onChange={(checked) => setHasPassword(checked)}/>
+          <TextInput
+            showLength
+            defaultValue={password}
+            disabled={!hasPassword}
+            maxLength={PASSWORD_LENGTH}
+            restrictFn={(s) => testAlphanumeric(s)}
+            onContentChange={(newContent) => setPassword(newContent)}/>
+        </div>
         <Divider />
-        <span>
-          {isUpdate ? "新バージョンをアップロードしますか？" : "新しいファイルとしてアップロードしますか？"}
-          {
-            !currentVersion.isDirty &&
-            <span className="w-full font-semibold text-center text-gray-600">
-              編集はありません。
-            </span>
-          }
-        </span>
+        <p>最終編集日時：{currentVersion.lastUpdated}</p>
+        {
+          !hasChanges &&
+          <p>
+            編集はありません。
+          </p>
+        }
+        {
+          hasChanges &&
+          <>
+            { isUpdate && <p>公開バージョン：{oldVersion.version!! + 1}</p>}
+            <p>
+              {isUpdate ? "新バージョンをアップロードしますか？" : "新しいファイルとしてアップロードしますか？"}
+            </p>
+          </>
+        }
         {
           isProcessing &&
-          <span className="w-full font-semibold text-center text-primary">
+          <p className="w-full font-semibold text-center text-primary">
             処理中...
-          </span>
+          </p>
         }
         {
           error === "error" && 
-          <span className="w-full font-semibold text-center text-primary">
+          <p className="w-full font-semibold text-center text-primary">
             処理中に問題が発生しました
-          </span>
+          </p>
         }
         {
           error === "versionError" && 
-          <span className="w-full font-semibold text-center text-primary">
+          <p className="w-full font-semibold text-center text-primary">
             他のユーザーによって更新されました。ホームに戻って最新バージョンをご確認ください。
-          </span>
+          </p>
         }
       </div>
     </BaseEditDialog>
