@@ -4,7 +4,8 @@ import { Team } from "../../models/team";
 const getApiUrl = (endpoint: 
   "auth/login" | 
   "auth/logout" | 
-  "auth/set-password" | 
+  "auth/reset-password" | 
+  "auth/forgot-password" | 
   "auth/verify-team" | 
   "auth/verify-user" | 
   "choreos/summary" | 
@@ -67,12 +68,58 @@ export const logoutUserFromTeam = async (
   }
 }
 
-export const sendPasswordResetRequest = async (email: string, teamId: string): Promise<string> => {
-  return "TODO";
+export const sendPasswordResetRequest = async (
+  email: string,
+  teamId: string,
+  onSuccess: () => void,
+  onFailure: (status: number) => void,
+): Promise<void> => {
+  try {
+    const response = await fetch(getApiUrl("auth/forgot-password"), {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, team_id: teamId }),
+    });
+    if (!response.ok) {
+      const data = await response.json() as { message?: string; error?: string };
+      console.error(`Reset password failed: ${response.status} message: ${data.message} error: ${data.error}`);
+      onFailure(response.status);
+    } else {
+      onSuccess();
+    }
+  } catch (e: any) {
+    console.error("login failed:", (e as Error)?.message);
+    throw e;
+  }
 }
 
-export const resetPassword = async (userId: string, password: string): Promise<string> => {
-  return "TODO";
+export const resetPassword = async (
+  email: string,
+  teamId: string,
+  code: string,
+  password: string,
+  onSuccess: () => void,
+  onFailure: (status: number) => void,
+): Promise<void> => {
+  try {
+    const response = await fetch(getApiUrl("auth/reset-password"), {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, team_id: teamId, code, password }),
+    });
+    if (!response.ok) {
+      const data = await response.json() as { message?: string; error?: string };
+      console.error(`Reset password failed: ${response.status} message: ${data.message} error: ${data.error}`);
+      onFailure(response.status);
+    } else {
+      onSuccess();
+    }
+  } catch (e: any) {
+    console.error("login failed:", (e as Error)?.message);
+    throw e;
+  }
 }
 
 export const getChoreoSummary = async (teamId?: string): Promise<BasicChoreoDetails[]> => {
@@ -124,7 +171,6 @@ export const verifyChoreoPassword = async (
     throw e;
   }
 }
-
 
 export const getChoreoPassword = async (
   teamId: string,

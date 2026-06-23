@@ -1,4 +1,4 @@
-import { ICON } from "../../lib/consts/consts";
+import { ICON, PASSWORD_LENGTH } from "../../lib/consts/consts";
 import { formatDateRange, getJpDate } from "../../lib/helpers/dateHelper";
 import { findCurrentVersion, publishChoreo } from "../../lib/helpers/apiHelper";
 import { isNullOrUndefinedOrBlank, strEquals, testAlphanumeric } from "../../lib/helpers/globalHelper";
@@ -198,12 +198,14 @@ export default function PublishConfirmationDialog({
           </tbody>
         </table>
         <CustomSwitch
-          label="パスワード"
+          label="パスワード（英数字のみ）"
           defaultChecked={hasPassword}
           onChange={(checked) => setHasPassword(checked)}/>
         <TextInput
+          showLength
           defaultValue={password}
           disabled={!hasPassword}
+          maxLength={PASSWORD_LENGTH}
           restrictFn={(s) => testAlphanumeric(s)}
           onContentChange={(newContent) => setPassword(newContent)}/>
         <Divider />
@@ -225,7 +227,7 @@ export default function PublishConfirmationDialog({
         {
           error === "error" && 
           <span className="w-full font-semibold text-center text-primary">
-            処理中にエラーが発生しました
+            処理中に問題が発生しました
           </span>
         }
         {

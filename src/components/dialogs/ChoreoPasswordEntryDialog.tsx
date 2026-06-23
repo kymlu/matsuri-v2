@@ -3,6 +3,7 @@ import BaseEditDialog from "./BaseEditDialog";
 import TextInput from "../inputs/TextInput";
 import { isNullOrUndefinedOrBlank } from "../../lib/helpers/globalHelper";
 import { verifyChoreoPassword } from "../../lib/helpers/apiHelper";
+import { PASSWORD_ENTRY_LENGTH } from "../../lib/consts/consts";
 
 export type ChoreoPasswordEntryDialogProps = {
   teamId: string,
@@ -52,25 +53,26 @@ export default function ChoreoPasswordEntryDialog({
     onClose={close}
     onSubmit={login}
   >
-    <span><b>{choreoName}</b>を見るにはパスワードがあります</span>
-    <TextInput
-      label="パスワード"
-      name="パスワード"
-      type="password"
-      defaultValue=""
-      maxLength={150}
-      onContentChange={(value) => setPassword(value)}/>
-    {
-      error === "error" &&
-      <span className="w-full font-semibold text-center text-primary">
-        処理中にエラーが発生しました
-      </span>
-    }
-    {
-      error === "incorrect" &&
-      <span className="w-full font-semibold text-center text-primary">
-        パスワードが違っています
-      </span>
-    }
+    <div className="space-y-2">
+      <span><b>{choreoName}</b>を見るにはパスワードがあります</span>
+      <TextInput
+        label="パスワード"
+        type="password"
+        defaultValue=""
+        maxLength={PASSWORD_ENTRY_LENGTH}
+        onContentChange={(value) => setPassword(value)}/>
+      {
+        error === "error" &&
+        <span className="w-full font-semibold text-center text-primary">
+          処理中に問題が発生しました
+        </span>
+      }
+      {
+        error === "incorrect" &&
+        <span className="w-full font-semibold text-center text-primary">
+          パスワードが違います
+        </span>
+      }
+    </div>
   </BaseEditDialog>
 }

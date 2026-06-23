@@ -1,3 +1,5 @@
+import { Resend } from 'resend';
+
 const allowedOrigins = [
   "http://localhost:3000",
   "https://matsuri-v2.pages.dev",
@@ -55,6 +57,7 @@ export const verifyPassword = async (password: string, stored: string): Promise<
 interface Env {
 	DB: D1Database;
 	BUCKET: R2Bucket;
+	RESEND_API_KEY: string;
 }
 
 const getFileName = (id: string, version: string) => {return `${id}_v${version}.json`};
@@ -62,6 +65,9 @@ const setSessionCookie = (token: string) => `token=${token}; HttpOnly; Secure; S
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
+
+		const resend = new Resend(env.RESEND_API_KEY);
+
 		const origin = request.headers.get("Origin");
 		const corsHeaders = getCorsHeaders(origin);
 
@@ -250,26 +256,127 @@ export default {
 				}
 			}
     }
+		
+		if (url.pathname === "/api/auth/forgot-password" && request.method === "POST") {
+			const body = await request.json() as { email: string, team_id: string };
 
-		if (url.pathname === "/api/auth/set-password" && request.method === "POST") {
-			const body = await request.json() as { email: string; password: string };
-
-			const user = await env.DB.prepare(`
-				SELECT * FROM users WHERE email = ?
-			`).bind(body.email).first();
+			const user = await env.DB.prepare(
+				"SELECT * FROM users WHERE email = ?"
+			).bind(body.email).first();
 
 			if (!user) {
-				return new Response(
-					JSON.stringify({ error: "User not found" }),
-					{ status: 404, headers: corsHeaders }
-				);
+				return new Response(JSON.stringify({ success: true }), {
+					status: 404,
+					headers: { ...corsHeaders, "Content-Type": "application/json" },
+				});
 			}
 
-			const hash = await hashPassword(body.password);
+			const teamMember = await env.DB.prepare(
+				"SELECT * FROM team_members WHERE user_id = ? AND team_id = ? AND deleted = 0"
+			).bind(user.id, body.team_id).first();
+			
+			if (!teamMember) {
+				return new Response(JSON.stringify({ success: true }), {
+					status: 401,
+					headers: { ...corsHeaders, "Content-Type": "application/json" },
+				});
+			}
+
+			const code = (crypto.getRandomValues(new Uint32Array(1))[0] % 90000000 + 10000000).toString();
+			const codeHash = await hashPassword(code);
+
+			await env.DB.prepare(`
+				DELETE FROM password_reset_tokens WHERE user_id = ?
+			`).bind(user.id).run();
+
+			await env.DB.prepare(`
+				INSERT INTO password_reset_tokens (id, user_id, code_hash, expires_at, created_at)
+				VALUES (?, ?, ?, datetime('now', '+15 minutes'), datetime('now'))
+			`).bind(crypto.randomUUID(), user.id, codeHash).run();
+
+			const { data, error } = await resend.emails.send({
+				from: '隊列表作成アプリ <noreply@tairetsu.app>',
+				to: body.email,
+				subject: 'パスワード忘れた方へ',
+				html: `<p>認証コード：${code}</p>`,
+			});
+
+			return new Response(JSON.stringify({ success: true }), {
+				status: 200,
+				headers: { ...corsHeaders, "Content-Type": "application/json" },
+			});
+		}
+
+		if (url.pathname === "/api/auth/reset-password" && request.method === "POST") {
+			const body = await request.json() as { email: string; team_id: string, code: string; password: string };
+
+			const user = await env.DB.prepare(
+				"SELECT * FROM users WHERE email = ?"
+			).bind(body.email).first();
+
+			if (!user) {
+				return new Response(JSON.stringify({ error: "Invalid email" }), {
+					status: 401,
+					headers: { ...corsHeaders, "Content-Type": "application/json" },
+				});
+			}
+
+			const teamMember = await env.DB.prepare(
+				"SELECT * FROM team_members WHERE user_id = ? AND team_id = ? AND deleted = 0"
+			).bind(user.id, body.team_id).first();
+			
+			if (!teamMember) {
+				return new Response(JSON.stringify({ success: true }), {
+					status: 401,
+					headers: { ...corsHeaders, "Content-Type": "application/json" },
+				});
+			}
+
+			const resetToken = await env.DB.prepare(`
+				SELECT * FROM password_reset_tokens 
+				WHERE user_id = ? AND used_at IS NULL AND expires_at > datetime('now')
+			`).bind(user.id).first();
+
+			if (!resetToken) {
+				return new Response(JSON.stringify({ error: "Invalid or expired code" }), {
+					status: 401,
+					headers: { ...corsHeaders, "Content-Type": "application/json" },
+				});
+			}
+
+			if (resetToken.attempts as number >= 5) {
+				return new Response(JSON.stringify({ error: "Too many attempts, request a new code" }), {
+					status: 401,
+					headers: { ...corsHeaders, "Content-Type": "application/json" },
+				});
+			}
+
+			const codeMatch = await verifyPassword(body.code, resetToken.code_hash as string);
+
+			if (!codeMatch) {
+				await env.DB.prepare(`
+					UPDATE password_reset_tokens SET attempts = attempts + 1 WHERE id = ?
+				`).bind(resetToken.id).run();
+
+				return new Response(JSON.stringify({ error: "Invalid code" }), {
+					status: 401,
+					headers: { ...corsHeaders, "Content-Type": "application/json" },
+				});
+			}
+
+			const newHash = await hashPassword(body.password);
 
 			await env.DB.prepare(`
 				UPDATE users SET password_hash = ?, updated_at = datetime('now') WHERE id = ?
-			`).bind(hash, user.id).run();
+			`).bind(newHash, user.id).run();
+
+			await env.DB.prepare(`
+				UPDATE password_reset_tokens SET used_at = datetime('now') WHERE id = ?
+			`).bind(resetToken.id).run();
+
+			await env.DB.prepare(`
+				DELETE FROM sessions WHERE user_id = ?
+			`).bind(user.id).run();
 
 			return new Response(JSON.stringify({ success: true }), {
 				status: 200,

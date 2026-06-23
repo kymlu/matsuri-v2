@@ -25,6 +25,10 @@ export const ACTION_NAME_LENGTH = 10;
 export const COUNT_NAME_LENGTH = 5;
 export const EXPORT_NAME_LENGTH = 100;
 export const SEARCH_NAME_LENGTH = 100;
+export const EMAIL_LENGTH = 254;
+export const PASSWORD_LENGTH = 30;
+export const PASSWORD_ENTRY_LENGTH = 150;
+export const VERIFICATION_CODE_LENGTH = 8;
 
 export const SAMPLE_STAGE_ID = "0a002caf-611a-40aa-9989-a690e6791e0a";
 export const SAMPLE_PARADE_ID = "41221ff9-2647-4255-8189-fa4008bef93a";

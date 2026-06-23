@@ -827,7 +827,7 @@ export default function HomePage({
             onClose={() => {
               setLoginDialogOpen(false);
             }}
-            teamId={team!.id}/>
+            teamId={team?.id ?? ""}/>
         </Dialog.Root>
       </div>
     </div>
