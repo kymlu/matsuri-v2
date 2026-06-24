@@ -330,6 +330,7 @@ export default function HomePage({
       //   }, {} as Record<string, Record<string, string[]>>)
       // );
       setSavedChoreos(newChoreos);
+      setLocalChoreos(prev => ({...prev, [newChoreo.id]: newChoreo}));
     });
   }
 
