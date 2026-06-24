@@ -42,6 +42,11 @@ export const IMG = {
   moveForward: "moveForward.svg",
   moveToBack: "moveToBack.svg",
   moveToFront: "moveToFront.svg",
+  home: "home.png",
+  view1: "view1.png",
+  view2: "view2.png",
+  dialog: "dialog.png",
+  pdf: "pdf.png"
 }
 
 export const ICON = {
