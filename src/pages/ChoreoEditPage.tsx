@@ -14,7 +14,7 @@ import { Dialog } from "@base-ui/react";
 import EditChoreoSizeDialog from "../components/dialogs/EditChoreoSizeDialog";
 import { exportChoreo } from "../lib/helpers/exportHelper";
 import { saveChoreo } from "../lib/dataAccess/DataController";
-import { DEFAULT_PROP_LENGTH, DEFAULT_PROP_WIDTH, ICON, SAMPLE_PARADE_ID, SAMPLE_STAGE_ID } from "../lib/consts/consts";
+import { DEFAULT_PROP_LENGTH, DEFAULT_PROP_WIDTH, SAMPLE_PARADE_ID, SAMPLE_STAGE_ID } from "../lib/consts/consts";
 import { AppSetting } from "../models/appSettings";
 import { changeStageGeometryAndType, renameChoreo } from "../lib/editor/commands/choreoCommands";
 import EditChoreoInfoDialog from "../components/dialogs/EditChoreoInfoDialog";
@@ -918,7 +918,7 @@ export default function ChoreoEditPage(props: {
           <div className="flex flex-col gap-2">
             <Dialog.Close>
               <IconLabelButton
-                icon={ICON.textFieldsAlt}
+                icon="textFieldsAlt"
                 label="名前変更"
                 asDiv
                 onClick={() => {
@@ -930,7 +930,7 @@ export default function ChoreoEditPage(props: {
 
             <Dialog.Close>
               <IconLabelButton
-                icon={ICON.speakerNotes}
+                icon="speakerNotes"
                 label="メモ編集"
                 asDiv
                 onClick={() => {
@@ -942,7 +942,7 @@ export default function ChoreoEditPage(props: {
 
             <Dialog.Close>
               <IconLabelButton
-                icon={ICON.fileCopy}
+                icon="fileCopy"
                 label="複製"
                 asDiv
                 onClick={() => {
@@ -961,7 +961,7 @@ export default function ChoreoEditPage(props: {
               history.presentState.state.sections.length > 1 &&
               <Dialog.Close>
                 <IconLabelButton
-                  icon={ICON.delete}
+                  icon="delete"
                   label="削除"
                   asDiv
                   primaryText

@@ -3,7 +3,6 @@ import { ChoreoSection } from "../../models/choreoSection";
 import Button from "../basic/Button";
 import { useRef, useState } from "react";
 import IconButton from "../basic/IconButton";
-import { ICON } from "../../lib/consts/consts";
 import { DndContext, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { arrayMove, SortableContext, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -45,7 +44,7 @@ export default function FormationSelectionToolbar({
     >
       <Drawer.Trigger>
         <IconButton
-          src={ICON.menu}
+          src="menu"
           size="sm"
           asDiv
           colour="grey"
@@ -66,7 +65,7 @@ export default function FormationSelectionToolbar({
                 <Drawer.Close>
                   <Icon
                     size="sm"
-                    src={ICON.clear}
+                    src="clear"
                   />
                 </Drawer.Close>
               </div>
@@ -133,7 +132,7 @@ export default function FormationSelectionToolbar({
       showAddButton &&
       <IconButton
         size="sm"
-        src={ICON.add}
+        src="add"
         colour="grey"
         onClick={() => {onClickAddButton?.(crypto.randomUUID())}}
       />
@@ -192,15 +191,15 @@ function FormationSectionItem (props: {
           <div className="flex items-center">
             {
               !isNullOrUndefinedOrBlank(section.note) && 
-              <Icon colour={ isSelected? "white" : "black" } src={ICON.speakerNotes} size="xs"/>
+              <Icon colour={ isSelected? "white" : "black" } src="speakerNotes" size="xs"/>
             }
             {
               section.formation.dancerActions.length > 0 && 
-              <Icon colour={ isSelected? "white" : "black" } src={ICON[123]} size="sm"/>
+              <Icon colour={ isSelected? "white" : "black" } src="123" size="sm"/>
             }
             {
               onOpenSectionMenu && isSelected && 
-              <Icon colour={ isSelected? "white" : "black" } src={ICON.arrowDropDown} size="sm"/>
+              <Icon colour={ isSelected? "white" : "black" } src="arrowDropDown" size="sm"/>
             }
           </div>
         }

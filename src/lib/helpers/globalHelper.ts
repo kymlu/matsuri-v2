@@ -1,4 +1,5 @@
 import { BasicChoreoDetails, Choreo, EventDetails } from "../../models/choreo";
+import {IMG} from "../consts/consts"
 
 export function strEquals(str1: string | null | undefined, str2: string | null | undefined) {
   return !isNullOrUndefined(str1) && !isNullOrUndefined(str2) && str1?.localeCompare?.(str2!) === 0
@@ -128,4 +129,8 @@ export function stringifyEvent(choreo: BasicChoreoDetails | Choreo): string {
     startDate: choreo.startDate ?? "",
     endDate: choreo.endDate ?? ""
   } as EventDetails);
+}
+
+export function getImgPath(image: keyof typeof IMG) {
+  return `${process.env.PUBLIC_URL}/img/${IMG[image]}`
 }

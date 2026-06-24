@@ -4,7 +4,6 @@ import { IconLabelButton } from "../basic/Button";
 import { AppSetting } from "../../models/appSettings";
 import CustomSwitch from "../inputs/CustomSwitch";
 import IconButton from "../basic/IconButton";
-import { ICON } from "../../lib/consts/consts";
 import { isNullOrUndefinedOrBlank } from "../../lib/helpers/globalHelper";
 
 type SidebarProps = {
@@ -66,7 +65,7 @@ export function Sidebar({
           <div>
             <IconButton
               noBorder
-              src={ICON.edit}
+              src="edit"
               size="sm"
               onClick={editName}
             />
@@ -79,7 +78,7 @@ export function Sidebar({
             <IconLabelButton
               onClick={editSize}
               label="舞台サイズを変更"
-              full icon={ICON.resize}/>
+              full icon="resize"/>
           </>
         }
         {
@@ -88,7 +87,7 @@ export function Sidebar({
             <IconLabelButton
               onClick={manageDancers}
               label="ダンサー管理"
-              full icon={ICON.group}/>
+              full icon="group"/>
           </>
         }
         {
@@ -97,7 +96,7 @@ export function Sidebar({
             <IconLabelButton
               onClick={manageProps}
               label="道具管理"
-              full icon={ICON.flag}/>
+              full icon="flag"/>
           </>
         }
         {/* {
@@ -129,7 +128,7 @@ export function Sidebar({
               onClick={publish}
               label="公開する"
               full
-              icon={ICON.globe}/>
+              icon="globe"/>
           </>
         }
       </div>

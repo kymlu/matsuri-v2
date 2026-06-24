@@ -21,7 +21,7 @@ type PublishConfirmationDialogProps = {
 }
 
 type Row = {
-  icon?: string;
+  icon?: keyof typeof ICON;
   old?: string;
   new: string;
 }
@@ -92,13 +92,13 @@ export default function PublishConfirmationDialog({
   const rows = useMemo(() => {
     var rowList: Row[] = [];
     rowList.push({
-      icon: ICON.label,
+      icon: "label",
       new: currentVersion.name,
       old: oldVersion?.name,
     });
     if (currentVersion.event || oldVersion?.event) {
       rowList.push({
-        icon: ICON.calendarToday,
+        icon: "calendarToday",
         new: `${currentVersion.event}`,
         old: oldVersion ? `${oldVersion.event}` : undefined,
       });
@@ -112,20 +112,20 @@ export default function PublishConfirmationDialog({
     }
     rowList = [...rowList, ...[
         {
-          icon: ICON.resize,
+          icon: "resize",
           new: `${currentVersion.stageLength}m×${currentVersion.stageWidth}m`,
           old: oldVersion ? `${oldVersion.stageLength}m×${oldVersion.stageWidth}m` : undefined,
-        },
+        } as Row,
         {
-          icon: ICON.group,
+          icon: "group",
           new: `${currentVersion.dancerCount}人`,
           old: oldVersion ? `${oldVersion.dancerCount}人` : undefined,
-        },
+        } as Row,
         {
-          icon: ICON.flag,
+          icon: "flag",
           new: `${currentVersion.propCount}`,
           old: oldVersion ? `${oldVersion.propCount}` : undefined,
-        },
+        } as Row,
       ]
     ];
     return rowList;

@@ -3,7 +3,6 @@ import classNames from "classnames";
 import React, { useImperativeHandle } from "react";
 import { FieldWithLabel } from "./Label";
 import Icon from "../basic/Icon";
-import { ICON } from "../../lib/consts/consts";
 
 export interface NumberInputProps {
   name?: string,
@@ -60,11 +59,11 @@ export default function NumberInput ({
         <div className={wrapperClasses}>
           <NumberField.Group className="grid grid-cols-[1fr,2fr,1fr] w-full bg-white data-[disabled]:bg-gray-200 border rounded-md border-gray-400 focus-within:border-primary">
             <NumberField.Decrement className={"flex items-center justify-center select-none rounded-l-md min-w-4 bg-clip-padding" + ((value ?? 1) > (min ?? 0) ? " opacity-100" : " opacity-30")}>
-              <Icon src={ICON.remove} colour="black" size="sm"/>
+              <Icon src="remove" colour="black" size="sm"/>
             </NumberField.Decrement>
             <NumberField.Input className="p-3 text-center text-gray-900 min-w-10 tabular-nums focus:z-1 focus:outline-none focus:-outline-offset-1" />
             <NumberField.Increment className={"flex items-center justify-center select-none rounded-r-md min-w-4 bg-clip-padding" + ((value ?? 1) < (max ?? 100000000) ? " opacity-100" : " opacity-30")}>
-              <Icon src={ICON.add} colour="black" size="sm"/>
+              <Icon src="add" colour="black" size="sm"/>
             </NumberField.Increment>
           </NumberField.Group>
         </div>

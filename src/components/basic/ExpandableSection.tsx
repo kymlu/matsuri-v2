@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { ICON } from "../../lib/consts/consts";
 import IconButton from "./IconButton";
 import CustomMenu from "../inputs/CustomMenu";
 
@@ -19,7 +18,7 @@ export default function ExpandableSection({
     <div className={"sticky flex flex-row justify-between w-full" + (level === 1 ? (" top-0 z-20 py-1 bg-gray-200 " + (isExpanded ? "rounded-t-lg" : "rounded-lg")) : " z-10 bg-gray-50")}>
       <button onClick={() => setIsExpanded(prev => !prev)} className='flex flex-row items-center w-full'>
         <IconButton
-          src={isExpanded ? ICON.arrowDropDown : ICON.arrowRight}
+          src={isExpanded ? "arrowDropDown" : "arrowRight"}
           size="sm"
           colour="primary"
           noBorder
@@ -30,7 +29,7 @@ export default function ExpandableSection({
         menuContents && 
         <CustomMenu trigger={
           <IconButton
-            src={ICON.moreVert}
+            src="moreVert"
             asDiv
             noBorder
             colour="grey"

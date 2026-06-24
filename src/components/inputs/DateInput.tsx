@@ -3,7 +3,6 @@ import { isNullOrUndefinedOrBlank } from "../../lib/helpers/globalHelper";
 import classNames from "classnames";
 import { FieldWithLabel } from "./Label";
 import IconButton from "../basic/IconButton";
-import { ICON } from "../../lib/consts/consts";
 import { getJpDate } from "../../lib/helpers/dateHelper";
 
 export type DateInputProps = {
@@ -75,7 +74,7 @@ export default function DateInput({
             size="sm"
             colour={disabled ? "grey" : "primary"}
             noBorder
-            src={ICON.calendarToday}/>
+            src="calendarToday"/>
         </div>
         <input
           disabled={disabled}

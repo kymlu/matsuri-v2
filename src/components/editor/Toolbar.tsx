@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { ICON } from "../../lib/consts/consts";
 import IconButton from "../basic/IconButton";
 import { VerticalDivider } from "../basic/Divider";
 import { Distribution, HorizontalAlignment, VerticalAlignment } from "../../models/alignment";
@@ -94,6 +93,7 @@ export default function Toolbar({
   onSwapPosition,
 
   showArrange,
+  showRearrange,
   onVerticalAlign,
   onHorizontalAlign,
   showDistribute,
@@ -128,7 +128,7 @@ export default function Toolbar({
   const areSelectionActionsActivated = showRenameDancer || showArrange || showDeleteObjects;
 
   useEffect(() => {
-    if (showArrange && isArrangeVisible) {
+    if (!showArrange && isArrangeVisible) {
       setIsArrangeVisible(false);
     }
   }, [showArrange]);
@@ -145,34 +145,34 @@ export default function Toolbar({
       <>
         {
           !areSelectionActionsActivated && <>
-            <IconButton src={ICON.add} label="追加" onClick={()=>{setIsAddManagerVisible(true)}}/>
-            <IconButton src={ICON[123]} label="カウント" onClick={()=>{setIsActionManagerVisible(true)}}/>
+            <IconButton src="add" label="追加" onClick={()=>{setIsAddManagerVisible(true)}}/>
+            <IconButton src="123" label="カウント" onClick={()=>{setIsActionManagerVisible(true)}}/>
           </>
         }
         {
           areSelectionActionsActivated && 
           <>
-            <IconButton src={ICON.deselect} label="選択解除" onClick={() => {onDeselect()}} />
+            <IconButton src="deselect" label="選択解除" onClick={() => {onDeselect()}} />
             <VerticalDivider/>
           </>
         }
-        {showRenameDancer && <IconButton src={ICON.textFieldsAlt} label="名前変更" onClick={() => {onRenameDancer()}} />}
-        {showRenameProp && <IconButton src={ICON.textFieldsAlt} label="名前変更" onClick={() => {onRenameProp()}} />}
-        {showRenameObstacle && <IconButton src={ICON.textFieldsAlt} label="名前変更" onClick={() => {onRenameObstacle()}} />}
-        {showArrange && <IconButton src={ICON.straighten} label="整理" onClick={()=>{setIsArrangeVisible(true)}}/>}
-        {showChangeColour && <IconButton src={ICON.colors} label="色" onClick={() => {onChangeColor()}} />}
-        {showCopyPosition && <IconButton src={ICON.contentCopy} label="コピー" onClick={() => {onCopyPosition()}} />}
-        {showPastePosition && <IconButton src={ICON.contentPaste} label="ペースト" onClick={() => {onPastePosition()}} />}
-        {showSwapPosition && <IconButton src={ICON.swapHoriz} label="位置交換" onClick={() => {onSwapPosition()}} />}
-        {showDuplicateObstacle && <IconButton src={ICON.contentCopy} label="複製" onClick={() => {onDuplicateObstacle()}} />}
-        {showDeleteObjects && <IconButton src={ICON.delete} label="削除" onClick={()=>{onDeleteObjects()}}/>}
-        {showSelectDancer && showSelectDancersButton && <IconButton src={ICON.select} subIconSrc={ICON.colors} label="同色選択" onClick={() => {onSelectColor()}} />}
-        {showSelectDancersButton && <IconButton src={ICON.select} subIconSrc={ICON.person} label="全員選択" onClick={() => {onSelectType(true,  false)}} />}
-        {showSelectPropsButton && <IconButton src={ICON.select} subIconSrc={ICON.flag} label="道具選択" onClick={() => {onSelectType(false, true)}} />}
-        {showSelectAllButton && <IconButton src={ICON.selectAll} label="全部選択" onClick={() => {onSelectType(true, true)}} />}
+        {showRenameDancer && <IconButton src="textFieldsAlt" label="名前変更" onClick={() => {onRenameDancer()}} />}
+        {showRenameProp && <IconButton src="textFieldsAlt" label="名前変更" onClick={() => {onRenameProp()}} />}
+        {showRenameObstacle && <IconButton src="textFieldsAlt" label="名前変更" onClick={() => {onRenameObstacle()}} />}
+        {showArrange && <IconButton src="straighten" label="整理" onClick={()=>{setIsArrangeVisible(true)}}/>}
+        {showChangeColour && <IconButton src="colors" label="色" onClick={() => {onChangeColor()}} />}
+        {showCopyPosition && <IconButton src="contentCopy" label="コピー" onClick={() => {onCopyPosition()}} />}
+        {showPastePosition && <IconButton src="contentPaste" label="ペースト" onClick={() => {onPastePosition()}} />}
+        {showSwapPosition && <IconButton src="swapHoriz" label="位置交換" onClick={() => {onSwapPosition()}} />}
+        {showDuplicateObstacle && <IconButton src="contentCopy" label="複製" onClick={() => {onDuplicateObstacle()}} />}
+        {showDeleteObjects && <IconButton src="delete" label="削除" onClick={()=>{onDeleteObjects()}}/>}
+        {showSelectDancer && showSelectDancersButton && <IconButton src="select" subIconSrc="colors" label="同色選択" onClick={() => {onSelectColor()}} />}
+        {showSelectDancersButton && <IconButton src="select" subIconSrc="person" label="全員選択" onClick={() => {onSelectType(true,  false)}} />}
+        {showSelectPropsButton && <IconButton src="select" subIconSrc="flag" label="道具選択" onClick={() => {onSelectType(false, true)}} />}
+        {showSelectAllButton && <IconButton src="selectAll" label="全部選択" onClick={() => {onSelectType(true, true)}} />}
         {
           !areSelectionActionsActivated && <>
-            {showLockObstacle && <IconButton src={areObstaclesLocked ? ICON.lockOpen : ICON.lock} label={ areObstaclesLocked ? "障害物解除" : "障害物固定"} onClick={() => {onToggleObstacleLock()}} />}
+            {showLockObstacle && <IconButton src={areObstaclesLocked ? "lockOpen" : "lock"} label={ areObstaclesLocked ? "障害物解除" : "障害物固定"} onClick={() => {onToggleObstacleLock()}} />}
           </>
         }
       </>
@@ -180,7 +180,7 @@ export default function Toolbar({
     {
       isSubmenuOpen && 
       <>
-        <IconButton disabled={isAssigningActions || isAddingDancer || isAddingProp || isAddingObstacle} src={ICON.chevronBackward} label="戻る" onClick={()=>{
+        <IconButton disabled={isAssigningActions || isAddingDancer || isAddingProp || isAddingObstacle} src="chevronBackward" label="戻る" onClick={()=>{
           setIsArrangeVisible(false);
           setIsAddManagerVisible(false);
           setIsActionManagerVisible(false);
@@ -190,17 +190,17 @@ export default function Toolbar({
           isAddManagerVisible && 
           <>
             <IconButton
-              src={isAddingDancer ? ICON.clear : ICON.person}
+              src={isAddingDancer ? "clear" : "person"}
               disabled={isAddingProp || isAddingObstacle}
               label="ダンサー"
               onClick={() => {onAddDancer()}} />
             <IconButton
-              src={isAddingProp ? ICON.clear : ICON.flag}
+              src={isAddingProp ? "clear" : "flag"}
               disabled={isAddingDancer || isAddingObstacle}
               label="道具"
               onClick={() => {onAddProp()}} />
             <IconButton
-              src={isAddingObstacle ? ICON.clear : ICON.emergencyHome}
+              src={isAddingObstacle ? "clear" : "emergencyHome"}
               disabled={isAddingDancer || isAddingProp}
               label="障害物"
               onClick={() => {onAddObstacle()}} />
@@ -209,18 +209,19 @@ export default function Toolbar({
         {
           isArrangeVisible && 
           <>
-            <IconButton src={ICON.alignHorizontalLeft} label="左" onClick={() => {onHorizontalAlign("left")}} />
-            <IconButton src={ICON.alignHorizontalCenter} label="横中" onClick={() => {onHorizontalAlign("centre")}} />
-            <IconButton src={ICON.alignHorizontalRight} label="右" onClick={() => {onHorizontalAlign("right")}} />
+            
+            <IconButton src="alignHorizontalLeft" label="左" onClick={() => {onHorizontalAlign("left")}} />
+            <IconButton src="alignHorizontalCenter" label="横中" onClick={() => {onHorizontalAlign("centre")}} />
+            <IconButton src="alignHorizontalRight" label="右" onClick={() => {onHorizontalAlign("right")}} />
             <VerticalDivider/>
-            <IconButton src={ICON.alignVerticalTop} label="上" onClick={() => {onVerticalAlign("top")}} />
-            <IconButton src={ICON.alignVerticalCenter} label="縦中" onClick={() => {onVerticalAlign("centre")}} />
-            <IconButton src={ICON.alignVerticalBottom} label="下" onClick={() => {onVerticalAlign("bottom")}} />
+            <IconButton src="alignVerticalTop" label="上" onClick={() => {onVerticalAlign("top")}} />
+            <IconButton src="alignVerticalCenter" label="縦中" onClick={() => {onVerticalAlign("centre")}} />
+            <IconButton src="alignVerticalBottom" label="下" onClick={() => {onVerticalAlign("bottom")}} />
             {
               showDistribute && <>
                 <VerticalDivider/>
-                <IconButton src={ICON.verticalDistribute} label="縦均" onClick={() => {onDistribute("y")}} />
-                <IconButton src={ICON.horizontalDistribute} label="横均" onClick={() => {onDistribute("x")}} />
+                <IconButton src="verticalDistribute" label="縦均" onClick={() => {onDistribute("y")}} />
+                <IconButton src="horizontalDistribute" label="横均" onClick={() => {onDistribute("x")}} />
               </>
             }
           </>
@@ -230,12 +231,12 @@ export default function Toolbar({
           <>
             <IconButton
               disabled={isAssigningActions}
-              src={ICON.category}
+              src="category"
               label="管理" // todo: show how many actions?
               onClick={() => {onOpenActionManager()}} />
             <IconButton
               disabled={!isAssigningActionsEnabled}
-              src={isAssigningActions ? ICON.clear : ICON.category}
+              src={isAssigningActions ? "clear" : "category"}
               label="割当"
               onClick={() => {onAssignActions()}} />
           </>

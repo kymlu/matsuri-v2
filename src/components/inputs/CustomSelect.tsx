@@ -2,7 +2,6 @@ import { Select } from "@base-ui/react";
 import React, { useState } from "react";
 import { useImperativeHandle } from "react";
 import { strEquals } from "../../lib/helpers/globalHelper";
-import { ICON } from "../../lib/consts/consts";
 import { FieldWithLabel } from "./Label";
 import Icon from "../basic/Icon";
 
@@ -45,7 +44,7 @@ export default function CustomSelect({
             {isIcons ? <img className="size-8" src={value}/> : value}
           </Select.Value>
           <Select.Icon className="flex align-middle">
-            <Icon size="sm" src={ICON.expandMore}/>
+            <Icon size="sm" src="expandMore"/>
           </Select.Icon>
         </Select.Trigger>
         <Select.Portal>

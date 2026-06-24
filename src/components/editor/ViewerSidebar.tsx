@@ -3,7 +3,6 @@ import { Dancer, DancerPosition } from "../../models/dancer";
 import { DancerAction, DancerActionTiming } from "../../models/dancerAction";
 import PositionHint from "./PositionHint";
 import IconButton from "../basic/IconButton";
-import { ICON } from "../../lib/consts/consts";
 import { isNullOrUndefinedOrBlank, strEquals } from "../../lib/helpers/globalHelper";
 import Divider from "../basic/Divider";
 import Button from "../basic/Button";
@@ -46,7 +45,7 @@ export default function ViewerSidebar({
         {
           (isPositionHintShown || selectedTiming) && <IconButton
             size="sm"
-            src={ICON.clear}
+            src="clear"
             noBorder
             onClick={() => {
               if (isPositionHintShown) {

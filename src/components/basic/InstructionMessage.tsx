@@ -1,4 +1,3 @@
-import { ICON } from "../../lib/consts/consts"
 import IconButton from "./IconButton"
 
 type InstructionMessageProps = {
@@ -14,7 +13,7 @@ export default function InstructionMessage({
       {instruction}
     </span>
     <IconButton
-      src={ICON.clear}
+      src="clear"
       size="sm"
       onClick={onClose}/>
   </div>

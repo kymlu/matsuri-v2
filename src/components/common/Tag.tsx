@@ -6,7 +6,7 @@ import { ChoreoStatus } from "../../pages/HomePage"
 type TagProps = {
   type: "primary" | "filled" | "grey",
   text: string,
-  icon?: string,
+  icon?: keyof typeof ICON,
   compact?: boolean,
   dottedLine?: boolean,
 }
@@ -54,11 +54,11 @@ export function ChoreoStatusTag ({
     }
     {
       choreoStatus === "edited" &&
-      <Tag compact={compact} type="grey" text={`v${version}`} icon={ICON.edit}/>
+      <Tag compact={compact} type="grey" text={`v${version}`} icon="edit"/>
     }
     {
       choreoStatus === "syncRequired" &&
-      <Tag compact={compact} type="filled" text={`v${version}`} icon={ICON.warning}/>
+      <Tag compact={compact} type="filled" text={`v${version}`} icon="warning"/>
     }
     {
       (choreoStatus === "localOnly") &&

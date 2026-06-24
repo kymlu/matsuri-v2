@@ -1,8 +1,8 @@
 import React, { useImperativeHandle } from "react";
 import classNames from "classnames";
-import { ICON } from "../../lib/consts/consts";
 import { isNullOrUndefinedOrBlank } from "../../lib/helpers/globalHelper";
 import { FieldWithLabel } from "./Label";
+import IconButton from "../basic/IconButton";
 
 export type TextInputProps = {
   name?: string,
@@ -86,12 +86,12 @@ export default function LongTextInput({
 
         {
           clearable && !isNullOrUndefinedOrBlank(value) && 
-          <button className="col-start-1 row-start-1 pr-2 ml-auto text-end" onClick={() => {handleChange("")}}>
-            <img
-              className="size-4"
-              src={ICON.clear}
-              alt="Clear text"/>
-          </button>
+          <IconButton
+            src="clear"
+            colour="primary"
+            size="sm"
+            noBorder
+            onClick={() => {handleChange("")}}/>
         }
 
         {

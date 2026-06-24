@@ -1,5 +1,4 @@
 import { Dialog, Menu } from "@base-ui/react";
-import { ICON } from "../../lib/consts/consts";
 import IconButton from "../basic/IconButton";
 import { Choreo } from "../../models/choreo";
 import { Sidebar } from "./Sidebar";
@@ -71,7 +70,7 @@ export default function Header({
     <div className="flex items-center justify-between w-screen gap-2 px-2">
       <div className="flex">
         <IconButton
-          src={ICON.home}
+          src="home"
           noBorder
           onClick={() => {
             onSave?.();
@@ -87,7 +86,7 @@ export default function Header({
       <div className="flex justify-end gap-2">
         <IconButton
           colour="primary"
-          src={goToEdit ? ICON.edit : ICON.visibility}
+          src={goToEdit ? "edit" : "visibility"}
           noBorder
           onClick={() => {
             if (goToEdit) {
@@ -100,7 +99,7 @@ export default function Header({
           showDancerWarningMessage &&
           <IconButton
             colour="primary"
-            src={ICON.personAlert}
+            src="personAlert"
             noBorder
             onClick={showDancerWarningMessage}
           />
@@ -109,7 +108,7 @@ export default function Header({
           toggleShowPath &&
           <IconButton
             colour="black"
-            src={ICON.step}
+            src="step"
             noBorder
             onClick={toggleShowPath}
             disabled={isShowPathBtnDisabled}
@@ -121,31 +120,31 @@ export default function Header({
           onDownload && exportChoreo &&
           <CustomMenu trigger={
             <IconButton
-              src={ICON.download}
+              src="download"
               noBorder
               asDiv/>
           }>
             <div className="space-y-2">
               <Menu.Item>
-                <IconLabelButton full noBorder icon={ICON.fileExport} label="共有用" onClick={exportChoreo}/>
+                <IconLabelButton full noBorder icon="fileExport" label="共有用" onClick={exportChoreo}/>
               </Menu.Item>
               <Divider compact/>
               <Menu.Item>
-                <IconLabelButton full noBorder icon={ICON.pictureAsPdf} label="PDF" onClick={onDownload}/>
+                <IconLabelButton full noBorder icon="pictureAsPdf" label="PDF" onClick={onDownload}/>
               </Menu.Item>
             </div>
           </CustomMenu>
         }
         {
           onDownload && !exportChoreo &&
-          <IconButton noBorder src={ICON.pictureAsPdf} onClick={onDownload}/>
+          <IconButton noBorder src="pictureAsPdf" onClick={onDownload}/>
         }
         {
           hasSidebar &&
           <Dialog.Root>
             <Dialog.Trigger>
               <IconButton
-                src={ICON.settings}
+                src="settings"
                 noBorder
                 asDiv/>
             </Dialog.Trigger>
@@ -176,7 +175,7 @@ export default function Header({
       <div className="flex gap-1">
         <div className="flex items-center gap-0.5">
           <Icon
-            src={ICON.resize}
+            src="resize"
             colour="grey"
             size="xs"
           />
@@ -187,7 +186,7 @@ export default function Header({
           dancerCount > 0 &&
           <div className="flex items-center gap-0.5">
             <Icon
-              src={ICON.group}
+              src="group"
               colour="grey"
               size="xs"
             />
@@ -198,7 +197,7 @@ export default function Header({
           propCount > 0 &&
           <div className="flex items-center gap-0.5">
             <Icon
-              src={ICON.flag}
+              src="flag"
               colour="grey"
               size="xs"
             />

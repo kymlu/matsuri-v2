@@ -5,7 +5,6 @@ import { BasicChoreoDetails } from "../../models/choreo";
 import Divider from "../basic/Divider";
 import { getDate } from "../../lib/helpers/dateHelper";
 import Icon from "../basic/Icon";
-import { ICON } from "../../lib/consts/consts";
 import { ChoreoStatusTag } from "../common/Tag";
 
 type SyncChoreoDialogProps = {
@@ -33,7 +32,7 @@ export default function SyncChoreoDialog ({
       </div>
       <div className="py-2 border border-gray-400 rounded-md">
         <div className="grid grid-cols-[auto,auto,1fr,auto] gap-2 items-center justify-between px-2">
-          <Icon src={ICON.editDocument} size="sm"/>
+          <Icon src="editDocument" size="sm"/>
           <span className="font-semibold text-nowrap">編集版</span>
           <span className="text-right text-nowrap">{savedChoreo?.lastUpdated ? getDate(new Date(savedChoreo.lastUpdated)) : ""}</span>
           {
@@ -47,7 +46,7 @@ export default function SyncChoreoDialog ({
         </div>
         <Divider medium/>
         <div className="grid grid-cols-[auto,auto,1fr,auto] gap-2 items-center justify-between px-2">
-          <Icon src={ICON.globe} size="sm"/>
+          <Icon src="globe" size="sm"/>
           <span className="font-semibold text-nowrap">公開版</span>
           <span className="text-right text-nowrap">{serverChoreo?.lastUpdated ? getDate(new Date(serverChoreo.lastUpdated)) : ""}</span>
           {

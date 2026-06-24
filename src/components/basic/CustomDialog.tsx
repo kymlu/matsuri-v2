@@ -1,6 +1,5 @@
 import { Dialog } from "@base-ui/react";
 import React from "react";
-import { ICON } from "../../lib/consts/consts";
 import Icon from "./Icon";
 
 export type CustomDialogProps = {
@@ -31,7 +30,7 @@ export default function CustomDialog({
               <Dialog.Close
                 onClick={() => {onClose?.()}}
                 className="min-w-6">
-                <Icon src={ICON.clear} size="sm"/>
+                <Icon src="clear" size="sm"/>
               </Dialog.Close>
             )}
           </div>

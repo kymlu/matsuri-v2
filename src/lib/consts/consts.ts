@@ -36,8 +36,16 @@ export const SAMPLE_PARADE_ID = "41221ff9-2647-4255-8189-fa4008bef93a";
 export enum CUSTOM_EVENT {
 }
 
+export const IMG = {
+  beginner: "beginner.svg",
+  moveBackward: "moveBackward.svg",
+  moveForward: "moveForward.svg",
+  moveToBack: "moveToBack.svg",
+  moveToFront: "moveToFront.svg",
+}
+
 export const ICON = {
-  123: "123",
+  "123": "123",
   add: "add",
   alignHorizontalCenter: "align_horizontal_center",
   alignHorizontalLeft: "align_horizontal_left",

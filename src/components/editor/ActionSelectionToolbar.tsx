@@ -3,7 +3,6 @@ import { DancerAction, DancerActionTiming } from "../../models/dancerAction"
 import Button from "../basic/Button";
 import { strEquals } from "../../lib/helpers/globalHelper";
 import Icon from "../basic/Icon";
-import { ICON } from "../../lib/consts/consts";
 
 type ActionSelectionToolbarProps = {
   actions: DancerAction[],
@@ -58,7 +57,7 @@ function ActionSection ({
         <span className="font-semibold truncate">
           {action.name}
         </span>
-        <Icon colour="white" src={isExpanded ? ICON.chevronBackward : ICON.chevronForward} size="xs"/>
+        <Icon colour="white" src={isExpanded ? "chevronBackward" : "chevronForward"} size="xs"/>
       </div>
     </Button>
     {
@@ -94,7 +93,7 @@ function TimingButton ({timing, selectedTimingId, onSelectTiming}: TimingButtonP
       </span>
       <div className="flex items-center justify-center">
         <span>{"("}</span>
-        <Icon colour={strEquals(timing.id, selectedTimingId) ? "white" : "grey"} src={ICON.group} size="xs"/>
+        <Icon colour={strEquals(timing.id, selectedTimingId) ? "white" : "grey"} src="group" size="xs"/>
         {timing.dancerIds.length}
         <span>{")"}</span>
       </div>

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import CustomDialog from "../basic/CustomDialog";
 import Button from "../basic/Button";
+import { getImgPath } from "../../lib/helpers/globalHelper";
 
 
 export default function BeginnersDialog() {
@@ -30,7 +31,7 @@ export default function BeginnersDialog() {
           <Button primary={step === "dialog"} onClick={() => setStep("dialog")}>エクスポート</Button>
           <Button primary={step === "pdf"} onClick={() => setStep("pdf")}>PDF</Button>
         </div>
-        <img alt={step} src={`${process.env.PUBLIC_URL}/img/${step}.png`}/>
+        <img alt={step} src={getImgPath(step)}/>
       </div>
   </CustomDialog>
 }

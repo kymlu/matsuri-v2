@@ -4,7 +4,7 @@ import BaseEditDialog from "./BaseEditDialog";
 import { strCompare, strEquals } from "../../lib/helpers/globalHelper";
 import TextInput from "../inputs/TextInput";
 import IconButton from "../basic/IconButton";
-import { ICON, MAX_PROP_DIMENSION, MIN_PROP_DIMENSION, SHORT_NAME_LENGTH } from "../../lib/consts/consts";
+import { MAX_PROP_DIMENSION, MIN_PROP_DIMENSION, SHORT_NAME_LENGTH } from "../../lib/consts/consts";
 import NumberInput from "../inputs/NumberInput";
 import CustomMenu from "../inputs/CustomMenu";
 import { colorPalette } from "../../lib/consts/colors";
@@ -138,7 +138,7 @@ export function PropManagerDialog({
                 noBorder
                 size="sm"
                 colour="primary"
-                src={ICON.delete}
+                src="delete"
                 onClick={() => {
                   setDeletedPropIds(prev => [...prev, prop.id]);
                   setPropList(prev => prev.filter(x => !strEquals(x.id, prop.id)));

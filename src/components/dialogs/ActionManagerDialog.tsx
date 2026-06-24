@@ -7,7 +7,7 @@ import { restrictToParentElement } from "@dnd-kit/modifiers";
 import TextInput from "../inputs/TextInput";
 import { strEquals } from "../../lib/helpers/globalHelper";
 import Icon from "../basic/Icon";
-import { ACTION_NAME_LENGTH, COUNT_NAME_LENGTH, ICON } from "../../lib/consts/consts";
+import { ACTION_NAME_LENGTH, COUNT_NAME_LENGTH } from "../../lib/consts/consts";
 import IconButton from "../basic/IconButton";
 import BaseEditDialog from "./BaseEditDialog";
 import { ChoreoSection } from "../../models/choreoSection";
@@ -124,7 +124,7 @@ export function ActionManagerDialog({
     <div className="h-full max-h-full grid gap-2 grid-rows-[1fr,auto]">
       <div className="max-h-full space-y-4 overflow-scroll">
         <IconLabelButton
-          icon={ICON.add}
+          icon="add"
           full
           onClick={addAction}
           primary
@@ -219,7 +219,7 @@ function SortableActionSection ({
 
   return <div className="relative flex flex-row items-start gap-2 p-4 bg-white border border-gray-400 rounded-md" style={style} ref={setNodeRef}>
     <div {...attributes} {...listeners}>
-      <Icon src={ICON.dragHandle}/>
+      <Icon src="dragHandle"/>
     </div>
     <div className="flex-1">
       <TextInput
@@ -249,12 +249,12 @@ function SortableActionSection ({
         }
         {
           action.timings.length < 16 &&
-          <IconButton onClick={onAddTiming} src={ICON.add} size="sm"/>
+          <IconButton onClick={onAddTiming} src="add" size="sm"/>
         }
       </div>
     </div>
     <div className="absolute top-2 right-2">
-      <IconButton size="sm" colour="primary" noBorder src={ICON.delete} onClick={() => onDeleteAction()}/>
+      <IconButton size="sm" colour="primary" noBorder src="delete" onClick={() => onDeleteAction()}/>
     </div>
   </div>
 }
@@ -278,8 +278,8 @@ function TimingItem ({
       compact short
       defaultValue={timing.name}
       onContentChange={(newName) => {onRenameTiming(newName)}}/>
-    <Icon size="sm" src={ICON.group}/>
+    <Icon size="sm" src="group"/>
     <span>{timing.dancerIds.length}</span>
-    {showDeleteButton && <IconButton colour="primary" size="sm" noBorder src={ICON.delete} onClick={() => {onDeleteTiming()}}/>}
+    {showDeleteButton && <IconButton colour="primary" size="sm" noBorder src="delete" onClick={() => {onDeleteTiming()}}/>}
   </div>
 }

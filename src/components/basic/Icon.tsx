@@ -1,7 +1,8 @@
 import classNames from "classnames";
+import { ICON } from "../../lib/consts/consts";
 
 type IconProps = {
-  src: string;
+  src: keyof typeof ICON;
   colour?: "primary" | "black" | "grey" | "white";
   size?: "xs" | "sm" | "md" | "lg";
   crossedOut?: boolean;
@@ -30,7 +31,7 @@ export default function Icon({
   return (
     <span className="relative inline-flex items-center justify-center leading-none">
       <span className={iconClasses}>
-        {src}
+        {ICON[src]}
       </span>
       {crossedOut && (
         <svg

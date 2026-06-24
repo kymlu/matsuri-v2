@@ -1,6 +1,6 @@
 import { Dialog, Menu } from "@base-ui/react"
 import CustomDialog from "../components/basic/CustomDialog"
-import { ICON, LONG_NAME_LENGTH, SAMPLE_PARADE_ID, SAMPLE_STAGE_ID, SEARCH_NAME_LENGTH } from "../lib/consts/consts"
+import { LONG_NAME_LENGTH, SAMPLE_PARADE_ID, SAMPLE_STAGE_ID, SEARCH_NAME_LENGTH } from "../lib/consts/consts"
 import { IconLabelButton } from "../components/basic/Button"
 import Icon from "../components/basic/Icon"
 import { readUploadedFile } from "../lib/helpers/uploadHelper"
@@ -350,7 +350,7 @@ export default function HomePage({
       teamId: team?.id,
     } as Choreo;
     saveChoreo(newChoreo, () => {
-      setLocalChoreos(prev => ({...prev, [newChoreo.id]: newChoreo}))
+      setLocalChoreos(prev => ({...prev, [newChoreo.id]: newChoreo}));
       var newChoreos = [...savedChoreos, {...getBasicChoreoDetails(newChoreo), status: "localOnly" as ChoreoStatus}];
 
       // setDancerNamesByEvent(
@@ -386,31 +386,31 @@ export default function HomePage({
           <div className="flex items-center ">
             <Dialog.Root>
               <Dialog.Trigger>
-                <IconButton src={ICON.info} colour="primary" noBorder asDiv/>
+                <IconButton src="info" colour="primary" noBorder asDiv/>
               </Dialog.Trigger>
               <SiteInfoDialog buildInfo={buildInfo}/>
             </Dialog.Root>
             <Dialog.Root>
               <Dialog.Trigger>
-                <IconButton src={ICON.personEdit} colour="primary" noBorder asDiv/>
+                <IconButton src="personEdit" colour="primary" noBorder asDiv/>
               </Dialog.Trigger>
               <UserNameEditDialog name={savedDancerName ?? ""} onSubmit={(name) => setSavedDancerName(name)}/>
             </Dialog.Root>
             {
               !isLoggedIn && team?.id &&
-              <IconButton src={ICON.login} colour="grey" noBorder onClick={() => setLoginDialogOpen(true)}/>
+              <IconButton src="login" colour="grey" noBorder onClick={() => setLoginDialogOpen(true)}/>
             }
             {
               isLoggedIn && team?.id &&
               <CustomMenu
                 trigger={
-                  <IconButton asDiv src={ICON.verifiedUser} colour="primary" noBorder/>
+                  <IconButton asDiv src="verifiedUser" colour="primary" noBorder/>
                 }>
                 <div className="space-y-2">
                   <Menu.Item>
                     <IconLabelButton
                       full noBorder
-                      icon={ICON.logout}
+                      icon="logout"
                       label="ログアウト"
                       onClick={()=>{
                         logoutUserFromTeam(() => {
@@ -430,13 +430,13 @@ export default function HomePage({
             full
             primary
             label="新規作成"
-            icon={ICON.add}
+            icon="add"
             onClick={() => goToNewChoreoPage()}
             />
           <IconLabelButton
             full
             label="アップロード"
-            icon={ICON.upload}
+            icon="upload"
             onClick={triggerUpload}
             />
         </div>
@@ -557,8 +557,8 @@ export default function HomePage({
 
         <Dialog.Root>
           <Dialog.Trigger>
-            <div className="z-20 fixed flex items-center p-1.5 bg-white border-2 rounded-full bottom-12 right-8 size-10 border-primary">
-              <img className="" src={`${process.env.PUBLIC_URL}/img/beginner.svg`}/>
+            <div className="fixed z-20 bg-white bottom-12 right-8">
+              <IconButton asDiv imgSrc="beginner" colour="primary"/>
             </div>
           </Dialog.Trigger>
           <BeginnersDialog/>
@@ -916,15 +916,15 @@ function EventSection({
     menuContents={ // todo: add a feature to see the upload history
       <>
         <Menu.Item>
-          <IconLabelButton full noBorder icon={ICON.add} label="追加" onClick={addEvent}/>
+          <IconLabelButton full noBorder icon="add" label="追加" onClick={addEvent}/>
         </Menu.Item>
         <Divider compact/>
         <Menu.Item>
-          <IconLabelButton full noBorder icon={ICON.edit} label="情報変更" onClick={editEventName}/>
+          <IconLabelButton full noBorder icon="edit" label="情報変更" onClick={editEventName}/>
         </Menu.Item>
         <Divider compact/>
         <Menu.Item>
-          <IconLabelButton full noBorder icon={ICON.download} label="共有" onClick={() => onExportEvent()}/>
+          <IconLabelButton full noBorder icon="download" label="共有" onClick={() => onExportEvent()}/>
         </Menu.Item>
       </>
     }
@@ -955,7 +955,7 @@ function EventSection({
                 {/* Title */}
                 <div className="relative flex flex-row items-start justify-between gap-2">
                   <span className="flex items-center gap-0.5 font-medium text-left break-words text-wrap">
-                    {choreo.hasPassword ? <Icon src={isLoggedIn ? ICON.lockOpen : ICON.lock} colour="primary" size="xs"/> : <></>}
+                    {choreo.hasPassword ? <Icon src={isLoggedIn ? "lockOpen" : "lock"} colour="primary" size="xs"/> : <></>}
                     <span>{choreo.name}</span>
                   </span>
                   <div className="flex flex-row items-center gap-2">
@@ -966,7 +966,7 @@ function EventSection({
                         setSelectedChoreo(choreo);
                         setDancerWarningDialogOpen(true);
                       }}>
-                        <IconButton asDiv noBorder size="sm" src={ICON.personAlert} colour="primary"/>
+                        <IconButton asDiv noBorder size="sm" src="personAlert" colour="primary"/>
                       </Dialog.Trigger>
                     }
                     <ChoreoStatusTag choreoStatus={choreo.status} version={choreo.version}/>
@@ -976,7 +976,7 @@ function EventSection({
                       setOptionsDialogOpen(true);
                     }}>
                       <IconButton
-                        src={ICON.moreVert}
+                        src="moreVert"
                         colour="grey"
                         size="sm"
                         noBorder
@@ -992,7 +992,7 @@ function EventSection({
                       <Icon
                         colour="grey"
                         size="xs"
-                        src={ICON.history}/>
+                        src="history"/>
                       {getDate(new Date(choreo.lastUpdated))}
                     </div>
                   ) : (
@@ -1002,7 +1002,7 @@ function EventSection({
                   <div className="flex items-center gap-2">
                     <div className="flex items-center gap-0.5">
                       <Icon
-                        src={ICON.resize}
+                        src="resize"
                         colour="grey"
                         size="xs"
                       />
@@ -1011,7 +1011,7 @@ function EventSection({
 
                     <div className="flex items-center gap-0.5">
                       <Icon
-                        src={ICON.group}
+                        src="group"
                         colour="grey"
                         size="xs"
                       />
@@ -1034,7 +1034,7 @@ function EventSection({
             <div className="flex flex-col gap-2">
               <Dialog.Close>
                 <IconLabelButton
-                  icon={ICON.edit}
+                  icon="edit"
                   label="隊列情報変更"
                   asDiv
                   onClick={() => {
@@ -1050,7 +1050,7 @@ function EventSection({
               
               <Dialog.Close>
                 <IconLabelButton
-                  icon={ICON.fileCopy}
+                  icon="fileCopy"
                   label="複製"
                   asDiv
                   onClick={() => {
@@ -1066,7 +1066,7 @@ function EventSection({
 
               <Dialog.Close>
                 <IconLabelButton
-                  icon={ICON.fileExport}
+                  icon="fileExport"
                   label="共有用エクスポート"
                   asDiv
                   onClick={() => {
@@ -1082,7 +1082,7 @@ function EventSection({
               
               <Dialog.Close>
                 <IconLabelButton
-                  icon={ICON.pictureAsPdf}
+                  icon="pictureAsPdf"
                   label="PDFをダウンロード"
                   asDiv
                   onClick={() => {
@@ -1100,7 +1100,7 @@ function EventSection({
                 <Dialog.Close>
                   <IconLabelButton
                     primaryText
-                    icon={ICON.delete}
+                    icon="delete"
                     label="削除"
                     asDiv
                     onClick={() => deleteChoreo(selectedChoreo)}
@@ -1113,7 +1113,7 @@ function EventSection({
                 <Dialog.Close>
                   <IconLabelButton
                     primaryText
-                    icon={ICON.warning}
+                    icon="warning"
                     label="確認"
                     asDiv
                     onClick={() => {
@@ -1128,7 +1128,7 @@ function EventSection({
                 <Dialog.Close>
                   <IconLabelButton
                     primaryText
-                    icon={ICON.restorePage}
+                    icon="restorePage"
                     label="変更を破棄"
                     asDiv
                     onClick={() => revertChoreo(selectedChoreo)}

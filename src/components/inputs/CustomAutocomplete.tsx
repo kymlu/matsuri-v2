@@ -1,6 +1,6 @@
 import React, { useImperativeHandle } from "react";
 import classNames from "classnames";
-import { DEFAULT_NAME_LENGTH, ICON } from "../../lib/consts/consts";
+import { DEFAULT_NAME_LENGTH } from "../../lib/consts/consts";
 import { isNullOrUndefinedOrBlank } from "../../lib/helpers/globalHelper";
 import { FieldWithLabel } from "./Label";
 import IconButton from "../basic/IconButton";
@@ -114,7 +114,7 @@ export default function CustomAutocomplete({
               clearable && !isNullOrUndefinedOrBlank(value) && 
               <Autocomplete.Clear className="absolute right-2">
                 <IconButton
-                  src={ICON.clear}
+                  src="clear"
                   colour="primary"
                   size="sm"
                   noBorder
@@ -129,7 +129,7 @@ export default function CustomAutocomplete({
             search &&
             <div className="absolute flex items-center justify-center size-8 left-2">
               <Icon
-                src={ICON.search}
+                src="search"
                 colour="grey"
                 size="sm"/>
             </div>

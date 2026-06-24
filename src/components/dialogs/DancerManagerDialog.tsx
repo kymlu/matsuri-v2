@@ -4,7 +4,7 @@ import BaseEditDialog from "./BaseEditDialog";
 import { strCompare, strEquals } from "../../lib/helpers/globalHelper";
 import TextInput from "../inputs/TextInput";
 import IconButton from "../basic/IconButton";
-import { ICON, SHORT_NAME_LENGTH } from "../../lib/consts/consts";
+import { SHORT_NAME_LENGTH } from "../../lib/consts/consts";
 
 type DancerManagerDialogProps = {
   dancers: Record<string, Dancer>,
@@ -77,7 +77,7 @@ export function DancerManagerDialog({
                     noBorder
                     size="sm"
                     colour="primary"
-                    src={ICON.delete}
+                    src="delete"
                     onClick={() => {
                       setDeletedDancerIds(prev => [...prev, dancer.id]);
                       setDancerList(prev => prev.filter(x => !strEquals(x.id, dancer.id)));

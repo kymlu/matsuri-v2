@@ -1,6 +1,7 @@
 import React, { RefObject } from 'react';
 import className from "classnames";
 import Icon from './Icon';
+import { ICON } from '../../lib/consts/consts';
 
 type ButtonProps = {
   children: React.ReactNode
@@ -89,7 +90,7 @@ export default function Button({
 
 type IconLabelButtonProps = {
   onClick: () => void;
-  icon: string;
+  icon: keyof typeof ICON;
   label: string;
   primaryText?: boolean,
   primary?: boolean;
