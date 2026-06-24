@@ -346,7 +346,8 @@ export default function HomePage({
       id: crypto.randomUUID(),
       name: `${choreo.name}のコピー`.slice(0, LONG_NAME_LENGTH),
       lastUpdated: new Date().toISOString(),
-      version: undefined
+      version: undefined,
+      teamId: team?.id,
     } as Choreo;
     saveChoreo(newChoreo, () => {
       setLocalChoreos(prev => ({...prev, [newChoreo.id]: newChoreo}))
@@ -585,13 +586,14 @@ export default function HomePage({
                     setUploadedChoreo(newChoreo);
                   } else {
                     newChoreo.id = crypto.randomUUID();
+                    newChoreo.teamId = team?.id;
                     saveChoreo(newChoreo, () => {onSelectChoreo(newChoreo, "localOnly")});
                   }
                 },
                 (newChoreos: Choreo[], errorMessage?: string) => {
                   if (newChoreos.length > 0) {
                     saveChoreos(
-                      [...newChoreos.map((c) => ({...c, id: crypto.randomUUID()}))],
+                      [...newChoreos.map((c) => ({...c, teamId: team?.id, id: crypto.randomUUID()}))],
                       () => {
                         loadChoreos();
                         if (errorMessage) {
@@ -628,7 +630,7 @@ export default function HomePage({
               if (editingChoreo) {
                 getChoreo(editingChoreo.id).then(choreo => {
                   if (choreo) {
-                    saveChoreo({...choreo, name, event, startDate, endDate}, () => {
+                    saveChoreo({...choreo, name, event, startDate, endDate, teamId: team?.id}, () => {
                       editChoreoInfoDialog.close();
                       setEditChoreoInfoDialogOpen(false);
                       setEditingChoreo(undefined);
@@ -658,7 +660,8 @@ export default function HomePage({
                       ...c,
                       event: name,
                       startDate: startDate,
-                      endDate: endDate
+                      endDate: endDate,
+                      teamId: team?.id,
                     }}), 
                     () => {
                       setEventNameDialogOpen(false);
@@ -796,6 +799,7 @@ export default function HomePage({
                 id: crypto.randomUUID(),
                 name: `${uploadedChoreo!.name}のコピー`,
                 isDirty: false,
+                teamId: team?.id,
               } as Choreo;
               saveChoreo(newChoreo, () => {onSelectChoreo(newChoreo, "localOnly")});
               setUploadedChoreo(undefined);
@@ -807,6 +811,7 @@ export default function HomePage({
                 ...uploadedChoreo!,
                 id: duplicateChoreoId ?? crypto.randomUUID(),
                 isDirty: true,
+                teamId: team?.id,
               } as Choreo;
               saveChoreo(newChoreo, () => {onSelectChoreo(newChoreo, "localOnly")});
               setUploadedChoreo(undefined);
