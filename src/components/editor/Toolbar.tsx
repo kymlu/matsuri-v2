@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import IconButton from "../basic/IconButton";
 import { VerticalDivider } from "../basic/Divider";
-import { Distribution, HorizontalAlignment, VerticalAlignment } from "../../models/alignment";
+import { Distribution, HorizontalAlignment, Rearrangement, VerticalAlignment } from "../../models/alignment";
 
 type ToolbarProps = {
   // add
@@ -35,6 +35,7 @@ type ToolbarProps = {
 
   // arrange
   showArrange: boolean;
+  onRearrange: (rearrangement: Rearrangement) => void;
   onVerticalAlign: (alignment: VerticalAlignment) => void;
   onHorizontalAlign: (alignment: HorizontalAlignment) => void;
   showDistribute: boolean;
@@ -93,7 +94,7 @@ export default function Toolbar({
   onSwapPosition,
 
   showArrange,
-  showRearrange,
+  onRearrange,
   onVerticalAlign,
   onHorizontalAlign,
   showDistribute,
@@ -209,7 +210,11 @@ export default function Toolbar({
         {
           isArrangeVisible && 
           <>
-            
+            <IconButton imgSrc={"moveToFront"} label="最前面へ" onClick={() => {onRearrange("toFront")}} />
+            <IconButton imgSrc={"moveForward"} label="前面へ" onClick={() => {onRearrange("forward")}} />
+            <IconButton imgSrc={"moveBackward"} label="背面へ" onClick={() => {onRearrange("backward")}} />
+            <IconButton imgSrc={"moveToBack"} label="最背面へ" onClick={() => {onRearrange("toBack")}} />
+            <VerticalDivider/>
             <IconButton src="alignHorizontalLeft" label="左" onClick={() => {onHorizontalAlign("left")}} />
             <IconButton src="alignHorizontalCenter" label="横中" onClick={() => {onHorizontalAlign("centre")}} />
             <IconButton src="alignHorizontalRight" label="右" onClick={() => {onHorizontalAlign("right")}} />

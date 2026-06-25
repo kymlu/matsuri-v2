@@ -10,6 +10,7 @@ export type BaseModel = z.infer<typeof BaseModelSchema>;
 export const CoordinatesSchema = z.object({
   x: z.number(),
   y: z.number(),
+  z: z.number().optional(),
 });
 
 export type Coordinates = z.infer<typeof CoordinatesSchema>;

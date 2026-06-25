@@ -17,6 +17,7 @@ import { Coordinates } from "../../models/base";
 import { strEquals } from "../../lib/helpers/globalHelper";
 import MarkingsLayer from "./layers/MarkingsLayer";
 import RulerLayer from "./layers/RulerLayer";
+import { sortDancers, sortProps } from "../../lib/editor/commands/objectCommands";
 
 Konva.hitOnDragEnabled = true;
 
@@ -78,11 +79,11 @@ export default function MainStage({
   }, [currentChoreo]);
   
   useEffect(() => {
-    setDancerPositions(Object.values(currentSection.formation.dancerPositions ?? []));
+    setDancerPositions(currentSection.formation.dancerPositions ? sortDancers(Object.values(currentSection.formation.dancerPositions)) : []);
   }, [currentSection.formation.dancerPositions]);
 
   useEffect(() => {
-    setPropPositions(Object.values(currentSection.formation.propPositions ?? []));
+    setPropPositions(currentSection.formation.propPositions ? sortProps(Object.values(currentSection.formation.propPositions)) : []);
   }, [currentSection.formation.propPositions]);
   
   const containerRef = useRef<HTMLDivElement>(null);

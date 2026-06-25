@@ -1,6 +1,6 @@
 import { Coordinates } from "@dnd-kit/utilities"
 import { colourMode } from "../../../components/dialogs/EditDancerColourDialog"
-import { HorizontalAlignment, VerticalAlignment, Distribution } from "../../../models/alignment"
+import { HorizontalAlignment, VerticalAlignment, Distribution, Rearrangement } from "../../../models/alignment"
 import { Choreo } from "../../../models/choreo"
 import { Formation } from "../../../models/choreoSection"
 import { Dancer, DancerPosition } from "../../../models/dancer"
@@ -9,7 +9,7 @@ import { Obstacle, Prop, PropPosition } from "../../../models/prop"
 import { colorPalette } from "../../consts/colors"
 import { strEquals, roundToTenth, indexByKey } from "../../helpers/globalHelper"
 
-export function addDancer(state: Choreo, dancer: Dancer, x: number, y: number): Choreo {
+export function addDancer(state: Choreo, dancer: Dancer, x: number, y: number, z: number): Choreo {
   const newDancers = { ...state.dancers, [dancer.id]: dancer }
 
   const newSections = state.sections.map(section => ({
@@ -24,6 +24,7 @@ export function addDancer(state: Choreo, dancer: Dancer, x: number, y: number): 
           type: "dancer",
           x: x,
           y: y,
+          z: z,
           color: colorPalette.rainbow.blue[0],
         }
       }
@@ -105,7 +106,7 @@ export function editAndDeleteProps(state: Choreo, editedProps: Record<string, Pr
   }
 }
 
-export function addProp(state: Choreo, prop: Prop, x: number, y: number): Choreo {
+export function addProp(state: Choreo, prop: Prop, x: number, y: number, z: number): Choreo {
   const newProps = { ...state.props, [prop.id]: prop }
 
   const newSections = state.sections.map(section => ({
@@ -120,6 +121,7 @@ export function addProp(state: Choreo, prop: Prop, x: number, y: number): Choreo
           type: "prop",
           x: x,
           y: y,
+          z: z,
         }
       }
     } as Formation
@@ -154,9 +156,10 @@ export function addObstacle(state: Choreo, obstacle: Obstacle): Choreo {
 }
 
 export function addObstacles(state: Choreo, obstacle: Obstacle[]): Choreo {
+  var obstacleCount = Object.keys(state.obstacles ?? {}).length;
   const newObstacles = { ...state.obstacles };
-  obstacle.reduce((acc, item) => {
-    acc[item.id] = item;
+  obstacle.reduce((acc, item, i) => {
+    acc[item.id] = {...item, z: obstacleCount + i};
     return acc;
   }, newObstacles);
 
@@ -692,14 +695,14 @@ export function swapPositions(
   sectionId: string,
   dancerAId: string,
   dancerBId: string
-) {
+): Choreo {
   const newSections = state.sections.map(section => {
     if (section.id !== sectionId) return section
     var dancerPositions = {...section.formation.dancerPositions};
     var originalA = section.formation.dancerPositions[dancerAId];
     var originalB = section.formation.dancerPositions[dancerBId];
-    dancerPositions[dancerAId] = { ...originalA, x: originalB.x, y: originalB.y };
-    dancerPositions[dancerBId] = { ...originalB, x: originalA.x, y: originalA.y };
+    dancerPositions[dancerAId] = { ...originalA, x: originalB.x, y: originalB.y, z: originalB.z };
+    dancerPositions[dancerBId] = { ...originalB, x: originalA.x, y: originalA.y, z: originalA.z };
     return {
       ...section,
       formation: {
@@ -711,3 +714,249 @@ export function swapPositions(
   
   return { ...state, sections: newSections }
 }
+// KATIE TODO: fix issue with not being able to reordering when adding props (and maybe others)
+export function setZOnAllPositions(
+  state: Choreo
+): Choreo {
+  // if there are z indices, ignore
+  if (Object.values(state.sections[0].formation.dancerPositions)[0].z !== undefined) return state;
+
+  var newObstacles = indexByKey(Object.values(state.obstacles ?? {}).map((o, i) => ({...o, z: i} as Obstacle)), "id");
+  const newSections = state.sections.map(section => {
+    var newDancerPositions: DancerPosition[] = Object.values(section.formation.dancerPositions).map((d, i) => ({...d, z: i} as DancerPosition));
+    var newPropPositions: PropPosition[] = Object.values(section.formation.propPositions).map((d, i) => ({...d, z: i} as PropPosition));
+    return {
+      ...section,
+      formation: {
+        ...section.formation,
+        dancerPositions: indexByKey(newDancerPositions, "dancerId"),
+        propPositions: indexByKey(newPropPositions, "propId")
+      } as Formation
+    };
+  });
+
+  return { ...state, obstacles: newObstacles, sections: newSections }
+}
+
+export function rearrangePositions(
+  state: Choreo,
+  sectionId: string,
+  selectedPositions: StageEntities<string[]>,
+  rearrangement: Rearrangement,
+): Choreo {
+  var newObstacles: Obstacle[] = [];
+  if (rearrangement === "toFront") {
+    newObstacles = bringObstaclesToFront(Object.values(state.obstacles ?? {}), selectedPositions.obstacles);
+  } else if (rearrangement === "forward") {
+    newObstacles = bringForwardObstacles(Object.values(state.obstacles ?? {}), selectedPositions.obstacles);
+  } else if (rearrangement === "backward") {
+    newObstacles = sendBackwardObstacles(Object.values(state.obstacles ?? {}), selectedPositions.obstacles);
+  } else {
+    newObstacles = sendObstaclesToBack(Object.values(state.obstacles ?? {}), selectedPositions.obstacles);
+  }
+
+  const newSections = state.sections.map(section => {
+    if (section.id !== sectionId) return section;
+    var newDancerPositions: DancerPosition[] = [];
+    var newPropPositions: PropPosition[] = [];
+    if (rearrangement === "toFront") {
+      newDancerPositions = bringDancersToFront(Object.values(section.formation.dancerPositions), selectedPositions.dancers);
+      newPropPositions = bringPropsToFront(Object.values(section.formation.propPositions), selectedPositions.props);
+    } else if (rearrangement === "forward") {
+      newDancerPositions = bringForwardDancers(Object.values(section.formation.dancerPositions), selectedPositions.dancers);
+      newPropPositions = bringForwardProps(Object.values(section.formation.propPositions), selectedPositions.props);
+    } else if (rearrangement === "backward") {
+      newDancerPositions = sendBackwardDancers(Object.values(section.formation.dancerPositions), selectedPositions.dancers);
+      newPropPositions = sendBackwardProps(Object.values(section.formation.propPositions), selectedPositions.props);
+    } else {
+      newDancerPositions = sendDancersToBack(Object.values(section.formation.dancerPositions), selectedPositions.dancers);
+      newPropPositions = sendPropsToBack(Object.values(section.formation.propPositions), selectedPositions.props);
+    }
+
+    return {
+      ...section,
+      formation: {
+        ...section.formation,
+        dancerPositions: indexByKey(newDancerPositions, "dancerId"),
+        propPositions: indexByKey(newPropPositions, "propId")
+      } as Formation
+    };
+  });
+
+  return { ...state, obstacles: indexByKey(newObstacles, "id"), sections: newSections }
+}
+
+export const sortDancers = (items: DancerPosition[]): DancerPosition[] => {
+  return [...items].sort((a, b) => (a.z ?? 0) - (b.z ?? 0));
+}
+export const sortProps = (items: PropPosition[]): PropPosition[] => {
+  return [...items].sort((a, b) => (a.z ?? 0) - (b.z ?? 0));
+}
+export const sortObstacles = (items: Obstacle[]): Obstacle[] => {
+  return [...items].sort((a, b) => (a.z ?? 0) - (b.z ?? 0));
+}
+
+const normalizeDancers = (items: DancerPosition[]) : DancerPosition[] => {
+  const sorted = sortDancers(items);
+  return sorted.map((item, i) => ({ ...item, z: i }));
+};
+
+const normalizeProps = (items: PropPosition[]) : PropPosition[] => {
+  const sorted = sortProps(items);
+  return sorted.map((item, i) => ({ ...item, z: i }));
+};
+
+const normalizeObstacles = (items: Obstacle[]) : Obstacle[] => {
+  const sorted = sortObstacles(items);
+  return sorted.map((item, i) => ({ ...item, z: i }));
+};
+
+const bringDancersToFront = (items: DancerPosition[], ids: string[]): DancerPosition[] => {
+  const maxZ = Math.max(...items.map(i => i.z ?? 0));
+  const result = sortDancers(items).map((item, i) =>
+    ids.includes(item.dancerId) ? { ...item, z: maxZ + i + 1 } : { ...item }
+  );
+  return normalizeDancers(result) as DancerPosition[];
+};
+
+const bringPropsToFront = (items: PropPosition[], ids: string[]): PropPosition[] => {
+  const maxZ = Math.max(...items.map(i => i.z ?? 0));
+  const result = sortProps(items).map((item, i) =>
+    ids.includes(item.propId) ? { ...item, z: maxZ + i + 1 } : { ...item }
+  );
+  return normalizeProps(result) as PropPosition[];
+};
+
+const bringObstaclesToFront = (items: Obstacle[], ids: string[]): Obstacle[] => {
+  const maxZ = Math.max(...items.map(i => i.z ?? 0));
+  const result = sortObstacles(items).map((item, i) =>
+    ids.includes(item.id) ? { ...item, z: maxZ + i + 1 } : { ...item }
+  );
+  return normalizeObstacles(result) as Obstacle[];
+};
+
+const sendDancersToBack = (items: DancerPosition[], ids: string[]): DancerPosition[] => {
+  const result = items.map(item =>
+    ids.includes(item.dancerId) ? { ...item, z: -(ids.length - ids.indexOf(item.dancerId)) } : { ...item }
+  );
+  return normalizeDancers(result) as DancerPosition[];
+};
+
+const sendPropsToBack = (items: PropPosition[], ids: string[]): PropPosition[] => {
+  const result = items.map(item =>
+    ids.includes(item.propId) ? { ...item, z: -(ids.length - ids.indexOf(item.propId)) } : { ...item }
+  );
+  return normalizeProps(result) as PropPosition[];
+};
+
+const sendObstaclesToBack = (items: Obstacle[], ids: string[]): Obstacle[] => {
+  const result = items.map(item =>
+    ids.includes(item.id) ? { ...item, z: -(ids.length - ids.indexOf(item.id)) } : { ...item }
+  );
+  return normalizeObstacles(result) as Obstacle[];
+};
+
+const bringForwardDancers = (items: DancerPosition[], ids: string[]): DancerPosition[] => {
+  const sorted = sortDancers(items);
+  const selected = sorted.filter(i => ids.includes(i.dancerId));
+  const unselected = sorted.filter(i => !ids.includes(i.dancerId));
+
+  const maxSelectedZ = Math.max(...selected.map(i => i.z ?? 0));
+  const blockingIdx = unselected.findIndex(i => (i.z ?? 0) > maxSelectedZ);
+
+  if (blockingIdx === -1) return items; // already at top
+
+  const below = unselected.slice(0, blockingIdx + 1);
+  const above = unselected.slice(blockingIdx + 1);
+  const reordered = [...below, ...selected, ...above];
+
+  return reordered.map((item, i) => ({ ...item, z: i }));
+};
+
+const bringForwardProps = (items: PropPosition[], ids: string[]): PropPosition[] => {
+  const sorted = sortProps(items);
+  const selected = sorted.filter(i => ids.includes(i.propId));
+  const unselected = sorted.filter(i => !ids.includes(i.propId));
+
+  const maxSelectedZ = Math.max(...selected.map(i => i.z ?? 0));
+  const blockingIdx = unselected.findIndex(i => (i.z ?? 0) > maxSelectedZ);
+
+  if (blockingIdx === -1) return items; // already at top
+
+  const below = unselected.slice(0, blockingIdx + 1);
+  const above = unselected.slice(blockingIdx + 1);
+  const reordered = [...below, ...selected, ...above];
+
+  return reordered.map((item, i) => ({ ...item, z: i }));
+};
+
+const bringForwardObstacles = (items: Obstacle[], ids: string[]): Obstacle[] => {
+  const sorted = sortObstacles(items);
+  const selected = sorted.filter(i => ids.includes(i.id));
+  const unselected = sorted.filter(i => !ids.includes(i.id));
+
+  const maxSelectedZ = Math.max(...selected.map(i => i.z ?? 0));
+  const blockingIdx = unselected.findIndex(i => (i.z ?? 0) > maxSelectedZ);
+
+  if (blockingIdx === -1) return items; // already at top
+
+  const below = unselected.slice(0, blockingIdx + 1);
+  const above = unselected.slice(blockingIdx + 1);
+  const reordered = [...below, ...selected, ...above];
+
+  return reordered.map((item, i) => ({ ...item, z: i }));
+};
+
+const sendBackwardDancers = (items: DancerPosition[], ids: string[]): DancerPosition[] => {
+  const sorted = sortDancers(items);
+  const selected = sorted.filter(i => ids.includes(i.dancerId));
+  const unselected = sorted.filter(i => !ids.includes(i.dancerId));
+
+  const minSelectedZ = Math.min(...selected.map(i => i.z ?? 0));
+  const blockingIdx = [...unselected].reverse().findIndex(i => (i.z ?? 0) < minSelectedZ);
+  const resolvedIdx = blockingIdx === -1 ? -1 : unselected.length - 1 - blockingIdx;
+
+  if (resolvedIdx === -1) return items; // already at bottom
+
+  const below = unselected.slice(0, resolvedIdx);
+  const above = unselected.slice(resolvedIdx);
+  const reordered = [...below, ...selected, ...above];
+
+  return reordered.map((item, i) => ({ ...item, z: i }));
+};
+
+const sendBackwardProps = (items: PropPosition[], ids: string[]): PropPosition[] => {
+  const sorted = sortProps(items);
+  const selected = sorted.filter(i => ids.includes(i.propId));
+  const unselected = sorted.filter(i => !ids.includes(i.propId));
+
+  const minSelectedZ = Math.min(...selected.map(i => i.z ?? 0));
+  const blockingIdx = [...unselected].reverse().findIndex(i => (i.z ?? 0) < minSelectedZ);
+  const resolvedIdx = blockingIdx === -1 ? -1 : unselected.length - 1 - blockingIdx;
+
+  if (resolvedIdx === -1) return items; // already at bottom
+
+  const below = unselected.slice(0, resolvedIdx);
+  const above = unselected.slice(resolvedIdx);
+  const reordered = [...below, ...selected, ...above];
+
+  return reordered.map((item, i) => ({ ...item, z: i }));
+};
+
+const sendBackwardObstacles = (items: Obstacle[], ids: string[]): Obstacle[] => {
+  const sorted = sortObstacles(items);
+  const selected = sorted.filter(i => ids.includes(i.id));
+  const unselected = sorted.filter(i => !ids.includes(i.id));
+
+  const minSelectedZ = Math.min(...selected.map(i => i.z ?? 0));
+  const blockingIdx = [...unselected].reverse().findIndex(i => (i.z ?? 0) < minSelectedZ);
+  const resolvedIdx = blockingIdx === -1 ? -1 : unselected.length - 1 - blockingIdx;
+
+  if (resolvedIdx === -1) return items; // already at bottom
+
+  const below = unselected.slice(0, resolvedIdx);
+  const above = unselected.slice(resolvedIdx);
+  const reordered = [...below, ...selected, ...above];
+
+  return reordered.map((item, i) => ({ ...item, z: i }));
+};

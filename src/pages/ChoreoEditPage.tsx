@@ -27,7 +27,7 @@ import ConfirmDeletionDialog from "../components/dialogs/ConfirmDeletionDialog";
 import EditSectionNoteDialog from "../components/dialogs/EditSectionNoteDialog";
 import { Coordinates } from "../models/base";
 import { colorPalette } from "../lib/consts/colors";
-import { addDancer, addObstacle, addObstacles, addProp, alignHorizontalPositions, alignVerticalPositions, changeObjectColours, distributePositions, editAndDeleteProps, moveObjectPositions, pastePositions, removeObjects, renameAndDeleteDancers, renameDancer, renameObstacle, renameProp, swapPositions, updateObstacleSizeAndRotate, updatePropSizeAndRotate } from "../lib/editor/commands/objectCommands";
+import { addDancer, addObstacle, addObstacles, addProp, alignHorizontalPositions, alignVerticalPositions, changeObjectColours, distributePositions, editAndDeleteProps, moveObjectPositions, pastePositions, rearrangePositions, removeObjects, renameAndDeleteDancers, renameDancer, renameObstacle, renameProp, setZOnAllPositions, swapPositions, updateObstacleSizeAndRotate, updatePropSizeAndRotate } from "../lib/editor/commands/objectCommands";
 import { Obstacle, PropPosition } from "../models/prop";
 import { DancerManagerDialog } from "../components/dialogs/DancerManagerDialog";
 import ExportDialog from "../components/dialogs/ExportDialog";
@@ -96,10 +96,9 @@ export default function ChoreoEditPage(props: {
   const [history, dispatch] = useReducer(historyReducer,
     {
       undoStack: [],
-      presentState: {state: props.currentChoreo, currentSectionId: props.currentChoreo.sections[0].id},
+      presentState: {state: setZOnAllPositions(props.currentChoreo), currentSectionId: props.currentChoreo.sections[0].id},
       redoStack: [],
     } as EditHistory<Choreo>);
-
 
   const currentStateRef = useRef(history.presentState.state);
   useEffect(() => {
@@ -609,10 +608,11 @@ export default function ChoreoEditPage(props: {
                 history.presentState.state, 
                 {
                   id: crypto.randomUUID(),
-                  name: Object.keys(history.presentState.state.dancers).length.toString()
+                  name: (entityCount.dancers + 1).toString()
                 },
                 x,
-                y
+                y,
+                entityCount.dancers
               ),
               currentSectionId: currentSection.id,
               commit: true});
@@ -625,13 +625,14 @@ export default function ChoreoEditPage(props: {
                 history.presentState.state, 
                 {
                   id: crypto.randomUUID(),
-                  name: Object.keys(history.presentState.state.props).length.toString(),
+                  name: (entityCount.props + 1).toString(),
                   length: DEFAULT_PROP_LENGTH,
                   width: DEFAULT_PROP_WIDTH,
                   color: colorPalette.rainbow.blue[0],
                 },
                 x - 2,
-                y - 0.5
+                y - 0.5,
+                entityCount.props
               ),
               currentSectionId: currentSection.id,
               commit: true});
@@ -644,12 +645,13 @@ export default function ChoreoEditPage(props: {
                 history.presentState.state, 
                 {
                   id: crypto.randomUUID(),
-                  name: Object.keys(history.presentState.state.obstacles ?? {}).length.toString(),
+                  name: (entityCount.obstacles + 1).toString(),
                   length: DEFAULT_PROP_LENGTH,
                   width: DEFAULT_PROP_WIDTH,
                   color: colorPalette.greys[2],
                   x: x - 2,
                   y: y - 0.5,
+                  z: entityCount.obstacles + 1,
                   rotation: 0,
                   type: "obstacle",
                   sectionId: "",
@@ -759,6 +761,14 @@ export default function ChoreoEditPage(props: {
         showSelectPropsButton={entityCount.props > 0 && entityCount.props > selectedIds.props.length}
         showSelectAllButton={entityCount.dancers > selectedIds.dancers.length || entityCount.props > selectedIds.props.length}
         onDeselect={resetSelectedIds}
+        onRearrange={(rearrangement) => {
+          dispatch({
+            type: "SET_STATE",
+            newState: rearrangePositions(history.presentState.state, currentSection.id, selectedIds, rearrangement),
+            currentSectionId: currentSection.id,
+            commit: true,
+          })
+        }}
         showDistribute={(selectedIds.dancers.length + selectedIds.props.length + selectedIds.obstacles.length) >= 3}
         onDistribute={(distribution) => {
           dispatch({

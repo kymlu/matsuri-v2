@@ -56,14 +56,16 @@ export default function BaseGridObject({
     if (newPosition.x === ref.current?.x() && newPosition.y === ref.current?.y()) return;
 
     setIsAnimating(true);
-    ref.current?.to({
-      x: newPosition.x,
-      y: newPosition.y,
-      rotation: rotation ?? 0,
-      duration: animate ? 1 : 0,
-      easing: Konva.Easings.EaseInOut,
-      onFinish: () => {setIsAnimating(false)}
-    });
+    if (ref.current) {
+      ref.current.to({
+        x: newPosition.x,
+        y: newPosition.y,
+        rotation: rotation ?? 0,
+        duration: animate ? 1 : 0,
+        easing: Konva.Easings.EaseInOut,
+        onFinish: () => {setIsAnimating(false)}
+      });
+    }
   }, [position, stageGeometry, rotation]);
 
   const snapSize = METER_PX/2;

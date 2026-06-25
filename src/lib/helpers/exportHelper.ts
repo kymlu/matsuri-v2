@@ -7,6 +7,7 @@ import { BaseModel, Coordinates } from "../../models/base";
 import JSZip from "jszip";
 import { Obstacle } from "../../models/prop";
 import { PDF_METER_PX, STRIPES_PER_METRE } from "../consts/consts";
+import { sortDancers, sortObstacles, sortProps } from "../editor/commands/objectCommands";
 
 const README_TEXT =
   "このZIPには本アプリ用のデータが含まれています。\n" +
@@ -283,7 +284,7 @@ export async function exportToPdf (
 
     // Draw obstacles
     if (choreo.obstacles) {
-      Object.values(choreo.obstacles).forEach(obstacle => {
+      sortObstacles(Object.values(choreo.obstacles)).forEach(obstacle => {
         context.save();
         const positionInPx = stageMetersToPx({x: obstacle.x, y: obstacle.y}, stage, PDF_METER_PX, obstacle.length);
         const obstacleX = positionInPx.x + pageMargin;
@@ -368,7 +369,7 @@ export async function exportToPdf (
     pdf.setFontSize(8);
 
     // Draw props
-    Object.values(section.formation.propPositions).forEach(p => {
+    sortProps(Object.values(section.formation.propPositions)).forEach(p => {
       var prop = choreo.props[p.propId];
       if (prop) {
         context.save();
@@ -419,7 +420,7 @@ export async function exportToPdf (
     });
 
     // Draw participants
-    Object.values(section.formation.dancerPositions).forEach(p => {
+    sortDancers(Object.values(section.formation.dancerPositions)).forEach(p => {
       var dancer = choreo.dancers[p.dancerId];
       if (dancer) {
         const isFollowing = strEquals(followingId, dancer.id);
