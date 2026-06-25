@@ -270,7 +270,7 @@ type TimingItemProps = {
 function TimingItem ({
   timing, timingNames, onRenameTiming, onDeleteTiming, showDeleteButton}: TimingItemProps
 ) {
-  return <div className="flex items-center">
+  return <div className="flex items-center gap-0.5">
     <TextInput 
       required
       hasError={timingNames[timing.name.trim()] > 1}
