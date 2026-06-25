@@ -108,6 +108,7 @@ export default function ObstacleGridObject({
 
   return <BaseGridObject
     id={obstacle.id}
+    listening={canEdit}
     draggable={canEdit}
     position={position}
     height={obstacle.length}

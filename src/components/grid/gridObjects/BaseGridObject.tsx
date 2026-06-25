@@ -17,6 +17,7 @@ export interface BaseGridObjectProps {
   updatePosition?: (x: number, y: number) => void,
   onClick?: (isAdditive?: boolean) => void,
   draggable?: boolean,
+  listening?: boolean,
   onTransform?: (item: Shape<ShapeConfig> | Stage) => void,
   stageGeometry: StageGeometry,
   isSelected: boolean;
@@ -35,6 +36,7 @@ export default function BaseGridObject({
   updatePosition,
   onClick,
   draggable,
+  listening,
   onTransform,
   stageGeometry,
   isSelected,
@@ -78,6 +80,7 @@ export default function BaseGridObject({
       id={id} 
       ref={ref}
       draggable={draggable && !isAnimating}
+      listening={listening}
       rotation={0}
       x={0}
       y={0}
