@@ -4,10 +4,11 @@ import TextInput from "../inputs/TextInput";
 import { isNullOrUndefinedOrBlank } from "../../lib/helpers/globalHelper";
 import { loginUserToTeam, resetPassword, sendPasswordResetRequest } from "../../lib/helpers/apiHelper";
 import { EMAIL_LENGTH, PASSWORD_ENTRY_LENGTH, PASSWORD_LENGTH, VERIFICATION_CODE_LENGTH } from "../../lib/consts/consts";
+import { RoleType } from "../../models/user";
 
 export type LoginDialogProps = {
   teamId: string,
-  onLogin: (name: string) => void,
+  onLogin: (name: string, role: RoleType) => void,
   onClose: () => void,
 }
 
@@ -41,8 +42,8 @@ export default function LoginDialog({
     if (!isProcessing) {
       setIsProcessing(true);
       setError("none");
-      loginUserToTeam(teamId, email, password, (name) => {
-        onLogin(name);
+      loginUserToTeam(teamId, email, password, (name, role) => {
+        onLogin(name, role);
         close();
         setIsProcessing(false);
       }, (status) => {
@@ -83,8 +84,8 @@ export default function LoginDialog({
       setIsProcessing(true);
       setError("none");
       resetPassword(email, teamId, verificationCode, password, () => {
-        loginUserToTeam(teamId, email, password, (name) => {
-          onLogin(name);
+        loginUserToTeam(teamId, email, password, (name, role) => {
+          onLogin(name, role);
           close();
           setIsProcessing(false);
         }, (status) => {

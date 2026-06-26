@@ -1,5 +1,6 @@
 import { BasicChoreoDetails, Choreo } from "../../models/choreo";
 import { Team } from "../../models/team";
+import { RoleType, User } from "../../models/user";
 
 const getApiUrl = (endpoint: 
   "auth/login" | 
@@ -8,6 +9,11 @@ const getApiUrl = (endpoint:
   "auth/forgot-password" | 
   "auth/verify-team" | 
   "auth/verify-user" | 
+  "team/invite-user" |
+  "team/members" |
+  "team/members/role" |
+  "team/members/name" |
+  "team/members/delete" |
   "choreos/summary" | 
   "choreos/verify" |
   "choreos/get-password" |
@@ -20,7 +26,7 @@ export const loginUserToTeam = async (
   teamId: string,
   email: string,
   password: string,
-  onSuccess: (name: string) => void,
+  onSuccess: (name: string, role: RoleType) => void,
   onFailure: (status: number) => void
 ): Promise<void> => {
   try {
@@ -37,8 +43,8 @@ export const loginUserToTeam = async (
       console.error(`Login failed: ${response.status} message: ${data.message} error: ${data.error}`);
       onFailure(response.status);
     } else {
-      const data = await response.json() as { success?: boolean; name?: string };
-      onSuccess(data.name ?? "");
+      const data = await response.json() as { success?: boolean; name: string; role: RoleType };
+      onSuccess(data.name, data.role);
     }
   } catch (e: any) {
     console.error("login failed:", (e as Error)?.message);
@@ -47,7 +53,8 @@ export const loginUserToTeam = async (
 }
 
 export const logoutUserFromTeam = async (
-  onSuccess: () => void
+  onSuccess: () => void,
+  onFailure: () => void,
 ): Promise<void> => {
   try {
     const response = await fetch(getApiUrl("auth/logout"), {
@@ -64,6 +71,7 @@ export const logoutUserFromTeam = async (
     }
   } catch (e: any) {
     console.error("login failed:", (e as Error)?.message);
+    onFailure();
     throw e;
   }
 }
@@ -117,8 +125,126 @@ export const resetPassword = async (
       onSuccess();
     }
   } catch (e: any) {
-    console.error("login failed:", (e as Error)?.message);
+    console.error("Reset password failed:", (e as Error)?.message);
     throw e;
+  }
+}
+
+export const inviteUser = async (
+  email: string,
+  role: RoleType,
+  onSuccess: () => void,
+  onFailure: (status: number) => void,
+): Promise<void> => {
+  try {
+    const response = await fetch(`${getApiUrl("team/invite-user")}`, {
+      method: "POST",
+      credentials: "include",
+      body: JSON.stringify({ email, role }),
+    });
+    if (response.ok) {
+      onSuccess();
+    } else {
+      const data = await response.json() as { message?: string; error?: string };
+      console.error(`inviteUser failed: ${response.status} message: ${data.message} error: ${data.error}`);
+      onFailure(response.status);
+    }
+  } catch (e: any) {
+    console.error("inviteUser failed:", (e as Error)?.message);
+    onFailure(400);
+  }
+}
+
+export const getAllMembers = async (): Promise<User[]> => {
+  try {
+    const response = await fetch(`${getApiUrl("team/members")}`, {
+      method: "GET",
+      credentials: "include",
+    });
+    if (response.ok) {
+      const data = await response.json() as User[];
+      return data;
+    } else {
+      const data = await response.json() as { message?: string; error?: string };
+      console.error(`getAllMembers failed: ${response.status} message: ${data.message} error: ${data.error}`);
+      throw Error;
+    }
+  } catch (e: any) {
+    console.error("getAllMembers failed:", (e as Error)?.message);
+    return [] as User[]; // todo: show error dialog
+  }
+}
+
+export const changeUserRole = async (
+  memberId: string,
+  role: RoleType,
+  onSuccess: () => void,
+  onFailure: (status: number) => void,
+): Promise<void> => {
+  try {
+    const response = await fetch(`${getApiUrl("team/members/role")}`, {
+      method: "POST",
+      credentials: "include",
+      body: JSON.stringify({ member_id: memberId, role }),
+    });
+    if (response.ok) {
+      onSuccess();
+    } else {
+      const data = await response.json() as { message?: string; error?: string };
+      console.error(`changeUserRole failed: ${response.status} message: ${data.message} error: ${data.error}`);
+      onFailure(response.status);
+    }
+  } catch (e: any) {
+    console.error(`changeUserRole failed: ${(e as Error)?.message}`);
+    onFailure(400);
+  }
+}
+
+export const removeUserFromTeam = async (
+  memberId: string,
+  onSuccess: () => void,
+  onFailure: (status: number) => void,
+): Promise<void> => {
+  try {
+    const response = await fetch(`${getApiUrl("team/members/delete")}`, {
+      method: "POST",
+      credentials: "include",
+      body: JSON.stringify({ member_id: memberId }),
+    });
+    if (response.ok) {
+      onSuccess();
+    } else {
+      const data = await response.json() as { message?: string; error?: string };
+      console.error(`removeUserFromTeam failed: ${response.status} message: ${data.message} error: ${data.error}`);
+      onFailure(response.status);
+    }
+  } catch (e: any) {
+    console.error(`removeUserFromTeam failed: ${(e as Error)?.message}`);
+    onFailure(400);
+  }
+}
+
+export const changeUserName = async (
+  name: string,
+  onSuccess: () => void,
+  onFailure: (status: number) => void,
+): Promise<void> => {
+  try {
+    const response = await fetch(`${getApiUrl("team/members/name")}`, {
+      method: "POST",
+      credentials: "include",
+      body: JSON.stringify({ name }),
+    });
+    if (response.ok) {
+      onSuccess();
+    } else {
+      const data = await response.json() as { message?: string; error?: string };
+      console.error(`changeUserName failed: ${response.status} message: ${data.message} error: ${data.error}`);
+      onFailure(response.status);
+    }
+  } catch (e: any) {
+    console.error(`changeUserName failed: ${(e as Error)?.message}`);
+    onFailure(400);
   }
 }
 
@@ -140,7 +266,7 @@ export const getChoreoSummary = async (teamId?: string): Promise<BasicChoreoDeta
     }
   } catch (e: any) {
     console.error("getchoreoSummary failed:", (e as Error)?.message);
-    return [] as BasicChoreoDetails[];
+    return [] as BasicChoreoDetails[]; // todo: show error dialog
   }
 }
 
@@ -244,23 +370,24 @@ export const verifyTeam = async(
 
 export const checkLogin = async(
   teamId: string,
-  onSuccess: () => void,
+  onSuccess: (name: string, role: RoleType) => void,
   onFailure: (status: number) => void
 ) => {
   try {
     const response = await fetch(`${getApiUrl("auth/verify-user")}?team_id=${teamId}`, {
       credentials: "include",
     });
-  
-    
+
     if (!response.ok) {
       const data = await response.json() as { message?: string; error?: string };
       console.error(`Status: ${response.status} message: ${data.message} error: ${data.error}`);
       onFailure(response.status);
       return;
+    } else {
+      const data = await response.json() as { name: string, role: RoleType };
+      onSuccess(data.name, data.role);
     }
   
-    onSuccess();
   } catch (e: any) {
     console.error((e as Error)?.message);
     onFailure(400);

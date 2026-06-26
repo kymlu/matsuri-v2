@@ -1,3 +1,4 @@
+import z from "zod";
 import { BasicChoreoDetails, Choreo, EventDetails } from "../../models/choreo";
 import {IMG} from "../consts/consts"
 
@@ -110,6 +111,12 @@ export function testInvalidCharacters(text: string) {
 
 export function testAlphanumeric(text: string) {
   return /^[a-zA-Z0-9]*$/.test(text);
+}
+
+export function testEmail(text: string) {
+  const emailSchema = z.email()
+  const result = emailSchema.safeParse(text);
+  return result.success;
 }
 
 export function incrementBracketSuffix(str: string) {

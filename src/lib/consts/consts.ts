@@ -52,6 +52,7 @@ export const IMG = {
 export const ICON = {
   "123": "123",
   add: "add",
+  adminPanelSettings: "admin_panel_settings",
   alignHorizontalCenter: "align_horizontal_center",
   alignHorizontalLeft: "align_horizontal_left",
   alignHorizontalRight: "align_horizontal_right",

@@ -1157,7 +1157,7 @@ export default function ChoreoEditPage(props: {
         onOpenChange={handleDeleteSectionDialogOpen}
         >
         <ConfirmDeletionDialog
-          section={currentSection}
+          name={currentSection.name}
           onSubmit={() => {
             const currentSectionIndex = history.presentState.state.sections
               .findIndex((s) => strEquals(s.id, currentSection.id));

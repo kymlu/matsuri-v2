@@ -433,7 +433,7 @@ export default {
 				VALUES (?, ?, ?, ?, datetime('now', '+30 days'), datetime('now'))
 			`).bind(crypto.randomUUID(), user.id, teamMember.team_id, token).run();
 
-			return new Response(JSON.stringify({ success: true, name: teamMember.name }), {
+			return new Response(JSON.stringify({ success: true, name: teamMember.name, role: teamMember.role }), {
 				status: 200,
 				headers: {
 					...corsHeaders,
@@ -498,7 +498,7 @@ export default {
 
 		// Look up session in D1
 		const session = await env.DB.prepare(`
-			SELECT s.*, u.email, tm.id AS team_member_id, tm.role
+			SELECT s.*, u.email, u.name, tm.id AS team_member_id, tm.role as role
 			FROM sessions s
 			JOIN users u ON s.user_id = u.id
 			JOIN team_members tm ON s.user_id = tm.user_id AND s.team_id = tm.team_id
@@ -516,11 +516,157 @@ export default {
 			await env.DB.prepare(`
 				UPDATE sessions SET expires_at = datetime('now', '+30 days') WHERE token = ?
 			`).bind(token).run();
-			return new Response("{}", {
+			return new Response(JSON.stringify({name: session.name, role: session.role}), {
 				status: 200,
 				headers: { ...corsHeaders, "Content-Type": "application/json", "Set-Cookie": setSessionCookie(token) },
 			});
 		}
+
+		if (url.pathname.startsWith("/api/team/")) {
+			// users change their own name
+			if (url.pathname === "/api/team/members/name" && request.method === "POST") {
+				const body = await request.json() as { name: string };
+	
+				await env.DB.prepare(`
+					UPDATE team_members SET name = ?, updated_at = datetime('now')
+					WHERE id = ? AND team_id = ?
+				`).bind(body.name, session.team_member_id, session.team_id).run();
+	
+				return new Response(JSON.stringify({ success: true }), {
+					status: 200,
+					headers: { ...corsHeaders, "Content-Type": "application/json" },
+				});
+			}
+	
+			if (session.role !== "admin") {
+				return new Response(JSON.stringify({ error: "Not permitted to add users" }), {
+					status: 401,
+					headers: { ...corsHeaders, "Content-Type": "application/json" },
+				});
+			}
+
+			if (url.pathname === "/api/team/invite-user" && request.method === "POST") {
+				const body = await request.json() as { email: string; name: string; role: string };
+	
+				const team = await env.DB.prepare(
+					"SELECT * FROM teams WHERE id = ?"
+				).bind(session.team_id).first();
+	
+				if (!team) {
+					return new Response(JSON.stringify({ error: "Team not found" }), {
+						status: 404,
+						headers: { ...corsHeaders, "Content-Type": "application/json" },
+					});
+				}
+	
+				// Check if user already exists
+				let user = await env.DB.prepare(
+					"SELECT * FROM users WHERE email = ?"
+				).bind(body.email).first();
+	
+				if (!user) {
+					const userId = crypto.randomUUID();
+					await env.DB.prepare(`
+						INSERT INTO users (id, email, password_hash, name, created_at, updated_at)
+						VALUES (?, ?, '', ?, datetime('now'), datetime('now'))
+					`).bind(userId, body.email, body.name).run();
+	
+					user = await env.DB.prepare(
+						"SELECT * FROM users WHERE id = ?"
+					).bind(userId).first();
+				}
+	
+				// Check if already a member
+				const existingMember = await env.DB.prepare(
+					"SELECT * FROM team_members WHERE user_id = ? AND team_id = ?"
+				).bind(user!.id, session.team_id).first();
+	
+				if (existingMember) {
+					if (existingMember.deleted === 0) {
+						return new Response(JSON.stringify({ error: "User is already a member of this team" }), {
+							status: 409,
+							headers: { ...corsHeaders, "Content-Type": "application/json" },
+						});
+					} else {
+						await env.DB.prepare(`
+							UPDATE team_members SET deleted = 0, updated_at = datetime('now')
+							WHERE id = ?
+						`).bind(existingMember.id).run();
+					}
+				} else {
+					await env.DB.prepare(`
+						INSERT INTO team_members (id, team_id, user_id, name, role, deleted, created_at, updated_at)
+						VALUES (?, ?, ?, ?, ?, 0, datetime('now'), datetime('now'))
+					`).bind(crypto.randomUUID(), session.team_id, user!.id, body.name, body.role).run();
+				}
+	
+				const { data, error } = await resend.emails.send({
+					from: '隊列表作成アプリ <noreply@tairetsu.app>',
+					to: body.email,
+					subject: `${team.name}に招待されました`,
+					html: `<p>${team.name}に招待されました。</p>
+						<p><a>tairetsu.app/${team.slug}</a> にアクセスする</p>
+						<p>初めての方は、「パスワードを忘れた」からパスワードを設定してログインしてください。</p>
+					`,
+				});
+	
+				return new Response(JSON.stringify({ success: true }), {
+					status: 201,
+					headers: { ...corsHeaders, "Content-Type": "application/json" },
+				});
+			}
+	
+			if (url.pathname === "/api/team/members" && request.method === "GET") {
+				const { results } = await env.DB.prepare(`
+					SELECT tm.id, tm.name, tm.role, u.email
+					FROM team_members tm
+					JOIN users u ON tm.user_id = u.id
+					WHERE tm.team_id = ? AND tm.deleted = 0
+				`).bind(session.team_id).all();
+
+				return new Response(JSON.stringify(results), {
+					status: 200,
+					headers: { ...corsHeaders, "Content-Type": "application/json" },
+				});
+			}
+	
+			if (url.pathname === "/api/team/members/role" && request.method === "POST") {
+				const body = await request.json() as { member_id: string; role: string };
+	
+				await env.DB.prepare(`
+					UPDATE team_members SET role = ?, updated_at = datetime('now')
+					WHERE id = ? AND team_id = ?
+				`).bind(body.role, body.member_id, session.team_id).run();
+	
+				return new Response(JSON.stringify({ success: true }), {
+					status: 200,
+					headers: { ...corsHeaders, "Content-Type": "application/json" },
+				});
+			}
+	
+			if (url.pathname === "/api/team/members/remove" && request.method === "POST") {
+				const body = await request.json() as { member_id: string };
+				const results = await env.DB.prepare(`
+					SELECT user_id
+					WHERE id = ? AND team_id = ?
+				`).bind(body.member_id, session.team_id).first();
+
+				await env.DB.prepare(`
+					UPDATE team_members SET deleted = 1, updated_at = datetime('now')
+					WHERE id = ? AND team_id = ?
+				`).bind(body.member_id, session.team_id).run();
+
+				await env.DB.prepare(`
+					DELETE FROM sessions WHERE user_id = ?
+				`).bind(results?.user_id, session.team_id).run();
+	
+				return new Response(JSON.stringify({ success: true }), {
+					status: 200,
+					headers: { ...corsHeaders, "Content-Type": "application/json" },
+				});
+			}
+		}
+
 		if (url.pathname === "/api/choreos/get-password" && request.method === "POST") {
 			try {
 				const data = await request.json() as any;

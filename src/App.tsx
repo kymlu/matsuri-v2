@@ -9,8 +9,9 @@ import { getUserName, setUserName } from './lib/dataAccess/LocalStorageControlle
 import { useParams } from 'react-router-dom';
 import { Team } from './models/team';
 import { checkLogin, verifyTeam } from './lib/helpers/apiHelper';
+import AdminPage from './pages/AdminPage';
 
-type Mode = "home" | "form" | "edit" | "view";
+type Mode = "home" | "form" | "edit" | "view" | "admin";
 
 function App() {
   const [mode, setMode] = useState<Mode>("home");
@@ -23,6 +24,7 @@ function App() {
   const [name, setName] = useState<string | null>(null);
   const [buildInfo, setBuildInfo] = useState<string | undefined>();
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [isProcessing, setIsProcessing] = useState<boolean>(true);
 
   const { teamSlug } = useParams();
@@ -33,7 +35,9 @@ function App() {
     verifyTeam(teamSlug ?? "", (t) => {
       setTeam(t);
       checkLogin(t?.id!,
-        () => {
+      (name, role) => {
+        setNewName(name);
+        setIsAdmin(role === "admin");
         setIsLoggedIn(true);
       }, () => {
         setIsLoggedIn(false);
@@ -67,12 +71,24 @@ function App() {
 
   return (
     <div>
+      {
+        team && mode === "admin" && (
+          <AdminPage
+            goToHomePage={() => setMode("home")}
+            team={team}
+            currentUserId='1'
+          />
+        )
+      }
       {!isProcessing && mode === "home" && (
         <HomePage
           buildInfo={buildInfo}
           eventList={eventList}
           setEventList={(eventList) => {
             setEventList(eventList);
+          }}
+          goToAdminPage={() => {
+            setMode("admin");
           }}
           goToNewChoreoPage={(event) => {
             setSelectedEvent(event);
@@ -88,6 +104,8 @@ function App() {
           setSavedDancerName={(newName) => setNewName(newName)}
           dancerNamesByEvent={dancerNamesByEvent}
           setDancerNamesByEvent={(groupedNames) => setDancerNamesByEvent(groupedNames)}
+          isAdmin={isAdmin}
+          setIsAdmin={setIsAdmin}
           isLoggedIn={isLoggedIn}
           setIsLoggedIn={setIsLoggedIn}
           team={team}

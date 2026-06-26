@@ -32,7 +32,7 @@ import BeginnersDialog from "../components/dialogs/BeginnersDialog"
 import EditEventInfoDialog from "../components/dialogs/EditEventInfoDialog"
 import SiteInfoDialog from "../components/dialogs/SiteInfoDialog"
 import { ChoreoStatusTag } from "../components/common/Tag"
-import { getChoreoFile, getChoreoSummary, logoutUserFromTeam } from "../lib/helpers/apiHelper"
+import { changeUserName, getChoreoFile, getChoreoSummary, logoutUserFromTeam } from "../lib/helpers/apiHelper"
 import LoginDialog from "../components/dialogs/LoginDialog"
 import { Team } from "../models/team"
 import CustomMenu from "../components/inputs/CustomMenu"
@@ -42,6 +42,7 @@ type HomePageProps = {
   buildInfo?: string,
   eventList: EventDetails[],
   setEventList: (eventList: EventDetails[]) => void,
+  goToAdminPage: () => void,
   goToNewChoreoPage: (eventDetails?: EventDetails) => void,
   goToViewPage: (choreo: Choreo, status: ChoreoStatus, serverChoreo?: BasicChoreoDetails) => void,
   savedDancerName: string | null,
@@ -50,6 +51,8 @@ type HomePageProps = {
   setDancerNamesByEvent: (groupedNames: Record<string, Record<string, string[]>>) => void,
   isLoggedIn: boolean,
   setIsLoggedIn: (value: boolean) => void,
+  isAdmin: boolean,
+  setIsAdmin: (value: boolean) => void,
   team?: Team,
 }
 
@@ -61,10 +64,10 @@ type ChoreoWithStatus = BasicChoreoDetails & {
 
 export default function HomePage({
   buildInfo, eventList, setEventList,
-  goToNewChoreoPage, goToViewPage,
+  goToAdminPage, goToNewChoreoPage, goToViewPage,
   savedDancerName, setSavedDancerName,
   dancerNamesByEvent, setDancerNamesByEvent,
-  isLoggedIn, setIsLoggedIn,
+  isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin,
   team
 }: HomePageProps) {
   const [savedChoreos, setSavedChoreos] = useState<ChoreoWithStatus[]>([]);
@@ -73,6 +76,7 @@ export default function HomePage({
   // const [choreosFromServer, setChoreosFromServer] = useState<Record<string, Choreo>>({});
   const [serverChoreoDetails, setServerChoreoDetails] = useState<Record<string, BasicChoreoDetails>>({});
   const [localChoreos, setLocalChoreos] = useState<Record<string, Choreo>>({});
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
   const getChoreoFromServer = async (
     id: string
@@ -382,7 +386,7 @@ export default function HomePage({
           }
         </div>
         <div className="flex items-center justify-between pb-1">
-          <h1 className='text-2xl font-bold text-nowrap'>隊列表一覧</h1>
+          <h1 onClick={() => {goToAdminPage()}} className='text-2xl font-bold text-nowrap'>隊列表一覧</h1>
           <div className="flex items-center ">
             <Dialog.Root>
               <Dialog.Trigger>
@@ -394,7 +398,12 @@ export default function HomePage({
               <Dialog.Trigger>
                 <IconButton src="personEdit" colour="primary" noBorder asDiv/>
               </Dialog.Trigger>
-              <UserNameEditDialog name={savedDancerName ?? ""} onSubmit={(name) => setSavedDancerName(name)}/>
+              <UserNameEditDialog name={savedDancerName ?? ""} onSubmit={(name) => {
+                setSavedDancerName(name);
+                if (isLoggedIn) {
+                  changeUserName(name, () => {}, () => {})
+                }
+              }}/>
             </Dialog.Root>
             {
               !isLoggedIn && team?.id &&
@@ -407,17 +416,41 @@ export default function HomePage({
                   <IconButton asDiv src="verifiedUser" colour="primary" noBorder/>
                 }>
                 <div className="space-y-2">
+                  {
+                    !isNullOrUndefinedOrBlank(savedDancerName) && <>
+                      {savedDancerName}<small>さん</small>
+                      <Divider/>
+                    </>
+                  }
+                  {
+                    isAdmin && <>
+                      <Menu.Item>
+                        <IconLabelButton
+                          full noBorder
+                          icon="adminPanelSettings"
+                          label="管理"
+                          onClick={goToAdminPage}/>
+                      </Menu.Item>
+                      <Divider/>
+                    </>
+                  }
                   <Menu.Item>
                     <IconLabelButton
                       full noBorder
                       icon="logout"
                       label="ログアウト"
                       onClick={()=>{
-                        logoutUserFromTeam(() => {
-                          // todo: add isprocessingflag to prevent double tap
-                          // todo: on fail, show failed dialog
-                          setIsLoggedIn(false);
-                        });
+                        if(!isProcessing) {
+                          setIsProcessing(true);
+                          logoutUserFromTeam(
+                            () => {
+                              // todo: on fail, show failed dialog
+                              setIsLoggedIn(false);
+                              setIsProcessing(false);
+                            },
+                            () => setIsProcessing(false)
+                          );
+                        }
                       }}/>
                   </Menu.Item>
                 </div>
@@ -824,7 +857,11 @@ export default function HomePage({
           open={loginDialogOpen}
           onOpenChange={handleLoginDialogOpen}>
           <LoginDialog
-            onLogin={() => setIsLoggedIn(true)}
+            onLogin={(name, role) => {
+              setIsLoggedIn(true);
+              setIsAdmin(role === "admin");
+              setSavedDancerName(name);
+            }}
             onClose={() => {
               setLoginDialogOpen(false);
             }}
