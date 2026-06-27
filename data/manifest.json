@@ -103,6 +103,19 @@
     "propCount": 20
   },
   {
+    "id": "76063fc5-025f-4f35-918a-a4f8d3e918a9",
+    "name": "パレード　8×80",
+    "event": "光が丘&宵よさ",
+    "startDate": "2026-07-18",
+    "endDate": "2026-07-19",
+    "version": 2,
+    "lastUpdated": "2026-06-27T06:39:08.139Z",
+    "stageLength": 80,
+    "stageWidth": 8,
+    "dancerCount": 21,
+    "propCount": 0
+  },
+  {
     "id": "7e902031-1411-4672-bcef-d66f95d8ffb6",
     "name": "メイン会場ステ　10×20",
     "event": "踊っこ",
@@ -214,19 +227,6 @@
     "stageLength": 8,
     "stageWidth": 17,
     "dancerCount": 22,
-    "propCount": 0
-  },
-  {
-    "id": "76063fc5-025f-4f35-918a-a4f8d3e918a9",
-    "name": "パレード　8×80",
-    "event": "光が丘&宵よさ",
-    "startDate": "2026-07-18",
-    "endDate": "2026-07-19",
-    "version": 1,
-    "lastUpdated": "2026-06-27T06:19:15.365Z",
-    "stageLength": 80,
-    "stageWidth": 8,
-    "dancerCount": 21,
     "propCount": 0
   }
 ]
