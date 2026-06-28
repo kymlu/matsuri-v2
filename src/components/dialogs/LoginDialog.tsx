@@ -67,13 +67,7 @@ export default function LoginDialog({
         setMode("resetPassword");
         setIsProcessing(false);
       }, (status) => {
-        if (status === 404) {
-          setError("notFound");
-        } else if (status === 401) {
-          setError("notOnTeamError");
-        } else {
-          setError("error");
-        }
+        setError("error");
         setIsProcessing(false);
       });
     }
@@ -185,31 +179,19 @@ export default function LoginDialog({
     {
       mode === "forgot" &&
       <>
-        <div>メールアドレスを持つユーザーが存在する場合、入力したメールアドレスに認証コードを送ります。</div>
+        <div>入力されたメールアドレスがチームに登録されている場合、認証コードを送信します。</div>
+        
         <TextInput
-          label="メールアドレス"
           name="メールアドレス"
           defaultValue=""
           maxLength={EMAIL_LENGTH}
           onContentChange={(value) => setEmail(value)}/>
-        {
-          error === "notFound" &&
-          <span className="w-full font-semibold text-center text-primary">
-            このメールアドレスを持つアカウントは存在しません。
-          </span>
-        }
-        {
-          error === "notOnTeamError" &&
-          <span className="w-full font-semibold text-center text-primary">
-            編集権限はありません。
-          </span>
-        }
       </>
     }
     {
       mode === "resetPassword" &&
       <>
-        <div>メールアドレスを持つユーザーが存在する場合、入力したメールアドレスに認証コードを送ります。10分以内に入力してください。</div>
+        <div>入力されたメールアドレスが登録されている場合、認証コードを送信します。10分以内に入力してください。</div>
         <TextInput
           label="コード"
           name="認証コード"
