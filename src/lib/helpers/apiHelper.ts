@@ -1,3 +1,4 @@
+import { ErrorResponse } from "../../models/api";
 import { BasicChoreoDetails, Choreo } from "../../models/choreo";
 import { Team } from "../../models/team";
 import { RoleType, User } from "../../models/user";
@@ -39,8 +40,8 @@ export const loginUserToTeam = async (
 
     
     if (!response.ok) {
-      const data = await response.json() as { message?: string; error?: string };
-      console.error(`Login failed: ${response.status} message: ${data.message} error: ${data.error}`);
+      const data = await response.json() as ErrorResponse;
+      console.error(`Login failed: ${response.status} message: ${data.message}`);
       onFailure(response.status);
     } else {
       const data = await response.json() as { success?: boolean; name: string; role: RoleType };
@@ -63,8 +64,8 @@ export const logoutUserFromTeam = async (
     });
     
     if (!response.ok) {
-      const data = await response.json() as { message?: string; error?: string };
-      console.error(`Login failed: ${response.status} message: ${data.message} error: ${data.error}`);
+      const data = await response.json() as ErrorResponse;
+      console.error(`Login failed: ${response.status} message: ${data.message}`);
       throw new Error(data.message ?? "Login failed");
     } else {
       onSuccess();
@@ -90,8 +91,8 @@ export const sendPasswordResetRequest = async (
       body: JSON.stringify({ email, team_id: teamId }),
     });
     if (!response.ok) {
-      const data = await response.json() as { message?: string; error?: string };
-      console.error(`Reset password failed: ${response.status} message: ${data.message} error: ${data.error}`);
+      const data = await response.json() as ErrorResponse;
+      console.error(`Reset password failed: ${response.status} message: ${data.message}`);
       onFailure(response.status);
     } else {
       onSuccess();
@@ -118,8 +119,8 @@ export const resetPassword = async (
       body: JSON.stringify({ email, team_id: teamId, code, password }),
     });
     if (!response.ok) {
-      const data = await response.json() as { message?: string; error?: string };
-      console.error(`Reset password failed: ${response.status} message: ${data.message} error: ${data.error}`);
+      const data = await response.json() as ErrorResponse;
+      console.error(`Reset password failed: ${response.status} message: ${data.message}`);
       onFailure(response.status);
     } else {
       onSuccess();
@@ -145,8 +146,8 @@ export const inviteUser = async (
     if (response.ok) {
       onSuccess();
     } else {
-      const data = await response.json() as { message?: string; error?: string };
-      console.error(`inviteUser failed: ${response.status} message: ${data.message} error: ${data.error}`);
+      const data = await response.json() as ErrorResponse;
+      console.error(`inviteUser failed: ${response.status} message: ${data.message}`);
       onFailure(response.status);
     }
   } catch (e: any) {
@@ -165,8 +166,8 @@ export const getAllMembers = async (): Promise<User[]> => {
       const data = await response.json() as User[];
       return data;
     } else {
-      const data = await response.json() as { message?: string; error?: string };
-      console.error(`getAllMembers failed: ${response.status} message: ${data.message} error: ${data.error}`);
+      const data = await response.json() as ErrorResponse;
+      console.error(`getAllMembers failed: ${response.status} message: ${data.message}`);
       throw Error;
     }
   } catch (e: any) {
@@ -190,8 +191,8 @@ export const changeUserRole = async (
     if (response.ok) {
       onSuccess();
     } else {
-      const data = await response.json() as { message?: string; error?: string };
-      console.error(`changeUserRole failed: ${response.status} message: ${data.message} error: ${data.error}`);
+      const data = await response.json() as ErrorResponse;
+      console.error(`changeUserRole failed: ${response.status} message: ${data.message}`);
       onFailure(response.status);
     }
   } catch (e: any) {
@@ -214,8 +215,8 @@ export const removeUserFromTeam = async (
     if (response.ok) {
       onSuccess();
     } else {
-      const data = await response.json() as { message?: string; error?: string };
-      console.error(`removeUserFromTeam failed: ${response.status} message: ${data.message} error: ${data.error}`);
+      const data = await response.json() as ErrorResponse;
+      console.error(`removeUserFromTeam failed: ${response.status} message: ${data.message}`);
       onFailure(response.status);
     }
   } catch (e: any) {
@@ -238,8 +239,8 @@ export const changeUserName = async (
     if (response.ok) {
       onSuccess();
     } else {
-      const data = await response.json() as { message?: string; error?: string };
-      console.error(`changeUserName failed: ${response.status} message: ${data.message} error: ${data.error}`);
+      const data = await response.json() as ErrorResponse;
+      console.error(`changeUserName failed: ${response.status} message: ${data.message}`);
       onFailure(response.status);
     }
   } catch (e: any) {
@@ -260,8 +261,8 @@ export const getChoreoSummary = async (teamId?: string): Promise<BasicChoreoDeta
       const data = await response.json() as BasicChoreoDetails[];
       return data;
     } else {
-      const data = await response.json() as { message?: string; error?: string };
-      console.error(`getChoreoSummary failed: ${response.status} message: ${data.message} error: ${data.error}`);
+      const data = await response.json() as ErrorResponse;
+      console.error(`getChoreoSummary failed: ${response.status} message: ${data.message}`);
       throw Error;
     }
   } catch (e: any) {
@@ -286,8 +287,8 @@ export const verifyChoreoPassword = async (
     });
 
     if (!response.ok) {
-      const data = await response.json() as { message?: string; error?: string };
-      console.error(`Choreo password validation failed: ${response.status} message: ${data.message} error: ${data.error}`);
+      const data = await response.json() as ErrorResponse;
+      console.error(`Choreo password validation failed: ${response.status} message: ${data.message}`);
       onFailure(response.status);
     } else {
       onSuccess();
@@ -313,8 +314,8 @@ export const getChoreoPassword = async (
     });
 
     if (!response.ok) {
-      const data = await response.json() as { message?: string; error?: string };
-      console.error(`Choreo password validation failed: ${response.status} message: ${data.message} error: ${data.error}`);
+      const data = await response.json() as ErrorResponse;
+      console.error(`Choreo password validation failed: ${response.status} message: ${data.message}`);
       onFailure(response.status);
     } else {
       const data = await response.json() as { password?: string };
@@ -332,8 +333,8 @@ export const getChoreoFile = async (teamId: string, choreoId: string, version: n
     if (response.ok) {
       return await response.json() as Choreo;
     } else {
-      const data = await response.json() as { message?: string; error?: string };
-      console.error(`getChoreoFile failed: ${response.status} message: ${data.message} error: ${data.error}`);
+      const data = await response.json() as ErrorResponse;
+      console.error(`getChoreoFile failed: ${response.status} message: ${data.message}`);
       throw Error;
     }
   } catch (e: any) {
@@ -354,8 +355,8 @@ export const verifyTeam = async(
   
     
     if (!response.ok) {
-      const data = await response.json() as { message?: string; error?: string };
-      console.error(`Status: ${response.status} message: ${data.message} error: ${data.error}`);
+      const data = await response.json() as ErrorResponse;
+      console.error(`Status: ${response.status} message: ${data.message}`);
       onFailure(response.status);
       return;
     } else {
@@ -379,8 +380,8 @@ export const checkLogin = async(
     });
 
     if (!response.ok) {
-      const data = await response.json() as { message?: string; error?: string };
-      console.error(`Status: ${response.status} message: ${data.message} error: ${data.error}`);
+      const data = await response.json() as ErrorResponse;
+      console.error(`Status: ${response.status} message: ${data.message}`);
       onFailure(response.status);
       return;
     } else {
@@ -403,8 +404,8 @@ export const findCurrentVersion = async (
     if (response.ok) {
       return await response.json() as {version: number};
     } else {
-      const data = await response.json() as { message?: string; error?: string };
-      console.error(`findCurrentVersion failed: ${response.status} message: ${data.message} error: ${data.error}`);
+      const data = await response.json() as ErrorResponse;
+      console.error(`findCurrentVersion failed: ${response.status} message: ${data.message}`);
       throw Error;
     }
   } catch (e: any) {
@@ -450,7 +451,7 @@ export const publishChoreo = async (
       const result = data.newFile as Choreo;
       onSuccess(result);
     } else {
-      console.error(`Failed to save file. Status: ${response.status} message: ${data.message} error: ${data.error}`);
+      console.error(`Failed to save file. Status: ${response.status} message: ${data.message}`);
       onFailure(response.status);
     }
   } catch (e: any) {

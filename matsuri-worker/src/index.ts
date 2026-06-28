@@ -1,4 +1,5 @@
 import { Resend } from 'resend';
+import { ErrorResponse } from './models/models';
 
 const allowedOrigins = [
   "http://localhost:3000",
@@ -71,6 +72,33 @@ export default {
 		const origin = request.headers.get("Origin");
 		const corsHeaders = getCorsHeaders(origin);
 
+		const getErrorResponse = (message: string, status: number = 400): Response => {
+			console.error(`Error at ${request} - status: ${status} ; message: ${message}`);
+			
+			return new Response(
+				JSON.stringify({message: message} as ErrorResponse), 
+				{
+					status: status,
+					headers: { ...corsHeaders, "Content-Type": "application/problem+json" },
+				}
+			);
+		}
+
+		const sendEmail = async (emailAddress: string, subject: string, body: string): Promise<boolean> => {
+			const { data, error } = await resend.emails.send({
+				from: '隊列表作成アプリ <noreply@tairetsu.app>',
+				to: emailAddress,
+				subject: subject,
+				html: body,
+			});
+
+			if (error) {
+				throw Error(error.message);
+			}
+
+			return true;
+		}
+
 		if (request.method === "OPTIONS") {
       return new Response(null, { headers: corsHeaders });
     }
@@ -83,10 +111,7 @@ export default {
 				const teamSlug = url.searchParams.get("team_slug");
 
 				if (!teamSlug) {
-					return new Response(
-						JSON.stringify({ error: "team_slug is required" }),
-						{ status: 400, headers: corsHeaders }
-					);
+					return getErrorResponse("team_slug is required");
 				}
 
 				const team = await env.DB.prepare(
@@ -94,10 +119,7 @@ export default {
 				).bind(teamSlug).first();
 
 				if (!team) {
-					return new Response(
-						JSON.stringify({ error: "Team not found" }),
-						{ status: 404, headers: corsHeaders }
-					);
+					return getErrorResponse("Team not found", 404);
 				}
 
 				return new Response(JSON.stringify(team), {
@@ -106,14 +128,10 @@ export default {
 				});
 			}
 
-			if (!teamId) {
-				return new Response(
-					JSON.stringify({ error: "team_id is required" }),
-					{ status: 400, headers: corsHeaders }
-				);
-			}
-
 			if (url.pathname === "/api/choreos/summary") {
+				if (!teamId) {
+					return getErrorResponse("team_id is required");
+				}
 				try {
 					const { results } = await env.DB.prepare(
 						`
@@ -143,40 +161,25 @@ export default {
 						headers: corsHeaders,
 					});
 				} catch (e: any) {
-					return new Response(
-						JSON.stringify({ error: "Internal server error" }),
-						{ status: 500, headers: corsHeaders }
-					);
+					return getErrorResponse(`Internal server error: ${(e as Error)?.message}`, 500);
 				}
 			} else if (url.pathname === "/api/choreos/file") {
 				if (!teamId) {
-					return new Response(
-						JSON.stringify({ error: "team_id is required" }),
-						{ status: 400, headers: corsHeaders }
-					);
+					return getErrorResponse("team_id is required");
 				}
 				
 				const choreoId = url.searchParams.get("choreo_id");
 				const version = url.searchParams.get("version");
 				
 				if (choreoId === null) {
-					return new Response(
-						JSON.stringify({error: "Choreo id must not be null"}),
-						{ status: 400, headers: corsHeaders }
-					);
+					return getErrorResponse("Choreo id must not be null");
 				}
 
 				if (version === null) {
-					return new Response(
-						JSON.stringify({error: "Version must not be null"}),
-						{ status: 400, headers: corsHeaders }
-					);
+					return getErrorResponse("Version must not be null");
 				} else {
 					if (!Number.isInteger(Number(version))) {
-						return new Response(
-							JSON.stringify({error: "Version must be an int"}),
-							{ status: 400, headers: corsHeaders }
-						);
+						return getErrorResponse("Version must be an int");
 					}
 				}
 
@@ -185,10 +188,7 @@ export default {
 				).bind(choreoId, teamId).first();
 
 				if (!choreoCheck) {
-					return new Response(
-						JSON.stringify({ error: "Choreo not found" }),
-						{ status: 404, headers: corsHeaders }
-					);
+					return getErrorResponse("Choreo not found", 404);
 				}
 
 				try {
@@ -196,10 +196,7 @@ export default {
 					const object = await env.BUCKET.get(r2Key);
 	
 					if (!object) {
-						return new Response(
-							JSON.stringify({error: "Not found"}),
-							{ status: 404, headers: corsHeaders }
-						);
+						return getErrorResponse("File not found", 404);
 					}
 	
 					return new Response(object.body, {
@@ -207,26 +204,20 @@ export default {
 						headers: { ...corsHeaders, "Content-Type": "application/json" }
 					});
 				} catch (e: any) {
-					return new Response(
-						JSON.stringify({ error: "Internal server error" }),
-						{ status: 500, headers: corsHeaders }
-					);
+					return getErrorResponse(`Internal server error: ${(e as Error).message}`, 500);
 				}
 			} else if (url.pathname === "/api/choreos/file/current-version") {
+				if (!teamId) {
+					return getErrorResponse("team_id is required");
+				}
 				try {
 					const choreoId = url.searchParams.get("choreo_id");
 					if (!choreoId) {
-						return new Response(
-							JSON.stringify({ error: "choreo_id is required" }),
-							{ status: 400, headers: corsHeaders }
-						);
+						return getErrorResponse("choreo_id is required");
 					}
 
 					if (!teamId) {
-						return new Response(
-							JSON.stringify({ error: "team_id is required" }),
-							{ status: 400, headers: corsHeaders }
-						);
+						return getErrorResponse("team_id is required");
 					}
 
 					const choreoCheck = await env.DB.prepare(
@@ -234,10 +225,7 @@ export default {
 					).bind(choreoId, teamId).first();
 
 					if (!choreoCheck) {
-						return new Response(
-							JSON.stringify({ error: "Choreo not found" }),
-							{ status: 404, headers: corsHeaders }
-						);
+						return getErrorResponse("Choreo not found", 404);
 					}
 
 					const row = await env.DB.prepare(
@@ -249,10 +237,7 @@ export default {
 						{ status: 200, headers: corsHeaders }
 					);
 				} catch (e: any) {
-					return new Response(
-						JSON.stringify({ error: "Internal server error" }),
-						{ status: 500, headers: corsHeaders }
-					);
+					return getErrorResponse(`Internal server error: ${(e as Error).message}`, 500);
 				}
 			}
     }
@@ -264,9 +249,10 @@ export default {
 				"SELECT * FROM users WHERE email = ?"
 			).bind(body.email).first();
 
+			// Prevent user enumeration
 			if (!user) {
 				return new Response(JSON.stringify({ success: true }), {
-					status: 404,
+					status: 200,
 					headers: { ...corsHeaders, "Content-Type": "application/json" },
 				});
 			}
@@ -275,9 +261,10 @@ export default {
 				"SELECT * FROM team_members WHERE user_id = ? AND team_id = ? AND deleted = 0"
 			).bind(user.id, body.team_id).first();
 			
+			// Prevent user enumeration
 			if (!teamMember) {
 				return new Response(JSON.stringify({ success: true }), {
-					status: 401,
+					status: 200,
 					headers: { ...corsHeaders, "Content-Type": "application/json" },
 				});
 			}
@@ -294,11 +281,8 @@ export default {
 				VALUES (?, ?, ?, datetime('now', '+10 minutes'), datetime('now'))
 			`).bind(crypto.randomUUID(), user.id, codeHash).run();
 
-			const { data, error } = await resend.emails.send({
-				from: '隊列表作成アプリ <noreply@tairetsu.app>',
-				to: body.email,
-				subject: 'パスワード再設定',
-				html: `<p>パスワード再設定のリクエストを受け付けました。</p>
+			try {
+				sendEmail(body.email, 'パスワード再設定', `<p>パスワード再設定のリクエストを受け付けました。</p>
 					<p>以下の認証コードを入力してください。</p>
 					<p>${code}</p>
 					<p>この認証コードの有効期限は10分です。</p>
@@ -306,8 +290,10 @@ export default {
 			    <p>この操作に心当たりがない場合は、このメールを無視してください。</p>
 					<br/>
 			    <p>※このメールは自動送信されています。返信には対応しておりませんのでご了承ください。</p>
-				`,
-			});
+				`);
+			} catch (e: any) {
+				return getErrorResponse(`Failed to send email: ${(e as Error)?.message}`, 500);
+			}
 
 			return new Response(JSON.stringify({ success: true }), {
 				status: 200,
@@ -323,10 +309,7 @@ export default {
 			).bind(body.email).first();
 
 			if (!user) {
-				return new Response(JSON.stringify({ error: "Invalid email" }), {
-					status: 401,
-					headers: { ...corsHeaders, "Content-Type": "application/json" },
-				});
+				return getErrorResponse("The verification code or email is invalid", 400);
 			}
 
 			const teamMember = await env.DB.prepare(
@@ -334,10 +317,7 @@ export default {
 			).bind(user.id, body.team_id).first();
 			
 			if (!teamMember) {
-				return new Response(JSON.stringify({ success: true }), {
-					status: 401,
-					headers: { ...corsHeaders, "Content-Type": "application/json" },
-				});
+				return getErrorResponse("The verification code or email is invalid", 400);
 			}
 
 			const resetToken = await env.DB.prepare(`
@@ -346,17 +326,11 @@ export default {
 			`).bind(user.id).first();
 
 			if (!resetToken) {
-				return new Response(JSON.stringify({ error: "Invalid or expired code" }), {
-					status: 401,
-					headers: { ...corsHeaders, "Content-Type": "application/json" },
-				});
+				return getErrorResponse("The verification code or email is invalid", 400);
 			}
 
 			if (resetToken.attempts as number >= 5) {
-				return new Response(JSON.stringify({ error: "Too many attempts, request a new code" }), {
-					status: 401,
-					headers: { ...corsHeaders, "Content-Type": "application/json" },
-				});
+				return getErrorResponse("Too many attempt, request a new code", 400);
 			}
 
 			const codeMatch = await verifyPassword(body.code, resetToken.code_hash as string);
@@ -366,10 +340,7 @@ export default {
 					UPDATE password_reset_tokens SET attempts = attempts + 1 WHERE id = ?
 				`).bind(resetToken.id).run();
 
-				return new Response(JSON.stringify({ error: "Invalid code" }), {
-					status: 401,
-					headers: { ...corsHeaders, "Content-Type": "application/json" },
-				});
+				return getErrorResponse("The verification code or email is invalid", 400);
 			}
 
 			const newHash = await hashPassword(body.password);
@@ -400,19 +371,13 @@ export default {
 			`).bind(body.email).first();
 
 			if (!user) {
-				return new Response(
-					JSON.stringify({ error: "Invalid email or password" }),
-					{ status: 401, headers: corsHeaders }
-				);
+				return getErrorResponse("Invalid email or password", 401);
 			}
 
 			const passwordMatch = await verifyPassword(body.password, user.password_hash as string);
 
 			if (!passwordMatch) {
-				return new Response(
-					JSON.stringify({ error: "Invalid email or password" }),
-					{ status: 401, headers: corsHeaders }
-				);
+				return getErrorResponse("Invalid email or password", 401);
 			}
 
 			const teamMember = await env.DB.prepare(`
@@ -420,10 +385,7 @@ export default {
 			`).bind(user.id, body.team_id).first();
 
 			if (!teamMember) {
-				return new Response(
-					JSON.stringify({ error: "User does not belong to this team" }),
-					{ status: 403, headers: corsHeaders }
-				);
+				return getErrorResponse("User does not belong to this team", 403);
 			}
 
 			const token = crypto.randomUUID();
@@ -454,10 +416,7 @@ export default {
 			const passwordMatch = body.password === (password?.password ?? "");
 
 			if (!passwordMatch) {
-				return new Response(
-					JSON.stringify({ error: "Invalid password" }),
-					{ status: 401, headers: corsHeaders }
-				);
+				return getErrorResponse("Invalid password", 401);
 			} else {
 				return new Response("{}", {
 					status: 200,
@@ -473,10 +432,7 @@ export default {
 		console.log("extracted token:", token);
 
 		if (!token) {
-			return new Response(
-				JSON.stringify({ error: "No session token provided. Please log in." }),
-				{ status: 401, headers: corsHeaders }
-			);
+			return getErrorResponse("No session token provided. Please log in.", 401);
 		}
 
 		if (url.pathname === "/api/auth/logout" && request.method === "POST") {
@@ -506,10 +462,7 @@ export default {
 		`).bind(token).first();
 
 		if (!session) {
-			return new Response(
-				JSON.stringify({ error: "Invalid or expired session. Please log in again." }),
-				{ status: 401, headers: corsHeaders }
-			);
+			return getErrorResponse("Invalid or expired session. Please log in again.", 401);
 		}
 
 		if (url.pathname === "/api/auth/verify-user" && request.method === "GET") {
@@ -539,24 +492,18 @@ export default {
 			}
 	
 			if (session.role !== "admin") {
-				return new Response(JSON.stringify({ error: "Not permitted to add users" }), {
-					status: 401,
-					headers: { ...corsHeaders, "Content-Type": "application/json" },
-				});
+				return getErrorResponse("Not permitted to add users.", 401);
 			}
 
 			if (url.pathname === "/api/team/invite-user" && request.method === "POST") {
-				const body = await request.json() as { email: string; name: string; role: string };
+				const body = await request.json() as { email: string; role: string };
 	
 				const team = await env.DB.prepare(
 					"SELECT * FROM teams WHERE id = ?"
 				).bind(session.team_id).first();
 	
 				if (!team) {
-					return new Response(JSON.stringify({ error: "Team not found" }), {
-						status: 404,
-						headers: { ...corsHeaders, "Content-Type": "application/json" },
-					});
+					return getErrorResponse("Team not found.", 404);
 				}
 	
 				// Check if user already exists
@@ -568,8 +515,8 @@ export default {
 					const userId = crypto.randomUUID();
 					await env.DB.prepare(`
 						INSERT INTO users (id, email, password_hash, name, created_at, updated_at)
-						VALUES (?, ?, '', ?, datetime('now'), datetime('now'))
-					`).bind(userId, body.email, body.name).run();
+						VALUES (?, ?, '', '', datetime('now'), datetime('now'))
+					`).bind(userId, body.email).run();
 	
 					user = await env.DB.prepare(
 						"SELECT * FROM users WHERE id = ?"
@@ -583,10 +530,7 @@ export default {
 	
 				if (existingMember) {
 					if (existingMember.deleted === 0) {
-						return new Response(JSON.stringify({ error: "User is already a member of this team" }), {
-							status: 409,
-							headers: { ...corsHeaders, "Content-Type": "application/json" },
-						});
+						return getErrorResponse("User is already a member of this team", 409);
 					} else {
 						await env.DB.prepare(`
 							UPDATE team_members SET deleted = 0, updated_at = datetime('now')
@@ -595,20 +539,19 @@ export default {
 					}
 				} else {
 					await env.DB.prepare(`
-						INSERT INTO team_members (id, team_id, user_id, name, role, deleted, created_at, updated_at)
-						VALUES (?, ?, ?, ?, ?, 0, datetime('now'), datetime('now'))
-					`).bind(crypto.randomUUID(), session.team_id, user!.id, body.name, body.role).run();
+						INSERT INTO team_members (id, team_id, user_id, role, deleted, created_at, updated_at)
+						VALUES (?, ?, ?, ?, 0, datetime('now'), datetime('now'))
+					`).bind(crypto.randomUUID(), session.team_id, user!.id, body.role).run();
 				}
 	
-				const { data, error } = await resend.emails.send({
-					from: '隊列表作成アプリ <noreply@tairetsu.app>',
-					to: body.email,
-					subject: `${team.name}に招待されました`,
-					html: `<p>${team.name}に招待されました。</p>
+				try {
+					sendEmail(body.email, `${team.name}に招待されました`, `<p>${team.name}に招待されました。</p>
 						<p><a>tairetsu.app/${team.slug}</a> にアクセスする</p>
-						<p>初めての方は、「パスワードを忘れた」からパスワードを設定してログインしてください。</p>
-					`,
-				});
+						<p>当アプリの使用が初めての方は、「パスワードを忘れた」からパスワードを設定してログインしてください。</p>
+					`);
+				} catch (e: any) {
+					return getErrorResponse(`Failed to send email: ${(e as Error)?.message}`, 500);
+				}
 	
 				return new Response(JSON.stringify({ success: true }), {
 					status: 201,
@@ -680,11 +623,7 @@ export default {
 					headers: { ...corsHeaders, "Content-Type": "application/json", "Set-Cookie": setSessionCookie(token) },
 				});
 			} catch (e) {
-				console.log(e);
-				return new Response(
-					JSON.stringify({ error: `Internal server error: ${e}` }),
-					{ status: 500, headers: corsHeaders }
-				);
+				return getErrorResponse(`Internal server error: ${(e as Error).message}`, 500);
 			}
 		}
 
@@ -706,10 +645,7 @@ export default {
 				const uploadedBy = session.team_member_id as string;
 
 				if (!file || !choreoId || !name) {
-					return new Response(
-						JSON.stringify({ error: "file, choreo_id, and name are required" }),
-						{ status: 400, headers: corsHeaders }
-					);
+					return getErrorResponse("file, choreo_id, and name are required", 400);
 				}
 
 				// get next version number
@@ -722,10 +658,7 @@ export default {
 
 					if (!current) {
 						console.log(`choreo not found: ${choreoId}`);
-						return new Response(
-							JSON.stringify({ error: "Choreo not found" }),
-							{ status: 404, headers: corsHeaders }
-						);
+						return getErrorResponse("Choreo not found", 400);
 					}
 
 					version = current.version + 1;
@@ -775,17 +708,10 @@ export default {
 					{ status: isNew ? 201 : 200, headers: corsHeaders }
 				);
 			} catch (e) {
-				console.log(e);
-				return new Response(
-					JSON.stringify({ error: `Internal server error: ${e}` }),
-					{ status: 500, headers: corsHeaders }
-				);
+				return getErrorResponse(`Internal server error: ${(e as Error).message}`, 500);
 			}
 		}
 
-		return new Response(
-			JSON.stringify({ error: "Endpoint not found." }),
-			{ status: 404, headers: corsHeaders }
-		);
+		return getErrorResponse(`Endpoint not found`, 404);
   }
 };
