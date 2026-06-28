@@ -59,7 +59,7 @@ export default function AdminPage({
         onClick={() => {
           goToHomePage();
         }}/>
-      <div className="text-start">
+      <div className="flex-1 text-start">
         <div className="text-sm text-primary">
           <b>{team.name}</b><span>の</span>
         </div>
