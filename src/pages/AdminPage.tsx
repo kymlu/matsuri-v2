@@ -74,7 +74,7 @@ export default function AdminPage({
           existingUsers={existingEmails}
           onSuccess={() => {
             loadData();
-            () => inviteUserActionsRef.current?.close();
+            inviteUserActionsRef.current?.close();
           }}
           />
       </Dialog.Root>
