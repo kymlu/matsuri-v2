@@ -50,26 +50,31 @@ export default function AdminPage({
     }
   }
   
-  return <div className="w-full px-4 grid grid-rows[auto,1fr] py-10 gap-4 text-center overflow-hide bg-gray-50 h-[100svh]">
-    <header className="flex items-center gap-2">
-      <IconButton
-        src="home"
-        noBorder
-        onClick={() => {
-          goToHomePage();
-        }}/>
-      <h2 className='flex-1 text-2xl font-bold text-start text-nowrap'>ユーザー管理</h2>
-      <Dialog.Root>
-        <Dialog.Trigger>
-          <IconLabelButton icon="add" label="招待" primary asDiv/>
-        </Dialog.Trigger>
-        <InviteUserDialog
-          teamName={team.name}
-          existingUsers={existingEmails}
-          onSuccess={() => {
-            loadData()
+  return <div className="w-full px-4 grid grid-rows-[auto,1fr] py-10 gap-4 text-center overflow-hide bg-gray-50 h-[100svh]">
+    <header>
+      <div className="text-sm text-primary">
+        <b>{team.name}</b><span>の</span>
+      </div>
+      <div className="flex items-center gap-2">
+        <IconButton
+          src="home"
+          noBorder
+          onClick={() => {
+            goToHomePage();
           }}/>
-      </Dialog.Root>
+        <h2 className='flex-1 text-2xl font-bold text-start text-nowrap'>ユーザー管理</h2>
+        <Dialog.Root>
+          <Dialog.Trigger>
+            <IconLabelButton icon="add" label="招待" primary asDiv/>
+          </Dialog.Trigger>
+          <InviteUserDialog
+            teamName={team.name}
+            existingUsers={existingEmails}
+            onSuccess={() => {
+              loadData()
+            }}/>
+        </Dialog.Root>
+      </div>
     </header>
     <div className="px-2 h-full grid items-center overflow-y-auto w-full max-w-full gap-4 grid-cols-[1fr,auto,auto]">
       {

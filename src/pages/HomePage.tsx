@@ -418,8 +418,8 @@ export default function HomePage({
                 <div className="space-y-2">
                   {
                     !isNullOrUndefinedOrBlank(savedDancerName) && <>
-                      {savedDancerName}<small>さん</small>
-                      <Divider/>
+                      <b>{savedDancerName}</b><small>さん</small>
+                      <Divider compact/>
                     </>
                   }
                   {
@@ -431,7 +431,7 @@ export default function HomePage({
                           label="管理"
                           onClick={goToAdminPage}/>
                       </Menu.Item>
-                      <Divider/>
+                      <Divider compact/>
                     </>
                   }
                   <Menu.Item>
