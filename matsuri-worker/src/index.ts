@@ -561,7 +561,7 @@ export default {
 	
 			if (url.pathname === "/api/team/members" && request.method === "GET") {
 				const { results } = await env.DB.prepare(`
-					SELECT tm.id, tm.name, tm.role, u.email
+					SELECT tm.id, u.name, tm.role, u.email
 					FROM team_members tm
 					JOIN users u ON tm.user_id = u.id
 					WHERE tm.team_id = ? AND tm.deleted = 0
