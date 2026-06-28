@@ -21,7 +21,7 @@ export default function InviteUserDialog({
   const [role, setRole] = useState<RoleType>("editor");
   const [hasError, setHasError] = useState<boolean>(false);
 
-  const onClose = () => {
+  const resetData = () => {
     setEmail("");
     setRole("editor");
     setHasError(false);
@@ -50,8 +50,8 @@ export default function InviteUserDialog({
           email,
           role,
           () => {
-            onSuccess()
-            onClose();
+            onSuccess();
+            resetData();
             setIsProcessing(false);
           },
           (status) => {
@@ -70,9 +70,8 @@ export default function InviteUserDialog({
     title="招待"
     onSubmit={() => onSubmit()}
     actionButtonText="招待"
-    onClose={onClose}
+    onClose={resetData}
     isActionButtonDisabled={!isEmailValid}
-    noDetachedTrigger
     >
     <div className="space-y-2">
       <p><b>{teamName}</b>に招待するメールアドレスを入力してください。</p>

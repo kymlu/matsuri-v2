@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { IconLabelButton } from "../components/basic/Button";
 import { User } from "../models/user";
 import IconButton from "../components/basic/IconButton";
@@ -21,6 +21,7 @@ export default function AdminPage({
   goToHomePage, team, currentUserId
 }: AdminPageProps) {
   const [users, setUsers] = useState<User[]>([]);
+  const inviteUserActionsRef = useRef<Dialog.Root.Actions | null>(null);
 
   const loadData = async () => {
     try {
@@ -51,30 +52,32 @@ export default function AdminPage({
   }
   
   return <div className="w-full px-4 grid grid-rows-[auto,1fr] py-10 gap-4 text-center overflow-hide bg-gray-50 h-[100svh]">
-    <header>
-      <div className="text-sm text-primary">
-        <b>{team.name}</b><span>の</span>
+    <header className="flex items-center gap-2">
+      <IconButton
+        src="home"
+        noBorder
+        onClick={() => {
+          goToHomePage();
+        }}/>
+      <div className="text-start">
+        <div className="text-sm text-primary">
+          <b>{team.name}</b><span>の</span>
+        </div>
+        <h2 className='flex-1 text-2xl font-bold text-nowrap'>ユーザー管理</h2>
       </div>
-      <div className="flex items-center gap-2">
-        <IconButton
-          src="home"
-          noBorder
-          onClick={() => {
-            goToHomePage();
-          }}/>
-        <h2 className='flex-1 text-2xl font-bold text-start text-nowrap'>ユーザー管理</h2>
-        <Dialog.Root>
-          <Dialog.Trigger>
-            <IconLabelButton icon="add" label="招待" primary asDiv/>
-          </Dialog.Trigger>
-          <InviteUserDialog
-            teamName={team.name}
-            existingUsers={existingEmails}
-            onSuccess={() => {
-              loadData()
-            }}/>
-        </Dialog.Root>
-      </div>
+      <Dialog.Root actionsRef={inviteUserActionsRef}>
+        <Dialog.Trigger>
+          <IconLabelButton icon="add" label="招待" primary asDiv/>
+        </Dialog.Trigger>
+        <InviteUserDialog
+          teamName={team.name}
+          existingUsers={existingEmails}
+          onSuccess={() => {
+            loadData();
+            () => inviteUserActionsRef.current?.close();
+          }}
+          />
+      </Dialog.Root>
     </header>
     <div className="px-2 h-full grid items-center overflow-y-auto w-full max-w-full gap-4 grid-cols-[1fr,auto,auto]">
       {
