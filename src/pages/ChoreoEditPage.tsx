@@ -547,10 +547,14 @@ export default function ChoreoEditPage(props: {
         }
         publish={() => {
           if (props.teamId) {
-            getChoreoPassword(props.teamId, props.currentChoreo.id, (svrPassword) => {
+            if (props.currentChoreoStatus === "localOnly") {
               setPublishConfirmationDialogOpen(true);
-              setPassword(svrPassword);
-            }, () => {}); // todo: on failure
+            } else {
+              getChoreoPassword(props.teamId, props.currentChoreo.id, (svrPassword) => {
+                setPublishConfirmationDialogOpen(true);
+                setPassword(svrPassword);
+              }, () => {}); // todo: on failure
+            }
           }
         }}
         />
