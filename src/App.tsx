@@ -6,10 +6,11 @@ import ChoreoEditPage from './pages/ChoreoEditPage';
 import ChoreoViewPage from './pages/ChoreoViewPage';
 import { BasicChoreoDetails, Choreo, EventDetails } from './models/choreo';
 import { getUserName, setUserName } from './lib/dataAccess/LocalStorageController';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Team } from './models/team';
 import { checkLogin, verifyTeam } from './lib/helpers/apiHelper';
 import AdminPage from './pages/AdminPage';
+import { isNullOrUndefinedOrBlank } from './lib/helpers/globalHelper';
 
 type Mode = "home" | "form" | "edit" | "view" | "admin";
 
@@ -27,27 +28,35 @@ function App() {
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [currentTeamMemberId, setCurrentTeamMemberId] = useState<string | undefined>();
   const [isProcessing, setIsProcessing] = useState<boolean>(true);
+  const [showNoTeamDialog, setShowNoTeamDialog] = useState<boolean>(false);
 
   const { teamSlug } = useParams();
 
   const [team, setTeam] = useState<Team | undefined>(undefined);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    verifyTeam(teamSlug ?? "", (t) => {
-      setTeam(t);
-      checkLogin(t?.id!,
-      (name, role, teamMemberId) => {
-        setNewName(name);
-        setIsAdmin(role === "admin");
-        setIsLoggedIn(true);
-        setCurrentTeamMemberId(teamMemberId);
+    if (isNullOrUndefinedOrBlank(teamSlug)) {
+      setShowNoTeamDialog(true);
+      setIsProcessing(false);
+    } else {
+      verifyTeam(teamSlug!!, (t) => {
+        setTeam(t);
+        checkLogin(t?.id!,
+        (name, role, teamMemberId) => {
+          setNewName(name);
+          setIsAdmin(role === "admin");
+          setIsLoggedIn(true);
+          setCurrentTeamMemberId(teamMemberId);
+        }, () => {
+          setIsLoggedIn(false);
+        });
+        setIsProcessing(false);
       }, () => {
-        setIsLoggedIn(false);
+        navigate('/');
+        setIsProcessing(false);
       });
-      setIsProcessing(false);
-    }, () => {
-      setIsProcessing(false);
-    });
+    }
   }, []);
 
   useEffect(() => {
@@ -112,6 +121,8 @@ function App() {
           setIsLoggedIn={setIsLoggedIn}
           team={team}
           setCurrentTeamMemberId={(id) => setCurrentTeamMemberId(id)}
+          showNoTeamDialog={showNoTeamDialog}
+          setShowNoTeamDialog={setShowNoTeamDialog}
         />
       )}
       {mode === "form" && (

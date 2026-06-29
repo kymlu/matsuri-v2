@@ -55,6 +55,8 @@ type HomePageProps = {
   setIsAdmin: (value: boolean) => void,
   setCurrentTeamMemberId: (value: string) => void,
   team?: Team,
+  showNoTeamDialog: boolean,
+  setShowNoTeamDialog: (value: boolean) => void,
 }
 
 export type ChoreoStatus = "localOnly" | "syncRequired" | "upToDate" | "edited";
@@ -69,7 +71,7 @@ export default function HomePage({
   savedDancerName, setSavedDancerName,
   dancerNamesByEvent, setDancerNamesByEvent,
   isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin,
-  setCurrentTeamMemberId, team
+  setCurrentTeamMemberId, team, showNoTeamDialog, setShowNoTeamDialog
 }: HomePageProps) {
   const [savedChoreos, setSavedChoreos] = useState<ChoreoWithStatus[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -868,6 +870,15 @@ export default function HomePage({
               setLoginDialogOpen(false);
             }}
             teamId={team?.id ?? ""}/>
+        </Dialog.Root>
+        <Dialog.Root open={showNoTeamDialog} onOpenChange={() => setShowNoTeamDialog(false)}>
+          <CustomDialog title="ようこそ！" hasX fullWidth>
+            <div className="space-y-2">
+              <p>チームに参加すると、隊列表の保存・公開ができます。</p>
+              <p>参加をご希望の方はチームの管理者にお問い合わせください。</p>
+              <p>なお、チームに参加していない場合、データはブラウザ上にのみ保存されます。</p>
+            </div>
+          </CustomDialog>
         </Dialog.Root>
       </div>
     </div>
