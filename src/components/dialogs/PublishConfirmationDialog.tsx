@@ -55,28 +55,29 @@ export default function PublishConfirmationDialog({
       setIsProcessing(true);
       setError("none");
       try {
-        const serverVersion = await findCurrentVersion(teamId, currentVersion.id);
-        if (serverVersion.version !== (oldVersion?.version ?? 0)) {
-          setError("versionError");
-          setIsProcessing(false);
-        } else {
-          let choreo = {...getChoreo()};
-          choreo.isDirty = undefined;
-          publishChoreo(
-            teamId,
-            choreo,
-            !isUpdate,
-            (newChoreo: Choreo) => {
-              onSave(newChoreo);
-              setError("none");
-            },
-            (status) => {
-              setError("error");
-              setIsProcessing(false);
-            },
-            (hasPassword && !isNullOrUndefinedOrBlank(password)) ? password : undefined
-          );
+        if (oldVersion) {
+          const serverVersion = await findCurrentVersion(teamId, currentVersion.id);
+          if (serverVersion.version !== (oldVersion?.version ?? 0)) {
+            setError("versionError");
+            setIsProcessing(false);
+          }
         }
+        let choreo = {...getChoreo()};
+        choreo.isDirty = undefined;
+        publishChoreo(
+          teamId,
+          choreo,
+          !isUpdate,
+          (newChoreo: Choreo) => {
+            onSave(newChoreo);
+            setError("none");
+          },
+          (status) => {
+            setError("error");
+            setIsProcessing(false);
+          },
+          (hasPassword && !isNullOrUndefinedOrBlank(password)) ? password : undefined
+        );
       } catch (e: any) {
         setError("error");
         if (e instanceof Error) {
