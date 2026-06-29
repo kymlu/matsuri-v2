@@ -11,6 +11,8 @@ import { Team } from './models/team';
 import { checkLogin, verifyTeam } from './lib/helpers/apiHelper';
 import AdminPage from './pages/AdminPage';
 import { isNullOrUndefinedOrBlank } from './lib/helpers/globalHelper';
+import { Oval } from 'react-loader-spinner';
+import { colorPalette } from './lib/consts/colors';
 
 type Mode = "home" | "form" | "edit" | "view" | "admin";
 
@@ -90,6 +92,15 @@ function App() {
             currentUserId={currentTeamMemberId}
           />
         )
+      }
+      {
+        isProcessing &&
+        <div className='w-full h-svh'>
+          <Oval
+            wrapperClass="mt-4 justify-self-center"
+            color={colorPalette.primary}
+            secondaryColor={colorPalette.rainbow.red[2]}/>
+        </div>
       }
       {!isProcessing && mode === "home" && (
         <HomePage
