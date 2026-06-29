@@ -590,7 +590,7 @@ export default {
 			if (url.pathname === "/api/team/members/remove" && request.method === "POST") {
 				const body = await request.json() as { member_id: string };
 				const results = await env.DB.prepare(`
-					SELECT user_id
+					SELECT user_id FROM team_members
 					WHERE id = ? AND team_id = ?
 				`).bind(body.member_id, session.team_id).first();
 
