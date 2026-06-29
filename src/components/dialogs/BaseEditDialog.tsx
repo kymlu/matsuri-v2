@@ -8,6 +8,7 @@ type BaseEditDialogProps = {
   actionButtonText?: string,
   noDetachedTrigger?: boolean,
   full?: boolean,
+  fullWidth?: boolean,
   showCloseButton?: boolean,
   onClose?: () => void,
   onSubmit: () => void,
@@ -18,13 +19,14 @@ type BaseEditDialogProps = {
 export default function BaseEditDialog({
   title,
   isActionButtonDisabled, actionButtonText,
-  noDetachedTrigger, full,
+  noDetachedTrigger, full, fullWidth,
   onClose, showCloseButton = true,
   onSubmit, children, hasX = true
 }: BaseEditDialogProps) {
   return <CustomDialog
     hasX={hasX}
     full={full}
+    fullWidth={fullWidth}
     title={title}
     onClose={onClose}
     footer={

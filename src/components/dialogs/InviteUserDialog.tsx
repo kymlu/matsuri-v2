@@ -72,6 +72,7 @@ export default function InviteUserDialog({
     actionButtonText="招待"
     onClose={resetData}
     isActionButtonDisabled={!isEmailValid}
+    fullWidth
     >
     <div className="space-y-2">
       <p><b>{teamName}</b>に招待するメールアドレスを入力してください。</p>
@@ -101,10 +102,8 @@ export default function InviteUserDialog({
           管理者
         </Button>
       </div>
-      <p className="text-sm text-gray-600 text-wrap">
-        {role === "admin" && <>隊列表の編集とユーザー管理ができます。</>}
-        {role === "editor" && <>隊列表の編集ができます。</>}
-      </p>
+      <p className="text-sm text-gray-600"><b>編集者：</b>隊列表の編集ができます。</p>
+      <p className="text-sm text-gray-600"><b>管理者：</b>隊列表の編集とユーザー管理ができます。</p>
     </div>
     {
       hasError &&
