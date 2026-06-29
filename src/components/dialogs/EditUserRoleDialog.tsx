@@ -46,14 +46,19 @@ export default function EditUserRoleDialog({
     actionButtonText="保存"
     noDetachedTrigger
     >
-    <div className="space-y-2">
+    <div className="grid grid-cols-[auto,1fr] auto-rows-min gap-2">
       {
         !isNullOrUndefinedOrBlank(user.name) &&
-        <p className="text-gray-600">名前：<b>{user.name}</b></p>
+        <>
+          <span>名前：</span>
+          <span className="font-bold break-all">{user.name}</span>
+        </>
       }
-      <p className="text-gray-600">メール：<b>{user.email}</b></p>
-      <p className="text-gray-600">役割：</p>
-      <div className="flex gap-2">
+      <span>メール：</span>
+      <span className="font-bold break-all">{user.email}</span>
+      <span>役割：</span>
+      <span></span>
+      <div className="flex col-span-2 gap-2">
         <Button
           full
           primary={role === "editor"}
@@ -67,8 +72,10 @@ export default function EditUserRoleDialog({
           管理者
         </Button>
       </div>
-      <p className="text-sm text-gray-600 text-wrap">編集者：隊列表の編集ができます。</p>
-      <p className="text-sm text-gray-600 text-wrap">管理者：隊列表の編集とユーザー管理ができます。</p>
+      <span className="text-sm font-bold">編集者：</span>
+      <span className="text-sm">隊列表の編集ができます。</span>
+      <span className="text-sm font-bold">管理者：</span>
+      <span className="text-sm">隊列表の編集とユーザー管理ができます。</span>
     </div>
     {
       hasError &&
