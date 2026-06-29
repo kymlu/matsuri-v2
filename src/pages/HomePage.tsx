@@ -593,7 +593,7 @@ export default function HomePage({
 
         <Dialog.Root>
           <Dialog.Trigger>
-            <div className="fixed z-20 bg-white bottom-12 right-8">
+            <div className="fixed z-20 bottom-12 right-8">
               <IconButton asDiv imgSrc="beginner" colour="primary"/>
             </div>
           </Dialog.Trigger>
