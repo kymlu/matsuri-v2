@@ -115,7 +115,7 @@ export default function LoginDialog({
       case "forgot":
         return isNullOrUndefinedOrBlank(email) || isProcessing;
       case "resetPassword":
-        return isNullOrUndefinedOrBlank(password) || isNullOrUndefinedOrBlank(verificationCode) || isProcessing;
+        return isNullOrUndefinedOrBlank(password) || isNullOrUndefinedOrBlank(verificationCode) || isProcessing || password.length < 8;
     }
   }, [email, password, isProcessing]);
 
@@ -200,7 +200,7 @@ export default function LoginDialog({
           maxLength={VERIFICATION_CODE_LENGTH}
           onContentChange={(value) => setVerificationCode(value)}/>
         <TextInput
-          label="パスワード（英数字のみ）"
+          label="パスワード（8~30文字のみ）"
           name="パスワード"
           type="password"
           defaultValue=""
