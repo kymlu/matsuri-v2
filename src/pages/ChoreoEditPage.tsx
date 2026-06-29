@@ -1158,6 +1158,7 @@ export default function ChoreoEditPage(props: {
         >
         <ConfirmDeletionDialog
           name={currentSection.name}
+          verb="削除"
           onSubmit={() => {
             const currentSectionIndex = history.presentState.state.sections
               .findIndex((s) => strEquals(s.id, currentSection.id));

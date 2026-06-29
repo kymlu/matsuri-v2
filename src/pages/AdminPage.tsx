@@ -79,7 +79,7 @@ export default function AdminPage({
           />
       </Dialog.Root>
     </header>
-    <div className="px-2 h-full grid items-center overflow-y-auto w-full max-w-full gap-4 grid-cols-[1fr,auto,auto]">
+    <div className="px-2 h-full grid auto-rows-min items-center overflow-y-auto w-full max-w-full gap-4 grid-cols-[1fr,auto,auto]">
       {
         users.map((user, i) => (
           <React.Fragment key={user.id}>
@@ -112,6 +112,7 @@ export default function AdminPage({
                 <ConfirmDeletionDialog
                   name={!isNullOrUndefinedOrBlank(user.name) ? `${user.name} (${user.email})` : user.email}
                   onSubmit={() => deleteUser(user.id)}
+                  verb="取り消"
                 />
               </Dialog.Root>
             </div>

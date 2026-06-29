@@ -43,15 +43,16 @@ export default function EditUserRoleDialog({
   return <BaseEditDialog
     title="権限変更"
     onSubmit={() => onSubmit()}
-    actionButtonText="招待"
+    actionButtonText="保存"
     noDetachedTrigger
     >
     <div className="space-y-2">
       {
         !isNullOrUndefinedOrBlank(user.name) &&
-        <p>{user.name}</p>
+        <p className="text-gray-600">名前：<b>{user.name}</b></p>
       }
-      <p>{user.email}</p>
+      <p className="text-gray-600">メール：<b>{user.email}</b></p>
+      <p className="text-gray-600">役割：</p>
       <div className="flex gap-2">
         <Button
           full
@@ -66,10 +67,8 @@ export default function EditUserRoleDialog({
           管理者
         </Button>
       </div>
-      <p className="text-sm text-gray-600 text-wrap">
-        {role === "admin" && <>隊列表の編集とユーザー管理ができます。</>}
-        {role === "editor" && <>隊列表の編集ができます。</>}
-      </p>
+      <p className="text-sm text-gray-600 text-wrap">編集者：隊列表の編集ができます。</p>
+      <p className="text-sm text-gray-600 text-wrap">管理者：隊列表の編集とユーザー管理ができます。</p>
     </div>
     {
       hasError &&
