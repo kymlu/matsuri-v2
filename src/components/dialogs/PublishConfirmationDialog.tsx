@@ -1,7 +1,7 @@
 import { ICON, PASSWORD_LENGTH } from "../../lib/consts/consts";
 import { formatDateRange, getJpDate } from "../../lib/helpers/dateHelper";
 import { findCurrentVersion, publishChoreo } from "../../lib/helpers/apiHelper";
-import { isNullOrUndefinedOrBlank, strEquals, testAlphanumeric } from "../../lib/helpers/globalHelper";
+import { isNullOrUndefinedOrBlank, strEquals, testAlphanumericSymbols } from "../../lib/helpers/globalHelper";
 import { BasicChoreoDetails, Choreo } from "../../models/choreo";
 import Divider from "../basic/Divider";
 import Icon from "../basic/Icon";
@@ -131,15 +131,18 @@ export default function PublishConfirmationDialog({
     return rowList;
   }, [currentVersion, oldVersion]);
 
-  const hasChanges = useMemo(()=> {
-    return currentVersion.isDirty || !strEquals(svrPassword, password) || hasPassword !== !isNullOrUndefinedOrBlank(svrPassword);
+  const isActionButtonEnabled = useMemo(()=> {
+    return currentVersion.isDirty ||
+      !strEquals(svrPassword, password) ||
+      hasPassword !== !isNullOrUndefinedOrBlank(svrPassword) ||
+      (hasPassword && password.length >= 4);
   }, [currentVersion.isDirty]);
 
   return (
     <BaseEditDialog
       title="公開確認"
       actionButtonText="公開する"
-      isActionButtonDisabled={!hasChanges}
+      isActionButtonDisabled={!isActionButtonEnabled}
       onSubmit={upload}
       onClose={() => {
         onClose();
@@ -187,7 +190,7 @@ export default function PublishConfirmationDialog({
             </tbody>
           </table>
           <CustomSwitch
-            label="パスワード（英数字のみ）"
+            label="パスワード（4~25文字のみ）"
             defaultChecked={hasPassword}
             onChange={(checked) => setHasPassword(checked)}/>
           <TextInput
@@ -195,18 +198,18 @@ export default function PublishConfirmationDialog({
             defaultValue={password}
             disabled={!hasPassword}
             maxLength={PASSWORD_LENGTH}
-            restrictFn={(s) => testAlphanumeric(s)}
+            restrictFn={(s) => testAlphanumericSymbols(s)}
             onContentChange={(newContent) => setPassword(newContent)}/>
         </div>
         <Divider />
         <p>最終編集日時：{currentVersion.lastUpdated ? getJpDate(new Date(currentVersion.lastUpdated)) : ""}</p>
         {
-          !hasChanges &&
+          !isActionButtonEnabled &&
           <p className="w-full font-semibold text-center text-primary">
             編集はありません。
           </p>
         }
-        { hasChanges && isUpdate &&
+        { isActionButtonEnabled && isUpdate &&
           <p>公開バージョン：{oldVersion.version!! + 1}</p>
         }
         {

@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import BaseEditDialog from "./BaseEditDialog";
 import TextInput from "../inputs/TextInput";
-import { isNullOrUndefinedOrBlank } from "../../lib/helpers/globalHelper";
+import { isNullOrUndefinedOrBlank, testAlphanumericSymbols } from "../../lib/helpers/globalHelper";
 import { loginUserToTeam, resetPassword, sendPasswordResetRequest } from "../../lib/helpers/apiHelper";
 import { EMAIL_LENGTH, PASSWORD_ENTRY_LENGTH, PASSWORD_LENGTH, VERIFICATION_CODE_LENGTH } from "../../lib/consts/consts";
 import { RoleType } from "../../models/user";
@@ -200,11 +200,12 @@ export default function LoginDialog({
           maxLength={VERIFICATION_CODE_LENGTH}
           onContentChange={(value) => setVerificationCode(value)}/>
         <TextInput
-          label="パスワード（8~30文字のみ）"
+          label="パスワード（8~25文字）"
           name="パスワード"
           type="password"
           defaultValue=""
           maxLength={PASSWORD_LENGTH}
+          restrictFn={(s) => testAlphanumericSymbols(s)}
           onContentChange={(value) => setPassword(value)}/>
         {
           error === "failedReset" &&

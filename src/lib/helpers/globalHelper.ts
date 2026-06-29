@@ -109,8 +109,8 @@ export function testInvalidCharacters(text: string) {
   return RegExp(/[<>:"/\\|?*]$/g).test(text);
 }
 
-export function testAlphanumeric(text: string) {
-  return /^[a-zA-Z0-9]*$/.test(text);
+export function testAlphanumericSymbols(text: string) {
+  return /^[a-zA-Z0-9!@#$%^&*]*$/.test(text);
 }
 
 export function testEmail(text: string) {
