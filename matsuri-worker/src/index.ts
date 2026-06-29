@@ -632,7 +632,7 @@ export default {
 					FROM choreos c
 					WHERE c.id = ? AND c.team_id = ?
 				`).bind(data.choreo_id as string, data.team_id as string).first<{password: string | null}>();
-				return new Response(JSON.stringify({password: password}), {
+				return new Response(JSON.stringify(password), {
 					status: 200,
 					headers: { ...corsHeaders, "Content-Type": "application/json", "Set-Cookie": setSessionCookie(token) },
 				});
