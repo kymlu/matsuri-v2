@@ -14,7 +14,7 @@ const getApiUrl = (endpoint:
   "team/members" |
   "team/members/role" |
   "team/members/name" |
-  "team/members/delete" |
+  "team/members/remove" |
   "choreos/summary" | 
   "choreos/verify" |
   "choreos/get-password" |
@@ -206,7 +206,7 @@ export const removeUserFromTeam = async (
   onFailure: (status: number) => void,
 ): Promise<void> => {
   try {
-    const response = await fetch(`${getApiUrl("team/members/delete")}`, {
+    const response = await fetch(`${getApiUrl("team/members/remove")}`, {
       method: "POST",
       credentials: "include",
       body: JSON.stringify({ member_id: memberId }),
