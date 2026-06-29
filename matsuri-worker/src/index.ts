@@ -546,8 +546,11 @@ export default {
 	
 				try {
 					await sendEmail(body.email, `${team.name}に招待されました`, `<p>${team.name}に招待されました。</p>
-						<p><a>tairetsu.app/${team.slug}</a> にアクセスする</p>
-						<p>当アプリの使用が初めての方は、「パスワードを忘れた」からパスワードを設定してログインしてください。</p>
+						<p><a href="https://tairetsu.app/${team.slug}">tairetsu.app/${team.slug}</a> にアクセスする</p>
+						<p>初めてご利用の方は、「パスワードをお忘れの方はこちら」からパスワードを設定してください。</p>
+						<p>ご不明な点がございましたら、チームの管理者にお問い合わせください。</p>
+						<br/>
+						<p>※このメールは自動送信されています。返信には対応しておりませんのでご了承ください。</p>
 					`);
 				} catch (e: any) {
 					return getErrorResponse(`Failed to send email: ${(e as Error)?.message}`, 500);

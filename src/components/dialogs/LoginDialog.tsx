@@ -172,7 +172,7 @@ export default function LoginDialog({
           setPassword("");
         }}>
           <span className="w-full font-semibold text-center underline">
-            パスワード忘れた
+            パスワードをお忘れの方はこちら
           </span>
         </button>
       </>
