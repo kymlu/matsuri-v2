@@ -282,7 +282,7 @@ export default {
 			`).bind(crypto.randomUUID(), user.id, codeHash).run();
 
 			try {
-				sendEmail(body.email, 'パスワード再設定', `<p>パスワード再設定のリクエストを受け付けました。</p>
+				await sendEmail(body.email, 'パスワード再設定', `<p>パスワード再設定のリクエストを受け付けました。</p>
 					<p>以下の認証コードを入力してください。</p>
 					<p>${code}</p>
 					<p>この認証コードの有効期限は10分です。</p>
@@ -545,7 +545,7 @@ export default {
 				}
 	
 				try {
-					sendEmail(body.email, `${team.name}に招待されました`, `<p>${team.name}に招待されました。</p>
+					await sendEmail(body.email, `${team.name}に招待されました`, `<p>${team.name}に招待されました。</p>
 						<p><a>tairetsu.app/${team.slug}</a> にアクセスする</p>
 						<p>当アプリの使用が初めての方は、「パスワードを忘れた」からパスワードを設定してログインしてください。</p>
 					`);
