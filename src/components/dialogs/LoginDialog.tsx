@@ -18,7 +18,7 @@ export default function LoginDialog({
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [verificationCode, setVerificationCode] = useState<string>("");
-  const [error, setError] = useState<"none" | "error" | "loginError" | "notOnTeamError" | "notFound" | "failedReset">("none");
+  const [error, setError] = useState<"none" | "error" | "loginError" | "notOnTeamError" | "notFound" | "failedReset" | string>("none");
   
   const [mode, setMode] = useState<"login" | "forgot" | "resetPassword">("login");
 
@@ -86,9 +86,11 @@ export default function LoginDialog({
           setError("error");
           setIsProcessing(false);
         });
-      }, (status) => {
+      }, (status, message) => {
         if (status === 401) {
           setError("failedReset");
+        } else if (!isNullOrUndefinedOrBlank(message)) {
+          setError(message);
         } else {
           setError("error");
         }

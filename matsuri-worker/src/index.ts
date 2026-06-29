@@ -308,8 +308,10 @@ export default {
 				"SELECT * FROM users WHERE email = ?"
 			).bind(body.email).first();
 
+			const invalidCodeErrorMessage = "認証コードまたはメールアドレスが正しくありません";
+
 			if (!user) {
-				return getErrorResponse("The verification code or email is invalid", 400);
+				return getErrorResponse(invalidCodeErrorMessage, 400);
 			}
 
 			const teamMember = await env.DB.prepare(
@@ -317,7 +319,16 @@ export default {
 			).bind(user.id, body.team_id).first();
 			
 			if (!teamMember) {
-				return getErrorResponse("The verification code or email is invalid", 400);
+				return getErrorResponse(invalidCodeErrorMessage, 400);
+			}
+
+			const expiredToken = await env.DB.prepare(`
+				SELECT * FROM password_reset_tokens 
+				WHERE user_id = ? AND used_at IS NULL AND expires_at <= datetime('now')
+			`).bind(user.id).first();
+
+			if (expiredToken) {
+				return getErrorResponse("コードの有効期限が切れています。新しいコードを再送してください", 400);
 			}
 
 			const resetToken = await env.DB.prepare(`
@@ -326,11 +337,11 @@ export default {
 			`).bind(user.id).first();
 
 			if (!resetToken) {
-				return getErrorResponse("The verification code or email is invalid", 400);
+				return getErrorResponse(invalidCodeErrorMessage, 400);
 			}
 
 			if (resetToken.attempts as number >= 5) {
-				return getErrorResponse("Too many attempt, request a new code", 400);
+				return getErrorResponse("試行回数が多すぎます。新しいコードをリクエストしてください", 400);
 			}
 
 			const codeMatch = await verifyPassword(body.code, resetToken.code_hash as string);
@@ -340,7 +351,7 @@ export default {
 					UPDATE password_reset_tokens SET attempts = attempts + 1 WHERE id = ?
 				`).bind(resetToken.id).run();
 
-				return getErrorResponse("The verification code or email is invalid", 400);
+				return getErrorResponse(invalidCodeErrorMessage, 400);
 			}
 
 			const newHash = await hashPassword(body.password);

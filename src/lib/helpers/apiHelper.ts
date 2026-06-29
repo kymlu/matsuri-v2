@@ -108,7 +108,7 @@ export const resetPassword = async (
   code: string,
   password: string,
   onSuccess: () => void,
-  onFailure: (status: number) => void,
+  onFailure: (status: number, message: string) => void,
 ): Promise<void> => {
   try {
     const response = await fetch(getApiUrl("auth/reset-password"), {
@@ -120,7 +120,7 @@ export const resetPassword = async (
     if (!response.ok) {
       const data = await response.json() as ErrorResponse;
       console.error(`Reset password failed: ${response.status} message: ${data.message}`);
-      onFailure(response.status);
+      onFailure(response.status, data.message);
     } else {
       onSuccess();
     }
