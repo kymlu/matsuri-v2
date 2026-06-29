@@ -25,6 +25,7 @@ function App() {
   const [buildInfo, setBuildInfo] = useState<string | undefined>();
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const [currentTeamMemberId, setCurrentTeamMemberId] = useState<string | undefined>();
   const [isProcessing, setIsProcessing] = useState<boolean>(true);
 
   const { teamSlug } = useParams();
@@ -35,10 +36,11 @@ function App() {
     verifyTeam(teamSlug ?? "", (t) => {
       setTeam(t);
       checkLogin(t?.id!,
-      (name, role) => {
+      (name, role, teamMemberId) => {
         setNewName(name);
         setIsAdmin(role === "admin");
         setIsLoggedIn(true);
+        setCurrentTeamMemberId(teamMemberId);
       }, () => {
         setIsLoggedIn(false);
       });
@@ -72,11 +74,11 @@ function App() {
   return (
     <div>
       {
-        team && mode === "admin" && (
+        currentTeamMemberId && team && mode === "admin" && (
           <AdminPage
             goToHomePage={() => setMode("home")}
             team={team}
-            currentUserId='1'
+            currentUserId={currentTeamMemberId}
           />
         )
       }
@@ -109,6 +111,7 @@ function App() {
           isLoggedIn={isLoggedIn}
           setIsLoggedIn={setIsLoggedIn}
           team={team}
+          setCurrentTeamMemberId={(id) => setCurrentTeamMemberId(id)}
         />
       )}
       {mode === "form" && (

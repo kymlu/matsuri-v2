@@ -8,7 +8,7 @@ import { RoleType } from "../../models/user";
 
 export type LoginDialogProps = {
   teamId: string,
-  onLogin: (name: string, role: RoleType) => void,
+  onLogin: (name: string, role: RoleType, teamMemberId: string) => void,
   onClose: () => void,
 }
 
@@ -42,8 +42,8 @@ export default function LoginDialog({
     if (!isProcessing) {
       setIsProcessing(true);
       setError("none");
-      loginUserToTeam(teamId, email, password, (name, role) => {
-        onLogin(name, role);
+      loginUserToTeam(teamId, email, password, (name, role, teamMemberId) => {
+        onLogin(name, role, teamMemberId);
         close();
         setIsProcessing(false);
       }, (status) => {
@@ -78,8 +78,8 @@ export default function LoginDialog({
       setIsProcessing(true);
       setError("none");
       resetPassword(email, teamId, verificationCode, password, () => {
-        loginUserToTeam(teamId, email, password, (name, role) => {
-          onLogin(name, role);
+        loginUserToTeam(teamId, email, password, (name, role, teamMemberId) => {
+          onLogin(name, role, teamMemberId);
           close();
           setIsProcessing(false);
         }, (status) => {

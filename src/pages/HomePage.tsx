@@ -53,6 +53,7 @@ type HomePageProps = {
   setIsLoggedIn: (value: boolean) => void,
   isAdmin: boolean,
   setIsAdmin: (value: boolean) => void,
+  setCurrentTeamMemberId: (value: string) => void,
   team?: Team,
 }
 
@@ -68,7 +69,7 @@ export default function HomePage({
   savedDancerName, setSavedDancerName,
   dancerNamesByEvent, setDancerNamesByEvent,
   isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin,
-  team
+  setCurrentTeamMemberId, team
 }: HomePageProps) {
   const [savedChoreos, setSavedChoreos] = useState<ChoreoWithStatus[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -857,10 +858,11 @@ export default function HomePage({
           open={loginDialogOpen}
           onOpenChange={handleLoginDialogOpen}>
           <LoginDialog
-            onLogin={(name, role) => {
+            onLogin={(name, role, teamMemberId) => {
               setIsLoggedIn(true);
               setIsAdmin(role === "admin");
               setSavedDancerName(name);
+              setCurrentTeamMemberId(teamMemberId);
             }}
             onClose={() => {
               setLoginDialogOpen(false);

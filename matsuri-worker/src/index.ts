@@ -395,7 +395,7 @@ export default {
 				VALUES (?, ?, ?, ?, datetime('now', '+30 days'), datetime('now'))
 			`).bind(crypto.randomUUID(), user.id, teamMember.team_id, token).run();
 
-			return new Response(JSON.stringify({ success: true, name: teamMember.name, role: teamMember.role }), {
+			return new Response(JSON.stringify({ success: true, teamMemberId: teamMember.id, name: teamMember.name, role: teamMember.role }), {
 				status: 200,
 				headers: {
 					...corsHeaders,
@@ -469,7 +469,7 @@ export default {
 			await env.DB.prepare(`
 				UPDATE sessions SET expires_at = datetime('now', '+30 days') WHERE token = ?
 			`).bind(token).run();
-			return new Response(JSON.stringify({name: session.name, role: session.role}), {
+			return new Response(JSON.stringify({teamMemberId: session.team_member_id, name: session.name, role: session.role}), {
 				status: 200,
 				headers: { ...corsHeaders, "Content-Type": "application/json", "Set-Cookie": setSessionCookie(token) },
 			});

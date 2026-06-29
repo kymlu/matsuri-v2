@@ -27,7 +27,7 @@ export const loginUserToTeam = async (
   teamId: string,
   email: string,
   password: string,
-  onSuccess: (name: string, role: RoleType) => void,
+  onSuccess: (name: string, role: RoleType, teamMemberId: string) => void,
   onFailure: (status: number) => void
 ): Promise<void> => {
   try {
@@ -38,14 +38,13 @@ export const loginUserToTeam = async (
       body: JSON.stringify({ email, password, team_id: teamId }),
     });
 
-    
     if (!response.ok) {
       const data = await response.json() as ErrorResponse;
       console.error(`Login failed: ${response.status} message: ${data.message}`);
       onFailure(response.status);
     } else {
-      const data = await response.json() as { success?: boolean; name: string; role: RoleType };
-      onSuccess(data.name, data.role);
+      const data = await response.json() as { success?: boolean; name: string; role: RoleType, teamMemberId: string };
+      onSuccess(data.name, data.role, data.teamMemberId);
     }
   } catch (e: any) {
     console.error("login failed:", (e as Error)?.message);
@@ -371,7 +370,7 @@ export const verifyTeam = async(
 
 export const checkLogin = async(
   teamId: string,
-  onSuccess: (name: string, role: RoleType) => void,
+  onSuccess: (name: string, role: RoleType, teamMemberId: string) => void,
   onFailure: (status: number) => void
 ) => {
   try {
@@ -385,8 +384,8 @@ export const checkLogin = async(
       onFailure(response.status);
       return;
     } else {
-      const data = await response.json() as { name: string, role: RoleType };
-      onSuccess(data.name, data.role);
+      const data = await response.json() as { teamMemberId: string, name: string, role: RoleType };
+      onSuccess(data.name, data.role, data.teamMemberId);
     }
   
   } catch (e: any) {
