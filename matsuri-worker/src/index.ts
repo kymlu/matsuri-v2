@@ -600,7 +600,7 @@ export default {
 				`).bind(body.member_id, session.team_id).run();
 
 				await env.DB.prepare(`
-					DELETE FROM sessions WHERE user_id = ?
+					DELETE FROM sessions WHERE user_id = ? AND team_id = ?
 				`).bind(results?.user_id, session.team_id).run();
 	
 				return new Response(JSON.stringify({ success: true }), {
