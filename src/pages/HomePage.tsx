@@ -1123,7 +1123,7 @@ function EventSection({
               </Dialog.Close>
 
               {
-                teamId &&
+                teamId && selectedChoreo.status !== "localOnly" &&
                 <Dialog.Close>
                   <IconLabelButton
                     icon="history"
