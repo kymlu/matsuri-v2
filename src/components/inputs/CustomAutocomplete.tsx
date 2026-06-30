@@ -56,8 +56,9 @@ export default function CustomAutocomplete({
   var inputClasses = classNames(
     "col-start-1 border row-start-1 text-black p-3 border-gray-400 rounded-md focus-within:border-primary focus:outline-none",
     {
-      "pr-6": clearable,
-      "pr-2": !clearable,
+      "pr-20": clearable && showLength,
+      "pr-10": clearable !== showLength,
+      "pr-2": !clearable && !showLength,
       "pl-10": search,
       "pl-2": !search,
       "h-10": tall,
@@ -111,15 +112,24 @@ export default function CustomAutocomplete({
               </Autocomplete.Positioner>
             </Autocomplete.Portal>
             {
-              clearable && !isNullOrUndefinedOrBlank(value) && 
-              <Autocomplete.Clear className="absolute right-2">
-                <IconButton
-                  src="clear"
-                  colour="primary"
-                  size="sm"
-                  noBorder
-                  asDiv/>
-              </Autocomplete.Clear>
+              (showLength || clearable) &&
+              <div className="absolute flex items-center gap-1 right-2">
+                {
+                  showLength &&
+                  <span className="text-sm text-gray-600 text-end">{`${value.length}/${maxLength ?? 20}`}</span>
+                }
+                {
+                  clearable && !isNullOrUndefinedOrBlank(value) && 
+                  <Autocomplete.Clear >
+                    <IconButton
+                      src="clear"
+                      colour="primary"
+                      size="sm"
+                      noBorder
+                      asDiv/>
+                  </Autocomplete.Clear>
+                }
+              </div>
             }
           </Autocomplete.Root>
           {
@@ -135,11 +145,6 @@ export default function CustomAutocomplete({
             </div>
           }
         </div>
-
-        {
-          showLength &&
-          <span className="text-sm text-end">{`${value.length}/${maxLength ?? 20}`}</span>
-        }
       </div>
     </FieldWithLabel>
   )

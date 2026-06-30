@@ -54,8 +54,9 @@ export default function TextInput({
   var inputClasses = classNames(
     "col-start-1 border row-start-1 text-black py-3 border-gray-400 rounded-md focus-within:border-primary focus:outline-none",
     {
-      "pr-6": clearable,
-      "pr-2": !clearable,
+      "pr-20": clearable && showLength,
+      "pr-10": clearable !== showLength,
+      "pr-2": !clearable && !showLength,
       "pl-10": search,
       "pl-2": !search,
       "h-10": tall,
@@ -99,22 +100,26 @@ export default function TextInput({
             </div>
           }
           {
-            clearable && !isNullOrUndefinedOrBlank(value) && 
-            <div className="absolute right-2">
-              <IconButton
-                src="clear"
-                colour="primary"
-                size="sm"
-                noBorder
-                onClick={() => {handleChange("")}}/>
+            (showLength || clearable) &&
+            <div className="absolute flex items-center gap-1 right-2">
+              {
+                clearable && !isNullOrUndefinedOrBlank(value) && 
+                <div>
+                  <IconButton
+                    src="clear"
+                    colour="primary"
+                    size="sm"
+                    noBorder
+                    onClick={() => {handleChange("")}}/>
+                </div>
+              }
+              {
+                showLength &&
+                <span className="text-sm text-gray-600 text-end">{`${value.length}/${maxLength ?? 20}`}</span>
+              }
             </div>
           }
         </div>
-
-        {
-          showLength &&
-          <span className="text-sm text-end">{`${value.length}/${maxLength ?? 20}`}</span>
-        }
       </div>
     </FieldWithLabel>
   )
