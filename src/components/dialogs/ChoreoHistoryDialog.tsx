@@ -45,13 +45,14 @@ export function ChoreoHistoryDialog({
               <div className="text-sm text-gray-600">
                 {h.uploadedAt ? getJpDate(new Date(h.uploadedAt)) : ""}
               </div>
-              <div className="text-sm">
-                {!isLoggedIn
-                  ? "非公開"
-                  : (h.uploadedByName
-                      ? `${h.uploadedByName}${h.uploadedByEmail ? `（${h.uploadedByEmail}）` : ""}`
-                      : h.uploadedByEmail)}
-              </div>
+              {
+                isLoggedIn &&
+                <div className="text-sm">
+                  {h.uploadedByName
+                    ? `${h.uploadedByName}${h.uploadedByEmail ? `（${h.uploadedByEmail}）` : ""}`
+                    : h.uploadedByEmail}
+                </div>
+              }
             </div>
           </div>
         ))
