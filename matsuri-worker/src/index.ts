@@ -265,8 +265,8 @@ export default {
 				const history = results.map((r: any) => ({
 					version: r.version,
 					uploadedAt: r.uploaded_at,
-					uploadedByName: r.name?.trim(),
-					uploadedByEmail: r.email,
+					uploadedByName: undefined,
+					uploadedByEmail: undefined,
 				}));
 				return Response.json(history, { status: 200, headers: corsHeaders });
 			}
@@ -690,7 +690,7 @@ export default {
 				SELECT 
 					cf.version,
 					cf.uploaded_at,
-					tm.name,
+					u.name,
 					u.email
 				FROM choreo_files cf
 				LEFT JOIN team_members tm ON cf.uploaded_by = tm.id
