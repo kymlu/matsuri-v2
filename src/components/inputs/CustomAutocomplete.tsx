@@ -57,7 +57,7 @@ export default function CustomAutocomplete({
     "col-start-1 border row-start-1 text-black p-3 border-gray-400 rounded-md focus-within:border-primary focus:outline-none",
     {
       "pr-20": clearable && showLength,
-      "pr-10": clearable !== showLength,
+      "pr-12": clearable !== showLength,
       "pr-2": !clearable && !showLength,
       "pl-10": search,
       "pl-2": !search,

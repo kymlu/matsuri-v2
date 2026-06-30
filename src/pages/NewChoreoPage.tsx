@@ -158,7 +158,7 @@ export function NewChoreoPage({
                 defaultValue={form.name}
                 onContentChange={newValue => handleChange("name", newValue)}
                 placeholder="名前を入力してください"
-                label="隊列名前"
+                label="隊列名"
                 restrictFn={(s) => !testInvalidCharacters(s)}
                 showLength
                 maxLength={LONG_NAME_LENGTH}

@@ -8,10 +8,10 @@ import CustomMenu from "../inputs/CustomMenu";
 import { IconLabelButton } from "../basic/Button";
 import Divider from "../basic/Divider";
 import { formatDateRange } from "../../lib/helpers/dateHelper";
-import Icon from "../basic/Icon";
 import { ChoreoStatus } from "../../pages/HomePage";
 import { ChoreoStatusTag } from "../common/Tag";
 import { isNullOrUndefinedOrBlank } from "../../lib/helpers/globalHelper";
+import { DancerCount, PropCount, StageSize } from "../common/IconInfo";
 
 type HeaderProps = {
   returnHome: () => void;
@@ -173,36 +173,15 @@ export default function Header({
     </div>
     <div className="flex items-center justify-between px-3 text-sm text-gray-500">
       <div className="flex gap-1">
-        <div className="flex items-center gap-0.5">
-          <Icon
-            src="resize"
-            colour="grey"
-            size="xs"
-          />
-          <span>{stageLength}m×{stageWidth}m</span>
-        </div>
+        <StageSize stageLength={stageLength} stageWidth={stageWidth}/>
 
         {
           dancerCount > 0 &&
-          <div className="flex items-center gap-0.5">
-            <Icon
-              src="group"
-              colour="grey"
-              size="xs"
-            />
-            <span>{dancerCount}人</span>
-          </div>
+          <DancerCount dancerCount={dancerCount}/>
         }
         {
           propCount > 0 &&
-          <div className="flex items-center gap-0.5">
-            <Icon
-              src="flag"
-              colour="grey"
-              size="xs"
-            />
-            <span>{propCount}</span>
-          </div>
+          <PropCount propCount={propCount}/>
         }
       </div>
       <ChoreoStatusTag compact choreoStatus={choreoStatus} version={version}/>

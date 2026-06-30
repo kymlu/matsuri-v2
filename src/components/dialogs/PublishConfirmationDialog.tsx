@@ -1,4 +1,4 @@
-import { ICON, PASSWORD_LENGTH } from "../../lib/consts/consts";
+import { PASSWORD_LENGTH } from "../../lib/consts/consts";
 import { formatDateRange, getJpDate } from "../../lib/helpers/dateHelper";
 import { findCurrentVersion, publishChoreo } from "../../lib/helpers/apiHelper";
 import { isNullOrUndefinedOrBlank, strEquals, testAlphanumericSymbols } from "../../lib/helpers/globalHelper";
@@ -6,9 +6,10 @@ import { BasicChoreoDetails, Choreo } from "../../models/choreo";
 import Divider from "../basic/Divider";
 import Icon from "../basic/Icon";
 import BaseEditDialog from "./BaseEditDialog";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import CustomSwitch from "../inputs/CustomSwitch";
 import TextInput from "../inputs/TextInput";
+import { DancerCount, PropCount, StageSize } from "../common/IconInfo";
 
 type PublishConfirmationDialogProps = {
   onClose: () => void,
@@ -20,10 +21,10 @@ type PublishConfirmationDialogProps = {
   svrPassword?: string
 }
 
-type Row = {
-  icon?: keyof typeof ICON;
-  old?: string;
-  new: string;
+type Diff = {
+  type: "隊列名" | "ステージ幅" | "イベント" | "日程" | "ダンサー数" | "道具数";
+  oldValue: string,
+  newValue: string,
 }
 
 export default function PublishConfirmationDialog({
@@ -90,53 +91,37 @@ export default function PublishConfirmationDialog({
     }
   }, [publishChoreo, teamId, hasPassword, password, onSave, onClose, isUpdate, oldVersion?.version]);
 
-  const rows = useMemo(() => {
-    var rowList: Row[] = [];
-    rowList.push({
-      icon: "label",
-      new: currentVersion.name,
-      old: oldVersion?.name,
-    });
-    if (currentVersion.event || oldVersion?.event) {
-      rowList.push({
-        icon: "calendarToday",
-        new: `${currentVersion.event}`,
-        old: oldVersion ? `${oldVersion.event}` : undefined,
-      });
-      
-      if (currentVersion.startDate || currentVersion.endDate || oldVersion?.startDate || oldVersion?.endDate) {
-        rowList.push({
-          new: formatDateRange(currentVersion.startDate, currentVersion.endDate),
-          old: oldVersion ? formatDateRange(oldVersion.startDate, oldVersion.endDate) : undefined,
-        });
-      }
-    }
-    rowList = [...rowList, ...[
-        {
-          icon: "resize",
-          new: `${currentVersion.stageLength}m×${currentVersion.stageWidth}m`,
-          old: oldVersion ? `${oldVersion.stageLength}m×${oldVersion.stageWidth}m` : undefined,
-        } as Row,
-        {
-          icon: "group",
-          new: `${currentVersion.dancerCount}人`,
-          old: oldVersion ? `${oldVersion.dancerCount}人` : undefined,
-        } as Row,
-        {
-          icon: "flag",
-          new: `${currentVersion.propCount}`,
-          old: oldVersion ? `${oldVersion.propCount}` : undefined,
-        } as Row,
-      ]
-    ];
-    return rowList;
-  }, [currentVersion, oldVersion]);
 
   const isActionButtonEnabled = useMemo(()=> {
     return currentVersion.isDirty ||
       !strEquals(svrPassword, password) ||
       hasPassword !== !isNullOrUndefinedOrBlank(svrPassword);
   }, [currentVersion.isDirty]);
+
+  const changes = useMemo(() => {
+    var list: Diff[] = [];
+    if (isUpdate) {
+      if (!strEquals(oldVersion.name, currentVersion.name)) {
+        list.push({type: "隊列名", oldValue: oldVersion?.name, newValue: currentVersion.name});
+      }
+      if (!strEquals(oldVersion.event, currentVersion.event)) {
+        list.push({type: "イベント", oldValue: oldVersion?.event ?? "", newValue: currentVersion.event ?? ""});
+      }
+      if (!strEquals(oldVersion.startDate, currentVersion.startDate) || !strEquals(oldVersion.endDate, currentVersion.endDate)) {
+        list.push({type: "日程", oldValue: formatDateRange(oldVersion.startDate, oldVersion.endDate), newValue: formatDateRange(currentVersion.startDate, currentVersion.endDate)});
+      }
+      if (oldVersion.stageLength !== currentVersion.stageLength || oldVersion.stageWidth !== currentVersion.stageWidth) {
+        list.push({type: "ステージ幅", oldValue: `${oldVersion.stageLength}m×${oldVersion.stageWidth}m` , newValue: `${currentVersion.stageLength}m×${currentVersion.stageWidth}m`});
+      }
+      if (oldVersion.dancerCount !== currentVersion.dancerCount) {
+        list.push({type: "ダンサー数", oldValue: `${oldVersion.dancerCount}人`, newValue: `${currentVersion.dancerCount}人`});
+      }
+      if (oldVersion.propCount !== currentVersion.propCount) {
+        list.push({type: "道具数", oldValue: `${oldVersion.propCount}`, newValue: `${currentVersion.propCount}`});
+      }
+    }
+    return list;
+  }, [currentVersion, oldVersion]);
 
   return (
     <BaseEditDialog
@@ -158,40 +143,64 @@ export default function PublishConfirmationDialog({
         }
       }}
     >
-      <div className={`space-y-2 ${isUpdate ? "w-[70svw]" : ""}`}>
+      <div className="space-y-2">
         <div className="space-y-2 max-h-[50svh]">
-          <table className="w-full text-sm">
-            <tbody>
-              {rows.map((row, i) => {
-                const hasChange = isUpdate && row.old !== undefined && !strEquals(row.old, row.new);
-                return (
-                  <tr key={i}>
-                    <td className="w-4 pt-2 pr-2 text-gray-400 align-middle">
-                      {row.icon && <Icon src={row.icon} colour="grey" size="sm" />}
-                    </td>
-                    {
-                      isUpdate && (
-                        <td
-                          className={`py-0.5 pr-2 align-middle ${hasChange ? "line-through text-gray-400" : ""}`}>
-                          {row.old}
-                        </td>
-                      )
-                    }
-                    {
-                      (!isUpdate || hasChange) &&
-                      <td
-                        colSpan={isUpdate ? 1 : 2}
-                        className={`py-0.5 align-middle ${hasChange ? "font-semibold" : ""}`}>
-                        {row.new}
-                      </td>
-                    }
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+          <div className="flex items-center gap-2">
+            <Icon src="label" size="sm"/>
+            <div>
+              <div className="text-sm text-gray-600">隊列名</div>
+              <b>{currentVersion.name}</b>
+            </div>
+          </div>
+          {
+            currentVersion.event &&
+            <div className="flex items-center gap-2">
+              <Icon src="calendarToday" size="sm"/>
+              <div>
+                <div className="text-sm text-gray-600">イベント情報</div>
+                <b>{currentVersion.event}</b>
+                <div>{formatDateRange(currentVersion.startDate, currentVersion.endDate)}</div>
+              </div>
+            </div>
+          }
+          <div className="flex gap-4">
+            <StageSize stageLength={currentVersion.stageLength} stageWidth={currentVersion.stageWidth}/>
+            <DancerCount dancerCount={currentVersion.dancerCount}/>
+            <PropCount propCount={currentVersion.propCount}/>
+          </div>
+          {
+            changes.length > 0 && <>
+              <Divider />
+              <b>変更内容</b>
+              <div className="px-2">
+                {
+                  changes.map((c) => <React.Fragment key={c.type}>
+                    <div className="text-sm text-gray-600">{c.type}</div>
+                    <div><span className="text-gray-600 line-through">{c.oldValue}</span> → <span className="font-semibold">{c.newValue}</span></div>
+                  </React.Fragment>)
+                }
+              </div>
+            </>
+          }
+          <Divider />
+          <div className="grid items-center gap-y-1 grid-cols-[auto,1fr] px-2 text-sm text-gray-600">
+            <b>最終編集日時</b>
+            <span className="text-right">{currentVersion.lastUpdated ? getJpDate(new Date(currentVersion.lastUpdated)) : ""}</span>
+            {
+              isActionButtonEnabled &&
+              <>
+                <b>公開バージョン</b>
+                <span className="text-right">{(oldVersion?.version ?? 0) + 1}</span>
+              </>
+            }
+            {
+              !isActionButtonEnabled &&
+              <span className="col-span-2 font-semibold text-center text-primary">編集はありません。</span>
+            }
+          </div>
+          <Divider />
           <CustomSwitch
-            label="パスワード（25文字まで）"
+            label="パスワード"
             defaultChecked={hasPassword}
             onChange={(checked) => setHasPassword(checked)}/>
           <TextInput
@@ -202,17 +211,6 @@ export default function PublishConfirmationDialog({
             restrictFn={(s) => testAlphanumericSymbols(s)}
             onContentChange={(newContent) => setPassword(newContent)}/>
         </div>
-        <Divider />
-        <p>最終編集日時：{currentVersion.lastUpdated ? getJpDate(new Date(currentVersion.lastUpdated)) : ""}</p>
-        {
-          !isActionButtonEnabled &&
-          <p className="w-full font-semibold text-center text-primary">
-            編集はありません。
-          </p>
-        }
-        { isActionButtonEnabled && isUpdate &&
-          <p>公開バージョン：{oldVersion.version!! + 1}</p>
-        }
         {
           isProcessing &&
           <p className="w-full font-semibold text-center text-primary">
