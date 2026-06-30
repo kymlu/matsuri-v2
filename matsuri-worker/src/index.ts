@@ -522,9 +522,9 @@ export default {
 				const body = await request.json() as { name: string };
 	
 				await env.DB.prepare(`
-					UPDATE team_members SET name = ?, updated_at = datetime('now')
-					WHERE id = ? AND team_id = ?
-				`).bind(body.name, session.team_member_id, session.team_id).run();
+					UPDATE users SET name = ?, updated_at = datetime('now')
+					WHERE id = ?
+				`).bind(body.name, session.user_id).run();
 	
 				return new Response(JSON.stringify({ success: true }), {
 					status: 200,
