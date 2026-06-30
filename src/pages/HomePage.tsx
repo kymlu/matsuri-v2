@@ -421,7 +421,7 @@ export default function HomePage({
                 <div className="space-y-2">
                   {
                     !isNullOrUndefinedOrBlank(savedDancerName) && <>
-                      <b>{savedDancerName}</b><small>さん</small>
+                      <b className="pl-2">{savedDancerName}</b><small>さん</small>
                       <Divider compact/>
                     </>
                   }
@@ -431,7 +431,8 @@ export default function HomePage({
                         <IconLabelButton
                           full noBorder
                           icon="adminPanelSettings"
-                          label="管理"
+                          label="ユーザー管理"
+                          alignment="left"
                           onClick={goToAdminPage}/>
                       </Menu.Item>
                       <Divider compact/>
@@ -442,6 +443,7 @@ export default function HomePage({
                       full noBorder
                       icon="logout"
                       label="ログアウト"
+                      alignment="left"
                       onClick={()=>{
                         if(!isProcessing) {
                           setIsProcessing(true);

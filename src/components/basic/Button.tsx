@@ -99,6 +99,7 @@ type IconLabelButtonProps = {
   disabled?: boolean;
   full?: boolean;
   iconSize?: "sm" | "md" | "lg";
+  alignment?: "left" | "centre" | "right";
 };
 
 export function IconLabelButton({
@@ -112,6 +113,7 @@ export function IconLabelButton({
   disabled = false,
   full = false,
   iconSize = "sm",
+  alignment = "centre"
 }: IconLabelButtonProps) {
   return <Button
     onClick={onClick}
@@ -122,7 +124,7 @@ export function IconLabelButton({
     noBorder={noBorder}
     full={full}
     >
-    <div className="flex items-center justify-center gap-2">
+    <div className={`flex items-center gap-2 ${alignment === "centre" ? "justify-center" : alignment === "left" ? "justify-start" : "justify-end"}`}>
       <Icon colour={primaryText ? "primary" : primary ? "white" : "black"} src={icon} size={iconSize}/>
       <div className={primary ? "font-bold" : 'font-semibold'}>
         {label}
