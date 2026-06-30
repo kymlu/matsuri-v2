@@ -135,8 +135,7 @@ export default function PublishConfirmationDialog({
   const isActionButtonEnabled = useMemo(()=> {
     return currentVersion.isDirty ||
       !strEquals(svrPassword, password) ||
-      hasPassword !== !isNullOrUndefinedOrBlank(svrPassword) ||
-      (hasPassword && password.length >= 4);
+      hasPassword !== !isNullOrUndefinedOrBlank(svrPassword);
   }, [currentVersion.isDirty]);
 
   return (
@@ -192,7 +191,7 @@ export default function PublishConfirmationDialog({
             </tbody>
           </table>
           <CustomSwitch
-            label="パスワード（4~25文字のみ）"
+            label="パスワード（25文字まで）"
             defaultChecked={hasPassword}
             onChange={(checked) => setHasPassword(checked)}/>
           <TextInput
