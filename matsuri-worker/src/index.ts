@@ -262,7 +262,13 @@ export default {
 					ORDER BY version DESC
 				`).bind(choreoId).all();
 
-				return Response.json(results, { status: 200, headers: corsHeaders });
+				const history = results.map((r: any) => ({
+					version: r.version,
+					uploadedAt: r.uploaded_at,
+					uploadedByName: r.name?.trim(),
+					uploadedByEmail: r.email,
+				}));
+				return Response.json(history, { status: 200, headers: corsHeaders });
 			}
     }
 		

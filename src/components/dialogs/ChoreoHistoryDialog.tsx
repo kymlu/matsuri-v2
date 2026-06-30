@@ -4,6 +4,8 @@ import { getChoreoHistory, getPublicChoreoHistory } from "../../lib/helpers/apiH
 import { ChoreoVersion } from "../../models/choreo";
 import { isNullOrUndefinedOrBlank } from "../../lib/helpers/globalHelper";
 import { getJpDate } from "../../lib/helpers/dateHelper";
+import CustomDialog from "../basic/CustomDialog";
+import { Tag } from "../common/Tag";
 
 type ChoreoHistoryDialogProps = {
   teamId: string,
@@ -33,22 +35,27 @@ export function ChoreoHistoryDialog({
     fetchHistory();
   }, [teamId, choreoId, isLoggedIn]);
 
-  return <BaseErrorDialog title="公開履歴" onClose={onClose}>
-    <table>
-      <th>
-        <td>バージョン</td>
-        <td>日付</td>
-        <td>対応者</td>
-      </th>
-      <tbody>
-        {
-          history.map(h => <>
-            <td>{h.version}</td>
-            <td>{h.uploadedAt ? getJpDate(new Date(h.uploadedAt)) : ""}</td>
-            <td>{isLoggedIn ? "非公開" : (h.uploadedByName ? `${h.uploadedByName}${h.uploadedByEmail ? `（｀${h.uploadedByEmail}）`: ""}` : h.uploadedByEmail)}</td>
-          </>)
-        }
-      </tbody>
-    </table>
-  </BaseErrorDialog>
+  return <CustomDialog title="公開履歴" onClose={onClose} hasX fullWidth>
+    <div className="flex flex-col w-full gap-2">
+      {
+        history.map((h, i) => (
+          <div key={h.version} className="flex items-start gap-3 p-3 border border-gray-400 rounded-lg">
+            <Tag text={`v${h.version}`} type={i === 0 ? "filled" : "grey"} />
+            <div className="flex flex-col flex-1 min-w-0">
+              <div className="text-sm text-gray-600">
+                {h.uploadedAt ? getJpDate(new Date(h.uploadedAt)) : ""}
+              </div>
+              <div className="text-sm">
+                {!isLoggedIn
+                  ? "非公開"
+                  : (h.uploadedByName
+                      ? `${h.uploadedByName}${h.uploadedByEmail ? `（${h.uploadedByEmail}）` : ""}`
+                      : h.uploadedByEmail)}
+              </div>
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </CustomDialog>
 }
