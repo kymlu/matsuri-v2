@@ -1,5 +1,5 @@
 import { ErrorResponse } from "../../models/api";
-import { BasicChoreoDetails, Choreo } from "../../models/choreo";
+import { BasicChoreoDetails, Choreo, ChoreoVersion } from "../../models/choreo";
 import { Team } from "../../models/team";
 import { RoleType, User } from "../../models/user";
 
@@ -16,6 +16,8 @@ const getApiUrl = (endpoint:
   "team/members/name" |
   "team/members/remove" |
   "choreos/summary" | 
+  "choreos/file/history" | 
+  "choreos/file/history/public" | 
   "choreos/verify" |
   "choreos/get-password" |
   "choreos/file" | 
@@ -338,6 +340,38 @@ export const getChoreoFile = async (teamId: string, choreoId: string, version: n
     }
   } catch (e: any) {
     console.error("getChoreoFile failed:", (e as Error)?.message);
+    throw e;
+  }
+}
+
+export const getPublicChoreoHistory = async (teamId: string, choreoId: string): Promise<ChoreoVersion[]> => {
+  try {
+    const response = await fetch(`${getApiUrl("choreos/file/history/public")}?team_id=${teamId}&choreo_id=${choreoId}`);
+    if (response.ok) {
+      return await response.json() as ChoreoVersion[];
+    } else {
+      const data = await response.json() as ErrorResponse;
+      console.error(`getPublicChoreoHistory failed: ${response.status} message: ${data.message}`);
+      throw Error;
+    }
+  } catch (e: any) {
+    console.error("getPublicChoreoHistory failed:", (e as Error)?.message);
+    throw e;
+  }
+}
+
+export const getChoreoHistory = async (teamId: string, choreoId: string): Promise<ChoreoVersion[]> => {
+  try {
+    const response = await fetch(`${getApiUrl("choreos/file/history")}?team_id=${teamId}&choreo_id=${choreoId}`);
+    if (response.ok) {
+      return await response.json() as ChoreoVersion[];
+    } else {
+      const data = await response.json() as ErrorResponse;
+      console.error(`getChoreoHistory failed: ${response.status} message: ${data.message}`);
+      throw Error;
+    }
+  } catch (e: any) {
+    console.error("getChoreoHistory failed:", (e as Error)?.message);
     throw e;
   }
 }

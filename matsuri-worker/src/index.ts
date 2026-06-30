@@ -239,6 +239,30 @@ export default {
 				} catch (e: any) {
 					return getErrorResponse(`Internal server error: ${(e as Error).message}`, 500);
 				}
+			} else if (url.pathname === "/api/choreos/file/history/public") {
+				const choreoId = url.searchParams.get("choreo_id");
+				const teamId = url.searchParams.get("team_id");
+
+				if (!choreoId || !teamId) {
+					return getErrorResponse("choreo_id and team_id are required", 400);
+				}
+
+				const choreoCheck = await env.DB.prepare(
+					"SELECT id FROM choreos WHERE id = ? AND team_id = ?"
+				).bind(choreoId, teamId).first();
+
+				if (!choreoCheck) {
+					return getErrorResponse("Choreo not found", 404);
+				}
+
+				const { results } = await env.DB.prepare(`
+					SELECT version, uploaded_at
+					FROM choreo_files
+					WHERE choreo_id = ?
+					ORDER BY version DESC
+				`).bind(choreoId).all();
+
+				return Response.json(results, { status: 200, headers: corsHeaders });
 			}
     }
 		
@@ -639,6 +663,44 @@ export default {
 			} catch (e) {
 				return getErrorResponse(`Internal server error: ${(e as Error).message}`, 500);
 			}
+		}
+
+		if (url.pathname === "/api/choreos/file/history" && request.method === "GET") {
+			const choreoId = url.searchParams.get("choreo_id");
+
+			if (!choreoId) {
+				return getErrorResponse("choreo_id is required", 400);
+			}
+
+			const choreoCheck = await env.DB.prepare(
+				"SELECT id FROM choreos WHERE id = ? AND team_id = ?"
+			).bind(choreoId, session.team_id).first();
+
+			if (!choreoCheck) {
+				return getErrorResponse("Choreo not found", 404);
+			}
+
+			const { results } = await env.DB.prepare(`
+				SELECT 
+					cf.version,
+					cf.uploaded_at,
+					tm.name,
+					u.email
+				FROM choreo_files cf
+				LEFT JOIN team_members tm ON cf.uploaded_by = tm.id
+				LEFT JOIN users u ON tm.user_id = u.id
+				WHERE cf.choreo_id = ?
+				ORDER BY cf.version DESC
+			`).bind(choreoId).all();
+
+			const history = results.map((r: any) => ({
+				version: r.version,
+				uploadedAt: r.uploaded_at,
+				uploadedByName: r.name?.trim(),
+				uploadedByEmail: r.email,
+			}));
+
+			return Response.json(history, { status: 200, headers: corsHeaders });
 		}
 
 		if (request.method === "POST" && url.pathname === "/api/choreos/file") {

@@ -37,6 +37,7 @@ import LoginDialog from "../components/dialogs/LoginDialog"
 import { Team } from "../models/team"
 import CustomMenu from "../components/inputs/CustomMenu"
 import ChoreoPasswordEntryDialog from "../components/dialogs/ChoreoPasswordEntryDialog"
+import { ChoreoHistoryDialog } from "../components/dialogs/ChoreoHistoryDialog"
 
 type HomePageProps = {
   buildInfo?: string,
@@ -921,6 +922,8 @@ function EventSection({
   const [dancerWarningDialogOpen, setDancerWarningDialogOpen] = React.useState(false);
   const choreoPasswordEntryDialog = Dialog.createHandle<Choreo>();
   const [choreoPasswordEntryDialogOpen, setChoreoPasswordEntryDialogOpen] = React.useState(false);
+  const historyDialog = Dialog.createHandle<Choreo>();
+  const [historyDialogOpen, setHistoryDialogOpen] = React.useState(false);
 
   const event = JSON.parse(eventInfo) as EventDetails;
 
@@ -947,6 +950,9 @@ function EventSection({
   };
   const handleChoreoPasswordEntryDialogOpenChange = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setChoreoPasswordEntryDialogOpen(isOpen);
+  };
+  const handleHistoryDialogOpenChange = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
+    setHistoryDialogOpen(isOpen);
   };
   
   return <ExpandableSection
@@ -1116,6 +1122,20 @@ function EventSection({
                   full />
               </Dialog.Close>
 
+              {
+                teamId &&
+                <Dialog.Close>
+                  <IconLabelButton
+                    icon="history"
+                    label="公開履歴"
+                    asDiv
+                    onClick={() => {
+                      setHistoryDialogOpen(true);
+                    }}
+                    full />
+                </Dialog.Close>
+              }
+
               <Dialog.Close>
                 <IconLabelButton
                   icon="fileExport"
@@ -1201,6 +1221,17 @@ function EventSection({
           dancerNames={selectedChoreo ? Array.from(missingNames[selectedChoreo.id]): []}
         />
       </Dialog.Root> */}
+      <Dialog.Root
+        open={historyDialogOpen}
+        onOpenChange={handleHistoryDialogOpenChange}
+        handle={historyDialog}>
+        <ChoreoHistoryDialog
+          teamId={teamId ?? ""}
+          choreoId={selectedChoreo?.id ?? ""}
+          isLoggedIn={isLoggedIn}
+          onClose={() => setHistoryDialogOpen(false)}
+        />
+      </Dialog.Root>
       <Dialog.Root
         open={choreoPasswordEntryDialogOpen}
         onOpenChange={handleChoreoPasswordEntryDialogOpenChange}
