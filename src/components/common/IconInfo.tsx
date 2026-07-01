@@ -13,11 +13,11 @@ function IconInfo(props: {icon: keyof typeof ICON, text: string}) {
 }
 
 export function StageSize(props: {stageLength: number, stageWidth: number}) {
-  return <IconInfo icon="resize" text={`${props.stageLength}m×${props.stageWidth}m`}/>
+  return <IconInfo icon="resize" text={`縦${props.stageLength}m × 幅${props.stageWidth}m`}/>
 }
 
 export function DancerCount(props: {dancerCount: number}) {
-  return <IconInfo icon="group" text={props.dancerCount.toString()}/>
+  return <IconInfo icon="group" text={`${props.dancerCount.toString()}人`}/>
 }
 
 export function PropCount(props: {propCount: number}) {

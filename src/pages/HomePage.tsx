@@ -38,6 +38,7 @@ import { Team } from "../models/team"
 import CustomMenu from "../components/inputs/CustomMenu"
 import ChoreoPasswordEntryDialog from "../components/dialogs/ChoreoPasswordEntryDialog"
 import { ChoreoHistoryDialog } from "../components/dialogs/ChoreoHistoryDialog"
+import { DancerCount, PropCount, StageSize } from "../components/common/IconInfo"
 
 type HomePageProps = {
   buildInfo?: string,
@@ -1063,7 +1064,7 @@ function EventSection({
                   </div>
                 </div>
                 {/* Meta row */}
-                <div className="items-center justify-between text-sm text-gray-500 md:flex">
+                <div className="items-center justify-between text-sm text-gray-600 md:flex">
                   {choreo.lastUpdated ? (
                     <div className="flex items-center gap-0.5">
                       <Icon
@@ -1077,23 +1078,9 @@ function EventSection({
                   )}
 
                   <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-0.5">
-                      <Icon
-                        src="resize"
-                        colour="grey"
-                        size="xs"
-                      />
-                      <span>縦{choreo.stageLength}m 幅{choreo.stageWidth}m</span>
-                    </div>
-
-                    <div className="flex items-center gap-0.5">
-                      <Icon
-                        src="group"
-                        colour="grey"
-                        size="xs"
-                      />
-                      <span>{choreo.dancerCount}人</span>
-                    </div>
+                    <StageSize stageLength={choreo.stageLength} stageWidth={choreo.stageWidth}/>
+                    <DancerCount dancerCount={choreo.dancerCount}/>
+                    <PropCount propCount={choreo.propCount}/>
                   </div>
                 </div>
               </div>
