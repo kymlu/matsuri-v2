@@ -25,6 +25,7 @@ export default function UserNameEditDialog ({
     onSubmit={() => onSubmit(newName.trim())}
     noDetachedTrigger
     isActionButtonDisabled={isLoggedIn && isNullOrUndefinedOrBlank(newName.trim())}
+    showCloseButton={!isLoggedIn || isNullOrUndefinedOrBlank(name)}
     >
     <p className="max-w-full w-max">{isLoggedIn ? "ユーザー名を入力してください。" : "名前を入力すると、隊列内に同じ名前があれば自動で選択されます。"}</p>
     <TextInput
