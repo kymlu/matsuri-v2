@@ -349,7 +349,6 @@ export default function HomePage({
   };
 
   useEffect(() => {
-    console.log(savedDancerName);
     if (isLoggedIn && isNullOrUndefinedOrBlank(savedDancerName)) {
       setEditUserNameDialogOpen(true);
     }
