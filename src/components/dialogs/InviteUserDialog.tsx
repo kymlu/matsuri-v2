@@ -11,10 +11,11 @@ type InviteUserDialogProps = {
   teamName?: string,
   existingUsers: Set<string>,
   onSuccess: () => void,
+  onClose: () => void,
 }
 
 export default function InviteUserDialog({
-  teamName, existingUsers, onSuccess
+  teamName, existingUsers, onSuccess, onClose
 }: InviteUserDialogProps) {
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [email, setEmail] = useState<string>("");
@@ -42,7 +43,7 @@ export default function InviteUserDialog({
   }, [email]);
 
   const onSubmit = () => {
-    if (!isProcessing) {
+    if (!isProcessing && mode === "enter") {
       setIsProcessing(true);
       setHasError(false);
       try {
@@ -64,6 +65,8 @@ export default function InviteUserDialog({
         setIsProcessing(false);
         setHasError(true);
       }
+    } else if (mode === "sent") {
+      onClose();
     }
   }
 
