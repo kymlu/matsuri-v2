@@ -348,6 +348,13 @@ export default function HomePage({
     setEditUserNameDialogOpen(isOpen);
   };
 
+  useEffect(() => {
+    console.log(savedDancerName);
+    if (isLoggedIn && isNullOrUndefinedOrBlank(savedDancerName)) {
+      setEditUserNameDialogOpen(true);
+    }
+  }, [isLoggedIn]);
+
   const triggerUpload = () => {
     const uploadFileElement = document.getElementById("uploadFileInput");
     if (uploadFileElement){
@@ -879,14 +886,10 @@ export default function HomePage({
           onOpenChange={handleLoginDialogOpen}>
           <LoginDialog
             onLogin={(name, role, teamMemberId) => {
-              setIsLoggedIn(true);
-              setIsAdmin(role === "admin");
               setSavedDancerName(name);
+              setIsAdmin(role === "admin");
               setCurrentTeamMemberId(teamMemberId);
-              console.log(name);
-              if (isNullOrUndefinedOrBlank(name)) {
-                setEditUserNameDialogOpen(true);
-              }
+              setIsLoggedIn(true);
             }}
             onClose={() => {
               setLoginDialogOpen(false);

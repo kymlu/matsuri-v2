@@ -435,7 +435,7 @@ export default {
 				VALUES (?, ?, ?, ?, datetime('now', '+30 days'), datetime('now'))
 			`).bind(crypto.randomUUID(), user.id, teamMember.team_id, token).run();
 
-			return new Response(JSON.stringify({ success: true, teamMemberId: teamMember.id, name: teamMember.name, role: teamMember.role }), {
+			return new Response(JSON.stringify({ success: true, teamMemberId: teamMember.id, name: user.name, role: teamMember.role }), {
 				status: 200,
 				headers: {
 					...corsHeaders,
