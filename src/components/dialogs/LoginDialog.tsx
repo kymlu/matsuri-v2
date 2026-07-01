@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import BaseEditDialog from "./BaseEditDialog";
 import TextInput from "../inputs/TextInput";
-import { isNullOrUndefinedOrBlank, testAlphanumericSymbols } from "../../lib/helpers/globalHelper";
+import { isNullOrUndefinedOrBlank, testAlphanumericSymbols, testEmail } from "../../lib/helpers/globalHelper";
 import { loginUserToTeam, resetPassword, sendPasswordResetRequest } from "../../lib/helpers/apiHelper";
 import { EMAIL_LENGTH, PASSWORD_ENTRY_LENGTH, PASSWORD_LENGTH, VERIFICATION_CODE_LENGTH } from "../../lib/consts/consts";
 import { RoleType } from "../../models/user";
@@ -115,7 +115,7 @@ export default function LoginDialog({
       case "login":
         return isNullOrUndefinedOrBlank(email) || isNullOrUndefinedOrBlank(password) || isProcessing;
       case "forgot":
-        return isNullOrUndefinedOrBlank(email) || isProcessing;
+        return isNullOrUndefinedOrBlank(email) || isProcessing || testEmail(email);
       case "resetPassword":
         return isNullOrUndefinedOrBlank(password) || isNullOrUndefinedOrBlank(verificationCode) || isProcessing || password.length < 8;
     }
@@ -194,7 +194,8 @@ export default function LoginDialog({
     {
       mode === "resetPassword" &&
       <>
-        <div>入力されたメールアドレスが登録されている場合、認証コードを送信します。10分以内に入力してください。</div>
+        <div>メールアドレスが登録されている場合、認証コードを送信します。コードの有効期限は10分です。</div>
+        <div>メールが届かない場合は、迷惑メールフォルダもご確認ください。</div>
         <TextInput
           label="コード"
           name="認証コード"

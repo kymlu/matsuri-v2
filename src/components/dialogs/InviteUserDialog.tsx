@@ -20,6 +20,7 @@ export default function InviteUserDialog({
   const [email, setEmail] = useState<string>("");
   const [role, setRole] = useState<RoleType>("editor");
   const [hasError, setHasError] = useState<boolean>(false);
+  const [mode, setMode] = useState<"enter" | "sent">("enter");
 
   const resetData = () => {
     setEmail("");
@@ -51,7 +52,7 @@ export default function InviteUserDialog({
           role,
           () => {
             onSuccess();
-            resetData();
+            setMode("sent");
             setIsProcessing(false);
           },
           (status) => {
@@ -69,42 +70,50 @@ export default function InviteUserDialog({
   return <BaseEditDialog
     title="招待"
     onSubmit={() => onSubmit()}
-    actionButtonText="招待"
+    showCloseButton={mode === "enter"}
+    actionButtonText={mode === "enter" ? "招待" : "OK"}
     onClose={resetData}
     isActionButtonDisabled={!isEmailValid}
     fullWidth
     >
-    <div className="space-y-2">
-      <p><b>{teamName}</b>に招待するメールアドレスを入力してください。</p>
-      <TextInput
-        name="メール"
-        onContentChange={(newEmail) => setEmail(newEmail)}
-        maxLength={EMAIL_LENGTH}
-        hasError={errorMessage !== undefined}
-        required
-      />
-      {
-        errorMessage && <p className="text-sm font-bold text-wrap text-primary">
-        {errorMessage}
-      </p>
-      }
-      <div className="flex gap-2">
-        <Button
-          full
-          primary={role === "editor"}
-          onClick={() => setRole("editor")}>
-          編集者
-        </Button>
-        <Button
-          full
-          primary={role === "admin"}
-          onClick={() => setRole("admin")}>
-          管理者
-        </Button>
+    {
+      mode === "enter" &&
+      <div className="space-y-2">
+        <p><b>{teamName}</b>に招待するメールアドレスを入力してください。</p>
+        <TextInput
+          name="メール"
+          onContentChange={(newEmail) => setEmail(newEmail)}
+          maxLength={EMAIL_LENGTH}
+          hasError={errorMessage !== undefined}
+          required
+        />
+        {
+          errorMessage && <p className="text-sm font-bold text-wrap text-primary">
+          {errorMessage}
+        </p>
+        }
+        <div className="flex gap-2">
+          <Button
+            full
+            primary={role === "editor"}
+            onClick={() => setRole("editor")}>
+            編集者
+          </Button>
+          <Button
+            full
+            primary={role === "admin"}
+            onClick={() => setRole("admin")}>
+            管理者
+          </Button>
+        </div>
+        <p className="text-sm text-gray-600"><b>編集者：</b>隊列表の編集ができます。</p>
+        <p className="text-sm text-gray-600"><b>管理者：</b>隊列表の編集とユーザー管理ができます。</p>
       </div>
-      <p className="text-sm text-gray-600"><b>編集者：</b>隊列表の編集ができます。</p>
-      <p className="text-sm text-gray-600"><b>管理者：</b>隊列表の編集とユーザー管理ができます。</p>
-    </div>
+    }
+    {
+      mode === "sent" &&
+      <p>{email}に招待メールを送信しました。メールが届かない場合は、迷惑メールフォルダもご確認ください。</p>
+    }
     {
       hasError &&
       <span className="w-full font-semibold text-center text-primary">

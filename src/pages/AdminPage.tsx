@@ -21,7 +21,6 @@ export default function AdminPage({
   goToHomePage, team, currentUserId
 }: AdminPageProps) {
   const [users, setUsers] = useState<User[]>([]);
-  const inviteUserActionsRef = useRef<Dialog.Root.Actions | null>(null);
 
   const loadData = async () => {
     try {
@@ -65,7 +64,7 @@ export default function AdminPage({
         </div>
         <h2 className='flex-1 text-2xl font-bold text-nowrap'>ユーザー管理</h2>
       </div>
-      <Dialog.Root actionsRef={inviteUserActionsRef}>
+      <Dialog.Root>
         <Dialog.Trigger>
           <IconLabelButton icon="add" label="招待" primary asDiv/>
         </Dialog.Trigger>
@@ -74,7 +73,6 @@ export default function AdminPage({
           existingUsers={existingEmails}
           onSuccess={() => {
             loadData();
-            inviteUserActionsRef.current?.close();
           }}
           />
       </Dialog.Root>
