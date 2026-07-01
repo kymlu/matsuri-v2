@@ -6,7 +6,7 @@ import { BasicChoreoDetails, Choreo } from "../../models/choreo";
 import Divider from "../basic/Divider";
 import Icon from "../basic/Icon";
 import BaseEditDialog from "./BaseEditDialog";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import CustomSwitch from "../inputs/CustomSwitch";
 import TextInput from "../inputs/TextInput";
 import { DancerCount, PropCount, StageSize } from "../common/IconInfo";
@@ -98,31 +98,6 @@ export default function PublishConfirmationDialog({
       hasPassword !== !isNullOrUndefinedOrBlank(svrPassword);
   }, [currentVersion.isDirty]);
 
-  const changes = useMemo(() => {
-    var list: Diff[] = [];
-    if (isUpdate) {
-      if (!strEquals(oldVersion.name, currentVersion.name)) {
-        list.push({type: "隊列名", oldValue: oldVersion?.name, newValue: currentVersion.name});
-      }
-      if (!strEquals(oldVersion.event, currentVersion.event)) {
-        list.push({type: "イベント", oldValue: oldVersion?.event ?? "", newValue: currentVersion.event ?? ""});
-      }
-      if (!strEquals(oldVersion.startDate, currentVersion.startDate) || !strEquals(oldVersion.endDate, currentVersion.endDate)) {
-        list.push({type: "日程", oldValue: formatDateRange(oldVersion.startDate, oldVersion.endDate), newValue: formatDateRange(currentVersion.startDate, currentVersion.endDate)});
-      }
-      if (oldVersion.stageLength !== currentVersion.stageLength || oldVersion.stageWidth !== currentVersion.stageWidth) {
-        list.push({type: "ステージ幅", oldValue: `${oldVersion.stageLength}m×${oldVersion.stageWidth}m` , newValue: `${currentVersion.stageLength}m×${currentVersion.stageWidth}m`});
-      }
-      if (oldVersion.dancerCount !== currentVersion.dancerCount) {
-        list.push({type: "ダンサー数", oldValue: `${oldVersion.dancerCount}人`, newValue: `${currentVersion.dancerCount}人`});
-      }
-      if (oldVersion.propCount !== currentVersion.propCount) {
-        list.push({type: "道具数", oldValue: `${oldVersion.propCount}`, newValue: `${currentVersion.propCount}`});
-      }
-    }
-    return list;
-  }, [currentVersion, oldVersion]);
-
   return (
     <BaseEditDialog
       title="公開確認"
@@ -168,20 +143,6 @@ export default function PublishConfirmationDialog({
             <DancerCount dancerCount={currentVersion.dancerCount}/>
             <PropCount propCount={currentVersion.propCount}/>
           </div>
-          {
-            changes.length > 0 && <>
-              <Divider />
-              <b>変更内容</b>
-              <div className="px-2">
-                {
-                  changes.map((c) => <React.Fragment key={c.type}>
-                    <div className="text-sm text-gray-600">{c.type}</div>
-                    <div><span className="text-gray-600 line-through">{c.oldValue}</span> → <span className="font-semibold">{c.newValue}</span></div>
-                  </React.Fragment>)
-                }
-              </div>
-            </>
-          }
           <Divider />
           <div className="grid items-center gap-y-1 grid-cols-[auto,1fr] px-2 text-sm text-gray-600">
             <b>最終編集日時</b>
