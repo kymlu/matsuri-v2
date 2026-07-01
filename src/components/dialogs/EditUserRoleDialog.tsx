@@ -4,6 +4,7 @@ import { RoleType, User } from "../../models/user";
 import Button from "../basic/Button";
 import { isNullOrUndefinedOrBlank } from "../../lib/helpers/globalHelper";
 import { changeUserRole } from "../../lib/helpers/apiHelper";
+import Divider from "../basic/Divider";
 
 type EditUserRoleProps = {
   teamName?: string,
@@ -47,36 +48,32 @@ export default function EditUserRoleDialog({
     noDetachedTrigger
     fullWidth
     >
-    <div className="grid grid-cols-[auto,1fr] auto-rows-min gap-2">
-      {
-        !isNullOrUndefinedOrBlank(user.name) &&
-        <>
-          <span>名前：</span>
-          <span className="font-bold break-all">{user.name}</span>
-        </>
-      }
-      <span>メール：</span>
-      <span className="font-bold break-all">{user.email}</span>
-      <span>役割：</span>
-      <span></span>
-      <div className="flex col-span-2 gap-2">
-        <Button
-          full
-          primary={role === "editor"}
-          onClick={() => setRole("editor")}>
-          編集者
-        </Button>
-        <Button
-          full
-          primary={role === "admin"}
-          onClick={() => setRole("admin")}>
-          管理者
-        </Button>
+    <div className="flex flex-col gap-5">
+      <div className="grid grid-cols-[auto,1fr] gap-x-4 gap-y-1 text-sm">
+        {!isNullOrUndefinedOrBlank(user.name) && <>
+          <span className="text-gray-600">名前</span>
+          <span className="font-medium">{user.name}</span>
+        </>}
+        <span className="text-gray-600">メール</span>
+        <span className="font-medium">{user.email}</span>
       </div>
-      <span className="text-sm font-bold">編集者：</span>
-      <span className="text-sm">隊列表の編集ができます。</span>
-      <span className="text-sm font-bold">管理者：</span>
-      <span className="text-sm">隊列表の編集とユーザー管理ができます。</span>
+
+      <Divider compact/>
+
+      <div className="flex flex-col gap-2">
+        <span className="text-sm font-medium">役割</span>
+        <div className="grid grid-cols-2 gap-2">
+          <Button full primary={role === "editor"} onClick={() => setRole("editor")}>
+            編集者
+          </Button>
+          <Button full primary={role === "admin"} onClick={() => setRole("admin")}>
+            管理者
+          </Button>
+        </div>
+        <span className="text-sm text-gray-600">
+          {role === "editor" ? "隊列表の編集ができます。" : "隊列表の編集とユーザー管理ができます。"}
+        </span>
+      </div>
     </div>
     {
       hasError &&

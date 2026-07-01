@@ -95,22 +95,20 @@ export default function InviteUserDialog({
           {errorMessage}
         </p>
         }
-        <div className="flex gap-2">
-          <Button
-            full
-            primary={role === "editor"}
-            onClick={() => setRole("editor")}>
-            編集者
-          </Button>
-          <Button
-            full
-            primary={role === "admin"}
-            onClick={() => setRole("admin")}>
-            管理者
-          </Button>
+        <div className="flex flex-col gap-2">
+          <span className="text-sm font-medium">役割</span>
+          <div className="grid grid-cols-2 gap-2">
+            <Button full primary={role === "editor"} onClick={() => setRole("editor")}>
+              編集者
+            </Button>
+            <Button full primary={role === "admin"} onClick={() => setRole("admin")}>
+              管理者
+            </Button>
+          </div>
+          <span className="text-sm text-gray-600">
+            {role === "editor" ? "隊列表の編集ができます。" : "隊列表の編集とユーザー管理ができます。"}
+          </span>
         </div>
-        <p className="text-sm text-gray-600"><b>編集者：</b>隊列表の編集ができます。</p>
-        <p className="text-sm text-gray-600"><b>管理者：</b>隊列表の編集とユーザー管理ができます。</p>
       </div>
     }
     {
