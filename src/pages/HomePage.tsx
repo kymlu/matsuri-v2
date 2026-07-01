@@ -409,7 +409,7 @@ export default function HomePage({
               handle={editUserNameDialog}
               open={editUserNameDialogOpen}
               onOpenChange={handleEditUserNameDialogOpen}
-              disablePointerDismissal={isLoggedIn && !isNullOrUndefinedOrBlank(savedDancerName)}>
+              disablePointerDismissal={isLoggedIn && isNullOrUndefinedOrBlank(savedDancerName)}>
               <Dialog.Trigger>
                 <IconButton src="personEdit" colour="primary" noBorder asDiv/>
               </Dialog.Trigger>
@@ -883,6 +883,7 @@ export default function HomePage({
               setIsAdmin(role === "admin");
               setSavedDancerName(name);
               setCurrentTeamMemberId(teamMemberId);
+              console.log(name);
               if (isNullOrUndefinedOrBlank(name)) {
                 setEditUserNameDialogOpen(true);
               }
