@@ -112,7 +112,13 @@ export default function InviteUserDialog({
     }
     {
       mode === "sent" &&
-      <p>{email}に招待メールを送信しました。メールが届かない場合は、迷惑メールフォルダもご確認ください。</p>
+      <p><b>{email}</b>に招待メールを送信しました。メールが届かない場合は、迷惑メールフォルダもご確認ください。</p>
+    }
+    {
+      isProcessing &&
+      <span className="w-full font-semibold text-center text-primary">
+        処理中...
+      </span>
     }
     {
       hasError &&
