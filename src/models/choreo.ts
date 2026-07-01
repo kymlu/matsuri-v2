@@ -47,7 +47,6 @@ export const ChoreoVersion = z.object({
   version: z.number(),
   uploadedAt: z.string(),
   uploadedByName: z.string().optional(),
-  uploadedByEmail: z.string().optional(),
 });
 
 export type ChoreoVersion = z.infer<typeof ChoreoVersion>;

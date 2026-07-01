@@ -1129,7 +1129,11 @@ function EventSection({
               </Dialog.Close>
 
               {
-                teamId && selectedChoreo.status !== "localOnly" &&
+                teamId &&
+                selectedChoreo.status !== "localOnly" &&
+                !strEquals(selectedChoreo.id, SAMPLE_PARADE_ID) &&
+                !strEquals(selectedChoreo.id, SAMPLE_STAGE_ID) &&
+                
                 <Dialog.Close>
                   <IconLabelButton
                     icon="history"
@@ -1234,6 +1238,7 @@ function EventSection({
         <ChoreoHistoryDialog
           teamId={teamId ?? ""}
           choreoId={selectedChoreo?.id ?? ""}
+          isEditing={selectedChoreo?.isDirty ?? false}
           isLoggedIn={isLoggedIn}
           onClose={() => setHistoryDialogOpen(false)}
         />

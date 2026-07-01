@@ -266,7 +266,6 @@ export default {
 					version: r.version,
 					uploadedAt: r.uploaded_at,
 					uploadedByName: undefined,
-					uploadedByEmail: undefined,
 				}));
 				return Response.json(history, { status: 200, headers: corsHeaders });
 			}
@@ -690,8 +689,7 @@ export default {
 				SELECT 
 					cf.version,
 					cf.uploaded_at,
-					u.name,
-					u.email
+					u.name
 				FROM choreo_files cf
 				LEFT JOIN team_members tm ON cf.uploaded_by = tm.id
 				LEFT JOIN users u ON tm.user_id = u.id
@@ -703,7 +701,6 @@ export default {
 				version: r.version,
 				uploadedAt: r.uploaded_at,
 				uploadedByName: r.name?.trim(),
-				uploadedByEmail: r.email,
 			}));
 
 			return Response.json(history, { status: 200, headers: corsHeaders });
