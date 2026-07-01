@@ -2,14 +2,16 @@ import { useState, useEffect } from "react";
 import BaseEditDialog from "./BaseEditDialog";
 import TextInput from "../inputs/TextInput";
 import { SHORT_NAME_LENGTH } from "../../lib/consts/consts";
+import { isNullOrUndefinedOrBlank } from "../../lib/helpers/globalHelper";
 
 type UserNameEditDialogProps = {
   name: string,
   onSubmit: (name: string) => void,
+  isLoggedIn: boolean,
 }
 
 export default function UserNameEditDialog ({
-  name, onSubmit
+  name, onSubmit, isLoggedIn
 }: UserNameEditDialogProps) {
   const [newName, setNewName] = useState("");
 
@@ -22,8 +24,9 @@ export default function UserNameEditDialog ({
     onClose={() => setNewName(name ?? "")}
     onSubmit={() => onSubmit(newName.trim())}
     noDetachedTrigger
+    isActionButtonDisabled={isLoggedIn && isNullOrUndefinedOrBlank(newName.trim())}
     >
-    <p className="max-w-full w-max">名前を入力すると、隊列内に同じ名前があれば自動で選択されます。</p>
+    <p className="max-w-full w-max">{isLoggedIn ? "ユーザー名を入力してください。" : "名前を入力すると、隊列内に同じ名前があれば自動で選択されます。"}</p>
     <TextInput
       defaultValue={name ?? ""}
       onContentChange={ (newName) => { setNewName(newName) }}

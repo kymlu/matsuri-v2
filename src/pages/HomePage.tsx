@@ -340,6 +340,18 @@ export default function HomePage({
   const handleLoginDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setLoginDialogOpen(isOpen);
   };
+  
+  const [editUserNameDialogOpen, setEditUserNameDialogOpen] = useState(false);
+  const editUserNameDialog = Dialog.createHandle<{}>();
+  const handleEditUserNameDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
+    setEditUserNameDialogOpen(isOpen);
+  };
+
+  useEffect(() => {
+    if (isLoggedIn && isNullOrUndefinedOrBlank(savedDancerName)) {
+      setEditUserNameDialogOpen(true);
+    }
+  }, [isLoggedIn, savedDancerName]);
 
   const triggerUpload = () => {
     const uploadFileElement = document.getElementById("uploadFileInput");
@@ -398,16 +410,23 @@ export default function HomePage({
               </Dialog.Trigger>
               <SiteInfoDialog buildInfo={buildInfo}/>
             </Dialog.Root>
-            <Dialog.Root>
+            <Dialog.Root
+              handle={editUserNameDialog}
+              open={editUserNameDialogOpen}
+              onOpenChange={handleEditUserNameDialogOpen}>
               <Dialog.Trigger>
                 <IconButton src="personEdit" colour="primary" noBorder asDiv/>
               </Dialog.Trigger>
-              <UserNameEditDialog name={savedDancerName ?? ""} onSubmit={(name) => {
-                setSavedDancerName(name);
-                if (isLoggedIn) {
-                  changeUserName(name, () => {}, () => {})
+              <UserNameEditDialog
+                name={savedDancerName ?? ""}
+                isLoggedIn={isLoggedIn}
+                onSubmit={(name) => {
+                  setSavedDancerName(name);
+                  if (isLoggedIn) {
+                    changeUserName(name, () => {}, () => {})
+                  }
                 }
-              }}/>
+              }/>
             </Dialog.Root>
             {
               !isLoggedIn && team?.id &&
