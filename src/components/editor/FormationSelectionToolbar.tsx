@@ -1,7 +1,7 @@
 import { isNullOrUndefinedOrBlank, strEquals } from "../../lib/helpers/globalHelper";
 import { ChoreoSection } from "../../models/choreoSection";
 import Button from "../basic/Button";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import IconButton from "../basic/IconButton";
 import { DndContext, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { arrayMove, SortableContext, useSortable } from "@dnd-kit/sortable";
@@ -26,6 +26,9 @@ export default function FormationSelectionToolbar({
 }: FormationSelectionToolbarProps) {
 
   const [isDragging, setIsDragging] = useState<boolean>(false);
+
+  const sectionRefs = useRef<Map<string, HTMLButtonElement | null>>(new Map());
+  const dialogSectionRefs = useRef<Map<string, HTMLButtonElement | null>>(new Map());
   
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -36,6 +39,12 @@ export default function FormationSelectionToolbar({
       },
     })
   );
+
+  const onClickSection = (s: ChoreoSection) => {
+    sectionRefs.current.get(s.id)?.scrollIntoView({"behavior": "smooth", "inline": "center"});
+    dialogSectionRefs.current.get(s.id)?.scrollIntoView({"behavior": "smooth", "inline": "center"});
+    onChangeSection(s);
+  }
 
   return <div className="grid grid-cols-[auto,1fr,auto] w-full max-w-full gap-2 p-2 overflow-scroll max-w-screen">
     <Drawer.Root
@@ -74,8 +83,9 @@ export default function FormationSelectionToolbar({
                   sections.map(s =>
                     <Dialog.Close key={s.id}>
                       <FormationSectionItem
+                        registerRef={(id, button) => sectionRefs.current.set(id, button)}
                         section={s}
-                        onChangeSection={() => onChangeSection(s)}
+                        onChangeSection={() => onClickSection(s)}
                         isSelected={strEquals(currentSectionId, s.id)}
                         asDiv
                         full
@@ -120,8 +130,9 @@ export default function FormationSelectionToolbar({
                 key={section.id}
                 section={section}
                 isSelected={strEquals(currentSectionId, section.id)}
-                onChangeSection={onChangeSection}
+                onChangeSection={onClickSection}
                 onOpenSectionMenu={onOpenSectionMenu}
+                registerRef={(id, button) => dialogSectionRefs.current.set(id, button)}
                 />
             )
           }
@@ -147,8 +158,9 @@ function FormationSectionItem (props: {
   onOpenSectionMenu?: () => void,
   asDiv?: boolean,
   full?: boolean,
+  registerRef: (id: string, button: HTMLButtonElement | null) => void,
 }) {
-  var {section, isSelected, onChangeSection, onOpenSectionMenu, asDiv, full} = props;
+  var {section, isSelected, onChangeSection, onOpenSectionMenu, asDiv, full, registerRef} = props;
 
   const {
     attributes,
@@ -157,12 +169,18 @@ function FormationSectionItem (props: {
     transform,
     transition,
   } = useSortable({id: section.id});
+  
+  const ref = useRef<HTMLButtonElement | null>(null);
+
+  useEffect(() => {
+    registerRef?.(section.id, ref.current);
+    return () => registerRef?.(section.id, null);
+  }, [section.id, registerRef]);
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
   };
-  const ref = useRef<HTMLButtonElement | null>(null);
 
   return <div style={style} ref={setNodeRef} {...attributes} {...listeners}>
     <Button
@@ -171,7 +189,6 @@ function FormationSectionItem (props: {
       buttonref={ref}
       onClick={() => {
         if (!isSelected) {
-          ref?.current?.scrollIntoView({"behavior": "smooth", "inline": "center"})
           onChangeSection(section);
         } else {
           onOpenSectionMenu?.();
