@@ -28,11 +28,13 @@ export default function UserNameEditDialog ({
     showCloseButton={!isLoggedIn || !isNullOrUndefinedOrBlank(name)}
     hasX={!isLoggedIn || !isNullOrUndefinedOrBlank(name)}
     >
-    <p className="max-w-full w-max">{isLoggedIn ? "ユーザー名を入力してください。" : "名前を入力すると、隊列内に同じ名前があれば自動で選択されます。"}</p>
-    <TextInput
-      defaultValue={name ?? ""}
-      onContentChange={ (newName) => { setNewName(newName) }}
-      maxLength={SHORT_NAME_LENGTH}
-      showLength/>
+    <div className="space-y-1">
+      <p className="max-w-full w-max">{isLoggedIn ? "ユーザー名を入力してください。" : "名前を入力すると、隊列内に同じ名前があれば自動で選択されます。"}</p>
+      <TextInput
+        defaultValue={name ?? ""}
+        onContentChange={ (newName) => { setNewName(newName) }}
+        maxLength={SHORT_NAME_LENGTH}
+        showLength/>
+    </div>
   </BaseEditDialog>
 }
