@@ -153,46 +153,42 @@ export function NewChoreoPage({
       <div className="flex-1">
         {step === 1 && (
           <div className="flex flex-col h-full pt-10 pb-20 justify-evenly">
-            <div>
-              <TextInput
-                defaultValue={form.name}
-                onContentChange={newValue => handleChange("name", newValue)}
-                placeholder="名前を入力してください"
-                label="隊列名"
-                restrictFn={(s) => !testInvalidCharacters(s)}
-                showLength
-                maxLength={LONG_NAME_LENGTH}
-              />
-            </div>
-            <div>
-              <CustomAutocomplete
-                defaultValue={form.eventName}
-                options={eventNames}
-                onContentChange={newValue => handleChange("eventName", newValue)}
-                placeholder="イベント名を入力してください"
-                label="イベント"
-                clearable
-                // restrictFn={(s) => !testInvalidCharacters(s)} // todo: after pushing the official goen change to restrict
-                showLength
-                itemToStringValueFunc={(item) => {
-                  try {
-                    const eventDetails = JSON.parse(item) as EventDetails;
-                    return eventDetails.event ?? "";
-                  } catch {
-                    return item;
-                  }
+            <TextInput
+              defaultValue={form.name}
+              onContentChange={newValue => handleChange("name", newValue)}
+              placeholder="名前を入力してください"
+              label="隊列名"
+              restrictFn={(s) => !testInvalidCharacters(s)}
+              showLength
+              maxLength={LONG_NAME_LENGTH}
+            />
+            <CustomAutocomplete
+              defaultValue={form.eventName}
+              options={eventNames}
+              onContentChange={newValue => handleChange("eventName", newValue)}
+              placeholder="イベント名を入力してください"
+              label="イベント"
+              clearable
+              // restrictFn={(s) => !testInvalidCharacters(s)} // todo: after pushing the official goen change to restrict
+              showLength
+              itemToStringValueFunc={(item) => {
+                try {
+                  const eventDetails = JSON.parse(item) as EventDetails;
+                  return eventDetails.event ?? "";
+                } catch {
+                  return item;
+                }
+              }}
+              listItemFormat={(item) => <EventListItem
+                item={item}
+                setStartAndEndDate={(event, start, end) => {
+                  setForm(prev => ({...prev, eventName: event, startDate: start, endDate: end}));
+                  startDateRef?.current?.changeValue(start);
+                  endDateRef?.current?.changeValue(end);
                 }}
-                listItemFormat={(item) => <EventListItem
-                  item={item}
-                  setStartAndEndDate={(event, start, end) => {
-                    setForm(prev => ({...prev, eventName: event, startDate: start, endDate: end}));
-                    startDateRef?.current?.changeValue(start);
-                    endDateRef?.current?.changeValue(end);
-                  }}
-                  />}
-                maxLength={LONG_NAME_LENGTH}
-              />
-            </div>
+                />}
+              maxLength={LONG_NAME_LENGTH}
+            />
             {
               <div className={"grid grid-cols-2 gap-2 w-full max-w-full " + (hasEventName ? "" : "opacity-50 select-none pointer-events-none")}>
                 <DateInput
@@ -286,7 +282,8 @@ export function NewChoreoPage({
           </div>
         )}
 
-        {step === 3 && (
+        {
+          step === 3 && (
           <div className="flex items-center justify-center h-full">
             <NumberInput
               defaultValue={form.dancerCount}

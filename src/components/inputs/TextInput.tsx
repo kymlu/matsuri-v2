@@ -55,7 +55,8 @@ export default function TextInput({
     "col-start-1 border row-start-1 text-black py-3 border-gray-400 rounded-md focus-within:border-primary focus:outline-none",
     {
       "pr-20": clearable && showLength,
-      "pr-12": clearable !== showLength,
+      "pr-16": !clearable && showLength,
+      "pr-12": clearable && !showLength,
       "pr-2": !clearable && !showLength,
       "pl-10": search,
       "pl-4": !search,
@@ -77,47 +78,49 @@ export default function TextInput({
   return (
     <FieldWithLabel label={label} full={!compact}>
       <div className={wrapperClasses}>
-        <div className="relative flex items-center gap-2">
-          <input
-            disabled={disabled}
-            type={type}
-            name={name}
-            maxLength={maxLength ?? DEFAULT_NAME_LENGTH}
-            placeholder={placeholder ?? ""}
-            value={value ?? ""}
-            onInput={(event) => handleChange(event.currentTarget.value)}
-            className={inputClasses}/>
+        <div className="flex items-center gap-2">
+          <div className={"relative flex items-center " + (compact ? "" : "w-full")}>
+            <input
+              disabled={disabled}
+              type={type}
+              name={name}
+              maxLength={maxLength ?? DEFAULT_NAME_LENGTH}
+              placeholder={placeholder ?? ""}
+              value={value ?? ""}
+              onInput={(event) => handleChange(event.currentTarget.value)}
+              className={inputClasses}/>
+            {
+              search &&
+              <div className="absolute flex items-center justify-center size-8 left-2">
+                <Icon
+                  src="search"
+                  colour="grey"
+                  size="sm"/>
+              </div>
+            }
+            {
+              (showLength || clearable) &&
+              <div className="absolute flex items-center gap-1 right-2">
+                {
+                  clearable && !isNullOrUndefinedOrBlank(value) && 
+                  <div>
+                    <IconButton
+                      src="clear"
+                      colour="primary"
+                      size="sm"
+                      noBorder
+                      onClick={() => {handleChange("")}}/>
+                  </div>
+                }
+                {
+                  showLength &&
+                  <span className="text-sm text-gray-600 select-none text-end">{`${value.length}/${maxLength ?? 20}`}</span>
+                }
+              </div>
+            }
+          </div>
           {
             rightLabel && <span>{rightLabel}</span>
-          }
-          {
-            search &&
-            <div className="absolute flex items-center justify-center size-8 left-2">
-              <Icon
-                src="search"
-                colour="grey"
-                size="sm"/>
-            </div>
-          }
-          {
-            (showLength || clearable) &&
-            <div className="absolute flex items-center gap-1 right-2">
-              {
-                clearable && !isNullOrUndefinedOrBlank(value) && 
-                <div>
-                  <IconButton
-                    src="clear"
-                    colour="primary"
-                    size="sm"
-                    noBorder
-                    onClick={() => {handleChange("")}}/>
-                </div>
-              }
-              {
-                showLength &&
-                <span className="text-sm text-gray-600 text-end">{`${value.length}/${maxLength ?? 20}`}</span>
-              }
-            </div>
           }
         </div>
       </div>

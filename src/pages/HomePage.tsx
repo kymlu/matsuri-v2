@@ -1031,10 +1031,10 @@ function EventSection({
                     }
                   }
                 }}
-                className="flex flex-col justify-between h-full p-2 mx-[11px] transition-colors bg-white border border-gray-400 rounded-md cursor-pointer">
+                className="flex flex-col justify-between h-full p-2 gap-0.5 mx-[11px] transition-colors bg-white border border-gray-400 rounded-md cursor-pointer">
                 {/* Title */}
                 <div className="relative flex flex-row items-start justify-between gap-2">
-                  <span className="flex items-center gap-0.5 font-medium text-left break-words text-wrap">
+                  <span className="flex items-center gap-0.5 font-semibold text-left break-words text-wrap">
                     {choreo.hasPassword ? <Icon src={isLoggedIn ? "lockOpen" : "lock"} colour="primary" size="xs"/> : <></>}
                     <span>{choreo.name}</span>
                   </span>
@@ -1066,7 +1066,7 @@ function EventSection({
                   </div>
                 </div>
                 {/* Meta row */}
-                <div className="items-center justify-between text-sm text-gray-600 md:flex">
+                <div className="flex flex-col items-start justify-between gap-0.5 text-sm text-gray-600 md:flex-row">
                   {choreo.lastUpdated ? (
                     <div className="flex items-center gap-0.5">
                       <Icon
