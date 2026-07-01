@@ -159,23 +159,23 @@ export default function LoginDialog({
           onContentChange={(value) => setPassword(value)}/>
         {
           error === "loginError" &&
-          <span className="w-full font-semibold text-center text-primary">
+          <p className="w-full font-semibold text-center text-primary">
             メールアドレス、またはパスワードは正しくない
-          </span>
+          </p>
         }
         {
           error === "notOnTeamError" &&
-          <span className="w-full font-semibold text-center text-primary">
+          <p className="w-full font-semibold text-center text-primary">
             編集権限がありません
-          </span>
+          </p>
         }
         <button onClick={() => {
           setMode("forgot");
           setPassword("");
         }}>
-          <span className="w-full font-semibold text-center underline">
+          <p className="w-full font-semibold text-center underline">
             パスワードをお忘れの方はこちら
-          </span>
+          </p>
         </button>
       </>
     }
