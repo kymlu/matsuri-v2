@@ -408,7 +408,8 @@ export default function HomePage({
             <Dialog.Root
               handle={editUserNameDialog}
               open={editUserNameDialogOpen}
-              onOpenChange={handleEditUserNameDialogOpen}>
+              onOpenChange={handleEditUserNameDialogOpen}
+              disablePointerDismissal={isLoggedIn && !isNullOrUndefinedOrBlank(savedDancerName)}>
               <Dialog.Trigger>
                 <IconButton src="personEdit" colour="primary" noBorder asDiv/>
               </Dialog.Trigger>
