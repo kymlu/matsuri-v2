@@ -1,19 +1,28 @@
 import { Dialog } from "@base-ui/react";
 import CustomDialog from "../basic/CustomDialog";
 import Button from "../basic/Button";
+import ChoreoInfo from "../common/ChoreoInfo";
+import { getJpDate } from "../../lib/helpers/dateHelper";
 
 type ConfirmUploadDialogProps = {
   choreoName?: string,
   event?: string,
+  startDate?: string,
+  endDate?: string,
+  currentUpdatedDate?: string,
+  incomingUpdatedDate?: string,
   onCancel: () => void,
   onOverwrite: () => void,
   onCopy: () => void,
 }
 
 export default function ConfirmUploadDialog({
-  choreoName, event, onCancel, onCopy, onOverwrite
+  choreoName, event, startDate, endDate,
+  currentUpdatedDate, incomingUpdatedDate,
+  onCancel, onCopy, onOverwrite
 }: ConfirmUploadDialogProps) {
   return <CustomDialog
+      fullWidth
       title="ファイルの重複"
       footer={
       <div className="flex flex-col w-full gap-2 mt-4 md:flex-row">
@@ -45,8 +54,18 @@ export default function ConfirmUploadDialog({
         </Dialog.Close>
       </div>
     }>
-      <p>同じファイルがすでに存在します。どうしますか？</p>
-      <p>名前：{choreoName}</p>
-      {event && <p>イベント：{event}</p>}
+      <p>隊列名とイベントの組み合わせがすでに存在します。どうしますか？</p>
+      <ChoreoInfo
+        name={choreoName ?? ""}
+        event={event}
+        startDate={startDate}
+        endDate={endDate}/>
+      <b>最終編集日時</b>
+      <div className="grid grid-cols-[auto,auto]">
+      <span className="text-left">現在のファイル</span>
+      <span className="text-right">{currentUpdatedDate ? getJpDate(new Date(currentUpdatedDate)) : ""}</span>
+      <span className="text-left">アップロード中のファイル</span>
+      <span className="text-right">{incomingUpdatedDate ? getJpDate(new Date(incomingUpdatedDate)) : ""}</span>
+      </div>
     </CustomDialog>
 }

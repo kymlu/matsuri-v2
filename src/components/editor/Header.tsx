@@ -171,7 +171,7 @@ export default function Header({
         }
       </div>
     </div>
-    <div className="flex items-center justify-between px-3 text-sm text-gray-500">
+    <div className="flex items-center justify-between px-3 text-sm text-gray-600">
       <div className="flex gap-1">
         <StageSize stageLength={stageLength} stageWidth={stageWidth}/>
 

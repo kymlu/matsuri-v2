@@ -1,15 +1,15 @@
 import { PASSWORD_LENGTH } from "../../lib/consts/consts";
-import { formatDateRange, getJpDate } from "../../lib/helpers/dateHelper";
+import { getJpDate } from "../../lib/helpers/dateHelper";
 import { findCurrentVersion, publishChoreo } from "../../lib/helpers/apiHelper";
 import { isNullOrUndefinedOrBlank, strEquals, testAlphanumericSymbols } from "../../lib/helpers/globalHelper";
 import { BasicChoreoDetails, Choreo } from "../../models/choreo";
 import Divider from "../basic/Divider";
-import Icon from "../basic/Icon";
 import BaseEditDialog from "./BaseEditDialog";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import CustomSwitch from "../inputs/CustomSwitch";
 import TextInput from "../inputs/TextInput";
 import { DancerCount, PropCount, StageSize } from "../common/IconInfo";
+import ChoreoInfo from "../common/ChoreoInfo";
 
 type PublishConfirmationDialogProps = {
   onClose: () => void,
@@ -19,12 +19,6 @@ type PublishConfirmationDialogProps = {
   getChoreo: () => Choreo,
   teamId: string,
   svrPassword?: string
-}
-
-type Diff = {
-  type: "隊列名" | "ステージ幅" | "イベント" | "日程" | "ダンサー数" | "道具数";
-  oldValue: string,
-  newValue: string,
 }
 
 export default function PublishConfirmationDialog({
@@ -119,25 +113,12 @@ export default function PublishConfirmationDialog({
       }}
     >
       <div className="space-y-2">
-        <div className="space-y-2 max-h-[50svh]">
-          <div className="flex items-center gap-2">
-            <Icon src="label" size="sm"/>
-            <div>
-              <div className="text-sm text-gray-600">隊列名</div>
-              <b>{currentVersion.name}</b>
-            </div>
-          </div>
-          {
-            currentVersion.event &&
-            <div className="flex items-center gap-2">
-              <Icon src="calendarToday" size="sm"/>
-              <div>
-                <div className="text-sm text-gray-600">イベント情報</div>
-                <b>{currentVersion.event}</b>
-                <div>{formatDateRange(currentVersion.startDate, currentVersion.endDate)}</div>
-              </div>
-            </div>
-          }
+        <div className="space-y-2 max-h-[50svh] overflow-y-auto">
+          <ChoreoInfo
+            name={currentVersion.name}
+            event={currentVersion.event}
+            startDate={currentVersion.startDate}
+            endDate={currentVersion.endDate}/>
           <div className="flex gap-4">
             <StageSize stageLength={currentVersion.stageLength} stageWidth={currentVersion.stageWidth}/>
             <DancerCount dancerCount={currentVersion.dancerCount}/>

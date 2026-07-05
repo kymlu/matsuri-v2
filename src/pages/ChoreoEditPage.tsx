@@ -1232,7 +1232,9 @@ export default function ChoreoEditPage(props: {
           onSubmit={() => {window.location.reload()}}
           actionButtonText="ホーム画面へ戻る"
           showCloseButton={false}>
-          隊列表の公開が完了しました。
+          <span className="text-nowrap">
+            隊列表の公開が完了しました。
+          </span>
         </BaseEditDialog>
       </Dialog.Root>
     </div>

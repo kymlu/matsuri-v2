@@ -329,7 +329,7 @@ export default function HomePage({
   };
 
   const [uploadedChoreo, setUploadedChoreo] = useState<Choreo | undefined>();
-  const [duplicateChoreoId, setDuplicateChoreoId] = useState<string | undefined>();
+  const [duplicatedChoreo, setDuplicatedChoreo] = useState<ChoreoWithStatus | undefined>();
   const [uploadChoreoDialogOpen, setUploadChoreoDialogOpen] = useState(false);
   const uploadChoreoDialog = Dialog.createHandle<{}>();
   const handleUploadChoreoDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
@@ -639,9 +639,14 @@ export default function HomePage({
                 (newChoreo: Choreo) => {
                   newChoreo.teamId = team?.id;
                   const existingChoreos = Object.values(savedChoreos).flat();
-                  const duplicateChoreo = existingChoreos.find(c => strEquals(c.name, newChoreo.name) && strEquals(c.event, newChoreo.event));
+                  const duplicateChoreo = existingChoreos.find(c => 
+                    strEquals(c.name, newChoreo.name) &&
+                    strEquals(c.event, newChoreo.event) &&
+                    strEquals(c.startDate, newChoreo.startDate) &&
+                    strEquals(c.endDate, newChoreo.endDate)
+                  );
                   if (duplicateChoreo) {
-                    setDuplicateChoreoId(duplicateChoreo.id);
+                    setDuplicatedChoreo(duplicateChoreo);
                     setUploadChoreoDialogOpen(true);
                     setUploadedChoreo(newChoreo);
                   } else {
@@ -849,6 +854,10 @@ export default function HomePage({
           <ConfirmUploadDialog
             choreoName={uploadedChoreo?.name}
             event={uploadedChoreo?.event}
+            startDate={uploadedChoreo?.startDate}
+            endDate={uploadedChoreo?.endDate}
+            incomingUpdatedDate={uploadedChoreo?.lastUpdated}
+            currentUpdatedDate={duplicatedChoreo?.lastUpdated}
             onCancel={() => {
               setUploadChoreoDialogOpen(false);
               setUploadedChoreo(undefined);
@@ -869,7 +878,7 @@ export default function HomePage({
               setUploadChoreoDialogOpen(false);
               const newChoreo = {
                 ...uploadedChoreo!,
-                id: duplicateChoreoId ?? crypto.randomUUID(),
+                id: duplicatedChoreo?.id ?? crypto.randomUUID(),
                 isDirty: true,
                 teamId: team?.id,
               } as Choreo;
