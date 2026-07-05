@@ -106,7 +106,7 @@ export default function InviteUserDialog({
             </Button>
           </div>
           <span className="text-sm text-gray-600">
-            {role === "editor" ? "隊列表の編集ができます。" : "隊列表の編集とユーザー管理ができます。"}
+            {role === "editor" ? "隊列表の編集・公開ができます。" : "隊列表の編集・公開とユーザー管理ができます。"}
           </span>
         </div>
       </div>
