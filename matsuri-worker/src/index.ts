@@ -459,8 +459,8 @@ export default {
 				VALUES (?, ?, ?, ?, datetime('now', '+30 days'), datetime('now'))
 			`).bind(crypto.randomUUID(), user.id, teamMember.team_id, token).run();
 
-			return getSuccessResponse(JSON.stringify(
-				{ success: true, teamMemberId: teamMember.id, name: user.name, role: teamMember.role }),
+			return getSuccessResponse(
+				{ success: true, teamMemberId: teamMember.id, name: user.name, role: teamMember.role },
 				200, 
 				setSessionCookie(token)
 			);
@@ -498,7 +498,7 @@ export default {
 				).bind(token).run();
 			}
 
-			return getSuccessResponse(JSON.stringify({ success: true }), 
+			return getSuccessResponse({ success: true }, 
 				200,
 				"token=; HttpOnly; Secure; SameSite=None; Max-Age=0; Path=/"
 			);
@@ -521,8 +521,8 @@ export default {
 			await env.DB.prepare(`
 				UPDATE sessions SET expires_at = datetime('now', '+30 days') WHERE token = ?
 			`).bind(token).run();
-			return getSuccessResponse(JSON.stringify(
-				{teamMemberId: session.team_member_id, name: session.name, role: session.role}),
+			return getSuccessResponse(
+				{teamMemberId: session.team_member_id, name: session.name, role: session.role},
 				200,
 				setSessionCookie(token)
 			);
@@ -606,7 +606,7 @@ export default {
 					return getErrorResponse(`Failed to send email: ${(e as Error)?.message}`, 500);
 				}
 	
-				return getSuccessResponse(JSON.stringify({ success: true }), 201);
+				return getSuccessResponse({ success: true }, 201);
 			}
 	
 			if (url.pathname === "/api/team/members" && request.method === "GET") {
