@@ -1,6 +1,6 @@
 {
-  "short_name": "Matsuri",
-  "name": "祭り",
+  "short_name": "隊列アプリ",
+  "name": "祭：隊列作成アプリ",
   "icons": [
     {
       "src": "favicon.ico",
@@ -20,6 +20,6 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#000000",
+  "theme_color": "#AB1010",
   "background_color": "#ffffff"
 }

@@ -106,6 +106,34 @@ export default {
     const url = new URL(request.url);
 		const teamId = url.searchParams.get("team_id");
 
+		const match = url.pathname.match(/^\/api\/manifest\/(.+)$/);
+
+		if (match) {
+			const slug = match[1];
+
+      const manifest = {
+				short_name: "隊列アプリ",
+				name: "祭：隊列作成アプリ",
+				icons: [
+					{ src: "/favicon.ico", sizes: "64x64 32x32 24x24 16x16", type: "image/x-icon" },
+					{ src: "/logo192.png", type: "image/png", sizes: "192x192" },
+					{ src: "/logo512.png", type: "image/png", sizes: "512x512" }
+				],
+				start_url: `/${slug}`,
+				scope: "/",
+				display: "standalone",
+				theme_color: "#AB1010",
+				background_color: "#ffffff"
+			};
+
+      return new Response(JSON.stringify(manifest), {
+        headers: {
+          "Content-Type": "application/manifest+json",
+          "Cache-Control": "public, max-age=3600"
+        }
+      });
+		}
+
     if (request.method === "GET") {
 			if (url.pathname === "/api/auth/verify-team") {
 				const teamSlug = url.searchParams.get("team_slug");

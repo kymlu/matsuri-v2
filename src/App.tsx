@@ -34,6 +34,18 @@ function App() {
 
   const { teamSlug } = useParams();
 
+  useEffect(() => {
+    const href = teamSlug ? `/api/manifest/${teamSlug}` : "/manifest.json";
+
+    let link = document.querySelector('link[rel="manifest"]') as HTMLLinkElement | null;
+    if (!link) {
+      link = document.createElement("link");
+      link.rel = "manifest";
+      document.head.appendChild(link);
+    }
+    link.href = href;
+  }, [teamSlug]);
+
   const [team, setTeam] = useState<Team | undefined>(undefined);
   const navigate = useNavigate();
 
