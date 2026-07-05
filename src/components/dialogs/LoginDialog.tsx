@@ -113,9 +113,9 @@ export default function LoginDialog({
   const isActionButtonDisabled = useMemo(() => {
     switch (mode) {
       case "login":
-        return isNullOrUndefinedOrBlank(email) || isNullOrUndefinedOrBlank(password) || isProcessing || testEmail(email);
+        return isNullOrUndefinedOrBlank(email) || isNullOrUndefinedOrBlank(password) || isProcessing || !testEmail(email);
       case "forgot":
-        return isNullOrUndefinedOrBlank(email) || isProcessing || testEmail(email);
+        return isNullOrUndefinedOrBlank(email) || isProcessing || !testEmail(email);
       case "resetPassword":
         return isNullOrUndefinedOrBlank(password) || isNullOrUndefinedOrBlank(verificationCode) || isProcessing || password.length < 8;
     }
