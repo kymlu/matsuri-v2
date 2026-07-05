@@ -241,7 +241,10 @@ export default {
 					if (!object) {
 						return getErrorResponse("File not found", 404);
 					}
-					return getSuccessResponse(object.body);
+					return new Response(object.body, {
+						status: 200,
+						headers: { ...corsHeaders, "Content-Type": "application/json" }
+					});
 				} catch (e: any) {
 					return getErrorResponse(`Internal server error: ${(e as Error).message}`, 500);
 				}
