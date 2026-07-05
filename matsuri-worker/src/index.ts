@@ -113,7 +113,7 @@ export default {
 
       const manifest = {
 				short_name: "隊列アプリ",
-				name: "祭：隊列作成アプリ",
+				name: `${slug ? slug + " | " : ""}隊列作成アプリ`,
 				icons: [
 					{ src: "/favicon.ico", sizes: "64x64 32x32 24x24 16x16", type: "image/x-icon" },
 					{ src: "/logo192.png", type: "image/png", sizes: "192x192" },
