@@ -72,8 +72,29 @@ export default {
 		const origin = request.headers.get("Origin");
 		const corsHeaders = getCorsHeaders(origin);
 
+		const getSuccessResponse = (
+			body: any = { success: true },
+			status: 200 | 201 | 204 = 200,
+			setCookie?: any,
+		): Response => {
+			console.info(`Successfully resolved ${request.url} - status: ${status}`);
+			const headers = new Headers(corsHeaders);
+			headers.set("Content-Type", "application/json");
+			if (setCookie) {
+				headers.set("Set-Cookie", setCookie);
+			}
+
+			return new Response(
+				JSON.stringify(body), 
+				{
+					status: status,
+					headers: headers,
+				}
+			);
+		}
+
 		const getErrorResponse = (message: string, status: number = 400): Response => {
-			console.error(`Error at ${request} - status: ${status} ; message: ${message}`);
+			console.error(`Error at ${request.url} - status: ${status} ; message: ${message}`);
 			
 			return new Response(
 				JSON.stringify({message: message} as ErrorResponse), 
@@ -150,10 +171,7 @@ export default {
 					return getErrorResponse("Team not found", 404);
 				}
 
-				return new Response(JSON.stringify(team), {
-					status: 200,
-					headers: { ...corsHeaders, "Content-Type": "application/json" },
-				});
+				return getSuccessResponse(team);
 			}
 
 			if (url.pathname === "/api/choreos/summary") {
@@ -184,10 +202,7 @@ export default {
 						`
 					).bind(teamId).all();
 	
-					return Response.json(results, {
-						status: 200,
-						headers: corsHeaders,
-					});
+					return getSuccessResponse(results);
 				} catch (e: any) {
 					return getErrorResponse(`Internal server error: ${(e as Error)?.message}`, 500);
 				}
@@ -226,11 +241,7 @@ export default {
 					if (!object) {
 						return getErrorResponse("File not found", 404);
 					}
-	
-					return new Response(object.body, {
-						status: 200,
-						headers: { ...corsHeaders, "Content-Type": "application/json" }
-					});
+					return getSuccessResponse(object.body);
 				} catch (e: any) {
 					return getErrorResponse(`Internal server error: ${(e as Error).message}`, 500);
 				}
@@ -260,10 +271,7 @@ export default {
 						"SELECT version FROM choreo_files WHERE choreo_id = ? AND is_current = 1"
 					).bind(choreoId).first<{ version: number }>();
 	
-					return Response.json(
-						{ version: row?.version ?? 0 },
-						{ status: 200, headers: corsHeaders }
-					);
+					return getSuccessResponse({ version: row?.version ?? 0 });
 				} catch (e: any) {
 					return getErrorResponse(`Internal server error: ${(e as Error).message}`, 500);
 				}
@@ -295,7 +303,7 @@ export default {
 					uploadedAt: r.uploaded_at,
 					uploadedByName: undefined,
 				}));
-				return Response.json(history, { status: 200, headers: corsHeaders });
+				return getSuccessResponse(history);
 			}
     }
 		
@@ -308,10 +316,7 @@ export default {
 
 			// Prevent user enumeration
 			if (!user) {
-				return new Response(JSON.stringify({ success: true }), {
-					status: 200,
-					headers: { ...corsHeaders, "Content-Type": "application/json" },
-				});
+				return getSuccessResponse();
 			}
 
 			const teamMember = await env.DB.prepare(
@@ -320,10 +325,7 @@ export default {
 			
 			// Prevent user enumeration
 			if (!teamMember) {
-				return new Response(JSON.stringify({ success: true }), {
-					status: 200,
-					headers: { ...corsHeaders, "Content-Type": "application/json" },
-				});
+				return getSuccessResponse();
 			}
 
 			const code = (crypto.getRandomValues(new Uint32Array(1))[0] % 90000000 + 10000000).toString();
@@ -352,10 +354,7 @@ export default {
 				return getErrorResponse(`Failed to send email: ${(e as Error)?.message}`, 500);
 			}
 
-			return new Response(JSON.stringify({ success: true }), {
-				status: 200,
-				headers: { ...corsHeaders, "Content-Type": "application/json" },
-			});
+			return getSuccessResponse();
 		}
 
 		if (url.pathname === "/api/auth/reset-password" && request.method === "POST") {
@@ -425,10 +424,7 @@ export default {
 				DELETE FROM sessions WHERE user_id = ?
 			`).bind(user.id).run();
 
-			return new Response(JSON.stringify({ success: true }), {
-				status: 200,
-				headers: { ...corsHeaders, "Content-Type": "application/json" },
-			});
+			return getSuccessResponse();
 		}
 
 		if (url.pathname === "/api/auth/login" && request.method === "POST") {
@@ -463,14 +459,11 @@ export default {
 				VALUES (?, ?, ?, ?, datetime('now', '+30 days'), datetime('now'))
 			`).bind(crypto.randomUUID(), user.id, teamMember.team_id, token).run();
 
-			return new Response(JSON.stringify({ success: true, teamMemberId: teamMember.id, name: user.name, role: teamMember.role }), {
-				status: 200,
-				headers: {
-					...corsHeaders,
-					"Content-Type": "application/json",
-					"Set-Cookie": setSessionCookie(token),
-				},
-			});
+			return getSuccessResponse(JSON.stringify(
+				{ success: true, teamMemberId: teamMember.id, name: user.name, role: teamMember.role }),
+				200, 
+				setSessionCookie(token)
+			);
 		}
 
 		if (url.pathname === "/api/choreos/verify" && request.method === "POST") {
@@ -486,18 +479,13 @@ export default {
 			if (!passwordMatch) {
 				return getErrorResponse("Invalid password", 401);
 			} else {
-				return new Response("{}", {
-					status: 200,
-					headers: { ...corsHeaders, "Content-Type": "application/json" },
-				});
+				return getSuccessResponse();
 			}
 		}
 
 		// Verify session token from cookie
 		const cookie = request.headers.get('cookie');
-		console.log("cookie header:", cookie);
 		const token = cookie?.split(';').map(c => c.trim()).find(c => c.startsWith('token='))?.split('=')[1];
-		console.log("extracted token:", token);
 
 		if (!token) {
 			return getErrorResponse("No session token provided. Please log in.", 401);
@@ -510,14 +498,10 @@ export default {
 				).bind(token).run();
 			}
 
-			return new Response(JSON.stringify({ success: true }), {
-				status: 200,
-				headers: {
-					...corsHeaders,
-					"Content-Type": "application/json",
-					"Set-Cookie": "token=; HttpOnly; Secure; SameSite=None; Max-Age=0; Path=/",
-				},
-			});
+			return getSuccessResponse(JSON.stringify({ success: true }), 
+				200,
+				"token=; HttpOnly; Secure; SameSite=None; Max-Age=0; Path=/"
+			);
 		}
 
 		// Look up session in D1
@@ -537,10 +521,11 @@ export default {
 			await env.DB.prepare(`
 				UPDATE sessions SET expires_at = datetime('now', '+30 days') WHERE token = ?
 			`).bind(token).run();
-			return new Response(JSON.stringify({teamMemberId: session.team_member_id, name: session.name, role: session.role}), {
-				status: 200,
-				headers: { ...corsHeaders, "Content-Type": "application/json", "Set-Cookie": setSessionCookie(token) },
-			});
+			return getSuccessResponse(JSON.stringify(
+				{teamMemberId: session.team_member_id, name: session.name, role: session.role}),
+				200,
+				setSessionCookie(token)
+			);
 		}
 
 		if (url.pathname.startsWith("/api/team/")) {
@@ -553,10 +538,7 @@ export default {
 					WHERE id = ?
 				`).bind(body.name, session.user_id).run();
 	
-				return new Response(JSON.stringify({ success: true }), {
-					status: 200,
-					headers: { ...corsHeaders, "Content-Type": "application/json" },
-				});
+				return getSuccessResponse();
 			}
 	
 			if (session.role !== "admin") {
@@ -624,10 +606,7 @@ export default {
 					return getErrorResponse(`Failed to send email: ${(e as Error)?.message}`, 500);
 				}
 	
-				return new Response(JSON.stringify({ success: true }), {
-					status: 201,
-					headers: { ...corsHeaders, "Content-Type": "application/json" },
-				});
+				return getSuccessResponse(JSON.stringify({ success: true }), 201);
 			}
 	
 			if (url.pathname === "/api/team/members" && request.method === "GET") {
@@ -638,10 +617,7 @@ export default {
 					WHERE tm.team_id = ? AND tm.deleted = 0
 				`).bind(session.team_id).all();
 
-				return new Response(JSON.stringify(results), {
-					status: 200,
-					headers: { ...corsHeaders, "Content-Type": "application/json" },
-				});
+				return getSuccessResponse(results);
 			}
 	
 			if (url.pathname === "/api/team/members/role" && request.method === "POST") {
@@ -651,11 +627,7 @@ export default {
 					UPDATE team_members SET role = ?, updated_at = datetime('now')
 					WHERE id = ? AND team_id = ?
 				`).bind(body.role, body.member_id, session.team_id).run();
-	
-				return new Response(JSON.stringify({ success: true }), {
-					status: 200,
-					headers: { ...corsHeaders, "Content-Type": "application/json" },
-				});
+				return getSuccessResponse();
 			}
 	
 			if (url.pathname === "/api/team/members/remove" && request.method === "POST") {
@@ -674,10 +646,7 @@ export default {
 					DELETE FROM sessions WHERE user_id = ? AND team_id = ?
 				`).bind(results?.user_id, session.team_id).run();
 	
-				return new Response(JSON.stringify({ success: true }), {
-					status: 200,
-					headers: { ...corsHeaders, "Content-Type": "application/json" },
-				});
+				return getSuccessResponse();
 			}
 		}
 
@@ -689,10 +658,7 @@ export default {
 					FROM choreos c
 					WHERE c.id = ? AND c.team_id = ?
 				`).bind(data.choreo_id as string, data.team_id as string).first<{password: string | null}>();
-				return new Response(JSON.stringify(password), {
-					status: 200,
-					headers: { ...corsHeaders, "Content-Type": "application/json", "Set-Cookie": setSessionCookie(token) },
-				});
+				return getSuccessResponse(password, 200, setSessionCookie(token));
 			} catch (e) {
 				return getErrorResponse(`Internal server error: ${(e as Error).message}`, 500);
 			}
@@ -731,7 +697,7 @@ export default {
 				uploadedByName: r.name?.trim(),
 			}));
 
-			return Response.json(history, { status: 200, headers: corsHeaders });
+			return getSuccessResponse(history);
 		}
 
 		if (request.method === "POST" && url.pathname === "/api/choreos/file") {
@@ -758,7 +724,6 @@ export default {
 				// get next version number
 				let version = 1;
 				if (!isNew) {
-					console.log("getting version number");
 					const current = await env.DB.prepare(
 						"SELECT version FROM choreo_files WHERE choreo_id = ? AND is_current = 1"
 					).bind(choreoId).first<{ version: number }>();
@@ -771,7 +736,6 @@ export default {
 					version = current.version + 1;
 
 					// mark old version as not current
-					console.log("set old choreo to not current");
 					await env.DB.prepare(
 						"UPDATE choreo_files SET is_current = 0 WHERE choreo_id = ? AND is_current = 1"
 					).bind(choreoId).run()
@@ -788,7 +752,6 @@ export default {
 				.catch(e => { throw new Error(`Failed to upload file to r2: ${e}`) });
 
 				// upsert choreo
-				console.log("upsert choreo");
 				await env.DB.prepare(
 					`INSERT INTO choreos (id, name, event_name, event_start_date, event_end_date, team_id, password)
 					VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -803,17 +766,13 @@ export default {
 
 				// insert new choreo_file row
 				const fileId = crypto.randomUUID();
-				console.log("insert choreo file");
 				await env.DB.prepare(
 					`INSERT INTO choreo_files (id, choreo_id, version, is_current, stage_width, stage_length, dancer_count, prop_count, uploaded_by, uploaded_at)
 					VALUES (?, ?, ?, 1, ?, ?, ?, ?, ?, ?)`
 				).bind(fileId, choreoId, version, stageWidth, stageLength, dancerCount, propCount, uploadedBy, new Date().toISOString()).run()
 				.catch(e => { throw new Error(`Failed to insert choreo file info into db: ${e}`) });
 
-				return Response.json(
-					{ newFile: file },
-					{ status: isNew ? 201 : 200, headers: corsHeaders }
-				);
+				return getSuccessResponse({ newFile: file }, isNew ? 201 : 200);
 			} catch (e) {
 				return getErrorResponse(`Internal server error: ${(e as Error).message}`, 500);
 			}
