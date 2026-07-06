@@ -132,8 +132,19 @@ export default function LoginDialog({
     }
   }, [mode]);
 
+  const dialogTitleText = useMemo(() => {
+    switch (mode) {
+      case "login":
+        return "ログイン";
+      case "forgot":
+        return "パスワードの設定・再設定";
+      case "resetPassword":
+        return "新しいパスワード設定";
+    }
+  }, [mode]);
+
   return <BaseEditDialog
-    title="ログイン"
+    title={dialogTitleText}
     actionButtonText={actionButtonText}
     isActionButtonDisabled={isActionButtonDisabled}
     showCloseButton={false}
