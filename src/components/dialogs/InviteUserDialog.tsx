@@ -114,8 +114,10 @@ export default function InviteUserDialog({
       </div>
     }
     {
-      mode === "sent" &&
-      <p><b>{email}</b>に招待メールを送信しました。メールが届かない場合は、迷惑メールフォルダもご確認ください。</p>
+      mode === "sent" && <div className="mb-2 space-y-1">
+        <p><b>{email}</b>に招待メールを送信しました。</p>
+        <p>メールが届かない場合は、迷惑メールフォルダもご確認ください。</p>
+      </div>
     }
     {
       isProcessing &&
