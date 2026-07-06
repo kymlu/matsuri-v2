@@ -513,8 +513,8 @@ export default {
 			FROM sessions s
 			JOIN users u ON s.user_id = u.id
 			JOIN team_members tm ON s.user_id = tm.user_id AND s.team_id = tm.team_id
-			WHERE s.token = ? AND s.expires_at > datetime('now')
-		`).bind(token).first();
+			WHERE s.token = ? AND s.expires_at > datetime('now') AND tm.team_id = ?
+		`).bind(token, teamId).first();
 
 		if (!session) {
 			return getErrorResponse("Invalid or expired session. Please log in again.", 401);
