@@ -205,7 +205,7 @@ export default function LoginDialog({
     {
       mode === "resetPassword" &&
       <>
-        <div className="mb-2">
+        <div className="mb-2 space-y-1">
           <p>メールアドレスが登録されている場合、認証コードを送信します。コードの有効期限は10分です。</p>
           <p>メールが届かない場合は、迷惑メールフォルダもご確認ください。</p>
         </div>
