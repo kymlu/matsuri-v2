@@ -25,7 +25,7 @@ export default function AdminPage({
 
   const loadData = async () => {
     try {
-      const result = await getAllMembers();
+      const result = await getAllMembers(team.id);
       setUsers(result
         .sort((a, b) => strCompare<User>(a, b, "email"))
         .sort((a, b) => strCompare<User>(a, b, "name")));
@@ -44,7 +44,7 @@ export default function AdminPage({
 
   const deleteUser = (id: string) => {
     try {
-      removeUserFromTeam(id, () => {loadData()}, () => {loadData()});
+      removeUserFromTeam(id, team.id, () => {loadData()}, () => {loadData()});
     } catch (e) {
       // todo: error handling
       loadData();
@@ -71,6 +71,7 @@ export default function AdminPage({
         </Dialog.Trigger>
         <InviteUserDialog
           teamName={team.name}
+          teamId={team.id}
           existingUsers={existingEmails}
           onSuccess={() => {
             loadData();
@@ -103,7 +104,7 @@ export default function AdminPage({
                 <Dialog.Trigger disabled={strEquals(currentUserId, user.id)}>
                   <IconButton disabled={strEquals(currentUserId, user.id)} src="edit" colour="grey" noBorder asDiv/>
                 </Dialog.Trigger>
-                <EditUserRoleDialog teamName="Test team name" user={user} onSuccess={() => {loadData()}}/>
+                <EditUserRoleDialog teamId={team.id} teamName={team.name} user={user} onSuccess={() => {loadData()}}/>
               </Dialog.Root>
               <Dialog.Root>
                 <Dialog.Trigger disabled={strEquals(currentUserId, user.id)}>

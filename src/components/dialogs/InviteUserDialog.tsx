@@ -8,6 +8,7 @@ import Button from "../basic/Button";
 import { inviteUser } from "../../lib/helpers/apiHelper";
 
 type InviteUserDialogProps = {
+  teamId: string,
   teamName?: string,
   existingUsers: Set<string>,
   onSuccess: () => void,
@@ -15,7 +16,7 @@ type InviteUserDialogProps = {
 }
 
 export default function InviteUserDialog({
-  teamName, existingUsers, onSuccess, onClose
+  teamId, teamName, existingUsers, onSuccess, onClose
 }: InviteUserDialogProps) {
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [email, setEmail] = useState<string>("");
@@ -50,6 +51,7 @@ export default function InviteUserDialog({
         // call api
         inviteUser(
           email,
+          teamId,
           role,
           () => {
             onSuccess();

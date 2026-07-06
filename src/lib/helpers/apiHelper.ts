@@ -134,12 +134,13 @@ export const resetPassword = async (
 
 export const inviteUser = async (
   email: string,
+  teamId: string,
   role: RoleType,
   onSuccess: () => void,
   onFailure: (status: number) => void,
 ): Promise<void> => {
   try {
-    const response = await fetch(`${getApiUrl("team/invite-user")}`, {
+    const response = await fetch(`${getApiUrl("team/invite-user")}?team_id=${teamId}`, {
       method: "POST",
       credentials: "include",
       body: JSON.stringify({ email, role }),
@@ -157,9 +158,9 @@ export const inviteUser = async (
   }
 }
 
-export const getAllMembers = async (): Promise<User[]> => {
+export const getAllMembers = async (teamId: string): Promise<User[]> => {
   try {
-    const response = await fetch(`${getApiUrl("team/members")}`, {
+    const response = await fetch(`${getApiUrl("team/members")}?team_id=${teamId}`, {
       method: "GET",
       credentials: "include",
     });
@@ -179,12 +180,13 @@ export const getAllMembers = async (): Promise<User[]> => {
 
 export const changeUserRole = async (
   memberId: string,
+  teamId: string,
   role: RoleType,
   onSuccess: () => void,
   onFailure: (status: number) => void,
 ): Promise<void> => {
   try {
-    const response = await fetch(`${getApiUrl("team/members/role")}`, {
+    const response = await fetch(`${getApiUrl("team/members/role")}?team_id=${teamId}`, {
       method: "POST",
       credentials: "include",
       body: JSON.stringify({ member_id: memberId, role }),
@@ -204,11 +206,12 @@ export const changeUserRole = async (
 
 export const removeUserFromTeam = async (
   memberId: string,
+  teamId: string,
   onSuccess: () => void,
   onFailure: (status: number) => void,
 ): Promise<void> => {
   try {
-    const response = await fetch(`${getApiUrl("team/members/remove")}`, {
+    const response = await fetch(`${getApiUrl("team/members/remove")}?team_id=${teamId}`, {
       method: "POST",
       credentials: "include",
       body: JSON.stringify({ member_id: memberId }),
@@ -228,11 +231,12 @@ export const removeUserFromTeam = async (
 
 export const changeUserName = async (
   name: string,
+  teamId: string,
   onSuccess: () => void,
   onFailure: (status: number) => void,
 ): Promise<void> => {
   try {
-    const response = await fetch(`${getApiUrl("team/members/name")}`, {
+    const response = await fetch(`${getApiUrl("team/members/name")}?team_id=${teamId}`, {
       method: "POST",
       credentials: "include",
       body: JSON.stringify({ name }),

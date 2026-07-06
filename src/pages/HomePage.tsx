@@ -424,8 +424,8 @@ export default function HomePage({
                 isLoggedIn={isLoggedIn}
                 onSubmit={(name) => {
                   setSavedDancerName(name);
-                  if (isLoggedIn) {
-                    changeUserName(name, () => {}, () => {})
+                  if (isLoggedIn && team) {
+                    changeUserName(name, team.id, () => {}, () => {})
                   }
                 }
               }/>

@@ -7,13 +7,14 @@ import { changeUserRole } from "../../lib/helpers/apiHelper";
 import Divider from "../basic/Divider";
 
 type EditUserRoleProps = {
-  teamName?: string,
+  teamName: string,
+  teamId: string,
   user: User,
   onSuccess: () => void,
 }
 
 export default function EditUserRoleDialog({
-  user, onSuccess
+  teamName, teamId, user, onSuccess
 }: EditUserRoleProps) {
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [role, setRole] = useState<RoleType>(user.role);
@@ -25,6 +26,7 @@ export default function EditUserRoleDialog({
       try {
         changeUserRole(
           user.id,
+          teamId,
           role,
           () => {
             onSuccess()
