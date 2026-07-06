@@ -661,7 +661,7 @@ export default {
 					FROM choreos c
 					WHERE c.id = ? AND c.team_id = ?
 				`).bind(data.choreo_id as string, data.team_id as string).first<{password: string | null}>();
-				return getSuccessResponse(password, 200, setSessionCookie(token));
+				return getSuccessResponse(password);
 			} catch (e) {
 				return getErrorResponse(`Internal server error: ${(e as Error).message}`, 500);
 			}

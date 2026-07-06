@@ -307,7 +307,7 @@ export const getChoreoPassword = async (
   onFailure: (status: number) => void
 ): Promise<void> => {
   try {
-    const response = await fetch(getApiUrl("choreos/get-password"), {
+    const response = await fetch(`${getApiUrl("choreos/get-password")}?team_id=${teamId}`, {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
@@ -456,7 +456,7 @@ export const publishChoreo = async (
   password?: string
 ) => {
   try {
-    const response = await fetch(getApiUrl("choreos/file"), {
+    const response = await fetch(`${getApiUrl("choreos/file")}?team_id=${teamId}`, {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
