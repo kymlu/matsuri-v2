@@ -869,6 +869,7 @@ export default function HomePage({
                 name: `${uploadedChoreo!.name}のコピー`,
                 isDirty: false,
                 teamId: team?.id,
+                version: undefined,
               } as Choreo;
               saveChoreo(newChoreo, () => {onSelectChoreo(newChoreo, "localOnly")});
               setUploadedChoreo(undefined);
@@ -881,6 +882,7 @@ export default function HomePage({
                 id: duplicatedChoreo?.id ?? crypto.randomUUID(),
                 isDirty: true,
                 teamId: team?.id,
+                version: duplicatedChoreo?.version
               } as Choreo;
               saveChoreo(newChoreo, () => {onSelectChoreo(newChoreo, "localOnly")});
               setUploadedChoreo(undefined);
