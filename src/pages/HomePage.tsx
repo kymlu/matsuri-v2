@@ -884,7 +884,7 @@ export default function HomePage({
                 teamId: team?.id,
                 version: duplicatedChoreo?.version
               } as Choreo;
-              saveChoreo(newChoreo, () => {onSelectChoreo(newChoreo, "localOnly")});
+              saveChoreo(newChoreo, () => {onSelectChoreo(newChoreo, duplicatedChoreo?.version ? "edited" : "localOnly")});
               setUploadedChoreo(undefined);
               setUploadChoreoDialogOpen(false);
             }}
