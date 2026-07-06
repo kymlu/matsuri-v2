@@ -216,7 +216,7 @@ export default function LoginDialog({
           maxLength={VERIFICATION_CODE_LENGTH}
           onContentChange={(value) => setVerificationCode(value)}/>
         <TextInput
-          label="パスワード（8~25文字）"
+          label="新パスワード（8~25文字）"
           name="パスワード"
           type="password"
           defaultValue=""
