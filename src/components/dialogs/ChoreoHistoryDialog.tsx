@@ -37,7 +37,7 @@ export function ChoreoHistoryDialog({
   }, [teamId, choreoId, isLoggedIn]);
 
   return <CustomDialog title="公開履歴" onClose={onClose} hasX fullWidth>
-    <div className="flex flex-col w-full gap-2">
+    <div className="flex flex-col w-full gap-1">
       {
         history.map((h, i) => (
           <div key={h.version} className="flex items-center gap-3 p-3">
