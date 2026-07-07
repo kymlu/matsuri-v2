@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { Fragment, useEffect, useState } from "react"
 import { getChoreoHistory, getPublicChoreoHistory } from "../../lib/helpers/apiHelper";
 import { ChoreoVersion } from "../../models/choreo";
 import { isNullOrUndefinedOrBlank } from "../../lib/helpers/globalHelper";
@@ -39,8 +39,14 @@ export function ChoreoHistoryDialog({
   return <CustomDialog title="公開履歴" onClose={onClose} hasX fullWidth>
     <div className="flex flex-col w-full gap-1">
       {
-        history.map((h, i) => (
-          <div key={h.version} className="flex items-center gap-3 p-3">
+        history.map((h, i) => (<Fragment key={h.version} >
+          {
+            i === 0 && <div className="text-sm text-gray-600">最新版</div>
+          }
+          {
+            i === 1 && <div className="text-sm text-gray-600">過去の履歴</div>
+          }
+          <div className="flex items-center gap-3 px-3 py-1">
             <Tag
               text={`v${h.version}`}
               type={i === 0 ? "filled" : "grey"}
@@ -56,8 +62,9 @@ export function ChoreoHistoryDialog({
                 </div>
               }
             </div>
-            { (i < history.length - 1) && <Divider compact/> }
           </div>
+          { (i > 0  && i < history.length - 1) && <Divider compact/> }
+        </Fragment>
         ))
       }
     </div>
