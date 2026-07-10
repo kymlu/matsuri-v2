@@ -89,6 +89,7 @@ export default function ChoreoEditPage(props: {
     showGrid: true,
     showPreviousSection: false,
     dancerDisplayType: "large",
+    moveScreenOnSelect: true,
   });
   const isDirty = useRef(false);
   const hasInitialized = useRef(false);
@@ -521,6 +522,9 @@ export default function ChoreoEditPage(props: {
         changeShowPrevious={() => {
           setAppSettings(prev => {return {...prev, showPreviousSection: !prev.showPreviousSection}})
         }}
+        changeMoveScreenOnSelect={history.presentState.state.stageType === "parade" ? () => {
+          setAppSettings(prev => {return {...prev, moveScreenOnSelect: !prev.moveScreenOnSelect}})
+        } : undefined}
         changeSnap={() => {
           setAppSettings(prev => {return {...prev, snapToGrid: !prev.snapToGrid}})
         }}

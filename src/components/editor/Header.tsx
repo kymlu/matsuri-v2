@@ -30,6 +30,7 @@ type HeaderProps = {
   changeSnap?: () => void;
   changeShowGrid?: () => void;
   changeShowPrevious?: () => void;
+  changeMoveScreenOnSelect?: () => void;
   changeDancerSize?: (showLarge: boolean) => void;
   appSettings: AppSetting;
   goToEdit?: () => void;
@@ -58,7 +59,7 @@ export default function Header({
   showManageProps, manageProps, 
   manageSections,
   exportChoreo,
-  changeSnap, changeShowGrid, changeShowPrevious, changeDancerSize,
+  changeSnap, changeShowGrid, changeShowPrevious, changeDancerSize, changeMoveScreenOnSelect,
   appSettings,
   goToEdit, goToView,
   toggleShowPath, showPath, isShowPathBtnDisabled,
@@ -164,6 +165,7 @@ export default function Header({
               changeDancerSize={changeDancerSize}
               appSettings={appSettings}
               changeShowPrevious={changeShowPrevious}
+              changeMoveScreenOnSelect={changeMoveScreenOnSelect}
               showPublish={showPublish}
               publish={publish}
             />

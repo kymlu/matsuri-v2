@@ -117,7 +117,7 @@ export default function MainStage({
   const [isSelectingNewSection, setIsSelectingNewSection] = useState<boolean>(false);
 
   useEffect(() => {
-    if (stageGeometry && stageGeometry.yAxis === "bottom-up" && !strEquals(stagePosSectionId, currentSection.id)) {
+    if (stageGeometry && appSettings.moveScreenOnSelect && stageGeometry.yAxis === "bottom-up" && !strEquals(stagePosSectionId, currentSection.id)) {
       setIsSelectingNewSection(true);
       setStagePosSectionId(currentSection.id);
       var frontmostY = Math.max(

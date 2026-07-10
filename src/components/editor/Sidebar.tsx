@@ -22,6 +22,7 @@ type SidebarProps = {
   changeSnap?: () => void;
   changeShowGrid?: () => void;
   changeShowPrevious?: () => void;
+  changeMoveScreenOnSelect?: () => void;
   changeDancerSize?: (showLarge: boolean) => void;
   
   appSettings: AppSetting;
@@ -40,6 +41,7 @@ export function Sidebar({
   changeShowGrid,
   changeDancerSize,
   changeShowPrevious,
+  changeMoveScreenOnSelect,
   appSettings,
   showPublish,  publish,
 }: SidebarProps) {
@@ -119,6 +121,10 @@ export function Sidebar({
         {
           changeDancerSize &&
           <CustomSwitch label="大きいダンサー" defaultChecked={appSettings.dancerDisplayType === "large"} onChange={changeDancerSize}/>
+        }
+        {
+          changeMoveScreenOnSelect &&
+          <CustomSwitch label="セクション選択で画面移動" defaultChecked={appSettings.moveScreenOnSelect} onChange={changeMoveScreenOnSelect}/>
         }
         {
           showPublish && publish &&

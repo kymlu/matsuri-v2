@@ -36,6 +36,7 @@ export default function ChoreoViewPage(props: {
     showGrid: true,
     showPreviousSection: false,
     dancerDisplayType: "large",
+    moveScreenOnSelect: true,
   });
 
   const entityCount = useMemo(() => ({
