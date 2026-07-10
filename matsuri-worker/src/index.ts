@@ -107,7 +107,7 @@ export default {
 
 		const sendEmail = async (emailAddress: string, subject: string, body: string): Promise<boolean> => {
 			const { data, error } = await resend.emails.send({
-				from: '隊列表作成アプリ <noreply@tairetsu.app>',
+				from: '隊列表作成アプリ <accounts@tairetsu.app>',
 				to: emailAddress,
 				subject: subject,
 				html: body,
