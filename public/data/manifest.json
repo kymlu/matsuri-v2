@@ -215,5 +215,18 @@
     "stageWidth": 17,
     "dancerCount": 22,
     "propCount": 0
+  },
+  {
+    "id": "26173d52-1d06-4336-a580-f40f985be465",
+    "name": "パレード　9×80",
+    "event": "どまつり",
+    "startDate": "2026-08-29",
+    "endDate": "2026-08-30",
+    "version": 1,
+    "lastUpdated": "2026-07-10T19:44:45.508Z",
+    "stageLength": 80,
+    "stageWidth": 9,
+    "dancerCount": 76,
+    "propCount": 4
   }
 ]
