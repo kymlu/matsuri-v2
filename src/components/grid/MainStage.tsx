@@ -120,9 +120,10 @@ export default function MainStage({
     if (stageGeometry && appSettings.moveScreenOnSelect && stageGeometry.yAxis === "bottom-up" && !strEquals(stagePosSectionId, currentSection.id)) {
       setIsSelectingNewSection(true);
       setStagePosSectionId(currentSection.id);
+      // only consider the frontmost dancer within the app since dancers are the main
+      // within the pdf it will still show props and dancers
       var frontmostY = Math.max(
-        ...Object.values(currentSection.formation.dancerPositions).map(x => x.y),
-        ...Object.values(currentSection.formation.propPositions).map(x => x.y)
+        ...Object.values(currentSection.formation.dancerPositions).map(x => x.y)
       );
       var newPosition = {x: stagePos.x, y: -stageMetersToPx({x: 0, y: frontmostY + 2}, stageGeometry, METER_PX).y * stageScale.y + 24};
       setRulerPos(newPosition)
