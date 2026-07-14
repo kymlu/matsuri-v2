@@ -14,6 +14,7 @@ import ExportDialog from "../components/dialogs/ExportDialog";
 import { Dialog } from "@base-ui/react";
 import InstructionMessage from "../components/basic/InstructionMessage";
 import { ChoreoStatus } from "./HomePage";
+import BaseErrorDialog from "../components/dialogs/BaseErrorDialog";
 
 export default function ChoreoViewPage(props: {
   goToHomePage: () => void
@@ -30,7 +31,6 @@ export default function ChoreoViewPage(props: {
   const [selectedObjects, setSelectedObjects] = useState<StageEntities<PropPosition[], DancerPosition[]>>({dancers: [], props: [], obstacles: []});
   const [showPaths, setShowPaths] = useState<boolean>(true);
   const [showHint, setShowHint] = useState<boolean>(false);
-  const [hintManuallyClosed, setHintManuallyClosed] = useState<boolean>(false);
   const [appSettings, setAppSettings] = useState<AppSetting>({
     snapToGrid: true,
     showGrid: true,
@@ -46,7 +46,6 @@ export default function ChoreoViewPage(props: {
   } as StageEntities<number>), [props.currentChoreo.dancers, props.currentChoreo.props, props.currentChoreo.obstacles]);
 
   useEffect(() => {
-    setHintManuallyClosed(false);
     if (!isNullOrUndefinedOrBlank(props.savedDancerName)) {
       const dancer = Object.values(props.currentChoreo.dancers).find(x => strEquals(x.name, props.savedDancerName));
       if (dancer) {
@@ -57,7 +56,7 @@ export default function ChoreoViewPage(props: {
         setShowHint(true);
       }
     }
-  }, [props.currentChoreo, props.savedDancerName]);
+  }, [props.currentChoreo]);
   
   useEffect(() => {
     setSelectedObjects({
@@ -118,9 +117,6 @@ export default function ChoreoViewPage(props: {
           }
           deselectPosition={() => {
             resetSelectedIds();
-            if (!hintManuallyClosed) {
-              setShowHint(true);
-            }
           }}
           onSelectTiming={(timing) => {
             if (timing) {
@@ -169,21 +165,14 @@ export default function ChoreoViewPage(props: {
              } :
             undefined
           }
-          onDancerSelected={() => {
-            if (showHint) setShowHint(false);
-          }}
         />
       </div>
 
-      {
-        showHint &&
-        <InstructionMessage
-          instruction={<div className="text-center"><span>名前をタップすると、</span><br/><span>位置情報が表示されます。</span></div>}
-          onClose={() => {
-            setShowHint(false);
-            setHintManuallyClosed(true);
-          }}/>
-      }
+      <Dialog.Root onOpenChange={() => setShowHint(false)} open={showHint}>
+        <BaseErrorDialog title="利用方法" onClose={() => setShowHint(false)}>
+          <span>名前をタップすると、<br/>位置情報が表示されます。</span>
+        </BaseErrorDialog>
+      </Dialog.Root>
       
       <Dialog.Root
         handle={exportDialog}
