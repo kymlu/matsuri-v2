@@ -1212,31 +1212,32 @@ function EventSection({
           choreoName={selectedChoreo?.name}
           teamId={teamId!}
           onSuccess={() => {
-              if (selectedChoreo) {
-                switch (postPasswordAction) {
-                  case "open":
-                    setUnlockedChoreo(selectedChoreo.id, selectedChoreo.version);
-                    onSelectChoreo(selectedChoreo.id, selectedChoreo.status);
-                    break;
-                  case "duplicate":
-                    duplicateChoreo(selectedChoreo);
-                    break;
-                  case "export":
-                    onExport(selectedChoreo.id);
-                    break;
-                  case "rename":
-                    editChoreoName(selectedChoreo);
-                    break;
-                  case "pdf":
-                    onPdfExport(selectedChoreo);
-                    break;
-                
-                  default:
-                    break;
-                }
+            console.log(postPasswordAction, selectedChoreo);
+            if (selectedChoreo) {
+              switch (postPasswordAction) {
+                case "open":
+                  console.log
+                  setUnlockedChoreo(selectedChoreo.id, selectedChoreo.version);
+                  onSelectChoreo(selectedChoreo.id, selectedChoreo.status);
+                  break;
+                case "duplicate":
+                  duplicateChoreo(selectedChoreo);
+                  break;
+                case "export":
+                  onExport(selectedChoreo.id);
+                  break;
+                case "rename":
+                  editChoreoName(selectedChoreo);
+                  break;
+                case "pdf":
+                  onPdfExport(selectedChoreo);
+                  break;
+              
+                default:
+                  break;
               }
             }
-          }
+          }}
           onClose={() => {
             setPostPasswordAction("none");
             setChoreoPasswordEntryDialogOpen(false);
