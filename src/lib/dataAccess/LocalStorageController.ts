@@ -14,10 +14,12 @@ function getUnlockedChoreoKey(choreoId: string, version?: number): string {
 const IS_UNLOCKED = "true";
 
 export function setUnlockedChoreo(choreoId: string, version?: number) {
+  console.log("set lock", choreoId, version);
   localStorage.setItem(getUnlockedChoreoKey(choreoId, version), IS_UNLOCKED);
 
   if (version) {
     for (let i = 0; i < version; i++) {
+      console.log("clear lock", version);
       localStorage.removeItem(getUnlockedChoreoKey(choreoId, version));
     }
   }

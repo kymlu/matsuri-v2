@@ -1212,7 +1212,6 @@ function EventSection({
           choreoName={selectedChoreo?.name}
           teamId={teamId!}
           onSuccess={() => {
-            console.log(postPasswordAction, selectedChoreo);
             if (selectedChoreo) {
               switch (postPasswordAction) {
                 case "open":
