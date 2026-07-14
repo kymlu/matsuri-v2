@@ -162,8 +162,8 @@ export default function Toolbar({
         {showRenameObstacle && <IconButton src="textFieldsAlt" label="名前変更" onClick={() => {onRenameObstacle()}} />}
         {showArrange && <IconButton src="straighten" label="整理" onClick={()=>{setIsArrangeVisible(true)}}/>}
         {showChangeColour && <IconButton src="colors" label="色" onClick={() => {onChangeColor()}} />}
-        {showCopyPosition && <IconButton src="contentCopy" label="コピー" onClick={() => {onCopyPosition()}} />}
-        {showPastePosition && <IconButton src="contentPaste" label="ペースト" onClick={() => {onPastePosition()}} />}
+        {showCopyPosition && <IconButton src="contentCopy" label="位置コピー" onClick={() => {onCopyPosition()}} />}
+        {showPastePosition && <IconButton src="contentPaste" label="位置ペースト" onClick={() => {onPastePosition()}} />}
         {showSwapPosition && <IconButton src="swapHoriz" label="位置交換" onClick={() => {onSwapPosition()}} />}
         {showDuplicateObstacle && <IconButton src="contentCopy" label="複製" onClick={() => {onDuplicateObstacle()}} />}
         {showDeleteObjects && <IconButton src="delete" label="削除" onClick={()=>{onDeleteObjects()}}/>}
@@ -173,7 +173,7 @@ export default function Toolbar({
         {showSelectAllButton && <IconButton src="selectAll" label="全部選択" onClick={() => {onSelectType(true, true)}} />}
         {
           !areSelectionActionsActivated && <>
-            {showLockObstacle && <IconButton src={areObstaclesLocked ? "lockOpen" : "lock"} label={ areObstaclesLocked ? "障害物解除" : "障害物固定"} onClick={() => {onToggleObstacleLock()}} />}
+            {showLockObstacle && <IconButton src={areObstaclesLocked ? "lockOpenRight" : "lock"} label={ areObstaclesLocked ? "障害物解除" : "障害物固定"} onClick={() => {onToggleObstacleLock()}} />}
           </>
         }
       </>

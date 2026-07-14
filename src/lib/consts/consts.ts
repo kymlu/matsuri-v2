@@ -118,7 +118,7 @@ export const ICON = {
   lineStart: "line_start",
   lists: "lists",
   lock: "lock",
-  lockOpen: "lock_open",
+  lockOpenRight: "lock_open_right",
   login: "login",
   logout: "logout",
   menu: "menu",

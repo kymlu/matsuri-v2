@@ -1273,7 +1273,7 @@ function ChoreoListItem ({
         {/* Title */}
         <div className="relative flex flex-row items-start justify-between gap-2">
           <span className="flex items-center gap-0.5 font-semibold text-left break-words text-wrap">
-            {choreo.hasPassword ? <Icon src={isUnlocked ? "lockOpen" : "lock"} colour="primary" size="xs"/> : <></>}
+            {choreo.hasPassword ? <Icon src={isUnlocked ? "lockOpenRight" : "lock"} colour="primary" size="xs"/> : <></>}
             <span>{choreo.name}</span>
           </span>
           <div className="flex flex-row items-center gap-2">
