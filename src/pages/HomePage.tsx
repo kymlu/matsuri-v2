@@ -1216,7 +1216,6 @@ function EventSection({
             if (selectedChoreo) {
               switch (postPasswordAction) {
                 case "open":
-                  console.log
                   setUnlockedChoreo(selectedChoreo.id, selectedChoreo.version);
                   onSelectChoreo(selectedChoreo.id, selectedChoreo.status);
                   break;
