@@ -1234,10 +1234,6 @@ function EventSection({
                   default:
                     break;
                 }
-                if (postPasswordAction === "open") {
-                } else if (postPasswordAction === "duplicate") {
-                  duplicateChoreo(selectedChoreo);
-                }
               }
             }
           }
