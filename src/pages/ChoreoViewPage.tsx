@@ -55,6 +55,8 @@ export default function ChoreoViewPage(props: {
         resetSelectedIds();
         setShowHint(true);
       }
+    } else {
+      setShowHint(true);
     }
   }, [props.currentChoreo]);
   
