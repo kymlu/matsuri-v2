@@ -9,10 +9,9 @@ import { isNullOrUndefinedOrBlank, strEquals } from "../lib/helpers/globalHelper
 import ViewerSidebar from "../components/editor/ViewerSidebar";
 import { StageEntities } from "../models/history";
 import { DancerPosition } from "../models/dancer";
-import { PropPosition } from "../models/prop";
+import { Obstacle, PropPosition } from "../models/prop";
 import ExportDialog from "../components/dialogs/ExportDialog";
 import { Dialog } from "@base-ui/react";
-import InstructionMessage from "../components/basic/InstructionMessage";
 import { ChoreoStatus } from "./HomePage";
 import BaseErrorDialog from "../components/dialogs/BaseErrorDialog";
 
@@ -30,15 +29,15 @@ export default function ChoreoViewPage(props: {
   const [nextSection, setNextSection] = useState<ChoreoSection | undefined>();
   const [selectedIds, setSelectedIds] = useState<StageEntities<string[]>>({props: [], dancers: [], obstacles: []});
   const [selectedTimingId, setSelectedTimingId] = useState<string | undefined>();
-  const [selectedObjects, setSelectedObjects] = useState<StageEntities<PropPosition[], DancerPosition[]>>({dancers: [], props: [], obstacles: []});
   const [showPaths, setShowPaths] = useState<boolean>(true);
   const [appSettings, setAppSettings] = useState<AppSetting>({
     snapToGrid: true,
     showGrid: true,
     showPreviousSection: false,
     dancerDisplayType: "large",
-    moveScreenOnSelect: true,
   });
+
+  const [sidebarHeight, setSidebarHeight] = useState<number>(0);
 
   const entityCount = useMemo(() => ({
     props: Object.keys(props.currentChoreo.props).length,
@@ -61,13 +60,11 @@ export default function ChoreoViewPage(props: {
     }
   }, [props.currentChoreo]);
   
-  useEffect(() => {
-    setSelectedObjects({
-      dancers: Object.entries(currentSection.formation.dancerPositions).filter(x => selectedIds.dancers.includes(x[0])).map(x => x[1]),
-      props: [],
-      obstacles: []
-    });
-  }, [selectedIds]);
+  const selectedObjects = useMemo(() => ({
+    dancers: Object.entries(currentSection.formation.dancerPositions).filter(x => selectedIds.dancers.includes(x[0])).map(x => x[1]),
+    props: [],
+    obstacles: []
+  } as StageEntities<PropPosition[], DancerPosition[], Obstacle[]>), [selectedIds, currentSection]);
 
   useEffect(() => {
     var currentSectionIndex = props.currentChoreo.sections.findIndex(x => strEquals(x.id, currentSection.id));
@@ -144,6 +141,7 @@ export default function ChoreoViewPage(props: {
               }}
             />
           }
+          onChangeHeight={(height) => setSidebarHeight(height)}
         />
         <MainStage
           appSettings={appSettings}
@@ -156,6 +154,7 @@ export default function ChoreoViewPage(props: {
           currentChoreo={props.currentChoreo}
           currentSection={currentSection}
           selectedIds={selectedIds}
+          selectedObjects={selectedObjects}
           setSelectedIds={(action) => {
             setSelectedIds(action);
             setSelectedTimingId(undefined);
@@ -168,6 +167,7 @@ export default function ChoreoViewPage(props: {
              } :
             undefined
           }
+          bottomMarginPercent={sidebarHeight}
         />
       </div>
 

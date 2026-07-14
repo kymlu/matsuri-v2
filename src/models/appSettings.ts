@@ -7,7 +7,6 @@ export const AppSettingSchema = z.object({
   snapToGrid: z.boolean().default(true),
   showGrid: z.boolean().default(true),
   showPreviousSection: z.boolean().default(false),
-  moveScreenOnSelect: z.boolean().default(true),
   dancerDisplayType: DancerDisplayTypeSchema,
 });
 

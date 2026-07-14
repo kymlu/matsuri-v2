@@ -1024,6 +1024,7 @@ function EventSection({
       {
         choreos.map((choreo) =>
           <ChoreoListItem
+            key={choreo.id}
             choreo={choreo}
             isLoggedIn={isLoggedIn}
             searchTerm={searchTerm}

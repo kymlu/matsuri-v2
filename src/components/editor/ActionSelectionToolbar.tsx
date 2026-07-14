@@ -63,6 +63,7 @@ function ActionSection ({
     {
       isExpanded &&
       action.timings.map(timing => <TimingButton
+        key={timing.id}
         timing={timing}
         selectedTimingId={selectedTimingId}
         onSelectTiming={() => onSelectTiming(timing)}/>)

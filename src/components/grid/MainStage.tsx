@@ -9,7 +9,7 @@ import { pxToStageMeters, snapCoordsToGrid, stageMetersToPx } from "../../lib/he
 import { DEFAULT_PROP_LENGTH, MAX_ZOOM, METER_PX, MIN_ZOOM } from "../../lib/consts/consts";
 import { AppSetting } from "../../models/appSettings";
 import Konva from "konva";
-import { PropPosition } from "../../models/prop";
+import { Obstacle, PropPosition } from "../../models/prop";
 import { StageEntities } from "../../models/history";
 import GhostLayer from "./layers/GhostLayer";
 import NextDirectionLayer from "./layers/NextDirectionLayer";
@@ -18,6 +18,7 @@ import { strEquals } from "../../lib/helpers/globalHelper";
 import MarkingsLayer from "./layers/MarkingsLayer";
 import RulerLayer from "./layers/RulerLayer";
 import { sortDancers, sortProps } from "../../lib/editor/commands/objectCommands";
+import IconButton from "../basic/IconButton";
 
 Konva.hitOnDragEnabled = true;
 
@@ -39,6 +40,7 @@ type MainStageProps = {
   updatePropSizeAndRotate?: (width: number, length: number, rotation: number, x: number, y: number, propId: string) => void
   updateObstacleSizeAndRotate?: (width: number, length: number, rotation: number, x: number, y: number, itemId: string) => void
   selectedIds: StageEntities<string[]>,
+  selectedObjects: StageEntities<PropPosition[], DancerPosition[], Obstacle[]>,
   setSelectedIds: (action: SetStateAction<StageEntities<string[]>>) => void,
   addDancer?: (x: number, y: number) => void,
   addProp?: (x: number, y: number) => void,
@@ -47,6 +49,7 @@ type MainStageProps = {
   previousSection?: ChoreoSection,
   selectedDancerMovement?: {current?: DancerPosition, next?: DancerPosition},
   onDancerSelected?: () => void,
+  bottomMarginPercent?: number,
 }
 
 export default function MainStage({
@@ -55,13 +58,20 @@ export default function MainStage({
   isAddingDancer, isAddingProp, isAddingObstacles,
   hideTransformerBorder, currentChoreo, currentSection,
   updateDancerPosition, updatePropPosition, updateObstaclePosition,
-  updatePropSizeAndRotate, updateObstacleSizeAndRotate, selectedIds, setSelectedIds,
+  updatePropSizeAndRotate, updateObstacleSizeAndRotate,
+  selectedIds, setSelectedIds, selectedObjects,
   addDancer, addProp, addObstacle, appSettings, previousSection, selectedDancerMovement,
-  onDancerSelected,
+  onDancerSelected, bottomMarginPercent = 0
 }: MainStageProps) {
   const [dancerPositions, setDancerPositions] = useState<DancerPosition[]>([]);
   const [propPositions, setPropPositions] = useState<PropPosition[]>([]);
   const [stageGeometry, setStageGeometry] = useState<StageGeometry>();
+  const [isShowingVerticalRuler, setIsShowingVerticalRuler] = useState<boolean>(false);
+  const [isShowingHorizontalRuler, setIsShowingHorizontalRuler] = useState<boolean>(false);
+  const [isManualMovement, setIsManualMovement] = useState<boolean>(false);
+
+  const [stageScale, setStageScale] = useState<Coordinates>({ x: 1, y: 1 });
+  const pixelsPerMeter = useMemo(() => METER_PX * stageScale.y, [stageScale]);
 
   const [clickedOnEmpty, setClickedOnEmpty] = useState<boolean>(false);
   const [isDraggingOnEmpty, setIsDraggingOnEmpty] = useState<boolean | undefined>(undefined);
@@ -105,6 +115,11 @@ export default function MainStage({
   }, []);
 
   const [stagePos, setStagePos] = useState<Coordinates>({ x: 0, y: 0 });
+  const stagePositionRef = useRef(stagePos);
+  const setStagePosition = (newValue: Coordinates) => {
+    stagePositionRef.current = newValue;
+    setStagePos(newValue);
+  }
   const stageRef = useRef<Konva.Stage>(null);
   useEffect(() => {
     return () => {
@@ -117,17 +132,39 @@ export default function MainStage({
   const [isSelectingNewSection, setIsSelectingNewSection] = useState<boolean>(false);
 
   useEffect(() => {
-    if (stageGeometry && appSettings.moveScreenOnSelect && stageGeometry.yAxis === "bottom-up" && !strEquals(stagePosSectionId, currentSection.id)) {
+    if (stageGeometry && stageGeometry.yAxis === "bottom-up" && !strEquals(stagePosSectionId, currentSection.id)) {
       setIsSelectingNewSection(true);
       setStagePosSectionId(currentSection.id);
       // only consider the frontmost dancer within the app since dancers are the main
       // within the pdf it will still show props and dancers
-      var frontmostY = Math.max(
-        ...Object.values(currentSection.formation.dancerPositions).map(x => x.y)
-      );
-      var newPosition = {x: stagePos.x, y: -stageMetersToPx({x: 0, y: frontmostY + 2}, stageGeometry, METER_PX).y * stageScale.y + 24};
-      setRulerPos(newPosition)
-      if (newPosition.y !== stagePos.y) {
+      var newPosition = {x: stagePositionRef.current.x, y: stagePositionRef.current.y};
+      
+      if (selectedIds.dancers.length === 1) {
+        let y = selectedObjects.dancers[0].y;
+        let stageYMeters = pxToStageMeters({x: 0, y: -stagePositionRef.current.y}, stageGeometry, pixelsPerMeter).y;
+        let bottomMarginM = bottomMarginPercent === 0 ? (100 / pixelsPerMeter) : ((size.height / pixelsPerMeter) * bottomMarginPercent);
+        let topThresholdM = stageYMeters - (METER_PX * 2)/pixelsPerMeter;
+        let bottomThresholdM = stageYMeters - (size.height - 78)/METER_PX/stageScale.y + bottomMarginM + 1;
+        if (y > topThresholdM || y < bottomThresholdM) {
+          if (y > stageYMeters) {
+            newPosition.y = Math.floor(-stageMetersToPx({x: 0, y: y}, stageGeometry, pixelsPerMeter).y + (size.height - bottomMarginM * pixelsPerMeter) / 2 + METER_PX * 2);
+          } else if (y > topThresholdM) {
+            newPosition.y = Math.floor(-stageMetersToPx({x: 0, y: y}, stageGeometry, pixelsPerMeter).y) + METER_PX * 2;
+          } else {
+            newPosition.y = Math.floor(-stageMetersToPx({x: 0, y: y}, stageGeometry, pixelsPerMeter).y) + (size.height - bottomMarginM * pixelsPerMeter) * 0.7;
+          }
+        }
+      } else if (selectedIds.dancers.length === 0) {
+        if (!isManualMovement) {
+          var frontmostY = Math.max(
+            ...Object.values(currentSection.formation.dancerPositions).map(x => x.y)
+          );
+          newPosition.y = -stageMetersToPx({x: 0, y: frontmostY + 2}, stageGeometry, pixelsPerMeter).y + METER_PX;
+        }
+      }
+      
+      if (newPosition.y !== stagePositionRef.current.y) {
+        setRulerPos(newPosition);
         stageRef?.current?.to({
           x: newPosition.x,
           y: newPosition.y,
@@ -135,17 +172,44 @@ export default function MainStage({
           easing: Konva.Easings.EaseInOut,
           onFinish: () => {
             setIsSelectingNewSection(false);
-            setStagePos(newPosition);
+            setStagePosition(newPosition);
           }
         });
       }
     }
-  }, [stageRef, currentSection, stageGeometry]);
+  }, [stageRef, currentSection, selectedIds, stagePositionRef.current, stageGeometry, bottomMarginPercent]);
 
-  const [stageScale, setStageScale] = useState<Coordinates>({ x: 1, y: 1 });
-  const [lastCenter, setLastCenter] = useState<any>(null);
-  const [lastDist, setLastDist] = useState(0);
-  const [dragStopped, setDragStopped] = useState(false);
+  const resetCamera = () => {
+    setIsManualMovement(false);
+    if (!stageGeometry) return;
+    
+    let newPosition = {x: stagePositionRef.current.x, y: stagePositionRef.current.y};
+
+    if (selectedIds.dancers.length === 1) {
+      let y = selectedObjects.dancers[0].y;
+      let bottomMarginM = bottomMarginPercent === 0 ? (100 / pixelsPerMeter) : ((size.height / pixelsPerMeter) * bottomMarginPercent);
+      newPosition.y = Math.floor(-stageMetersToPx({x: 0, y: y}, stageGeometry, pixelsPerMeter).y + (size.height - bottomMarginM * pixelsPerMeter) / 2 + METER_PX * 2);
+    } else {
+      let frontmostY = Math.max(
+        ...Object.values(currentSection.formation.dancerPositions).map(x => x.y)
+      );
+      newPosition.y = -stageMetersToPx({x: 0, y: frontmostY + 2}, stageGeometry, pixelsPerMeter).y + METER_PX;
+    }
+    
+    if (newPosition.y !== stagePositionRef.current.y) {
+      setRulerPos(newPosition);
+      stageRef?.current?.to({
+        x: newPosition.x,
+        y: newPosition.y,
+        duration: 1,
+        easing: Konva.Easings.EaseInOut,
+        onFinish: () => {
+          setIsSelectingNewSection(false);
+          setStagePosition(newPosition);
+        }
+      });
+    }
+  };
 
   const getDistance = (p1: any, p2: any) => {
     return Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
@@ -193,6 +257,10 @@ export default function MainStage({
     // };
     // stage.position(newPos);
   };
+  
+  const [lastCenter, setLastCenter] = useState<any>(null);
+  const [lastDist, setLastDist] = useState(0);
+  const [dragStopped, setDragStopped] = useState(false);
 
   const handleTouchMove = useCallback((e: any) => {
     e.evt.preventDefault();
@@ -256,7 +324,7 @@ export default function MainStage({
         y: newCenter.y - pointTo.y * scale + dy,
       };
 
-      setStagePos({...newPosition});
+      setStagePosition({...newPosition});
       setRulerPos({...newPosition});
 
       setLastDist(dist);
@@ -273,12 +341,10 @@ export default function MainStage({
     setDragStopped(false);
     // Ensure stage position is synchronized with our reactive state
     const stage = e.target.getStage();
-    setStagePos({ x: stage.x(), y: stage.y() });
+    setStagePosition({ x: stage.x(), y: stage.y() });
   };
 
-  const verticalGridIncrement = useMemo(() => {
-    const pixelsPerMeter = METER_PX * stageScale.y;
-    
+  const verticalGridIncrement = useMemo(() => {    
     if (pixelsPerMeter < 10) {
       return 10;
     } else if (pixelsPerMeter < 20) {
@@ -304,6 +370,7 @@ export default function MainStage({
         onDragMove={(e) => {
           if (e.target === e.target.getStage()) {
             setRulerPos({x: e.target.x(), y: e.target.y()})
+            setIsManualMovement(true);
           }
         }}
         onPointerUp={(e) => {
@@ -417,7 +484,20 @@ export default function MainStage({
         verticalGridIncrement={verticalGridIncrement}
         scale={stageScale}
         isSelectingNewSection={isSelectingNewSection}
+        setIsShowingHorizontalRuler={(value) => setIsShowingHorizontalRuler(value)}
+        setIsShowingVerticalRuler={(value) => setIsShowingVerticalRuler(value)}
       />
+    }
+    {
+      isManualMovement &&
+      <div className={`absolute ${isShowingVerticalRuler ? "right-9" : "right-2"} ${isShowingHorizontalRuler ? "top-7" : "top-1"}`}>
+        <IconButton
+          size="sm"
+          src="resetFocus"
+          colour="grey"
+          onClick={() => resetCamera()}
+          />
+      </div>
     }
   </div>
 }

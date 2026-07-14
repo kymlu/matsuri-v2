@@ -21,6 +21,7 @@ type ViewerSidebarProps = {
   isPositionHintShown: boolean;
   deselectPosition: () => void;
   formationSelectionToolbar: ReactNode,
+  onChangeHeight: (height: number) => void,
 };
 
 export default function ViewerSidebar({
@@ -35,6 +36,7 @@ export default function ViewerSidebar({
   isPositionHintShown,
   deselectPosition,
   formationSelectionToolbar,
+  onChangeHeight,
 }: ViewerSidebarProps) {
   return <BottomDrawer
     header={
@@ -58,7 +60,8 @@ export default function ViewerSidebar({
         }
       </div>
     }
-    footer={formationSelectionToolbar}>
+    footer={formationSelectionToolbar}
+    onChangeHeight={(height) => onChangeHeight(height)}>
     <>
       {
         isPositionHintShown &&

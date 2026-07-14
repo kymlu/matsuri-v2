@@ -76,8 +76,6 @@ export default function ChoreoEditPage(props: {
   const [currentAction, setCurrentAction] = useState<DancerAction | undefined>();
   const [currentTiming, setCurrentTiming] = useState<DancerActionTiming | undefined>();
   const [selectedIds, setSelectedIds] = useState<StageEntities<string[]>>({props: [], dancers: [], obstacles: []});
-  const [selectedObjects, setSelectedObjects] = useState<StageEntities<PropPosition[], DancerPosition[], Obstacle[]>>({dancers: [], props: [], obstacles: []});
-  const [selectedColour, setSelectedColour] = useState<string | undefined>();
   const [isAddingDancers, setIsAddingDancers] = useState<boolean>(false);
   const [isAddingProps, setIsAddingProps] = useState<boolean>(false);
   const [isAddingObstacles, setIsAddingObstacles] = useState<boolean>(false);
@@ -89,7 +87,6 @@ export default function ChoreoEditPage(props: {
     showGrid: true,
     showPreviousSection: false,
     dancerDisplayType: "large",
-    moveScreenOnSelect: true,
   });
   const isDirty = useRef(false);
   const hasInitialized = useRef(false);
@@ -213,24 +210,29 @@ export default function ChoreoEditPage(props: {
       setCurrentTiming(undefined);
       resetSelectedIds();
     };
+  }, [selectedIds]);
 
+  const selectedObjects = useMemo(() => {
     const dancers = Object.entries(currentSection.formation.dancerPositions).filter(x => selectedIds.dancers.includes(x[0])).map(x => x[1]);
     const props = Object.entries(currentSection.formation.propPositions).filter(x => selectedIds.props.includes(x[0])).map(x => x[1]);
     const obstacles = history.presentState.state.obstacles ? Object.entries(history.presentState.state.obstacles).filter(x => selectedIds.obstacles.includes(x[0])).map(x => x[1]) : [];
 
-    setSelectedObjects({
+    return {
       dancers: dancers,
       props: props,
       obstacles: obstacles,
-    });
+    } as StageEntities<PropPosition[], DancerPosition[], Obstacle[]>;
+  }, [selectedIds]);
+
+  const selectedColour = useMemo(() => {
     const colours = new Set([
-      ...dancers.map(x => x.color),
+      ...selectedObjects.dancers.map(x => x.color),
       ...Object.entries(history.presentState.state.props).filter(x => selectedIds.props.includes(x[0])).map(x => x[1].color),
-      ...obstacles.map(x => x.color)
+      ...selectedObjects.obstacles.map(x => x.color)
     ]);
     
-    setSelectedColour(colours.size === 1 ? Array.from(colours)[0] : undefined);
-  }, [selectedIds]);
+    return colours.size === 1 ? Array.from(colours)[0] : undefined;
+  }, [selectedObjects]);
 
   const copyBuffer = useRef<StageEntities<Record<string, PropPosition>, Record<string, DancerPosition>>>({props: {}, dancers: {}, obstacles: {}});
 
@@ -522,9 +524,6 @@ export default function ChoreoEditPage(props: {
         changeShowPrevious={() => {
           setAppSettings(prev => {return {...prev, showPreviousSection: !prev.showPreviousSection}})
         }}
-        changeMoveScreenOnSelect={history.presentState.state.stageType === "parade" ? () => {
-          setAppSettings(prev => {return {...prev, moveScreenOnSelect: !prev.moveScreenOnSelect}})
-        } : undefined}
         changeSnap={() => {
           setAppSettings(prev => {return {...prev, snapToGrid: !prev.snapToGrid}})
         }}
@@ -608,6 +607,7 @@ export default function ChoreoEditPage(props: {
           }}
           selectedIds={selectedIds}
           setSelectedIds={setSelectedIds}
+          selectedObjects={selectedObjects}
           previousSection={prevSection}
           addDancer={(x, y) => {
             dispatch({
