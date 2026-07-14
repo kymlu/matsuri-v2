@@ -140,7 +140,7 @@ export default function Toolbar({
     }
    }, [areSelectionActionsActivated]);
 
-  return <div className="z-10 flex items-center w-screen gap-2 px-4 pt-4 pb-8 overflow-y-scroll bg-white border-t-2 border-gray-400">
+  return <div className="z-10 flex items-center w-screen gap-2 px-4 pt-4 pb-8 overflow-y-auto bg-white border-t-2 border-gray-400">
     {
       !isSubmenuOpen &&
       <>

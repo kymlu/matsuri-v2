@@ -510,7 +510,7 @@ export default function HomePage({
             maxLength={SEARCH_NAME_LENGTH}
             clearable/>
         </div>
-        <div className="h-full space-y-2 overflow-scroll">
+        <div className="h-full space-y-2 overflow-auto">
           {
             !isLoading && filteredChoreos.size === 0 &&
             <div className="mt-4 text-center">隊列表はありません</div>
@@ -1215,7 +1215,7 @@ function EventSection({
               if (selectedChoreo) {
                 switch (postPasswordAction) {
                   case "open":
-                    setUnlockedChoreo(selectedChoreo.id, selectedChoreo.version)
+                    setUnlockedChoreo(selectedChoreo.id, selectedChoreo.version);
                     onSelectChoreo(selectedChoreo.id, selectedChoreo.status);
                     break;
                   case "duplicate":
@@ -1262,7 +1262,7 @@ type ChoreoListItemProps = {
 function ChoreoListItem ({
   choreo, isLoggedIn, searchTerm, onSelectChoreo, openOptionsDialog
 }: ChoreoListItemProps) {
-  const isUnlocked = useMemo(() => isLoggedIn || checkUnlockedChoreo(choreo.id, choreo.version), []);
+  const isUnlocked = useMemo(() => isLoggedIn || checkUnlockedChoreo(choreo.id, choreo.version), [isLoggedIn, choreo]);
   
   return <React.Fragment key={choreo.id}>
     {

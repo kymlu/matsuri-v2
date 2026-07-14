@@ -122,7 +122,7 @@ export function ActionManagerDialog({
     }}
     onSubmit={() => {onSubmit(actions)}}>
     <div className="h-full max-h-full grid gap-2 grid-rows-[1fr,auto]">
-      <div className="max-h-full space-y-4 overflow-scroll">
+      <div className="max-h-full space-y-4 overflow-auto">
         <IconLabelButton
           icon="add"
           full

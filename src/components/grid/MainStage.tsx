@@ -289,7 +289,7 @@ export default function MainStage({
     }
   }, [stageScale])
   
-  return <div ref={containerRef} className="w-full h-full overflow-scroll">
+  return <div ref={containerRef} className="w-full h-full overflow-auto">
     {
       stageGeometry && 
       <Stage

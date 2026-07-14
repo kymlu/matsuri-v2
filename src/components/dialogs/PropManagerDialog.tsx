@@ -58,7 +58,7 @@ export function PropManagerDialog({
         onSubmit(trimmedProps, deletedPropIds);
       }}>
       <div className="max-h-full grid grid-rows-[1fr,auto]">
-        <div className="justify-center max-h-full overflow-scroll grid grid-cols-[1fr,auto] gap-2">
+        <div className="justify-center max-h-full overflow-auto grid grid-cols-[1fr,auto] gap-2">
           {
             propList.map((prop, i) => 
               <React.Fragment key={prop.id}>
