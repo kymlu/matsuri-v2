@@ -14,6 +14,9 @@ import ExportDialog from "../components/dialogs/ExportDialog";
 import { Dialog } from "@base-ui/react";
 import { ChoreoStatus } from "./HomePage";
 import BaseErrorDialog from "../components/dialogs/BaseErrorDialog";
+import CustomSwitch from "../components/inputs/CustomSwitch";
+import { checkShowingViewPageInfoDialog, stopShowingViewPageInfoDialog } from "../lib/dataAccess/LocalStorageController";
+import Divider from "../components/basic/Divider";
 
 export default function ChoreoViewPage(props: {
   goToHomePage: () => void
@@ -22,8 +25,6 @@ export default function ChoreoViewPage(props: {
   goToEditPage: () => void,
   savedDancerName: string | null,
   teamId?: string,
-  showHintDialog: boolean,
-  setShowHintDialog: (newValue: boolean) => void
 }) {
   const [currentSection, setCurrentSection] = useState<ChoreoSection>(props.currentChoreo.sections[0]);
   const [nextSection, setNextSection] = useState<ChoreoSection | undefined>();
@@ -36,6 +37,8 @@ export default function ChoreoViewPage(props: {
     showPreviousSection: false,
     dancerDisplayType: "large",
   });
+
+  const [showHintDialog, setShowHintDialog] = useState<boolean>(false);
 
   const [sidebarHeight, setSidebarHeight] = useState<number>(0);
 
@@ -50,13 +53,13 @@ export default function ChoreoViewPage(props: {
       const dancer = Object.values(props.currentChoreo.dancers).find(x => strEquals(x.name, props.savedDancerName));
       if (dancer) {
         setSelectedIds({dancers: [dancer.id], props: [], obstacles: []});
-        props.setShowHintDialog(false);
+        setShowHintDialog(false);
       } else {
         resetSelectedIds();
-        props.setShowHintDialog(true);
+        setShowHintDialog(!checkShowingViewPageInfoDialog());
       }
     } else {
-      props.setShowHintDialog(true);
+      setShowHintDialog(!checkShowingViewPageInfoDialog());
     }
   }, [props.currentChoreo]);
   
@@ -171,9 +174,14 @@ export default function ChoreoViewPage(props: {
         />
       </div>
 
-      <Dialog.Root onOpenChange={() => props.setShowHintDialog(false)} open={props.showHintDialog}>
-        <BaseErrorDialog title="利用方法" onClose={() => props.setShowHintDialog(false)}>
-          <span>名前をタップすると、<br/>位置情報が表示されます。</span>
+      <Dialog.Root onOpenChange={() => setShowHintDialog(false)} open={showHintDialog}>
+        <BaseErrorDialog title="利用方法" fullWidth onClose={() => setShowHintDialog(false)}>
+          <div>名前をタップすると、位置情報が表示されます。</div>
+          <Divider/>
+          <CustomSwitch
+            label="今後このメッセージを表示しない"
+            defaultChecked={false}
+            onChange={(value) => stopShowingViewPageInfoDialog(value)}/>
         </BaseErrorDialog>
       </Dialog.Root>
       
