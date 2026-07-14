@@ -31,6 +31,7 @@ function App() {
   const [currentTeamMemberId, setCurrentTeamMemberId] = useState<string | undefined>();
   const [isProcessing, setIsProcessing] = useState<boolean>(true);
   const [showNoTeamDialog, setShowNoTeamDialog] = useState<boolean>(false);
+  const [showHintDialog, setShowHintDialog] = useState<boolean>(false);
 
   const { teamSlug } = useParams();
 
@@ -190,6 +191,8 @@ function App() {
           goToEditPage={() => setMode("edit")}
           savedDancerName={name}
           teamId={team?.id}
+          showHintDialog={showHintDialog}
+          setShowHintDialog={(newValue) => setShowHintDialog(newValue)}
         />
       )}
     </div>

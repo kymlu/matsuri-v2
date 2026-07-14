@@ -23,6 +23,8 @@ export default function ChoreoViewPage(props: {
   goToEditPage: () => void,
   savedDancerName: string | null,
   teamId?: string,
+  showHintDialog: boolean,
+  setShowHintDialog: (newValue: boolean) => void
 }) {
   const [currentSection, setCurrentSection] = useState<ChoreoSection>(props.currentChoreo.sections[0]);
   const [nextSection, setNextSection] = useState<ChoreoSection | undefined>();
@@ -30,7 +32,6 @@ export default function ChoreoViewPage(props: {
   const [selectedTimingId, setSelectedTimingId] = useState<string | undefined>();
   const [selectedObjects, setSelectedObjects] = useState<StageEntities<PropPosition[], DancerPosition[]>>({dancers: [], props: [], obstacles: []});
   const [showPaths, setShowPaths] = useState<boolean>(true);
-  const [showHint, setShowHint] = useState<boolean>(false);
   const [appSettings, setAppSettings] = useState<AppSetting>({
     snapToGrid: true,
     showGrid: true,
@@ -50,13 +51,13 @@ export default function ChoreoViewPage(props: {
       const dancer = Object.values(props.currentChoreo.dancers).find(x => strEquals(x.name, props.savedDancerName));
       if (dancer) {
         setSelectedIds({dancers: [dancer.id], props: [], obstacles: []});
-        setShowHint(false);
+        props.setShowHintDialog(false);
       } else {
         resetSelectedIds();
-        setShowHint(true);
+        props.setShowHintDialog(true);
       }
     } else {
-      setShowHint(true);
+      props.setShowHintDialog(true);
     }
   }, [props.currentChoreo]);
   
@@ -170,8 +171,8 @@ export default function ChoreoViewPage(props: {
         />
       </div>
 
-      <Dialog.Root onOpenChange={() => setShowHint(false)} open={showHint}>
-        <BaseErrorDialog title="利用方法" onClose={() => setShowHint(false)}>
+      <Dialog.Root onOpenChange={() => props.setShowHintDialog(false)} open={props.showHintDialog}>
+        <BaseErrorDialog title="利用方法" onClose={() => props.setShowHintDialog(false)}>
           <span>名前をタップすると、<br/>位置情報が表示されます。</span>
         </BaseErrorDialog>
       </Dialog.Root>
