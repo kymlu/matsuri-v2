@@ -39,6 +39,7 @@ import CustomMenu from "../components/inputs/CustomMenu"
 import ChoreoPasswordEntryDialog from "../components/dialogs/ChoreoPasswordEntryDialog"
 import { ChoreoHistoryDialog } from "../components/dialogs/ChoreoHistoryDialog"
 import { DancerCount, PropCount, StageSize } from "../components/common/IconInfo"
+import { checkUnlockedChoreo, setUnlockedChoreo } from "../lib/dataAccess/LocalStorageController"
 
 type HomePageProps = {
   buildInfo?: string,
@@ -1022,82 +1023,29 @@ function EventSection({
     <div className="flex flex-col gap-2 md:grid md:grid-cols-2">
       {
         choreos.map((choreo) =>
-          <React.Fragment key={choreo.id}>
-            {
-              (isNullOrUndefinedOrBlank(searchTerm) ||
-              choreo.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-              choreo.event?.toLowerCase().includes(searchTerm.toLowerCase())) &&
-              <div
-                onClick={() => {
-                  if (choreo.status === "syncRequired") {
-                    syncChoreo(choreo);
-                  } else {
-                    if (choreo.hasPassword && !isLoggedIn) {
-                      setSelectedChoreo(choreo);
-                      setPostPasswordAction("open");
-                      setChoreoPasswordEntryDialogOpen(true);
-                    } else {
-                      onSelectChoreo(choreo.id, choreo.status);
-                    }
-                  }
-                }}
-                className="flex flex-col justify-between h-full p-2 gap-0.5 mx-[11px] transition-colors bg-white border border-gray-400 rounded-md cursor-pointer">
-                {/* Title */}
-                <div className="relative flex flex-row items-start justify-between gap-2">
-                  <span className="flex items-center gap-0.5 font-semibold text-left break-words text-wrap">
-                    {choreo.hasPassword ? <Icon src={isLoggedIn ? "lockOpen" : "lock"} colour="primary" size="xs"/> : <></>}
-                    <span>{choreo.name}</span>
-                  </span>
-                  <div className="flex flex-row items-center gap-2">
-                    {
-                      event.event && event.event.length > 0 && missingNames[choreo.id]?.size > 0 &&
-                      <Dialog.Trigger handle={dancerWarningDialog} onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedChoreo(choreo);
-                        setDancerWarningDialogOpen(true);
-                      }}>
-                        <IconButton asDiv noBorder size="sm" src="personAlert" colour="primary"/>
-                      </Dialog.Trigger>
-                    }
-                    <ChoreoStatusTag choreoStatus={choreo.status} version={choreo.version}/>
-                    <Dialog.Trigger id={choreo.id} payload={choreo} handle={optionsDialog} onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedChoreo(choreo);
-                      setOptionsDialogOpen(true);
-                    }}>
-                      <IconButton
-                        src="moreVert"
-                        colour="grey"
-                        size="sm"
-                        noBorder
-                        asDiv
-                      />
-                    </Dialog.Trigger>
-                  </div>
-                </div>
-                {/* Meta row */}
-                <div className="flex flex-col items-start justify-between gap-0.5 text-sm text-gray-600 md:flex-row">
-                  {choreo.lastUpdated ? (
-                    <div className="flex items-center gap-0.5">
-                      <Icon
-                        colour="grey"
-                        size="xs"
-                        src="history"/>
-                      {getDate(new Date(choreo.lastUpdated))}
-                    </div>
-                  ) : (
-                    <div />
-                  )}
-
-                  <div className="flex items-center gap-2">
-                    <StageSize stageLength={choreo.stageLength} stageWidth={choreo.stageWidth}/>
-                    <DancerCount dancerCount={choreo.dancerCount}/>
-                    <PropCount propCount={choreo.propCount}/>
-                  </div>
-                </div>
-              </div>
+          <ChoreoListItem
+            choreo={choreo}
+            isLoggedIn={isLoggedIn}
+            searchTerm={searchTerm}
+            openOptionsDialog={() => {
+              setSelectedChoreo(choreo);
+              setOptionsDialogOpen(true);
+            }}
+            onSelectChoreo={(isUnlocked: boolean) => {
+              if (choreo.status === "syncRequired") {
+                syncChoreo(choreo);
+              } else {
+                if (choreo.hasPassword && !isLoggedIn && !isUnlocked) {
+                  setSelectedChoreo(choreo);
+                  setPostPasswordAction("open");
+                  setChoreoPasswordEntryDialogOpen(true);
+                } else {
+                  onSelectChoreo(choreo.id, choreo.status);
+                }
+              }
             }
-          </React.Fragment>
+          }
+        />
         )
       }
       <Dialog.Root
@@ -1267,6 +1215,7 @@ function EventSection({
               if (selectedChoreo) {
                 switch (postPasswordAction) {
                   case "open":
+                    setUnlockedChoreo(selectedChoreo.id, selectedChoreo.version)
                     onSelectChoreo(selectedChoreo.id, selectedChoreo.status);
                     break;
                   case "duplicate":
@@ -1300,4 +1249,82 @@ function EventSection({
       </Dialog.Root>
     </div>
   </ExpandableSection>
+}
+
+type ChoreoListItemProps = {
+  choreo: ChoreoWithStatus;
+  isLoggedIn: boolean;
+  searchTerm: string;
+  onSelectChoreo: (hasPassword: boolean) => void,
+  openOptionsDialog: () => void,
+}
+
+function ChoreoListItem ({
+  choreo, isLoggedIn, searchTerm, onSelectChoreo, openOptionsDialog
+}: ChoreoListItemProps) {
+  const isUnlocked = useMemo(() => isLoggedIn || checkUnlockedChoreo(choreo.id, choreo.version), []);
+  
+  return <React.Fragment key={choreo.id}>
+    {
+      (isNullOrUndefinedOrBlank(searchTerm) ||
+      choreo.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      choreo.event?.toLowerCase().includes(searchTerm.toLowerCase())) &&
+      <div
+        onClick={() => {
+          onSelectChoreo(isUnlocked);
+        }}
+        className="flex flex-col justify-between h-full p-2 gap-0.5 mx-[11px] transition-colors bg-white border border-gray-400 rounded-md cursor-pointer">
+        {/* Title */}
+        <div className="relative flex flex-row items-start justify-between gap-2">
+          <span className="flex items-center gap-0.5 font-semibold text-left break-words text-wrap">
+            {choreo.hasPassword ? <Icon src={isUnlocked ? "lockOpen" : "lock"} colour="primary" size="xs"/> : <></>}
+            <span>{choreo.name}</span>
+          </span>
+          <div className="flex flex-row items-center gap-2">
+            {/* {
+              event.event && event.event.length > 0 && missingNames[choreo.id]?.size > 0 &&
+              <Dialog.Trigger handle={dancerWarningDialog} onClick={(e) => {
+                e.stopPropagation();
+                setSelectedChoreo(choreo);
+                setDancerWarningDialogOpen(true);
+              }}>
+                <IconButton asDiv noBorder size="sm" src="personAlert" colour="primary"/>
+              </Dialog.Trigger>
+            } */}
+            <ChoreoStatusTag choreoStatus={choreo.status} version={choreo.version}/>
+            <IconButton
+              src="moreVert"
+              colour="grey"
+              size="sm"
+              noBorder
+              onClick={() => {
+                // e.stopPropagation();
+                openOptionsDialog();
+              }}
+            />
+          </div>
+        </div>
+        {/* Meta row */}
+        <div className="flex flex-col items-start justify-between gap-0.5 text-sm text-gray-600 md:flex-row">
+          {choreo.lastUpdated ? (
+            <div className="flex items-center gap-0.5">
+              <Icon
+                colour="grey"
+                size="xs"
+                src="history"/>
+              {getDate(new Date(choreo.lastUpdated))}
+            </div>
+          ) : (
+            <div />
+          )}
+
+          <div className="flex items-center gap-2">
+            <StageSize stageLength={choreo.stageLength} stageWidth={choreo.stageWidth}/>
+            <DancerCount dancerCount={choreo.dancerCount}/>
+            <PropCount propCount={choreo.propCount}/>
+          </div>
+        </div>
+      </div>
+    }
+  </React.Fragment>
 }
