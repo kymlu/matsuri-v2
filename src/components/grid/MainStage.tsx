@@ -70,7 +70,6 @@ export default function MainStage({
   const [isShowingVerticalRuler, setIsShowingVerticalRuler] = useState<boolean>(false);
   const [isShowingHorizontalRuler, setIsShowingHorizontalRuler] = useState<boolean>(false);
   const [isManualMovement, setIsManualMovement] = useState<boolean>(false);
-  const enableResetButton = useMemo(() => stageGeometry?.yAxis === "bottom-up", [stageGeometry?.yAxis]);
   const [editEnabled, setIsEditEnabled] = useState<boolean>(canEdit);
 
   const [stageScale, setStageScale] = useState<Coordinates>({ x: 1, y: 1 });
@@ -101,6 +100,11 @@ export default function MainStage({
   
   const containerRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
+  const centerXPx = useMemo(() => stageGeometry ? 
+    ((size.width - (isShowingVerticalRuler ? 32 : 0))/pixelsPerMeter/2
+    -(stageGeometry.stageWidth + stageGeometry.margin.leftMargin + stageGeometry.margin.rightMargin)/2) * pixelsPerMeter :
+    0
+  , [size, stageGeometry, isShowingVerticalRuler, pixelsPerMeter]);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -135,50 +139,82 @@ export default function MainStage({
   const [isSelectingNewSection, setIsSelectingNewSection] = useState<boolean>(false);
 
   useEffect(() => {
-    if (stageGeometry && stageGeometry.yAxis === "bottom-up" && !strEquals(stagePosSectionId, currentSection.id)) {
-      setIsSelectingNewSection(true);
-      setStagePosSectionId(currentSection.id);
-      // only consider the frontmost dancer within the app since dancers are the main
-      // within the pdf it will still show props and dancers
-      var newPosition = {x: stagePositionRef.current.x, y: stagePositionRef.current.y};
-      
+    if (!stageGeometry || strEquals(stagePosSectionId, currentSection.id)) return;
+    setIsSelectingNewSection(true);
+    setStagePosSectionId(currentSection.id);
+    // only consider the frontmost dancer within the app since dancers are the main
+    // within the pdf it will still show props and dancers
+    var newPosition = {x: stagePositionRef.current.x, y: stagePositionRef.current.y};
+    if (selectedIds.dancers.length === 1) {
+      let x = selectedObjects.dancers[0].x;
+      let stageXMeters = pxToStageMeters({x: -stagePositionRef.current.x, y: 0}, stageGeometry, pixelsPerMeter).x;
+      let leftThreshold = stageXMeters + 1;
+      let rightThreshold = stageXMeters + (size.width/pixelsPerMeter) - 1;
+      if (x < leftThreshold || x > rightThreshold) {
+        if (x < leftThreshold) {
+          newPosition.x = -stageMetersToPx({x: x - 1, y: 0}, stageGeometry, pixelsPerMeter).x;
+        } else {
+          newPosition.x = -stageMetersToPx({x: x - size.width/pixelsPerMeter, y: 0}, stageGeometry, pixelsPerMeter).x - pixelsPerMeter - (isShowingVerticalRuler ? 32 : 0);
+        }
+      }
+    }
+    
+    if (stageGeometry.yAxis === "bottom-up") {
       if (selectedIds.dancers.length === 1) {
         let y = selectedObjects.dancers[0].y;
         let stageYMeters = pxToStageMeters({x: 0, y: -stagePositionRef.current.y}, stageGeometry, pixelsPerMeter).y;
         let bottomMarginM = bottomMarginPercent === 0 ? (100 / pixelsPerMeter) : ((size.height / pixelsPerMeter) * bottomMarginPercent);
         let topThresholdM = stageYMeters - (METER_PX * 2)/pixelsPerMeter;
-        let bottomThresholdM = stageYMeters - (size.height - 78)/METER_PX/stageScale.y + bottomMarginM + 1;
+        let bottomThresholdM = stageYMeters - (size.height - 78)/pixelsPerMeter + bottomMarginM + 1;
         if (y > topThresholdM || y < bottomThresholdM) {
+          let newYPx = -stageMetersToPx({x: 0, y: y}, stageGeometry, pixelsPerMeter).y;
           if (y > stageYMeters) {
-            newPosition.y = Math.floor(-stageMetersToPx({x: 0, y: y}, stageGeometry, pixelsPerMeter).y + (size.height - bottomMarginM * pixelsPerMeter) / 2 + METER_PX * 2);
+            newPosition.y = newYPx + (size.height - bottomMarginM * pixelsPerMeter) / 2;
           } else if (y > topThresholdM) {
-            newPosition.y = Math.floor(-stageMetersToPx({x: 0, y: y}, stageGeometry, pixelsPerMeter).y) + METER_PX * 2;
+            newPosition.y = newYPx + METER_PX * 2;
           } else {
-            newPosition.y = Math.floor(-stageMetersToPx({x: 0, y: y}, stageGeometry, pixelsPerMeter).y) + (size.height - bottomMarginM * pixelsPerMeter) * 0.7;
+            newPosition.y = newYPx + (size.height - bottomMarginM * pixelsPerMeter) * 0.7;
           }
         }
-      } else if (selectedIds.dancers.length === 0) {
-        if (!isManualMovement) {
-          var frontmostY = Math.max(
-            ...Object.values(currentSection.formation.dancerPositions).map(x => x.y)
-          );
-          newPosition.y = -stageMetersToPx({x: 0, y: frontmostY + 2}, stageGeometry, pixelsPerMeter).y + METER_PX;
+      } else if (!isManualMovement) {
+        var frontmostY = Math.max(
+          ...Object.values(currentSection.formation.dancerPositions).map(x => x.y)
+        );
+        newPosition.y = -stageMetersToPx({x: 0, y: frontmostY + 2}, stageGeometry, pixelsPerMeter).y + METER_PX;
+      } 
+    } else {
+      if (selectedIds.dancers.length === 1) {
+        let y = selectedObjects.dancers[0].y;
+        let stageYMeters = pxToStageMeters({x: 0, y: -stagePositionRef.current.y}, stageGeometry, pixelsPerMeter).y;
+        let bottomMarginM = bottomMarginPercent === 0 ? (100 / pixelsPerMeter) : ((size.height / pixelsPerMeter) * bottomMarginPercent);
+        let topThresholdM = stageYMeters + 1;
+        let bottomThresholdM = stageYMeters + (size.height - 78)/pixelsPerMeter - bottomMarginM - 1;
+        let yWithMargin = y;
+        if (yWithMargin < topThresholdM || yWithMargin > bottomThresholdM) {
+          let newYPx = -stageMetersToPx({x: 0, y: y}, stageGeometry, pixelsPerMeter).y;
+          if (y < stageYMeters) {
+            newPosition.y = newYPx + (size.height - bottomMarginM * pixelsPerMeter) / 2 - METER_PX * 2;
+          } else if (y < topThresholdM) {
+            newPosition.y = newYPx - METER_PX * 2;
+          } else {
+            newPosition.y = newYPx + (size.height - bottomMarginM * pixelsPerMeter) * 0.7;
+          }
         }
       }
-      
-      if (newPosition.y !== stagePositionRef.current.y) {
-        setRulerPos(newPosition);
-        stageRef?.current?.to({
-          x: newPosition.x,
-          y: newPosition.y,
-          duration: 1,
-          easing: Konva.Easings.EaseInOut,
-          onFinish: () => {
-            setIsSelectingNewSection(false);
-            setStagePosition(newPosition);
-          }
-        });
-      }
+    }
+    
+    if (newPosition.x !== stagePositionRef.current.x || newPosition.y !== stagePositionRef.current.y) {
+      setRulerPos(newPosition);
+      stageRef?.current?.to({
+        x: newPosition.x,
+        y: newPosition.y,
+        duration: 1,
+        easing: Konva.Easings.EaseInOut,
+        onFinish: () => {
+          setIsSelectingNewSection(false);
+          setStagePosition(newPosition);
+        }
+      });
     }
   }, [stageRef, currentSection, selectedIds, stagePositionRef.current, stageGeometry, bottomMarginPercent]);
 
@@ -188,15 +224,27 @@ export default function MainStage({
     
     let newPosition = {x: stagePositionRef.current.x, y: stagePositionRef.current.y};
 
+
     if (selectedIds.dancers.length === 1) {
-      let y = selectedObjects.dancers[0].y;
-      let bottomMarginM = bottomMarginPercent === 0 ? (100 / pixelsPerMeter) : ((size.height / pixelsPerMeter) * bottomMarginPercent);
-      newPosition.y = Math.floor(-stageMetersToPx({x: 0, y: y}, stageGeometry, pixelsPerMeter).y + (size.height - bottomMarginM * pixelsPerMeter) / 2 + METER_PX * 2);
+      let x = selectedObjects.dancers[0].x;
+      newPosition.x = (size.width - (isShowingVerticalRuler ? 32 : 0))/2 - stageMetersToPx({x: x, y: 0}, stageGeometry, pixelsPerMeter).x;
     } else {
-      let frontmostY = Math.max(
-        ...Object.values(currentSection.formation.dancerPositions).map(x => x.y)
-      );
-      newPosition.y = -stageMetersToPx({x: 0, y: frontmostY + 2}, stageGeometry, pixelsPerMeter).y + METER_PX;
+      newPosition.x = centerXPx;
+    }
+
+    if (stageGeometry.yAxis === "bottom-up") {
+      if (selectedIds.dancers.length === 1) {
+        let y = selectedObjects.dancers[0].y;
+        let bottomMarginM = bottomMarginPercent === 0 ? (100 / pixelsPerMeter) : ((size.height / pixelsPerMeter) * bottomMarginPercent);
+        newPosition.y = -stageMetersToPx({x: 0, y: y}, stageGeometry, pixelsPerMeter).y + (size.height - bottomMarginM * pixelsPerMeter) / 2;
+      } else {
+        let frontmostY = Math.max(
+          ...Object.values(currentSection.formation.dancerPositions).map(x => x.y)
+        );
+        newPosition.y = -stageMetersToPx({x: 0, y: frontmostY + 2}, stageGeometry, pixelsPerMeter).y + METER_PX;
+      }
+    } else {
+      newPosition.y = 0;
     }
     
     if (newPosition.y !== stagePositionRef.current.y) {
@@ -252,6 +300,9 @@ export default function MainStage({
     const scaleBy = 1.01;
     const newScale = clampScale(direction > 0 ? oldScale * scaleBy : oldScale / scaleBy);
 
+    if (!isManualMovement) {
+      setIsManualMovement(true);
+    }
     setStageScale({ x: newScale, y: newScale });
 
     // const newPos = {
@@ -327,6 +378,10 @@ export default function MainStage({
         y: newCenter.y - pointTo.y * scale + dy,
       };
 
+      if (!isManualMovement) {
+        setIsManualMovement(true);
+      }
+
       setStagePosition({...newPosition});
       setRulerPos({...newPosition});
 
@@ -373,7 +428,7 @@ export default function MainStage({
         onDragMove={(e) => {
           if (e.target === e.target.getStage()) {
             setRulerPos({x: e.target.x(), y: e.target.y()})
-            if (enableResetButton && !isManualMovement) {
+            if (!isManualMovement) {
               setIsManualMovement(true);
             }
           }
@@ -495,10 +550,10 @@ export default function MainStage({
       />
     }
     {
-      ((enableResetButton && isManualMovement) || canEdit) &&
+      (isManualMovement || canEdit) &&
       <div className={`absolute space-y-1 ${isShowingVerticalRuler ? "right-9" : "right-2"} ${isShowingHorizontalRuler ? "top-7" : "top-1"}`}>
         {
-          enableResetButton && isManualMovement &&
+          isManualMovement &&
           <IconButton
             size="sm"
             src="centerFocusStrong"
