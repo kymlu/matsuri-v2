@@ -70,6 +70,7 @@ export default function MainStage({
   const [isShowingVerticalRuler, setIsShowingVerticalRuler] = useState<boolean>(false);
   const [isShowingHorizontalRuler, setIsShowingHorizontalRuler] = useState<boolean>(false);
   const [isManualMovement, setIsManualMovement] = useState<boolean>(false);
+  const enableResetButton = useMemo(() => stageGeometry?.yAxis === "bottom-up", [stageGeometry?.yAxis]);
   const [editEnabled, setIsEditEnabled] = useState<boolean>(canEdit);
 
   const [stageScale, setStageScale] = useState<Coordinates>({ x: 1, y: 1 });
@@ -372,7 +373,7 @@ export default function MainStage({
         onDragMove={(e) => {
           if (e.target === e.target.getStage()) {
             setRulerPos({x: e.target.x(), y: e.target.y()})
-            if (!isManualMovement) {
+            if (enableResetButton && !isManualMovement) {
               setIsManualMovement(true);
             }
           }
@@ -494,10 +495,10 @@ export default function MainStage({
       />
     }
     {
-      (isManualMovement || canEdit) &&
+      ((enableResetButton && isManualMovement) || canEdit) &&
       <div className={`absolute space-y-1 ${isShowingVerticalRuler ? "right-9" : "right-2"} ${isShowingHorizontalRuler ? "top-7" : "top-1"}`}>
         {
-          isManualMovement &&
+          enableResetButton && isManualMovement &&
           <IconButton
             size="sm"
             src="centerFocusStrong"
