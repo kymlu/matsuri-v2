@@ -136,7 +136,6 @@ export default function Toolbar({
 
   const isSubmenuOpen = isAddManagerVisible || isArrangeVisible || isActionManagerVisible;
   const areSelectionActionsActivated = showRenameDancer || showArrange || showDeleteObjects;
-  const showResizeLock = !areSelectionActionsActivated || showLockResizeProps;
 
   useEffect(() => {
     if (!showArrange && isArrangeVisible) {
@@ -182,12 +181,12 @@ export default function Toolbar({
         {showSelectPropsButton && <IconButton src="select" subIconSrc="flag" label="道具選択" onClick={() => {onSelectType(false, true)}} />}
         {showSelectAllButton && <IconButton src="selectAll" label="全部選択" onClick={() => {onSelectType(true, true)}} />}
         {
-          showResizeLock && 
-          <IconButton src={isResizePropsLocked ? "lockOpenRight" : "lock"} label="道具リサイズ" onClick={() => onToggleResizePropsLock()}/>
+          showLockResizeProps && 
+          <IconButton src={isResizePropsLocked ? "lock" : "lockOpenRight"} label="道具サイズ" onClick={() => onToggleResizePropsLock()}/>
         }
         {
           !areSelectionActionsActivated && <>
-            {showLockObstacle && <IconButton src={areObstaclesLocked ? "lockOpenRight" : "lock"} label={ areObstaclesLocked ? "障害物解除" : "障害物固定"} onClick={() => onToggleObstacleLock()} />}
+            {showLockObstacle && <IconButton src={areObstaclesLocked ? "lock" : "lockOpenRight"} label="障害物変更" onClick={() => onToggleObstacleLock()} />}
           </>
         }
       </>

@@ -158,6 +158,7 @@ export default function ChoreoViewPage(props: {
           currentSection={currentSection}
           selectedIds={selectedIds}
           selectedObjects={selectedObjects}
+          canResizeProps={false}
           setSelectedIds={(action) => {
             setSelectedIds(action);
             setSelectedTimingId(undefined);

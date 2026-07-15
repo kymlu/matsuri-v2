@@ -68,6 +68,7 @@ export const ICON = {
   arrowRightAlt: "arrow_right_alt",
   calendarToday: "calendar_today",
   category: "category",
+  centerFocusStrong: "center_focus_strong",
   check: "check",
   chevronBackward: "chevron_backward",
   chevronForward: "chevron_forward",

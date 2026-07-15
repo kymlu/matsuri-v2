@@ -70,6 +70,7 @@ export default function MainStage({
   const [isShowingVerticalRuler, setIsShowingVerticalRuler] = useState<boolean>(false);
   const [isShowingHorizontalRuler, setIsShowingHorizontalRuler] = useState<boolean>(false);
   const [isManualMovement, setIsManualMovement] = useState<boolean>(false);
+  const [editEnabled, setIsEditEnabled] = useState<boolean>(canEdit);
 
   const [stageScale, setStageScale] = useState<Coordinates>({ x: 1, y: 1 });
   const pixelsPerMeter = useMemo(() => METER_PX * stageScale.y, [stageScale]);
@@ -371,7 +372,9 @@ export default function MainStage({
         onDragMove={(e) => {
           if (e.target === e.target.getStage()) {
             setRulerPos({x: e.target.x(), y: e.target.y()})
-            setIsManualMovement(true);
+            if (!isManualMovement) {
+              setIsManualMovement(true);
+            }
           }
         }}
         onPointerUp={(e) => {
@@ -438,7 +441,7 @@ export default function MainStage({
           />
         }
         <FormationLayer
-          canEdit={canEdit}
+          canEdit={canEdit && editEnabled}
           hideTransformerBorder={hideTransformerBorder}
           canSelectDancers={canSelectDancers}
           canSelectProps={canSelectProps}
@@ -491,14 +494,26 @@ export default function MainStage({
       />
     }
     {
-      isManualMovement &&
-      <div className={`absolute ${isShowingVerticalRuler ? "right-9" : "right-2"} ${isShowingHorizontalRuler ? "top-7" : "top-1"}`}>
-        <IconButton
-          size="sm"
-          src="resetFocus"
-          colour="grey"
-          onClick={() => resetCamera()}
+      (isManualMovement || canEdit) &&
+      <div className={`absolute space-y-1 ${isShowingVerticalRuler ? "right-9" : "right-2"} ${isShowingHorizontalRuler ? "top-7" : "top-1"}`}>
+        {
+          isManualMovement &&
+          <IconButton
+            size="sm"
+            src="centerFocusStrong"
+            colour="grey"
+            onClick={() => resetCamera()}
           />
+        }
+        {
+          canEdit &&
+          <IconButton
+            size="sm"
+            src={(canEdit && editEnabled) ? "edit" : "editOff"}
+            colour="grey"
+            onClick={() => setIsEditEnabled(prev => !prev)}
+          />
+        }
       </div>
     }
   </div>

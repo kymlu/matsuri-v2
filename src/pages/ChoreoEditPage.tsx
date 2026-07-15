@@ -573,7 +573,7 @@ export default function ChoreoEditPage(props: {
           isAddingDancer={isAddingDancers}
           isAddingProp={isAddingProps}
           isAddingObstacles={isAddingObstacles}
-          canResizeProps={isPropResizeLocked}
+          canResizeProps={!isPropResizeLocked}
           hideTransformerBorder={isAssigningActions}
           currentChoreo={history.presentState.state}
           currentSection={currentSection}
@@ -857,7 +857,7 @@ export default function ChoreoEditPage(props: {
         onToggleObstacleLock={() => {setAreObstaclesLocked(prev => !prev)}}
         onToggleResizePropsLock={() => {setIsPropResizeLocked(prev => !prev)}}
         isResizePropsLocked={isPropResizeLocked}
-        showLockResizeProps={selectedObjects.props.length <= 1}
+        showLockResizeProps={selectedObjects.props.length === 1}
       />
       {
         isAddingDancers &&
