@@ -81,6 +81,7 @@ export default function ChoreoEditPage(props: {
   const [isAddingObstacles, setIsAddingObstacles] = useState<boolean>(false);
   const [isAssigningActions, setIsAssigningActions] = useState<boolean>(false);
   const [areObstaclesLocked, setAreObstaclesLocked] = useState<boolean>(true);
+  const [isPropResizeLocked, setIsPropResizeLocked] = useState<boolean>(true);
   const [password, setPassword] = useState<string | undefined>();
   const [appSettings, setAppSettings] = useState<AppSetting>({
     snapToGrid: true,
@@ -572,6 +573,7 @@ export default function ChoreoEditPage(props: {
           isAddingDancer={isAddingDancers}
           isAddingProp={isAddingProps}
           isAddingObstacles={isAddingObstacles}
+          canResizeProps={isPropResizeLocked}
           hideTransformerBorder={isAssigningActions}
           currentChoreo={history.presentState.state}
           currentSection={currentSection}
@@ -738,6 +740,7 @@ export default function ChoreoEditPage(props: {
         onAddProp={() => {
           resetSelectedIds();
           setIsAddingProps(prev => !prev);
+          setIsPropResizeLocked(false);
         }}
         isAddingProp={isAddingProps}
         onAddObstacle={() => {
@@ -852,6 +855,9 @@ export default function ChoreoEditPage(props: {
         showLockObstacle={entityCount.obstacles > 0}
         areObstaclesLocked={areObstaclesLocked}
         onToggleObstacleLock={() => {setAreObstaclesLocked(prev => !prev)}}
+        onToggleResizePropsLock={() => {setIsPropResizeLocked(prev => !prev)}}
+        isResizePropsLocked={isPropResizeLocked}
+        showLockResizeProps={selectedObjects.props.length <= 1}
       />
       {
         isAddingDancers &&

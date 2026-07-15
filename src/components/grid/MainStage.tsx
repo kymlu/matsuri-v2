@@ -50,6 +50,7 @@ type MainStageProps = {
   selectedDancerMovement?: {current?: DancerPosition, next?: DancerPosition},
   onDancerSelected?: () => void,
   bottomMarginPercent?: number,
+  canResizeProps?: boolean
 }
 
 export default function MainStage({
@@ -61,7 +62,7 @@ export default function MainStage({
   updatePropSizeAndRotate, updateObstacleSizeAndRotate,
   selectedIds, setSelectedIds, selectedObjects,
   addDancer, addProp, addObstacle, appSettings, previousSection, selectedDancerMovement,
-  onDancerSelected, bottomMarginPercent = 0
+  onDancerSelected, bottomMarginPercent = 0, canResizeProps
 }: MainStageProps) {
   const [dancerPositions, setDancerPositions] = useState<DancerPosition[]>([]);
   const [propPositions, setPropPositions] = useState<PropPosition[]>([]);
@@ -460,6 +461,7 @@ export default function MainStage({
           dancerDisplayType={appSettings.dancerDisplayType}
           isDraggingOnEmpty={isDraggingOnEmpty}
           onDancerSelected={onDancerSelected}
+          canResizeProps={canResizeProps}
           />
         {
           selectedDancerMovement &&

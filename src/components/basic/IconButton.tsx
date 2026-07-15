@@ -62,15 +62,15 @@ export default function IconButton ({
   const icons = (
     <div className="relative flex items-center justify-center">
       {
-        src &&
-        <Icon src={src} size={size} colour={colour} crossedOut={crossedOut} vertFlip={vertFlip}/>
-      }
-      {
         subIconSrc && (
         <div className="absolute inset-0 flex items-center justify-center">
           <Icon src={subIconSrc} size={subIconSize} colour={colour}/>
         </div>
       )}
+      {
+        src &&
+        <Icon src={src} size={size} colour={colour} crossedOut={crossedOut} vertFlip={vertFlip}/>
+      }
       {
         imgSrc &&
         <img src={getImgPath(imgSrc)} className={imgClasses}/>

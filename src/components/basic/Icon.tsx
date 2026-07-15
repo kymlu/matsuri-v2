@@ -41,7 +41,7 @@ export default function Icon({
           preserveAspectRatio="none"
         >
           <line x1="3" y1="3" x2="17" y2="17" stroke="black" strokeWidth="1.5" strokeLinecap="round"/>
-          <line x1="4" y1="2" x2="20" y2="18" stroke="white" strokeWidth="1" strokeLinecap="round"/>
+          <line x1="4" y1="2" x2="19" y2="17" stroke="white" strokeWidth="1" strokeLinecap="round"/>
         </svg>
       )}
     </span>

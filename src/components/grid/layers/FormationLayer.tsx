@@ -37,6 +37,7 @@ type FormationLayerProps = {
   dancerDisplayType: DancerDisplayType,
   isDraggingOnEmpty?: boolean,
   onDancerSelected?: () => void,
+  canResizeProps?: boolean
 };
 
 export default function FormationLayer({
@@ -62,7 +63,8 @@ export default function FormationLayer({
   hideTransformerBorder,
   dancerDisplayType,
   isDraggingOnEmpty,
-  onDancerSelected
+  onDancerSelected,
+  canResizeProps,
 }: FormationLayerProps) {
 	const transformerRef = useRef<Konva.Transformer>(null);
 
@@ -213,7 +215,7 @@ export default function FormationLayer({
           flipEnabled={false}
           keepRatio={false}
           ref={transformerRef}
-          resizeEnabled={selectedIds.dancers.length === 0 && (selectedIds.props.length + selectedIds.obstacles.length) === 1}
+          resizeEnabled={canResizeProps && selectedIds.dancers.length === 0 && (selectedIds.props.length + selectedIds.obstacles.length) === 1}
           enabledAnchors={["middle-right", "middle-left", "top-center", "bottom-center"]}
           rotateEnabled={selectedIds.dancers.length === 0 && (selectedIds.props.length + selectedIds.obstacles.length) === 1}
           borderStrokeWidth={2}
