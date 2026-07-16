@@ -39,6 +39,7 @@ export default function NextDirectionLayer({
           stageGeometry={geometry}
           position={nextPosition!!}
           isSelected={false}
+          areOthersSelected={false}
           canEdit={false}
           animate={false}
           isZooming={false}

@@ -38,6 +38,7 @@ export default function GhostLayer({
               position={propPosition}
               stageGeometry={geometry}
               isSelected={false}
+              areOthersSelected={false}
               canEdit={false}
               canSelect={false}
               animate={false}
@@ -56,6 +57,7 @@ export default function GhostLayer({
               position={dancerPosition}
               stageGeometry={geometry}
               isSelected={false}
+              areOthersSelected={false}
               canEdit={false}
               dancerDisplayType={dancerDisplayType}
               animate={false}

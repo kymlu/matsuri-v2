@@ -21,6 +21,7 @@ export interface BaseGridObjectProps {
   onTransform?: (item: Shape<ShapeConfig> | Stage) => void,
   stageGeometry: StageGeometry,
   isSelected: boolean;
+  areOthersSelected: boolean;
   registerNode?: (id: string, node: Konva.Node | null) => void;
   isTransformerActive?: boolean,
   snapToGrid?: boolean,
@@ -41,6 +42,7 @@ export default function BaseGridObject({
   onTransform,
   stageGeometry,
   isSelected,
+  areOthersSelected,
   registerNode,
   isTransformerActive,
   snapToGrid,
@@ -118,8 +120,8 @@ export default function BaseGridObject({
         }
       }}
       onPointerUp={(e) => {
-        if (dragStartRef && !isDraggingRef.current) {
-          onClick?.(); // TODO: don't select if dragging something else
+        if (dragStartRef && !isDraggingRef.current && !isZooming && !areOthersSelected) {
+          onClick?.();
         }
       }}
       onDragEnd={(e) => {
