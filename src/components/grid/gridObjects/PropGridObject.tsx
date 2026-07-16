@@ -19,6 +19,7 @@ type PropGridObjectProps = {
   snapToGrid?: boolean;
   canSelect: boolean;
   animate: boolean,
+  isZooming: boolean;
 };
 
 export default function PropGridObject({
@@ -33,7 +34,8 @@ export default function PropGridObject({
   canEdit,
   snapToGrid,
   canSelect,
-  animate
+  animate,
+  isZooming,
 }: PropGridObjectProps) {
   return <>
     {
@@ -52,6 +54,7 @@ export default function PropGridObject({
         snapToGrid={snapToGrid}
         rotation={position.rotation}
         animate={animate}
+        isZooming={isZooming}
       >
         <Rect
           width={prop.width * METER_PX}

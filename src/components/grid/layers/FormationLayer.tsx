@@ -37,7 +37,8 @@ type FormationLayerProps = {
   dancerDisplayType: DancerDisplayType,
   isDraggingOnEmpty?: boolean,
   onDancerSelected?: () => void,
-  canResizeProps?: boolean
+  canResizeProps?: boolean,
+  isZooming: boolean;
 };
 
 export default function FormationLayer({
@@ -65,6 +66,7 @@ export default function FormationLayer({
   isDraggingOnEmpty,
   onDancerSelected,
   canResizeProps,
+  isZooming,
 }: FormationLayerProps) {
 	const transformerRef = useRef<Konva.Transformer>(null);
 
@@ -164,6 +166,7 @@ export default function FormationLayer({
             snapToGrid={snapToGrid}
             canSelect={canSelectObstacles}
             animate
+            isZooming={isZooming}
           />
         );
       })}
@@ -183,6 +186,7 @@ export default function FormationLayer({
             snapToGrid={snapToGrid}
             canSelect={canSelectProps}
             animate
+            isZooming={isZooming}
           />
         );
       })}
@@ -205,6 +209,7 @@ export default function FormationLayer({
             snapToGrid={snapToGrid}
             dancerDisplayType={dancerDisplayType}
             animate
+            isZooming={isZooming}
           />
         );
       })}

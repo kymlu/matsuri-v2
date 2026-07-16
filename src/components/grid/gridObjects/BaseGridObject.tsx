@@ -25,6 +25,7 @@ export interface BaseGridObjectProps {
   isTransformerActive?: boolean,
   snapToGrid?: boolean,
   animate: boolean,
+  isZooming: boolean,
 }
 
 export default function BaseGridObject({
@@ -43,7 +44,8 @@ export default function BaseGridObject({
   registerNode,
   isTransformerActive,
   snapToGrid,
-  animate
+  animate,
+  isZooming,
 }: BaseGridObjectProps) {
   const ref = useRef<Konva.Group>(null);
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
@@ -92,6 +94,7 @@ export default function BaseGridObject({
         isDraggingRef.current = false;
       }}
       onDragMove={(e) => {
+        if (isZooming) return;
         if (!isSelected) {
           onClick?.(false);
         }

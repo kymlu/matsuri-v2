@@ -72,7 +72,7 @@ export default function MainStage({
   const [isShowingVerticalRuler, setIsShowingVerticalRuler] = useState<boolean>(false);
   const [isShowingHorizontalRuler, setIsShowingHorizontalRuler] = useState<boolean>(false);
   const [isManualMovement, setIsManualMovement] = useState<boolean>(false);
-  const [editEnabled, setIsEditEnabled] = useState<boolean>(canEdit);
+  const [isZooming, setIsZooming] = useState<boolean>(false);
 
   const [stageScale, setStageScale] = useState<Coordinates>({ x: 1, y: 1 });
   const pixelsPerMeter = useMemo(() => METER_PX * stageScale.y, [stageScale]);
@@ -338,6 +338,8 @@ export default function MainStage({
         setDragStopped(true);
       }
 
+      if (!isZooming) setIsZooming(true);
+
       const rect = stage.container().getBoundingClientRect();
 
       const p1 = {
@@ -395,6 +397,7 @@ export default function MainStage({
   const handleTouchEnd = () => {
     setLastDist(0);
     setLastCenter(null);
+    if (isZooming) setIsZooming(false);
   };
 
   const handleDragEnd = (e: any) => {
@@ -523,6 +526,7 @@ export default function MainStage({
           isDraggingOnEmpty={isDraggingOnEmpty}
           onDancerSelected={onDancerSelected}
           canResizeProps={canResizeProps}
+          isZooming={isZooming}
           />
         {
           selectedDancerMovement &&

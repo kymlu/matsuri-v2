@@ -19,6 +19,7 @@ type ObstacleGridObjectProps = {
   snapToGrid?: boolean;
   canSelect: boolean;
   animate: boolean,
+  isZooming: boolean;
 };
 
 const STRIPES_PER_METRE = 10;
@@ -34,7 +35,8 @@ export default function ObstacleGridObject({
   canEdit,
   snapToGrid,
   canSelect,
-  animate
+  animate,
+  isZooming,
 }: ObstacleGridObjectProps) {
   const position = useMemo(() => {
     return {x: obstacle.x, y: obstacle.y};
@@ -121,6 +123,7 @@ export default function ObstacleGridObject({
     snapToGrid={snapToGrid}
     rotation={obstacle.rotation}
     animate={animate}
+    isZooming={isZooming}
   >
     <Rect
       width={obstacle.width * METER_PX}

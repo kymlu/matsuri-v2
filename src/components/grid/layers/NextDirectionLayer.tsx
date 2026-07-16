@@ -41,6 +41,7 @@ export default function NextDirectionLayer({
           isSelected={false}
           canEdit={false}
           animate={false}
+          isZooming={false}
         />
         <Arrow
           points={points}
