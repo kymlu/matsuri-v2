@@ -83,6 +83,7 @@ export default function ChoreoEditPage(props: {
   const [areObstaclesLocked, setAreObstaclesLocked] = useState<boolean>(true);
   const [isPropResizeLocked, setIsPropResizeLocked] = useState<boolean>(true);
   const [password, setPassword] = useState<string | undefined>();
+  const [editEnabled, setEditEnabled] = useState<boolean>(true);
   const [appSettings, setAppSettings] = useState<AppSetting>({
     snapToGrid: true,
     showGrid: true,
@@ -671,6 +672,8 @@ export default function ChoreoEditPage(props: {
               commit: true});
             }
           }
+          editEnabled={editEnabled}
+          toggleEditEnabled={() => setEditEnabled(prev => !prev)}
         />
         <div className="absolute bottom-0 flex flex-col">
           <div className="absolute bottom-12">
@@ -732,6 +735,7 @@ export default function ChoreoEditPage(props: {
         </div>
       </div>
       <Toolbar
+        isEnabled={editEnabled}
         onAddDancer={() => {
           resetSelectedIds();
           setIsAddingDancers(prev => !prev);

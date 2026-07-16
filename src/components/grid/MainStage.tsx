@@ -50,7 +50,9 @@ type MainStageProps = {
   selectedDancerMovement?: {current?: DancerPosition, next?: DancerPosition},
   onDancerSelected?: () => void,
   bottomMarginPercent?: number,
-  canResizeProps?: boolean
+  canResizeProps?: boolean,
+  editEnabled?: boolean,
+  toggleEditEnabled?: () => void,
 }
 
 export default function MainStage({
@@ -62,7 +64,7 @@ export default function MainStage({
   updatePropSizeAndRotate, updateObstacleSizeAndRotate,
   selectedIds, setSelectedIds, selectedObjects,
   addDancer, addProp, addObstacle, appSettings, previousSection, selectedDancerMovement,
-  onDancerSelected, bottomMarginPercent = 0, canResizeProps
+  onDancerSelected, bottomMarginPercent = 0, canResizeProps, editEnabled, toggleEditEnabled
 }: MainStageProps) {
   const [dancerPositions, setDancerPositions] = useState<DancerPosition[]>([]);
   const [propPositions, setPropPositions] = useState<PropPosition[]>([]);
@@ -497,11 +499,11 @@ export default function MainStage({
           />
         }
         <FormationLayer
-          canEdit={canEdit && editEnabled}
+          canEdit={canEdit && editEnabled === true}
           hideTransformerBorder={hideTransformerBorder}
-          canSelectDancers={canSelectDancers}
-          canSelectProps={canSelectProps}
-          canSelectObstacles={canSelectObstacles}
+          canSelectDancers={canSelectDancers && editEnabled !== false}
+          canSelectProps={canSelectProps && editEnabled !== false}
+          canSelectObstacles={canSelectObstacles && editEnabled !== false}
           canToggleSelection={canToggleSelection}
           geometry={stageGeometry}
           dancers={currentChoreo.dancers}
@@ -557,7 +559,7 @@ export default function MainStage({
           <IconButton
             size="sm"
             src="centerFocusStrong"
-            colour="grey"
+            colour="black"
             onClick={() => resetCamera()}
           />
         }
@@ -566,8 +568,8 @@ export default function MainStage({
           <IconButton
             size="sm"
             src={(canEdit && editEnabled) ? "edit" : "editOff"}
-            colour="grey"
-            onClick={() => setIsEditEnabled(prev => !prev)}
+            colour="black"
+            onClick={toggleEditEnabled}
           />
         }
       </div>

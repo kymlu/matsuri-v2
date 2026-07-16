@@ -2,8 +2,11 @@ import { useEffect, useState } from "react";
 import IconButton from "../basic/IconButton";
 import { VerticalDivider } from "../basic/Divider";
 import { Distribution, HorizontalAlignment, Rearrangement, VerticalAlignment } from "../../models/alignment";
+import classNames from "classnames";
 
 type ToolbarProps = {
+  isEnabled: boolean;
+  
   // add
   onAddDancer: () => void;
   isAddingDancer: boolean;
@@ -73,6 +76,8 @@ type ToolbarProps = {
 };
 
 export default function Toolbar({
+  isEnabled,
+  
   onAddDancer,
   isAddingDancer,
   onAddProp,
@@ -149,7 +154,11 @@ export default function Toolbar({
     }
    }, [areSelectionActionsActivated]);
 
-  return <div className="z-10 flex items-center w-screen gap-2 px-4 pt-4 pb-8 overflow-y-auto bg-white border-t-2 border-gray-400">
+  var className = classNames("z-10 flex items-center w-screen gap-2 px-4 pt-4 pb-8 overflow-y-auto bg-white border-t-2 border-gray-400", {
+    "pointer-events-none opacity-40": !isEnabled
+  });
+
+  return <div className={className}>
     {
       !isSubmenuOpen &&
       <>
