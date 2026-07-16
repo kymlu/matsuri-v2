@@ -227,7 +227,12 @@ export default function FormationLayer({
           flipEnabled={false}
           keepRatio={false}
           ref={transformerRef}
-          resizeEnabled={canResizeProps && selectedIds.dancers.length === 0 && (selectedIds.props.length + selectedIds.obstacles.length) === 1}
+          resizeEnabled={
+            selectedIds.dancers.length === 0 &&
+            (selectedIds.props.length + selectedIds.obstacles.length) === 1 &&
+            (canResizeProps && selectedIds.props.length === 1 ||
+            selectedIds.obstacles.length === 1)
+          }
           enabledAnchors={["middle-right", "middle-left", "top-center", "bottom-center"]}
           rotateEnabled={selectedIds.dancers.length === 0 && (selectedIds.props.length + selectedIds.obstacles.length) === 1}
           borderStrokeWidth={2}
