@@ -141,7 +141,7 @@ export default function MainStage({
   const [isSelectingNewSection, setIsSelectingNewSection] = useState<boolean>(false);
 
   const bottomMarginM = useMemo(() => {
-    return bottomMarginPercent === 0 ? 4 : ((size.height / pixelsPerMeter) * bottomMarginPercent);
+    return bottomMarginPercent === 0 ? 100/pixelsPerMeter : ((size.height / pixelsPerMeter) * bottomMarginPercent);
   }, [bottomMarginPercent, size.height, pixelsPerMeter]);
 
   useEffect(() => {
@@ -208,9 +208,9 @@ export default function MainStage({
           } else if (frontmostY > topThresholdM) {
             const newYPx = -stageMetersToPx({x: 0, y: frontmostY}, stageGeometry, pixelsPerMeter).y;
             newPosition.y = newYPx + METER_PX * 2;
-          } else if (backmostY < bottomThresholdM) {
+          } else if (backmostY < bottomThresholdM && (frontmostY - backmostY) < (size.height / pixelsPerMeter)) {
             const newYPx = -stageMetersToPx({x: 0, y: backmostY}, stageGeometry, pixelsPerMeter).y;
-            newPosition.y = newYPx + (size.height - bottomMarginM * pixelsPerMeter) * 0.7;
+            newPosition.y = newYPx + (size.height - bottomMarginM * pixelsPerMeter);
           }
         }
       } else if (!isManualMovement) {
@@ -234,7 +234,7 @@ export default function MainStage({
           } else if (y < topThresholdM) {
             newPosition.y = newYPx - METER_PX * 2;
           } else {
-            newPosition.y = newYPx + (size.height - bottomMarginM * pixelsPerMeter) * 0.7;
+            newPosition.y = newYPx + (size.height - bottomMarginM * pixelsPerMeter);
           }
         }
       }
