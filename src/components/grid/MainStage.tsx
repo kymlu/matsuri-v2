@@ -164,10 +164,14 @@ export default function MainStage({
         }
       } else {
         const rightmostX = Math.max(
-          ...Object.values(selectedObjects.dancers).map(x => x.x)
+          ...Object.values(selectedObjects.dancers).map(x => x.x),
+          ...Object.values(selectedObjects.props).map(x => x.x),
+          ...Object.values(selectedObjects.obstacles).map(x => x.x)
         );
         const leftmostX = Math.min(
-          ...Object.values(selectedObjects.dancers).map(x => x.x)
+          ...Object.values(selectedObjects.dancers).map(x => x.x),
+          ...Object.values(selectedObjects.props).map(x => x.x),
+          ...Object.values(selectedObjects.obstacles).map(x => x.x)
         );
         if (leftmostX < leftThreshold) {
           newPosition.x = -stageMetersToPx({x: leftmostX - 1, y: 0}, stageGeometry, pixelsPerMeter).x;
@@ -176,14 +180,24 @@ export default function MainStage({
         }
       }
     }
+    const totalSelected = selectedIds.dancers.length + selectedIds.props.length + selectedIds.obstacles.length;
     
     if (stageGeometry.yAxis === "bottom-up") {
-      if (selectedIds.dancers.length > 0) {
+      if (totalSelected > 0) {
         let stageYMeters = pxToStageMeters({x: 0, y: -stagePositionRef.current.y}, stageGeometry, pixelsPerMeter).y;
         let topThresholdM = stageYMeters - (METER_PX * 2)/pixelsPerMeter;
         let bottomThresholdM = stageYMeters - (size.height - 78)/pixelsPerMeter + bottomMarginM + 1;
-        if (selectedIds.dancers.length === 1) {
-          const y = selectedObjects.dancers[0].y;
+        if (totalSelected === 1) {
+          let y = 0;
+          if (selectedObjects.dancers.length === 1) {
+            y = selectedObjects.dancers[0].y;
+          } else if (selectedObjects.props.length === 1) {
+            const pos = selectedObjects.props[0];
+            y = pos.y + currentChoreo.props[pos.propId].length;
+          } else {
+            const obstacle = selectedObjects.obstacles[0];
+            y = obstacle.y + obstacle.length;
+          }
           if (y > topThresholdM || y < bottomThresholdM) {
             const newYPx = -stageMetersToPx({x: 0, y: y}, stageGeometry, pixelsPerMeter).y;
             if (y > stageYMeters) {
@@ -194,12 +208,16 @@ export default function MainStage({
               newPosition.y = newYPx + (size.height - bottomMarginM * pixelsPerMeter) * 0.7;
             }
           }
-        } else if (selectedIds.dancers.length > 1) {
+        } else if (totalSelected > 1) {
           const frontmostY = Math.max(
-            ...Object.values(selectedObjects.dancers).map(x => x.y)
+            ...Object.values(selectedObjects.dancers).map(x => x.y),
+            ...Object.values(selectedObjects.props).map(x => x.y - currentChoreo.props[x.propId].length),
+            ...Object.values(selectedObjects.obstacles).map(x => x.y - x.length)
           );
           const backmostY = Math.min(
-            ...Object.values(selectedObjects.dancers).map(x => x.y)
+            ...Object.values(selectedObjects.dancers).map(x => x.y),
+            ...Object.values(selectedObjects.props).map(x => x.y - currentChoreo.props[x.propId].length),
+            ...Object.values(selectedObjects.obstacles).map(x => x.y - x.length)
           );
 
           if (frontmostY > stageYMeters) {
@@ -220,20 +238,34 @@ export default function MainStage({
         newPosition.y = -stageMetersToPx({x: 0, y: frontmostY + 2}, stageGeometry, pixelsPerMeter).y + METER_PX;
       }
     } else {
-      if (selectedIds.dancers.length === 1) {
-        let y = selectedObjects.dancers[0].y;
+      if (totalSelected === 1) {
+        let topY = 0;
+        let bottomY = 0;
+        if (selectedObjects.dancers.length === 1) {
+          topY = bottomY = selectedObjects.dancers[0].y;
+        } else if (selectedObjects.props.length === 1) {
+          const pos = selectedObjects.props[0];
+          topY = pos.y;
+          bottomY = topY + currentChoreo.props[pos.propId].length
+        } else {
+          const obstacle = selectedObjects.obstacles[0];
+          topY = obstacle.y;
+          bottomY = topY + obstacle.length
+        }
+        // let y = [...selectedObjects.dancers, ...selectedObjects.props, ...selectedObjects.obstacles][0].y;
         let stageYMeters = pxToStageMeters({x: 0, y: -stagePositionRef.current.y}, stageGeometry, pixelsPerMeter).y;
         
         let topThresholdM = stageYMeters + 1;
-        let bottomThresholdM = stageYMeters + (size.height - 78)/pixelsPerMeter - bottomMarginM - 1;
-        let yWithMargin = y;
-        if (yWithMargin < topThresholdM || yWithMargin > bottomThresholdM) {
-          let newYPx = -stageMetersToPx({x: 0, y: y}, stageGeometry, pixelsPerMeter).y;
-          if (y < stageYMeters) {
+        let bottomThresholdM = stageYMeters + (size.height - 78)/pixelsPerMeter;
+        if (topY < topThresholdM || bottomY > bottomThresholdM) {
+          if (topY < stageYMeters) {
+            let newYPx = -stageMetersToPx({x: 0, y: topY}, stageGeometry, pixelsPerMeter).y;
             newPosition.y = newYPx + (size.height - bottomMarginM * pixelsPerMeter) / 2 - METER_PX * 2;
-          } else if (y < topThresholdM) {
-            newPosition.y = newYPx - METER_PX * 2;
+          } else if (topY < topThresholdM) {
+            let newYPx = -stageMetersToPx({x: 0, y: topY}, stageGeometry, pixelsPerMeter).y;
+            newPosition.y = newYPx + METER_PX * 2;
           } else {
+            let newYPx = -stageMetersToPx({x: 0, y: bottomY}, stageGeometry, pixelsPerMeter).y;
             newPosition.y = newYPx + (size.height - bottomMarginM * pixelsPerMeter);
           }
         }
