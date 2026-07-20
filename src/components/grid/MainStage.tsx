@@ -506,9 +506,9 @@ export default function MainStage({
         <FormationLayer
           canEdit={canEdit && editEnabled === true}
           hideTransformerBorder={hideTransformerBorder}
-          canSelectDancers={canSelectDancers && editEnabled !== false}
-          canSelectProps={canSelectProps && editEnabled !== false}
-          canSelectObstacles={canSelectObstacles && editEnabled !== false}
+          canSelectDancers={canSelectDancers}
+          canSelectProps={canSelectProps}
+          canSelectObstacles={canSelectObstacles}
           canToggleSelection={canToggleSelection}
           geometry={stageGeometry}
           dancers={currentChoreo.dancers}
