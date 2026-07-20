@@ -149,10 +149,6 @@ export default function FormationLayer({
     return (selectedIds.dancers.length + selectedIds.props.length + selectedIds.obstacles.length) > 1
   }, [selectedIds]);
 
-  const allSelectedIds = useMemo(() => {
-    return new Set([...selectedIds.dancers, ...selectedIds.obstacles, ...selectedIds.props]);
-  }, [selectedIds]);
-
   return ( 
     <Layer>
       {obstacleList.map((obstacle) => {
