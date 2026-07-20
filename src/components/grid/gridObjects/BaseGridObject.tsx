@@ -21,7 +21,6 @@ export interface BaseGridObjectProps {
   onTransform?: (item: Shape<ShapeConfig> | Stage) => void,
   stageGeometry: StageGeometry,
   isSelected: boolean;
-  areOthersSelected: boolean;
   registerNode?: (id: string, node: Konva.Node | null) => void;
   isTransformerActive?: boolean,
   snapToGrid?: boolean,
@@ -42,7 +41,6 @@ export default function BaseGridObject({
   onTransform,
   stageGeometry,
   isSelected,
-  areOthersSelected,
   registerNode,
   isTransformerActive,
   snapToGrid,

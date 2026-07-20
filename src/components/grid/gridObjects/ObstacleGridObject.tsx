@@ -13,7 +13,6 @@ type ObstacleGridObjectProps = {
   updatePosition?: (x: number, y: number) => void;
   onClick?: (isAdditive?: boolean) => void;
   isSelected: boolean;
-  areOthersSelected: boolean;
   registerNode?: (id: string, node: Konva.Node | null) => void;
   isTransformerActive?: boolean;
   canEdit: boolean;
@@ -31,7 +30,6 @@ export default function ObstacleGridObject({
   updatePosition,
   onClick,
   isSelected,
-  areOthersSelected,
   registerNode,
   isTransformerActive,
   canEdit,
@@ -120,7 +118,6 @@ export default function ObstacleGridObject({
     updatePosition={(x, y) => {updatePosition?.(x, y);}}
     stageGeometry={stageGeometry}
     isSelected={isSelected}
-    areOthersSelected={areOthersSelected}
     registerNode={registerNode}
     isTransformerActive={isTransformerActive}
     snapToGrid={snapToGrid}

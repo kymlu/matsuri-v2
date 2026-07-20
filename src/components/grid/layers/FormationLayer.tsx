@@ -164,7 +164,6 @@ export default function FormationLayer({
             updatePosition={(x, y) => updateObstaclePosition?.(x, y, obstacle.id)}
             onClick={(isAdditive) => {toggleObstacleSelect(obstacle.id, isAdditive)}}
             isSelected={selectedIds.obstacles.includes(obstacle.id)}
-            areOthersSelected={allSelectedIds.size > 0 && !allSelectedIds.has(obstacle.id)}
             isTransformerActive={isTransformerActive}
             registerNode={registerNode}
             canEdit={canEdit && canSelectObstacles}
@@ -185,7 +184,6 @@ export default function FormationLayer({
             updatePosition={(x, y) => updatePropPosition?.(x, y, propPosition.propId)}
             onClick={(isAdditive) => {togglePropSelect(propPosition.propId, isAdditive)}}
             isSelected={selectedIds.props.includes(propPosition.propId)}
-            areOthersSelected={allSelectedIds.size > 0 && !allSelectedIds.has(propPosition.propId)}
             isTransformerActive={isTransformerActive}
             registerNode={registerNode}
             canEdit={canEdit && canSelectProps}
@@ -209,8 +207,6 @@ export default function FormationLayer({
               onDancerSelected?.();
             }}
             isSelected={selectedIds.dancers.includes(dancerPosition.dancerId)}
-            areOthersSelected={allSelectedIds.size > 0 && !allSelectedIds.has(dancerPosition.dancerId)}
-            isTransformerActive={isTransformerActive}
             registerNode={registerNode}
             canEdit={canEdit}
             snapToGrid={snapToGrid}
