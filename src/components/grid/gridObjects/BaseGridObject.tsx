@@ -89,6 +89,7 @@ export default function BaseGridObject({
       x={0}
       y={0}
       onPointerDown={(e) => {
+        if (isZooming?.current) return;
         dragStartRef.current = {
           x: e.target.x(),
           y: e.target.y(),
