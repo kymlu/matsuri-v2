@@ -179,7 +179,6 @@ export default function MainStage({
         let bottomMarginM = bottomMarginPercent === 0 ? (100 / pixelsPerMeter) : ((size.height / pixelsPerMeter) * bottomMarginPercent);
         let topThresholdM = stageYMeters - (METER_PX * 2)/pixelsPerMeter;
         let bottomThresholdM = stageYMeters - (size.height - 78)/pixelsPerMeter + bottomMarginM + 1;
-        
         if (selectedIds.dancers.length === 1) {
           const y = selectedObjects.dancers[0].y;
           if (y > topThresholdM || y < bottomThresholdM) {
@@ -216,7 +215,7 @@ export default function MainStage({
           ...Object.values(currentSection.formation.dancerPositions).map(x => x.y)
         );
         newPosition.y = -stageMetersToPx({x: 0, y: frontmostY + 2}, stageGeometry, pixelsPerMeter).y + METER_PX;
-      } 
+      }
     } else {
       if (selectedIds.dancers.length === 1) {
         let y = selectedObjects.dancers[0].y;
@@ -252,7 +251,7 @@ export default function MainStage({
         }
       });
     }
-  }, [stageRef, currentSection, selectedIds, stagePositionRef.current, stageGeometry, bottomMarginPercent]);
+  }, [stageRef, currentSection, selectedIds, selectedObjects, stagePositionRef.current, stageGeometry, bottomMarginPercent]);
 
   const resetCamera = () => {
     setIsManualMovement(false);

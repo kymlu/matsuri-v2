@@ -224,7 +224,7 @@ export default function ChoreoEditPage(props: {
       props: props,
       obstacles: obstacles,
     } as StageEntities<PropPosition[], DancerPosition[], Obstacle[]>;
-  }, [selectedIds]);
+  }, [selectedIds, currentSection]);
 
   const selectedColour = useMemo(() => {
     const colours = new Set([
