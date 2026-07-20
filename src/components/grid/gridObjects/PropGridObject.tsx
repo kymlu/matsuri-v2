@@ -20,7 +20,7 @@ type PropGridObjectProps = {
   snapToGrid?: boolean;
   canSelect: boolean;
   animate: boolean,
-  isZooming: boolean;
+  isZooming?: React.RefObject<boolean>;
 };
 
 export default function PropGridObject({

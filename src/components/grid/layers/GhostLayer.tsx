@@ -42,7 +42,6 @@ export default function GhostLayer({
               canEdit={false}
               canSelect={false}
               animate={false}
-              isZooming={false}
             />
           );
         })
@@ -61,7 +60,6 @@ export default function GhostLayer({
               canEdit={false}
               dancerDisplayType={dancerDisplayType}
               animate={false}
-              isZooming={false}
             />
           );
         })

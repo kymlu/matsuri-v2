@@ -38,7 +38,7 @@ type FormationLayerProps = {
   isDraggingOnEmpty?: boolean,
   onDancerSelected?: () => void,
   canResizeProps?: boolean,
-  isZooming: boolean;
+  isZooming: React.RefObject<boolean>;
 };
 
 export default function FormationLayer({

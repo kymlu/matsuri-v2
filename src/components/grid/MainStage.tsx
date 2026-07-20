@@ -72,7 +72,7 @@ export default function MainStage({
   const [isShowingVerticalRuler, setIsShowingVerticalRuler] = useState<boolean>(false);
   const [isShowingHorizontalRuler, setIsShowingHorizontalRuler] = useState<boolean>(false);
   const [isManualMovement, setIsManualMovement] = useState<boolean>(false);
-  const [isZooming, setIsZooming] = useState<boolean>(false);
+  var isZooming = useRef<boolean>(false);
 
   const [stageScale, setStageScale] = useState<Coordinates>({ x: 1, y: 1 });
   const pixelsPerMeter = useMemo(() => METER_PX * stageScale.y, [stageScale]);
@@ -338,7 +338,9 @@ export default function MainStage({
         setDragStopped(true);
       }
 
-      if (!isZooming) setIsZooming(true);
+      if (!isZooming.current) {
+        isZooming.current = true;
+      }
 
       const rect = stage.container().getBoundingClientRect();
 
@@ -392,12 +394,12 @@ export default function MainStage({
       setLastDist(dist);
       setLastCenter(newCenter);
     }
-  }, [dragStopped, lastCenter, lastDist, stagePos, stageScale]);
+  }, [dragStopped, lastCenter, lastDist, stagePos, stageScale, isZooming]);
 
   const handleTouchEnd = () => {
     setLastDist(0);
     setLastCenter(null);
-    if (isZooming) setIsZooming(false);
+    if (isZooming) isZooming.current = false;
   };
 
   const handleDragEnd = (e: any) => {

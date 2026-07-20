@@ -20,7 +20,7 @@ type ObstacleGridObjectProps = {
   snapToGrid?: boolean;
   canSelect: boolean;
   animate: boolean,
-  isZooming: boolean;
+  isZooming?: React.RefObject<boolean>;
 };
 
 const STRIPES_PER_METRE = 10;

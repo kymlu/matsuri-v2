@@ -26,7 +26,7 @@ export interface BaseGridObjectProps {
   isTransformerActive?: boolean,
   snapToGrid?: boolean,
   animate: boolean,
-  isZooming: boolean,
+  isZooming?: React.RefObject<boolean>;
 }
 
 export default function BaseGridObject({
@@ -138,7 +138,6 @@ export default function BaseGridObject({
             x: position.x,
             y: position.y,
             onFinish: () => {
-              console.log("stopped")
               var snappedPositionInM = pxToStageMeters({x: node.attrs.x, y: node.attrs.y}, stageGeometry, METER_PX, height);
               updatePosition?.(snappedPositionInM.x, snappedPositionInM.y);
             }

@@ -21,7 +21,7 @@ type DancerGridObjectProps = {
   snapToGrid?: boolean;
   dancerDisplayType?: DancerDisplayType;
   animate: boolean;
-  isZooming: boolean;
+  isZooming?: React.RefObject<boolean>;
 };
 
 export default function DancerGridObject({
