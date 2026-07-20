@@ -120,7 +120,7 @@ export default function BaseGridObject({
         }
       }}
       onPointerUp={(e) => {
-        if (dragStartRef && !isDraggingRef.current && !isZooming && !areOthersSelected) {
+        if (dragStartRef && !isDraggingRef.current && !isZooming) {
           onClick?.();
         }
       }}
@@ -138,6 +138,7 @@ export default function BaseGridObject({
             x: position.x,
             y: position.y,
             onFinish: () => {
+              console.log("stopped")
               var snappedPositionInM = pxToStageMeters({x: node.attrs.x, y: node.attrs.y}, stageGeometry, METER_PX, height);
               updatePosition?.(snappedPositionInM.x, snappedPositionInM.y);
             }
