@@ -692,7 +692,6 @@ export default function ChoreoEditPage(props: {
                 sections={history.presentState.state.sections}
                 showAddButton
                 onClickAddButton={(id: string) => {
-                  resetSelectedIds();
                   dispatch({
                     type: "SET_STATE",
                     newState: addSection(history.presentState.state, id),
@@ -702,13 +701,11 @@ export default function ChoreoEditPage(props: {
                 }}
                 onChangeSection={(section) => {
                   setCurrentSection(section);
-                  resetSelectedIds();
                 }}
                 onOpenSectionMenu={() => {
                   setSectionManagerDialogOpen(true);
                 }}
                 onReorder={(sections) => {
-                  resetSelectedIds();
                   dispatch({
                     type: "SET_STATE",
                     newState: reorderSections(history.presentState.state, sections),
