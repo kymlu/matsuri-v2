@@ -60,7 +60,7 @@ export const colorPalette = {
 
   // Helper: get readable text color safely
   getTextColor(bg: string): string {
-    var textColour = this.textContrast[bg];
+    const textColour = this.textContrast[bg];
     if (textColour) {
       return textColour;
     } else {

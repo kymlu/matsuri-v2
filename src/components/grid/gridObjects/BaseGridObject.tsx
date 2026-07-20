@@ -25,6 +25,7 @@ export interface BaseGridObjectProps {
   isTransformerActive?: boolean,
   snapToGrid?: boolean,
   animate: boolean,
+  isZooming?: React.RefObject<boolean>;
 }
 
 export default function BaseGridObject({
@@ -43,7 +44,8 @@ export default function BaseGridObject({
   registerNode,
   isTransformerActive,
   snapToGrid,
-  animate
+  animate,
+  isZooming,
 }: BaseGridObjectProps) {
   const ref = useRef<Konva.Group>(null);
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
@@ -54,7 +56,7 @@ export default function BaseGridObject({
   }, [id, registerNode]);
 
   useEffect(() => {
-    var newPosition = stageMetersToPx({x: position.x, y: position.y}, stageGeometry, METER_PX, height);
+    const newPosition = stageMetersToPx({x: position.x, y: position.y}, stageGeometry, METER_PX, height);
     if (newPosition.x === ref.current?.x() && newPosition.y === ref.current?.y()) return;
 
     setIsAnimating(true);
@@ -85,6 +87,7 @@ export default function BaseGridObject({
       x={0}
       y={0}
       onPointerDown={(e) => {
+        if (isZooming?.current) return;
         dragStartRef.current = {
           x: e.target.x(),
           y: e.target.y(),
@@ -92,6 +95,7 @@ export default function BaseGridObject({
         isDraggingRef.current = false;
       }}
       onDragMove={(e) => {
+        if (isZooming?.current) return;
         if (!isSelected) {
           onClick?.(false);
         }
@@ -115,15 +119,15 @@ export default function BaseGridObject({
         }
       }}
       onPointerUp={(e) => {
-        if (dragStartRef && !isDraggingRef.current) {
-          onClick?.(); // TODO: don't select if dragging something else
+        if (dragStartRef && !isDraggingRef.current && !isZooming?.current) {
+          onClick?.();
         }
       }}
       onDragEnd={(e) => {
         if (isDraggingRef.current) {
           const node = ref.current!!;
 
-          var position: Coordinates = {x: node.x(), y: node.y()};
+          let position: Coordinates = {x: node.x(), y: node.y()};
 
           if (snapToGrid) {
             position = snapCoordsToGrid({x: node.x(), y: node.y()}, snapSize)
@@ -133,7 +137,7 @@ export default function BaseGridObject({
             x: position.x,
             y: position.y,
             onFinish: () => {
-              var snappedPositionInM = pxToStageMeters({x: node.attrs.x, y: node.attrs.y}, stageGeometry, METER_PX, height);
+              const snappedPositionInM = pxToStageMeters({x: node.attrs.x, y: node.attrs.y}, stageGeometry, METER_PX, height);
               updatePosition?.(snappedPositionInM.x, snappedPositionInM.y);
             }
           });

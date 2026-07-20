@@ -22,9 +22,9 @@ type FieldWithLabelProps = {
 export function FieldWithLabel({
   label, full, fullHeight, children
 }: FieldWithLabelProps) {
-  var id = React.useId();
+  const id = React.useId();
 
-  var classes = classNames(
+  const classes = classNames(
     "",
     {
       "w-full": full,

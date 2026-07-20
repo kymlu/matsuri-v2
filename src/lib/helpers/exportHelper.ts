@@ -69,7 +69,7 @@ export async function exportEvent(
   eventName = "隊列表"
 ) {
   const zip = new JSZip();
-  var list: BaseModel[] = [];
+  let list: BaseModel[] = [];
 
   choreoList.forEach(choreo => {
     zip.file(
@@ -129,19 +129,19 @@ export async function exportToPdf (
   const gridOffsetPx = gridOffsetMeters * PDF_METER_PX;
 
   const followingDancer = choreo.dancers[followingId];
-  var memoLeft = diagramWidthPx + pageMargin * 2;
+  let memoLeft = diagramWidthPx + pageMargin * 2;
 
   // formations longer than 20m will print in increments
-  var visualDiagramHeightPx = diagramHeightPx;
-  var startingPoints: number[] = [];
-  var sectionDeltas: number[] = [];
+  let visualDiagramHeightPx = diagramHeightPx;
+  let startingPoints: number[] = [];
+  let sectionDeltas: number[] = [];
   if (stage.yAxis === "bottom-up" && stage.stageLength > 20) {
     choreo.sections.forEach((s) => {
-      var yValues = Object.values(s.formation.dancerPositions).map(p => p.y );
-      var propYValues = Object.values(s.formation.propPositions).map(p => p.y); // to do: consider the length of the prop?
-      var min = Math.min(...yValues.map(y => y - 2), ...propYValues.map(y => y - 2));
-      var max = Math.max(...yValues.map(y => y + 2), ...propYValues.map(y => y + 2));
-      var delta = Math.ceil(max - min);
+      let yValues = Object.values(s.formation.dancerPositions).map(p => p.y );
+      let propYValues = Object.values(s.formation.propPositions).map(p => p.y); // to do: consider the length of the prop?
+      let min = Math.min(...yValues.map(y => y - 2), ...propYValues.map(y => y - 2));
+      let max = Math.max(...yValues.map(y => y + 2), ...propYValues.map(y => y + 2));
+      let delta = Math.ceil(max - min);
       startingPoints.push(Math.ceil(max));
       sectionDeltas.push(delta)
     });
@@ -161,7 +161,7 @@ export async function exportToPdf (
     unit: "px",
     format: [fileWidth, fileHeight]});
   
-  var context = pdf.context2d;
+  let context = pdf.context2d;
   context.font = "NotoSansJP";
 
   pdf.setLanguage("ja");
@@ -314,7 +314,7 @@ export async function exportToPdf (
         })
         
         context.fillStyle = colorPalette.black;
-        var textDimension = pdf.getTextDimensions(obstacle.name, {maxWidth: obstacleWidth});
+        let textDimension = pdf.getTextDimensions(obstacle.name, {maxWidth: obstacleWidth});
         context.fillText(obstacle.name,
           obstacleWidth/2 - textDimension.w/2,
           obstacleHeight/2 + (textDimension.h/3),
@@ -370,7 +370,7 @@ export async function exportToPdf (
 
     // Draw props
     sortProps(Object.values(section.formation.propPositions)).forEach(p => {
-      var prop = choreo.props[p.propId];
+      let prop = choreo.props[p.propId];
       if (prop) {
         context.save();
         const positionInPx = stageMetersToPx(p, stage, PDF_METER_PX, prop.length);
@@ -395,7 +395,7 @@ export async function exportToPdf (
         context.fillRect(0, 0, propWidth, propHeight);
         
         context.fillStyle = colorPalette.getTextColor(prop.color);
-        var textDimension = pdf.getTextDimensions(prop?.name ?? "", {maxWidth: propWidth});
+        let textDimension = pdf.getTextDimensions(prop?.name ?? "", {maxWidth: propWidth});
         context.fillText(prop?.name ?? "",
           propWidth/2 - textDimension.w/2,
           propHeight/2 + (textDimension.h/3),
@@ -406,7 +406,7 @@ export async function exportToPdf (
     });
 
     // Get actions by dancer
-    var actionsByDancer = Object.keys(choreo.dancers).reduce((acc, item) => {
+    let actionsByDancer = Object.keys(choreo.dancers).reduce((acc, item) => {
       acc[item] = [];
       return acc;
     }, {} as Record<string, (number | undefined)[]>);
@@ -421,7 +421,7 @@ export async function exportToPdf (
 
     // Draw participants
     sortDancers(Object.values(section.formation.dancerPositions)).forEach(p => {
-      var dancer = choreo.dancers[p.dancerId];
+      let dancer = choreo.dancers[p.dancerId];
       if (dancer) {
         const isFollowing = strEquals(followingId, dancer.id);
         const hasActions = actionsByDancer[p.dancerId]?.length > 0;
@@ -459,19 +459,19 @@ export async function exportToPdf (
         pdf.circle(x, y + titleBuffer, PDF_METER_PX * (isFollowing || hasActions ? 0.27 : 0.4), "FD");
   
         pdf.setTextColor(colorPalette.getTextColor(p.color));
-        var displayName = dancer.name ?? "";
-        var textHeight = pdf.getTextDimensions(displayName, {maxWidth: PDF_METER_PX}).h;
+        let displayName = dancer.name ?? "";
+        let textHeight = pdf.getTextDimensions(displayName, {maxWidth: PDF_METER_PX}).h;
         pdf.text(displayName, x, y - textHeight/2 + titleBuffer, {align: "center", baseline: "top", maxWidth: PDF_METER_PX});
       }
     });
 
-    var memoY = PDF_METER_PX;
+    let memoY = PDF_METER_PX;
 
     if (followingDancer) {
-      var nextPosition = choreo.sections[i + 1]?.formation?.dancerPositions[followingDancer.id];
+      let nextPosition = choreo.sections[i + 1]?.formation?.dancerPositions[followingDancer.id];
 
       if (showFollowingPath) {
-        var currentPosition = section.formation.dancerPositions[followingDancer.id];
+        let currentPosition = section.formation.dancerPositions[followingDancer.id];
         if (currentPosition && nextPosition &&
           (currentPosition.x !== nextPosition.x || currentPosition.y !== nextPosition.y)) {
             const currentPx = stageMetersToPx(currentPosition, stage, PDF_METER_PX);
@@ -499,9 +499,9 @@ export async function exportToPdf (
       pdf.setTextColor(colorPalette.black);
       pdf.setFontSize(12);
       
-      var position = section.formation.dancerPositions[followingDancer.id];
-      var displayX = "";
-      var xFromCenter = stage.stageWidth / 2 - position.x;
+      let position = section.formation.dancerPositions[followingDancer.id];
+      let displayX = "";
+      let xFromCenter = stage.stageWidth / 2 - position.x;
       if (xFromCenter === 0) {
         displayX = "↔︎0";
       } else if (xFromCenter > 0) {
@@ -510,7 +510,7 @@ export async function exportToPdf (
         displayX = "→" + roundToTenth(Math.abs(xFromCenter));
       }
   
-      var displayY = roundToTenth(position.y);
+      let displayY = roundToTenth(position.y);
 
       pdf.setFontSize(14);
       pdf.text(followingDancer.name, memoLeft, memoY, {maxWidth: memoWidth});
@@ -567,8 +567,8 @@ export async function exportToPdf (
           pdf.text("なし", memoLeft + memoWidth/2, memoY, {maxWidth: memoWidth, align: "center"});
           memoY += 10.5;
         } else {
-          var xMovement: string | null = null;
-          var yMovement: string | null = null;
+          let xMovement: string | null = null;
+          let yMovement: string | null = null;
       
           if (delta.y > 0) {
             yMovement = (stage.yAxis === "bottom-up" ? "↑" : "↓") + roundToTenth(delta.y) + "m"
@@ -591,7 +591,7 @@ export async function exportToPdf (
       if (section.formation.dancerActions.length > 0) {
         section.formation.dancerActions.forEach((action, i) => {
           pdf.setTextColor(colorPalette.black);
-          var assignedTiming = actionsByDancer[followingId][i] !== undefined ? 
+          let assignedTiming = actionsByDancer[followingId][i] !== undefined ? 
             action.timings[actionsByDancer[followingId][i]].name : undefined;
 
           pdf.setDrawColor(colorPalette.actionOutlineColours[actionsByDancer[followingId][i] as number] ?? colorPalette.lightGrey);
@@ -658,15 +658,15 @@ export async function exportToPdf (
         pdf.setFont(font);
         pdf.setTextColor(colorPalette.grey);
 
-        var actionNameDimensions = pdf.getTextDimensions(action.name, {maxWidth: memoWidth/2 - 12});
+        let actionNameDimensions = pdf.getTextDimensions(action.name, {maxWidth: memoWidth/2 - 12});
         pdf.text(action.name, memoLeft + 11, memoY - 1 - (actionNameDimensions.h > 8 ? 3 : 0), {maxWidth: memoWidth/2 - 12});
-        var timingX = 0;
+        let timingX = 0;
         action.timings.forEach((timing, i) => {
           pdf.setFontSize(10);
           pdf.setFont(boldFont);
           pdf.setTextColor(colorPalette.getTextColor(colorPalette.actionOutlineColours[i % 16]));
           pdf.setFillColor(colorPalette.actionOutlineColours[i % 16]);
-          var w = pdf.getTextWidth(timing.name);
+          let w = pdf.getTextWidth(timing.name);
 
           if ((timingX + w) > memoWidth / 2) {
             timingX = 0;
@@ -751,7 +751,7 @@ export async function exportToPdf (
     }
   }
 
-  var blob = pdf.output("blob");
+  let blob = pdf.output("blob");
   
   const fullFileName = `${getSafeFileName(fileName)}.pdf`
 

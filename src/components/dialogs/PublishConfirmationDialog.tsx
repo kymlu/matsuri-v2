@@ -113,7 +113,7 @@ export default function PublishConfirmationDialog({
       }}
     >
       <div className="space-y-2">
-        <div className="space-y-2 max-h-[50svh] overflow-y-auto">
+        <div className="space-y-2 overflow-y-auto">
           <ChoreoInfo
             name={currentVersion.name}
             event={currentVersion.event}

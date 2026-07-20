@@ -46,7 +46,7 @@ export default function FormationSelectionToolbar({
     onChangeSection(s);
   }
 
-  return <div className="grid grid-cols-[auto,1fr,auto] w-full max-w-full gap-2 p-2 overflow-scroll max-w-screen">
+  return <div className="grid grid-cols-[auto,1fr,auto] w-full max-w-full gap-2 p-2 overflow-auto max-w-screen">
     <Drawer.Root
       swipeDirection="down"
       modal
@@ -99,7 +99,7 @@ export default function FormationSelectionToolbar({
         </Drawer.Viewport>
       </Drawer.Portal>
     </Drawer.Root>
-    <div className="flex gap-2 overflow-scroll">
+    <div className="flex gap-2 overflow-auto">
       <DndContext
         sensors={sensors}
         modifiers={[restrictToHorizontalAxis, restrictToParentElement]}
@@ -160,7 +160,7 @@ function FormationSectionItem (props: {
   full?: boolean,
   registerRef: (id: string, button: HTMLButtonElement | null) => void,
 }) {
-  var {section, isSelected, onChangeSection, onOpenSectionMenu, asDiv, full, registerRef} = props;
+  const {section, isSelected, onChangeSection, onOpenSectionMenu, asDiv, full, registerRef} = props;
 
   const {
     attributes,

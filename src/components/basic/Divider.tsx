@@ -9,7 +9,7 @@ export type DividerProps = {
 export default function Divider({
   compact, medium, primary
 }: DividerProps) {
-  var classes = classNames("border-none h-0.5", {
+  const classes = classNames("border-none h-0.5", {
     "my-3": !compact && !medium,
     "my-1": medium,
     "h-0.5": compact,

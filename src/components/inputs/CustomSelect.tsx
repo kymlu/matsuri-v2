@@ -35,7 +35,7 @@ export default function CustomSelect({
         value={value}
         items={items}
         onValueChange={(newValue) => {
-          var value = Object.entries(items).find(([display,value]) => strEquals(value, newValue))?.[0] ?? "";
+          const value = Object.entries(items).find(([display,value]) => strEquals(value, newValue))?.[0] ?? "";
           setSelectValue?.(value);
           setValue(newValue ?? "");
         }}>

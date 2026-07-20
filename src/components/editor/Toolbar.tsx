@@ -2,8 +2,11 @@ import { useEffect, useState } from "react";
 import IconButton from "../basic/IconButton";
 import { VerticalDivider } from "../basic/Divider";
 import { Distribution, HorizontalAlignment, Rearrangement, VerticalAlignment } from "../../models/alignment";
+import classNames from "classnames";
 
 type ToolbarProps = {
+  isEnabled: boolean;
+  
   // add
   onAddDancer: () => void;
   isAddingDancer: boolean;
@@ -65,9 +68,16 @@ type ToolbarProps = {
   showLockObstacle: boolean;
   onToggleObstacleLock: () => void;
   areObstaclesLocked: boolean;
+
+  // props
+  onToggleResizePropsLock: () => void;
+  isResizePropsLocked: boolean;
+  showLockResizeProps: boolean;
 };
 
 export default function Toolbar({
+  isEnabled,
+  
   onAddDancer,
   isAddingDancer,
   onAddProp,
@@ -120,6 +130,10 @@ export default function Toolbar({
   showLockObstacle,
   onToggleObstacleLock,
   areObstaclesLocked,
+
+  onToggleResizePropsLock,
+  isResizePropsLocked,
+  showLockResizeProps,
 }: ToolbarProps) {
   const [isAddManagerVisible, setIsAddManagerVisible] = useState<boolean>(false);
   const [isArrangeVisible, setIsArrangeVisible] = useState<boolean>(false);
@@ -140,7 +154,11 @@ export default function Toolbar({
     }
    }, [areSelectionActionsActivated]);
 
-  return <div className="z-10 flex items-center w-screen gap-2 px-4 pt-4 pb-8 overflow-y-scroll bg-white border-t-2 border-gray-400">
+  const className = classNames("z-10 flex items-center w-screen gap-2 px-4 pt-4 pb-8 overflow-y-auto bg-white border-t-2 border-gray-400", {
+    "pointer-events-none opacity-40": !isEnabled
+  });
+
+  return <div className={className}>
     {
       !isSubmenuOpen &&
       <>
@@ -162,8 +180,8 @@ export default function Toolbar({
         {showRenameObstacle && <IconButton src="textFieldsAlt" label="名前変更" onClick={() => {onRenameObstacle()}} />}
         {showArrange && <IconButton src="straighten" label="整理" onClick={()=>{setIsArrangeVisible(true)}}/>}
         {showChangeColour && <IconButton src="colors" label="色" onClick={() => {onChangeColor()}} />}
-        {showCopyPosition && <IconButton src="contentCopy" label="コピー" onClick={() => {onCopyPosition()}} />}
-        {showPastePosition && <IconButton src="contentPaste" label="ペースト" onClick={() => {onPastePosition()}} />}
+        {showCopyPosition && <IconButton src="contentCopy" label="位置コピー" onClick={() => {onCopyPosition()}} />}
+        {showPastePosition && <IconButton src="contentPaste" label="位置ペースト" onClick={() => {onPastePosition()}} />}
         {showSwapPosition && <IconButton src="swapHoriz" label="位置交換" onClick={() => {onSwapPosition()}} />}
         {showDuplicateObstacle && <IconButton src="contentCopy" label="複製" onClick={() => {onDuplicateObstacle()}} />}
         {showDeleteObjects && <IconButton src="delete" label="削除" onClick={()=>{onDeleteObjects()}}/>}
@@ -172,8 +190,12 @@ export default function Toolbar({
         {showSelectPropsButton && <IconButton src="select" subIconSrc="flag" label="道具選択" onClick={() => {onSelectType(false, true)}} />}
         {showSelectAllButton && <IconButton src="selectAll" label="全部選択" onClick={() => {onSelectType(true, true)}} />}
         {
+          showLockResizeProps && 
+          <IconButton src={isResizePropsLocked ? "lock" : "lockOpenRight"} label="道具サイズ" onClick={() => onToggleResizePropsLock()}/>
+        }
+        {
           !areSelectionActionsActivated && <>
-            {showLockObstacle && <IconButton src={areObstaclesLocked ? "lockOpen" : "lock"} label={ areObstaclesLocked ? "障害物解除" : "障害物固定"} onClick={() => {onToggleObstacleLock()}} />}
+            {showLockObstacle && <IconButton src={areObstaclesLocked ? "lock" : "lockOpenRight"} label="障害物変更" onClick={() => onToggleObstacleLock()} />}
           </>
         }
       </>

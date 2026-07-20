@@ -13,7 +13,7 @@ type ActionSelectionToolbarProps = {
 export default function ActionSelectionToolbar({
   actions, selectedTimingId, onSelectTiming
 }: ActionSelectionToolbarProps){
-  return <div className="flex w-screen gap-2 p-2 overflow-scroll max-w-screen">
+  return <div className="flex w-screen gap-2 p-2 overflow-auto max-w-screen">
     {
       actions.map((action, index) => <ActionSection
         key={action.id}
@@ -63,6 +63,7 @@ function ActionSection ({
     {
       isExpanded &&
       action.timings.map(timing => <TimingButton
+        key={timing.id}
         timing={timing}
         selectedTimingId={selectedTimingId}
         onSelectTiming={() => onSelectTiming(timing)}/>)

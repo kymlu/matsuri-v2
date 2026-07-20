@@ -27,8 +27,8 @@ export function addSection(state: Choreo, id: string): Choreo {
 }
 
 export function duplicateSection(state: Choreo, section: ChoreoSection, index: number): Choreo {
-  var duplicatedSection = { ...section };
-  var newId = crypto.randomUUID();
+  const duplicatedSection = { ...section };
+  const newId = crypto.randomUUID();
   duplicatedSection.id = newId;
   Object.values(duplicatedSection.formation.dancerPositions).forEach(position => position.sectionId = newId)
   const newSections = [ ...state.sections.slice(0, index), ...[duplicatedSection], ...state.sections.slice(index) ];
@@ -65,7 +65,7 @@ export function editDancerActions(state: Choreo, sectionId: string, newActions: 
 }
 
 export function assignDancersToTiming(state: Choreo, sectionId: string, actionId: string, timingId: string, dancerIds: string[]): Choreo {
-  var dancerIdSet = new Set(dancerIds);
+  const dancerIdSet = new Set(dancerIds);
   const newSections = state.sections.map(s => 
     s.id === sectionId ? {
       ...s,

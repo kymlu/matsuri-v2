@@ -51,11 +51,11 @@ export function DancerManagerDialog({
         }));
       }}
       onSubmit={() => {
-        var trimmedDancers: Dancer[] = dancerList.map(x => ({id: x.id, name: x.name.trim()} as Dancer));
+        const trimmedDancers: Dancer[] = dancerList.map(x => ({id: x.id, name: x.name.trim()} as Dancer));
         onSubmit(trimmedDancers, deletedDancerIds);
       }}>
       <div className="max-h-full grid grid-rows-[1fr,auto]">
-        <div className="justify-center max-h-full space-y-2 overflow-scroll md:flex md:flex-wrap md:gap-4">
+        <div className="justify-center max-h-full space-y-2 overflow-auto md:flex md:flex-wrap md:gap-4">
           {
             dancerList.map((dancer, i) => 
               <div className="flex flex-row items-center gap-1" key={dancer.id}>

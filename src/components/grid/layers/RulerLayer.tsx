@@ -1,6 +1,6 @@
 import { StageGeometry } from "../../../models/choreo";
 import { METER_PX } from "../../../lib/consts/consts";
-import { ReactNode, useMemo } from "react";
+import { ReactNode, useEffect, useMemo } from "react";
 import { Coordinates } from "../../../models/base";
 
 interface RulerLayerProps {
@@ -10,6 +10,8 @@ interface RulerLayerProps {
   verticalGridIncrement: number,
   scale: Coordinates,
   isSelectingNewSection: boolean,
+  setIsShowingVerticalRuler: (value: boolean) => void,
+  setIsShowingHorizontalRuler: (value: boolean) => void,
 }
 
 export default function RulerLayer({
@@ -19,6 +21,8 @@ export default function RulerLayer({
   verticalGridIncrement,
   scale,
   isSelectingNewSection,
+  setIsShowingVerticalRuler,
+  setIsShowingHorizontalRuler
 }: RulerLayerProps) {
   const {
     gridSizePx,
@@ -88,6 +92,14 @@ export default function RulerLayer({
   const showHorizontalMarks = useMemo(() => {
     return position.y + (stageTopPx - gridSizePx) * scale.y < 0;
   }, [position.y, scale.y]);
+
+  useEffect(() => {
+    setIsShowingHorizontalRuler(showHorizontalMarks);
+  }, [showHorizontalMarks, setIsShowingHorizontalRuler]);
+
+  useEffect(() => {
+    setIsShowingVerticalRuler(showVerticalMarks);
+  }, [showVerticalMarks, setIsShowingVerticalRuler]);
 
   const horizontalMarks = useMemo(() => {
     const elements = [];

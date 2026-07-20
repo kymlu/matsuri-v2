@@ -20,6 +20,7 @@ type DancerGridObjectProps = {
   snapToGrid?: boolean;
   dancerDisplayType?: DancerDisplayType;
   animate: boolean;
+  isZooming?: React.RefObject<boolean>;
 };
 
 export default function DancerGridObject({
@@ -34,7 +35,8 @@ export default function DancerGridObject({
   canEdit,
   snapToGrid,
   dancerDisplayType = "large",
-  animate
+  animate,
+  isZooming,
 }: DancerGridObjectProps) {
   return <>
     {
@@ -51,6 +53,7 @@ export default function DancerGridObject({
         isTransformerActive={isTransformerActive}
         snapToGrid={snapToGrid}
         animate={animate}
+        isZooming={isZooming}
       >
         {
           isSelected && 

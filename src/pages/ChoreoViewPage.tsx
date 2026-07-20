@@ -9,11 +9,14 @@ import { isNullOrUndefinedOrBlank, strEquals } from "../lib/helpers/globalHelper
 import ViewerSidebar from "../components/editor/ViewerSidebar";
 import { StageEntities } from "../models/history";
 import { DancerPosition } from "../models/dancer";
-import { PropPosition } from "../models/prop";
+import { Obstacle, PropPosition } from "../models/prop";
 import ExportDialog from "../components/dialogs/ExportDialog";
 import { Dialog } from "@base-ui/react";
-import InstructionMessage from "../components/basic/InstructionMessage";
 import { ChoreoStatus } from "./HomePage";
+import BaseErrorDialog from "../components/dialogs/BaseErrorDialog";
+import CustomSwitch from "../components/inputs/CustomSwitch";
+import { checkShowingViewPageInfoDialog, stopShowingViewPageInfoDialog } from "../lib/dataAccess/LocalStorageController";
+import Divider from "../components/basic/Divider";
 
 export default function ChoreoViewPage(props: {
   goToHomePage: () => void
@@ -27,17 +30,17 @@ export default function ChoreoViewPage(props: {
   const [nextSection, setNextSection] = useState<ChoreoSection | undefined>();
   const [selectedIds, setSelectedIds] = useState<StageEntities<string[]>>({props: [], dancers: [], obstacles: []});
   const [selectedTimingId, setSelectedTimingId] = useState<string | undefined>();
-  const [selectedObjects, setSelectedObjects] = useState<StageEntities<PropPosition[], DancerPosition[]>>({dancers: [], props: [], obstacles: []});
   const [showPaths, setShowPaths] = useState<boolean>(true);
-  const [showHint, setShowHint] = useState<boolean>(false);
-  const [hintManuallyClosed, setHintManuallyClosed] = useState<boolean>(false);
   const [appSettings, setAppSettings] = useState<AppSetting>({
     snapToGrid: true,
     showGrid: true,
     showPreviousSection: false,
     dancerDisplayType: "large",
-    moveScreenOnSelect: true,
   });
+
+  const [showHintDialog, setShowHintDialog] = useState<boolean>(false);
+
+  const [sidebarHeight, setSidebarHeight] = useState<number>(0);
 
   const entityCount = useMemo(() => ({
     props: Object.keys(props.currentChoreo.props).length,
@@ -46,29 +49,28 @@ export default function ChoreoViewPage(props: {
   } as StageEntities<number>), [props.currentChoreo.dancers, props.currentChoreo.props, props.currentChoreo.obstacles]);
 
   useEffect(() => {
-    setHintManuallyClosed(false);
     if (!isNullOrUndefinedOrBlank(props.savedDancerName)) {
       const dancer = Object.values(props.currentChoreo.dancers).find(x => strEquals(x.name, props.savedDancerName));
       if (dancer) {
         setSelectedIds({dancers: [dancer.id], props: [], obstacles: []});
-        setShowHint(false);
+        setShowHintDialog(false);
       } else {
         resetSelectedIds();
-        setShowHint(true);
+        setShowHintDialog(!checkShowingViewPageInfoDialog());
       }
+    } else {
+      setShowHintDialog(!checkShowingViewPageInfoDialog());
     }
-  }, [props.currentChoreo, props.savedDancerName]);
+  }, [props.currentChoreo]);
   
-  useEffect(() => {
-    setSelectedObjects({
-      dancers: Object.entries(currentSection.formation.dancerPositions).filter(x => selectedIds.dancers.includes(x[0])).map(x => x[1]),
-      props: [],
-      obstacles: []
-    });
-  }, [selectedIds]);
+  const selectedObjects = useMemo(() => ({
+    dancers: Object.entries(currentSection.formation.dancerPositions).filter(x => selectedIds.dancers.includes(x[0])).map(x => x[1]),
+    props: [],
+    obstacles: []
+  } as StageEntities<PropPosition[], DancerPosition[], Obstacle[]>), [selectedIds, currentSection]);
 
   useEffect(() => {
-    var currentSectionIndex = props.currentChoreo.sections.findIndex(x => strEquals(x.id, currentSection.id));
+    const currentSectionIndex = props.currentChoreo.sections.findIndex(x => strEquals(x.id, currentSection.id));
     setNextSection(props.currentChoreo.sections[currentSectionIndex + 1]);
   }, [currentSection]);
 
@@ -118,9 +120,6 @@ export default function ChoreoViewPage(props: {
           }
           deselectPosition={() => {
             resetSelectedIds();
-            if (!hintManuallyClosed) {
-              setShowHint(true);
-            }
           }}
           onSelectTiming={(timing) => {
             if (timing) {
@@ -145,6 +144,7 @@ export default function ChoreoViewPage(props: {
               }}
             />
           }
+          onChangeHeight={(height) => setSidebarHeight(height)}
         />
         <MainStage
           appSettings={appSettings}
@@ -157,6 +157,8 @@ export default function ChoreoViewPage(props: {
           currentChoreo={props.currentChoreo}
           currentSection={currentSection}
           selectedIds={selectedIds}
+          selectedObjects={selectedObjects}
+          canResizeProps={false}
           setSelectedIds={(action) => {
             setSelectedIds(action);
             setSelectedTimingId(undefined);
@@ -169,21 +171,20 @@ export default function ChoreoViewPage(props: {
              } :
             undefined
           }
-          onDancerSelected={() => {
-            if (showHint) setShowHint(false);
-          }}
+          bottomMarginPercent={sidebarHeight}
         />
       </div>
 
-      {
-        showHint &&
-        <InstructionMessage
-          instruction={<div className="text-center"><span>名前をタップすると、</span><br/><span>位置情報が表示されます。</span></div>}
-          onClose={() => {
-            setShowHint(false);
-            setHintManuallyClosed(true);
-          }}/>
-      }
+      <Dialog.Root onOpenChange={() => setShowHintDialog(false)} open={showHintDialog}>
+        <BaseErrorDialog title="利用方法" fullWidth onClose={() => setShowHintDialog(false)}>
+          <div>名前をタップすると、位置情報が表示されます。</div>
+          <Divider/>
+          <CustomSwitch
+            label="今後このメッセージを表示しない"
+            defaultChecked={false}
+            onChange={(value) => stopShowingViewPageInfoDialog(value)}/>
+        </BaseErrorDialog>
+      </Dialog.Root>
       
       <Dialog.Root
         handle={exportDialog}

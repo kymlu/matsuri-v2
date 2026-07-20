@@ -25,7 +25,7 @@ export default function IconButton ({
   noBorder, disabled, size, colour, asDiv,
   crossedOut, vertFlip,
 }: IconButtonProps) {
-  var buttonClasses = classNames("relative flex justify-center items-center rounded-full", {
+  const buttonClasses = classNames("relative flex justify-center items-center rounded-full", {
     "border-0": noBorder,
     "border-primary": noBorder !== true && colour === "primary",
     "border-black": noBorder !== true && (colour === undefined || colour === "black"),
@@ -43,34 +43,34 @@ export default function IconButton ({
     [size]
   );
 
-  var imgClasses = classNames("self-center justify-self-center flex-1", {
+  const imgClasses = classNames("self-center justify-self-center flex-1", {
     "min-w-12 min-h-12 size-12 max-w-12 max-h-12": size === "lg",
     "min-w-9 min-h-9 size-9x max-w-9 max-h-9": (size === undefined || size === "md"),
     "min-w-6 min-h-6 size-6 max-w-6 max-h-6": size === "sm",
   });
 
-  var subImgClasses = classNames("self-center justify-self-center flex-1", {
+  const subImgClasses = classNames("self-center justify-self-center flex-1", {
     "min-w-9 min-h-9 size-9 max-w-9 max-h-9": size === "lg",
     "min-w-6 min-h-6 size-6 max-w-6 max-h-6": (size === undefined || size === "md"),
     "min-w-4 min-h-4 size-4 max-w-4 max-h-4": size === "sm",
   });
 
-  var labelClasses = classNames("text-sm text-nowrap font-semibold", {
+  const labelClasses = classNames("text-sm text-nowrap font-semibold", {
     "opacity-30": disabled
   })
 
   const icons = (
     <div className="relative flex items-center justify-center">
       {
-        src &&
-        <Icon src={src} size={size} colour={colour} crossedOut={crossedOut} vertFlip={vertFlip}/>
-      }
-      {
         subIconSrc && (
         <div className="absolute inset-0 flex items-center justify-center">
           <Icon src={subIconSrc} size={subIconSize} colour={colour}/>
         </div>
       )}
+      {
+        src &&
+        <Icon src={src} size={size} colour={colour} crossedOut={crossedOut} vertFlip={vertFlip}/>
+      }
       {
         imgSrc &&
         <img src={getImgPath(imgSrc)} className={imgClasses}/>

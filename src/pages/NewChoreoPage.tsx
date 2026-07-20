@@ -79,11 +79,11 @@ export function NewChoreoPage({
   };
 
   const handleSubmit = () => {
-    var sectionId = crypto.randomUUID();
-    var dancers: Record<string, Dancer> = {};
-    var dancerPositions: Record<string, DancerPosition> = {};
-    for (var i = 0; i < form.dancerCount; i++) {
-      var id = crypto.randomUUID();
+    const sectionId = crypto.randomUUID();
+    const dancers: Record<string, Dancer> = {};
+    const dancerPositions: Record<string, DancerPosition> = {};
+    for (let i = 0; i < form.dancerCount; i++) {
+      const id = crypto.randomUUID();
       dancers[id] = {
         id: id,
         name: (i + 1).toString(),
@@ -99,7 +99,7 @@ export function NewChoreoPage({
         rotation: 0,
       }
     }
-    var choreo: Choreo = {
+    const choreo: Choreo = {
       id: crypto.randomUUID(),
       teamId: teamId,
       name: form.name.trim(),
