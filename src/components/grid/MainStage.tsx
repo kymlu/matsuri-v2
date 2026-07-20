@@ -399,7 +399,7 @@ export default function MainStage({
   const handleTouchEnd = () => {
     setLastDist(0);
     setLastCenter(null);
-    if (isZooming) isZooming.current = false;
+    if (isZooming.current) isZooming.current = false;
   };
 
   const handleDragEnd = (e: any) => {

@@ -96,7 +96,7 @@ export default function BaseGridObject({
         isDraggingRef.current = false;
       }}
       onDragMove={(e) => {
-        if (isZooming) return;
+        if (isZooming?.current) return;
         if (!isSelected) {
           onClick?.(false);
         }
@@ -120,7 +120,7 @@ export default function BaseGridObject({
         }
       }}
       onPointerUp={(e) => {
-        if (dragStartRef && !isDraggingRef.current && !isZooming) {
+        if (dragStartRef && !isDraggingRef.current && !isZooming?.current) {
           onClick?.();
         }
       }}
