@@ -140,6 +140,10 @@ export default function MainStage({
   const [rulerPos, setRulerPos] = useState<Coordinates>({x: 0, y: 0});
   const [isSelectingNewSection, setIsSelectingNewSection] = useState<boolean>(false);
 
+  const bottomMarginM = useMemo(() => {
+    return bottomMarginPercent === 0 ? 4 : ((size.height / pixelsPerMeter) * bottomMarginPercent);
+  }, [bottomMarginPercent, size.height, pixelsPerMeter]);
+
   useEffect(() => {
     if (!stageGeometry || strEquals(stagePosSectionId, currentSection.id)) return;
     setIsSelectingNewSection(true);
@@ -176,7 +180,6 @@ export default function MainStage({
     if (stageGeometry.yAxis === "bottom-up") {
       if (selectedIds.dancers.length > 0) {
         let stageYMeters = pxToStageMeters({x: 0, y: -stagePositionRef.current.y}, stageGeometry, pixelsPerMeter).y;
-        let bottomMarginM = bottomMarginPercent === 0 ? (100 / pixelsPerMeter) : ((size.height / pixelsPerMeter) * bottomMarginPercent);
         let topThresholdM = stageYMeters - (METER_PX * 2)/pixelsPerMeter;
         let bottomThresholdM = stageYMeters - (size.height - 78)/pixelsPerMeter + bottomMarginM + 1;
         if (selectedIds.dancers.length === 1) {
@@ -220,7 +223,6 @@ export default function MainStage({
       if (selectedIds.dancers.length === 1) {
         let y = selectedObjects.dancers[0].y;
         let stageYMeters = pxToStageMeters({x: 0, y: -stagePositionRef.current.y}, stageGeometry, pixelsPerMeter).y;
-        let bottomMarginM = bottomMarginPercent === 0 ? (100 / pixelsPerMeter) : ((size.height / pixelsPerMeter) * bottomMarginPercent);
         
         let topThresholdM = stageYMeters + 1;
         let bottomThresholdM = stageYMeters + (size.height - 78)/pixelsPerMeter - bottomMarginM - 1;
@@ -269,11 +271,9 @@ export default function MainStage({
     if (stageGeometry.yAxis === "bottom-up") {
       if (selectedIds.dancers.length === 1) {
         let y = selectedObjects.dancers[0].y;
-        let bottomMarginM = bottomMarginPercent === 0 ? (100 / pixelsPerMeter) : ((size.height / pixelsPerMeter) * bottomMarginPercent);
         newPosition.y = -stageMetersToPx({x: 0, y: y}, stageGeometry, pixelsPerMeter).y + (size.height - bottomMarginM * pixelsPerMeter) / 2;
       } else if (selectedIds.dancers.length > 1) {
         let y = selectedObjects.dancers.reduce((sum, d) => sum + d.y, 0) / selectedObjects.dancers.length;
-        let bottomMarginM = bottomMarginPercent === 0 ? (100 / pixelsPerMeter) : ((size.height / pixelsPerMeter) * bottomMarginPercent);
         newPosition.y = -stageMetersToPx({x: 0, y: y}, stageGeometry, pixelsPerMeter).y + (size.height - bottomMarginM * pixelsPerMeter) / 2;
       } else {
         let frontmostY = Math.max(
