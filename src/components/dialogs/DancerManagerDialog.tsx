@@ -51,7 +51,7 @@ export function DancerManagerDialog({
         }));
       }}
       onSubmit={() => {
-        var trimmedDancers: Dancer[] = dancerList.map(x => ({id: x.id, name: x.name.trim()} as Dancer));
+        const trimmedDancers: Dancer[] = dancerList.map(x => ({id: x.id, name: x.name.trim()} as Dancer));
         onSubmit(trimmedDancers, deletedDancerIds);
       }}>
       <div className="max-h-full grid grid-rows-[1fr,auto]">

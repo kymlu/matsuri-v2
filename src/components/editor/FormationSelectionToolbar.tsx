@@ -160,7 +160,7 @@ function FormationSectionItem (props: {
   full?: boolean,
   registerRef: (id: string, button: HTMLButtonElement | null) => void,
 }) {
-  var {section, isSelected, onChangeSection, onOpenSectionMenu, asDiv, full, registerRef} = props;
+  const {section, isSelected, onChangeSection, onOpenSectionMenu, asDiv, full, registerRef} = props;
 
   const {
     attributes,

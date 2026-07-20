@@ -58,7 +58,7 @@ export default function BaseGridObject({
   }, [id, registerNode]);
 
   useEffect(() => {
-    var newPosition = stageMetersToPx({x: position.x, y: position.y}, stageGeometry, METER_PX, height);
+    const newPosition = stageMetersToPx({x: position.x, y: position.y}, stageGeometry, METER_PX, height);
     if (newPosition.x === ref.current?.x() && newPosition.y === ref.current?.y()) return;
 
     setIsAnimating(true);
@@ -129,7 +129,7 @@ export default function BaseGridObject({
         if (isDraggingRef.current) {
           const node = ref.current!!;
 
-          var position: Coordinates = {x: node.x(), y: node.y()};
+          let position: Coordinates = {x: node.x(), y: node.y()};
 
           if (snapToGrid) {
             position = snapCoordsToGrid({x: node.x(), y: node.y()}, snapSize)
@@ -139,7 +139,7 @@ export default function BaseGridObject({
             x: position.x,
             y: position.y,
             onFinish: () => {
-              var snappedPositionInM = pxToStageMeters({x: node.attrs.x, y: node.attrs.y}, stageGeometry, METER_PX, height);
+              const snappedPositionInM = pxToStageMeters({x: node.attrs.x, y: node.attrs.y}, stageGeometry, METER_PX, height);
               updatePosition?.(snappedPositionInM.x, snappedPositionInM.y);
             }
           });

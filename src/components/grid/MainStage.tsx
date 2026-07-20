@@ -72,7 +72,7 @@ export default function MainStage({
   const [isShowingVerticalRuler, setIsShowingVerticalRuler] = useState<boolean>(false);
   const [isShowingHorizontalRuler, setIsShowingHorizontalRuler] = useState<boolean>(false);
   const [isManualMovement, setIsManualMovement] = useState<boolean>(false);
-  var isZooming = useRef<boolean>(false);
+  const isZooming = useRef<boolean>(false);
 
   const [stageScale, setStageScale] = useState<Coordinates>({ x: 1, y: 1 });
   const pixelsPerMeter = useMemo(() => METER_PX * stageScale.y, [stageScale]);
@@ -80,7 +80,7 @@ export default function MainStage({
   const [clickedOnEmpty, setClickedOnEmpty] = useState<boolean>(false);
   const [isDraggingOnEmpty, setIsDraggingOnEmpty] = useState<boolean | undefined>(undefined);
   useEffect(() => {
-    var newGeometry = currentChoreo.stageGeometry;
+    const newGeometry = currentChoreo.stageGeometry;
     if (stageGeometry !== undefined &&
       stageGeometry.stageWidth === newGeometry.stageWidth &&
       stageGeometry.stageLength === newGeometry.stageLength &&
@@ -150,7 +150,7 @@ export default function MainStage({
     setStagePosSectionId(currentSection.id);
     // only consider the frontmost dancer within the app since dancers are the main
     // within the pdf it will still show props and dancers
-    var newPosition = {x: stagePositionRef.current.x, y: stagePositionRef.current.y};
+    const newPosition = {x: stagePositionRef.current.x, y: stagePositionRef.current.y};
     if (selectedIds.dancers.length > 0) {
       let stageXMeters = pxToStageMeters({x: -stagePositionRef.current.x, y: 0}, stageGeometry, pixelsPerMeter).x;
       let leftThreshold = stageXMeters + 1;
@@ -232,7 +232,7 @@ export default function MainStage({
           }
         }
       } else if (!isManualMovement) {
-        var frontmostY = Math.max(
+        const frontmostY = Math.max(
           ...Object.values(currentSection.formation.dancerPositions).map(x => x.y)
         );
         newPosition.y = -stageMetersToPx({x: 0, y: frontmostY + 2}, stageGeometry, pixelsPerMeter).y + METER_PX;
@@ -516,7 +516,7 @@ export default function MainStage({
             const stagePosition = e.target.getStage();
             
             if ((isAddingDancer || isAddingProp || isAddingObstacles) && stagePosition) {
-              var position = {
+              let position = {
                 x: (e.evt.x - stagePosition.attrs.x)/stagePosition.attrs.scaleX,
                 y: (e.evt.y - stagePosition.attrs.y - stageGeometry.margin.topMargin * METER_PX) / stagePosition.attrs.scaleY
               }
@@ -525,7 +525,7 @@ export default function MainStage({
                 position = snapCoordsToGrid(position, METER_PX/2)
               }
 
-              var positionM = pxToStageMeters(position, stageGeometry, METER_PX, isAddingProp ? DEFAULT_PROP_LENGTH : 0);
+              const positionM = pxToStageMeters(position, stageGeometry, METER_PX, isAddingProp ? DEFAULT_PROP_LENGTH : 0);
               
               if (
                 positionM.x >= -(stageGeometry.margin.leftMargin) &&

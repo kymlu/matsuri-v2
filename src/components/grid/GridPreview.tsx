@@ -30,7 +30,7 @@ export default function GridPreview (props: GridPreviewProps) {
   const ref = useRef<HTMLDivElement>(null);
 
   const scale = useMemo<number>(() => {
-    var boundingClient = ref.current?.getBoundingClientRect();
+    const boundingClient = ref.current?.getBoundingClientRect();
     if (!boundingClient) return 1;
     return Math.min(
       boundingClient.width / ((props.stageWidth + props.xMargin * 2) * METER_PX), 

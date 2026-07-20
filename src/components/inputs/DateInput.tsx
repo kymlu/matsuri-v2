@@ -43,7 +43,7 @@ export default function DateInput({
     onDateChange(newValue);
   }
 
-  var inputClasses = classNames(
+  const inputClasses = classNames(
     "col-start-1 pointer-events-none row-start-1 px-2 py-3 text-black border border-gray-400 rounded-md focus-within:border-primary focus:outline-none",
     {
       "h-10": tall,
@@ -56,7 +56,7 @@ export default function DateInput({
       "bg-white disabled:bg-white disabled:text-black": !(required && isNullOrUndefinedOrBlank(value)) && !hasError && !disabled,
     },)
 
-  var wrapperClasses = classNames(
+  const wrapperClasses = classNames(
     "grid relative items-center w-full grid-cols-1",
     {
       "mb-2": !compact,

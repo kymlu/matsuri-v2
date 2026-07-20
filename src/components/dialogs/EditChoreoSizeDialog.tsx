@@ -24,7 +24,7 @@ type EditChoreoSizeDialogProps = {
 export default function EditChoreoSizeDialog({
   currentChoreo, onSave
 }: EditChoreoSizeDialogProps) {
-  var [form, setForm] = useState<EditChoreoMetaForm>({
+  const [form, setForm] = useState<EditChoreoMetaForm>({
     name: "",
     eventName: "",
     stageType: "parade",

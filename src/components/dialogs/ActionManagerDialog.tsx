@@ -152,12 +152,12 @@ export function ActionManagerDialog({
                     action={action}
                     actionNames={actionNames}
                     onRenameAction={(name) => {
-                      var newActions = [...actions];
+                      const newActions = [...actions];
                       newActions[i].name = name;
                       setActions(newActions);
                     }}
                     onDeleteAction={() => {
-                      var newActions = [...actions.slice(0, i), ...actions.slice(i + 1)];
+                      const newActions = [...actions.slice(0, i), ...actions.slice(i + 1)];
                       setActions(newActions);
                     }}
                     onAddTiming={() => {addTiming(i)}}
@@ -238,7 +238,7 @@ function SortableActionSection ({
               timing={timing}
               timingNames={timingNames}
               onRenameTiming={(name) => {
-                var newTimings = [...action.timings];
+                const newTimings = [...action.timings];
                 newTimings[i].name = name;
                 onRenameTiming(newTimings);
               }}

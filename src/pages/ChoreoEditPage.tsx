@@ -160,7 +160,7 @@ export default function ChoreoEditPage(props: {
   const [prevSection, setPrevSection] = useState<ChoreoSection | undefined>();
   useEffect(() => {
     if (appSettings.showPreviousSection) {
-      var currentSectionIndex = history.presentState.state.sections.findIndex(x => strEquals(x.id, currentSection.id));
+      const currentSectionIndex = history.presentState.state.sections.findIndex(x => strEquals(x.id, currentSection.id));
       setPrevSection(history.presentState.state.sections[currentSectionIndex - 1]);
     } else {
       setPrevSection(undefined);
@@ -192,7 +192,7 @@ export default function ChoreoEditPage(props: {
   useEffect(() => {
     // undo/redo timing
     if (currentAction && currentTiming) {
-      var newTiming = currentSection.formation.dancerActions.find(x => strEquals(currentAction.id, x.id))?.timings.find(x => strEquals(currentTiming.id, x.id));
+      const newTiming = currentSection.formation.dancerActions.find(x => strEquals(currentAction.id, x.id))?.timings.find(x => strEquals(currentTiming.id, x.id));
       if (newTiming && newTiming.dancerIds.length !== selectedIds.dancers.length) {
         setCurrentTiming(newTiming);
         setSelectedIds({dancers: [...newTiming.dancerIds], props: [], obstacles: []});
@@ -239,7 +239,7 @@ export default function ChoreoEditPage(props: {
   const copyBuffer = useRef<StageEntities<Record<string, PropPosition>, Record<string, DancerPosition>>>({props: {}, dancers: {}, obstacles: {}});
 
   useEffect(() => {
-    var newSection = history.presentState.state.sections.find(s => strEquals(s.id, history.presentState.currentSectionId));
+    const newSection = history.presentState.state.sections.find(s => strEquals(s.id, history.presentState.currentSectionId));
     
     if (newSection === undefined) {
       setCurrentSection(history.presentState.state.sections[0]);
@@ -758,8 +758,8 @@ export default function ChoreoEditPage(props: {
         onPastePosition={() => {onPaste()}}
         showSelectDancer={selectedIds.dancers.length > 0}
         onSelectColor={() => {
-          var positions = Object.entries(currentSection.formation.dancerPositions);
-          var currentColours = new Set(positions.filter(x => selectedIds.dancers.includes(x[0])).map(x => x[1].color));
+          const positions = Object.entries(currentSection.formation.dancerPositions);
+          const currentColours = new Set(positions.filter(x => selectedIds.dancers.includes(x[0])).map(x => x[1].color));
           setSelectedIds(prev => ({...prev, dancers: positions.filter(x => currentColours.has(x[1].color)).map(x => x[0])}));
         }}
         onSelectType={(selectDancers: boolean, selectProps: boolean) => {
@@ -836,13 +836,13 @@ export default function ChoreoEditPage(props: {
         showRenameObstacle={selectedIds.obstacles.length === 1 && (selectedIds.dancers.length + selectedIds.props.length === 0)}
         showDuplicateObstacle={selectedIds.obstacles.length > 0 && selectedIds.dancers.length === 0 && selectedIds.props.length === 0}
         onDuplicateObstacle={() => {
-          var newObstacles = selectedObjects.obstacles.map(o => ({
+          const newObstacles = selectedObjects.obstacles.map(o => ({
             ...o,
             id: crypto.randomUUID(),
             x: o.x + 0.5,
             y: o.y + (history.presentState.state.stageGeometry.yAxis === "bottom-up" ? -0.5 : +0.5)
           }));
-          var newIds = newObstacles.map(o => o.id);
+          const newIds = newObstacles.map(o => o.id);
           dispatch({
             type: "SET_STATE",
             newState: addObstacles(

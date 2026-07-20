@@ -54,7 +54,7 @@ export function PropManagerDialog({
           return strCompare<Prop>(a, b, "name");
         }));}}
       onSubmit={() => {
-        var trimmedProps: Prop[] = propList.map(x => ({...x, name: x.name.trim()}))
+        const trimmedProps: Prop[] = propList.map(x => ({...x, name: x.name.trim()}))
         onSubmit(trimmedProps, deletedPropIds);
       }}>
       <div className="max-h-full grid grid-rows-[1fr,auto]">

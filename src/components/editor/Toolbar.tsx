@@ -154,7 +154,7 @@ export default function Toolbar({
     }
    }, [areSelectionActionsActivated]);
 
-  var className = classNames("z-10 flex items-center w-screen gap-2 px-4 pt-4 pb-8 overflow-y-auto bg-white border-t-2 border-gray-400", {
+  const className = classNames("z-10 flex items-center w-screen gap-2 px-4 pt-4 pb-8 overflow-y-auto bg-white border-t-2 border-gray-400", {
     "pointer-events-none opacity-40": !isEnabled
   });
 

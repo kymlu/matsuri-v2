@@ -70,7 +70,7 @@ export default function ChoreoViewPage(props: {
   } as StageEntities<PropPosition[], DancerPosition[], Obstacle[]>), [selectedIds, currentSection]);
 
   useEffect(() => {
-    var currentSectionIndex = props.currentChoreo.sections.findIndex(x => strEquals(x.id, currentSection.id));
+    const currentSectionIndex = props.currentChoreo.sections.findIndex(x => strEquals(x.id, currentSection.id));
     setNextSection(props.currentChoreo.sections[currentSectionIndex + 1]);
   }, [currentSection]);
 

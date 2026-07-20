@@ -156,7 +156,7 @@ export function addObstacle(state: Choreo, obstacle: Obstacle): Choreo {
 }
 
 export function addObstacles(state: Choreo, obstacle: Obstacle[]): Choreo {
-  var obstacleCount = Object.keys(state.obstacles ?? {}).length;
+  const obstacleCount = Object.keys(state.obstacles ?? {}).length;
   const newObstacles = { ...state.obstacles };
   obstacle.reduce((acc, item, i) => {
     acc[item.id] = {...item, z: obstacleCount + i};
@@ -468,7 +468,7 @@ export function alignHorizontalPositions (
 ): Choreo {
   if ((positions.dancers.length + positions.props.length + positions.obstacles.length) === 0) return {...state};
 
-  var newValue: number = 0;
+  let newValue: number = 0;
 
   if ((positions.dancers.length + positions.props.length + positions.obstacles.length) === 1) {
     switch (type) {
@@ -483,7 +483,7 @@ export function alignHorizontalPositions (
         break;
     }
   } else {
-    var xValues = [
+    const xValues = [
       ...positions.dancers.map(x => x.x),
       ...positions.props.map(x => x.x),
       ...positions.props.map(x => x.x + state.props[x.propId].width / 2),
@@ -532,7 +532,7 @@ export function alignHorizontalPositions (
     }
   });
   
-  var newObstacles = state.obstacles ? updateObstacles(
+  const newObstacles = state.obstacles ? updateObstacles(
     {...state.obstacles},
     positions.obstacles.map(x => x.id),
     f => ({
@@ -555,7 +555,7 @@ export function alignVerticalPositions (
 ): Choreo {
   if ((positions.dancers.length + positions.props.length + positions.obstacles.length) === 0) return {...state};
 
-  var newValue: number = 0;
+  let newValue: number = 0;
 
   if ((positions.dancers.length + positions.props.length + positions.obstacles.length) === 1) {
     switch (type) {
@@ -570,7 +570,7 @@ export function alignVerticalPositions (
         break;
     }
   } else {
-    var yValues = [
+    const yValues = [
       ...positions.dancers.map(x => x.y),
       ...positions.props.map(x => x.y + (
         type === "top" ? 0 :
@@ -624,7 +624,7 @@ export function alignVerticalPositions (
     }
   });
   
-  var newObstacles = state.obstacles ? updateObstacles(
+  const newObstacles = state.obstacles ? updateObstacles(
     {...state.obstacles},
     positions.obstacles.map(x => x.id),
     f => ({
@@ -647,20 +647,20 @@ export function distributePositions (
 ): Choreo {
   if (positions.dancers.length === 0 && positions.props.length === 0 && positions.obstacles.length === 0) return {...state};
 
-  var sortedItems = [...positions.dancers, ...positions.props, ...positions.obstacles].sort((a, b) => {return a[type] - b[type]});
-  var allValues = [...positions.dancers.map(d => d[type]), ...positions.props.map(d => d[type]), ...positions.obstacles.map(d => d[type])]
+  const sortedItems = [...positions.dancers, ...positions.props, ...positions.obstacles].sort((a, b) => {return a[type] - b[type]});
+  const allValues = [...positions.dancers.map(d => d[type]), ...positions.props.map(d => d[type]), ...positions.obstacles.map(d => d[type])]
 
-  var min = Math.min(...sortedItems.map(x => x[type]));
-  var max = Math.max(...sortedItems.map(x => x[type]));
-  var interval = (max - min) / (allValues.length - 1);
+  const min = Math.min(...sortedItems.map(x => x[type]));
+  const max = Math.max(...sortedItems.map(x => x[type]));
+  const interval = (max - min) / (allValues.length - 1);
 
   sortedItems.forEach((value, index) => {
     value[type] = roundToTenth(min + index * interval);
   });
 
-  var dancerPositions = indexByKey(sortedItems.filter(x => x.type === "dancer") as DancerPosition[], "dancerId");
-  var propPositions = indexByKey(sortedItems.filter(x => x.type === "prop") as PropPosition[], "propId");
-  var obstaclePositions = indexByKey(sortedItems.filter(x => x.type === "obstacle") as Obstacle[], "id");
+  const dancerPositions = indexByKey(sortedItems.filter(x => x.type === "dancer") as DancerPosition[], "dancerId");
+  const propPositions = indexByKey(sortedItems.filter(x => x.type === "prop") as PropPosition[], "propId");
+  const obstaclePositions = indexByKey(sortedItems.filter(x => x.type === "obstacle") as Obstacle[], "id");
 
   const newSections = state.sections.map(section => {
     if (!strEquals(section.id, sectionId)) return section
@@ -682,7 +682,7 @@ export function distributePositions (
     }
   });
 
-  var newObstacles = updateObstacles(
+  const newObstacles = updateObstacles(
     {...state.obstacles},
     positions.obstacles.map(x => x.id),
     f => ({...f, [type]: obstaclePositions[f.id][type]}));
@@ -698,9 +698,9 @@ export function swapPositions(
 ): Choreo {
   const newSections = state.sections.map(section => {
     if (section.id !== sectionId) return section
-    var dancerPositions = {...section.formation.dancerPositions};
-    var originalA = section.formation.dancerPositions[dancerAId];
-    var originalB = section.formation.dancerPositions[dancerBId];
+    const dancerPositions = {...section.formation.dancerPositions};
+    const originalA = section.formation.dancerPositions[dancerAId];
+    const originalB = section.formation.dancerPositions[dancerBId];
     dancerPositions[dancerAId] = { ...originalA, x: originalB.x, y: originalB.y, z: originalB.z };
     dancerPositions[dancerBId] = { ...originalB, x: originalA.x, y: originalA.y, z: originalA.z };
     return {
@@ -721,10 +721,10 @@ export function setZOnAllPositions(
   // if there are z indices, ignore
   if (Object.values(state.sections[0].formation.dancerPositions)[0].z !== undefined) return state;
 
-  var newObstacles = indexByKey(Object.values(state.obstacles ?? {}).map((o, i) => ({...o, z: i} as Obstacle)), "id");
+  const newObstacles = indexByKey(Object.values(state.obstacles ?? {}).map((o, i) => ({...o, z: i} as Obstacle)), "id");
   const newSections = state.sections.map(section => {
-    var newDancerPositions: DancerPosition[] = Object.values(section.formation.dancerPositions).map((d, i) => ({...d, z: i} as DancerPosition));
-    var newPropPositions: PropPosition[] = Object.values(section.formation.propPositions).map((d, i) => ({...d, z: i} as PropPosition));
+    const newDancerPositions: DancerPosition[] = Object.values(section.formation.dancerPositions).map((d, i) => ({...d, z: i} as DancerPosition));
+    const newPropPositions: PropPosition[] = Object.values(section.formation.propPositions).map((d, i) => ({...d, z: i} as PropPosition));
     return {
       ...section,
       formation: {
@@ -744,7 +744,7 @@ export function rearrangePositions(
   selectedPositions: StageEntities<string[]>,
   rearrangement: Rearrangement,
 ): Choreo {
-  var newObstacles: Obstacle[] = [];
+  let newObstacles: Obstacle[] = [];
   if (rearrangement === "toFront") {
     newObstacles = bringObstaclesToFront(Object.values(state.obstacles ?? {}), selectedPositions.obstacles);
   } else if (rearrangement === "forward") {
@@ -757,8 +757,8 @@ export function rearrangePositions(
 
   const newSections = state.sections.map(section => {
     if (section.id !== sectionId) return section;
-    var newDancerPositions: DancerPosition[] = [];
-    var newPropPositions: PropPosition[] = [];
+    let newDancerPositions: DancerPosition[] = [];
+    let newPropPositions: PropPosition[] = [];
     if (rearrangement === "toFront") {
       newDancerPositions = bringDancersToFront(Object.values(section.formation.dancerPositions), selectedPositions.dancers);
       newPropPositions = bringPropsToFront(Object.values(section.formation.propPositions), selectedPositions.props);

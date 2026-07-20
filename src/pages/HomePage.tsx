@@ -373,7 +373,7 @@ export default function HomePage({
     } as Choreo;
     saveChoreo(newChoreo, () => {
       setLocalChoreos(prev => ({...prev, [newChoreo.id]: newChoreo}));
-      var newChoreos = [...savedChoreos, {...getBasicChoreoDetails(newChoreo), status: "localOnly" as ChoreoStatus}];
+      const newChoreos = [...savedChoreos, {...getBasicChoreoDetails(newChoreo), status: "localOnly" as ChoreoStatus}];
 
       // setDancerNamesByEvent(
       //   newChoreos.reduce((acc, item) => {
@@ -634,7 +634,7 @@ export default function HomePage({
             if (!event.target.files || event.target.files.length === 0) {
               console.log("No files were selected to upload.");              
             } else {
-              var file = event.target.files?.[0];
+              const file = event.target.files?.[0];
               readUploadedFile(
                 file,
                 (newChoreo: Choreo) => {
@@ -962,8 +962,8 @@ function EventSection({
 
   const missingNames = useMemo(() => {
     if (dancerNamesByFormation) {
-      var allNames = new Set(Object.values(dancerNamesByFormation ?? {}).flat());
-      var returnVal = Object.entries(dancerNamesByFormation).reduce((acc, [id, names]) => {
+      const allNames = new Set(Object.values(dancerNamesByFormation ?? {}).flat());
+      const returnVal = Object.entries(dancerNamesByFormation).reduce((acc, [id, names]) => {
         return {
           ...acc,
           [id]: allNames.difference(new Set(names)),

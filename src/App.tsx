@@ -79,7 +79,7 @@ function App() {
     fetch(`${process.env.PUBLIC_URL}/build-info.json`)
       .then(r => r.json())
       .then(info => {
-        var buildDate = info.buildDate;
+        const buildDate = info.buildDate;
         console.log(`Build: ${buildDate}`);
         setBuildInfo(`更新 ${buildDate}`);
       });

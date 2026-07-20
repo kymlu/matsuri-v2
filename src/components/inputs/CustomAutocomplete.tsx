@@ -53,7 +53,7 @@ export default function CustomAutocomplete({
     }
   }
 
-  var inputClasses = classNames(
+  const inputClasses = classNames(
     "col-start-1 border row-start-1 text-black p-3 border-gray-400 rounded-md focus-within:border-primary focus:outline-none",
     {
       "pr-20": clearable && showLength,
@@ -71,7 +71,7 @@ export default function CustomAutocomplete({
       "border-primary bg-primary bg-opacity-20 placeholder:text-primary": (required && isNullOrUndefinedOrBlank(value)) || hasError,
     },);
 
-  var wrapperClasses = classNames(
+  const wrapperClasses = classNames(
     "grid items-center w-full grid-cols-1",
     {
       "mb-2": !compact && !showLength,

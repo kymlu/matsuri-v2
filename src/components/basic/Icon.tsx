@@ -16,7 +16,7 @@ export default function Icon({
   crossedOut = false,
   vertFlip = false,
 }: IconProps) {
-  var iconClasses = classNames("font-icon leading-none overflow-hidden", {
+  const iconClasses = classNames("font-icon leading-none overflow-hidden", {
     "text-6xl max-w-[3.75rem]": size === "lg",
     "text-4xl max-w-[2.25rem]": size === "md",
     "text-2xl max-w-[1.5rem]": size === "sm",

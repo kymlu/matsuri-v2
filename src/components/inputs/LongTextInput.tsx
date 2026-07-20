@@ -56,7 +56,7 @@ export default function LongTextInput({
     onContentChange(newValue);
   }
 
-  var inputClasses = classNames(
+  const inputClasses = classNames(
     "w-full h-full col-start-1 row-start-1 pl-2 text-black p-3 border-gray-400 rounded-md border focus-within:border-primary focus:outline-none",
     {
       "pr-6": clearable,
@@ -66,7 +66,7 @@ export default function LongTextInput({
       "border-primary bg-primary-lighter placeholder:text-primary-darker": (required && isNullOrUndefinedOrBlank(value)) || hasError,
     },);
 
-  var wrapperClasses = classNames(
+  const wrapperClasses = classNames(
     "grid items-center w-full h-full grid-cols-1",
     {
       "mb-2": !compact,

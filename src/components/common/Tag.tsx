@@ -14,7 +14,7 @@ type TagProps = {
 export function Tag ({
   icon, text, type, compact, dottedLine
 }: TagProps) {
-  var tagClasses = classNames("w-min font-semibold flex items-center gap-0.5 border rounded-md text-nowrap",
+  const tagClasses = classNames("w-min font-semibold flex items-center gap-0.5 border rounded-md text-nowrap",
     {
       "bg-primary text-white border-primary": type === "filled",
       "bg-transparent text-primary border-primary": type === "primary",

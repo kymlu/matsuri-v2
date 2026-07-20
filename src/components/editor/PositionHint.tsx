@@ -84,7 +84,7 @@ export default function PositionHint({
           <div className="flex flex-wrap w-full gap-2">
             {
               actions.map(action => {
-                var assignedTiming = action.timings.find(t => t.dancerIds.includes(dancer.id));
+                const assignedTiming = action.timings.find(t => t.dancerIds.includes(dancer.id));
                 
                 return <InfoBox key={action.id} title={action.name} isSmall>
                   <span className="font-medium">{assignedTiming?.name ?? "---"}</span>

@@ -25,8 +25,8 @@ export default function NextDirectionLayer({
   const points = useMemo(() => {
     if (hideLayer) return [];
 
-    var currentPoints = stageMetersToPx(currentPosition!!, geometry, METER_PX);
-    var nextPoints = stageMetersToPx(nextPosition!!, geometry, METER_PX);
+    const currentPoints = stageMetersToPx(currentPosition!!, geometry, METER_PX);
+    const nextPoints = stageMetersToPx(nextPosition!!, geometry, METER_PX);
     return [currentPoints.x, currentPoints.y, nextPoints.x, nextPoints.y]
   }, [currentPosition, nextPosition]);
 

@@ -51,7 +51,7 @@ export default function TextInput({
     }
   }
 
-  var inputClasses = classNames(
+  const inputClasses = classNames(
     "col-start-1 border row-start-1 text-black py-3 border-gray-400 rounded-md focus-within:border-primary focus:outline-none",
     {
       "pr-20": clearable && showLength,
@@ -70,7 +70,7 @@ export default function TextInput({
       "border-primary bg-primary/20 placeholder:text-primary": (required && isNullOrUndefinedOrBlank(value?.trim())) || hasError,
     },);
 
-  var wrapperClasses = classNames(
+  const wrapperClasses = classNames(
     "grid items-center w-full grid-cols-1",
     {
       "mb-2": !compact && !showLength,

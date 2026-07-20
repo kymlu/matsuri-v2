@@ -246,10 +246,10 @@ export default function FormationLayer({
           ]}
           rotationSnapTolerance={10}
           onTransformEnd={(event) => {
-            var selectedItemType: "prop" | "obstacle" | undefined;
-            var selectedItemId: string | undefined;
-            var selectedWidth: number | undefined;
-            var selectedLength: number | undefined;
+            let selectedItemType: "prop" | "obstacle" | undefined;
+            let selectedItemId: string | undefined;
+            let selectedWidth: number | undefined;
+            let selectedLength: number | undefined;
             
             if (selectedIds.props.length === 1) {
               selectedItemId = selectedIds.props[0];
@@ -272,9 +272,9 @@ export default function FormationLayer({
             const group = event.target as Konva.Group;
             if (!group) return;
 
-            var width = Math.min(Math.max(Math.round(selectedWidth!! * group.scaleX() / PROP_SNAP_SIZE) * PROP_SNAP_SIZE, MIN_PROP_DIMENSION), MAX_PROP_DIMENSION);
-            var length = Math.min(Math.max(Math.round(selectedLength!! * group.scaleY() / PROP_SNAP_SIZE) * PROP_SNAP_SIZE, MIN_PROP_DIMENSION), MAX_PROP_DIMENSION);
-            var newCoords = pxToStageMeters(
+            const width = Math.min(Math.max(Math.round(selectedWidth!! * group.scaleX() / PROP_SNAP_SIZE) * PROP_SNAP_SIZE, MIN_PROP_DIMENSION), MAX_PROP_DIMENSION);
+            const length = Math.min(Math.max(Math.round(selectedLength!! * group.scaleY() / PROP_SNAP_SIZE) * PROP_SNAP_SIZE, MIN_PROP_DIMENSION), MAX_PROP_DIMENSION);
+            const newCoords = pxToStageMeters(
               {x: event.target.attrs.x, y: event.target.attrs.y},
               geometry,
               METER_PX,
