@@ -366,7 +366,7 @@ export default function HomePage({
     if (isLoggedIn && isNullOrUndefinedOrBlank(savedDancerName)) {
       setEditUserNameDialogOpen(true);
     }
-  }, [isLoggedIn]);
+  }, [isLoggedIn, savedDancerName]);
 
   const triggerUpload = () => {
     const uploadFileElement = document.getElementById("uploadFileInput");
