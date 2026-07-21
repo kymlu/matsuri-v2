@@ -32,7 +32,7 @@ import BeginnersDialog from "../components/dialogs/BeginnersDialog"
 import EditEventInfoDialog from "../components/dialogs/EditEventInfoDialog"
 import SiteInfoDialog from "../components/dialogs/SiteInfoDialog"
 import { ChoreoStatusTag } from "../components/common/Tag"
-import { changeUserName, getChoreoFile, getChoreoSummary, logoutUserFromTeam } from "../lib/helpers/apiHelper"
+import { changeUserName, getChoreoFile, getChoreoSummary, logoutUserFromTeam, verifyInvite } from "../lib/helpers/apiHelper"
 import LoginDialog from "../components/dialogs/LoginDialog"
 import { Team } from "../models/team"
 import CustomMenu from "../components/inputs/CustomMenu"
@@ -40,6 +40,7 @@ import ChoreoPasswordEntryDialog from "../components/dialogs/ChoreoPasswordEntry
 import { ChoreoHistoryDialog } from "../components/dialogs/ChoreoHistoryDialog"
 import { DancerCount, PropCount, StageSize } from "../components/common/IconInfo"
 import { checkUnlockedChoreo, setUnlockedChoreo } from "../lib/dataAccess/LocalStorageController"
+import AcceptInviteDialog from "../components/dialogs/AcceptInviteDialog"
 
 type HomePageProps = {
   buildInfo?: string,
@@ -60,6 +61,7 @@ type HomePageProps = {
   team?: Team,
   showNoTeamDialog: boolean,
   setShowNoTeamDialog: (value: boolean) => void,
+  setupToken?: string | null,
 }
 
 export type ChoreoStatus = "localOnly" | "syncRequired" | "upToDate" | "edited";
@@ -74,7 +76,7 @@ export default function HomePage({
   savedDancerName, setSavedDancerName,
   dancerNamesByEvent, setDancerNamesByEvent,
   isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin,
-  setCurrentTeamMemberId, team, showNoTeamDialog, setShowNoTeamDialog
+  setCurrentTeamMemberId, team, showNoTeamDialog, setShowNoTeamDialog, setupToken
 }: HomePageProps) {
   const [savedChoreos, setSavedChoreos] = useState<ChoreoWithStatus[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -83,6 +85,9 @@ export default function HomePage({
   const [serverChoreoDetails, setServerChoreoDetails] = useState<Record<string, BasicChoreoDetails>>({});
   const [localChoreos, setLocalChoreos] = useState<Record<string, Choreo>>({});
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const [showVerifyInviteErrorDialog, setShowVerifyInviteErrorDialog] = useState<boolean>(false);
+  const [showAcceptInviteDialog, setShowAcceptInviteDialog] = useState<boolean>(false);
+  const [email, setEmail] = useState<string>("");
 
   const getChoreoFromServer = async (
     id: string
@@ -186,6 +191,14 @@ export default function HomePage({
       setSavedChoreos(choreos);
       setServerChoreoDetails(indexedServer);
       setLocalChoreos(indexedLocal);
+      if (setupToken && team) {
+        verifyInvite(team.id, setupToken, (email) => {
+          setEmail(email);
+          setShowAcceptInviteDialog(true);
+        }, () => {
+          setShowVerifyInviteErrorDialog(false);
+        });
+      }
       setIsLoading(false);
     }, () => {
       setIsLoading(false);
@@ -915,6 +928,24 @@ export default function HomePage({
               <p>なお、チームに参加していない場合、データはブラウザ上にのみ保存されます。</p>
             </div>
           </CustomDialog>
+        </Dialog.Root>
+        <Dialog.Root open={showVerifyInviteErrorDialog} onOpenChange={() => setShowVerifyInviteErrorDialog(false)}>
+          <BaseErrorDialog title="招待失敗" fullWidth>
+            <p>チームに招待に失敗しました。</p>
+          </BaseErrorDialog>
+        </Dialog.Root>
+        <Dialog.Root disablePointerDismissal open={showAcceptInviteDialog} onOpenChange={() => setShowAcceptInviteDialog(false)}>
+          <AcceptInviteDialog
+            teamId={team?.id}
+            setupToken={setupToken}
+            inputEmail={email}
+            onLogin={() => {
+              const url = new URL(window.location.href);
+              url.search = "";
+              window.history.replaceState({}, "", url);
+            }}
+            onClose={() => setShowAcceptInviteDialog(false)}
+          />
         </Dialog.Root>
       </div>
     </div>

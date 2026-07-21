@@ -174,6 +174,40 @@ export default {
 				return getSuccessResponse(team);
 			}
 
+			if (url.pathname === "/api/auth/verify-invite") {
+				const rawToken = url.searchParams.get("setup");
+
+				if (!rawToken) {
+					return getErrorResponse("Invalid invite link", 400);
+				}
+
+				const { results } = await env.DB.prepare(`
+					SELECT it.*, u.email, t.name AS team_name, t.slug AS team_slug
+					FROM invite_tokens it
+					JOIN users u ON it.user_id = u.id
+					JOIN teams t ON it.team_id = t.id
+					WHERE it.used_at IS NULL AND it.team_id = ?
+				`).bind(teamId).all();
+
+				const match = await Promise.all(
+					results.map(async (row: any) => {
+						const valid = await verifyPassword(rawToken, row.token_hash);
+						return valid ? row : null;
+					})
+				).then(results => results.find(r => r !== null));
+
+				if (!match) {
+					return getErrorResponse("Invalid or already used invite link", 400);
+				}
+
+				return new Response(JSON.stringify({
+					email: match.email
+				}), {
+					status: 200,
+					headers: { ...corsHeaders, "Content-Type": "application/json" },
+				});
+			}
+
 			if (url.pathname === "/api/choreos/summary") {
 				if (!teamId) {
 					return getErrorResponse("team_id is required");
@@ -469,6 +503,64 @@ export default {
 			);
 		}
 
+		if (url.pathname === "/api/auth/accept-invite" && request.method === "POST") {
+			const body = await request.json() as { team_id: string, setup: string; password: string };
+
+			if (!body.setup || !body.password) {
+				return getErrorResponse("Invalid request", 400);
+			}
+
+			const { results } = await env.DB.prepare(`
+				SELECT it.*, u.id AS user_id, u.name as user_name, t.id AS team_id, t.slug AS team_slug
+				FROM invite_tokens it
+				JOIN users u ON it.user_id = u.id
+				JOIN teams t ON it.team_id = t.id
+				WHERE it.used_at IS NULL AND it.team_id = ?
+			`).bind(body.team_id).all();
+
+			const match = await Promise.all(
+				results.map(async (row: any) => {
+					const valid = await verifyPassword(body.setup, row.token_hash);
+					return valid ? row : null;
+				})
+			).then(r => r.find(x => x !== null));
+
+			if (!match) {
+				return getErrorResponse("このリンクは無効です。管理者にお問い合わせください。", 400);
+			}
+
+			const newHash = await hashPassword(body.password);
+
+			await env.DB.prepare(`
+				UPDATE users SET password_hash = ?, updated_at = datetime('now') WHERE id = ?
+			`).bind(newHash, match.user_id).run();
+
+			await env.DB.prepare(`
+				UPDATE invite_tokens SET used_at = datetime('now') WHERE id = ?
+			`).bind(match.id).run();
+
+			const teamMember = await env.DB.prepare(`
+				SELECT * FROM team_members WHERE user_id = ? AND team_id = ? AND deleted = 0
+			`).bind(match.user_id, match.team_id).first();
+
+			if (!teamMember) {
+				return getErrorResponse("User no longer belongs to this team", 403);
+			}
+
+			const token = crypto.randomUUID();
+
+			await env.DB.prepare(`
+				INSERT INTO sessions (id, user_id, team_id, token, expires_at, created_at)
+				VALUES (?, ?, ?, ?, datetime('now', '+30 days'), datetime('now'))
+			`).bind(crypto.randomUUID(), match.user_id, match.team_id, token).run();
+
+			return getSuccessResponse(
+				{ success: true, teamMemberId: teamMember.id, name: match.user_name, role: teamMember.role },
+				200, 
+				setSessionCookie(token)
+			);
+		}
+
 		if (url.pathname === "/api/choreos/verify" && request.method === "POST") {
 			const body = await request.json() as { choreo_id: string; password: string, team_id: string };
 			const password = await env.DB.prepare(`
@@ -596,17 +688,40 @@ export default {
 						VALUES (?, ?, ?, ?, 0, datetime('now'), datetime('now'))
 					`).bind(crypto.randomUUID(), session.team_id, user!.id, body.role).run();
 				}
-	
-				try {
-					await sendEmail(body.email, `${team.name}に招待されました`, `<p>${team.name}に招待されました。</p>
-						<p><a href="https://tairetsu.app/${team.slug}">tairetsu.app/${team.slug}</a> にアクセスする</p>
-						<p>初めてご利用の方は、「パスワードをお忘れの方はこちら」からパスワードを設定してください。</p>
-						<p>ご不明な点がございましたら、チームの管理者にお問い合わせください。</p>
-						<br/>
-						<p>※このメールは自動送信されています。返信には対応しておりませんのでご了承ください。</p>
-					`);
-				} catch (e: any) {
-					return getErrorResponse(`Failed to send email: ${(e as Error)?.message}`, 500);
+
+				const isNewUser = !user || user.password_hash === '';
+
+				if (isNewUser) {
+					const rawToken = crypto.randomUUID();
+					const tokenHash = await hashPassword(rawToken);
+
+					await env.DB.prepare(`
+						INSERT INTO invite_tokens (id, user_id, team_id, token_hash, created_at)
+						VALUES (?, ?, ?, ?, datetime('now'))
+					`).bind(crypto.randomUUID(), user!.id, session.team_id, tokenHash).run();
+
+					const inviteUrl = `https://tairetsu.app/${team.slug}?setup=${rawToken}`;
+
+					try {
+						await sendEmail(body.email, `${team.name}に招待されました`, `
+							<p>${team.name}に招待されました。</p>
+							<p>以下のリンクからアカウントを設定してください。</p>
+							<p><a href="${inviteUrl}">${inviteUrl}</a></p>
+							<p>※このメールは自動送信されています。返信には対応しておりませんのでご了承ください。</p>
+						`);
+					} catch (e: any) {
+						return getErrorResponse(`Failed to send email: ${(e as Error)?.message}`, 500);
+					}
+				} else {
+					try {
+						await sendEmail(body.email, `${team.name}に招待されました`, `
+							<p>${team.name}に追加されました。</p>
+							<p><a href="https://tairetsu.app/${team.slug}">tairetsu.app/${team.slug}</a> からログインしてください。</p>
+							<p>※このメールは自動送信されています。返信には対応しておりませんのでご了承ください。</p>
+						`);
+					} catch (e: any) {
+						return getErrorResponse(`Failed to send email: ${(e as Error)?.message}`, 500);
+					}
 				}
 	
 				return getSuccessResponse({ success: true }, 201);

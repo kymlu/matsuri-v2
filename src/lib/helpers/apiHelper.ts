@@ -10,6 +10,8 @@ const getApiUrl = (endpoint:
   "auth/forgot-password" | 
   "auth/verify-team" | 
   "auth/verify-user" | 
+  "auth/verify-invite" | 
+  "auth/accept-invite" | 
   "team/invite-user" |
   "team/members" |
   "team/members/role" |
@@ -100,6 +102,58 @@ export const sendPasswordResetRequest = async (
     }
   } catch (e: any) {
     console.error("login failed:", (e as Error)?.message);
+    throw e;
+  }
+}
+
+export const verifyInvite = async (
+  teamId: string,
+  setupToken: string,
+  onSuccess: (email: string) => void,
+  onFailure: (status: number, message: string) => void,
+): Promise<void> => {
+  try {
+    const response = await fetch(`${getApiUrl("auth/verify-invite")}?team_id=${teamId}&setup=${setupToken}`, {
+      method: "GET",
+      credentials: "include",
+    });
+    if (!response.ok) {
+      const data = await response.json() as ErrorResponse;
+      console.error(`Verify invite failed: ${response.status} message: ${data.message}`);
+      onFailure(response.status, data.message);
+    } else {
+      const data = await response.json() as {email: string};
+      onSuccess(data.email);
+    }
+  } catch (e: any) {
+    console.error("Verify invite failed:", (e as Error)?.message);
+    throw e;
+  }
+}
+
+export const acceptInvite = async (
+  teamId: string,
+  setupToken: string,
+  password: string,
+  onSuccess: () => void,
+  onFailure: (status: number, message: string) => void,
+): Promise<void> => {
+  try {
+    const response = await fetch(getApiUrl("auth/accept-invite"), {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ team_id: teamId, setup: setupToken, password }),
+    });
+    if (!response.ok) {
+      const data = await response.json() as ErrorResponse;
+      console.error(`Accept invite failed: ${response.status} message: ${data.message}`);
+      onFailure(response.status, data.message);
+    } else {
+      onSuccess();
+    }
+  } catch (e: any) {
+    console.error("Accept invite failed:", (e as Error)?.message);
     throw e;
   }
 }

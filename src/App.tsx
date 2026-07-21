@@ -13,6 +13,7 @@ import AdminPage from './pages/AdminPage';
 import { isNullOrUndefinedOrBlank } from './lib/helpers/globalHelper';
 import { Oval } from 'react-loader-spinner';
 import { colorPalette } from './lib/consts/colors';
+import { useSearchParams } from 'react-router-dom';
 
 type Mode = "home" | "form" | "edit" | "view" | "admin";
 
@@ -33,6 +34,9 @@ function App() {
   const [showNoTeamDialog, setShowNoTeamDialog] = useState<boolean>(false);
 
   const { teamSlug } = useParams();
+
+  const [searchParams] = useSearchParams();
+  const setupToken = searchParams.get('setup');
 
   useEffect(() => {
     const href = teamSlug ? `/api/manifest/${teamSlug}` : "/manifest.json";
@@ -146,6 +150,7 @@ function App() {
           setCurrentTeamMemberId={(id) => setCurrentTeamMemberId(id)}
           showNoTeamDialog={showNoTeamDialog}
           setShowNoTeamDialog={setShowNoTeamDialog}
+          setupToken={setupToken}
         />
       )}
       {mode === "form" && (
