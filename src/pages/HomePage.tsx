@@ -196,7 +196,7 @@ export default function HomePage({
           setEmail(email);
           setShowAcceptInviteDialog(true);
         }, () => {
-          setShowVerifyInviteErrorDialog(false);
+          setShowVerifyInviteErrorDialog(true);
         });
       }
       setIsLoading(false);
@@ -931,7 +931,7 @@ export default function HomePage({
         </Dialog.Root>
         <Dialog.Root open={showVerifyInviteErrorDialog} onOpenChange={() => setShowVerifyInviteErrorDialog(false)}>
           <BaseErrorDialog title="招待失敗" fullWidth>
-            <p>チームに招待に失敗しました。</p>
+            <p>この招待リンクはご利用いただけません。管理者に新しい招待リンクをご依頼ください。</p>
           </BaseErrorDialog>
         </Dialog.Root>
         <Dialog.Root disablePointerDismissal open={showAcceptInviteDialog} onOpenChange={() => setShowAcceptInviteDialog(false)}>
@@ -939,7 +939,12 @@ export default function HomePage({
             teamId={team?.id}
             setupToken={setupToken}
             inputEmail={email}
-            onLogin={() => {
+            onLogin={(name, role, teamMemberId) => {
+              setSavedDancerName(name);
+              setIsAdmin(role === "admin");
+              setCurrentTeamMemberId(teamMemberId);
+              setIsLoggedIn(true);
+              
               const url = new URL(window.location.href);
               url.search = "";
               window.history.replaceState({}, "", url);

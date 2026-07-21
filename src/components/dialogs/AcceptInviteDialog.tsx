@@ -75,6 +75,12 @@ export default function AcceptInviteDialog({
     hasX={false}
   >
     <TextInput
+      name="メールアドレス"
+      label="メールアドレス"
+      onContentChange={() => {}}
+      disabled
+      defaultValue={email}/>
+    <TextInput
       label="新パスワード（8~25文字）"
       name="パスワード"
       type="password"
