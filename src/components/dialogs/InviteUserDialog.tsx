@@ -68,6 +68,7 @@ export default function InviteUserDialog({
         setHasError(true);
       }
     } else if (mode === "sent") {
+      setMode("enter");
       onClose();
     }
   }
