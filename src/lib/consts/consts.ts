@@ -27,6 +27,7 @@ export const EXPORT_NAME_LENGTH = 100;
 export const SEARCH_NAME_LENGTH = 100;
 export const EMAIL_LENGTH = 254;
 export const PASSWORD_LENGTH = 25;
+export const MIN_PASSWORD_LENGTH = 8;
 export const PASSWORD_ENTRY_LENGTH = 150;
 export const VERIFICATION_CODE_LENGTH = 8;
 

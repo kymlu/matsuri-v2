@@ -3,7 +3,7 @@ import BaseEditDialog from "./BaseEditDialog";
 import TextInput from "../inputs/TextInput";
 import { isNullOrUndefinedOrBlank, testAlphanumericSymbols, testEmail } from "../../lib/helpers/globalHelper";
 import { loginUserToTeam, resetPassword, sendPasswordResetRequest } from "../../lib/helpers/apiHelper";
-import { EMAIL_LENGTH, PASSWORD_ENTRY_LENGTH, PASSWORD_LENGTH, VERIFICATION_CODE_LENGTH } from "../../lib/consts/consts";
+import { EMAIL_LENGTH, MIN_PASSWORD_LENGTH, PASSWORD_ENTRY_LENGTH, PASSWORD_LENGTH, VERIFICATION_CODE_LENGTH } from "../../lib/consts/consts";
 import { RoleType } from "../../models/user";
 
 export type LoginDialogProps = {
@@ -117,7 +117,7 @@ export default function LoginDialog({
       case "forgot":
         return isNullOrUndefinedOrBlank(email) || isProcessing || !testEmail(email);
       case "resetPassword":
-        return isNullOrUndefinedOrBlank(password) || isNullOrUndefinedOrBlank(verificationCode) || isProcessing || password.length < 8;
+        return isNullOrUndefinedOrBlank(password) || isNullOrUndefinedOrBlank(verificationCode) || isProcessing || password.length < MIN_PASSWORD_LENGTH;
     }
   }, [email, password, isProcessing]);
 
