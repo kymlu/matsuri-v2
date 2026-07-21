@@ -27,6 +27,7 @@ export default function InviteUserDialog({
   const resetData = () => {
     setEmail("");
     setRole("editor");
+    setIsProcessing(false);
     setHasError(false);
   }
 
@@ -68,6 +69,7 @@ export default function InviteUserDialog({
         setHasError(true);
       }
     } else if (mode === "sent") {
+      resetData();
       setMode("enter");
       onClose();
     }
