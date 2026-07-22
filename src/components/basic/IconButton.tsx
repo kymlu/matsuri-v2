@@ -10,7 +10,7 @@ type IconButtonProps = {
   imgSrc?: keyof typeof IMG,
   subImgSrc?: keyof typeof IMG,
   label?: string,
-  onClick?: () => void,
+  onClick?: (e: React.MouseEvent<HTMLButtonElement | HTMLDivElement>) => void,
   noBorder?: boolean,
   disabled?: boolean,
   size?: "sm" | "md" | "lg",
@@ -91,8 +91,7 @@ export default function IconButton ({
         className={buttonClasses}
         disabled={disabled}
         onClick={(e) => {
-          //e.stopPropagation();
-          onClick?.();
+          onClick?.(e);
         }}>
         {icons}
       </button>
@@ -102,9 +101,8 @@ export default function IconButton ({
       <div
         className={buttonClasses}
         onClick={(e) => {
-          //e.stopPropagation();
           if(disabled !== true) {
-            onClick?.();
+            onClick?.(e);
           }
         }}>
         {icons}

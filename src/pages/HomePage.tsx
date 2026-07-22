@@ -1329,8 +1329,8 @@ function ChoreoListItem ({
               colour="grey"
               size="sm"
               noBorder
-              onClick={() => {
-                // e.stopPropagation();
+              onClick={(e) => {
+                e.stopPropagation();
                 openOptionsDialog();
               }}
             />
