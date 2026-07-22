@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { memo, ReactNode, useEffect, useRef, useState } from "react";
 import { Group } from "react-konva";
 import Konva from "konva";
 import { Shape, ShapeConfig } from "konva/lib/Shape";
@@ -28,7 +28,7 @@ export interface BaseGridObjectProps {
   isZooming?: React.RefObject<boolean>;
 }
 
-export default function BaseGridObject({
+const BaseGridObject = memo(function BaseGridObject({
   id,
   children,
   rotation,
@@ -58,8 +58,7 @@ export default function BaseGridObject({
   useEffect(() => {
     const newPosition = stageMetersToPx({x: position.x, y: position.y}, stageGeometry, METER_PX, height);
     if (newPosition.x === ref.current?.x() && newPosition.y === ref.current?.y()) return;
-
-    setIsAnimating(true);
+    if (animate) setIsAnimating(true);
     if (ref.current) {
       ref.current.to({
         x: newPosition.x,
@@ -81,6 +80,7 @@ export default function BaseGridObject({
     <Group
       id={id} 
       ref={ref}
+      perfectDrawEnabled={false}
       draggable={draggable && !isAnimating}
       listening={listening}
       rotation={0}
@@ -147,4 +147,6 @@ export default function BaseGridObject({
       {children}
     </Group>
   )
-}
+});
+
+export default BaseGridObject;

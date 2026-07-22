@@ -61,6 +61,13 @@ type ToolbarProps = {
   onAssignActions: () => void;
   isAssigningActionsEnabled: boolean;
   isAssigningActions: boolean;
+  
+  // movement
+  onShowMovement: () => void;
+  showMovement: boolean;
+  canEditMovement: boolean;
+  isEditingMovement: boolean;
+  setIsEditingMovement: (value: boolean) => void;
 
   // obstacles
   showDuplicateObstacle: boolean;
@@ -125,6 +132,12 @@ export default function Toolbar({
   isAssigningActionsEnabled,
   isAssigningActions,
 
+  onShowMovement,
+  showMovement,
+  canEditMovement,
+  isEditingMovement,
+  setIsEditingMovement,
+
   showDuplicateObstacle,
   onDuplicateObstacle,
   showLockObstacle,
@@ -139,7 +152,7 @@ export default function Toolbar({
   const [isArrangeVisible, setIsArrangeVisible] = useState<boolean>(false);
   const [isActionManagerVisible, setIsActionManagerVisible] = useState<boolean>(false);
 
-  const isSubmenuOpen = isAddManagerVisible || isArrangeVisible || isActionManagerVisible;
+  const isSubmenuOpen = isAddManagerVisible || isArrangeVisible || isActionManagerVisible || isEditingMovement;
   const areSelectionActionsActivated = showRenameDancer || showArrange || showDeleteObjects;
 
   useEffect(() => {
@@ -185,6 +198,10 @@ export default function Toolbar({
         {showSwapPosition && <IconButton src="swapHoriz" label="位置交換" onClick={() => {onSwapPosition()}} />}
         {showDuplicateObstacle && <IconButton src="contentCopy" label="複製" onClick={() => {onDuplicateObstacle()}} />}
         {showDeleteObjects && <IconButton src="delete" label="削除" onClick={()=>{onDeleteObjects()}}/>}
+        {showMovement && <IconButton src="step" label="動線" onClick={()=>{
+          onShowMovement();
+          setIsEditingMovement(true);
+        }}/>}
         {showSelectDancer && showSelectDancersButton && <IconButton src="select" subIconSrc="colors" label="同色選択" onClick={() => {onSelectColor()}} />}
         {showSelectDancersButton && <IconButton src="select" subIconSrc="person" label="全員選択" onClick={() => {onSelectType(true,  false)}} />}
         {showSelectPropsButton && <IconButton src="select" subIconSrc="flag" label="道具選択" onClick={() => {onSelectType(false, true)}} />}
@@ -207,6 +224,9 @@ export default function Toolbar({
           setIsArrangeVisible(false);
           setIsAddManagerVisible(false);
           setIsActionManagerVisible(false);
+          if (isEditingMovement) {
+            onShowMovement();
+          }
         }}/>
         <VerticalDivider/>
         {
@@ -266,6 +286,21 @@ export default function Toolbar({
               src={isAssigningActions ? "clear" : "category"}
               label="割当"
               onClick={() => {onAssignActions()}} />
+          </>
+        }
+        {
+          isEditingMovement &&
+          <>
+            <IconButton
+              disabled={!canEditMovement}
+              src="restartAlt"
+              label="リセット" // todo
+              onClick={() => {}} />
+            <IconButton
+              disabled={!canEditMovement}
+              src={true ? "counter1" : "counter2"} // todo
+              label={`${true ? 1 : 2}点`}
+              onClick={() => {}} />
           </>
         }
       </>

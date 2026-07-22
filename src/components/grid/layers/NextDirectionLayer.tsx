@@ -43,6 +43,7 @@ export default function NextDirectionLayer({
           animate={false}
         />
         <Arrow
+          perfectDrawEnabled={false}
           points={points}
           strokeEnabled
           stroke={colorPalette.primary}
@@ -50,6 +51,8 @@ export default function NextDirectionLayer({
           fill={colorPalette.primary}
           fillEnabled
           dashEnabled
+          pointerWidth={5}
+          pointerLength={5}
           dash={[2, 2]}
         />
       </Layer>

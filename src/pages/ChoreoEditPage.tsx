@@ -14,7 +14,7 @@ import { Dialog } from "@base-ui/react";
 import EditChoreoSizeDialog from "../components/dialogs/EditChoreoSizeDialog";
 import { exportChoreo } from "../lib/helpers/exportHelper";
 import { saveChoreo } from "../lib/dataAccess/DataController";
-import { DEFAULT_PROP_LENGTH, DEFAULT_PROP_WIDTH, SAMPLE_PARADE_ID, SAMPLE_STAGE_ID } from "../lib/consts/consts";
+import { DEFAULT_PROP_LENGTH, DEFAULT_PROP_WIDTH, METER_PX, SAMPLE_PARADE_ID, SAMPLE_STAGE_ID } from "../lib/consts/consts";
 import { AppSetting } from "../models/appSettings";
 import { changeStageGeometryAndType, renameChoreo } from "../lib/editor/commands/choreoCommands";
 import EditChoreoInfoDialog from "../components/dialogs/EditChoreoInfoDialog";
@@ -42,6 +42,7 @@ import { ChoreoStatus } from "./HomePage";
 import PublishConfirmationDialog from "../components/dialogs/PublishConfirmationDialog";
 import BaseEditDialog from "../components/dialogs/BaseEditDialog";
 import { getChoreoPassword } from "../lib/helpers/apiHelper";
+import { stageMetersToPx } from "../lib/helpers/editorCalculationHelper";
 
 const resizeDialog = Dialog.createHandle<Choreo>();
 const editChoreoInfoDialog = Dialog.createHandle<string>();
@@ -59,6 +60,7 @@ const deleteSectionDialog = Dialog.createHandle<ChoreoSection>();
 const dancerWarningDialog = Dialog.createHandle<Choreo>();
 const publishConfirmationDialog = Dialog.createHandle<null>();
 const publishSuccessDialog = Dialog.createHandle<null>();
+export type MovementCache = Record<string, Record<string, number[]>>;
 
 export default function ChoreoEditPage(props: {
   goToHomePage: () => void,
@@ -77,6 +79,7 @@ export default function ChoreoEditPage(props: {
   const [currentTiming, setCurrentTiming] = useState<DancerActionTiming | undefined>();
   const [selectedIds, setSelectedIds] = useState<StageEntities<string[]>>({props: [], dancers: [], obstacles: []});
   const [isAddingDancers, setIsAddingDancers] = useState<boolean>(false);
+  const [isEditingMovement, setIsEditingMovement] = useState<boolean>(false);
   const [isAddingProps, setIsAddingProps] = useState<boolean>(false);
   const [isAddingObstacles, setIsAddingObstacles] = useState<boolean>(false);
   const [isAssigningActions, setIsAssigningActions] = useState<boolean>(false);
@@ -119,8 +122,35 @@ export default function ChoreoEditPage(props: {
     obstacles: history.presentState.state.obstacles ? Object.keys(history.presentState.state.obstacles).length : 0,
   } as StageEntities<number>), [history.presentState.state.dancers, history.presentState.state.props, history.presentState.state.obstacles]);
 
+  const [movementCache, setMovementCache] = useState<MovementCache>({});
+
+  const calculateCache = () => {
+    const newCache: MovementCache = {};
+    history.presentState.state.sections.forEach((s, i) => {
+      if (i > 0) {
+        const prev = history.presentState.state.sections[i - 1].formation.dancerPositions;
+        const curr = s.formation.dancerPositions;
+        const movement = s.formation.dancerMovements;
+        const all: Record<string, number[]> = {};
+        Object.entries(prev).forEach((p) => {
+          const [id, position] = p;
+          const start = stageMetersToPx(position, history.presentState.state.stageGeometry, METER_PX);
+          var movementPoints: number[] = [];
+          if (movement?.[id]) {
+            movementPoints = movement[id].points.flatMap(p => [p.x, p.y]);
+          }
+          const end = stageMetersToPx(curr[id], history.presentState.state.stageGeometry, METER_PX);
+          all[id] = [start.x, start.y, ...movementPoints, end.x, end.y];
+        });
+        newCache[s.id] = all;
+      }
+    });
+    setMovementCache(newCache);
+  }
+
   useEffect(() => {
     hasInitialized.current = false;
+    calculateCache();
   }, [props.currentChoreo]);
 
   useEffect(() => {
@@ -159,12 +189,12 @@ export default function ChoreoEditPage(props: {
 
   const [prevSection, setPrevSection] = useState<ChoreoSection | undefined>();
   useEffect(() => {
-    if (appSettings.showPreviousSection) {
-      const currentSectionIndex = history.presentState.state.sections.findIndex(x => strEquals(x.id, currentSection.id));
-      setPrevSection(history.presentState.state.sections[currentSectionIndex - 1]);
-    } else {
-      setPrevSection(undefined);
-    }
+    // if (appSettings.showPreviousSection) {
+    const currentSectionIndex = history.presentState.state.sections.findIndex(x => strEquals(x.id, currentSection.id));
+    setPrevSection(history.presentState.state.sections[currentSectionIndex - 1]);
+    // } else {
+      // setPrevSection(undefined);
+    // }
   }, [
     history.presentState.state.dancers,
     history.presentState.state.props,
@@ -567,9 +597,9 @@ export default function ChoreoEditPage(props: {
         <MainStage
           canEdit={!isAssigningActions}
           canSelectDancers={!isAssigningActions || currentTiming !== undefined}
-          canSelectProps={!isAssigningActions}
-          canSelectObstacles={!isAssigningActions && !areObstaclesLocked}
-          canToggleSelection
+          canSelectProps={!isAssigningActions && !isEditingMovement}
+          canSelectObstacles={!isAssigningActions && !areObstaclesLocked && !isEditingMovement}
+          canToggleSelection={!isEditingMovement}
           appSettings={appSettings}
           isAddingDancer={isAddingDancers}
           isAddingProp={isAddingProps}
@@ -674,6 +704,8 @@ export default function ChoreoEditPage(props: {
           }
           editEnabled={editEnabled}
           toggleEditEnabled={() => setEditEnabled(prev => !prev)}
+          isEditingMovement={isEditingMovement}
+          movementCache={movementCache}
         />
         <div className="absolute bottom-0 flex flex-col">
           <div className="absolute bottom-12">
@@ -859,6 +891,14 @@ export default function ChoreoEditPage(props: {
         onToggleResizePropsLock={() => {setIsPropResizeLocked(prev => !prev)}}
         isResizePropsLocked={isPropResizeLocked}
         showLockResizeProps={selectedObjects.props.length === 1}
+        showMovement={entityCount.dancers > 0}
+        onShowMovement={() => {
+          resetSelectedIds();
+          setIsEditingMovement(prev => !prev);
+        }}
+        isEditingMovement={isEditingMovement}
+        setIsEditingMovement={setIsEditingMovement}
+        canEditMovement={selectedIds.dancers.length === 1}
       />
       {
         isAddingDancers &&
@@ -898,6 +938,13 @@ export default function ChoreoEditPage(props: {
               setIsAssigningActions(false);
             }
           }}
+        />
+      }
+      {
+        isEditingMovement &&
+        <InstructionMessage
+          instruction={<>ダンサーを選択すると動線を編集できる</>}
+          onClose={() => setIsEditingMovement(false)}
         />
       }
       <Dialog.Root

@@ -1,11 +1,19 @@
-import { BaseModelSchema } from "./base";
+import { BaseModelSchema, CoordinatesSchema } from "./base";
 import { DancerPositionSchema } from "./dancer";
 import { DancerActionSchema } from "./dancerAction";
 import { PropPositionSchema } from "./prop";
 import * as z from "zod";
 
+export const MovementSchema = z.object({
+  points: CoordinatesSchema.array(),
+  tension: z.number().optional().default(0)
+});
+
+export type Movement = z.infer<typeof MovementSchema>;
+
 export const FormationSchema = z.object({
   dancerPositions: z.record(z.string(), DancerPositionSchema),
+  dancerMovements: z.record(z.string(), MovementSchema).optional(),
   dancerActions: z.array(DancerActionSchema),
   propPositions: z.record(z.string(), PropPositionSchema),
 });

@@ -17,6 +17,9 @@ import BaseErrorDialog from "../components/dialogs/BaseErrorDialog";
 import CustomSwitch from "../components/inputs/CustomSwitch";
 import { checkShowingViewPageInfoDialog, stopShowingViewPageInfoDialog } from "../lib/dataAccess/LocalStorageController";
 import Divider from "../components/basic/Divider";
+import { MovementCache } from "./ChoreoEditPage";
+import { stageMetersToPx } from "../lib/helpers/editorCalculationHelper";
+import { METER_PX } from "../lib/consts/consts";
 
 export default function ChoreoViewPage(props: {
   goToHomePage: () => void
@@ -48,6 +51,33 @@ export default function ChoreoViewPage(props: {
     obstacles: props.currentChoreo.obstacles ? Object.keys(props.currentChoreo.obstacles).length : 0,
   } as StageEntities<number>), [props.currentChoreo.dancers, props.currentChoreo.props, props.currentChoreo.obstacles]);
 
+
+  const [movementCache, setMovementCache] = useState<MovementCache>({});
+
+  const calculateCache = () => {
+    const newCache: MovementCache = {};
+    props.currentChoreo.sections.forEach((s, i) => {
+      if (i > 0) {
+        const prev = props.currentChoreo.sections[i - 1].formation.dancerPositions;
+        const curr = s.formation.dancerPositions;
+        const movement = s.formation.dancerMovements;
+        const all: Record<string, number[]> = {};
+        Object.entries(prev).forEach((p) => {
+          const [id, position] = p;
+          const start = stageMetersToPx(position, props.currentChoreo.stageGeometry, METER_PX);
+          var movementPoints: number[] = [];
+          if (movement?.[id]) {
+            movementPoints = movement[id].points.flatMap(p => [p.x, p.y]);
+          }
+          const end = stageMetersToPx(curr[id], props.currentChoreo.stageGeometry, METER_PX);
+          all[id] = [start.x, start.y, ...movementPoints, end.x, end.y];
+        });
+        newCache[s.id] = all;
+      }
+    });
+    setMovementCache(newCache);
+  }
+
   useEffect(() => {
     if (!isNullOrUndefinedOrBlank(props.savedDancerName)) {
       const dancer = Object.values(props.currentChoreo.dancers).find(x => strEquals(x.name, props.savedDancerName));
@@ -61,6 +91,7 @@ export default function ChoreoViewPage(props: {
     } else {
       setShowHintDialog(!checkShowingViewPageInfoDialog());
     }
+    calculateCache();
   }, [props.currentChoreo]);
   
   const selectedObjects = useMemo(() => ({
@@ -172,6 +203,7 @@ export default function ChoreoViewPage(props: {
             undefined
           }
           bottomMarginPercent={sidebarHeight}
+          movementCache={movementCache}
         />
       </div>
 
