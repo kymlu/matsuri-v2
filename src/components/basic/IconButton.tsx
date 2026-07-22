@@ -90,7 +90,10 @@ export default function IconButton ({
       <button
         className={buttonClasses}
         disabled={disabled}
-        onClick={onClick}>
+        onClick={(e) => {
+          e.stopPropagation();
+          onClick?.();
+        }}>
         {icons}
       </button>
     }
@@ -98,7 +101,8 @@ export default function IconButton ({
       asDiv &&
       <div
         className={buttonClasses}
-        onClick={() => {
+        onClick={(e) => {
+          e.stopPropagation();
           if(disabled !== true) {
             onClick?.();
           }
