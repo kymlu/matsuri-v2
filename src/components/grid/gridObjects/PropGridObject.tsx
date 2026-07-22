@@ -5,6 +5,7 @@ import Konva from "konva";
 import { colorPalette } from "../../../lib/consts/colors";
 import { METER_PX } from "../../../lib/consts/consts";
 import { Prop, PropPosition } from "../../../models/prop";
+import { memo } from "react";
 
 type PropGridObjectProps = {
   prop: Prop;
@@ -22,7 +23,7 @@ type PropGridObjectProps = {
   isZooming?: React.RefObject<boolean>;
 };
 
-export default function PropGridObject({
+const PropGridObject = memo(function PropGridObject({
   prop,
   position,
   stageGeometry,
@@ -84,4 +85,6 @@ export default function PropGridObject({
       </BaseGridObject>
     }
   </>
-}
+});
+
+export default PropGridObject;

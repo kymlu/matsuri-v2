@@ -5,7 +5,7 @@ import Konva from "konva";
 import { colorPalette } from "../../../lib/consts/colors";
 import { METER_PX } from "../../../lib/consts/consts";
 import { Obstacle } from "../../../models/prop";
-import { useMemo } from "react";
+import { memo, useMemo } from "react";
 
 type ObstacleGridObjectProps = {
   obstacle: Obstacle;
@@ -24,7 +24,7 @@ type ObstacleGridObjectProps = {
 
 const STRIPES_PER_METRE = 10;
 
-export default function ObstacleGridObject({
+const ObstacleGridObject = memo(function ObstacleGridObject({
   obstacle,
   stageGeometry,
   updatePosition,
@@ -165,4 +165,6 @@ export default function ObstacleGridObject({
       verticalAlign="middle"
       align="center" />
   </BaseGridObject>
-}
+});
+
+export default ObstacleGridObject;

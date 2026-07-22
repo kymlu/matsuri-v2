@@ -6,6 +6,7 @@ import Konva from "konva";
 import { colorPalette } from "../../../lib/consts/colors";
 import { DancerDisplayType } from "../../../models/appSettings";
 import { METER_PX } from "../../../lib/consts/consts";
+import { memo } from "react";
 
 type DancerGridObjectProps = {
   dancer: Dancer;
@@ -23,7 +24,7 @@ type DancerGridObjectProps = {
   isZooming?: React.RefObject<boolean>;
 };
 
-export default function DancerGridObject({
+const DancerGridObject = memo(function DancerGridObject({
   dancer,
   position,
   stageGeometry,
@@ -100,4 +101,6 @@ export default function DancerGridObject({
       </BaseGridObject>
     }
   </>
-}
+});
+
+export default DancerGridObject;

@@ -3,7 +3,7 @@ import { StageGeometry } from "../../../models/choreo";
 import { Dancer, DancerPosition } from "../../../models/dancer";
 import DancerGridObject from "../gridObjects/DancerGridObject";
 import Konva from "konva";
-import { SetStateAction, useEffect, useMemo, useRef } from "react";
+import { memo, SetStateAction, useEffect, useMemo, useRef } from "react";
 import { colorPalette } from "../../../lib/consts/colors";
 import { DancerDisplayType } from "../../../models/appSettings";
 import { Obstacle, Prop, PropPosition } from "../../../models/prop";
@@ -41,7 +41,7 @@ type FormationLayerProps = {
   isZooming: React.RefObject<boolean>;
 };
 
-export default function FormationLayer({
+const FormationLayer = memo(function FormationLayer({
   canEdit,
   canSelectDancers,
   canSelectProps,
@@ -297,4 +297,6 @@ export default function FormationLayer({
       )}
     </Layer>
   );
-}
+});
+
+export default FormationLayer;

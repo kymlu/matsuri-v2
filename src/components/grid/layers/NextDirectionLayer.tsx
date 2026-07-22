@@ -1,7 +1,7 @@
 import { Arrow, Layer } from "react-konva";
 import { DancerPosition } from "../../../models/dancer";
 import { colorPalette } from "../../../lib/consts/colors";
-import { useMemo } from "react";
+import { memo, useMemo } from "react";
 import { stageMetersToPx } from "../../../lib/helpers/editorCalculationHelper";
 import { StageGeometry } from "../../../models/choreo";
 import { METER_PX } from "../../../lib/consts/consts";
@@ -13,7 +13,7 @@ type NextDirectionLayerProps = {
   nextPosition?: DancerPosition,
 }
 
-export default function NextDirectionLayer({
+const NextDirectionLayer = memo(function NextDirectionLayer({
   geometry, currentPosition, nextPosition,
 }: NextDirectionLayerProps) {
   const hideLayer = useMemo(() => {
@@ -58,4 +58,6 @@ export default function NextDirectionLayer({
       </Layer>
     }
   </>
-}
+});
+
+export default NextDirectionLayer;

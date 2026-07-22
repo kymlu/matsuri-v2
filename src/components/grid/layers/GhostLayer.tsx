@@ -1,12 +1,11 @@
-import { Arrow, Layer, Line } from "react-konva";
+import { Layer, Line } from "react-konva";
 import { StageGeometry } from "../../../models/choreo";
 import { Dancer, DancerPosition } from "../../../models/dancer";
 import DancerGridObject from "../gridObjects/DancerGridObject";
-import { DancerDisplayType } from "../../../models/appSettings";
 import { Prop, PropPosition } from "../../../models/prop";
 import PropGridObject from "../gridObjects/PropGridObject";
 import { colorPalette } from "../../../lib/consts/colors";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 
 type GhostLayerProps = {
   dancers: Record<string, Dancer>,
@@ -35,7 +34,7 @@ export default function GhostLayer({
       listening={false}
       opacity={0.5}
       >
-      {
+      {/* {
         propPositions &&
         propPositions.map((propPosition) => {
           return (
@@ -51,7 +50,7 @@ export default function GhostLayer({
             />
           );
         })
-      }
+      } */}
       {
         prevDancerPositions &&
         dancerList.map(([id, dancer]) => <DancerMovement
@@ -59,7 +58,7 @@ export default function GhostLayer({
           prev={prevDancerPositions[id]}
           dancer={dancer}
           geometry={geometry}
-          pathPoints={movementCache[id]}
+          pathPoints={movementCache?.[id]}
           isSelected={id === selectedDancerId}
         />)
       }
@@ -71,7 +70,7 @@ type DancerMovementProps = {
   dancer: Dancer,
   prev?: DancerPosition,
   geometry: StageGeometry,
-  pathPoints: number[],
+  pathPoints?: number[],
   isSelected: boolean,
 }
 
@@ -92,9 +91,10 @@ const DancerMovement = React.memo(function DancerMovement ({
           animate={false}
         />
         {
-          !isSelected && 
+          !isSelected && pathPoints &&
           <Line
             points={pathPoints}
+            perfectDrawEnabled={false}
             strokeEnabled
             stroke={colorPalette.primary}
             strokeWidth={2}

@@ -2,7 +2,7 @@ import { Layer, Line } from "react-konva";
 import { StageGeometry } from "../../../models/choreo";
 import { Dancer, DancerPosition } from "../../../models/dancer";
 import { colorPalette } from "../../../lib/consts/colors";
-import { useMemo } from "react";
+import { memo, useMemo } from "react";
 import { Movement } from "../../../models/choreoSection";
 
 type GhostLayerProps = {
@@ -14,7 +14,7 @@ type GhostLayerProps = {
   onMidpointEdit: () => void;
 };
 
-export default function MovementEditLayer({
+const MovementEditLayer = memo(function MovementEditLayer({
   dancer, geometry, prevPosition, currentPosition, movement
 }: GhostLayerProps) {
   const points = useMemo(() => {
@@ -48,4 +48,6 @@ export default function MovementEditLayer({
       }
     </Layer>
   );
-}
+});
+
+export default MovementEditLayer;

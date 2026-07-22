@@ -2,7 +2,7 @@ import { Group, Layer, Line, Rect, Shape, Text } from "react-konva";
 import { StageGeometry, StageMargins, YAxisDirection } from "../../../models/choreo";
 import { colorPalette } from "../../../lib/consts/colors";
 import { METER_PX } from "../../../lib/consts/consts";
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 
 interface GridLayerProps {
   stageGeometry: StageGeometry,
@@ -12,7 +12,7 @@ interface GridLayerProps {
   verticalGridIncrement: number,
 }
 
-export default function GridLayer({
+const GridLayer = memo(function GridLayer({
   stageGeometry,
   gridSize,
   showGridLines,
@@ -230,72 +230,6 @@ export default function GridLayer({
         </Group>
       );
     }
-    
-    // // Right-side meter labels
-    // for (let m = 0; m <= margins.topMargin + length + margins.bottomMargin; m++) {
-    //     const y = m * gridSizePx;
-
-    //   // if stage, 0 at top of stage
-    //   // if parade, 0 at bottom of stage
-    //   if (y >= stageTopPx && y <= stageBottomPx) {
-    //     const meterFromTop =
-    //       yAxis === "top-down" ? 
-    //       (y - stageTopPx) / gridSizePx :
-    //       (stageBottomPx - y) / gridSizePx;
-
-    //     if (meterFromTop % verticalGridIncrement !== 0 && meterFromTop !== length) continue;
-    
-    //     elements.push(
-    //       <Text
-    //         key={`hr-${m}`}
-    //         x={totalWidthPx - gridSizePx * 1.2}
-    //         y={y - 5}
-    //         text={`${meterFromTop}`}
-    //         fontSize={12}
-    //         align="right"
-    //         width={gridSizePx}
-    //         fontStyle="bold"
-    //         fill={colorPalette.black}
-    //       />
-    //     );
-    //   }
-    // }
-    
-    // for (let m = 0; m <= margins.leftMargin + width + margins.rightMargin; m++) {
-    //   const x = m * gridSizePx + gridOffsetPx;
-    
-    //   const isCenter = x === centerX;
-    //   // Top numbering relative to center (stage only)
-    //   if (
-    //     x >= stageLeftPx &&
-    //     x <= stageRightPx &&
-    //     !isCenter
-    //   ) {
-    //     const meterFromCenter =
-    //     Math.abs(x - centerX) / gridSizePx;
-
-    //     if (meterFromCenter % 2 !== 0) continue;
-    
-    //     const radius = gridSizePx*0.4;
-    //     const cx = x;
-    //     const cy = stageTopPx - gridSizePx;
-    
-    //     elements.push(
-    //       <Group key={`vt-${m}`} x={cx} y={cy}>
-    //         <Text
-    //           text={`${meterFromCenter}`}
-    //           fill={colorPalette.grey}
-    //           fontStyle="bold"
-    //           fontSize={11}
-    //           width={radius * 2}
-    //           offsetX={radius}
-    //           align="center"
-    //           verticalAlign="middle"
-    //         />
-    //       </Group>
-    //     );
-    //   }
-    // }
 
     if (showBorder) {
       elements.push(
@@ -317,4 +251,6 @@ export default function GridLayer({
 
 
   return <Layer listening={false}>{elements}</Layer>;
-}
+});
+
+export default GridLayer;
