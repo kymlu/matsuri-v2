@@ -5,7 +5,7 @@ import { colorPalette } from "../../../lib/consts/colors";
 import { memo, useEffect, useMemo, useState } from "react";
 import { Movement } from "../../../models/choreoSection";
 import { Coordinates } from "../../../models/base";
-import { stageMetersToPx } from "../../../lib/helpers/editorCalculationHelper";
+import { pxToStageMeters, stageMetersToPx } from "../../../lib/helpers/editorCalculationHelper";
 import { METER_PX } from "../../../lib/consts/consts";
 
 type GhostLayerProps = {
@@ -25,7 +25,7 @@ const MovementEditLayer = memo(function MovementEditLayer({
   useEffect(() => {
     if (dancer && prevPosition && currentPosition ) {
       if (movement && movement.points.length > 0) {
-        setMidPoints([...movement.points]);
+        setMidPoints([...movement.points.map(p => stageMetersToPx(p, geometry, METER_PX))]);
       } else {
         const midPoint: Coordinates = stageMetersToPx({
           x: (currentPosition.x + prevPosition.x) / 2,
@@ -83,7 +83,7 @@ const MovementEditLayer = memo(function MovementEditLayer({
               midPoints[i].y = evt.currentTarget.y();
             }}
             onDragEnd={(evt) => {
-              onMidpointEdit({points: midPoints, tension: movement?.tension ?? "curved"});
+              onMidpointEdit({points: midPoints.map(p => pxToStageMeters(p, geometry, METER_PX)), tension: movement?.tension ?? "curved"});
             }}
             x={point.x}
             y={point.y}
