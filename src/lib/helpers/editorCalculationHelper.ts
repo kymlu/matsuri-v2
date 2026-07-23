@@ -1,5 +1,7 @@
 import { Coordinates } from "../../models/base";
 import { StageGeometry } from "../../models/choreo";
+import { Movement, MovementCache } from "../../models/choreoSection";
+import { METER_PX } from "../consts/consts";
 
 const MAX_CACHE_SIZE = 1000;
 const stageMetersToPxCache = new Map<string, Coordinates>();
@@ -61,3 +63,17 @@ export function snapCoordsToGrid(
     y: Math.round(pos.y / snapSize) * snapSize,
   }
 }
+
+export const createMovementCache = (stageGeometry: StageGeometry, previous: Coordinates, current: Coordinates, movement?: Movement): MovementCache => {
+  const start = stageMetersToPx(previous, stageGeometry, METER_PX);
+  var movementPoints: number[] = [];
+  if (movement) {
+    movementPoints = movement.points.flatMap(p => [p.x, p.y]);
+  }
+  const end = stageMetersToPx(current, stageGeometry, METER_PX);
+  return {
+    points: [start.x, start.y, ...movementPoints, end.x, end.y],
+    tension: "curved"
+  } as MovementCache;
+}
+

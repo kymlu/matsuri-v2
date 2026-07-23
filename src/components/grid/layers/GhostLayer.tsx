@@ -60,8 +60,8 @@ export default function GhostLayer({
           prev={prevDancerPositions[id]}
           dancer={dancer}
           geometry={geometry}
-          pathPoints={movementCache?.[id].points}
-          movementType={movementCache?.[id].tension}
+          pathPoints={movementCache?.[id]?.points}
+          movementType={movementCache?.[id]?.tension}
           hidePath={id === selectedDancerId && isEditingPaths === true}
         />)
       }

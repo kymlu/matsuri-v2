@@ -56,7 +56,7 @@ type MainStageProps = {
   toggleEditEnabled?: () => void,
   showPaths?: boolean,
   isEditingMovement?: boolean,
-  movementCache: MovementCacheRecord,
+  movementCache: MovementCacheRecord
 }
 
 export default function MainStage({
@@ -566,7 +566,7 @@ export default function MainStage({
           verticalGridIncrement={verticalGridIncrement}
           />
         {
-          (showPaths || isEditingMovement) &&
+          (showPaths || isEditingMovement) && movementCache &&
           <GhostLayer
             dancers={currentChoreo.dancers}
             prevDancerPositions={previousSection?.formation.dancerPositions}
