@@ -7,7 +7,7 @@ import { historyReducer } from "../lib/editor/historyReducer";
 import { BasicChoreoDetails, Choreo, EventDetails, getBasicChoreoDetails } from "../models/choreo";
 import { EditHistory, StageEntities } from "../models/history";
 import { addSection, assignDancersToTiming, duplicateSection, editDancerActions, editSectionNote, removeSection, renameSection, reorderSections } from "../lib/editor/commands/sectionCommands";
-import { ChoreoSection, MovementCache, MovementCacheByDancer, MovementCacheRecord, MovementType } from "../models/choreoSection";
+import { ChoreoSection, Movement, MovementCache, MovementCacheByDancer, MovementCacheRecord, MovementType } from "../models/choreoSection";
 import { debounce, indexByKey, isNullOrUndefinedOrBlank, strEquals, stringifyEvent } from "../lib/helpers/globalHelper";
 import MainStage from "../components/grid/MainStage";
 import { Dialog } from "@base-ui/react";
@@ -124,7 +124,7 @@ export default function ChoreoEditPage(props: {
 
   const [movementCache, setMovementCache] = useState<MovementCacheRecord>({});
 
-  const calculateCache = () => {
+  const calculateMovementCache = () => {
     const newCache: MovementCacheRecord = {};
     history.presentState.state.sections.forEach((s, i) => {
       if (i > 0) {
@@ -134,16 +134,7 @@ export default function ChoreoEditPage(props: {
         const all: MovementCacheByDancer = {};
         Object.entries(prev).forEach((p) => {
           const [id, position] = p;
-          const start = stageMetersToPx(position, history.presentState.state.stageGeometry, METER_PX);
-          var movementPoints: number[] = [];
-          if (movement?.[id]) {
-            movementPoints = movement[id].points.flatMap(p => [p.x, p.y]);
-          }
-          const end = stageMetersToPx(curr[id], history.presentState.state.stageGeometry, METER_PX);
-          all[id] = {
-            points: [start.x, start.y, ...movementPoints, end.x, end.y],
-            tension: "curved"
-          } as MovementCache;
+          all[id] = createMovementCache(position, curr[id], movement?.[id]);
         });
         newCache[s.id] = all;
       }
@@ -151,9 +142,39 @@ export default function ChoreoEditPage(props: {
     setMovementCache(newCache);
   }
 
+  const calculateMovementCacheForSection = (sectionId: string) => {
+    const newCache = {...movementCache};
+    const index = history.presentState.state.sections.findIndex(x => strEquals(x.id, sectionId));
+    if (index > 0) {
+      const prev = history.presentState.state.sections[index - 1].formation.dancerPositions;
+      const curr = history.presentState.state.sections[index].formation.dancerPositions;
+      const movement = history.presentState.state.sections[index].formation.dancerMovements;
+      const all: MovementCacheByDancer = {};
+      Object.entries(prev).forEach((p) => {
+        const [id, position] = p;
+        all[id] = createMovementCache(position, curr[id], movement?.[id]);
+      });
+      newCache[history.presentState.state.sections[index].id] = all;
+    }
+    setMovementCache(newCache);
+  }
+
+  const createMovementCache = (previous: Coordinates, current: Coordinates, movement?: Movement): MovementCache => {
+    const start = stageMetersToPx(previous, history.presentState.state.stageGeometry, METER_PX);
+    var movementPoints: number[] = [];
+    if (movement) {
+      movementPoints = movement.points.flatMap(p => [p.x, p.y]);
+    }
+    const end = stageMetersToPx(current, history.presentState.state.stageGeometry, METER_PX);
+    return {
+      points: [start.x, start.y, ...movementPoints, end.x, end.y],
+      tension: "curved"
+    } as MovementCache;
+  }
+
   useEffect(() => {
     hasInitialized.current = false;
-    calculateCache();
+    calculateMovementCache();
   }, [props.currentChoreo]);
 
   useEffect(() => {
@@ -502,6 +523,7 @@ export default function ChoreoEditPage(props: {
       newState: swapPositions(history.presentState.state, currentSection.id, selectedIds.dancers[0], selectedIds.dancers[1]),
       currentSectionId: currentSection.id,
       commit: true});
+    calculateMovementCacheForSection(currentSection.id);
   };
 
   const [movementUpdateGroup, setMovementUpdateGroup] = useState<StageEntities<Record<string, Coordinates>>>({props: {}, dancers: {}, obstacles: {}});
@@ -525,6 +547,7 @@ export default function ChoreoEditPage(props: {
       currentSectionId: currentSection.id,
       commit: true});
     setMovementUpdateGroup({props: {}, dancers: {}, obstacles: {}});
+    calculateMovementCache();
   }, [movementUpdateGroup]);
 
   const missingNames = useMemo(() => {
@@ -734,6 +757,7 @@ export default function ChoreoEditPage(props: {
                     currentSectionId: id,
                     commit: true
                   });
+                  calculateMovementCache(); // todo: optimize
                 }}
                 onChangeSection={(section) => {
                   setCurrentSection(section);
@@ -747,7 +771,8 @@ export default function ChoreoEditPage(props: {
                     newState: reorderSections(history.presentState.state, sections),
                     currentSectionId: currentSection.id,
                     commit: true,
-                  })
+                  });
+                  calculateMovementCache();
                 }}
               />
             }
@@ -815,7 +840,8 @@ export default function ChoreoEditPage(props: {
             newState: rearrangePositions(history.presentState.state, currentSection.id, selectedIds, rearrangement),
             currentSectionId: currentSection.id,
             commit: true,
-          })
+          });
+          calculateMovementCacheForSection(currentSection.id);
         }}
         showDistribute={(selectedIds.dancers.length + selectedIds.props.length + selectedIds.obstacles.length) >= 3}
         onDistribute={(distribution) => {
@@ -824,7 +850,8 @@ export default function ChoreoEditPage(props: {
             newState: distributePositions(history.presentState.state, currentSection.id, selectedObjects, distribution),
             currentSectionId: currentSection.id,
             commit: true,
-          })
+          });
+          calculateMovementCacheForSection(currentSection.id);
         }}
         onHorizontalAlign={(alignment) => {
           dispatch({
@@ -832,7 +859,8 @@ export default function ChoreoEditPage(props: {
             newState: alignHorizontalPositions(history.presentState.state, currentSection.id, selectedObjects, alignment),
             currentSectionId: currentSection.id,
             commit: true,
-          })
+          });
+          calculateMovementCacheForSection(currentSection.id);
         }}
         onVerticalAlign={(alignment) => {
           dispatch({
@@ -841,6 +869,7 @@ export default function ChoreoEditPage(props: {
             currentSectionId: currentSection.id,
             commit: true,
           });
+          calculateMovementCacheForSection(currentSection.id);
         }}
         showArrange={selectedIds.dancers.length > 0 || selectedIds.props.length > 0 || selectedIds.obstacles.length > 0}
         showSwapPosition={selectedIds.dancers.length === 2 && selectedIds.props.length === 0 && selectedIds.obstacles.length === 0}
@@ -854,6 +883,7 @@ export default function ChoreoEditPage(props: {
             commit: true,
           });
           resetSelectedIds();
+          calculateMovementCache();
         }}
         onOpenActionManager={() => setEditDancerActionsDialogOpen(true)}
         onAssignActions={() => {
@@ -1246,6 +1276,7 @@ export default function ChoreoEditPage(props: {
             });
             deleteSectionDialog.close();
             setDeleteSectionDialogOpen(false);
+            calculateMovementCache();
           }}/>
       </Dialog.Root>
       <Dialog.Root
