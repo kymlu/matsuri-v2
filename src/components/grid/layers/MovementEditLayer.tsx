@@ -14,7 +14,7 @@ type GhostLayerProps = {
   prevPosition?: DancerPosition;
   movement?: Movement;
   currentPosition?: DancerPosition;
-  onMidpointEdit: (newMidpoints: Coordinates[]) => void;
+  onMidpointEdit: (newMovement: Movement) => void;
 };
 
 const MovementEditLayer = memo(function MovementEditLayer({
@@ -83,7 +83,7 @@ const MovementEditLayer = memo(function MovementEditLayer({
               midPoints[i].y = evt.currentTarget.y();
             }}
             onDragEnd={(evt) => {
-              onMidpointEdit(midPoints);
+              onMidpointEdit({points: midPoints, tension: movement?.tension ?? "curved"});
             }}
             x={point.x}
             y={point.y}

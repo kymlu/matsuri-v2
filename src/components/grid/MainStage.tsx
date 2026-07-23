@@ -3,7 +3,7 @@ import GridLayer from "./layers/GridLayer";
 import { useState, useCallback, useEffect, useRef, SetStateAction, useMemo } from "react";
 import { Choreo, StageGeometry } from "../../models/choreo";
 import FormationLayer from "./layers/FormationLayer";
-import { ChoreoSection, MovementCacheRecord } from "../../models/choreoSection";
+import { ChoreoSection, Movement, MovementCacheRecord } from "../../models/choreoSection";
 import { DancerPosition } from "../../models/dancer";
 import { pxToStageMeters, snapCoordsToGrid, stageMetersToPx } from "../../lib/helpers/editorCalculationHelper";
 import { DEFAULT_PROP_LENGTH, MAX_ZOOM, METER_PX, MIN_ZOOM } from "../../lib/consts/consts";
@@ -56,7 +56,8 @@ type MainStageProps = {
   toggleEditEnabled?: () => void,
   showPaths?: boolean,
   isEditingMovement?: boolean,
-  movementCache: MovementCacheRecord
+  movementCache: MovementCacheRecord,
+  onMidpointEdit?: (newMovement: Movement, dancerId: string) => void;
 }
 
 export default function MainStage({
@@ -69,7 +70,7 @@ export default function MainStage({
   selectedIds, setSelectedIds, selectedObjects,
   addDancer, addProp, addObstacle, appSettings, previousSection, selectedDancerMovement,
   onDancerSelected, bottomMarginPercent = 0, canResizeProps, editEnabled, toggleEditEnabled,
-  showPaths = false, isEditingMovement = false, movementCache,
+  showPaths = false, isEditingMovement = false, movementCache, onMidpointEdit,
 }: MainStageProps) {
   const [dancerPositions, setDancerPositions] = useState<DancerPosition[]>([]);
   const [propPositions, setPropPositions] = useState<PropPosition[]>([]);
@@ -618,7 +619,7 @@ export default function MainStage({
           <MovementEditLayer
             prevPosition={previousSection?.formation.dancerPositions[selectedIds.dancers[0]]}
             currentPosition={currentSection?.formation.dancerPositions[selectedIds.dancers[0]]}
-            onMidpointEdit={() => {}} // todo
+            onMidpointEdit={(newMovement) => onMidpointEdit?.(newMovement, selectedIds.dancers[0])}
             movement={currentSection?.formation.dancerMovements?.[selectedIds.dancers[0]]}
             dancer={currentChoreo.dancers[selectedIds.dancers[0]]}
             geometry={stageGeometry}

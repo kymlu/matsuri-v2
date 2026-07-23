@@ -27,7 +27,7 @@ import ConfirmDeletionDialog from "../components/dialogs/ConfirmDeletionDialog";
 import EditSectionNoteDialog from "../components/dialogs/EditSectionNoteDialog";
 import { Coordinates } from "../models/base";
 import { colorPalette } from "../lib/consts/colors";
-import { addDancer, addObstacle, addObstacles, addProp, alignHorizontalPositions, alignVerticalPositions, changeObjectColours, distributePositions, editAndDeleteProps, moveObjectPositions, pastePositions, rearrangePositions, removeObjects, renameAndDeleteDancers, renameDancer, renameObstacle, renameProp, setZOnAllPositions, swapPositions, updateObstacleSizeAndRotate, updatePropSizeAndRotate } from "../lib/editor/commands/objectCommands";
+import { addDancer, addObstacle, addObstacles, addProp, alignHorizontalPositions, alignVerticalPositions, changeObjectColours, distributePositions, editAndDeleteProps, editDancerPath, moveObjectPositions, pastePositions, rearrangePositions, removeObjects, renameAndDeleteDancers, renameDancer, renameObstacle, renameProp, setZOnAllPositions, swapPositions, updateObstacleSizeAndRotate, updatePropSizeAndRotate } from "../lib/editor/commands/objectCommands";
 import { Obstacle, PropPosition } from "../models/prop";
 import { DancerManagerDialog } from "../components/dialogs/DancerManagerDialog";
 import ExportDialog from "../components/dialogs/ExportDialog";
@@ -278,6 +278,10 @@ export default function ChoreoEditPage(props: {
     } as StageEntities<PropPosition[], DancerPosition[], Obstacle[]>;
   }, [selectedIds, currentSection]);
 
+  const firstSelectedDancerId = useMemo(() => {
+    return selectedIds.dancers[0];
+  }, [selectedIds.dancers]);
+
   const selectedColour = useMemo(() => {
     const colours = new Set([
       ...selectedObjects.dancers.map(x => x.color),
@@ -518,7 +522,7 @@ export default function ChoreoEditPage(props: {
   const onSwapPositions = () => {
     dispatch({
       type: "SET_STATE",
-      newState: swapPositions(history.presentState.state, currentSection.id, selectedIds.dancers[0], selectedIds.dancers[1]),
+      newState: swapPositions(history.presentState.state, currentSection.id, firstSelectedDancerId, selectedIds.dancers[1]),
       currentSectionId: currentSection.id,
       commit: true});
   };
@@ -729,6 +733,18 @@ export default function ChoreoEditPage(props: {
           showPaths={showPaths}
           isEditingMovement={isEditingMovement}
           movementCache={movementCache}
+          onMidpointEdit={(newMovement, dancerId) => {
+            dispatch({
+              type: "SET_STATE",
+              newState: editDancerPath(
+                history.presentState.state, 
+                currentSection.id,
+                dancerId,
+                newMovement,
+              ),
+              currentSectionId: currentSection.id,
+              commit: true});
+          }}
         />
         <div className="absolute bottom-0 flex flex-col">
           <div className="absolute bottom-12">
@@ -923,12 +939,69 @@ export default function ChoreoEditPage(props: {
         }}
         isEditingMovement={isEditingMovement}
         setIsEditingMovement={setIsEditingMovement}
-        canEditMovement={selectedIds.dancers.length === 1}
-        curved // todo
-        toggleCurved={() => {}} // todo
-        pointCount={1} // todo
-        togglePointCount={() => {}} // todo
-        onResetPath={() => {}} // todo
+        canEditMovement={selectedIds.dancers.length === 1 && currentSection.id !== history.presentState.state.sections[0].id}
+        curved={movementCache[currentSection.id]?.[firstSelectedDancerId]?.tension === "curved"}
+        toggleCurved={() => {
+          dispatch({
+            type: "SET_STATE",
+            newState: editDancerPath(
+              history.presentState.state, 
+              currentSection.id,
+              firstSelectedDancerId,
+              {
+                points: currentSection.formation.dancerMovements?.[firstSelectedDancerId]?.points ?? [],
+                tension: movementCache[currentSection.id][firstSelectedDancerId]?.tension === "straight" ? "curved" : "straight" // todo: fix to update properly
+              },
+            ),
+            currentSectionId: currentSection.id,
+            commit: true});
+        }}
+        pointCount={currentSection.formation.dancerMovements?.[firstSelectedDancerId]?.points.length === 2 ? 2 : 1}
+        togglePointCount={() => {
+          let newPoints = [] as Coordinates[];
+          if (prevSection && currentSection.formation.dancerMovements?.[firstSelectedDancerId]?.points.length !== 2) {
+            const prev = prevSection.formation.dancerPositions[firstSelectedDancerId];
+            const curr = currentSection.formation.dancerPositions[firstSelectedDancerId];
+            newPoints.push({
+              x: (curr.x - prev.y) / (1/3),
+              y: (curr.y - prev.y) / (1/3)
+            })
+            newPoints.push({
+              x: (curr.x - prev.y) / (2/3),
+              y: (curr.y - prev.y) / (2/3)
+            })
+          }
+          dispatch({
+            type: "SET_STATE",
+            newState: editDancerPath(
+              history.presentState.state, 
+              currentSection.id,
+              firstSelectedDancerId,
+              {
+                points: newPoints,
+                tension: movementCache[currentSection.id][firstSelectedDancerId]?.tension ?? "curved"
+              },
+            ),
+            currentSectionId: currentSection.id,
+            commit: true});
+        }}
+        onResetPath={() => {
+          if (currentSection.formation.dancerMovements?.[firstSelectedDancerId]?.points?.length !== 0) {
+            dispatch({
+              type: "SET_STATE",
+              newState: editDancerPath(
+                history.presentState.state, 
+                currentSection.id,
+                firstSelectedDancerId,
+                {
+                  points: [],
+                  tension: movementCache[currentSection.id][firstSelectedDancerId]?.tension === "straight" ? "curved" : "straight" // todo: fix to update properly
+                },
+              ),
+              currentSectionId: currentSection.id,
+              commit: true});
+          }}
+        }
       />
       {
         isAddingDancers &&
@@ -1082,13 +1155,13 @@ export default function ChoreoEditPage(props: {
         open={renameDancerDialogOpen}
         onOpenChange={handleRenameDancerDialogOpen}>
         <EditDancerNameDialog
-          name={history.presentState.state.dancers[selectedIds.dancers[0]]?.name}
+          name={history.presentState.state.dancers[firstSelectedDancerId]?.name}
           otherNames={Object.values(history.presentState.state.dancers).map(x => x.name)}
           missingNames={missingNames}
           onSubmit={(name) => {
             dispatch({
               type: "SET_STATE",
-              newState: renameDancer(history.presentState.state, selectedIds.dancers[0], name),
+              newState: renameDancer(history.presentState.state, firstSelectedDancerId, name),
               currentSectionId: currentSection.id,
               commit: true});
             renameDancerDialog.close();
@@ -1276,7 +1349,7 @@ export default function ChoreoEditPage(props: {
           exportDialogOpen &&
           <ExportDialog
             choreo={history.presentState.state}
-            selectedId={selectedIds.dancers.length === 1 ? selectedIds.dancers[0] : ""}
+            selectedId={selectedIds.dancers.length === 1 ? firstSelectedDancerId : ""}
             onClose={() => setExportDialogOpen(false)}
           />
         }

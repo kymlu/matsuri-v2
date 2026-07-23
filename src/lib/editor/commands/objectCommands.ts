@@ -968,7 +968,7 @@ const sendBackwardObstacles = (items: Obstacle[], ids: string[]): Obstacle[] => 
 
 export function editDancerPath (state: Choreo, sectionId: string, dancerId: string, movement: Movement): Choreo {
   const newSections = state.sections.map(section => {
-    if (strEquals(section.id, sectionId)) return section;
+    if (!strEquals(section.id, sectionId)) return section;
     const newMovement = section.formation.dancerMovements ?? {};
     newMovement[dancerId] = movement;
 

@@ -289,12 +289,12 @@ export default function Toolbar({
               onClick={() => {onResetPath()}} />
             <IconButton
               disabled={!canEditMovement}
-              src={pointCount ? "counter1" : "counter2"} // todo
-              label={`${pointCount ? 1 : 2}点`}
+              src={pointCount === 2 ? "counter2" : "counter1"}
+              label={`${pointCount}点`}
               onClick={() => {togglePointCount()}} />
             <IconButton
               disabled={!canEditMovement}
-              src={curved ? "uTurnRight" : "turnRight"} // todo
+              src={curved ? "uTurnRight" : "turnRight"}
               label={curved ? "round" : "straight"}
               onClick={() => {toggleCurved()}} />
           </>
