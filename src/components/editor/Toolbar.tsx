@@ -295,7 +295,7 @@ export default function Toolbar({
             <IconButton
               disabled={!canEditMovement}
               src={curved ? "uTurnRight" : "turnRight"}
-              label={curved ? "round" : "straight"}
+              label={curved ? "曲線" : "直線"}
               onClick={() => {toggleCurved()}} />
           </>
         }
