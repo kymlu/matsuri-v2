@@ -2,7 +2,7 @@ import { Coordinates } from "@dnd-kit/utilities"
 import { colourMode } from "../../../components/dialogs/EditDancerColourDialog"
 import { HorizontalAlignment, VerticalAlignment, Distribution, Rearrangement } from "../../../models/alignment"
 import { Choreo } from "../../../models/choreo"
-import { Formation } from "../../../models/choreoSection"
+import { Formation, Movement } from "../../../models/choreoSection"
 import { Dancer, DancerPosition } from "../../../models/dancer"
 import { StageEntities } from "../../../models/history"
 import { Obstacle, Prop, PropPosition } from "../../../models/prop"
@@ -65,12 +65,17 @@ export function renameAndDeleteDancers(state: Choreo, renamedDancers: Record<str
       })),
     }));
 
+    const newDancerMovements = section.formation.dancerMovements ? Object.fromEntries(
+      Object.entries(section.formation.dancerMovements).filter(([id]) => !deletedDancerIds.has(id))
+    ) : undefined;
+
     return {
       ...section,
       formation: {
         ...section.formation,
         dancerPositions: newDancerPositions,
         dancerActions: newDancerActions,
+        dancerMovements: newDancerMovements,
       }
     }
   });
@@ -960,3 +965,24 @@ const sendBackwardObstacles = (items: Obstacle[], ids: string[]): Obstacle[] => 
 
   return reordered.map((item, i) => ({ ...item, z: i }));
 };
+
+export function editDancerPath (state: Choreo, sectionId: string, dancerId: string, movement: Movement): Choreo {
+  const newSections = state.sections.map(section => {
+    if (strEquals(section.id, sectionId)) return section;
+    const newMovement = section.formation.dancerMovements ?? {};
+    newMovement[dancerId] = movement;
+
+    return {
+      ...section,
+      formation: {
+        ...section.formation,
+        dancerMovements: newMovement,
+      }
+    }
+  });
+
+  return {
+    ...state,
+    sections: newSections,
+  }
+}
