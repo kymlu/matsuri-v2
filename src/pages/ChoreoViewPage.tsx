@@ -2,7 +2,7 @@ import Header from "../components/editor/Header"
 import FormationSelectionToolbar from "../components/editor/FormationSelectionToolbar";
 import { useEffect, useMemo, useState } from "react";
 import { Choreo } from "../models/choreo";
-import { ChoreoSection } from "../models/choreoSection";
+import { ChoreoSection, MovementCache, MovementCacheByDancer, MovementCacheRecord } from "../models/choreoSection";
 import MainStage from "../components/grid/MainStage";
 import { AppSetting } from "../models/appSettings";
 import { isNullOrUndefinedOrBlank, strEquals } from "../lib/helpers/globalHelper";
@@ -17,7 +17,6 @@ import BaseErrorDialog from "../components/dialogs/BaseErrorDialog";
 import CustomSwitch from "../components/inputs/CustomSwitch";
 import { checkShowingViewPageInfoDialog, stopShowingViewPageInfoDialog } from "../lib/dataAccess/LocalStorageController";
 import Divider from "../components/basic/Divider";
-import { MovementCache } from "./ChoreoEditPage";
 import { stageMetersToPx } from "../lib/helpers/editorCalculationHelper";
 import { METER_PX } from "../lib/consts/consts";
 
@@ -52,16 +51,16 @@ export default function ChoreoViewPage(props: {
   } as StageEntities<number>), [props.currentChoreo.dancers, props.currentChoreo.props, props.currentChoreo.obstacles]);
 
 
-  const [movementCache, setMovementCache] = useState<MovementCache>({});
+  const [movementCache, setMovementCache] = useState<MovementCacheRecord>({});
 
   const calculateCache = () => {
-    const newCache: MovementCache = {};
+    const newCache: MovementCacheRecord = {};
     props.currentChoreo.sections.forEach((s, i) => {
       if (i > 0) {
         const prev = props.currentChoreo.sections[i - 1].formation.dancerPositions;
         const curr = s.formation.dancerPositions;
         const movement = s.formation.dancerMovements;
-        const all: Record<string, number[]> = {};
+        const all: MovementCacheByDancer = {};
         Object.entries(prev).forEach((p) => {
           const [id, position] = p;
           const start = stageMetersToPx(position, props.currentChoreo.stageGeometry, METER_PX);
@@ -70,7 +69,10 @@ export default function ChoreoViewPage(props: {
             movementPoints = movement[id].points.flatMap(p => [p.x, p.y]);
           }
           const end = stageMetersToPx(curr[id], props.currentChoreo.stageGeometry, METER_PX);
-          all[id] = [start.x, start.y, ...movementPoints, end.x, end.y];
+          all[id] = {
+            points: [start.x, start.y, ...movementPoints, end.x, end.y],
+            tension: "curved"
+          } as MovementCache;
         });
         newCache[s.id] = all;
       }

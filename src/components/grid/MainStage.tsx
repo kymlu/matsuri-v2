@@ -3,7 +3,7 @@ import GridLayer from "./layers/GridLayer";
 import { useState, useCallback, useEffect, useRef, SetStateAction, useMemo } from "react";
 import { Choreo, StageGeometry } from "../../models/choreo";
 import FormationLayer from "./layers/FormationLayer";
-import { ChoreoSection } from "../../models/choreoSection";
+import { ChoreoSection, MovementCacheRecord } from "../../models/choreoSection";
 import { DancerPosition } from "../../models/dancer";
 import { pxToStageMeters, snapCoordsToGrid, stageMetersToPx } from "../../lib/helpers/editorCalculationHelper";
 import { DEFAULT_PROP_LENGTH, MAX_ZOOM, METER_PX, MIN_ZOOM } from "../../lib/consts/consts";
@@ -19,7 +19,6 @@ import MarkingsLayer from "./layers/MarkingsLayer";
 import RulerLayer from "./layers/RulerLayer";
 import { sortDancers, sortProps } from "../../lib/editor/commands/objectCommands";
 import IconButton from "../basic/IconButton";
-import { MovementCache } from "../../pages/ChoreoEditPage";
 import MovementEditLayer from "./layers/MovementEditLayer";
 
 Konva.hitOnDragEnabled = true;
@@ -55,8 +54,9 @@ type MainStageProps = {
   canResizeProps?: boolean,
   editEnabled?: boolean,
   toggleEditEnabled?: () => void,
+  showPaths?: boolean,
   isEditingMovement?: boolean,
-  movementCache: MovementCache,
+  movementCache: MovementCacheRecord,
 }
 
 export default function MainStage({
@@ -69,7 +69,7 @@ export default function MainStage({
   selectedIds, setSelectedIds, selectedObjects,
   addDancer, addProp, addObstacle, appSettings, previousSection, selectedDancerMovement,
   onDancerSelected, bottomMarginPercent = 0, canResizeProps, editEnabled, toggleEditEnabled,
-  isEditingMovement = false, movementCache,
+  showPaths = false, isEditingMovement = false, movementCache,
 }: MainStageProps) {
   const [dancerPositions, setDancerPositions] = useState<DancerPosition[]>([]);
   const [propPositions, setPropPositions] = useState<PropPosition[]>([]);
@@ -566,7 +566,7 @@ export default function MainStage({
           verticalGridIncrement={verticalGridIncrement}
           />
         {
-          isEditingMovement &&
+          (showPaths || isEditingMovement) &&
           <GhostLayer
             dancers={currentChoreo.dancers}
             prevDancerPositions={previousSection?.formation.dancerPositions}
@@ -575,6 +575,7 @@ export default function MainStage({
             propPositions={previousSection ? Object.values(previousSection?.formation.propPositions) : undefined}
             geometry={stageGeometry}
             selectedDancerId={selectedIds.dancers[0]}
+            isEditingPaths={isEditingMovement}
           />
         }
         <FormationLayer
@@ -618,6 +619,7 @@ export default function MainStage({
             prevPosition={previousSection?.formation.dancerPositions[selectedIds.dancers[0]]}
             currentPosition={currentSection?.formation.dancerPositions[selectedIds.dancers[0]]}
             onMidpointEdit={() => {}} // todo
+            movement={currentSection?.formation.dancerMovements?.[selectedIds.dancers[0]]}
             dancer={currentChoreo.dancers[selectedIds.dancers[0]]}
             geometry={stageGeometry}
           />

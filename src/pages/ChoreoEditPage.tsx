@@ -7,7 +7,7 @@ import { historyReducer } from "../lib/editor/historyReducer";
 import { BasicChoreoDetails, Choreo, EventDetails, getBasicChoreoDetails } from "../models/choreo";
 import { EditHistory, StageEntities } from "../models/history";
 import { addSection, assignDancersToTiming, duplicateSection, editDancerActions, editSectionNote, removeSection, renameSection, reorderSections } from "../lib/editor/commands/sectionCommands";
-import { ChoreoSection } from "../models/choreoSection";
+import { ChoreoSection, MovementCache, MovementCacheByDancer, MovementCacheRecord, MovementType } from "../models/choreoSection";
 import { debounce, indexByKey, isNullOrUndefinedOrBlank, strEquals, stringifyEvent } from "../lib/helpers/globalHelper";
 import MainStage from "../components/grid/MainStage";
 import { Dialog } from "@base-ui/react";
@@ -60,7 +60,6 @@ const deleteSectionDialog = Dialog.createHandle<ChoreoSection>();
 const dancerWarningDialog = Dialog.createHandle<Choreo>();
 const publishConfirmationDialog = Dialog.createHandle<null>();
 const publishSuccessDialog = Dialog.createHandle<null>();
-export type MovementCache = Record<string, Record<string, number[]>>;
 
 export default function ChoreoEditPage(props: {
   goToHomePage: () => void,
@@ -79,6 +78,7 @@ export default function ChoreoEditPage(props: {
   const [currentTiming, setCurrentTiming] = useState<DancerActionTiming | undefined>();
   const [selectedIds, setSelectedIds] = useState<StageEntities<string[]>>({props: [], dancers: [], obstacles: []});
   const [isAddingDancers, setIsAddingDancers] = useState<boolean>(false);
+  const [showPaths, setShowPaths] = useState<boolean>(false);
   const [isEditingMovement, setIsEditingMovement] = useState<boolean>(false);
   const [isAddingProps, setIsAddingProps] = useState<boolean>(false);
   const [isAddingObstacles, setIsAddingObstacles] = useState<boolean>(false);
@@ -122,16 +122,16 @@ export default function ChoreoEditPage(props: {
     obstacles: history.presentState.state.obstacles ? Object.keys(history.presentState.state.obstacles).length : 0,
   } as StageEntities<number>), [history.presentState.state.dancers, history.presentState.state.props, history.presentState.state.obstacles]);
 
-  const [movementCache, setMovementCache] = useState<MovementCache>({});
+  const [movementCache, setMovementCache] = useState<MovementCacheRecord>({});
 
   const calculateCache = () => {
-    const newCache: MovementCache = {};
+    const newCache: MovementCacheRecord = {};
     history.presentState.state.sections.forEach((s, i) => {
       if (i > 0) {
         const prev = history.presentState.state.sections[i - 1].formation.dancerPositions;
         const curr = s.formation.dancerPositions;
         const movement = s.formation.dancerMovements;
-        const all: Record<string, number[]> = {};
+        const all: MovementCacheByDancer = {};
         Object.entries(prev).forEach((p) => {
           const [id, position] = p;
           const start = stageMetersToPx(position, history.presentState.state.stageGeometry, METER_PX);
@@ -140,7 +140,10 @@ export default function ChoreoEditPage(props: {
             movementPoints = movement[id].points.flatMap(p => [p.x, p.y]);
           }
           const end = stageMetersToPx(curr[id], history.presentState.state.stageGeometry, METER_PX);
-          all[id] = [start.x, start.y, ...movementPoints, end.x, end.y];
+          all[id] = {
+            points: [start.x, start.y, ...movementPoints, end.x, end.y],
+            tension: "curved"
+          } as MovementCache;
         });
         newCache[s.id] = all;
       }
@@ -704,6 +707,7 @@ export default function ChoreoEditPage(props: {
           }
           editEnabled={editEnabled}
           toggleEditEnabled={() => setEditEnabled(prev => !prev)}
+          showPaths={showPaths}
           isEditingMovement={isEditingMovement}
           movementCache={movementCache}
         />
@@ -891,7 +895,9 @@ export default function ChoreoEditPage(props: {
         onToggleResizePropsLock={() => {setIsPropResizeLocked(prev => !prev)}}
         isResizePropsLocked={isPropResizeLocked}
         showLockResizeProps={selectedObjects.props.length === 1}
-        showMovement={entityCount.dancers > 0}
+        showMovementFunctions={entityCount.dancers > 0}
+        showPaths={showPaths}
+        toggleShowPaths={() => setShowPaths(prev => !prev)}
         onShowMovement={() => {
           resetSelectedIds();
           setIsEditingMovement(prev => !prev);
@@ -899,6 +905,11 @@ export default function ChoreoEditPage(props: {
         isEditingMovement={isEditingMovement}
         setIsEditingMovement={setIsEditingMovement}
         canEditMovement={selectedIds.dancers.length === 1}
+        curved // todo
+        toggleCurved={() => {}} // todo
+        pointCount={1} // todo
+        togglePointCount={() => {}} // todo
+        onResetPath={() => {}} // todo
       />
       {
         isAddingDancers &&

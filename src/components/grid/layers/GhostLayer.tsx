@@ -3,18 +3,19 @@ import { StageGeometry } from "../../../models/choreo";
 import { Dancer, DancerPosition } from "../../../models/dancer";
 import DancerGridObject from "../gridObjects/DancerGridObject";
 import { Prop, PropPosition } from "../../../models/prop";
-import PropGridObject from "../gridObjects/PropGridObject";
 import { colorPalette } from "../../../lib/consts/colors";
-import React, { useEffect, useMemo } from "react";
+import React, { useMemo } from "react";
+import { MovementCacheByDancer, MovementType } from "../../../models/choreoSection";
 
 type GhostLayerProps = {
   dancers: Record<string, Dancer>,
   prevDancerPositions?: Record<string, DancerPosition>,
-  movementCache: Record<string, number[]>,
+  movementCache: MovementCacheByDancer,
   props: Record<string, Prop>,
   propPositions?: PropPosition[],
   geometry: StageGeometry,
   selectedDancerId?: string,
+  isEditingPaths?: boolean
 };
 
 export default function GhostLayer({
@@ -25,6 +26,7 @@ export default function GhostLayer({
   propPositions,
   geometry,
   selectedDancerId,
+  isEditingPaths,
 }: GhostLayerProps) {
   const dancerList = useMemo(() => {
     return Object.entries(dancers);
@@ -58,8 +60,9 @@ export default function GhostLayer({
           prev={prevDancerPositions[id]}
           dancer={dancer}
           geometry={geometry}
-          pathPoints={movementCache?.[id]}
-          isSelected={id === selectedDancerId}
+          pathPoints={movementCache?.[id].points}
+          movementType={movementCache?.[id].tension}
+          hidePath={id === selectedDancerId && isEditingPaths === true}
         />)
       }
     </Layer>
@@ -71,11 +74,12 @@ type DancerMovementProps = {
   prev?: DancerPosition,
   geometry: StageGeometry,
   pathPoints?: number[],
-  isSelected: boolean,
+  movementType?: MovementType
+  hidePath: boolean,
 }
 
 const DancerMovement = React.memo(function DancerMovement ({
-  dancer, prev, geometry, pathPoints, isSelected
+  dancer, prev, geometry, pathPoints, movementType, hidePath
 }: DancerMovementProps) {
   return <>
     {
@@ -91,7 +95,7 @@ const DancerMovement = React.memo(function DancerMovement ({
           animate={false}
         />
         {
-          !isSelected && pathPoints &&
+          !hidePath && pathPoints &&
           <Line
             points={pathPoints}
             perfectDrawEnabled={false}
@@ -104,6 +108,7 @@ const DancerMovement = React.memo(function DancerMovement ({
             pointerWidth={5}
             pointerLength={5}
             dash={[2, 2]}
+            tension={movementType === "straight" ? 0 : 0.5}
           />
         }
       </>

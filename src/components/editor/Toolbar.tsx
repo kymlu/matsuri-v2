@@ -64,10 +64,17 @@ type ToolbarProps = {
   
   // movement
   onShowMovement: () => void;
-  showMovement: boolean;
+  showMovementFunctions: boolean;
+  showPaths: boolean;
+  toggleShowPaths: () => void
   canEditMovement: boolean;
   isEditingMovement: boolean;
   setIsEditingMovement: (value: boolean) => void;
+  onResetPath: () => void;
+  pointCount: 1 | 2;
+  togglePointCount: () => void;
+  curved: boolean;
+  toggleCurved: () => void;
 
   // obstacles
   showDuplicateObstacle: boolean;
@@ -85,12 +92,9 @@ type ToolbarProps = {
 export default function Toolbar({
   isEnabled,
   
-  onAddDancer,
-  isAddingDancer,
-  onAddProp,
-  isAddingProp,
-  onAddObstacle,
-  isAddingObstacle,
+  onAddDancer, isAddingDancer,
+  onAddProp, isAddingProp,
+  onAddObstacle, isAddingObstacle,
 
   showSelectDancer,
   onSelectColor,
@@ -100,49 +104,35 @@ export default function Toolbar({
   showSelectAllButton,
   onDeselect,
 
-  showChangeColour,
-  onChangeColor,
+  showChangeColour, onChangeColor,
 
-  showCopyPosition,
-  onCopyPosition,
-  showPastePosition,
-  onPastePosition,
-  showSwapPosition,
-  onSwapPosition,
+  showCopyPosition, onCopyPosition,
+  showPastePosition, onPastePosition,
+  showSwapPosition, onSwapPosition,
 
-  showArrange,
-  onRearrange,
-  onVerticalAlign,
-  onHorizontalAlign,
-  showDistribute,
-  onDistribute,
+  showArrange, onRearrange,
+  onVerticalAlign, onHorizontalAlign,
+  showDistribute, onDistribute,
 
-  showRenameDancer,
-  onRenameDancer,
-  showRenameProp,
-  onRenameProp,
-  showRenameObstacle,
-  onRenameObstacle,
+  showRenameDancer, onRenameDancer,
+  showRenameProp, onRenameProp,
+  showRenameObstacle, onRenameObstacle,
 
-  showDeleteObjects,
-  onDeleteObjects,
+  showDeleteObjects, onDeleteObjects,
 
   onOpenActionManager,
-  onAssignActions,
-  isAssigningActionsEnabled,
-  isAssigningActions,
+  onAssignActions, isAssigningActionsEnabled, isAssigningActions,
 
-  onShowMovement,
-  showMovement,
+  onShowMovement, showMovementFunctions,
+  showPaths, toggleShowPaths,
   canEditMovement,
-  isEditingMovement,
-  setIsEditingMovement,
+  isEditingMovement, setIsEditingMovement,
+  onResetPath,
+  curved, toggleCurved,
+  pointCount, togglePointCount,
 
-  showDuplicateObstacle,
-  onDuplicateObstacle,
-  showLockObstacle,
-  onToggleObstacleLock,
-  areObstaclesLocked,
+  showDuplicateObstacle, onDuplicateObstacle,
+  showLockObstacle, onToggleObstacleLock, areObstaclesLocked,
 
   onToggleResizePropsLock,
   isResizePropsLocked,
@@ -198,7 +188,8 @@ export default function Toolbar({
         {showSwapPosition && <IconButton src="swapHoriz" label="位置交換" onClick={() => {onSwapPosition()}} />}
         {showDuplicateObstacle && <IconButton src="contentCopy" label="複製" onClick={() => {onDuplicateObstacle()}} />}
         {showDeleteObjects && <IconButton src="delete" label="削除" onClick={()=>{onDeleteObjects()}}/>}
-        {showMovement && <IconButton src="step" label="動線" onClick={()=>{
+        {showMovementFunctions && <IconButton src="conversionPath" crossedOut={!showPaths} label="動線表示" onClick={()=>{toggleShowPaths()}}/>}
+        {showMovementFunctions && <IconButton src="rebaseEdit" label="動線編集" onClick={()=>{
           onShowMovement();
           setIsEditingMovement(true);
         }}/>}
@@ -295,12 +286,17 @@ export default function Toolbar({
               disabled={!canEditMovement}
               src="restartAlt"
               label="リセット" // todo
-              onClick={() => {}} />
+              onClick={() => {onResetPath()}} />
             <IconButton
               disabled={!canEditMovement}
-              src={true ? "counter1" : "counter2"} // todo
-              label={`${true ? 1 : 2}点`}
-              onClick={() => {}} />
+              src={pointCount ? "counter1" : "counter2"} // todo
+              label={`${pointCount ? 1 : 2}点`}
+              onClick={() => {togglePointCount()}} />
+            <IconButton
+              disabled={!canEditMovement}
+              src={curved ? "uTurnRight" : "turnRight"} // todo
+              label={curved ? "round" : "straight"}
+              onClick={() => {toggleCurved()}} />
           </>
         }
       </>

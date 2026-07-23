@@ -4,12 +4,22 @@ import { DancerActionSchema } from "./dancerAction";
 import { PropPositionSchema } from "./prop";
 import * as z from "zod";
 
+export const MovementTypeSchema = z.enum(["straight", "curved"]);
+export type MovementType = z.infer<typeof MovementTypeSchema>;
+
 export const MovementSchema = z.object({
   points: CoordinatesSchema.array(),
-  tension: z.number().optional().default(0)
+  tension: MovementTypeSchema,
 });
 
 export type Movement = z.infer<typeof MovementSchema>;
+
+export type MovementCacheRecord = Record<string, MovementCacheByDancer>;
+export type MovementCacheByDancer = Record<string, MovementCache>;
+export type MovementCache = {
+  points: number[],
+  tension: MovementType,
+}
 
 export const FormationSchema = z.object({
   dancerPositions: z.record(z.string(), DancerPositionSchema),
