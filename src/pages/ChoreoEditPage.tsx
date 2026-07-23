@@ -140,7 +140,6 @@ export default function ChoreoEditPage(props: {
       }
     });
     setMovementCache(newCache);
-    // movementCache.current = (newCache);
   }
 
   useEffect(() => {
@@ -940,7 +939,7 @@ export default function ChoreoEditPage(props: {
         isEditingMovement={isEditingMovement}
         setIsEditingMovement={setIsEditingMovement}
         canEditMovement={selectedIds.dancers.length === 1 && currentSection.id !== history.presentState.state.sections[0].id}
-        curved={movementCache[currentSection.id]?.[firstSelectedDancerId]?.tension === "curved"}
+        curved={currentSection.formation.dancerMovements?.[firstSelectedDancerId]?.tension !== "straight"}
         toggleCurved={() => {
           dispatch({
             type: "SET_STATE",
@@ -950,7 +949,7 @@ export default function ChoreoEditPage(props: {
               firstSelectedDancerId,
               {
                 points: currentSection.formation.dancerMovements?.[firstSelectedDancerId]?.points ?? [],
-                tension: movementCache[currentSection.id][firstSelectedDancerId]?.tension === "straight" ? "curved" : "straight" // todo: fix to update properly
+                tension: currentSection.formation.dancerMovements?.[firstSelectedDancerId]?.tension === "straight" ? "curved" : "straight"
               },
             ),
             currentSectionId: currentSection.id,
@@ -963,13 +962,13 @@ export default function ChoreoEditPage(props: {
             const prev = prevSection.formation.dancerPositions[firstSelectedDancerId];
             const curr = currentSection.formation.dancerPositions[firstSelectedDancerId];
             newPoints.push({
-              x: (curr.x - prev.y) / (1/3),
-              y: (curr.y - prev.y) / (1/3)
-            })
+              x: prev.x + (curr.x - prev.x) * (1/3),
+              y: prev.y + (curr.y - prev.y) * (1/3)
+            });
             newPoints.push({
-              x: (curr.x - prev.y) / (2/3),
-              y: (curr.y - prev.y) / (2/3)
-            })
+              x: prev.x + (curr.x - prev.x) * (2/3),
+              y: prev.y + (curr.y - prev.y) * (2/3)
+            });
           }
           dispatch({
             type: "SET_STATE",
@@ -979,7 +978,7 @@ export default function ChoreoEditPage(props: {
               firstSelectedDancerId,
               {
                 points: newPoints,
-                tension: movementCache[currentSection.id][firstSelectedDancerId]?.tension ?? "curved"
+                tension: currentSection.formation.dancerMovements?.[firstSelectedDancerId]?.tension ?? "curved"
               },
             ),
             currentSectionId: currentSection.id,
@@ -995,7 +994,7 @@ export default function ChoreoEditPage(props: {
                 firstSelectedDancerId,
                 {
                   points: [],
-                  tension: movementCache[currentSection.id][firstSelectedDancerId]?.tension === "straight" ? "curved" : "straight" // todo: fix to update properly
+                  tension: currentSection.formation.dancerMovements?.[firstSelectedDancerId]?.tension ?? "curved"
                 },
               ),
               currentSectionId: currentSection.id,

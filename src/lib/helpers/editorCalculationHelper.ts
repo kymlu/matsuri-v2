@@ -68,12 +68,12 @@ export const createMovementCache = (stageGeometry: StageGeometry, previous: Coor
   const start = stageMetersToPx(previous, stageGeometry, METER_PX);
   var movementPoints: number[] = [];
   if (movement) {
-    movementPoints = movement.points.flatMap(p => [p.x, p.y]);
+    movementPoints = movement.points.map(p => stageMetersToPx(p, stageGeometry, METER_PX)).flatMap(p => [p.x, p.y]);
   }
   const end = stageMetersToPx(current, stageGeometry, METER_PX);
   return {
     points: [start.x, start.y, ...movementPoints, end.x, end.y],
-    tension: "curved"
+    tension: movement?.tension ?? "curved"
   } as MovementCache;
 }
 
