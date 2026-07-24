@@ -3,7 +3,7 @@ import GridLayer from "./layers/GridLayer";
 import { useState, useCallback, useEffect, useRef, SetStateAction, useMemo } from "react";
 import { Choreo, StageGeometry } from "../../models/choreo";
 import FormationLayer from "./layers/FormationLayer";
-import { ChoreoSection, Movement, MovementCacheRecord } from "../../models/choreoSection";
+import { ChoreoSection, Movement, MovementCacheBySectionByDancer, PathSvgCacheByDancerBySection } from "../../models/choreoSection";
 import { DancerPosition } from "../../models/dancer";
 import { pxToStageMeters, snapCoordsToGrid, stageMetersToPx } from "../../lib/helpers/editorCalculationHelper";
 import { DEFAULT_PROP_LENGTH, MAX_ZOOM, METER_PX, MIN_ZOOM } from "../../lib/consts/consts";
@@ -56,8 +56,9 @@ type MainStageProps = {
   toggleEditEnabled?: () => void,
   showPaths?: boolean,
   isEditingMovement?: boolean,
-  movementCache: MovementCacheRecord,
+  movementCache: MovementCacheBySectionByDancer,
   onMidpointEdit?: (newMovement: Movement, dancerId: string) => void;
+  animationCache: PathSvgCacheByDancerBySection,
 }
 
 export default function MainStage({
@@ -70,7 +71,7 @@ export default function MainStage({
   selectedIds, setSelectedIds, selectedObjects,
   addDancer, addProp, addObstacle, appSettings, previousSection, selectedDancerMovement,
   onDancerSelected, bottomMarginPercent = 0, canResizeProps, editEnabled, toggleEditEnabled,
-  showPaths = false, isEditingMovement = false, movementCache, onMidpointEdit,
+  showPaths = false, isEditingMovement = false, movementCache, onMidpointEdit, animationCache
 }: MainStageProps) {
   const [dancerPositions, setDancerPositions] = useState<DancerPosition[]>([]);
   const [propPositions, setPropPositions] = useState<PropPosition[]>([]);
@@ -494,7 +495,6 @@ export default function MainStage({
       return 1;
     }
   }, [stageScale])
-  
   return <div ref={containerRef} className="w-full h-full overflow-auto">
     {
       stageGeometry && 
@@ -605,6 +605,8 @@ export default function MainStage({
           onDancerSelected={onDancerSelected}
           canResizeProps={canResizeProps}
           isZooming={isZooming}
+          sectionId={currentSection.id}
+          animationCache={animationCache}
           />
         {
           selectedDancerMovement &&
@@ -612,6 +614,7 @@ export default function MainStage({
             geometry={stageGeometry}
             currentPosition={selectedDancerMovement.current}
             nextPosition={selectedDancerMovement.next}
+            movementCache={movementCache[currentSection.id]}
           />
         }
         {

@@ -14,12 +14,17 @@ export const MovementSchema = z.object({
 
 export type Movement = z.infer<typeof MovementSchema>;
 
-export type MovementCacheRecord = Record<string, MovementCacheByDancer>;
+export type MovementCacheBySectionByDancer = Record<string, MovementCacheByDancer>;
 export type MovementCacheByDancer = Record<string, MovementCache>;
 export type MovementCache = {
   points: number[],
   tension: MovementType,
 }
+export type PathSvgCacheByDancerBySection = Record<string, PathSvgCacheBySection>;
+export type PathSvgCacheBySection = Record<string, PathSvgCache>;
+export type PathSvgCache = {
+  path: string,
+};
 
 export const FormationSchema = z.object({
   dancerPositions: z.record(z.string(), DancerPositionSchema),

@@ -7,6 +7,7 @@ import { colorPalette } from "../../../lib/consts/colors";
 import { DancerDisplayType } from "../../../models/appSettings";
 import { METER_PX } from "../../../lib/consts/consts";
 import { memo } from "react";
+import { PathSvgCacheBySection } from "../../../models/choreoSection";
 
 type DancerGridObjectProps = {
   dancer: Dancer;
@@ -22,6 +23,8 @@ type DancerGridObjectProps = {
   dancerDisplayType?: DancerDisplayType;
   animate: boolean;
   isZooming?: React.RefObject<boolean>;
+  sectionId?: string,
+  animationCache?: PathSvgCacheBySection;
 };
 
 const DancerGridObject = memo(function DancerGridObject({
@@ -37,7 +40,9 @@ const DancerGridObject = memo(function DancerGridObject({
   snapToGrid,
   dancerDisplayType = "large",
   animate,
+  sectionId,
   isZooming,
+  animationCache,
 }: DancerGridObjectProps) {
   return <>
     {
@@ -55,6 +60,8 @@ const DancerGridObject = memo(function DancerGridObject({
         snapToGrid={snapToGrid}
         animate={animate}
         isZooming={isZooming}
+        animationCache={animationCache}
+        sectionId={sectionId}
       >
         {
           isSelected && 

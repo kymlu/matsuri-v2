@@ -7,14 +7,14 @@ import { historyReducer } from "../lib/editor/historyReducer";
 import { BasicChoreoDetails, Choreo, EventDetails, getBasicChoreoDetails } from "../models/choreo";
 import { EditHistory, StageEntities } from "../models/history";
 import { addSection, assignDancersToTiming, duplicateSection, editDancerActions, editSectionNote, removeSection, renameSection, reorderSections } from "../lib/editor/commands/sectionCommands";
-import { ChoreoSection, Movement, MovementCache, MovementCacheByDancer, MovementCacheRecord, MovementType } from "../models/choreoSection";
+import { ChoreoSection, MovementCacheBySectionByDancer, PathSvgCacheByDancerBySection } from "../models/choreoSection";
 import { debounce, indexByKey, isNullOrUndefinedOrBlank, strEquals, stringifyEvent } from "../lib/helpers/globalHelper";
 import MainStage from "../components/grid/MainStage";
 import { Dialog } from "@base-ui/react";
 import EditChoreoSizeDialog from "../components/dialogs/EditChoreoSizeDialog";
 import { exportChoreo } from "../lib/helpers/exportHelper";
 import { saveChoreo } from "../lib/dataAccess/DataController";
-import { DEFAULT_PROP_LENGTH, DEFAULT_PROP_WIDTH, METER_PX, SAMPLE_PARADE_ID, SAMPLE_STAGE_ID } from "../lib/consts/consts";
+import { DEFAULT_PROP_LENGTH, DEFAULT_PROP_WIDTH, SAMPLE_PARADE_ID, SAMPLE_STAGE_ID } from "../lib/consts/consts";
 import { AppSetting } from "../models/appSettings";
 import { changeStageGeometryAndType, renameChoreo } from "../lib/editor/commands/choreoCommands";
 import EditChoreoInfoDialog from "../components/dialogs/EditChoreoInfoDialog";
@@ -42,7 +42,7 @@ import { ChoreoStatus } from "./HomePage";
 import PublishConfirmationDialog from "../components/dialogs/PublishConfirmationDialog";
 import BaseEditDialog from "../components/dialogs/BaseEditDialog";
 import { getChoreoPassword } from "../lib/helpers/apiHelper";
-import { createMovementCache } from "../lib/helpers/editorCalculationHelper";
+import { calculateMovementCache } from "../lib/helpers/editorCalculationHelper";
 
 const resizeDialog = Dialog.createHandle<Choreo>();
 const editChoreoInfoDialog = Dialog.createHandle<string>();
@@ -122,53 +122,14 @@ export default function ChoreoEditPage(props: {
     obstacles: history.presentState.state.obstacles ? Object.keys(history.presentState.state.obstacles).length : 0,
   } as StageEntities<number>), [history.presentState.state.dancers, history.presentState.state.props, history.presentState.state.obstacles]);
 
-  const [movementCache, setMovementCache] = useState<MovementCacheRecord>({});
-
-  const calculateMovementCache = () => {
-    const newCache: MovementCacheRecord = {};
-    history.presentState.state.sections.forEach((s, i) => {
-      if (i > 0) {
-        const prev = history.presentState.state.sections[i - 1].formation.dancerPositions;
-        const curr = s.formation.dancerPositions;
-        const movement = s.formation.dancerMovements;
-        const all: MovementCacheByDancer = {};
-        Object.entries(prev).forEach((p) => {
-          const [id, position] = p;
-          all[id] = createMovementCache(history.presentState.state.stageGeometry, position, curr[id], movement?.[id]);
-        });
-        newCache[s.id] = all;
-      }
-    });
-    setMovementCache(newCache);
-  }
+  const [movementCache, setMovementCache] = useState<MovementCacheBySectionByDancer>({});
+  const [animationCache, setAnimationCache] = useState<PathSvgCacheByDancerBySection>({});
 
   useEffect(() => {
-    calculateMovementCache();
+    const res = calculateMovementCache(history.presentState.state, true);
+    setMovementCache(res.newMovementCache);
+    setAnimationCache(res.newAnimationCache);
   }, [history.presentState.state.sections])
-
-  const calculateMovementCacheForSection = (sectionId: string) => {
-    setMovementCache(prev => {
-      const newCache = {...prev};
-      const index = history.presentState.state.sections.findIndex(x => strEquals(x.id, sectionId));
-      if (index > 0) {
-        const prev = history.presentState.state.sections[index - 1].formation.dancerPositions;
-        const curr = history.presentState.state.sections[index].formation.dancerPositions;
-        const movement = history.presentState.state.sections[index].formation.dancerMovements;
-        const all: MovementCacheByDancer = {};
-        Object.entries(prev).forEach((p) => {
-          const [id, position] = p;
-          all[id] = createMovementCache(history.presentState.state.stageGeometry, position, curr[id], movement?.[id]);
-        });
-        newCache[history.presentState.state.sections[index].id] = all;
-      }
-      return newCache;
-    });
-  }
-
-  const calculateMovementCacheForSectionForDancer = (sectionId: string, dancerId: string) => {
-    const newCache = {...movementCache};
-    // newCache[sectionId][dancerId] ;
-  }
 
   useEffect(() => {
     hasInitialized.current = false;
@@ -732,6 +693,7 @@ export default function ChoreoEditPage(props: {
           showPaths={showPaths}
           isEditingMovement={isEditingMovement}
           movementCache={movementCache}
+          animationCache={animationCache}
           onMidpointEdit={(newMovement, dancerId) => {
             dispatch({
               type: "SET_STATE",

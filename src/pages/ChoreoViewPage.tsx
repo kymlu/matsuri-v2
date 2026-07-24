@@ -1,8 +1,8 @@
 import Header from "../components/editor/Header"
 import FormationSelectionToolbar from "../components/editor/FormationSelectionToolbar";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Choreo } from "../models/choreo";
-import { ChoreoSection, MovementCache, MovementCacheByDancer, MovementCacheRecord } from "../models/choreoSection";
+import { ChoreoSection, MovementCacheBySectionByDancer, PathSvgCacheByDancerBySection } from "../models/choreoSection";
 import MainStage from "../components/grid/MainStage";
 import { AppSetting } from "../models/appSettings";
 import { isNullOrUndefinedOrBlank, strEquals } from "../lib/helpers/globalHelper";
@@ -17,7 +17,7 @@ import BaseErrorDialog from "../components/dialogs/BaseErrorDialog";
 import CustomSwitch from "../components/inputs/CustomSwitch";
 import { checkShowingViewPageInfoDialog, stopShowingViewPageInfoDialog } from "../lib/dataAccess/LocalStorageController";
 import Divider from "../components/basic/Divider";
-import { createMovementCache } from "../lib/helpers/editorCalculationHelper";
+import { calculateMovementCache } from "../lib/helpers/editorCalculationHelper";
 
 export default function ChoreoViewPage(props: {
   goToHomePage: () => void
@@ -48,25 +48,8 @@ export default function ChoreoViewPage(props: {
     dancers: Object.keys(props.currentChoreo.dancers).length,
     obstacles: props.currentChoreo.obstacles ? Object.keys(props.currentChoreo.obstacles).length : 0,
   } as StageEntities<number>), [props.currentChoreo.dancers, props.currentChoreo.props, props.currentChoreo.obstacles]);
-  const [movementCache, setMovementCache] = useState<MovementCacheRecord>({});
-
-  const calculateMovementCache = () => {
-    const newCache: MovementCacheRecord = {};
-    props.currentChoreo.sections.forEach((s, i) => {
-      if (i > 0) {
-        const prev = props.currentChoreo.sections[i - 1].formation.dancerPositions;
-        const curr = s.formation.dancerPositions;
-        const movement = s.formation.dancerMovements;
-        const all: MovementCacheByDancer = {};
-        Object.entries(prev).forEach((p) => {
-          const [id, position] = p;
-          all[id] = createMovementCache(props.currentChoreo.stageGeometry, position, curr[id], movement?.[id]);
-        });
-        newCache[s.id] = all;
-      }
-    });
-    setMovementCache(newCache);
-  }
+  const [movementCache, setMovementCache] = useState<MovementCacheBySectionByDancer>({});
+  const [animationCache, setAnimationCache] = useState<PathSvgCacheByDancerBySection>({});
 
   useEffect(() => {
     if (!isNullOrUndefinedOrBlank(props.savedDancerName)) {
@@ -81,7 +64,9 @@ export default function ChoreoViewPage(props: {
     } else {
       setShowHintDialog(!checkShowingViewPageInfoDialog());
     }
-    calculateMovementCache();
+    const res = calculateMovementCache(props.currentChoreo, false);
+    setAnimationCache(res.newAnimationCache);
+    setMovementCache(res.newMovementCache);
   }, [props.currentChoreo]);
   
   const selectedObjects = useMemo(() => ({
@@ -194,6 +179,7 @@ export default function ChoreoViewPage(props: {
           }
           bottomMarginPercent={sidebarHeight}
           movementCache={movementCache}
+          animationCache={animationCache}
         />
       </div>
 

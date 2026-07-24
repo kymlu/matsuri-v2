@@ -4,9 +4,10 @@ import Konva from "konva";
 import { Shape, ShapeConfig } from "konva/lib/Shape";
 import { Stage } from "konva/lib/Stage";
 import { METER_PX } from "../../../lib/consts/consts";
-import { pxToStageMeters, snapCoordsToGrid, stageMetersToPx } from "../../../lib/helpers/editorCalculationHelper";
+import { getAnimationKey, pxToStageMeters, snapCoordsToGrid, stageMetersToPx } from "../../../lib/helpers/editorCalculationHelper";
 import { StageGeometry } from "../../../models/choreo";
 import { Coordinates } from "../../../models/base";
+import { PathSvgCacheBySection } from "../../../models/choreoSection";
 
 export interface BaseGridObjectProps {
   id: string,
@@ -26,6 +27,8 @@ export interface BaseGridObjectProps {
   snapToGrid?: boolean,
   animate: boolean,
   isZooming?: React.RefObject<boolean>;
+  sectionId?: string,
+  animationCache?: PathSvgCacheBySection;
 }
 
 const BaseGridObject = memo(function BaseGridObject({
@@ -46,9 +49,12 @@ const BaseGridObject = memo(function BaseGridObject({
   snapToGrid,
   animate,
   isZooming,
+  animationCache,
+  sectionId,
 }: BaseGridObjectProps) {
   const ref = useRef<Konva.Group>(null);
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
+  const prevSectionId = useRef<string>("");
 
   useEffect(() => {
     registerNode?.(id, ref.current);
@@ -60,14 +66,42 @@ const BaseGridObject = memo(function BaseGridObject({
     if (newPosition.x === ref.current?.x() && newPosition.y === ref.current?.y()) return;
     if (animate) setIsAnimating(true);
     if (ref.current) {
-      ref.current.to({
-        x: newPosition.x,
-        y: newPosition.y,
-        rotation: rotation ?? 0,
-        duration: animate ? 1 : 0,
-        easing: Konva.Easings.EaseInOut,
-        onFinish: () => {setIsAnimating(false)}
-      });
+      if (sectionId && animationCache?.[getAnimationKey(prevSectionId.current, sectionId)]) {
+        let path: Konva.Path = new Konva.Path({x: 0, y: 0, data: animationCache[getAnimationKey(prevSectionId.current, sectionId)].path});
+        const steps = 50; // number of steps in animation
+        const pathLen = path.getLength();
+        const step = pathLen / steps;
+        let frameCnt = 0, pos =0, pt;
+
+        let anim = new Konva.Animation(function(frame) {
+            pos = pos + 1;
+            pt = path.getPointAtLength(pos * step);
+            if (ref.current && pt) {
+              ref.current.position({x: pt.x, y: pt.y});    
+            }
+            if (pos == steps) {
+              anim.stop();
+              ref?.current?.x(newPosition.x);
+              ref?.current?.y(newPosition.y);
+              ref?.current?.rotation(rotation ?? 0);
+              setIsAnimating(false);
+            }
+        }, ref.current.getLayer());
+        anim.start();
+
+      } else {
+        ref.current.to({
+          x: newPosition.x,
+          y: newPosition.y,
+          rotation: rotation ?? 0,
+          duration: animate ? 1 : 0,
+          easing: Konva.Easings.EaseInOut,
+          onFinish: () => {setIsAnimating(false)}
+        });
+      }
+      if (sectionId) {
+        prevSectionId.current = sectionId;
+      }
     }
   }, [position, stageGeometry, rotation]);
 

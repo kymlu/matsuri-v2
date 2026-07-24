@@ -6,15 +6,17 @@ import { stageMetersToPx } from "../../../lib/helpers/editorCalculationHelper";
 import { StageGeometry } from "../../../models/choreo";
 import { METER_PX } from "../../../lib/consts/consts";
 import DancerGridObject from "../gridObjects/DancerGridObject";
+import { MovementCacheByDancer } from "../../../models/choreoSection";
 
 type NextDirectionLayerProps = {
   geometry: StageGeometry
   currentPosition?: DancerPosition,
   nextPosition?: DancerPosition,
+  movementCache?: MovementCacheByDancer,
 }
 
 const NextDirectionLayer = memo(function NextDirectionLayer({
-  geometry, currentPosition, nextPosition,
+  geometry, currentPosition, nextPosition, movementCache
 }: NextDirectionLayerProps) {
   const hideLayer = useMemo(() => {
     return (!currentPosition ||
@@ -22,13 +24,20 @@ const NextDirectionLayer = memo(function NextDirectionLayer({
       (currentPosition.x === nextPosition.x && currentPosition.y === nextPosition.y))
   }, [currentPosition, nextPosition]);
 
+  const currentMovement =  useMemo(() => {
+    return movementCache?.[currentPosition!!.dancerId];
+  }, [movementCache, currentPosition]);
+
   const points = useMemo(() => {
     if (hideLayer) return [];
-
-    const currentPoints = stageMetersToPx(currentPosition!!, geometry, METER_PX);
-    const nextPoints = stageMetersToPx(nextPosition!!, geometry, METER_PX);
-    return [currentPoints.x, currentPoints.y, nextPoints.x, nextPoints.y]
-  }, [currentPosition, nextPosition]);
+    if (currentMovement) {
+      return currentMovement.points;
+    } else {
+      const currentPoints = stageMetersToPx(currentPosition!!, geometry, METER_PX);
+      const nextPoints = stageMetersToPx(nextPosition!!, geometry, METER_PX);
+      return [currentPoints.x, currentPoints.y, nextPoints.x, nextPoints.y]
+    }
+  }, [currentPosition, nextPosition, currentMovement]);
 
   return <>
     {
@@ -54,6 +63,7 @@ const NextDirectionLayer = memo(function NextDirectionLayer({
           pointerWidth={5}
           pointerLength={5}
           dash={[2, 2]}
+          tension={currentMovement?.tension === "straight" ? 0 : 0.5}
         />
       </Layer>
     }
