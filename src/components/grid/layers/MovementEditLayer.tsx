@@ -90,6 +90,7 @@ const MovementEditLayer = memo(function MovementEditLayer({
             strokeEnabled
             stroke={colorPalette.primary}
             strokeWidth={2}
+            hitStrokeWidth={METER_PX/2}
             fill={colorPalette.white}
             fillEnabled
             radius={METER_PX/5}
