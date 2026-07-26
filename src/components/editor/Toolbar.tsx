@@ -71,7 +71,7 @@ type ToolbarProps = {
   isEditingMovement: boolean;
   setIsEditingMovement: (value: boolean) => void;
   onResetPath: () => void;
-  pointCount: 1 | 2 | 3;
+  pointCount: number;
   togglePointCount: () => void;
   curved: boolean;
   toggleCurved: () => void;

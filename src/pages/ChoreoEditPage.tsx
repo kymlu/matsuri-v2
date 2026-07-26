@@ -926,11 +926,10 @@ export default function ChoreoEditPage(props: {
             const curr = currentSection.formation.dancerPositions[firstSelectedDancerId];
             for (let i = 1; i <= pointCount + 1; i++) {
               const frac = i / (pointCount + 2);
-                newPoints.push({
-                  x: prev.x + (curr.x - prev.x) * frac,
-                  y: prev.y + (curr.y - prev.y) * frac
-                });
-              }
+              newPoints.push({
+                x: prev.x + (curr.x - prev.x) * frac,
+                y: prev.y + (curr.y - prev.y) * frac
+              });
             }
           }
           dispatch({
