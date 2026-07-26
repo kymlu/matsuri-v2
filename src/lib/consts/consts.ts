@@ -80,6 +80,7 @@ export const ICON = {
   conversionPath: "conversion_path",
   counter1: "counter_1",
   counter2: "counter_2",
+  counter3: "counter_3",
   curtains: "curtains",
   delete: "delete",
   deselect: "deselect",
