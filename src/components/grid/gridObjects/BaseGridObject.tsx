@@ -116,7 +116,7 @@ const BaseGridObject = memo(function BaseGridObject({
     <Group
       id={id} 
       ref={ref}
-      opacity={isEditingOtherMovements ? 0.5 : 1}
+      opacity={isEditingOtherMovements ? 0.8 : 1}
       perfectDrawEnabled={false}
       draggable={draggable && !isAnimating}
       listening={listening}
