@@ -606,6 +606,7 @@ export default function MainStage({
           canResizeProps={canResizeProps}
           isZooming={isZooming}
           sectionId={currentSection.id}
+          isEditingMovement={isEditingMovement}
           dancerAnimationCache={dancerAnimationCache}
           />
         {
