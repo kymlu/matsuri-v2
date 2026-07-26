@@ -51,20 +51,31 @@ const MovementEditLayer = memo(function MovementEditLayer({
   return ( 
     <Layer>
       {
-        points.length > 0 &&
-        <Line
-          points={points}
-          strokeEnabled
-          stroke={colorPalette.primary}
-          strokeWidth={2}
-          fill={colorPalette.primary}
-          fillEnabled
-          dashEnabled
-          pointerWidth={5}
-          pointerLength={5}
-          dash={[2, 2]}
-          tension={movement?.tension === "straight" ? 0 : 0.5}
-        />
+        points.length > 0 && <>
+          <Line
+            points={points}
+            opacity={0.5}
+            strokeEnabled
+            stroke={colorPalette.white}
+            strokeWidth={4}
+            fill={colorPalette.white}
+            fillEnabled
+            tension={movement?.tension === "straight" ? 0 : 0.5}
+          />
+          <Line
+            points={points}
+            strokeEnabled
+            stroke={colorPalette.primary}
+            strokeWidth={2}
+            fill={colorPalette.primary}
+            fillEnabled
+            dashEnabled
+            pointerWidth={5}
+            pointerLength={5}
+            dash={[2, 2]}
+            tension={movement?.tension === "straight" ? 0 : 0.5}
+          />
+        </>
       }
       {
         midPoints?.map((point, i) => {
