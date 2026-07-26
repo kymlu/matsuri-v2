@@ -917,20 +917,21 @@ export default function ChoreoEditPage(props: {
             currentSectionId: currentSection.id,
             commit: true});
         }}
-        pointCount={currentSection.formation.dancerMovements?.[firstSelectedDancerId]?.points.length === 2 ? 2 : 1}
+        pointCount={currentSection.formation.dancerMovements?.[firstSelectedDancerId]?.points.length ?? 1}
         togglePointCount={() => {
+          const pointCount = currentSection.formation.dancerMovements?.[firstSelectedDancerId]?.points.length ?? 1;
           let newPoints = [] as Coordinates[];
-          if (prevSection && currentSection.formation.dancerMovements?.[firstSelectedDancerId]?.points.length !== 2) {
+          if (prevSection && pointCount < 3) {
             const prev = prevSection.formation.dancerPositions[firstSelectedDancerId];
             const curr = currentSection.formation.dancerPositions[firstSelectedDancerId];
-            newPoints.push({
-              x: prev.x + (curr.x - prev.x) * (1/3),
-              y: prev.y + (curr.y - prev.y) * (1/3)
-            });
-            newPoints.push({
-              x: prev.x + (curr.x - prev.x) * (2/3),
-              y: prev.y + (curr.y - prev.y) * (2/3)
-            });
+            for (let i = 1; i <= pointCount + 1; i++) {
+              const frac = i / (pointCount + 2);
+                newPoints.push({
+                  x: prev.x + (curr.x - prev.x) * frac,
+                  y: prev.y + (curr.y - prev.y) * frac
+                });
+              }
+            }
           }
           dispatch({
             type: "SET_STATE",
