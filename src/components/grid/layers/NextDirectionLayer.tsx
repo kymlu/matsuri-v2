@@ -42,8 +42,24 @@ const NextDirectionLayer = memo(function NextDirectionLayer({
   return <>
     {
       !hideLayer &&
-      <Layer opacity={0.5} listening={false}>
+      <Layer listening={false}>
+        <Arrow
+          opacity={0.7} 
+          perfectDrawEnabled={false}
+          points={points}
+          strokeEnabled
+          stroke={colorPalette.white}
+          strokeWidth={4}
+          fill={colorPalette.white}
+          fillEnabled
+          dashEnabled
+          pointerWidth={5}
+          pointerLength={5}
+          lineJoin="round"
+          tension={currentMovement?.tension === "straight" ? 0 : 0.5}
+        />
         <DancerGridObject
+          halfOpacity={true} 
           dancer={{"id": "", "name": ""}}
           stageGeometry={geometry}
           position={nextPosition!!}

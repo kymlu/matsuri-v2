@@ -105,6 +105,7 @@ const DancerMovement = React.memo(function DancerMovement ({
             fill={colorPalette.primary}
             fillEnabled
             dashEnabled
+            lineJoin="round"
             pointerWidth={5}
             pointerLength={5}
             dash={[2, 2]}
