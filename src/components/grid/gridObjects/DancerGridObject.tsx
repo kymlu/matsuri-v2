@@ -24,6 +24,7 @@ type DancerGridObjectProps = {
   animate: boolean;
   isZooming?: React.RefObject<boolean>;
   sectionId?: string,
+  isEditingOtherMovements?: boolean,
   dancerAnimationCache?: PathSvgCacheBySectionId;
 };
 
@@ -42,6 +43,7 @@ const DancerGridObject = memo(function DancerGridObject({
   animate,
   sectionId,
   isZooming,
+  isEditingOtherMovements,
   dancerAnimationCache,
 }: DancerGridObjectProps) {
   return <>
@@ -62,6 +64,7 @@ const DancerGridObject = memo(function DancerGridObject({
         isZooming={isZooming}
         dancerAnimationCache={dancerAnimationCache}
         sectionId={sectionId}
+        isEditingOtherMovements={isEditingOtherMovements}
       >
         {
           isSelected && 
