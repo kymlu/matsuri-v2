@@ -42,6 +42,7 @@ type FormationLayerProps = {
   isZooming: React.RefObject<boolean>;
   sectionId: string;
   dancerAnimationCache: PathSvgCacheByDancerIdBySectionId;
+  isEditingMovement?: boolean,
 };
 
 const FormationLayer = memo(function FormationLayer({
@@ -71,7 +72,7 @@ const FormationLayer = memo(function FormationLayer({
   canResizeProps,
   isZooming,
   sectionId,
-  dancerAnimationCache,
+  dancerAnimationCache,isEditingMovement,
 }: FormationLayerProps) {
 	const transformerRef = useRef<Konva.Transformer>(null);
 
@@ -216,6 +217,7 @@ const FormationLayer = memo(function FormationLayer({
             isZooming={isZooming}
             sectionId={sectionId}
             dancerAnimationCache={dancerAnimationCache[dancerPosition.dancerId]}
+			isEditingOtherMovements={isEditingMovement && selectedIds.dancers.length && !selectedIds.dancers.includes[dancerPosition.dancerId]}
           />
         );
       })}
