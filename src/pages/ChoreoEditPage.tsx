@@ -7,7 +7,7 @@ import { historyReducer } from "../lib/editor/historyReducer";
 import { BasicChoreoDetails, Choreo, EventDetails, getBasicChoreoDetails } from "../models/choreo";
 import { EditHistory, StageEntities } from "../models/history";
 import { addSection, assignDancersToTiming, duplicateSection, editDancerActions, editSectionNote, removeSection, renameSection, reorderSections } from "../lib/editor/commands/sectionCommands";
-import { ChoreoSection, MovementCacheBySectionByDancer, PathSvgCacheByDancerBySection } from "../models/choreoSection";
+import { ChoreoSection, MovementCacheBySectionIdByObjectId, PathSvgCacheByDancerIdBySectionId } from "../models/choreoSection";
 import { debounce, indexByKey, isNullOrUndefinedOrBlank, strEquals, stringifyEvent } from "../lib/helpers/globalHelper";
 import MainStage from "../components/grid/MainStage";
 import { Dialog } from "@base-ui/react";
@@ -122,13 +122,13 @@ export default function ChoreoEditPage(props: {
     obstacles: history.presentState.state.obstacles ? Object.keys(history.presentState.state.obstacles).length : 0,
   } as StageEntities<number>), [history.presentState.state.dancers, history.presentState.state.props, history.presentState.state.obstacles]);
 
-  const [movementCache, setMovementCache] = useState<MovementCacheBySectionByDancer>({});
-  const [animationCache, setAnimationCache] = useState<PathSvgCacheByDancerBySection>({});
+  const [dancerMovementCache, setDancerMovementCache] = useState<MovementCacheBySectionIdByObjectId>({});
+  const [dancerAnimationCache, setDancerAnimationCache] = useState<PathSvgCacheByDancerIdBySectionId>({});
 
   useEffect(() => {
     const res = calculateMovementCache(history.presentState.state, true);
-    setMovementCache(res.newMovementCache);
-    setAnimationCache(res.newAnimationCache);
+    setDancerMovementCache(res.newMovementCache);
+    setDancerAnimationCache(res.newAnimationCache);
   }, [history.presentState.state.sections])
 
   useEffect(() => {
@@ -692,8 +692,8 @@ export default function ChoreoEditPage(props: {
           toggleEditEnabled={() => setEditEnabled(prev => !prev)}
           showPaths={showPaths}
           isEditingMovement={isEditingMovement}
-          movementCache={movementCache}
-          animationCache={animationCache}
+          dancerMovementCache={dancerMovementCache}
+          dancerAnimationCache={dancerAnimationCache}
           onMidpointEdit={(newMovement, dancerId) => {
             dispatch({
               type: "SET_STATE",

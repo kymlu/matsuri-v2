@@ -2,7 +2,7 @@ import Header from "../components/editor/Header"
 import FormationSelectionToolbar from "../components/editor/FormationSelectionToolbar";
 import { useEffect, useMemo, useState } from "react";
 import { Choreo } from "../models/choreo";
-import { ChoreoSection, MovementCacheBySectionByDancer, PathSvgCacheByDancerBySection } from "../models/choreoSection";
+import { ChoreoSection, MovementCacheBySectionIdByObjectId, PathSvgCacheByDancerIdBySectionId } from "../models/choreoSection";
 import MainStage from "../components/grid/MainStage";
 import { AppSetting } from "../models/appSettings";
 import { isNullOrUndefinedOrBlank, strEquals } from "../lib/helpers/globalHelper";
@@ -48,8 +48,8 @@ export default function ChoreoViewPage(props: {
     dancers: Object.keys(props.currentChoreo.dancers).length,
     obstacles: props.currentChoreo.obstacles ? Object.keys(props.currentChoreo.obstacles).length : 0,
   } as StageEntities<number>), [props.currentChoreo.dancers, props.currentChoreo.props, props.currentChoreo.obstacles]);
-  const [movementCache, setMovementCache] = useState<MovementCacheBySectionByDancer>({});
-  const [animationCache, setAnimationCache] = useState<PathSvgCacheByDancerBySection>({});
+  const [dancerMovementCache, setDancerMovementCache] = useState<MovementCacheBySectionIdByObjectId>({});
+  const [dancerAnimationCache, setDancerAnimationCache] = useState<PathSvgCacheByDancerIdBySectionId>({});
 
   useEffect(() => {
     if (!isNullOrUndefinedOrBlank(props.savedDancerName)) {
@@ -65,8 +65,8 @@ export default function ChoreoViewPage(props: {
       setShowHintDialog(!checkShowingViewPageInfoDialog());
     }
     const res = calculateMovementCache(props.currentChoreo, false);
-    setAnimationCache(res.newAnimationCache);
-    setMovementCache(res.newMovementCache);
+    setDancerAnimationCache(res.newAnimationCache);
+    setDancerMovementCache(res.newMovementCache);
   }, [props.currentChoreo]);
   
   const selectedObjects = useMemo(() => ({
@@ -178,8 +178,8 @@ export default function ChoreoViewPage(props: {
             undefined
           }
           bottomMarginPercent={sidebarHeight}
-          movementCache={movementCache}
-          animationCache={animationCache}
+          dancerMovementCache={dancerMovementCache}
+          dancerAnimationCache={dancerAnimationCache}
         />
       </div>
 

@@ -1,6 +1,6 @@
 import { Coordinates } from "../../models/base";
 import { Choreo, StageGeometry } from "../../models/choreo";
-import { ChoreoSection, Movement, MovementCache, MovementCacheByDancer, MovementCacheBySectionByDancer, PathSvgCacheByDancerBySection } from "../../models/choreoSection";
+import { ChoreoSection, Movement, MovementCache, MovementCacheByObjectId, MovementCacheBySectionIdByObjectId, PathSvgCacheByDancerIdBySectionId } from "../../models/choreoSection";
 import { METER_PX } from "../consts/consts";
 
 const MAX_CACHE_SIZE = 1000;
@@ -77,13 +77,13 @@ function reversePoints(points: number[]): number[] {
   return pairs.reverse().flat();
 }
 
-const createMovementCache = (stageGeometry: StageGeometry, previous: Coordinates, current: Coordinates, movement?: Movement): MovementCache => {
-  const start = stageMetersToPx(previous, stageGeometry, METER_PX);
+const createMovementCache = (stageGeometry: StageGeometry, previous: Coordinates, current: Coordinates, movement?: Movement, px: number = METER_PX): MovementCache => {
+  const start = stageMetersToPx(previous, stageGeometry, px);
   var movementPoints: number[] = [];
   if (movement) {
-    movementPoints = movement.points.map(p => stageMetersToPx(p, stageGeometry, METER_PX)).flatMap(p => [p.x, p.y]);
+    movementPoints = movement.points.map(p => stageMetersToPx(p, stageGeometry, px)).flatMap(p => [p.x, p.y]);
   }
-  const end = stageMetersToPx(current, stageGeometry, METER_PX);
+  const end = stageMetersToPx(current, stageGeometry, px);
   return {
     points: [start.x, start.y, ...movementPoints, end.x, end.y],
     tension: movement?.tension ?? "curved"
@@ -147,9 +147,68 @@ function getPathLineSvg(points: number[], tension = 0.5, closed = false) {
   return path;
 }
 
+type PdfPathOp = { op: "m" | "l" | "c" | "h", c: number[] };
+
+// For jspdf
+export function getPathLineOps(points: number[], tension = 0.5, closed = false): PdfPathOp[] {
+  const ops: PdfPathOp[] = [];
+
+  if (points.length < 6) {
+    // Fallback to straight lines if there aren't enough points for curves
+    ops.push({ op: "m", c: [points[0], points[1]] });
+    for (let i = 2; i < points.length; i += 2) {
+      ops.push({ op: "l", c: [points[i], points[i + 1]] });
+    }
+    if (closed) ops.push({ op: "h", c: [] });
+    return ops;
+  }
+
+  let len = points.length;
+  ops.push({ op: "m", c: [points[0], points[1]] });
+
+  // Build a coordinate structure that handles wrapping for closed loops
+  let pts: number[] = [];
+  if (closed) {
+    // Add wrapping points to smooth start and end loops seamlessly
+    pts.push(points[len - 2], points[len - 1]);
+    for (let i = 0; i < len; i++) pts.push(points[i]);
+    pts.push(points[0], points[1]);
+    pts.push(points[2], points[3]);
+  } else {
+    // Duplicate edge points to serve as virtual anchors
+    pts.push(points[0], points[1]);
+    for (let i = 0; i < len; i++) pts.push(points[i]);
+    pts.push(points[len - 2], points[len - 1]);
+  }
+
+  // Loop through anchors to calculate cubic bezier control coordinates
+  // Step through by 2 because array is flat [x, y, x, y]
+  let start = 2;
+  let end = pts.length - 4;
+
+  for (let i = start; i < end; i += 2) {
+    let x0 = pts[i - 2], y0 = pts[i - 1];
+    let x1 = pts[i],     y1 = pts[i + 1];
+    let x2 = pts[i + 2], y2 = pts[i + 3];
+    let x3 = pts[i + 4], y3 = pts[i + 5];
+
+    // Catmull-Rom tangent scalar mapping
+    let cp1x = x1 + ((x2 - x0) * tension) / 6;
+    let cp1y = y1 + ((y2 - y0) * tension) / 6;
+    let cp2x = x2 - ((x3 - x1) * tension) / 6;
+    let cp2y = y2 - ((y3 - y1) * tension) / 6;
+
+    ops.push({ op: "c", c: [cp1x, cp1y, cp2x, cp2y, x2, y2] });
+  }
+
+  if (closed) ops.push({ op: "h", c: [] });
+
+  return ops;
+}
+
 export const calculateMovementCache = (choreo: Choreo, showPrev: boolean) => {
-  const newMovementCache: MovementCacheBySectionByDancer = {};
-  const newAnimationCache: PathSvgCacheByDancerBySection = {};
+  const newMovementCache: MovementCacheBySectionIdByObjectId = {};
+  const newAnimationCache: PathSvgCacheByDancerIdBySectionId = {};
 
   choreo.sections.forEach((s, i) => {
     if ((showPrev && i > 0) || (!showPrev && i < (choreo.sections.length - 1))) {
@@ -165,7 +224,7 @@ export const calculateMovementCache = (choreo: Choreo, showPrev: boolean) => {
       const prev = from.formation.dancerPositions;
       const curr = to.formation.dancerPositions;
       const movement = to.formation.dancerMovements;
-      const all: MovementCacheByDancer = {};
+      const all: MovementCacheByObjectId = {};
 
       Object.entries(prev).forEach((p) => {
         const [id, position] = p;

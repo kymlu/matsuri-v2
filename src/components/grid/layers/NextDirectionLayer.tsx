@@ -6,17 +6,17 @@ import { stageMetersToPx } from "../../../lib/helpers/editorCalculationHelper";
 import { StageGeometry } from "../../../models/choreo";
 import { METER_PX } from "../../../lib/consts/consts";
 import DancerGridObject from "../gridObjects/DancerGridObject";
-import { MovementCacheByDancer } from "../../../models/choreoSection";
+import { MovementCacheByObjectId } from "../../../models/choreoSection";
 
 type NextDirectionLayerProps = {
   geometry: StageGeometry
   currentPosition?: DancerPosition,
   nextPosition?: DancerPosition,
-  movementCache?: MovementCacheByDancer,
+  dancerMovementCache?: MovementCacheByObjectId,
 }
 
 const NextDirectionLayer = memo(function NextDirectionLayer({
-  geometry, currentPosition, nextPosition, movementCache
+  geometry, currentPosition, nextPosition, dancerMovementCache
 }: NextDirectionLayerProps) {
   const hideLayer = useMemo(() => {
     return (!currentPosition ||
@@ -25,8 +25,8 @@ const NextDirectionLayer = memo(function NextDirectionLayer({
   }, [currentPosition, nextPosition]);
 
   const currentMovement =  useMemo(() => {
-    return movementCache?.[currentPosition!!.dancerId];
-  }, [movementCache, currentPosition]);
+    return dancerMovementCache?.[currentPosition!!.dancerId];
+  }, [dancerMovementCache, currentPosition]);
 
   const points = useMemo(() => {
     if (hideLayer) return [];

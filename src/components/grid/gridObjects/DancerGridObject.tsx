@@ -7,7 +7,7 @@ import { colorPalette } from "../../../lib/consts/colors";
 import { DancerDisplayType } from "../../../models/appSettings";
 import { METER_PX } from "../../../lib/consts/consts";
 import { memo } from "react";
-import { PathSvgCacheBySection } from "../../../models/choreoSection";
+import { PathSvgCacheBySectionId } from "../../../models/choreoSection";
 
 type DancerGridObjectProps = {
   dancer: Dancer;
@@ -24,7 +24,7 @@ type DancerGridObjectProps = {
   animate: boolean;
   isZooming?: React.RefObject<boolean>;
   sectionId?: string,
-  animationCache?: PathSvgCacheBySection;
+  dancerAnimationCache?: PathSvgCacheBySectionId;
 };
 
 const DancerGridObject = memo(function DancerGridObject({
@@ -42,7 +42,7 @@ const DancerGridObject = memo(function DancerGridObject({
   animate,
   sectionId,
   isZooming,
-  animationCache,
+  dancerAnimationCache,
 }: DancerGridObjectProps) {
   return <>
     {
@@ -60,21 +60,21 @@ const DancerGridObject = memo(function DancerGridObject({
         snapToGrid={snapToGrid}
         animate={animate}
         isZooming={isZooming}
-        animationCache={animationCache}
+        dancerAnimationCache={dancerAnimationCache}
         sectionId={sectionId}
       >
         {
           isSelected && 
           <Circle
-            radius={METER_PX * (dancerDisplayType === "large" ?  0.45 : 0.25)}
+            radius={METER_PX * (dancerDisplayType === "large" ?  0.6 : 0.3)}
             fill={colorPalette.white}
             strokeEnabled
-            strokeWidth={2.5}
+            strokeWidth={3}
             stroke={colorPalette.primary}
           />
         }
         <Circle
-          radius={METER_PX * (dancerDisplayType === "large" ? (isSelected ? 0.35 : 0.45) : (isSelected ? 0.1 : 0.2))}
+          radius={METER_PX * (dancerDisplayType === "large" ? 0.45 : 0.2)}
           fill={position.color}
         />
 

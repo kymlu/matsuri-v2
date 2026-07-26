@@ -12,7 +12,7 @@ import { StageEntities } from "../../../models/history";
 import { pxToStageMeters } from "../../../lib/helpers/editorCalculationHelper";
 import { MAX_PROP_DIMENSION, METER_PX, MIN_PROP_DIMENSION, PROP_SNAP_SIZE } from "../../../lib/consts/consts";
 import ObstacleGridObject from "../gridObjects/ObstacleGridObject";
-import { PathSvgCacheByDancerBySection } from "../../../models/choreoSection";
+import { PathSvgCacheByDancerIdBySectionId } from "../../../models/choreoSection";
 
 type FormationLayerProps = {
   canEdit: boolean,
@@ -41,7 +41,7 @@ type FormationLayerProps = {
   canResizeProps?: boolean,
   isZooming: React.RefObject<boolean>;
   sectionId: string;
-  animationCache: PathSvgCacheByDancerBySection;
+  dancerAnimationCache: PathSvgCacheByDancerIdBySectionId;
 };
 
 const FormationLayer = memo(function FormationLayer({
@@ -71,7 +71,7 @@ const FormationLayer = memo(function FormationLayer({
   canResizeProps,
   isZooming,
   sectionId,
-  animationCache,
+  dancerAnimationCache,
 }: FormationLayerProps) {
 	const transformerRef = useRef<Konva.Transformer>(null);
 
@@ -215,7 +215,7 @@ const FormationLayer = memo(function FormationLayer({
             animate
             isZooming={isZooming}
             sectionId={sectionId}
-            animationCache={animationCache[dancerPosition.dancerId]}
+            dancerAnimationCache={dancerAnimationCache[dancerPosition.dancerId]}
           />
         );
       })}

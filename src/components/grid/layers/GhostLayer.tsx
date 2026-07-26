@@ -5,12 +5,12 @@ import DancerGridObject from "../gridObjects/DancerGridObject";
 import { Prop, PropPosition } from "../../../models/prop";
 import { colorPalette } from "../../../lib/consts/colors";
 import React, { useMemo } from "react";
-import { MovementCacheByDancer, MovementType } from "../../../models/choreoSection";
+import { MovementCacheByObjectId, MovementType } from "../../../models/choreoSection";
 
 type GhostLayerProps = {
   dancers: Record<string, Dancer>,
   prevDancerPositions?: Record<string, DancerPosition>,
-  movementCache: MovementCacheByDancer,
+  dancerMovementCache: MovementCacheByObjectId,
   props: Record<string, Prop>,
   propPositions?: PropPosition[],
   geometry: StageGeometry,
@@ -21,7 +21,7 @@ type GhostLayerProps = {
 export default function GhostLayer({
   dancers,
   prevDancerPositions,
-  movementCache,
+  dancerMovementCache,
   props,
   propPositions,
   geometry,
@@ -60,8 +60,8 @@ export default function GhostLayer({
           prev={prevDancerPositions[id]}
           dancer={dancer}
           geometry={geometry}
-          pathPoints={movementCache?.[id]?.points}
-          movementType={movementCache?.[id]?.tension}
+          pathPoints={dancerMovementCache?.[id]?.points}
+          movementType={dancerMovementCache?.[id]?.tension}
           hidePath={id === selectedDancerId && isEditingPaths === true}
         />)
       }
