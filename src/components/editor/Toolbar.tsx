@@ -71,7 +71,7 @@ type ToolbarProps = {
   isEditingMovement: boolean;
   setIsEditingMovement: (value: boolean) => void;
   onResetPath: () => void;
-  pointCount: 1 | 2;
+  pointCount: 1 | 2 | 3;
   togglePointCount: () => void;
   curved: boolean;
   toggleCurved: () => void;
@@ -289,7 +289,7 @@ export default function Toolbar({
               onClick={() => {onResetPath()}} />
             <IconButton
               disabled={!canEditMovement}
-              src={pointCount === 2 ? "counter2" : "counter1"}
+              src={pointCount === 3 ? "counter3" : pointCount === 2 ? "counter2" : "counter1"}
               label={`${pointCount}点`}
               onClick={() => {togglePointCount()}} />
             <IconButton
