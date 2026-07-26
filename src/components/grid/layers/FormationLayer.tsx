@@ -217,7 +217,7 @@ const FormationLayer = memo(function FormationLayer({
             isZooming={isZooming}
             sectionId={sectionId}
             dancerAnimationCache={dancerAnimationCache[dancerPosition.dancerId]}
-			isEditingOtherMovements={isEditingMovement && selectedIds.dancers.length && !selectedIds.dancers.includes[dancerPosition.dancerId]}
+			isEditingOtherMovements={isEditingMovement && selectedIds.dancers.length > 0 && !selectedIds.dancers.includes[dancerPosition.dancerId]}
           />
         );
       })}
