@@ -28,6 +28,7 @@ export interface BaseGridObjectProps {
   animate: boolean,
   isZooming?: React.RefObject<boolean>;
   sectionId?: string,
+  isEditingOtherMovements?: boolean,
   dancerAnimationCache?: PathSvgCacheBySectionId;
 }
 
@@ -49,6 +50,7 @@ const BaseGridObject = memo(function BaseGridObject({
   snapToGrid,
   animate,
   isZooming,
+  isEditingOtherMovements,
   dancerAnimationCache,
   sectionId,
 }: BaseGridObjectProps) {
@@ -114,6 +116,7 @@ const BaseGridObject = memo(function BaseGridObject({
     <Group
       id={id} 
       ref={ref}
+      opacity={isEditingOtherMovements ? 0.5 : 1}
       perfectDrawEnabled={false}
       draggable={draggable && !isAnimating}
       listening={listening}
