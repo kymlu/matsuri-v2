@@ -60,6 +60,7 @@ const MovementEditLayer = memo(function MovementEditLayer({
             strokeWidth={4}
             fill={colorPalette.white}
             fillEnabled
+            lineJoin="round"
             tension={movement?.tension === "straight" ? 0 : 0.5}
           />
           <Line
@@ -70,6 +71,7 @@ const MovementEditLayer = memo(function MovementEditLayer({
             fill={colorPalette.primary}
             fillEnabled
             dashEnabled
+            lineJoin="round"
             pointerWidth={5}
             pointerLength={5}
             dash={[2, 2]}

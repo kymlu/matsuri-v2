@@ -62,6 +62,7 @@ const NextDirectionLayer = memo(function NextDirectionLayer({
           dashEnabled
           pointerWidth={5}
           pointerLength={5}
+          lineJoin="round"
           dash={[2, 2]}
           tension={currentMovement?.tension === "straight" ? 0 : 0.5}
         />
