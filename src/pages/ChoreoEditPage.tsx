@@ -895,7 +895,9 @@ export default function ChoreoEditPage(props: {
         showPaths={showPaths}
         toggleShowPaths={() => setShowPaths(prev => !prev)}
         onShowMovement={() => {
-          resetSelectedIds();
+          if (selectedIds.dancers.length > 1 || selectedIds.obstacles.length > 0 || selectedIds.props.length > 0) {
+            resetSelectedIds();
+          }
           setIsEditingMovement(prev => !prev);
         }}
         isEditingMovement={isEditingMovement}
