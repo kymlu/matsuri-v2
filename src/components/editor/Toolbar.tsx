@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import IconButton from "../basic/IconButton";
 import { VerticalDivider } from "../basic/Divider";
 import { Distribution, HorizontalAlignment, Rearrangement, VerticalAlignment } from "../../models/alignment";
@@ -145,6 +145,13 @@ export default function Toolbar({
   const isSubmenuOpen = isAddManagerVisible || isArrangeVisible || isActionManagerVisible || isEditingMovement;
   const areSelectionActionsActivated = showRenameDancer || showArrange || showDeleteObjects;
 
+  const pointCountIcon = useMemo(() => {
+    return pointCount === 3 ? "counter3" : pointCount === 2 ? "counter2" : "counter1"
+  }, [pointCount]);
+  const pointCountLabel = useMemo(() => {
+    return pointCount === 3 ? "3点" : pointCount === 2 ? "2点" : "1点"
+  }, [pointCount]);
+
   useEffect(() => {
     if (!showArrange && isArrangeVisible) {
       setIsArrangeVisible(false);
@@ -289,8 +296,8 @@ export default function Toolbar({
               onClick={() => {onResetPath()}} />
             <IconButton
               disabled={!canEditMovement}
-              src={pointCount === 3 ? "counter3" : pointCount === 2 ? "counter2" : "counter1"}
-              label={`${pointCount}点`}
+              src={pointCountIcon}
+              label={pointCountLabel}
               onClick={() => {togglePointCount()}} />
             <IconButton
               disabled={!canEditMovement}
