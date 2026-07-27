@@ -70,24 +70,27 @@ const BaseGridObject = memo(function BaseGridObject({
     if (ref.current) {
       if (sectionId && animationCache?.[getAnimationKey(prevSectionId.current, sectionId)]) {
         let path: Konva.Path = new Konva.Path({x: 0, y: 0, data: animationCache[getAnimationKey(prevSectionId.current, sectionId)].path});
-        const steps = 50; // number of steps in animation
         const pathLen = path.getLength();
-        const step = pathLen / steps;
-        let frameCnt = 0, pos =0, pt;
+        const duration = 1000;
 
         let anim = new Konva.Animation(function(frame) {
-            pos = pos + 1;
-            pt = path.getPointAtLength(pos * step);
-            if (ref.current && pt) {
-              ref.current.position({x: pt.x, y: pt.y});    
-            }
-            if (pos == steps) {
-              anim.stop();
-              ref?.current?.x(newPosition.x);
-              ref?.current?.y(newPosition.y);
-              ref?.current?.rotation(rotation ?? 0);
-              setIsAnimating(false);
-            }
+          if (!frame) return;
+
+          const elapsed = frame.time; // ms since animation start
+          const t = Math.min(elapsed / duration, 1); // 0 to 1
+          const pt = path.getPointAtLength(t * pathLen);
+
+          if (ref.current && pt) {
+            ref.current.position({ x: pt.x, y: pt.y });
+          }
+
+          if (t >= 1) {
+            anim.stop();
+            ref?.current?.x(newPosition.x);
+            ref?.current?.y(newPosition.y);
+            ref?.current?.rotation(rotation ?? 0);
+            setIsAnimating(false);
+          }
         }, ref.current.getLayer());
         anim.start();
 
