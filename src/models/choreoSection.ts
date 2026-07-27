@@ -20,7 +20,7 @@ export type MovementCache = {
   points: number[],
   tension: MovementType,
 }
-export type PathSvgCacheByDancerIdBySectionId = Record<string, PathSvgCacheBySectionId>;
+export type PathSvgCacheByObjectIdBySectionId = Record<string, PathSvgCacheBySectionId>;
 export type PathSvgCacheBySectionId = Record<string, PathSvgCache>;
 export type PathSvgCache = {
   path: string,

@@ -3,7 +3,7 @@ import GridLayer from "./layers/GridLayer";
 import { useState, useCallback, useEffect, useRef, SetStateAction, useMemo } from "react";
 import { Choreo, StageGeometry } from "../../models/choreo";
 import FormationLayer from "./layers/FormationLayer";
-import { ChoreoSection, Movement, MovementCacheBySectionIdByObjectId, PathSvgCacheByDancerIdBySectionId } from "../../models/choreoSection";
+import { ChoreoSection, Movement, MovementCacheBySectionIdByObjectId, PathSvgCacheByObjectIdBySectionId } from "../../models/choreoSection";
 import { DancerPosition } from "../../models/dancer";
 import { pxToStageMeters, snapCoordsToGrid, stageMetersToPx } from "../../lib/helpers/editorCalculationHelper";
 import { DEFAULT_PROP_LENGTH, MAX_ZOOM, METER_PX, MIN_ZOOM } from "../../lib/consts/consts";
@@ -58,7 +58,7 @@ type MainStageProps = {
   isEditingMovement?: boolean,
   dancerMovementCache: MovementCacheBySectionIdByObjectId,
   onMidpointEdit?: (newMovement: Movement, dancerId: string) => void;
-  dancerAnimationCache: PathSvgCacheByDancerIdBySectionId,
+  dancerAnimationCache: PathSvgCacheByObjectIdBySectionId,
 }
 
 export default function MainStage({

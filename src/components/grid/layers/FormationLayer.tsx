@@ -12,7 +12,7 @@ import { StageEntities } from "../../../models/history";
 import { pxToStageMeters } from "../../../lib/helpers/editorCalculationHelper";
 import { MAX_PROP_DIMENSION, METER_PX, MIN_PROP_DIMENSION, PROP_SNAP_SIZE } from "../../../lib/consts/consts";
 import ObstacleGridObject from "../gridObjects/ObstacleGridObject";
-import { PathSvgCacheByDancerIdBySectionId } from "../../../models/choreoSection";
+import { PathSvgCacheByObjectIdBySectionId } from "../../../models/choreoSection";
 
 type FormationLayerProps = {
   canEdit: boolean,
@@ -41,7 +41,7 @@ type FormationLayerProps = {
   canResizeProps?: boolean,
   isZooming: React.RefObject<boolean>;
   sectionId: string;
-  dancerAnimationCache: PathSvgCacheByDancerIdBySectionId;
+  dancerAnimationCache: PathSvgCacheByObjectIdBySectionId;
   isEditingMovement?: boolean,
 };
 

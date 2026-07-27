@@ -29,7 +29,7 @@ export interface BaseGridObjectProps {
   isZooming?: React.RefObject<boolean>;
   sectionId?: string,
   halfOpacity?: boolean,
-  dancerAnimationCache?: PathSvgCacheBySectionId;
+  animationCache?: PathSvgCacheBySectionId;
 }
 
 const BaseGridObject = memo(function BaseGridObject({
@@ -51,7 +51,7 @@ const BaseGridObject = memo(function BaseGridObject({
   animate,
   isZooming,
   halfOpacity,
-  dancerAnimationCache,
+  animationCache,
   sectionId,
 }: BaseGridObjectProps) {
   const ref = useRef<Konva.Group>(null);
@@ -68,8 +68,8 @@ const BaseGridObject = memo(function BaseGridObject({
     if (newPosition.x === ref.current?.x() && newPosition.y === ref.current?.y()) return;
     if (animate) setIsAnimating(true);
     if (ref.current) {
-      if (sectionId && dancerAnimationCache?.[getAnimationKey(prevSectionId.current, sectionId)]) {
-        let path: Konva.Path = new Konva.Path({x: 0, y: 0, data: dancerAnimationCache[getAnimationKey(prevSectionId.current, sectionId)].path});
+      if (sectionId && animationCache?.[getAnimationKey(prevSectionId.current, sectionId)]) {
+        let path: Konva.Path = new Konva.Path({x: 0, y: 0, data: animationCache[getAnimationKey(prevSectionId.current, sectionId)].path});
         const steps = 50; // number of steps in animation
         const pathLen = path.getLength();
         const step = pathLen / steps;

@@ -63,7 +63,7 @@ type ToolbarProps = {
   isAssigningActions: boolean;
   
   // movement
-  onShowMovement: () => void;
+  onEditMovement: () => void;
   showMovementFunctions: boolean;
   showPaths: boolean;
   toggleShowPaths: () => void
@@ -123,7 +123,7 @@ export default function Toolbar({
   onOpenActionManager,
   onAssignActions, isAssigningActionsEnabled, isAssigningActions,
 
-  onShowMovement, showMovementFunctions,
+  onEditMovement, showMovementFunctions,
   showPaths, toggleShowPaths,
   canEditMovement,
   isEditingMovement, setIsEditingMovement,
@@ -197,7 +197,7 @@ export default function Toolbar({
         {showDeleteObjects && <IconButton src="delete" label="削除" onClick={()=>{onDeleteObjects()}}/>}
         {showMovementFunctions && <IconButton src="conversionPath" crossedOut={!showPaths} label="動線表示" onClick={()=>{toggleShowPaths()}}/>}
         {showMovementFunctions && <IconButton src="rebaseEdit" label="動線編集" onClick={()=>{
-          onShowMovement();
+          onEditMovement();
           setIsEditingMovement(true);
         }}/>}
         {showSelectDancer && showSelectDancersButton && <IconButton src="select" subIconSrc="colors" label="同色選択" onClick={() => {onSelectColor()}} />}
@@ -223,7 +223,7 @@ export default function Toolbar({
           setIsAddManagerVisible(false);
           setIsActionManagerVisible(false);
           if (isEditingMovement) {
-            onShowMovement();
+            onEditMovement();
           }
         }}/>
         <VerticalDivider/>

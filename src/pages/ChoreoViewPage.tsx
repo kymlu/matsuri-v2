@@ -2,7 +2,7 @@ import Header from "../components/editor/Header"
 import FormationSelectionToolbar from "../components/editor/FormationSelectionToolbar";
 import { useEffect, useMemo, useState } from "react";
 import { Choreo } from "../models/choreo";
-import { ChoreoSection, MovementCacheBySectionIdByObjectId, PathSvgCacheByDancerIdBySectionId } from "../models/choreoSection";
+import { ChoreoSection, MovementCacheBySectionIdByObjectId, PathSvgCacheByObjectIdBySectionId } from "../models/choreoSection";
 import MainStage from "../components/grid/MainStage";
 import { AppSetting } from "../models/appSettings";
 import { isNullOrUndefinedOrBlank, strEquals } from "../lib/helpers/globalHelper";
@@ -49,7 +49,7 @@ export default function ChoreoViewPage(props: {
     obstacles: props.currentChoreo.obstacles ? Object.keys(props.currentChoreo.obstacles).length : 0,
   } as StageEntities<number>), [props.currentChoreo.dancers, props.currentChoreo.props, props.currentChoreo.obstacles]);
   const [dancerMovementCache, setDancerMovementCache] = useState<MovementCacheBySectionIdByObjectId>({});
-  const [dancerAnimationCache, setDancerAnimationCache] = useState<PathSvgCacheByDancerIdBySectionId>({});
+  const [dancerAnimationCache, setDancerAnimationCache] = useState<PathSvgCacheByObjectIdBySectionId>({});
 
   useEffect(() => {
     if (!isNullOrUndefinedOrBlank(props.savedDancerName)) {

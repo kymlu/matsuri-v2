@@ -62,7 +62,7 @@ const DancerGridObject = memo(function DancerGridObject({
         snapToGrid={snapToGrid}
         animate={animate}
         isZooming={isZooming}
-        dancerAnimationCache={dancerAnimationCache}
+        animationCache={dancerAnimationCache}
         sectionId={sectionId}
         halfOpacity={halfOpacity}
       >

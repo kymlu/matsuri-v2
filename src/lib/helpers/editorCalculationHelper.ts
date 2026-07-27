@@ -1,6 +1,6 @@
 import { Coordinates } from "../../models/base";
 import { Choreo, StageGeometry } from "../../models/choreo";
-import { ChoreoSection, Movement, MovementCache, MovementCacheByObjectId, MovementCacheBySectionIdByObjectId, PathSvgCacheByDancerIdBySectionId } from "../../models/choreoSection";
+import { ChoreoSection, Movement, MovementCache, MovementCacheByObjectId, MovementCacheBySectionIdByObjectId, PathSvgCacheByObjectIdBySectionId } from "../../models/choreoSection";
 import { METER_PX } from "../consts/consts";
 
 const MAX_CACHE_SIZE = 1000;
@@ -208,7 +208,7 @@ export function getPathLineOps(points: number[], tension = 0.5, closed = false):
 
 export const calculateMovementCache = (choreo: Choreo, showPrev: boolean) => {
   const newMovementCache: MovementCacheBySectionIdByObjectId = {};
-  const newAnimationCache: PathSvgCacheByDancerIdBySectionId = {};
+  const newAnimationCache: PathSvgCacheByObjectIdBySectionId = {};
 
   choreo.sections.forEach((s, i) => {
     if ((showPrev && i > 0) || (!showPrev && i < (choreo.sections.length - 1))) {

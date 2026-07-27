@@ -7,7 +7,7 @@ import { historyReducer } from "../lib/editor/historyReducer";
 import { BasicChoreoDetails, Choreo, EventDetails, getBasicChoreoDetails } from "../models/choreo";
 import { EditHistory, StageEntities } from "../models/history";
 import { addSection, assignDancersToTiming, duplicateSection, editDancerActions, editSectionNote, removeSection, renameSection, reorderSections } from "../lib/editor/commands/sectionCommands";
-import { ChoreoSection, MovementCacheBySectionIdByObjectId, PathSvgCacheByDancerIdBySectionId } from "../models/choreoSection";
+import { ChoreoSection, MovementCacheBySectionIdByObjectId, PathSvgCacheByObjectIdBySectionId } from "../models/choreoSection";
 import { debounce, indexByKey, isNullOrUndefinedOrBlank, strEquals, stringifyEvent } from "../lib/helpers/globalHelper";
 import MainStage from "../components/grid/MainStage";
 import { Dialog } from "@base-ui/react";
@@ -123,7 +123,7 @@ export default function ChoreoEditPage(props: {
   } as StageEntities<number>), [history.presentState.state.dancers, history.presentState.state.props, history.presentState.state.obstacles]);
 
   const [dancerMovementCache, setDancerMovementCache] = useState<MovementCacheBySectionIdByObjectId>({});
-  const [dancerAnimationCache, setDancerAnimationCache] = useState<PathSvgCacheByDancerIdBySectionId>({});
+  const [dancerAnimationCache, setDancerAnimationCache] = useState<PathSvgCacheByObjectIdBySectionId>({});
 
   useEffect(() => {
     const res = calculateMovementCache(history.presentState.state, true);
@@ -894,7 +894,7 @@ export default function ChoreoEditPage(props: {
         showMovementFunctions={entityCount.dancers > 0}
         showPaths={showPaths}
         toggleShowPaths={() => setShowPaths(prev => !prev)}
-        onShowMovement={() => {
+        onEditMovement={() => {
           if (selectedIds.dancers.length > 1 || selectedIds.obstacles.length > 0 || selectedIds.props.length > 0) {
             resetSelectedIds();
           }
