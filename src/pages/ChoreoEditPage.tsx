@@ -1061,13 +1061,6 @@ export default function ChoreoEditPage(props: {
           }}
         />
       }
-      {
-        isEditingMovement &&
-        <InstructionMessage
-          instruction={<>ダンサーを選択すると動線を編集できる</>}
-          onClose={() => setIsEditingMovement(false)}
-        />
-      }
       <Dialog.Root
         handle={resizeDialog}
         open={resizeDialogOpen}
