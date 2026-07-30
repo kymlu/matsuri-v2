@@ -27,7 +27,7 @@ import ConfirmDeletionDialog from "../components/dialogs/ConfirmDeletionDialog";
 import EditSectionNoteDialog from "../components/dialogs/EditSectionNoteDialog";
 import { Coordinates } from "../models/base";
 import { colorPalette } from "../lib/consts/colors";
-import { addDancer, addObstacle, addObstacles, addProp, alignHorizontalPositions, alignVerticalPositions, changeObjectColours, distributePositions, editAndDeleteProps, editDancerPath, editPropPath, moveObjectPositions, pastePositions, rearrangePositions, removeObjects, renameAndDeleteDancers, renameDancer, renameObstacle, renameProp, setZOnAllPositions, swapPositions, updateObstacleSizeAndRotate, updatePropSizeAndRotate } from "../lib/editor/commands/objectCommands";
+import { addDancer, addObstacle, addObstacles, addProp, alignHorizontalPositions, alignVerticalPositions, changeObjectColours, distributePositions, editAndDeleteProps, editDancerPath, editPropPath, moveObjectPositions, pastePositions, rearrangePositions, removeObjects, renameAndDeleteDancers, renameDancer, renameObstacle, renameProp, setZOnAllPositions, swapDancerPositions, swapPropPositions, updateObstacleSizeAndRotate, updatePropSizeAndRotate } from "../lib/editor/commands/objectCommands";
 import { Obstacle, PropPosition } from "../models/prop";
 import { DancerManagerDialog } from "../components/dialogs/DancerManagerDialog";
 import ExportDialog from "../components/dialogs/ExportDialog";
@@ -501,11 +501,19 @@ export default function ChoreoEditPage(props: {
   };
 
   const onSwapPositions = () => {
-    dispatch({
-      type: "SET_STATE",
-      newState: swapPositions(history.presentState.state, currentSection.id, selectedIds.dancers[0], selectedIds.dancers[1]),
-      currentSectionId: currentSection.id,
-      commit: true});
+    if (selectedIds.dancers[0] && selectedIds.dancers[1]) {
+      dispatch({
+        type: "SET_STATE",
+        newState: swapDancerPositions(history.presentState.state, currentSection.id, selectedIds.dancers[0], selectedIds.dancers[1]),
+        currentSectionId: currentSection.id,
+        commit: true});
+    } else if (selectedIds.props[0] && selectedIds.props[1]) {
+      dispatch({
+        type: "SET_STATE",
+        newState: swapPropPositions(history.presentState.state, currentSection.id, selectedIds.props[0], selectedIds.props[1]),
+        currentSectionId: currentSection.id,
+        commit: true});
+    }
   };
 
   const [movementUpdateGroup, setMovementUpdateGroup] = useState<StageEntities<Record<string, Coordinates>>>({props: {}, dancers: {}, obstacles: {}});
@@ -936,7 +944,11 @@ export default function ChoreoEditPage(props: {
           });
         }}
         showArrange={selectedIds.dancers.length > 0 || selectedIds.props.length > 0 || selectedIds.obstacles.length > 0}
-        showSwapPosition={selectedIds.dancers.length === 2 && selectedIds.props.length === 0 && selectedIds.obstacles.length === 0}
+        showSwapPosition={
+          ((selectedIds.dancers.length === 2 && selectedIds.props.length === 0) ||
+          (selectedIds.dancers.length === 0 && selectedIds.props.length === 2)) &&
+          selectedIds.obstacles.length === 0
+        }
         onSwapPosition={onSwapPositions}
         showDeleteObjects={selectedIds.dancers.length > 0 || selectedIds.props.length > 0 || selectedIds.obstacles.length > 0}
         onDeleteObjects={() => {
