@@ -132,7 +132,7 @@ export default function ChoreoEditPage(props: {
   useEffect(() => {
     const res = calculateMovementCache(history.presentState.state, true);
     setDancerMovementCache(res.newDancerMovementCache);
-    setDancerAnimationCache(res.newPropAnimationCache);
+    setDancerAnimationCache(res.newDancerAnimationCache);
     setPropMovementCache(res.newPropMovementCache);
     setPropAnimationCache(res.newPropAnimationCache);
   }, [history.presentState.state.sections])
