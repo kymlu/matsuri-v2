@@ -75,6 +75,7 @@ const BaseGridObject = memo(function BaseGridObject({
         const duration = 1000;
         const prevRot = prevRotation.current ?? 0;
         const targetRot = rotation ?? 0;
+        const heightDelta = ((stageGeometry.yAxis === "bottom-up" ? height : 0) ?? 0) * METER_PX;
 
         let anim = new Konva.Animation(function(frame) {
           if (!frame) return;
@@ -85,7 +86,7 @@ const BaseGridObject = memo(function BaseGridObject({
           const rot = prevRot + (targetRot - prevRot) * t;
 
           if (ref.current && pt) {
-            ref.current.position({ x: pt.x, y: pt.y });
+            ref.current.position({ x: pt.x, y: pt.y - heightDelta });
             ref.current.rotation(rot)
           }
 
