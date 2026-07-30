@@ -25,7 +25,7 @@ type DancerGridObjectProps = {
   isZooming?: React.RefObject<boolean>;
   sectionId?: string,
   halfOpacity?: boolean,
-  dancerAnimationCache?: PathSvgCacheBySectionId;
+  animationCache?: PathSvgCacheBySectionId;
 };
 
 const DancerGridObject = memo(function DancerGridObject({
@@ -44,7 +44,7 @@ const DancerGridObject = memo(function DancerGridObject({
   sectionId,
   isZooming,
   halfOpacity,
-  dancerAnimationCache,
+  animationCache,
 }: DancerGridObjectProps) {
   return <>
     {
@@ -62,7 +62,7 @@ const DancerGridObject = memo(function DancerGridObject({
         snapToGrid={snapToGrid}
         animate={animate}
         isZooming={isZooming}
-        animationCache={dancerAnimationCache}
+        animationCache={animationCache}
         sectionId={sectionId}
         halfOpacity={halfOpacity}
       >

@@ -31,6 +31,7 @@ export const FormationSchema = z.object({
   dancerMovements: z.record(z.string(), MovementSchema).optional(),
   dancerActions: z.array(DancerActionSchema),
   propPositions: z.record(z.string(), PropPositionSchema),
+  propMovements: z.record(z.string(), MovementSchema).optional(),
 });
 
 export type Formation = z.infer<typeof FormationSchema>;

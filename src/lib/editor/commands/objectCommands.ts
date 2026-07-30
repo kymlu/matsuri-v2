@@ -724,7 +724,7 @@ export function setZOnAllPositions(
   state: Choreo
 ): Choreo {
   // if there are z indices, ignore
-  if (Object.values(state.sections[0].formation.dancerPositions)[0].z !== undefined) return state;
+  if (Object.values(state.sections[0].formation.dancerPositions)[0]?.z !== undefined) return state;
 
   const newObstacles = indexByKey(Object.values(state.obstacles ?? {}).map((o, i) => ({...o, z: i} as Obstacle)), "id");
   const newSections = state.sections.map(section => {
@@ -977,6 +977,27 @@ export function editDancerPath (state: Choreo, sectionId: string, dancerId: stri
       formation: {
         ...section.formation,
         dancerMovements: newMovement,
+      }
+    }
+  });
+
+  return {
+    ...state,
+    sections: newSections,
+  }
+}
+
+export function editPropPath (state: Choreo, sectionId: string, propId: string, movement: Movement): Choreo {
+  const newSections = state.sections.map(section => {
+    if (!strEquals(section.id, sectionId)) return section;
+    const newMovement = {...section.formation.propMovements ?? {}};
+    newMovement[propId] = movement;
+
+    return {
+      ...section,
+      formation: {
+        ...section.formation,
+        propMovements: newMovement,
       }
     }
   });

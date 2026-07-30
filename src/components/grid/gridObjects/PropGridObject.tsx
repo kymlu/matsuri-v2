@@ -6,6 +6,7 @@ import { colorPalette } from "../../../lib/consts/colors";
 import { METER_PX } from "../../../lib/consts/consts";
 import { Prop, PropPosition } from "../../../models/prop";
 import { memo } from "react";
+import { PathSvgCacheBySectionId } from "../../../models/choreoSection";
 
 type PropGridObjectProps = {
   prop: Prop;
@@ -19,7 +20,10 @@ type PropGridObjectProps = {
   canEdit: boolean;
   snapToGrid?: boolean;
   canSelect: boolean;
+  sectionId?: string,
   animate: boolean,
+  animationCache?: PathSvgCacheBySectionId;
+  halfOpacity?: boolean,
   isZooming?: React.RefObject<boolean>;
 };
 
@@ -35,7 +39,10 @@ const PropGridObject = memo(function PropGridObject({
   canEdit,
   snapToGrid,
   canSelect,
+  sectionId,
   animate,
+  animationCache,
+  halfOpacity,
   isZooming,
 }: PropGridObjectProps) {
   return <>
@@ -56,6 +63,9 @@ const PropGridObject = memo(function PropGridObject({
         rotation={position.rotation}
         animate={animate}
         isZooming={isZooming}
+        sectionId={sectionId}
+        halfOpacity={halfOpacity}
+        animationCache={animationCache}
       >
         <Rect
           width={prop.width * METER_PX}

@@ -292,7 +292,7 @@ export default function Toolbar({
             <IconButton
               disabled={!canEditMovement}
               src="restartAlt"
-              label="リセット" // todo
+              label="リセット"
               onClick={() => {onResetPath()}} />
             <IconButton
               disabled={!canEditMovement}

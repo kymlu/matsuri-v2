@@ -50,6 +50,7 @@ export default function ChoreoViewPage(props: {
   } as StageEntities<number>), [props.currentChoreo.dancers, props.currentChoreo.props, props.currentChoreo.obstacles]);
   const [dancerMovementCache, setDancerMovementCache] = useState<MovementCacheBySectionIdByObjectId>({});
   const [dancerAnimationCache, setDancerAnimationCache] = useState<PathSvgCacheByObjectIdBySectionId>({});
+  const [propAnimationCache, setPropAnimationCache] = useState<PathSvgCacheByObjectIdBySectionId>({});
 
   useEffect(() => {
     if (!isNullOrUndefinedOrBlank(props.savedDancerName)) {
@@ -65,8 +66,9 @@ export default function ChoreoViewPage(props: {
       setShowHintDialog(!checkShowingViewPageInfoDialog());
     }
     const res = calculateMovementCache(props.currentChoreo, false);
-    setDancerAnimationCache(res.newAnimationCache);
-    setDancerMovementCache(res.newMovementCache);
+    setDancerAnimationCache(res.newDancerAnimationCache);
+    setDancerMovementCache(res.newDancerMovementCache);
+    setPropAnimationCache(res.newPropAnimationCache);
   }, [props.currentChoreo]);
   
   const selectedObjects = useMemo(() => ({
@@ -180,6 +182,7 @@ export default function ChoreoViewPage(props: {
           bottomMarginPercent={sidebarHeight}
           dancerMovementCache={dancerMovementCache}
           dancerAnimationCache={dancerAnimationCache}
+          propAnimationCache={propAnimationCache}
         />
       </div>
 

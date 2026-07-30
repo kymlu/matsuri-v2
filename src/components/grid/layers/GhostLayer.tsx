@@ -6,15 +6,17 @@ import { Prop, PropPosition } from "../../../models/prop";
 import { colorPalette } from "../../../lib/consts/colors";
 import React, { useMemo } from "react";
 import { MovementCacheByObjectId, MovementType } from "../../../models/choreoSection";
+import PropGridObject from "../gridObjects/PropGridObject";
 
 type GhostLayerProps = {
   dancers: Record<string, Dancer>,
   prevDancerPositions?: Record<string, DancerPosition>,
   dancerMovementCache: MovementCacheByObjectId,
   props: Record<string, Prop>,
-  propPositions?: PropPosition[],
+  prevPropPositions?: Record<string, PropPosition>,
+  propMovementCache: MovementCacheByObjectId,
   geometry: StageGeometry,
-  selectedDancerId?: string,
+  selectedId?: string,
   isEditingPaths?: boolean
 };
 
@@ -23,36 +25,39 @@ export default function GhostLayer({
   prevDancerPositions,
   dancerMovementCache,
   props,
-  propPositions,
+  prevPropPositions,
+  propMovementCache,
   geometry,
-  selectedDancerId,
+  selectedId,
   isEditingPaths,
 }: GhostLayerProps) {
   const dancerList = useMemo(() => {
     return Object.entries(dancers);
   }, [dancers]);
+  const propList = useMemo(() => {
+    return Object.entries(props);
+  }, [props]);
   return ( 
     <Layer
       listening={false}
       opacity={0.5}
       >
-      {/* {
-        propPositions &&
-        propPositions.map((propPosition) => {
+      {
+        prevPropPositions &&
+        propList.map(([id, prop]) => {
           return (
-            <PropGridObject
-              key={propPosition.propId}
-              prop={props[propPosition.propId]}
-              position={propPosition}
-              stageGeometry={geometry}
-              isSelected={false}
-              canEdit={false}
-              canSelect={false}
-              animate={false}
+            <PropMovement
+              key={id}
+              prop={prop}
+              prev={prevPropPositions[id]}
+              geometry={geometry}
+              pathPoints={propMovementCache?.[id]?.points}
+              movementType={propMovementCache?.[id]?.tension}
+              hidePath={id === selectedId && isEditingPaths === true}
             />
           );
         })
-      } */}
+      }
       {
         prevDancerPositions &&
         dancerList.map(([id, dancer]) => <DancerMovement
@@ -62,7 +67,7 @@ export default function GhostLayer({
           geometry={geometry}
           pathPoints={dancerMovementCache?.[id]?.points}
           movementType={dancerMovementCache?.[id]?.tension}
-          hidePath={id === selectedDancerId && isEditingPaths === true}
+          hidePath={id === selectedId && isEditingPaths === true}
         />)
       }
     </Layer>
@@ -93,6 +98,54 @@ const DancerMovement = React.memo(function DancerMovement ({
           canEdit={false}
           dancerDisplayType={"small"}
           animate={false}
+        />
+        {
+          !hidePath && pathPoints &&
+          <Line
+            points={pathPoints}
+            perfectDrawEnabled={false}
+            strokeEnabled
+            stroke={colorPalette.primary}
+            strokeWidth={2}
+            fill={colorPalette.primary}
+            fillEnabled
+            dashEnabled
+            lineJoin="round"
+            pointerWidth={5}
+            pointerLength={5}
+            dash={[2, 2]}
+            tension={movementType === "straight" ? 0 : 0.5}
+          />
+        }
+      </>
+    }
+  </>
+});
+
+type PropMovementProps = {
+  prop: Prop,
+  prev?: PropPosition,
+  geometry: StageGeometry,
+  pathPoints?: number[],
+  movementType?: MovementType
+  hidePath: boolean,
+}
+
+const PropMovement = React.memo(function PropMovement ({
+  prop, prev, geometry, pathPoints, movementType, hidePath
+}: PropMovementProps) {
+  return <>
+    {
+      prev && <>
+        <PropGridObject
+          key={prop.id}
+          prop={{...prop, name: ""}}
+          position={prev}
+          stageGeometry={geometry}
+          isSelected={false}
+          canEdit={false}
+          animate={false}
+          canSelect={false}
         />
         {
           !hidePath && pathPoints &&

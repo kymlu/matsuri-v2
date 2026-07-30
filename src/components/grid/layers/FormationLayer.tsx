@@ -42,6 +42,7 @@ type FormationLayerProps = {
   isZooming: React.RefObject<boolean>;
   sectionId: string;
   dancerAnimationCache: PathSvgCacheByObjectIdBySectionId;
+  propAnimationCache: PathSvgCacheByObjectIdBySectionId;
   isEditingMovement?: boolean,
 };
 
@@ -72,7 +73,7 @@ const FormationLayer = memo(function FormationLayer({
   canResizeProps,
   isZooming,
   sectionId,
-  dancerAnimationCache,isEditingMovement,
+  dancerAnimationCache, propAnimationCache, isEditingMovement,
 }: FormationLayerProps) {
 	const transformerRef = useRef<Konva.Transformer>(null);
 
@@ -93,34 +94,34 @@ const FormationLayer = memo(function FormationLayer({
   const toggleDancerSelect = (id: string, isAdditive: boolean = true) => {
     if(canSelectDancers && !isDraggingOnEmpty) {
       setSelectedIds((prev) => ({
-        props: isAdditive ? [...prev.props] : [],
+        props: isAdditive && canToggleSelection ? [...prev.props] : [],
         dancers: (canToggleSelection && isAdditive) ?
           (prev.dancers.includes(id) ?
             prev.dancers.filter((x) => x !== id) :
             [...prev.dancers, id]) :
           [id],
-        obstacles: isAdditive ? [...prev.obstacles] : [],
+        obstacles: isAdditive && canToggleSelection ? [...prev.obstacles] : [],
       }));
     }
   }
   const togglePropSelect = (id: string, isAdditive: boolean = true) => {
     if(canSelectProps && !isDraggingOnEmpty) {
       setSelectedIds((prev) => ({
-        dancers: isAdditive ? [...prev.dancers] : [],
+        dancers: isAdditive && canToggleSelection ? [...prev.dancers] : [],
         props: (canToggleSelection && isAdditive) ?
           (prev.props.includes(id) ?
             prev.props.filter((x) => x !== id) :
             [...prev.props, id]) :
           [id],
-        obstacles: isAdditive ? [...prev.obstacles] : [],
+        obstacles: isAdditive && canToggleSelection ? [...prev.obstacles] : [],
       }));
     }
   }
   const toggleObstacleSelect = (id: string, isAdditive: boolean = true) => {
     if(canSelectObstacles && !isDraggingOnEmpty) {
       setSelectedIds((prev) => ({
-        dancers: isAdditive ? [...prev.dancers] : [],
-        props: isAdditive ? [...prev.props] : [],
+        dancers: isAdditive && canToggleSelection ? [...prev.dancers] : [],
+        props: isAdditive && canToggleSelection ? [...prev.props] : [],
         obstacles: (canToggleSelection && isAdditive) ?
           (prev.obstacles.includes(id) ?
             prev.obstacles.filter((x) => x !== id) :
@@ -191,8 +192,11 @@ const FormationLayer = memo(function FormationLayer({
             canEdit={canEdit && canSelectProps}
             snapToGrid={snapToGrid}
             canSelect={canSelectProps}
+            sectionId={sectionId}
             animate
+            animationCache={propAnimationCache[propPosition.propId]}
             isZooming={isZooming}
+			      halfOpacity={isEditingMovement && (selectedIds.props.length + selectedIds.dancers.length) > 0 && !selectedIds.props.includes(propPosition.propId)}
           />
         );
       })}
@@ -216,8 +220,8 @@ const FormationLayer = memo(function FormationLayer({
             animate
             isZooming={isZooming}
             sectionId={sectionId}
-            dancerAnimationCache={dancerAnimationCache[dancerPosition.dancerId]}
-			      halfOpacity={isEditingMovement && selectedIds.dancers.length > 0 && !selectedIds.dancers.includes(dancerPosition.dancerId)}
+            animationCache={dancerAnimationCache[dancerPosition.dancerId]}
+			      halfOpacity={isEditingMovement && (selectedIds.props.length + selectedIds.dancers.length) > 0 && !selectedIds.dancers.includes(dancerPosition.dancerId)}
           />
         );
       })}

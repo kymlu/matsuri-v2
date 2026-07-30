@@ -57,8 +57,11 @@ type MainStageProps = {
   showPaths?: boolean,
   isEditingMovement?: boolean,
   dancerMovementCache: MovementCacheBySectionIdByObjectId,
-  onMidpointEdit?: (newMovement: Movement, dancerId: string) => void;
+  propMovementCache?: MovementCacheBySectionIdByObjectId,
+  onMidpointEdit?: (newMovement: Movement) => void;
+  currentMovement?: Movement,
   dancerAnimationCache: PathSvgCacheByObjectIdBySectionId,
+  propAnimationCache: PathSvgCacheByObjectIdBySectionId,
 }
 
 export default function MainStage({
@@ -71,7 +74,8 @@ export default function MainStage({
   selectedIds, setSelectedIds, selectedObjects,
   addDancer, addProp, addObstacle, appSettings, previousSection, selectedDancerMovement,
   onDancerSelected, bottomMarginPercent = 0, canResizeProps, editEnabled, toggleEditEnabled,
-  showPaths = false, isEditingMovement = false, dancerMovementCache, onMidpointEdit, dancerAnimationCache
+  showPaths = false, isEditingMovement = false, dancerMovementCache, propMovementCache, onMidpointEdit, currentMovement,
+  dancerAnimationCache, propAnimationCache,
 }: MainStageProps) {
   const [dancerPositions, setDancerPositions] = useState<DancerPosition[]>([]);
   const [propPositions, setPropPositions] = useState<PropPosition[]>([]);
@@ -567,15 +571,16 @@ export default function MainStage({
           verticalGridIncrement={verticalGridIncrement}
           />
         {
-          (showPaths || isEditingMovement) && dancerMovementCache &&
+          (showPaths || isEditingMovement) && dancerMovementCache && propMovementCache &&
           <GhostLayer
             dancers={currentChoreo.dancers}
             prevDancerPositions={previousSection?.formation.dancerPositions}
             dancerMovementCache={dancerMovementCache[currentSection.id]}
+            propMovementCache={propMovementCache[currentSection.id]}
             props={currentChoreo.props}
-            propPositions={previousSection ? Object.values(previousSection?.formation.propPositions) : undefined}
+            prevPropPositions={previousSection?.formation.propPositions}
             geometry={stageGeometry}
-            selectedDancerId={selectedIds.dancers[0]}
+            selectedId={selectedIds.dancers[0]}
             isEditingPaths={isEditingMovement}
           />
         }
@@ -608,6 +613,7 @@ export default function MainStage({
           sectionId={currentSection.id}
           isEditingMovement={isEditingMovement}
           dancerAnimationCache={dancerAnimationCache}
+          propAnimationCache={propAnimationCache}
           />
         {
           selectedDancerMovement &&
@@ -621,11 +627,17 @@ export default function MainStage({
         {
           isEditingMovement &&
           <MovementEditLayer
-            prevPosition={previousSection?.formation.dancerPositions[selectedIds.dancers[0]]}
-            currentPosition={currentSection?.formation.dancerPositions[selectedIds.dancers[0]]}
-            onMidpointEdit={(newMovement) => onMidpointEdit?.(newMovement, selectedIds.dancers[0])}
-            movement={currentSection?.formation.dancerMovements?.[selectedIds.dancers[0]]}
-            dancer={currentChoreo.dancers[selectedIds.dancers[0]]}
+            prevPosition={
+              selectedIds.dancers[0] ?
+              previousSection?.formation.dancerPositions[selectedIds.dancers[0]] :
+              previousSection?.formation.propPositions[selectedIds.props[0]]}
+            currentPosition={
+              selectedIds.dancers[0] ?
+              currentSection?.formation.dancerPositions[selectedIds.dancers[0]] :
+              currentSection?.formation.propPositions[selectedIds.props[0]]
+            }
+            onMidpointEdit={(newMovement) => onMidpointEdit?.(newMovement)}
+            movement={currentMovement}
             geometry={stageGeometry}
           />
         }

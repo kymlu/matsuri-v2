@@ -9,21 +9,20 @@ import { pxToStageMeters, stageMetersToPx } from "../../../lib/helpers/editorCal
 import { METER_PX } from "../../../lib/consts/consts";
 
 type GhostLayerProps = {
-  dancer: Dancer;
   geometry: StageGeometry
-  prevPosition?: DancerPosition;
+  prevPosition?: Coordinates;
   movement?: Movement;
-  currentPosition?: DancerPosition;
+  currentPosition?: Coordinates;
   onMidpointEdit: (newMovement: Movement) => void;
 };
 
 const MovementEditLayer = memo(function MovementEditLayer({
-  dancer, geometry, prevPosition, currentPosition, movement, onMidpointEdit
+  geometry, prevPosition, currentPosition, movement, onMidpointEdit
 }: GhostLayerProps) {
   const [midPoints, setMidPoints] = useState<Coordinates[] | undefined>();
 
   useEffect(() => {
-    if (dancer && prevPosition && currentPosition ) {
+    if (prevPosition && currentPosition) {
       if (movement && movement.points.length > 0) {
         setMidPoints([...movement.points.map(p => stageMetersToPx(p, geometry, METER_PX))]);
       } else {
@@ -36,7 +35,7 @@ const MovementEditLayer = memo(function MovementEditLayer({
     } else {
       setMidPoints(undefined);
     }
-  }, [dancer, movement, prevPosition, currentPosition]);
+  }, [movement, prevPosition, currentPosition]);
 
   const points = useMemo(() => {
     if (prevPosition && currentPosition) {
@@ -57,7 +56,7 @@ const MovementEditLayer = memo(function MovementEditLayer({
             opacity={0.5}
             strokeEnabled
             stroke={colorPalette.white}
-            strokeWidth={4}
+            strokeWidth={6}
             fill={colorPalette.white}
             fillEnabled
             lineJoin="round"
@@ -67,7 +66,7 @@ const MovementEditLayer = memo(function MovementEditLayer({
             points={points}
             strokeEnabled
             stroke={colorPalette.primary}
-            strokeWidth={2}
+            strokeWidth={3}
             fill={colorPalette.primary}
             fillEnabled
             dashEnabled

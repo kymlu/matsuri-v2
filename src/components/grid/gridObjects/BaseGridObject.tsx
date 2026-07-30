@@ -57,6 +57,7 @@ const BaseGridObject = memo(function BaseGridObject({
   const ref = useRef<Konva.Group>(null);
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
   const prevSectionId = useRef<string>("");
+  const prevRotation = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     registerNode?.(id, ref.current);
@@ -72,6 +73,8 @@ const BaseGridObject = memo(function BaseGridObject({
         let path: Konva.Path = new Konva.Path({x: 0, y: 0, data: animationCache[getAnimationKey(prevSectionId.current, sectionId)].path});
         const pathLen = path.getLength();
         const duration = 1000;
+        const prevRot = prevRotation.current ?? 0;
+        const targetRot = rotation ?? 0;
 
         let anim = new Konva.Animation(function(frame) {
           if (!frame) return;
@@ -79,9 +82,11 @@ const BaseGridObject = memo(function BaseGridObject({
           const elapsed = frame.time; // ms since animation start
           const t = Math.min(elapsed / duration, 1); // 0 to 1
           const pt = path.getPointAtLength(t * pathLen);
+          const rot = prevRot + (targetRot - prevRot) * t;
 
           if (ref.current && pt) {
             ref.current.position({ x: pt.x, y: pt.y });
+            ref.current.rotation(rot)
           }
 
           if (t >= 1) {
@@ -107,6 +112,7 @@ const BaseGridObject = memo(function BaseGridObject({
       if (sectionId) {
         prevSectionId.current = sectionId;
       }
+      prevRotation.current = rotation ?? 0;
     }
   }, [position, stageGeometry, rotation]);
 

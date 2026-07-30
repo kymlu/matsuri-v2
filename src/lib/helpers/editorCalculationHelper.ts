@@ -207,8 +207,10 @@ export function getPathLineOps(points: number[], tension = 0.5, closed = false):
 }
 
 export const calculateMovementCache = (choreo: Choreo, showPrev: boolean) => {
-  const newMovementCache: MovementCacheBySectionIdByObjectId = {};
-  const newAnimationCache: PathSvgCacheByObjectIdBySectionId = {};
+  const newDancerMovementCache: MovementCacheBySectionIdByObjectId = {};
+  const newDancerAnimationCache: PathSvgCacheByObjectIdBySectionId = {};
+  const newPropMovementCache: MovementCacheBySectionIdByObjectId = {};
+  const newPropAnimationCache: PathSvgCacheByObjectIdBySectionId = {};
 
   choreo.sections.forEach((s, i) => {
     if ((showPrev && i > 0) || (!showPrev && i < (choreo.sections.length - 1))) {
@@ -221,20 +223,20 @@ export const calculateMovementCache = (choreo: Choreo, showPrev: boolean) => {
         from = s;
         to = choreo.sections[i + 1];
       }
-      const prev = from.formation.dancerPositions;
-      const curr = to.formation.dancerPositions;
-      const movement = to.formation.dancerMovements;
-      const all: MovementCacheByObjectId = {};
+      const prevDancers = from.formation.dancerPositions;
+      const currDancers = to.formation.dancerPositions;
+      const dancerMovement = to.formation.dancerMovements;
+      const allDancerMovement: MovementCacheByObjectId = {};
 
-      Object.entries(prev).forEach((p) => {
+      Object.entries(prevDancers).forEach((p) => {
         const [id, position] = p;
         const cache = createMovementCache(
           choreo.stageGeometry,
           position,
-          curr[id],
-          movement?.[id]
+          currDancers[id],
+          dancerMovement?.[id]
         );
-        all[id] = cache;
+        allDancerMovement[id] = cache;
 
         const tensionValue = cache.tension === "curved" ? 0.5 : 0;
 
@@ -247,16 +249,51 @@ export const calculateMovementCache = (choreo: Choreo, showPrev: boolean) => {
         const backwardPath = getPathLineSvgCached(reversedPoints, tensionValue, false);
         const backwardKey = getAnimationKey(to.id, from.id);
 
-        if (!newAnimationCache[id]) {
-          newAnimationCache[id] = {};
+        if (!newDancerAnimationCache[id]) {
+          newDancerAnimationCache[id] = {};
         }
-        newAnimationCache[id][forwardKey] = { path: forwardPath };
-        newAnimationCache[id][backwardKey] = { path: backwardPath };
+        newDancerAnimationCache[id][forwardKey] = { path: forwardPath };
+        newDancerAnimationCache[id][backwardKey] = { path: backwardPath };
       });
 
-      newMovementCache[showPrev ? to.id : from.id] = all;
+      newDancerMovementCache[showPrev ? to.id : from.id] = allDancerMovement;
+
+      const prevProps = from.formation.propPositions;
+      const currProps = to.formation.propPositions;
+      const propMovement = to.formation.propMovements;
+      const allPropMovement: MovementCacheByObjectId = {};
+
+      Object.entries(prevProps).forEach((p) => {
+        const [id, position] = p;
+        const cache = createMovementCache(
+          choreo.stageGeometry,
+          position,
+          currProps[id],
+          propMovement?.[id]
+        );
+        allPropMovement[id] = cache;
+
+        const tensionValue = cache.tension === "curved" ? 0.5 : 0;
+
+        // forward: prevSection -> s
+        const forwardPath = getPathLineSvgCached(cache.points, tensionValue, false);
+        const forwardKey = getAnimationKey(from.id, to.id);
+
+        // backward: s -> prevSection (reverse point order so the tween plays the other way)
+        const reversedPoints = reversePoints(cache.points);
+        const backwardPath = getPathLineSvgCached(reversedPoints, tensionValue, false);
+        const backwardKey = getAnimationKey(to.id, from.id);
+
+        if (!newPropAnimationCache[id]) {
+          newPropAnimationCache[id] = {};
+        }
+        newPropAnimationCache[id][forwardKey] = { path: forwardPath };
+        newPropAnimationCache[id][backwardKey] = { path: backwardPath };
+      });
+
+      newPropMovementCache[showPrev ? to.id : from.id] = allPropMovement;
     }
   });
 
-  return {newMovementCache, newAnimationCache};
+  return {newDancerMovementCache, newDancerAnimationCache, newPropMovementCache, newPropAnimationCache};
 };
