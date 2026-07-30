@@ -157,6 +157,7 @@ export default function MainStage({
 
   useEffect(() => {
     if (!stageGeometry || strEquals(stagePosSectionId, currentSection.id)) return;
+    if (size.width === 0) return;
     setIsSelectingNewSection(true);
     setStagePosSectionId(currentSection.id);
     // only consider the frontmost dancer within the app since dancers are the main
@@ -296,7 +297,7 @@ export default function MainStage({
         }
       });
     }
-  }, [stageRef, currentSection, selectedIds, selectedObjects, stagePositionRef.current, stageGeometry, bottomMarginPercent]);
+  }, [stageRef, currentSection, selectedIds, selectedObjects, stagePositionRef.current, stageGeometry, bottomMarginPercent, size.width]);
 
   const resetCamera = () => {
     setIsManualMovement(false);
