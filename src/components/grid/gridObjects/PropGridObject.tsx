@@ -83,6 +83,18 @@ const PropGridObject = memo(function PropGridObject({
           height={(prop.length * METER_PX) - (isSelected ? METER_PX * 0.2 : 0)}
           fill={prop.color}/>
 
+        {
+          position.inUse &&
+          <Rect
+            x={METER_PX * (isSelected ? 0.2 : 0.1)}
+            y={METER_PX * (isSelected ? 0.2 : 0.1)}
+            width={(prop.width * METER_PX) - METER_PX * (isSelected ? 0.4 : 0.2)}
+            height={(prop.length * METER_PX) - METER_PX * (isSelected ? 0.4 : 0.2)}
+            stroke={colorPalette.limeGreen}
+            strokeWidth={isSelected ? 4 : 5}
+            />
+        }
+
         <Text
           y={(prop.length / 2) * METER_PX}
           width={prop.width * METER_PX}

@@ -436,6 +436,34 @@ export function changeObjectColours(
   }
 }
 
+export function changePropInUse(
+  state: Choreo,
+  sectionId: string,
+  ids: string[],
+  inUse: boolean,
+): Choreo {
+  const newSections = state.sections.map(section => {
+    if (!strEquals(section.id, sectionId)) return section;
+
+    return {
+      ...section,
+      formation: {
+        ...section.formation,
+        propPositions: updatePropPositions(
+          section.formation.propPositions,
+          ids,
+          dp => ({ ...dp, inUse: inUse })
+        )
+      }
+    }
+  });
+
+  return {
+    ...state,
+    sections: newSections
+  }
+}
+
 export function pastePositions(
   state: Choreo,
   sectionId: string,

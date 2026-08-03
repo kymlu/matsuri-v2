@@ -11,6 +11,7 @@ export type Prop = z.infer<typeof PropSchema>;
 
 export const PropPositionSchema = BasePositionSchema.extend({
   propId: z.string(),
+  inUse: z.boolean().optional(),
 });
 
 export type PropPosition = z.infer<typeof PropPositionSchema>;

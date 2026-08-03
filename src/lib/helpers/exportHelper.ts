@@ -391,8 +391,15 @@ export async function exportToPdf (
         context.rotate(angle);
 
         // Draw the item relative to its own top-left
-        context.fillStyle = prop.color;
-        context.fillRect(0, 0, propWidth, propHeight);
+        if (p.inUse) {
+          context.fillStyle = colorPalette.limeGreen;
+          context.fillRect(0, 0, propWidth, propHeight);
+          context.fillStyle = prop.color;
+          context.fillRect(4, 4, propWidth - 8, propHeight - 8);
+        } else {
+          context.fillStyle = prop.color;
+          context.fillRect(0, 0, propWidth, propHeight);
+        }
         
         context.fillStyle = colorPalette.getTextColor(prop.color);
         let textDimension = pdf.getTextDimensions(prop?.name ?? "", {maxWidth: propWidth});

@@ -28,6 +28,11 @@ type ToolbarProps = {
   showChangeColour: boolean;
   onChangeColor: () => void;
 
+  // in use
+  showInUse: boolean;
+  isInUse: boolean;
+  onToggleInUse: () => void;
+
   // copy / paste / swap
   showCopyPosition: boolean;
   onCopyPosition: () => void;
@@ -105,6 +110,8 @@ export default function Toolbar({
   onDeselect,
 
   showChangeColour, onChangeColor,
+
+  showInUse, isInUse, onToggleInUse,
 
   showCopyPosition, onCopyPosition,
   showPastePosition, onPastePosition,
@@ -188,6 +195,7 @@ export default function Toolbar({
         {showRenameDancer && <IconButton src="textFieldsAlt" label="名前変更" onClick={() => {onRenameDancer()}} />}
         {showRenameProp && <IconButton src="textFieldsAlt" label="名前変更" onClick={() => {onRenameProp()}} />}
         {showRenameObstacle && <IconButton src="textFieldsAlt" label="名前変更" onClick={() => {onRenameObstacle()}} />}
+        {showInUse && <IconButton src="flagCheck" crossedOut={!isInUse} label="使用中" onClick={() => {onToggleInUse()}} />}
         {showArrange && <IconButton src="straighten" label="整理" onClick={()=>{setIsArrangeVisible(true)}}/>}
         {showChangeColour && <IconButton src="colors" label="色" onClick={() => {onChangeColor()}} />}
         {showCopyPosition && <IconButton src="contentCopy" label="位置コピー" onClick={() => {onCopyPosition()}} />}

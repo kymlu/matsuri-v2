@@ -27,7 +27,7 @@ import ConfirmDeletionDialog from "../components/dialogs/ConfirmDeletionDialog";
 import EditSectionNoteDialog from "../components/dialogs/EditSectionNoteDialog";
 import { Coordinates } from "../models/base";
 import { colorPalette } from "../lib/consts/colors";
-import { addDancer, addObstacle, addObstacles, addProp, alignHorizontalPositions, alignVerticalPositions, changeObjectColours, distributePositions, editAndDeleteProps, editDancerPath, editPropPath, moveObjectPositions, pastePositions, rearrangePositions, removeObjects, renameAndDeleteDancers, renameDancer, renameObstacle, renameProp, setZOnAllPositions, swapDancerPositions, swapPropPositions, updateObstacleSizeAndRotate, updatePropSizeAndRotate } from "../lib/editor/commands/objectCommands";
+import { addDancer, addObstacle, addObstacles, addProp, alignHorizontalPositions, alignVerticalPositions, changeObjectColours, changePropInUse, distributePositions, editAndDeleteProps, editDancerPath, editPropPath, moveObjectPositions, pastePositions, rearrangePositions, removeObjects, renameAndDeleteDancers, renameDancer, renameObstacle, renameProp, setZOnAllPositions, swapDancerPositions, swapPropPositions, updateObstacleSizeAndRotate, updatePropSizeAndRotate } from "../lib/editor/commands/objectCommands";
 import { Obstacle, PropPosition } from "../models/prop";
 import { DancerManagerDialog } from "../components/dialogs/DancerManagerDialog";
 import ExportDialog from "../components/dialogs/ExportDialog";
@@ -887,6 +887,17 @@ export default function ChoreoEditPage(props: {
           setAreObstaclesLocked(false);
         }}
         isAddingObstacle={isAddingObstacles}
+        showInUse={selectedIds.props.length > 0 && selectedIds.dancers.length === 0 && selectedIds.obstacles.length === 0}
+        isInUse={selectedObjects.props.every(x => x.inUse === true)}
+        onToggleInUse={() => {
+          const newIsInUse = !selectedObjects.props.every(x => x.inUse === true);
+          dispatch({
+            type: "SET_STATE",
+            newState: changePropInUse(history.presentState.state, currentSection.id, selectedIds.props, newIsInUse),
+            currentSectionId: currentSection.id,
+            commit: true,
+          });
+        }}
         showChangeColour={selectedIds.dancers.length > 0 || selectedIds.props.length > 0 || selectedIds.obstacles.length > 0}
         onChangeColor={() => {setEditDancerColourDialogOpen(true)}}
         showCopyPosition={selectedIds.dancers.length > 0 || selectedIds.props.length > 0}

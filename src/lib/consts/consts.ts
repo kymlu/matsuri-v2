@@ -96,6 +96,7 @@ export const ICON = {
   familiarFaceAndZone: "familiar_face_and_zone",
   festival: "festival",
   flag: "flag",
+  flagCheck: "flag_check",
   fileExport: "file_export",
   fileCopy: "file_copy",
   fileSave: "file_save",
