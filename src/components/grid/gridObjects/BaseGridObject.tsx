@@ -80,8 +80,8 @@ const BaseGridObject = memo(function BaseGridObject({
 
         if (height && height > 0 && width && width > 0) {
           const centre = cornerToCentre(ref.current.x(), ref.current.y(), ref.current.rotation(), width * METER_PX, height * METER_PX, stageGeometry.yAxis);
-          ref.current.position({x: centre.x, y: centre.y})
-          ref.current.offset({x: (width * METER_PX)/2, y: (stageGeometry.yAxis === "bottom-up" ? -1 : 1) * (height * METER_PX)/2})
+          ref.current.offset({x: (width * METER_PX)/2, y: (stageGeometry.yAxis === "bottom-up" ? -1 : 1) * (height * METER_PX)/2});
+          ref.current.position({x: centre.x, y: centre.y});
         }
 
         let anim = new Konva.Animation(function(frame) {
