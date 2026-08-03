@@ -52,6 +52,7 @@ const PropGridObject = memo(function PropGridObject({
         id={prop.id}
         draggable={canEdit}
         position={position}
+        width={prop.width}
         height={prop.length}
         onClick={(isAdditive) => {if (canSelect) onClick?.(isAdditive)}}
         updatePosition={(x, y) => {updatePosition?.(x, y);}}

@@ -640,6 +640,7 @@ export default function MainStage({
             onMidpointEdit={(newMovement) => onMidpointEdit?.(newMovement)}
             movement={currentMovement}
             geometry={stageGeometry}
+            prop={selectedObjects.props[0] ? currentChoreo.props[selectedObjects.props[0].propId] : undefined}
           />
         }
         <MarkingsLayer

@@ -42,7 +42,7 @@ import { ChoreoStatus } from "./HomePage";
 import PublishConfirmationDialog from "../components/dialogs/PublishConfirmationDialog";
 import BaseEditDialog from "../components/dialogs/BaseEditDialog";
 import { getChoreoPassword } from "../lib/helpers/apiHelper";
-import { calculateMovementCache } from "../lib/helpers/editorCalculationHelper";
+import { calculateMovementCache, cornerToCentreFromProp } from "../lib/helpers/editorCalculationHelper";
 
 const resizeDialog = Dialog.createHandle<Choreo>();
 const editChoreoInfoDialog = Dialog.createHandle<string>();
@@ -608,10 +608,10 @@ export default function ChoreoEditPage(props: {
     if (prevSection && pointCount < 3) {
       const prev = firstSelectedDancerProp.type === "dancer" ? 
         prevSection.formation.dancerPositions[firstSelectedDancerProp.id] :
-        prevSection.formation.propPositions[firstSelectedDancerProp.id];
+        cornerToCentreFromProp(prevSection.formation.propPositions[firstSelectedDancerProp.id], history.presentState.state.props[firstSelectedDancerProp.id], history.presentState.state.stageGeometry.yAxis);
       const curr = firstSelectedDancerProp.type === "dancer" ? 
         currentSection.formation.dancerPositions[firstSelectedDancerProp.id] :
-        currentSection.formation.propPositions[firstSelectedDancerProp.id];
+        cornerToCentreFromProp(currentSection.formation.propPositions[firstSelectedDancerProp.id], history.presentState.state.props[firstSelectedDancerProp.id], history.presentState.state.stageGeometry.yAxis);
       for (let i = 1; i <= pointCount + 1; i++) {
         const frac = i / (pointCount + 2);
         newPoints.push({

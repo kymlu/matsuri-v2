@@ -4,7 +4,7 @@ import Konva from "konva";
 import { Shape, ShapeConfig } from "konva/lib/Shape";
 import { Stage } from "konva/lib/Stage";
 import { METER_PX } from "../../../lib/consts/consts";
-import { getAnimationKey, pxToStageMeters, snapCoordsToGrid, stageMetersToPx } from "../../../lib/helpers/editorCalculationHelper";
+import { cornerToCentre, getAnimationKey, pxToStageMeters, snapCoordsToGrid, stageMetersToPx } from "../../../lib/helpers/editorCalculationHelper";
 import { StageGeometry } from "../../../models/choreo";
 import { Coordinates } from "../../../models/base";
 import { PathSvgCacheBySectionId } from "../../../models/choreoSection";
@@ -14,6 +14,7 @@ export interface BaseGridObjectProps {
   children: ReactNode
   rotation?: number,
   position: Coordinates,
+  width?: number,
   height?: number,
   updatePosition?: (x: number, y: number) => void,
   onClick?: (isAdditive?: boolean) => void,
@@ -37,7 +38,7 @@ const BaseGridObject = memo(function BaseGridObject({
   children,
   rotation,
   position,
-  height,
+  width, height,
   updatePosition,
   onClick,
   draggable,
@@ -77,6 +78,12 @@ const BaseGridObject = memo(function BaseGridObject({
         const targetRot = rotation ?? 0;
         const heightDelta = ((stageGeometry.yAxis === "bottom-up" ? height : 0) ?? 0) * METER_PX;
 
+        if (height && height > 0 && width && width > 0) {
+          const centre = cornerToCentre(ref.current.x(), ref.current.y(), ref.current.rotation(), width * METER_PX, height * METER_PX, stageGeometry.yAxis);
+          ref.current.position({x: centre.x, y: centre.y})
+          ref.current.offset({x: (width * METER_PX)/2, y: (stageGeometry.yAxis === "bottom-up" ? -1 : 1) * (height * METER_PX)/2})
+        }
+
         let anim = new Konva.Animation(function(frame) {
           if (!frame) return;
 
@@ -95,6 +102,7 @@ const BaseGridObject = memo(function BaseGridObject({
             ref?.current?.x(newPosition.x);
             ref?.current?.y(newPosition.y);
             ref?.current?.rotation(rotation ?? 0);
+            ref?.current?.offset({x: 0, y: 0})
             setIsAnimating(false);
           }
         }, ref.current.getLayer());

@@ -8,6 +8,7 @@ import { StageEntities } from "../../../models/history"
 import { Obstacle, Prop, PropPosition } from "../../../models/prop"
 import { colorPalette } from "../../consts/colors"
 import { strEquals, roundToTenth, indexByKey } from "../../helpers/globalHelper"
+import { centreToCorner, centreToCornerFromProp, cornerToCentreFromProp } from "../../helpers/editorCalculationHelper"
 
 export function addDancer(state: Choreo, dancer: Dancer, x: number, y: number, z: number): Choreo {
   const newDancers = { ...state.dancers, [dancer.id]: dancer }
@@ -728,10 +729,16 @@ export function swapPropPositions(
   const newSections = state.sections.map(section => {
     if (section.id !== sectionId) return section
     const propPositions = {...section.formation.propPositions};
-    const originalA = section.formation.propPositions[propAId];
+    const propA = state.props[propAId];
+    const propB = state.props[propBId];
+    const originalA = (section.formation.propPositions[propAId]);
     const originalB = section.formation.propPositions[propBId];
-    propPositions[propAId] = { ...originalA, x: originalB.x, y: originalB.y, z: originalB.z };
-    propPositions[propBId] = { ...originalB, x: originalA.x, y: originalA.y, z: originalA.z };
+    const originalACenter = cornerToCentreFromProp(section.formation.propPositions[propAId], state.props[propAId], state.stageGeometry.yAxis);
+    const originalBCenter = cornerToCentreFromProp(section.formation.propPositions[propBId], state.props[propBId], state.stageGeometry.yAxis);
+    const newAPosition = centreToCorner(originalBCenter.x, originalBCenter.y, originalA.rotation ?? 0, propA.width, propA.length, state.stageGeometry.yAxis);
+    const newBPosition = centreToCorner(originalACenter.x, originalACenter.y, originalB.rotation ?? 0, propB.width, propB.length, state.stageGeometry.yAxis);
+    propPositions[propAId] = { ...originalA, x: newAPosition.x, y: newAPosition.y };
+    propPositions[propBId] = { ...originalB, x: newBPosition.x, y: newBPosition.y };
     return {
       ...section,
       formation: {

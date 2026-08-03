@@ -1,6 +1,7 @@
-import { Coordinates } from "../../models/base";
-import { Choreo, StageGeometry } from "../../models/choreo";
+import { BasePosition, Coordinates } from "../../models/base";
+import { Choreo, StageGeometry, YAxisDirection } from "../../models/choreo";
 import { ChoreoSection, Movement, MovementCache, MovementCacheByObjectId, MovementCacheBySectionIdByObjectId, PathSvgCacheByObjectIdBySectionId } from "../../models/choreoSection";
+import { Prop, PropPosition } from "../../models/prop";
 import { METER_PX } from "../consts/consts";
 
 const MAX_CACHE_SIZE = 1000;
@@ -77,13 +78,26 @@ function reversePoints(points: number[]): number[] {
   return pairs.reverse().flat();
 }
 
-const createMovementCache = (stageGeometry: StageGeometry, previous: Coordinates, current: Coordinates, movement?: Movement, px: number = METER_PX): MovementCache => {
+const createDancerMovementCache = (stageGeometry: StageGeometry, previous: Coordinates, current: Coordinates, movement?: Movement, px: number = METER_PX): MovementCache => {
   const start = stageMetersToPx(previous, stageGeometry, px);
   var movementPoints: number[] = [];
   if (movement) {
     movementPoints = movement.points.map(p => stageMetersToPx(p, stageGeometry, px)).flatMap(p => [p.x, p.y]);
   }
   const end = stageMetersToPx(current, stageGeometry, px);
+  return {
+    points: [start.x, start.y, ...movementPoints, end.x, end.y],
+    tension: movement?.tension ?? "curved"
+  } as MovementCache;
+}
+
+const createPropMovementCache = (prop: Prop, stageGeometry: StageGeometry, previous: PropPosition, current: PropPosition, movement?: Movement, px: number = METER_PX): MovementCache => {
+  const start = stageMetersToPx(cornerToCentreFromProp(previous, prop, stageGeometry.yAxis), stageGeometry, px);
+  var movementPoints: number[] = [];
+  if (movement) {
+    movementPoints = movement.points.map(p => stageMetersToPx(p, stageGeometry, px)).flatMap(p => [p.x, p.y]);
+  }
+  const end = stageMetersToPx(cornerToCentreFromProp(current, prop, stageGeometry.yAxis), stageGeometry, px);
   return {
     points: [start.x, start.y, ...movementPoints, end.x, end.y],
     tension: movement?.tension ?? "curved"
@@ -230,7 +244,7 @@ export const calculateMovementCache = (choreo: Choreo, showPrev: boolean) => {
 
       Object.entries(prevDancers).forEach((p) => {
         const [id, position] = p;
-        const cache = createMovementCache(
+        const cache = createDancerMovementCache(
           choreo.stageGeometry,
           position,
           currDancers[id],
@@ -265,7 +279,8 @@ export const calculateMovementCache = (choreo: Choreo, showPrev: boolean) => {
 
       Object.entries(prevProps).forEach((p) => {
         const [id, position] = p;
-        const cache = createMovementCache(
+        const cache = createPropMovementCache(
+          choreo.props[id],
           choreo.stageGeometry,
           position,
           currProps[id],
@@ -297,3 +312,57 @@ export const calculateMovementCache = (choreo: Choreo, showPrev: boolean) => {
 
   return {newDancerMovementCache, newDancerAnimationCache, newPropMovementCache, newPropAnimationCache};
 };
+
+type Offset = { dx: number; dy: number };
+
+const offsetCache = new Map<string, Offset>();
+
+function getRotatedOffset(rotation: number, width: number, length: number): Offset {
+  const key = `${rotation ?? 0}|${width}|${length}`;
+
+  const cached = offsetCache.get(key);
+  if (cached) {
+    return cached;
+  }
+
+  const theta = ((rotation ?? 0) * Math.PI) / 180;
+  const hw = width / 2;
+  const hh = length / 2;
+
+  const offset: Offset = {
+    dx: hw * Math.cos(theta) - hh * Math.sin(theta),
+    dy: hw * Math.sin(theta) + hh * Math.cos(theta),
+  };
+
+  offsetCache.set(key, offset);
+  return offset;
+}
+
+export function cornerToCentreFromProp(position: BasePosition, prop: Prop, yAxis: YAxisDirection): Coordinates {
+  const {x, y, rotation} = position;
+  const {width, length} = prop;
+  return cornerToCentre(x, y, rotation ?? 0, width, length, yAxis);
+}
+
+export function cornerToCentre(x: number, y: number, rotation: number, width: number, length: number, yAxis: YAxisDirection): Coordinates {
+  const { dx, dy } = getRotatedOffset(rotation, width, length);
+  return {
+    x: x + dx,
+    y: y + dy * (yAxis === "bottom-up" ? -1 : 1) + (yAxis === "bottom-up" ? length : 0),
+  };
+}
+
+export function centreToCornerFromProp(position: BasePosition, prop: Prop, yAxis: YAxisDirection): Coordinates {
+  const {x, y, rotation} = position;
+  const {width, length} = prop;
+  return centreToCorner(x, y, rotation ?? 0, width, length, yAxis);
+}
+
+export function centreToCorner(x: number, y: number, rotation: number, width: number, length: number, yAxis: YAxisDirection): Coordinates {
+  const { dx, dy } = getRotatedOffset(rotation, width, length);
+  
+  return {
+    x: x - dx,
+    y: y - dy * (yAxis === "bottom-up" ? -1 : 1) - (yAxis === "bottom-up" ? length : 0),
+  };
+}

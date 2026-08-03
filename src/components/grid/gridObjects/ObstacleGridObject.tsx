@@ -113,6 +113,7 @@ const ObstacleGridObject = memo(function ObstacleGridObject({
     listening={canEdit}
     draggable={canEdit}
     position={position}
+    width={obstacle.width}
     height={obstacle.length}
     onClick={(isAdditive) => {if (canSelect) onClick?.(isAdditive)}}
     updatePosition={(x, y) => {updatePosition?.(x, y);}}
