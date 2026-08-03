@@ -86,10 +86,14 @@ const BaseGridObject = memo(function BaseGridObject({
 
         let anim = new Konva.Animation(function(frame) {
           if (!frame) return;
+          function easeInOutCubic(t: number): number {
+            return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+          }
 
           const elapsed = frame.time; // ms since animation start
           const t = Math.min(elapsed / duration, 1); // 0 to 1
-          const pt = path.getPointAtLength(t * pathLen);
+          const easedT = easeInOutCubic(t);           // 0 to 1, eased
+          const pt = path.getPointAtLength(easedT * pathLen);
           const rot = prevRot + (targetRot - prevRot) * t;
 
           if (ref.current && pt) {
