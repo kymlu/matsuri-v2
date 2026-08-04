@@ -65,7 +65,7 @@ const BaseGridObject = memo(function BaseGridObject({
     registerNode?.(id, ref.current);
     return () => registerNode?.(id, null);
   }, [id, registerNode]);
-  
+
   useEffect(() => {
     animation.current?.stop();
     const newPosition = stageMetersToPx({x: position.x, y: position.y}, stageGeometry, METER_PX, height);
@@ -98,7 +98,7 @@ const BaseGridObject = memo(function BaseGridObject({
         animation.current = new Konva.Animation(function(frame) {
           if (!frame) return;
           function easeInOut(t: number): number {
-            return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+            return t < 0.5 ? 4 * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
           }
 
           const elapsed = frame.time; // ms since animation start
@@ -135,7 +135,7 @@ const BaseGridObject = memo(function BaseGridObject({
           x: newPosition.x,
           y: newPosition.y,
           rotation: rotation ?? 0,
-          duration: animate ? 1 : 0,
+          duration: animate ? 1.2 : 0,
           easing: Konva.Easings.EaseInOut,
           offsetX: 0,
           offsetY: 0,
