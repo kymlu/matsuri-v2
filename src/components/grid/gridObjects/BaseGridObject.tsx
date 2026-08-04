@@ -62,6 +62,11 @@ const BaseGridObject = memo(function BaseGridObject({
   const prevRotation = useRef<number | undefined>(undefined);
   
   useEffect(() => {
+    registerNode?.(id, ref.current);
+    return () => registerNode?.(id, null);
+  }, [id, registerNode]);
+  
+  useEffect(() => {
     animation.current?.stop();
     const newPosition = stageMetersToPx({x: position.x, y: position.y}, stageGeometry, METER_PX, height);
     if (newPosition.x === ref.current?.x() && newPosition.y === ref.current?.y()) return;
@@ -110,7 +115,7 @@ const BaseGridObject = memo(function BaseGridObject({
             });
             setIsAnimating(false);
           } else {
-            const easedT = easeInOut(t);           // 0 to 1, eased
+            const easedT = easeInOut(t);
             const pt = path.getPointAtLength(easedT * pathLen);
             const rot = prevRot + (targetRot - prevRot) * t;
             if (ref.current && pt) {
