@@ -392,7 +392,7 @@ export async function exportToPdf (
 
         // Draw the item relative to its own top-left
         if (p.inUse) {
-          context.fillStyle = colorPalette.limeGreen;
+          context.fillStyle = colorPalette.inUseColour;
           context.fillRect(0, 0, propWidth, propHeight);
           context.fillStyle = prop.color;
           context.fillRect(4, 4, propWidth - 8, propHeight - 8);

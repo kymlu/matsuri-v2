@@ -69,29 +69,33 @@ const PropGridObject = memo(function PropGridObject({
         animationCache={animationCache}
       >
         <Rect
-          width={prop.width * METER_PX}
-          height={prop.length * METER_PX}
-          strokeEnabled={isSelected}
-          strokeWidth={2.5}
+          x={METER_PX*-0.15}
+          y={METER_PX*-0.15}
+          width={(prop.width + 0.3) * METER_PX}
+          height={(prop.length + 0.3) * METER_PX}
+          visible={isSelected}
+          strokeWidth={3}
           stroke={colorPalette.primary}
+          fill={colorPalette.white}
         />
         
         <Rect
-          x={isSelected ? METER_PX * 0.1 : 0}
-          y={isSelected ? METER_PX * 0.1 : 0}
-          width={(prop.width * METER_PX) - (isSelected ? METER_PX * 0.2 : 0)}
-          height={(prop.length * METER_PX) - (isSelected ? METER_PX * 0.2 : 0)}
-          fill={prop.color}/>
+          width={(prop.width * METER_PX)}
+          height={(prop.length * METER_PX)}
+          fill={prop.color}
+          stroke={position.inUse ? colorPalette.inUseColour : prop.color}
+          strokeWidth={1}
+          />
 
         {
           position.inUse &&
           <Rect
-            x={METER_PX * (isSelected ? 0.2 : 0.1)}
-            y={METER_PX * (isSelected ? 0.2 : 0.1)}
-            width={(prop.width * METER_PX) - METER_PX * (isSelected ? 0.4 : 0.2)}
-            height={(prop.length * METER_PX) - METER_PX * (isSelected ? 0.4 : 0.2)}
-            stroke={colorPalette.limeGreen}
-            strokeWidth={isSelected ? 4 : 5}
+            x={METER_PX * 0.1}
+            y={METER_PX * 0.1}
+            width={(prop.width * METER_PX) - METER_PX * 0.2}
+            height={(prop.length * METER_PX) - METER_PX * 0.2}
+            stroke={colorPalette.inUseColour}
+            strokeWidth={5}
             />
         }
 
