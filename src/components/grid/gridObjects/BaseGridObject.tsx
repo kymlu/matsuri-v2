@@ -59,28 +59,19 @@ const BaseGridObject = memo(function BaseGridObject({
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
   const prevSectionId = useRef<string>("");
   const prevRotation = useRef<number | undefined>(undefined);
-
-  useEffect(() => {
-    registerNode?.(id, ref.current);
-    return () => registerNode?.(id, null);
-  }, [id, registerNode]);
-  const animKey = useMemo(
-    () => getAnimationKey(prevSectionId?.current ?? "", sectionId ?? ""),
-    [prevSectionId.current, sectionId]
-  );
-
-  const animPath = useMemo(
-    () => animationCache?.[animKey]?.path,
-    [animationCache, animKey]
-  );
-
+  const [animPath, setAnimPath] = useState<string | undefined>(undefined);
+  
   useEffect(() => {
     const newPosition = stageMetersToPx({x: position.x, y: position.y}, stageGeometry, METER_PX, height);
     if (newPosition.x === ref.current?.x() && newPosition.y === ref.current?.y()) return;
     if (animate) setIsAnimating(true);
     if (ref.current) {
-      if (sectionId && animationCache?.[getAnimationKey(prevSectionId.current, sectionId)]) {
-        let path: Konva.Path = new Konva.Path({x: 0, y: 0, data: animationCache[getAnimationKey(prevSectionId.current, sectionId)].path});
+      const key = sectionId ? getAnimationKey(prevSectionId.current, sectionId) : undefined;
+      const cachedPath = key ? animationCache?.[key]?.path : undefined;
+
+      if (cachedPath) {
+        setAnimPath(cachedPath);
+        let path: Konva.Path = new Konva.Path({x: 0, y: 0, data: cachedPath});
         const pathLen = path.getLength();
         const duration = 1000;
         const prevRot = prevRotation.current ?? 0;
