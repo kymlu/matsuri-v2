@@ -65,7 +65,7 @@ const BaseGridObject = memo(function BaseGridObject({
     return () => registerNode?.(id, null);
   }, [id, registerNode]);
   const animKey = useMemo(
-    () => getAnimationKey(prevSectionId.current, sectionId),
+    () => getAnimationKey(prevSectionId?.current ?? "", sectionId ?? ""),
     [prevSectionId.current, sectionId]
   );
 
