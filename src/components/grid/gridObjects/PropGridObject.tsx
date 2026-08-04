@@ -5,7 +5,7 @@ import Konva from "konva";
 import { colorPalette } from "../../../lib/consts/colors";
 import { METER_PX } from "../../../lib/consts/consts";
 import { Prop, PropPosition } from "../../../models/prop";
-import { memo } from "react";
+import { memo, useEffect, useRef } from "react";
 import { PathSvgCacheBySectionId } from "../../../models/choreoSection";
 
 type PropGridObjectProps = {
@@ -45,6 +45,21 @@ const PropGridObject = memo(function PropGridObject({
   halfOpacity,
   isZooming,
 }: PropGridObjectProps) {
+  const inUseOutline = useRef<Konva.Rect>(null);
+
+  useEffect(() => {
+    if (!inUseOutline.current) return;
+
+    const anim = new Konva.Animation((frame) => {
+      if (!frame) return;
+      const speed = 15; // speed of movement
+      const offset = (frame.time / 1000) * speed;
+      inUseOutline.current?.dashOffset(-offset);
+    }, inUseOutline.current.getLayer());
+
+    anim.start();
+  }, [position.inUse]);
+  
   return <>
     {
       prop &&
@@ -83,20 +98,31 @@ const PropGridObject = memo(function PropGridObject({
           width={(prop.width * METER_PX)}
           height={(prop.length * METER_PX)}
           fill={prop.color}
-          stroke={position.inUse ? colorPalette.inUseColour : prop.color}
+          stroke={prop.color}
           strokeWidth={1}
           />
 
         {
           position.inUse &&
-          <Rect
-            x={METER_PX * 0.1}
-            y={METER_PX * 0.1}
-            width={(prop.width * METER_PX) - METER_PX * 0.2}
-            height={(prop.length * METER_PX) - METER_PX * 0.2}
-            stroke={colorPalette.inUseColour}
-            strokeWidth={5}
-            />
+          <>
+            <Rect
+              width={(prop.width * METER_PX)}
+              height={(prop.length * METER_PX)}
+              stroke={colorPalette.white}
+              opacity={0.7}
+              strokeWidth={6}
+              lineJoin="round"
+              />
+            <Rect
+              ref={inUseOutline}
+              width={(prop.width * METER_PX)}
+              height={(prop.length * METER_PX)}
+              stroke={colorPalette.primary}
+              strokeWidth={4}
+              lineJoin="round"
+              dash={[2, 2]}
+              />
+          </>
         }
 
         <Text
