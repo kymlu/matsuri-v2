@@ -1,5 +1,5 @@
-import { memo, ReactNode, useEffect, useRef, useState, useMemo } from "react";
-import { Group, Path } from "react-konva";
+import { memo, ReactNode, useEffect, useRef, useState } from "react";
+import { Group } from "react-konva";
 import Konva from "konva";
 import { Shape, ShapeConfig } from "konva/lib/Shape";
 import { Stage } from "konva/lib/Stage";
@@ -58,10 +58,11 @@ const BaseGridObject = memo(function BaseGridObject({
   const ref = useRef<Konva.Group>(null);
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
   const prevSectionId = useRef<string>("");
+  const animation = useRef<Konva.Animation | undefined>(undefined);
   const prevRotation = useRef<number | undefined>(undefined);
-  const [animPath, setAnimPath] = useState<string | undefined>(undefined);
   
   useEffect(() => {
+    animation.current?.stop();
     const newPosition = stageMetersToPx({x: position.x, y: position.y}, stageGeometry, METER_PX, height);
     if (newPosition.x === ref.current?.x() && newPosition.y === ref.current?.y()) return;
     if (animate) setIsAnimating(true);
@@ -70,59 +71,69 @@ const BaseGridObject = memo(function BaseGridObject({
       const cachedPath = key ? animationCache?.[key]?.path : undefined;
 
       if (cachedPath) {
-        setAnimPath(cachedPath);
         let path: Konva.Path = new Konva.Path({x: 0, y: 0, data: cachedPath});
         const pathLen = path.getLength();
-        const duration = 1000;
+        const duration = 1200;
         const prevRot = prevRotation.current ?? 0;
         const targetRot = rotation ?? 0;
-        const heightDelta = ((stageGeometry.yAxis === "bottom-up" ? height : 0) ?? 0) * METER_PX;
         let offsetX = 0;
         let offsetY = 0;
         if (height && height > 0 && width && width > 0) {
-          const box = ref.current.getClientRect();
           const centre = cornerToCentre(ref.current.x(), ref.current.y(), ref.current.rotation(), width * METER_PX, height * METER_PX, stageGeometry.yAxis);
           offsetX = width * METER_PX / 2;
-          offsetY = (stageGeometry.yAxis === "bottom-up" ? -1 : 1) * height * METER_PX / 2;
-          ref.current.offset({x: offsetX, y: offsetY});
-          ref.current.position({x: centre.x, y: centre.y});
+          offsetY = height * METER_PX / 2;
+          ref.current.setAttrs({
+            offsetX,
+            offsetY,
+            x: centre.x,
+            y: centre.y,
+          });
         }
 
-        let anim = new Konva.Animation(function(frame) {
+        animation.current = new Konva.Animation(function(frame) {
           if (!frame) return;
-          function easeInOutCubic(t: number): number {
+          function easeInOut(t: number): number {
             return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
           }
 
           const elapsed = frame.time; // ms since animation start
           const t = Math.min(elapsed / duration, 1); // 0 to 1
-          const easedT = easeInOutCubic(t);           // 0 to 1, eased
-          const pt = path.getPointAtLength(easedT * pathLen);
-          const rot = prevRot + (targetRot - prevRot) * t;
-
-          if (ref.current && pt) {
-            ref.current.position({ x: pt.x, y: pt.y - heightDelta });
-            ref.current.rotation(rot)
-          }
 
           if (t >= 1) {
-            anim.stop();
-            ref?.current?.x(newPosition.x);
-            ref?.current?.y(newPosition.y);
-            ref?.current?.rotation(rotation ?? 0);
-            ref?.current?.offset({x: 0, y: 0})
+            animation.current?.stop();
+            ref?.current?.setAttrs({
+              rotation: rotation,
+              x: newPosition.x,
+              y: newPosition.y,
+              offsetX: 0,
+              offsetY: 0,
+            });
             setIsAnimating(false);
+          } else {
+            const easedT = easeInOut(t);           // 0 to 1, eased
+            const pt = path.getPointAtLength(easedT * pathLen);
+            const rot = prevRot + (targetRot - prevRot) * t;
+            if (ref.current && pt) {
+              ref.current.setAttrs({
+                rotation: rot,
+                x: pt.x,
+                y: pt.y,
+              });
+            }
           }
         }, ref.current.getLayer());
-        anim.start();
+        animation.current?.start();
 
       } else {
+        animation?.current?.stop();
         ref.current.to({
           x: newPosition.x,
           y: newPosition.y,
           rotation: rotation ?? 0,
           duration: animate ? 1 : 0,
           easing: Konva.Easings.EaseInOut,
+          offsetX: 0,
+          offsetY: 0,
           onFinish: () => {setIsAnimating(false)}
         });
       }
@@ -208,10 +219,6 @@ const BaseGridObject = memo(function BaseGridObject({
       }}
       >
       {children}
-      {
-        animPath &&
-        <Path x={0} y={0} stroke="yellow" strokeWidth={3} data={animPath}/>
-      }
       </Group>
   )
 });
