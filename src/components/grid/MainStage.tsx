@@ -119,6 +119,10 @@ export default function MainStage({
     0
   , [size, stageGeometry, isShowingVerticalRuler, pixelsPerMeter]);
 
+  const allDancerIds = useMemo(() => {
+    return Object.keys(currentChoreo.dancers);
+  }, [currentChoreo.dancers]);
+
   useEffect(() => {
     if (!containerRef.current) return;
 
@@ -574,7 +578,7 @@ export default function MainStage({
         {
           (showPaths || isEditingMovement) && dancerMovementCache && propMovementCache &&
           <GhostLayer
-            dancers={currentChoreo.dancers}
+            dancerIds={allDancerIds}
             prevDancerPositions={previousSection?.formation.dancerPositions}
             dancerMovementCache={dancerMovementCache[currentSection.id]}
             propMovementCache={propMovementCache[currentSection.id]}

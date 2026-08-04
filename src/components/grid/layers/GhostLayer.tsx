@@ -1,15 +1,16 @@
 import { Layer, Line } from "react-konva";
 import { StageGeometry } from "../../../models/choreo";
-import { Dancer, DancerPosition } from "../../../models/dancer";
+import { DancerPosition } from "../../../models/dancer";
 import DancerGridObject from "../gridObjects/DancerGridObject";
 import { Prop, PropPosition } from "../../../models/prop";
 import { colorPalette } from "../../../lib/consts/colors";
-import React, { useMemo } from "react";
+import React, { useDeferredValue, useEffect, useMemo, useRef } from "react";
 import { MovementCacheByObjectId, MovementType } from "../../../models/choreoSection";
 import PropGridObject from "../gridObjects/PropGridObject";
+import Konva from "konva";
 
 type GhostLayerProps = {
-  dancers: Record<string, Dancer>,
+  dancerIds: string[],
   prevDancerPositions?: Record<string, DancerPosition>,
   dancerMovementCache: MovementCacheByObjectId,
   props: Record<string, Prop>,
@@ -21,7 +22,7 @@ type GhostLayerProps = {
 };
 
 const GhostLayer = React.memo(function GhostLayer({
-  dancers,
+  dancerIds,
   prevDancerPositions,
   dancerMovementCache,
   props,
@@ -31,44 +32,60 @@ const GhostLayer = React.memo(function GhostLayer({
   selectedId,
   isEditingPaths,
 }: GhostLayerProps) {
-  const dancerList = useMemo(() => {
-    return Object.entries(dancers);
-  }, [dancers]);
   const propList = useMemo(() => {
     return Object.entries(props);
   }, [props]);
+  const deferredDancerMovementCache = useDeferredValue(dancerMovementCache);
+  const deferredPropMovementCache = useDeferredValue(propMovementCache);
+  const layerRef = useRef<Konva.Layer>(null);
+  useEffect(() => {
+  if (layerRef.current) {
+    layerRef.current.cache();
+  }
+}, [deferredDancerMovementCache, deferredPropMovementCache]);
   return ( 
     <Layer
       listening={false}
       opacity={0.5}
+      ref={layerRef}
       >
       {
-        prevPropPositions &&
         propList.map(([id, prop]) => {
+          const prev = prevPropPositions?.[id];
+          if (!prev) return null;
+
+          const cache = deferredPropMovementCache?.[id];
+          const isSelected = id === selectedId;
           return (
             <PropMovement
               key={id}
               prop={prop}
               prev={prevPropPositions[id]}
               geometry={geometry}
-              pathPoints={propMovementCache?.[id]?.points}
-              movementType={propMovementCache?.[id]?.tension}
-              hidePath={id === selectedId && isEditingPaths === true}
+              pathPoints={cache?.points}
+              movementType={cache?.tension}
+              hidePath={isSelected && isEditingPaths === true}
             />
           );
         })
       }
       {
-        prevDancerPositions &&
-        dancerList.map(([id, dancer]) => <DancerMovement
-          key={id}
-          prev={prevDancerPositions[id]}
-          dancer={dancer}
-          geometry={geometry}
-          pathPoints={dancerMovementCache?.[id]?.points}
-          movementType={dancerMovementCache?.[id]?.tension}
-          hidePath={id === selectedId && isEditingPaths === true}
-        />)
+        dancerIds.map((id) => {
+          const prev = prevDancerPositions?.[id];
+          if (!prev) return null;
+
+          const cache = deferredDancerMovementCache?.[id];
+          const isSelected = id === selectedId;
+
+          return <DancerMovement
+            key={id}
+            prev={prevDancerPositions[id]}
+            geometry={geometry}
+            pathPoints={cache?.points}
+            movementType={cache?.tension}
+            hidePath={isSelected && isEditingPaths === true}
+          />
+        })
       }
     </Layer>
   );
@@ -77,23 +94,25 @@ const GhostLayer = React.memo(function GhostLayer({
 export default GhostLayer;
 
 type DancerMovementProps = {
-  dancer: Dancer,
   prev?: DancerPosition,
   geometry: StageGeometry,
   pathPoints?: number[],
   movementType?: MovementType
   hidePath: boolean,
 }
+const PREV_DANCER_BASE = { name: "", id: "" };
+const PATH_DASH = [2, 2];
 
 const DancerMovement = React.memo(function DancerMovement ({
-  dancer, prev, geometry, pathPoints, movementType, hidePath
+  prev, geometry, pathPoints, movementType, hidePath
 }: DancerMovementProps) {
+  const tension = movementType === "straight" ? 0 : 0.5;
+  const showPath = !hidePath && Boolean(pathPoints && pathPoints.length > 0);
   return <>
     {
       prev && <>
         <DancerGridObject
-          key={dancer.id}
-          dancer={{id: dancer.id, name: ""}}
+          dancer={PREV_DANCER_BASE}
           position={prev}
           stageGeometry={geometry}
           isSelected={false}
@@ -102,7 +121,7 @@ const DancerMovement = React.memo(function DancerMovement ({
           animate={false}
         />
         {
-          !hidePath && pathPoints &&
+          showPath &&
           <Line
             points={pathPoints}
             perfectDrawEnabled={false}
@@ -115,8 +134,9 @@ const DancerMovement = React.memo(function DancerMovement ({
             lineJoin="round"
             pointerWidth={5}
             pointerLength={5}
-            dash={[2, 2]}
-            tension={movementType === "straight" ? 0 : 0.5}
+            dash={PATH_DASH}
+            tension={tension}
+            listening={false}
           />
         }
       </>
@@ -136,12 +156,17 @@ type PropMovementProps = {
 const PropMovement = React.memo(function PropMovement ({
   prop, prev, geometry, pathPoints, movementType, hidePath
 }: PropMovementProps) {
+  const prevPropObj = useMemo<Prop>(
+    () => ({ color: prop.color, name: "", width: prop.width, length: prop.length, id: prop.id }),
+    [prop.id, prop.color, prop.width, prop.length]
+  );
+  const tension = movementType === "straight" ? 0 : 0.5;
+  const showPath = !hidePath && Boolean(pathPoints && pathPoints.length > 0);
   return <>
     {
       prev && <>
         <PropGridObject
-          key={prop.id}
-          prop={{...prop, name: ""}}
+          prop={prevPropObj}
           position={prev}
           stageGeometry={geometry}
           isSelected={false}
@@ -150,7 +175,7 @@ const PropMovement = React.memo(function PropMovement ({
           canSelect={false}
         />
         {
-          !hidePath && pathPoints &&
+          showPath &&
           <Line
             points={pathPoints}
             perfectDrawEnabled={false}
@@ -163,8 +188,9 @@ const PropMovement = React.memo(function PropMovement ({
             lineJoin="round"
             pointerWidth={5}
             pointerLength={5}
-            dash={[2, 2]}
-            tension={movementType === "straight" ? 0 : 0.5}
+            dash={PATH_DASH}
+            tension={tension}
+            listening={false}
           />
         }
       </>
