@@ -172,7 +172,7 @@ const FormationLayer = memo(function FormationLayer({
             canEdit={canEdit && canSelectObstacles}
             snapToGrid={snapToGrid}
             canSelect={canSelectObstacles}
-            animate
+            animate={false}
             isZooming={isZooming}
           />
         );
