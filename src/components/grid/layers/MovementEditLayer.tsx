@@ -71,7 +71,7 @@ const MovementEditLayer = memo(function MovementEditLayer({
         points.length > 0 && <>
           <Line
             points={points}
-            opacity={0.5}
+            opacity={0.7}
             strokeEnabled
             stroke={colorPalette.white}
             strokeWidth={6}

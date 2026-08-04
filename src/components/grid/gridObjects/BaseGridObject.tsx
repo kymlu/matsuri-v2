@@ -98,7 +98,7 @@ const BaseGridObject = memo(function BaseGridObject({
         animation.current = new Konva.Animation(function(frame) {
           if (!frame) return;
           function easeInOut(t: number): number {
-            return t < 0.5 ? 4 * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+            return t < 0.5 ? 4 * Math.pow(t, 3) : 1 - Math.pow(-2 * t + 2, 3) / 2;
           }
 
           const elapsed = frame.time; // ms since animation start
