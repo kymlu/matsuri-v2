@@ -46,19 +46,22 @@ const PropGridObject = memo(function PropGridObject({
   isZooming,
 }: PropGridObjectProps) {
   const inUseOutline = useRef<Konva.Rect>(null);
+  const inUseOutlineAnimation = useRef<Konva.Animation>(null);
 
   useEffect(() => {
+    inUseOutlineAnimation.current?.stop();
     if (!inUseOutline.current) return;
+    if (!animate || canEdit) return;
 
-    const anim = new Konva.Animation((frame) => {
+    inUseOutlineAnimation.current = new Konva.Animation((frame) => {
       if (!frame) return;
       const speed = 15; // speed of movement
       const offset = (frame.time / 1000) * speed;
       inUseOutline.current?.dashOffset(-offset);
     }, inUseOutline.current.getLayer());
 
-    anim.start();
-  }, [position.inUse]);
+    inUseOutlineAnimation.current.start();
+  }, [position.inUse, animate]);
   
   return <>
     {

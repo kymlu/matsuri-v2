@@ -4,7 +4,7 @@ import Konva from "konva";
 import { Shape, ShapeConfig } from "konva/lib/Shape";
 import { Stage } from "konva/lib/Stage";
 import { METER_PX } from "../../../lib/consts/consts";
-import { cornerToCentre, getAnimationKey, pxToStageMeters, snapCoordsToGrid, stageMetersToPx } from "../../../lib/helpers/editorCalculationHelper";
+import { cornerToCentre, easeInOut, getAnimationKey, pxToStageMeters, snapCoordsToGrid, stageMetersToPx } from "../../../lib/helpers/editorCalculationHelper";
 import { StageGeometry } from "../../../models/choreo";
 import { Coordinates } from "../../../models/base";
 import { PathSvgCacheBySectionId } from "../../../models/choreoSection";
@@ -97,9 +97,6 @@ const BaseGridObject = memo(function BaseGridObject({
 
         animation.current = new Konva.Animation(function(frame) {
           if (!frame) return;
-          function easeInOut(t: number): number {
-            return t < 0.5 ? 2 * Math.pow(t, 2) : 1 - Math.pow(-2 * t + 2, 2) / 2;
-          }
 
           const elapsed = frame.time; // ms since animation start
           const t = Math.min(elapsed / duration, 1); // 0 to 1

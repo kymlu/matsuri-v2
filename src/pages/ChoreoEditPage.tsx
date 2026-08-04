@@ -177,12 +177,8 @@ export default function ChoreoEditPage(props: {
 
   const [prevSection, setPrevSection] = useState<ChoreoSection | undefined>();
   useEffect(() => {
-    // if (appSettings.showPreviousSection) {
     const currentSectionIndex = history.presentState.state.sections.findIndex(x => strEquals(x.id, currentSection.id));
     setPrevSection(history.presentState.state.sections[currentSectionIndex - 1]);
-    // } else {
-      // setPrevSection(undefined);
-    // }
   }, [
     history.presentState.state.dancers,
     history.presentState.state.props,

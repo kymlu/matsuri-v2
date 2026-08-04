@@ -366,3 +366,7 @@ export function centreToCorner(x: number, y: number, rotation: number, width: nu
     y: y - dy * (yAxis === "bottom-up" ? -1 : 1) - (yAxis === "bottom-up" ? length : 0),
   };
 }
+
+export function easeInOut(t: number): number {
+  return t < 0.5 ? 2 * Math.pow(t, 2) : 1 - Math.pow(-2 * t + 2, 2) / 2;
+}

@@ -1,89 +1,149 @@
-import { Layer, Line } from "react-konva";
+import { Layer, Shape } from "react-konva";
 import { StageGeometry } from "../../../models/choreo";
 import { DancerPosition } from "../../../models/dancer";
 import DancerGridObject from "../gridObjects/DancerGridObject";
 import { Prop, PropPosition } from "../../../models/prop";
 import { colorPalette } from "../../../lib/consts/colors";
-import React, { useDeferredValue, useEffect, useMemo, useRef } from "react";
-import { MovementCacheByObjectId, MovementType } from "../../../models/choreoSection";
+import React, { useDeferredValue, useMemo } from "react";
+import { MovementCacheByObjectId, PathSvgCacheByObjectIdBySectionId } from "../../../models/choreoSection";
 import PropGridObject from "../gridObjects/PropGridObject";
-import Konva from "konva";
+import { getAnimationKey } from "../../../lib/helpers/editorCalculationHelper";
 
 type GhostLayerProps = {
   dancerIds: string[],
   prevDancerPositions?: Record<string, DancerPosition>,
   dancerMovementCache: MovementCacheByObjectId,
+  dancerSvgCache: PathSvgCacheByObjectIdBySectionId,
   props: Record<string, Prop>,
   prevPropPositions?: Record<string, PropPosition>,
   propMovementCache: MovementCacheByObjectId,
+  propSvgCache: PathSvgCacheByObjectIdBySectionId,
   geometry: StageGeometry,
   selectedId?: string,
   isEditingPaths?: boolean
+  prevSectionId?: string,
+  sectionId?: string,
 };
+
+function invertPathMap(dancerPathMap: PathSvgCacheByObjectIdBySectionId): PathSvgCacheByObjectIdBySectionId {
+  const sectionPathMap: PathSvgCacheByObjectIdBySectionId = {};
+
+  for (const [objId, sections] of Object.entries(dancerPathMap)) {
+    if (!sections) continue;
+
+    for (const [sectionId, path] of Object.entries(sections)) {
+      if (!path) continue;
+
+      if (!sectionPathMap[sectionId]) {
+        sectionPathMap[sectionId] = {};
+      }
+
+      sectionPathMap[sectionId][objId] = path;
+    }
+  }
+
+  return sectionPathMap;
+}
 
 const GhostLayer = React.memo(function GhostLayer({
   dancerIds,
   prevDancerPositions,
   dancerMovementCache,
+  dancerSvgCache,
   props,
   prevPropPositions,
   propMovementCache,
+  propSvgCache,
   geometry,
   selectedId,
   isEditingPaths,
+  prevSectionId,
+  sectionId,
 }: GhostLayerProps) {
-  const propList = useMemo(() => {
-    return Object.entries(props);
-  }, [props]);
-  const deferredDancerMovementCache = useDeferredValue(dancerMovementCache);
-  const deferredPropMovementCache = useDeferredValue(propMovementCache);
-  const layerRef = useRef<Konva.Layer>(null);
-  useEffect(() => {
-  if (layerRef.current) {
-    layerRef.current.cache();
-  }
-}, [deferredDancerMovementCache, deferredPropMovementCache]);
+  const sectionDancerPathMap = useMemo(
+    () => invertPathMap(dancerSvgCache),
+    [dancerSvgCache]
+  );
+  
+  const sectionPropPathMap = useMemo(
+    () => invertPathMap(propSvgCache),
+    [propSvgCache]
+  );
+
+  const allPaths = useMemo(() => {
+    const key = getAnimationKey(prevSectionId ?? "", sectionId ?? "");
+    const paths: string[] = [];
+
+    const dancerPaths = sectionDancerPathMap[key];
+    if (dancerPaths) {
+      for (const objId in dancerPaths) {
+        if (isEditingPaths && objId === selectedId) continue;
+        const item = dancerPaths[objId];
+        if (item?.path) paths.push(item.path);
+      }
+    }
+
+    const propPaths = sectionPropPathMap[key];
+    if (propPaths) {
+      for (const objId in propPaths) {
+        if (isEditingPaths && objId === selectedId) continue;
+        const item = propPaths[objId];
+        if (item?.path) paths.push(item.path);
+      }
+    }
+
+    return paths;
+  }, [
+    sectionDancerPathMap,
+    sectionPropPathMap,
+    prevSectionId,
+    sectionId,
+    selectedId,
+    isEditingPaths,
+  ]);
+
+  const ghostData = useMemo(
+    () => ({
+      prevDancerPositions,
+      prevPropPositions,
+    }),
+    [prevDancerPositions, prevPropPositions]
+  );
+
+  const deferredGhostData = useDeferredValue(ghostData);
+  const { prevDancerPositions: syncPrevDancers, prevPropPositions: syncPrevProps } =
+    deferredGhostData;
+
+  const propKeys = useMemo(() => Object.keys(props), [props]);
+
   return ( 
     <Layer
       listening={false}
       opacity={0.5}
-      ref={layerRef}
       >
+      <BatchedPath2D allPaths={allPaths}/>
       {
-        propList.map(([id, prop]) => {
-          const prev = prevPropPositions?.[id];
+        propKeys.map(([id]) => {
+          const prev = syncPrevProps?.[id];
           if (!prev) return null;
-
-          const cache = deferredPropMovementCache?.[id];
-          const isSelected = id === selectedId;
           return (
             <PropMovement
               key={id}
-              prop={prop}
-              prev={prevPropPositions[id]}
+              prop={props[id]}
+              prev={syncPrevProps[id]}
               geometry={geometry}
-              pathPoints={cache?.points}
-              movementType={cache?.tension}
-              hidePath={isSelected && isEditingPaths === true}
             />
           );
         })
       }
       {
         dancerIds.map((id) => {
-          const prev = prevDancerPositions?.[id];
+          const prev = syncPrevDancers?.[id];
           if (!prev) return null;
-
-          const cache = deferredDancerMovementCache?.[id];
-          const isSelected = id === selectedId;
-
           return <DancerMovement
             key={id}
-            prev={prevDancerPositions[id]}
+            prev={syncPrevDancers[id]}
             geometry={geometry}
-            pathPoints={cache?.points}
-            movementType={cache?.tension}
-            hidePath={isSelected && isEditingPaths === true}
           />
         })
       }
@@ -96,18 +156,13 @@ export default GhostLayer;
 type DancerMovementProps = {
   prev?: DancerPosition,
   geometry: StageGeometry,
-  pathPoints?: number[],
-  movementType?: MovementType
-  hidePath: boolean,
 }
 const PREV_DANCER_BASE = { name: "", id: "" };
 const PATH_DASH = [2, 2];
 
 const DancerMovement = React.memo(function DancerMovement ({
-  prev, geometry, pathPoints, movementType, hidePath
+  prev, geometry
 }: DancerMovementProps) {
-  const tension = movementType === "straight" ? 0 : 0.5;
-  const showPath = !hidePath && Boolean(pathPoints && pathPoints.length > 0);
   return <>
     {
       prev && <>
@@ -120,25 +175,6 @@ const DancerMovement = React.memo(function DancerMovement ({
           dancerDisplayType={"small"}
           animate={false}
         />
-        {
-          showPath &&
-          <Line
-            points={pathPoints}
-            perfectDrawEnabled={false}
-            strokeEnabled
-            stroke={colorPalette.primary}
-            strokeWidth={2}
-            fill={colorPalette.primary}
-            fillEnabled
-            dashEnabled
-            lineJoin="round"
-            pointerWidth={5}
-            pointerLength={5}
-            dash={PATH_DASH}
-            tension={tension}
-            listening={false}
-          />
-        }
       </>
     }
   </>
@@ -148,20 +184,15 @@ type PropMovementProps = {
   prop: Prop,
   prev?: PropPosition,
   geometry: StageGeometry,
-  pathPoints?: number[],
-  movementType?: MovementType
-  hidePath: boolean,
 }
 
 const PropMovement = React.memo(function PropMovement ({
-  prop, prev, geometry, pathPoints, movementType, hidePath
+  prop, prev, geometry
 }: PropMovementProps) {
   const prevPropObj = useMemo<Prop>(
     () => ({ color: prop.color, name: "", width: prop.width, length: prop.length, id: prop.id }),
     [prop.id, prop.color, prop.width, prop.length]
   );
-  const tension = movementType === "straight" ? 0 : 0.5;
-  const showPath = !hidePath && Boolean(pathPoints && pathPoints.length > 0);
   return <>
     {
       prev && <>
@@ -174,26 +205,52 @@ const PropMovement = React.memo(function PropMovement ({
           animate={false}
           canSelect={false}
         />
-        {
-          showPath &&
-          <Line
-            points={pathPoints}
-            perfectDrawEnabled={false}
-            strokeEnabled
-            stroke={colorPalette.primary}
-            strokeWidth={2}
-            fill={colorPalette.primary}
-            fillEnabled
-            dashEnabled
-            lineJoin="round"
-            pointerWidth={5}
-            pointerLength={5}
-            dash={PATH_DASH}
-            tension={tension}
-            listening={false}
-          />
-        }
       </>
     }
   </>
+});
+
+const path2dCache = new Map<string, Path2D>();
+
+function getOrCreatePath2D(svgString: string): Path2D {
+  let cached = path2dCache.get(svgString);
+  if (!cached) {
+    cached = new Path2D(svgString);
+    path2dCache.set(svgString, cached);
+  }
+  return cached;
+}
+
+export const BatchedPath2D = React.memo(function BatchedPath2D({
+  allPaths,
+}: {
+  allPaths: string[];
+}) {
+  const combinedPath = useMemo(() => {
+    if (!allPaths.length) return null;
+
+    const merged = new Path2D();
+    for (let i = 0; i < allPaths.length; i++) {
+      const str = allPaths[i];
+      if (str) {
+        merged.addPath(getOrCreatePath2D(str));
+      }
+    }
+    return merged;
+  }, [allPaths]);
+
+  if (!combinedPath) return null;
+
+  return (
+    <Shape
+      listening={false}
+      perfectDrawEnabled={false}
+      sceneFunc={(context) => {
+        context.strokeStyle = colorPalette.primary;
+        context.lineWidth = 2;
+        context.setLineDash(PATH_DASH);
+        context.stroke(combinedPath);
+      }}
+    />
+  );
 });

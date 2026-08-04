@@ -582,11 +582,15 @@ export default function MainStage({
             prevDancerPositions={previousSection?.formation.dancerPositions}
             dancerMovementCache={dancerMovementCache[currentSection.id]}
             propMovementCache={propMovementCache[currentSection.id]}
+            dancerSvgCache={dancerAnimationCache}
+            propSvgCache={propAnimationCache}
             props={currentChoreo.props}
             prevPropPositions={previousSection?.formation.propPositions}
             geometry={stageGeometry}
             selectedId={selectedIds.dancers[0]}
             isEditingPaths={isEditingMovement}
+            prevSectionId={previousSection?.id}
+            sectionId={currentSection.id}
           />
         }
         <FormationLayer
