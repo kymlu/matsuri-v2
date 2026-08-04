@@ -77,11 +77,14 @@ const BaseGridObject = memo(function BaseGridObject({
         const prevRot = prevRotation.current ?? 0;
         const targetRot = rotation ?? 0;
         const heightDelta = ((stageGeometry.yAxis === "bottom-up" ? height : 0) ?? 0) * METER_PX;
-
+        let offsetX = 0;
+        let offsetY = 0;
         if (height && height > 0 && width && width > 0) {
           const box = ref.current.getClientRect();
           const centre = cornerToCentre(ref.current.x(), ref.current.y(), ref.current.rotation(), width * METER_PX, height * METER_PX, stageGeometry.yAxis);
-          ref.current.offset({x: box.width/2, y: (stageGeometry.yAxis === "bottom-up" ? -1 : 1) * box.height/2});
+          offsetX = width * METER_PX / 2;
+          offsetY = (stageGeometry.yAxis === "bottom-up" ? -1 : 1) * height * METER_PX / 2;
+          ref.current.offset({x: offsetX, y: offsetY});
           ref.current.position({x: centre.x, y: centre.y});
         }
 
@@ -98,7 +101,7 @@ const BaseGridObject = memo(function BaseGridObject({
           const rot = prevRot + (targetRot - prevRot) * t;
 
           if (ref.current && pt) {
-            ref.current.position({ x: pt.x, y: pt.y - heightDelta });
+            ref.current.position({ x: pt.x - offsetX, y: pt.y - heightDelta - offsetY });
             ref.current.rotation(rot)
           }
 
