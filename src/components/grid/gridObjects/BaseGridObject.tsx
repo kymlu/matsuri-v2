@@ -75,7 +75,7 @@ const BaseGridObject = memo(function BaseGridObject({
       const key = sectionId ? getAnimationKey(prevSectionId.current, sectionId) : undefined;
       const cachedPath = key ? animationCache?.[key]?.path : undefined;
 
-      if (cachedPath) {
+      if (cachedPath && animate) {
         let path: Konva.Path = new Konva.Path({x: 0, y: 0, data: cachedPath});
         const pathLen = path.getLength();
         const duration = 1200;

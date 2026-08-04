@@ -20,7 +20,7 @@ type GhostLayerProps = {
   isEditingPaths?: boolean
 };
 
-export default function GhostLayer({
+const GhostLayer = React.memo(function GhostLayer({
   dancers,
   prevDancerPositions,
   dancerMovementCache,
@@ -72,7 +72,9 @@ export default function GhostLayer({
       }
     </Layer>
   );
-}
+});
+
+export default GhostLayer;
 
 type DancerMovementProps = {
   dancer: Dancer,
