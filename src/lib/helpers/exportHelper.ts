@@ -396,7 +396,7 @@ export async function exportToPdf (
         if (p.inUse) {
           context.strokeStyle = colorPalette.primary;
           pdf.setLineDashPattern([2, 2], 0);
-          context.lineWidth = 1.5;
+          context.lineWidth = 2;
           context.strokeRect(-1, -1, propWidth + 2, propHeight + 2);
         }
 
