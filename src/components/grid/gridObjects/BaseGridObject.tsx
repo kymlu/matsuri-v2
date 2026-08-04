@@ -64,6 +64,15 @@ const BaseGridObject = memo(function BaseGridObject({
     registerNode?.(id, ref.current);
     return () => registerNode?.(id, null);
   }, [id, registerNode]);
+  const animKey = useMemo(
+    () => getAnimationKey(prevSectionId.current, sectionId),
+    [prevSectionId.current, sectionId]
+  );
+
+  const animPath = useMemo(
+    () => animationCache?.[animKey]?.path,
+    [animationCache, animKey]
+  );
 
   useEffect(() => {
     const newPosition = stageMetersToPx({x: position.x, y: position.y}, stageGeometry, METER_PX, height);
@@ -209,8 +218,8 @@ const BaseGridObject = memo(function BaseGridObject({
       >
       {children}
       {
-        animationCache?.[getAnimationKey(prevSectionId.current, sectionId)]?.path &&
-        <Path x={0} y={0} stroke="yellow" strokeWidth={3} data={animationCache[getAnimationKey(prevSectionId.current, sectionId)].path ?? ""}/>
+        animPath &&
+        <Path x={0} y={0} stroke="yellow" strokeWidth={3} data={animPath}/>
       }
       </Group>
   )
