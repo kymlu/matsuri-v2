@@ -1,5 +1,5 @@
 import { memo, ReactNode, useEffect, useRef, useState } from "react";
-import { Group } from "react-konva";
+import { Group, Path } from "react-konva";
 import Konva from "konva";
 import { Shape, ShapeConfig } from "konva/lib/Shape";
 import { Stage } from "konva/lib/Stage";
