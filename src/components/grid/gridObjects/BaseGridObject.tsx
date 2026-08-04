@@ -210,7 +210,7 @@ const BaseGridObject = memo(function BaseGridObject({
       {children}
       {
         animationCache?.[getAnimationKey(prevSectionId.current, sectionId)]?.path &&
-        <Path x={0} y={0} stroke="yellow" strokeWidth={3} data={animationCache[getAnimationKey(prevSectionId.current, sectionId)].path}/>
+        <Path x={0} y={0} stroke="yellow" strokeWidth={3} data={animationCache[getAnimationKey(prevSectionId.current, sectionId)].path ?? ""}/>
       }
       </Group>
   )
