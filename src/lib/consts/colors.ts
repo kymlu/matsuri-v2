@@ -23,7 +23,7 @@ export const colorPalette = {
   lightGrey: "#CDCDCD",
   paleGrey: "#D4D4D4",
   primary: "#AB1010",
-  inUseColour: "#00FDE0",
+  inUseColour: "#0000FF",
 
   actionOutlineColours: [
     "#F3C300", "#875692", "#F38400", "#A1CAF1",
