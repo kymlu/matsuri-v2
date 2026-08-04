@@ -101,7 +101,7 @@ const BaseGridObject = memo(function BaseGridObject({
           const rot = prevRot + (targetRot - prevRot) * t;
 
           if (ref.current && pt) {
-            ref.current.position({ x: pt.x - offsetX, y: pt.y - heightDelta - offsetY });
+            ref.current.position({ x: pt.x + offsetX, y: pt.y - heightDelta + offsetY });
             ref.current.rotation(rot)
           }
 
