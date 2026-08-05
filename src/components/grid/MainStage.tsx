@@ -632,22 +632,22 @@ export default function MainStage({
           />
         }
         {
-          false &&
-          <MovementEditLayer
-            prevPosition={
-              selectedIds.dancers[0] ?
-              previousSection?.formation.dancerPositions[selectedIds.dancers[0]] :
-              previousSection?.formation.propPositions[selectedIds.props[0]]}
-            currentPosition={
-              selectedIds.dancers[0] ?
-              currentSection?.formation.dancerPositions[selectedIds.dancers[0]] :
-              currentSection?.formation.propPositions[selectedIds.props[0]]
-            }
-            onMidpointEdit={(newMovement) => onMidpointEdit?.(newMovement)}
-            movement={currentMovement}
-            geometry={stageGeometry}
-            prop={selectedObjects.props[0] ? currentChoreo.props[selectedObjects.props[0].propId] : undefined}
-          />
+          //false &&
+          //<MovementEditLayer
+            //prevPosition={
+              //selectedIds.dancers[0] ?
+              //previousSection?.formation.dancerPositions[selectedIds.dancers[0]] :
+             // previousSection?.formation.propPositions[selectedIds.props[0]]}
+           // currentPosition={
+            //  selectedIds.dancers[0] ?
+            //  currentSection?.formation.dancerPositions[selectedIds.dancers[0]] :
+            //  currentSection?.formation.propPositions[selectedIds.props[0]]
+            //}
+           // onMidpointEdit={(newMovement) => onMidpointEdit?.(newMovement)}
+           // movement={currentMovement}
+         //   geometry={stageGeometry}
+         //   prop={selectedObjects.props[0] ? currentChoreo.props[selectedObjects.props[0].propId] : undefined}
+        //  />
         }
         <MarkingsLayer
           stageGeometry={stageGeometry}
