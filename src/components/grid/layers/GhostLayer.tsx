@@ -122,7 +122,7 @@ const GhostLayer = React.memo(function GhostLayer({
       >
       <BatchedPath2D allPaths={allPaths}/>
       {
-        propKeys.map((id) => {
+        propKeys.map(([id]) => {
           const prev = syncPrevProps?.[id];
           if (!prev) return null;
           return (
