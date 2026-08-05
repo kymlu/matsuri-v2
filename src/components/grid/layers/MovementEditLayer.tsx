@@ -8,7 +8,7 @@ import { cornerToCentreFromProp, pxToStageMeters, stageMetersToPx } from "../../
 import { METER_PX, PATH_DASH } from "../../../lib/consts/consts";
 import { Prop } from "../../../models/prop";
 
-type GhostLayerProps = {
+type MovementEditLayerProps = {
   geometry: StageGeometry
   prevPosition?: BasePosition;
   movement?: Movement;
@@ -19,104 +19,112 @@ type GhostLayerProps = {
 
 const MovementEditLayer = memo(function MovementEditLayer({
   geometry, prevPosition, currentPosition, movement, prop, onMidpointEdit
-}: GhostLayerProps) {
+}: MovementEditLayerProps) {
   const [midPoints, setMidPoints] = useState<Coordinates[] | undefined>();
 
+  const midPointsRef = useRef<Coordinates[] | undefined>(midPoints);
   useEffect(() => {
-    if (prevPosition && currentPosition) {
-      if (movement && movement.points.length > 0) {
-        setMidPoints([...movement.points.map(p => stageMetersToPx(p, geometry, METER_PX))]);
-      } else {
-        let midPoint: Coordinates
-        if (prevPosition.type === "prop" && currentPosition.type === "prop" && prop) {
-          const prev = cornerToCentreFromProp(prevPosition, prop, geometry.yAxis);
-          const curr = cornerToCentreFromProp(currentPosition, prop, geometry.yAxis);
-          midPoint = stageMetersToPx({
-            x: (curr.x + prev.x) / 2,
-            y: (curr.y + prev.y) / 2
-          }, geometry, METER_PX);
-        } else {
-          midPoint = stageMetersToPx({
-            x: (currentPosition.x + prevPosition.x) / 2,
-            y: (currentPosition.y + prevPosition.y) / 2
-          }, geometry, METER_PX);
-        }
-        setMidPoints([midPoint]);
-      }
-    } else {
-      setMidPoints(undefined);
+    midPointsRef.current = midPoints;
+  }, [midPoints]);
+
+  const prevCurrPx = useMemo(() => {
+    if (!prevPosition || !currentPosition) return undefined;
+    if (prevPosition.type === "prop" && currentPosition.type === "prop" && prop) {
+      return {
+        prev: stageMetersToPx(cornerToCentreFromProp(prevPosition, prop, geometry.yAxis), geometry, METER_PX),
+        curr: stageMetersToPx(cornerToCentreFromProp(currentPosition, prop, geometry.yAxis), geometry, METER_PX),
+      };
     }
-  }, [movement, prevPosition, currentPosition]);
+    return {
+      prev: stageMetersToPx(prevPosition, geometry, METER_PX),
+      curr: stageMetersToPx(currentPosition, geometry, METER_PX),
+    };
+  }, [prevPosition, currentPosition, prop, geometry]);
+  
+  useEffect(() => {
+    if (!prevCurrPx) {
+      setMidPoints(undefined);
+      return;
+    }
+    if (movement && movement.points.length > 0) {
+      setMidPoints(movement.points.map(p => stageMetersToPx(p, geometry, METER_PX)));
+    } else {
+      const { prev, curr } = prevCurrPx;
+      setMidPoints([{
+        x: (curr.x + prev.x) / 2,
+        y: (curr.y + prev.y) / 2,
+      }]);
+    }
+  }, [movement, prevCurrPx, geometry]);
 
   const points = useMemo(() => {
-    if (prevPosition && currentPosition) {
-      let prev: Coordinates;
-      let curr: Coordinates;
-      if (prevPosition.type === "prop" && currentPosition.type === "prop" && prop) {
-        prev = stageMetersToPx(cornerToCentreFromProp(prevPosition, prop, geometry.yAxis), geometry, METER_PX)
-        curr = stageMetersToPx(cornerToCentreFromProp(currentPosition, prop, geometry.yAxis), geometry, METER_PX)
-      } else {
-        prev = stageMetersToPx(prevPosition, geometry, METER_PX)
-        curr = stageMetersToPx(currentPosition, geometry, METER_PX)
-      }
-      return [prev.x, prev.y, ...midPoints?.flatMap((p) => [p.x, p.y]) ?? [], curr.x, curr.y]
-    } else {
-      return [];
-    }
-  }, [prop, prevPosition, midPoints, currentPosition]);
-  // todo: add dots in the middle that are moveable
-  return ( 
+    if (!prevCurrPx) return [];
+    const { prev, curr } = prevCurrPx;
+    return [prev.x, prev.y, ...(midPoints?.flatMap((p) => [p.x, p.y]) ?? []), curr.x, curr.y];
+  }, [prevCurrPx, midPoints]);
+
+  const tension = movement?.tension === "straight" ? 0 : 0.5;
+
+  const sharedLineProps = {
+    listening: false,
+    points,
+    lineJoin: "round" as const,
+    tension,
+  };
+
+  const handleDragMove = useCallback((index: number, evt: KonvaEventObject<DragEvent>) => {
+    const newPoint: Coordinates = { x: evt.currentTarget.x(), y: evt.currentTarget.y() };
+    setMidPoints(prev => {
+      if (!prev) return prev;
+      const next = [...prev];
+      next[index] = newPoint;
+      return next;
+    });
+  }, []);
+
+  const handleDragEnd = useCallback(() => {
+    const current = midPointsRef.current;
+    if (!current) return;
+    onMidpointEdit({
+      points: current.map(p => pxToStageMeters(p, geometry, METER_PX)),
+      tension: movement?.tension ?? "curved",
+    });
+  }, [geometry, movement?.tension, onMidpointEdit]);
+
+  return (
     <Layer>
       {
         points.length > 0 && <>
           <Line
-            listening={false}
-            points={points}
+            {...sharedLineProps}
             opacity={0.7}
             strokeEnabled
             stroke={colorPalette.white}
             strokeWidth={6}
             fill={colorPalette.white}
             fillEnabled
-            lineJoin="round"
-            tension={movement?.tension === "straight" ? 0 : 0.5}
           />
           <Line
-            listening={false}
-            points={points}
+            {...sharedLineProps}
             strokeEnabled
             stroke={colorPalette.primary}
             strokeWidth={3}
             fill={colorPalette.primary}
             fillEnabled
             dashEnabled
-            lineJoin="round"
             pointerWidth={5}
             pointerLength={5}
             dash={PATH_DASH}
-            tension={movement?.tension === "straight" ? 0 : 0.5}
           />
         </>
       }
       {
         midPoints?.map((point, i) => {
           return <Circle
-            key={i}
+            key={point.id ?? i}
             draggable
-            onDragMove={(evt) => {
-              const newPoint: Coordinates = {x: evt.currentTarget.x(), y: evt.currentTarget.y()};
-              setMidPoints(prev => {
-                if (prev) {
-                  prev[i] = newPoint;
-                  return [...prev];
-                }
-              })
-              midPoints[i].x = evt.currentTarget.x();
-              midPoints[i].y = evt.currentTarget.y();
-            }}
-            onDragEnd={(evt) => {
-              onMidpointEdit({points: midPoints.map(p => pxToStageMeters(p, geometry, METER_PX)), tension: movement?.tension ?? "curved"});
-            }}
+            onDragMove={(evt) => handleDragMove(i, evt)}
+            onDragEnd={handleDragEnd}
             x={point.x}
             y={point.y}
             strokeEnabled
@@ -125,7 +133,7 @@ const MovementEditLayer = memo(function MovementEditLayer({
             hitStrokeWidth={METER_PX * 0.75}
             fill={colorPalette.white}
             fillEnabled
-            radius={METER_PX/5}
+            radius={METER_PX / 5}
           />
         })
       }
