@@ -1,7 +1,7 @@
 import { Circle, Layer, Line } from "react-konva";
 import { StageGeometry } from "../../../models/choreo";
 import { colorPalette } from "../../../lib/consts/colors";
-import { memo, useEffect, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useState, useRef } from "react";
 import { Movement } from "../../../models/choreoSection";
 import { BasePosition, Coordinates } from "../../../models/base";
 import { cornerToCentreFromProp, pxToStageMeters, stageMetersToPx } from "../../../lib/helpers/editorCalculationHelper";
