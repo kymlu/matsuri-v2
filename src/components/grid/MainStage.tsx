@@ -3,7 +3,7 @@ import GridLayer from "./layers/GridLayer";
 import { useState, useCallback, useEffect, useRef, SetStateAction, useMemo } from "react";
 import { Choreo, StageGeometry } from "../../models/choreo";
 import FormationLayer from "./layers/FormationLayer";
-import { ChoreoSection } from "../../models/choreoSection";
+import { ChoreoSection, Movement, MovementCacheBySectionIdByObjectId, PathSvgCacheByObjectIdBySectionId } from "../../models/choreoSection";
 import { DancerPosition } from "../../models/dancer";
 import { pxToStageMeters, snapCoordsToGrid, stageMetersToPx } from "../../lib/helpers/editorCalculationHelper";
 import { DEFAULT_PROP_LENGTH, MAX_ZOOM, METER_PX, MIN_ZOOM } from "../../lib/consts/consts";
@@ -19,6 +19,7 @@ import MarkingsLayer from "./layers/MarkingsLayer";
 import RulerLayer from "./layers/RulerLayer";
 import { sortDancers, sortProps } from "../../lib/editor/commands/objectCommands";
 import IconButton from "../basic/IconButton";
+import MovementEditLayer from "./layers/MovementEditLayer";
 
 Konva.hitOnDragEnabled = true;
 
@@ -53,6 +54,14 @@ type MainStageProps = {
   canResizeProps?: boolean,
   editEnabled?: boolean,
   toggleEditEnabled?: () => void,
+  showPaths?: boolean,
+  isEditingMovement?: boolean,
+  dancerMovementCache: MovementCacheBySectionIdByObjectId,
+  propMovementCache?: MovementCacheBySectionIdByObjectId,
+  onMidpointEdit?: (newMovement: Movement) => void;
+  currentMovement?: Movement,
+  dancerAnimationCache: PathSvgCacheByObjectIdBySectionId,
+  propAnimationCache: PathSvgCacheByObjectIdBySectionId,
 }
 
 export default function MainStage({
@@ -64,7 +73,9 @@ export default function MainStage({
   updatePropSizeAndRotate, updateObstacleSizeAndRotate,
   selectedIds, setSelectedIds, selectedObjects,
   addDancer, addProp, addObstacle, appSettings, previousSection, selectedDancerMovement,
-  onDancerSelected, bottomMarginPercent = 0, canResizeProps, editEnabled, toggleEditEnabled
+  onDancerSelected, bottomMarginPercent = 0, canResizeProps, editEnabled, toggleEditEnabled,
+  showPaths = false, isEditingMovement = false, dancerMovementCache, propMovementCache, onMidpointEdit, currentMovement,
+  dancerAnimationCache, propAnimationCache,
 }: MainStageProps) {
   const [dancerPositions, setDancerPositions] = useState<DancerPosition[]>([]);
   const [propPositions, setPropPositions] = useState<PropPosition[]>([]);
@@ -107,6 +118,10 @@ export default function MainStage({
     -(stageGeometry.stageWidth + stageGeometry.margin.leftMargin + stageGeometry.margin.rightMargin)/2) * pixelsPerMeter :
     0
   , [size, stageGeometry, isShowingVerticalRuler, pixelsPerMeter]);
+
+  const allDancerIds = useMemo(() => {
+    return Object.keys(currentChoreo.dancers);
+  }, [currentChoreo.dancers]);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -352,14 +367,8 @@ export default function MainStage({
     e.evt.preventDefault();
 
     const oldScale = stageScale.x;
-    // const pointer = stage.getPointerPosition();
 
-    // const mousePointTo = {
-    //   x: (pointer.x - stage.x()) / oldScale,
-    //   y: (pointer.y - stage.y()) / oldScale,
-    // };
-
-    // how to scale? Zoom in? Or zoom out?
+    // zoom in on up and out on down
     let direction = e.evt.deltaY > 0 ? 1 : -1;
 
     // when we zoom on trackpad, e.evt.ctrlKey is true
@@ -375,12 +384,6 @@ export default function MainStage({
       setIsManualMovement(true);
     }
     setStageScale({ x: newScale, y: newScale });
-
-    // const newPos = {
-    //   x: pointer.x - mousePointTo.x * newScale,
-    //   y: pointer.y - mousePointTo.y * newScale,
-    // };
-    // stage.position(newPos);
   };
   
   const [lastCenter, setLastCenter] = useState<any>(null);
@@ -489,7 +492,6 @@ export default function MainStage({
       return 1;
     }
   }, [stageScale])
-  
   return <div ref={containerRef} className="w-full h-full overflow-auto">
     {
       stageGeometry && 
@@ -562,14 +564,19 @@ export default function MainStage({
           verticalGridIncrement={verticalGridIncrement}
           />
         {
-          appSettings.showPreviousSection &&
+          (showPaths || isEditingMovement) && dancerMovementCache && propMovementCache &&
           <GhostLayer
-            dancers={currentChoreo.dancers}
-            dancerPositions={previousSection ? Object.values(previousSection?.formation.dancerPositions) : undefined}
+            dancerIds={allDancerIds}
+            prevDancerPositions={previousSection?.formation.dancerPositions}
+            dancerSvgCache={dancerAnimationCache}
+            propSvgCache={propAnimationCache}
             props={currentChoreo.props}
-            propPositions={previousSection ? Object.values(previousSection?.formation.propPositions) : undefined}
+            prevPropPositions={previousSection?.formation.propPositions}
             geometry={stageGeometry}
-            dancerDisplayType={appSettings.dancerDisplayType}
+            selectedId={selectedIds.dancers[0]}
+            isEditingPaths={isEditingMovement}
+            prevSectionId={previousSection?.id}
+            sectionId={currentSection.id}
           />
         }
         <FormationLayer
@@ -598,6 +605,10 @@ export default function MainStage({
           onDancerSelected={onDancerSelected}
           canResizeProps={canResizeProps}
           isZooming={isZooming}
+          sectionId={currentSection.id}
+          isEditingMovement={isEditingMovement}
+          dancerAnimationCache={dancerAnimationCache}
+          propAnimationCache={propAnimationCache}
           />
         {
           selectedDancerMovement &&
@@ -605,6 +616,25 @@ export default function MainStage({
             geometry={stageGeometry}
             currentPosition={selectedDancerMovement.current}
             nextPosition={selectedDancerMovement.next}
+            dancerMovementCache={dancerMovementCache[currentSection.id]}
+          />
+        }
+        {
+          isEditingMovement &&
+          <MovementEditLayer
+            prevPosition={
+              selectedIds.dancers[0] ?
+              previousSection?.formation.dancerPositions[selectedIds.dancers[0]] :
+              previousSection?.formation.propPositions[selectedIds.props[0]]}
+            currentPosition={
+              selectedIds.dancers[0] ?
+              currentSection?.formation.dancerPositions[selectedIds.dancers[0]] :
+              currentSection?.formation.propPositions[selectedIds.props[0]]
+            }
+            onMidpointEdit={(newMovement) => onMidpointEdit?.(newMovement)}
+            movement={currentMovement}
+            geometry={stageGeometry}
+            prop={selectedObjects.props[0] ? currentChoreo.props[selectedObjects.props[0].propId] : undefined}
           />
         }
         <MarkingsLayer

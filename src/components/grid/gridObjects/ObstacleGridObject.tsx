@@ -5,7 +5,7 @@ import Konva from "konva";
 import { colorPalette } from "../../../lib/consts/colors";
 import { METER_PX } from "../../../lib/consts/consts";
 import { Obstacle } from "../../../models/prop";
-import { useMemo } from "react";
+import { memo, useMemo } from "react";
 
 type ObstacleGridObjectProps = {
   obstacle: Obstacle;
@@ -24,7 +24,7 @@ type ObstacleGridObjectProps = {
 
 const STRIPES_PER_METRE = 10;
 
-export default function ObstacleGridObject({
+const ObstacleGridObject = memo(function ObstacleGridObject({
   obstacle,
   stageGeometry,
   updatePosition,
@@ -113,6 +113,7 @@ export default function ObstacleGridObject({
     listening={canEdit}
     draggable={canEdit}
     position={position}
+    width={obstacle.width}
     height={obstacle.length}
     onClick={(isAdditive) => {if (canSelect) onClick?.(isAdditive)}}
     updatePosition={(x, y) => {updatePosition?.(x, y);}}
@@ -126,31 +127,38 @@ export default function ObstacleGridObject({
     isZooming={isZooming}
   >
     <Rect
+      x={METER_PX*-0.15}
+      y={METER_PX*-0.15}
+      width={(obstacle.width + 0.3) * METER_PX}
+      height={(obstacle.length + 0.3) * METER_PX}
+      visible={isSelected}
+      strokeWidth={3}
+      stroke={colorPalette.primary}
+      fill={colorPalette.white}
+    />
+
+    <Rect
       width={obstacle.width * METER_PX}
       height={obstacle.length * METER_PX}
-      strokeEnabled
-      strokeWidth={2.5}
-      stroke={isSelected ? colorPalette.primary : obstacle.color}
+      strokeWidth={1.5}
+      stroke={obstacle.color}
     />
     
     <Rect
-      x={isSelected ? METER_PX * 0.1 : 0}
-      y={isSelected ? METER_PX * 0.1 : 0}
-      width={(obstacle.width * METER_PX) - (isSelected ? METER_PX * 0.2 : 0)}
-      height={(obstacle.length * METER_PX) - (isSelected ? METER_PX * 0.2 : 0)}
+      width={(obstacle.width * METER_PX)}
+      height={(obstacle.length * METER_PX)}
       fill="white"
       />
 
     {
       stripeLines.map((line, index) => (
         line &&
-      <Line
-        key={index}
-        points={[line.x1, line.y1, line.x2, line.y2]}
-        stroke={obstacle.color}
-        strokeWidth={1.5}
-        opacity={1}
-      />
+        <Line
+          key={index}
+          points={[line.x1, line.y1, line.x2, line.y2]}
+          stroke={obstacle.color}
+          strokeWidth={1.5}
+        />
       ))
     }
     
@@ -165,4 +173,6 @@ export default function ObstacleGridObject({
       verticalAlign="middle"
       align="center" />
   </BaseGridObject>
-}
+});
+
+export default ObstacleGridObject;

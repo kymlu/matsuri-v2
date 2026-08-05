@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import IconButton from "../basic/IconButton";
 import { VerticalDivider } from "../basic/Divider";
 import { Distribution, HorizontalAlignment, Rearrangement, VerticalAlignment } from "../../models/alignment";
@@ -27,6 +27,11 @@ type ToolbarProps = {
   // colour
   showChangeColour: boolean;
   onChangeColor: () => void;
+
+  // in use
+  showInUse: boolean;
+  isInUse: boolean;
+  onToggleInUse: () => void;
 
   // copy / paste / swap
   showCopyPosition: boolean;
@@ -61,6 +66,20 @@ type ToolbarProps = {
   onAssignActions: () => void;
   isAssigningActionsEnabled: boolean;
   isAssigningActions: boolean;
+  
+  // movement
+  onEditMovement: () => void;
+  showMovementFunctions: boolean;
+  showPaths: boolean;
+  toggleShowPaths: () => void
+  canEditMovement: boolean;
+  isEditingMovement: boolean;
+  setIsEditingMovement: (value: boolean) => void;
+  onResetPath: () => void;
+  pointCount: number;
+  togglePointCount: () => void;
+  curved: boolean;
+  toggleCurved: () => void;
 
   // obstacles
   showDuplicateObstacle: boolean;
@@ -78,12 +97,9 @@ type ToolbarProps = {
 export default function Toolbar({
   isEnabled,
   
-  onAddDancer,
-  isAddingDancer,
-  onAddProp,
-  isAddingProp,
-  onAddObstacle,
-  isAddingObstacle,
+  onAddDancer, isAddingDancer,
+  onAddProp, isAddingProp,
+  onAddObstacle, isAddingObstacle,
 
   showSelectDancer,
   onSelectColor,
@@ -93,43 +109,37 @@ export default function Toolbar({
   showSelectAllButton,
   onDeselect,
 
-  showChangeColour,
-  onChangeColor,
+  showChangeColour, onChangeColor,
 
-  showCopyPosition,
-  onCopyPosition,
-  showPastePosition,
-  onPastePosition,
-  showSwapPosition,
-  onSwapPosition,
+  showInUse, isInUse, onToggleInUse,
 
-  showArrange,
-  onRearrange,
-  onVerticalAlign,
-  onHorizontalAlign,
-  showDistribute,
-  onDistribute,
+  showCopyPosition, onCopyPosition,
+  showPastePosition, onPastePosition,
+  showSwapPosition, onSwapPosition,
 
-  showRenameDancer,
-  onRenameDancer,
-  showRenameProp,
-  onRenameProp,
-  showRenameObstacle,
-  onRenameObstacle,
+  showArrange, onRearrange,
+  onVerticalAlign, onHorizontalAlign,
+  showDistribute, onDistribute,
 
-  showDeleteObjects,
-  onDeleteObjects,
+  showRenameDancer, onRenameDancer,
+  showRenameProp, onRenameProp,
+  showRenameObstacle, onRenameObstacle,
+
+  showDeleteObjects, onDeleteObjects,
 
   onOpenActionManager,
-  onAssignActions,
-  isAssigningActionsEnabled,
-  isAssigningActions,
+  onAssignActions, isAssigningActionsEnabled, isAssigningActions,
 
-  showDuplicateObstacle,
-  onDuplicateObstacle,
-  showLockObstacle,
-  onToggleObstacleLock,
-  areObstaclesLocked,
+  onEditMovement, showMovementFunctions,
+  showPaths, toggleShowPaths,
+  canEditMovement,
+  isEditingMovement, setIsEditingMovement,
+  onResetPath,
+  curved, toggleCurved,
+  pointCount, togglePointCount,
+
+  showDuplicateObstacle, onDuplicateObstacle,
+  showLockObstacle, onToggleObstacleLock, areObstaclesLocked,
 
   onToggleResizePropsLock,
   isResizePropsLocked,
@@ -139,8 +149,15 @@ export default function Toolbar({
   const [isArrangeVisible, setIsArrangeVisible] = useState<boolean>(false);
   const [isActionManagerVisible, setIsActionManagerVisible] = useState<boolean>(false);
 
-  const isSubmenuOpen = isAddManagerVisible || isArrangeVisible || isActionManagerVisible;
+  const isSubmenuOpen = isAddManagerVisible || isArrangeVisible || isActionManagerVisible || isEditingMovement;
   const areSelectionActionsActivated = showRenameDancer || showArrange || showDeleteObjects;
+
+  const pointCountIcon = useMemo(() => {
+    return pointCount === 3 ? "counter3" : pointCount === 2 ? "counter2" : "counter1"
+  }, [pointCount]);
+  const pointCountLabel = useMemo(() => {
+    return pointCount === 3 ? "3点" : pointCount === 2 ? "2点" : "1点"
+  }, [pointCount]);
 
   useEffect(() => {
     if (!showArrange && isArrangeVisible) {
@@ -178,6 +195,7 @@ export default function Toolbar({
         {showRenameDancer && <IconButton src="textFieldsAlt" label="名前変更" onClick={() => {onRenameDancer()}} />}
         {showRenameProp && <IconButton src="textFieldsAlt" label="名前変更" onClick={() => {onRenameProp()}} />}
         {showRenameObstacle && <IconButton src="textFieldsAlt" label="名前変更" onClick={() => {onRenameObstacle()}} />}
+        {showInUse && <IconButton src="flagCheck" crossedOut={!isInUse} label="使用中" onClick={() => {onToggleInUse()}} />}
         {showArrange && <IconButton src="straighten" label="整理" onClick={()=>{setIsArrangeVisible(true)}}/>}
         {showChangeColour && <IconButton src="colors" label="色" onClick={() => {onChangeColor()}} />}
         {showCopyPosition && <IconButton src="contentCopy" label="位置コピー" onClick={() => {onCopyPosition()}} />}
@@ -185,6 +203,11 @@ export default function Toolbar({
         {showSwapPosition && <IconButton src="swapHoriz" label="位置交換" onClick={() => {onSwapPosition()}} />}
         {showDuplicateObstacle && <IconButton src="contentCopy" label="複製" onClick={() => {onDuplicateObstacle()}} />}
         {showDeleteObjects && <IconButton src="delete" label="削除" onClick={()=>{onDeleteObjects()}}/>}
+        {showMovementFunctions && <IconButton src="conversionPath" crossedOut={!showPaths} label="動線表示" onClick={()=>{toggleShowPaths()}}/>}
+        {showMovementFunctions && <IconButton src="rebaseEdit" label="動線編集" onClick={()=>{
+          onEditMovement();
+          setIsEditingMovement(true);
+        }}/>}
         {showSelectDancer && showSelectDancersButton && <IconButton src="select" subIconSrc="colors" label="同色選択" onClick={() => {onSelectColor()}} />}
         {showSelectDancersButton && <IconButton src="select" subIconSrc="person" label="全員選択" onClick={() => {onSelectType(true,  false)}} />}
         {showSelectPropsButton && <IconButton src="select" subIconSrc="flag" label="道具選択" onClick={() => {onSelectType(false, true)}} />}
@@ -207,6 +230,9 @@ export default function Toolbar({
           setIsArrangeVisible(false);
           setIsAddManagerVisible(false);
           setIsActionManagerVisible(false);
+          if (isEditingMovement) {
+            onEditMovement();
+          }
         }}/>
         <VerticalDivider/>
         {
@@ -266,6 +292,26 @@ export default function Toolbar({
               src={isAssigningActions ? "clear" : "category"}
               label="割当"
               onClick={() => {onAssignActions()}} />
+          </>
+        }
+        {
+          isEditingMovement &&
+          <>
+            <IconButton
+              disabled={!canEditMovement}
+              src="restartAlt"
+              label="リセット"
+              onClick={() => {onResetPath()}} />
+            <IconButton
+              disabled={!canEditMovement}
+              src={pointCountIcon}
+              label={pointCountLabel}
+              onClick={() => {togglePointCount()}} />
+            <IconButton
+              disabled={!canEditMovement}
+              src={curved ? "uTurnRight" : "turnRight"}
+              label={curved ? "曲線" : "直線"}
+              onClick={() => {toggleCurved()}} />
           </>
         }
       </>

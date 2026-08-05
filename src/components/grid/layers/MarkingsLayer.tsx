@@ -2,7 +2,7 @@ import { Group, Layer, Text } from "react-konva";
 import { StageGeometry, StageMargins, YAxisDirection } from "../../../models/choreo";
 import { colorPalette } from "../../../lib/consts/colors";
 import { METER_PX } from "../../../lib/consts/consts";
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { Coordinates } from "@dnd-kit/utilities";
 
 interface MarkingsLayerProps {
@@ -12,7 +12,7 @@ interface MarkingsLayerProps {
   scale: Coordinates,
 }
 
-export default function MarkingsLayer({
+const MarkingsLayer = memo(function MarkingsLayer({
   stageGeometry,
   gridSize,
   verticalGridIncrement,
@@ -110,4 +110,6 @@ export default function MarkingsLayer({
 
 
   return <Layer listening={false}>{elements}</Layer>;
-}
+});
+
+export default MarkingsLayer;

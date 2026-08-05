@@ -31,6 +31,8 @@ export const MIN_PASSWORD_LENGTH = 8;
 export const PASSWORD_ENTRY_LENGTH = 150;
 export const VERIFICATION_CODE_LENGTH = 8;
 
+export const PATH_DASH = [2, 2];
+
 export const SAMPLE_STAGE_ID = "0a002caf-611a-40aa-9989-a690e6791e0a";
 export const SAMPLE_PARADE_ID = "41221ff9-2647-4255-8189-fa4008bef93a";
 
@@ -77,6 +79,10 @@ export const ICON = {
   colors: "colors",
   contentCopy: "content_copy",
   contentPaste: "content_paste",
+  conversionPath: "conversion_path",
+  counter1: "counter_1",
+  counter2: "counter_2",
+  counter3: "counter_3",
   curtains: "curtains",
   delete: "delete",
   deselect: "deselect",
@@ -92,6 +98,7 @@ export const ICON = {
   familiarFaceAndZone: "familiar_face_and_zone",
   festival: "festival",
   flag: "flag",
+  flagCheck: "flag_check",
   fileExport: "file_export",
   fileCopy: "file_copy",
   fileSave: "file_save",
@@ -134,10 +141,12 @@ export const ICON = {
   personEdit: "person_edit",
   pictureAsPdf: "picture_as_pdf",
   podiatry: "podiatry",
+  rebaseEdit: "rebase_edit",
   redo: "redo",
   remove: "remove",
   resetFocus: "reset_focus",
   resize: "resize",
+  restartAlt: "restart_alt",
   restorePage: "restore_page",
   save: "save",
   search: "search",
@@ -157,6 +166,7 @@ export const ICON = {
   turnRight: "turn_right",
   undo: "undo",
   upload: "upload",
+  uTurnRight: "u_turn_right",
   verifiedUser: "verified_user",
   verticalDistribute: "vertical_distribute",
   visibility: "visibility",

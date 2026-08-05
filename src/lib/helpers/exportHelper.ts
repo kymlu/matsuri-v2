@@ -2,7 +2,7 @@ import jsPDF, { GState } from "jspdf";
 import { Choreo } from "../../models/choreo";
 import { colorPalette } from "../consts/colors";
 import { getDefaultFileName, getSafeFileName, isNullOrUndefined, isNullOrUndefinedOrBlank, roundToTenth, strEquals } from "./globalHelper";
-import { stageMetersToPx } from "./editorCalculationHelper";
+import { getPathLineOps, stageMetersToPx } from "./editorCalculationHelper";
 import { BaseModel, Coordinates } from "../../models/base";
 import JSZip from "jszip";
 import { Obstacle } from "../../models/prop";
@@ -393,7 +393,13 @@ export async function exportToPdf (
         // Draw the item relative to its own top-left
         context.fillStyle = prop.color;
         context.fillRect(0, 0, propWidth, propHeight);
-        
+        if (p.inUse) {
+          context.strokeStyle = colorPalette.primary;
+          pdf.setLineDashPattern([2, 2], 0);
+          context.lineWidth = 2;
+          context.strokeRect(-1, -1, propWidth + 2, propHeight + 2);
+        }
+
         context.fillStyle = colorPalette.getTextColor(prop.color);
         let textDimension = pdf.getTextDimensions(prop?.name ?? "", {maxWidth: propWidth});
         context.fillText(prop?.name ?? "",
@@ -434,7 +440,7 @@ export async function exportToPdf (
           pdf.setLineWidth(2);
           pdf.setDrawColor(colorPalette.primary);
           pdf.setFillColor(colorPalette.white);
-          pdf.circle(x, y + titleBuffer, PDF_METER_PX * 0.38, "FD");
+          pdf.circle(x, y + titleBuffer, PDF_METER_PX * 0.55, "FD");
         } else if (hasActions) {
           pdf.setFillColor(colorPalette.white);
           pdf.setDrawColor(colorPalette.white);
@@ -456,7 +462,7 @@ export async function exportToPdf (
         pdf.setLineWidth(0.8);
         pdf.setDrawColor(p.color);
         pdf.setFillColor(p.color);
-        pdf.circle(x, y + titleBuffer, PDF_METER_PX * (isFollowing || hasActions ? 0.27 : 0.4), "FD");
+        pdf.circle(x, y + titleBuffer, PDF_METER_PX * (hasActions && !isFollowing ? 0.27 : 0.4), "FD");
   
         pdf.setTextColor(colorPalette.getTextColor(p.color));
         let displayName = dancer.name ?? "";
@@ -472,6 +478,7 @@ export async function exportToPdf (
 
       if (showFollowingPath) {
         let currentPosition = section.formation.dancerPositions[followingDancer.id];
+        let movement = choreo.sections[i + 1]?.formation.dancerMovements?.[followingDancer.id];
         if (currentPosition && nextPosition &&
           (currentPosition.x !== nextPosition.x || currentPosition.y !== nextPosition.y)) {
             const currentPx = stageMetersToPx(currentPosition, stage, PDF_METER_PX);
@@ -490,7 +497,22 @@ export async function exportToPdf (
             pdf.setFillColor(nextPosition.color);
 
             pdf.circle(nextX, nextY, PDF_METER_PX * 0.4, "FD");
-            drawLine(pdf, colorPalette.primary, 1, [1, 1], currentX, currentY, nextX, nextY);
+            if (movement) {
+              pdf.setDrawColor(colorPalette.primary);
+              pdf.setLineWidth(1.5);
+              pdf.setLineDashPattern([1, 1], 0);
+              const points = movement.points.map(p => {
+                const point = stageMetersToPx(p, stage, PDF_METER_PX);
+                return {
+                  x: point.x + pageMargin,
+                  y: point.y - startingPointDelta + titleBuffer
+                }
+              }).flatMap(p => [p.x, p.y]);
+              const path = getPathLineOps([currentX, currentY, ...points, nextX, nextY], movement.tension === "curved" ? 0.5 : 0, false);
+              pdf.path(path).stroke();
+            } else {
+              drawLine(pdf, colorPalette.primary, 1.5, [1, 1], currentX, currentY, nextX, nextY);
+            }
             
             pdf.restoreGraphicsState();
         }

@@ -3,7 +3,7 @@ import { StageGeometry } from "../../../models/choreo";
 import { Dancer, DancerPosition } from "../../../models/dancer";
 import DancerGridObject from "../gridObjects/DancerGridObject";
 import Konva from "konva";
-import { SetStateAction, useEffect, useMemo, useRef } from "react";
+import { memo, SetStateAction, useEffect, useMemo, useRef } from "react";
 import { colorPalette } from "../../../lib/consts/colors";
 import { DancerDisplayType } from "../../../models/appSettings";
 import { Obstacle, Prop, PropPosition } from "../../../models/prop";
@@ -12,6 +12,7 @@ import { StageEntities } from "../../../models/history";
 import { pxToStageMeters } from "../../../lib/helpers/editorCalculationHelper";
 import { MAX_PROP_DIMENSION, METER_PX, MIN_PROP_DIMENSION, PROP_SNAP_SIZE } from "../../../lib/consts/consts";
 import ObstacleGridObject from "../gridObjects/ObstacleGridObject";
+import { PathSvgCacheByObjectIdBySectionId } from "../../../models/choreoSection";
 
 type FormationLayerProps = {
   canEdit: boolean,
@@ -39,9 +40,13 @@ type FormationLayerProps = {
   onDancerSelected?: () => void,
   canResizeProps?: boolean,
   isZooming: React.RefObject<boolean>;
+  sectionId: string;
+  dancerAnimationCache: PathSvgCacheByObjectIdBySectionId;
+  propAnimationCache: PathSvgCacheByObjectIdBySectionId;
+  isEditingMovement?: boolean,
 };
 
-export default function FormationLayer({
+const FormationLayer = memo(function FormationLayer({
   canEdit,
   canSelectDancers,
   canSelectProps,
@@ -67,6 +72,8 @@ export default function FormationLayer({
   onDancerSelected,
   canResizeProps,
   isZooming,
+  sectionId,
+  dancerAnimationCache, propAnimationCache, isEditingMovement,
 }: FormationLayerProps) {
 	const transformerRef = useRef<Konva.Transformer>(null);
 
@@ -87,34 +94,34 @@ export default function FormationLayer({
   const toggleDancerSelect = (id: string, isAdditive: boolean = true) => {
     if(canSelectDancers && !isDraggingOnEmpty) {
       setSelectedIds((prev) => ({
-        props: isAdditive ? [...prev.props] : [],
+        props: isAdditive && canToggleSelection ? [...prev.props] : [],
         dancers: (canToggleSelection && isAdditive) ?
           (prev.dancers.includes(id) ?
             prev.dancers.filter((x) => x !== id) :
             [...prev.dancers, id]) :
           [id],
-        obstacles: isAdditive ? [...prev.obstacles] : [],
+        obstacles: isAdditive && canToggleSelection ? [...prev.obstacles] : [],
       }));
     }
   }
   const togglePropSelect = (id: string, isAdditive: boolean = true) => {
     if(canSelectProps && !isDraggingOnEmpty) {
       setSelectedIds((prev) => ({
-        dancers: isAdditive ? [...prev.dancers] : [],
+        dancers: isAdditive && canToggleSelection ? [...prev.dancers] : [],
         props: (canToggleSelection && isAdditive) ?
           (prev.props.includes(id) ?
             prev.props.filter((x) => x !== id) :
             [...prev.props, id]) :
           [id],
-        obstacles: isAdditive ? [...prev.obstacles] : [],
+        obstacles: isAdditive && canToggleSelection ? [...prev.obstacles] : [],
       }));
     }
   }
   const toggleObstacleSelect = (id: string, isAdditive: boolean = true) => {
     if(canSelectObstacles && !isDraggingOnEmpty) {
       setSelectedIds((prev) => ({
-        dancers: isAdditive ? [...prev.dancers] : [],
-        props: isAdditive ? [...prev.props] : [],
+        dancers: isAdditive && canToggleSelection ? [...prev.dancers] : [],
+        props: isAdditive && canToggleSelection ? [...prev.props] : [],
         obstacles: (canToggleSelection && isAdditive) ?
           (prev.obstacles.includes(id) ?
             prev.obstacles.filter((x) => x !== id) :
@@ -149,6 +156,9 @@ export default function FormationLayer({
     return (selectedIds.dancers.length + selectedIds.props.length + selectedIds.obstacles.length) > 1
   }, [selectedIds]);
 
+  const totalSelected = selectedIds.props.length + selectedIds.dancers.length;
+  const shouldApplyHalfOpacity = isEditingMovement && totalSelected > 0;
+
   return ( 
     <Layer>
       {obstacleList.map((obstacle) => {
@@ -165,12 +175,14 @@ export default function FormationLayer({
             canEdit={canEdit && canSelectObstacles}
             snapToGrid={snapToGrid}
             canSelect={canSelectObstacles}
-            animate
+            animate={false}
             isZooming={isZooming}
           />
         );
       })}
       {propPositions.map((propPosition) => {
+        const halfOpacity = shouldApplyHalfOpacity && selectedIds.props.length === 1 && !selectedIds.props.includes(propPosition.propId);
+  
         return (
           <PropGridObject
             key={propPosition.propId}
@@ -185,12 +197,16 @@ export default function FormationLayer({
             canEdit={canEdit && canSelectProps}
             snapToGrid={snapToGrid}
             canSelect={canSelectProps}
+            sectionId={sectionId}
             animate
+            animationCache={propAnimationCache[propPosition.propId]}
             isZooming={isZooming}
+			      halfOpacity={halfOpacity}
           />
         );
       })}
       {dancerPositions.map((dancerPosition) => {
+        const halfOpacity = shouldApplyHalfOpacity && selectedIds.dancers.length === 1 && !selectedIds.dancers.includes(dancerPosition.dancerId);
         return (
           <DancerGridObject
             key={dancerPosition.dancerId}
@@ -209,11 +225,14 @@ export default function FormationLayer({
             dancerDisplayType={dancerDisplayType}
             animate
             isZooming={isZooming}
+            sectionId={sectionId}
+            animationCache={dancerAnimationCache[dancerPosition.dancerId]}
+			      halfOpacity={halfOpacity}
           />
         );
       })}
       {
-        (selectedIds.dancers.length > 0 || selectedIds.props.length > 0 || selectedIds.obstacles.length > 0) && (
+        (selectedIds.dancers.length + selectedIds.props.length + selectedIds.obstacles.length) > 0 && (
         <Transformer
           draggable
           flipEnabled={false}
@@ -297,4 +316,6 @@ export default function FormationLayer({
       )}
     </Layer>
   );
-}
+});
+
+export default FormationLayer;

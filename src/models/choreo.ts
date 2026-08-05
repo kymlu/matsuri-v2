@@ -43,13 +43,13 @@ export const ChoreoSchema = BaseModelSchema.extend({
 });
 export type Choreo = z.infer<typeof ChoreoSchema>;
 
-export const ChoreoVersion = z.object({
+export const ChoreoVersionSchema = z.object({
   version: z.number(),
   uploadedAt: z.string(),
   uploadedByName: z.string().optional(),
 });
 
-export type ChoreoVersion = z.infer<typeof ChoreoVersion>;
+export type ChoreoVersion = z.infer<typeof ChoreoVersionSchema>;
 
 export const EventDetailsSchema = z.object({
   event: z.string().optional(),

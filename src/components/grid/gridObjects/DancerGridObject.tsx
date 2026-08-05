@@ -6,6 +6,8 @@ import Konva from "konva";
 import { colorPalette } from "../../../lib/consts/colors";
 import { DancerDisplayType } from "../../../models/appSettings";
 import { METER_PX } from "../../../lib/consts/consts";
+import { memo } from "react";
+import { PathSvgCacheBySectionId } from "../../../models/choreoSection";
 
 type DancerGridObjectProps = {
   dancer: Dancer;
@@ -21,9 +23,12 @@ type DancerGridObjectProps = {
   dancerDisplayType?: DancerDisplayType;
   animate: boolean;
   isZooming?: React.RefObject<boolean>;
+  sectionId?: string,
+  halfOpacity?: boolean,
+  animationCache?: PathSvgCacheBySectionId;
 };
 
-export default function DancerGridObject({
+const DancerGridObject = memo(function DancerGridObject({
   dancer,
   position,
   stageGeometry,
@@ -36,7 +41,10 @@ export default function DancerGridObject({
   snapToGrid,
   dancerDisplayType = "large",
   animate,
+  sectionId,
   isZooming,
+  halfOpacity,
+  animationCache,
 }: DancerGridObjectProps) {
   return <>
     {
@@ -54,19 +62,22 @@ export default function DancerGridObject({
         snapToGrid={snapToGrid}
         animate={animate}
         isZooming={isZooming}
+        animationCache={animationCache}
+        sectionId={sectionId}
+        halfOpacity={halfOpacity}
       >
         {
           isSelected && 
           <Circle
-            radius={METER_PX * (dancerDisplayType === "large" ?  0.45 : 0.25)}
+            radius={METER_PX * (dancerDisplayType === "large" ?  0.6 : 0.3)}
             fill={colorPalette.white}
             strokeEnabled
-            strokeWidth={2.5}
+            strokeWidth={3}
             stroke={colorPalette.primary}
           />
         }
         <Circle
-          radius={METER_PX * (dancerDisplayType === "large" ? (isSelected ? 0.35 : 0.45) : (isSelected ? 0.1 : 0.2))}
+          radius={METER_PX * (dancerDisplayType === "large" ? 0.45 : 0.2)}
           fill={position.color}
         />
 
@@ -100,4 +111,6 @@ export default function DancerGridObject({
       </BaseGridObject>
     }
   </>
-}
+});
+
+export default DancerGridObject;

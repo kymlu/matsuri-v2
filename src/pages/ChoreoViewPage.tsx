@@ -2,7 +2,7 @@ import Header from "../components/editor/Header"
 import FormationSelectionToolbar from "../components/editor/FormationSelectionToolbar";
 import { useEffect, useMemo, useState } from "react";
 import { Choreo } from "../models/choreo";
-import { ChoreoSection } from "../models/choreoSection";
+import { ChoreoSection, MovementCacheBySectionIdByObjectId, PathSvgCacheByObjectIdBySectionId } from "../models/choreoSection";
 import MainStage from "../components/grid/MainStage";
 import { AppSetting } from "../models/appSettings";
 import { isNullOrUndefinedOrBlank, strEquals } from "../lib/helpers/globalHelper";
@@ -17,6 +17,7 @@ import BaseErrorDialog from "../components/dialogs/BaseErrorDialog";
 import CustomSwitch from "../components/inputs/CustomSwitch";
 import { checkShowingViewPageInfoDialog, stopShowingViewPageInfoDialog } from "../lib/dataAccess/LocalStorageController";
 import Divider from "../components/basic/Divider";
+import { calculateMovementCache } from "../lib/helpers/editorCalculationHelper";
 
 export default function ChoreoViewPage(props: {
   goToHomePage: () => void
@@ -27,7 +28,6 @@ export default function ChoreoViewPage(props: {
   teamId?: string,
 }) {
   const [currentSection, setCurrentSection] = useState<ChoreoSection>(props.currentChoreo.sections[0]);
-  const [nextSection, setNextSection] = useState<ChoreoSection | undefined>();
   const [selectedIds, setSelectedIds] = useState<StageEntities<string[]>>({props: [], dancers: [], obstacles: []});
   const [selectedTimingId, setSelectedTimingId] = useState<string | undefined>();
   const [showPaths, setShowPaths] = useState<boolean>(true);
@@ -47,6 +47,9 @@ export default function ChoreoViewPage(props: {
     dancers: Object.keys(props.currentChoreo.dancers).length,
     obstacles: props.currentChoreo.obstacles ? Object.keys(props.currentChoreo.obstacles).length : 0,
   } as StageEntities<number>), [props.currentChoreo.dancers, props.currentChoreo.props, props.currentChoreo.obstacles]);
+  const [dancerMovementCache, setDancerMovementCache] = useState<MovementCacheBySectionIdByObjectId>({});
+  const [dancerAnimationCache, setDancerAnimationCache] = useState<PathSvgCacheByObjectIdBySectionId>({});
+  const [propAnimationCache, setPropAnimationCache] = useState<PathSvgCacheByObjectIdBySectionId>({});
 
   useEffect(() => {
     if (!isNullOrUndefinedOrBlank(props.savedDancerName)) {
@@ -61,6 +64,10 @@ export default function ChoreoViewPage(props: {
     } else {
       setShowHintDialog(!checkShowingViewPageInfoDialog());
     }
+    const res = calculateMovementCache(props.currentChoreo, false);
+    setDancerAnimationCache(res.newDancerAnimationCache);
+    setDancerMovementCache(res.newDancerMovementCache);
+    setPropAnimationCache(res.newPropAnimationCache);
   }, [props.currentChoreo]);
   
   const selectedObjects = useMemo(() => ({
@@ -69,10 +76,21 @@ export default function ChoreoViewPage(props: {
     obstacles: []
   } as StageEntities<PropPosition[], DancerPosition[], Obstacle[]>), [selectedIds, currentSection]);
 
-  useEffect(() => {
-    const currentSectionIndex = props.currentChoreo.sections.findIndex(x => strEquals(x.id, currentSection.id));
-    setNextSection(props.currentChoreo.sections[currentSectionIndex + 1]);
-  }, [currentSection]);
+  const nextSections = useMemo<Record<string, ChoreoSection>>(() => {
+    const result: Record<string, ChoreoSection> = {};
+    
+    props.currentChoreo.sections.forEach((section, index) => {
+      if (index < props.currentChoreo.sections.length - 1) {
+        result[section.id] = props.currentChoreo.sections[index + 1];
+      }
+    });
+    
+    return result;
+  }, [props.currentChoreo.sections]);
+
+  const nextSection = useMemo(() => {
+    return nextSections[currentSection.id];
+  }, [nextSections, currentSection.id]);
 
   const resetSelectedIds = () => setSelectedIds({props: [], dancers: [], obstacles: []});
 
@@ -172,6 +190,9 @@ export default function ChoreoViewPage(props: {
             undefined
           }
           bottomMarginPercent={sidebarHeight}
+          dancerMovementCache={dancerMovementCache}
+          dancerAnimationCache={dancerAnimationCache}
+          propAnimationCache={propAnimationCache}
         />
       </div>
 

@@ -2,12 +2,13 @@ import { Coordinates } from "@dnd-kit/utilities"
 import { colourMode } from "../../../components/dialogs/EditDancerColourDialog"
 import { HorizontalAlignment, VerticalAlignment, Distribution, Rearrangement } from "../../../models/alignment"
 import { Choreo } from "../../../models/choreo"
-import { Formation } from "../../../models/choreoSection"
+import { Formation, Movement } from "../../../models/choreoSection"
 import { Dancer, DancerPosition } from "../../../models/dancer"
 import { StageEntities } from "../../../models/history"
 import { Obstacle, Prop, PropPosition } from "../../../models/prop"
 import { colorPalette } from "../../consts/colors"
 import { strEquals, roundToTenth, indexByKey } from "../../helpers/globalHelper"
+import { centreToCorner, centreToCornerFromProp, cornerToCentreFromProp } from "../../helpers/editorCalculationHelper"
 
 export function addDancer(state: Choreo, dancer: Dancer, x: number, y: number, z: number): Choreo {
   const newDancers = { ...state.dancers, [dancer.id]: dancer }
@@ -65,12 +66,17 @@ export function renameAndDeleteDancers(state: Choreo, renamedDancers: Record<str
       })),
     }));
 
+    const newDancerMovements = section.formation.dancerMovements ? Object.fromEntries(
+      Object.entries(section.formation.dancerMovements).filter(([id]) => !deletedDancerIds.has(id))
+    ) : undefined;
+
     return {
       ...section,
       formation: {
         ...section.formation,
         dancerPositions: newDancerPositions,
         dancerActions: newDancerActions,
+        dancerMovements: newDancerMovements,
       }
     }
   });
@@ -430,6 +436,34 @@ export function changeObjectColours(
   }
 }
 
+export function changePropInUse(
+  state: Choreo,
+  sectionId: string,
+  ids: string[],
+  inUse: boolean,
+): Choreo {
+  const newSections = state.sections.map(section => {
+    if (!strEquals(section.id, sectionId)) return section;
+
+    return {
+      ...section,
+      formation: {
+        ...section.formation,
+        propPositions: updatePropPositions(
+          section.formation.propPositions,
+          ids,
+          dp => ({ ...dp, inUse: inUse })
+        )
+      }
+    }
+  });
+
+  return {
+    ...state,
+    sections: newSections
+  }
+}
+
 export function pastePositions(
   state: Choreo,
   sectionId: string,
@@ -690,7 +724,7 @@ export function distributePositions (
   return { ...state, obstacles: newObstacles, sections: newSections }
 }
 
-export function swapPositions(
+export function swapDancerPositions(
   state: Choreo,
   sectionId: string,
   dancerAId: string,
@@ -714,12 +748,41 @@ export function swapPositions(
   
   return { ...state, sections: newSections }
 }
-// KATIE TODO: fix issue with not being able to reordering when adding props (and maybe others)
+export function swapPropPositions(
+  state: Choreo,
+  sectionId: string,
+  propAId: string,
+  propBId: string
+): Choreo {
+  const newSections = state.sections.map(section => {
+    if (section.id !== sectionId) return section
+    const propPositions = {...section.formation.propPositions};
+    const propA = state.props[propAId];
+    const propB = state.props[propBId];
+    const originalA = (section.formation.propPositions[propAId]);
+    const originalB = section.formation.propPositions[propBId];
+    const originalACenter = cornerToCentreFromProp(section.formation.propPositions[propAId], state.props[propAId], state.stageGeometry.yAxis);
+    const originalBCenter = cornerToCentreFromProp(section.formation.propPositions[propBId], state.props[propBId], state.stageGeometry.yAxis);
+    const newAPosition = centreToCorner(originalBCenter.x, originalBCenter.y, originalA.rotation ?? 0, propA.width, propA.length, state.stageGeometry.yAxis);
+    const newBPosition = centreToCorner(originalACenter.x, originalACenter.y, originalB.rotation ?? 0, propB.width, propB.length, state.stageGeometry.yAxis);
+    propPositions[propAId] = { ...originalA, x: newAPosition.x, y: newAPosition.y };
+    propPositions[propBId] = { ...originalB, x: newBPosition.x, y: newBPosition.y };
+    return {
+      ...section,
+      formation: {
+        ...section.formation,
+        propPositions: propPositions
+      }
+    }
+  });
+  
+  return { ...state, sections: newSections }
+}
 export function setZOnAllPositions(
   state: Choreo
 ): Choreo {
   // if there are z indices, ignore
-  if (Object.values(state.sections[0].formation.dancerPositions)[0].z !== undefined) return state;
+  if (Object.values(state.sections[0].formation.dancerPositions)[0]?.z !== undefined) return state;
 
   const newObstacles = indexByKey(Object.values(state.obstacles ?? {}).map((o, i) => ({...o, z: i} as Obstacle)), "id");
   const newSections = state.sections.map(section => {
@@ -960,3 +1023,45 @@ const sendBackwardObstacles = (items: Obstacle[], ids: string[]): Obstacle[] => 
 
   return reordered.map((item, i) => ({ ...item, z: i }));
 };
+
+export function editDancerPath (state: Choreo, sectionId: string, dancerId: string, movement: Movement): Choreo {
+  const newSections = state.sections.map(section => {
+    if (!strEquals(section.id, sectionId)) return section;
+    const newMovement = {...section.formation.dancerMovements ?? {}};
+    newMovement[dancerId] = movement;
+
+    return {
+      ...section,
+      formation: {
+        ...section.formation,
+        dancerMovements: newMovement,
+      }
+    }
+  });
+
+  return {
+    ...state,
+    sections: newSections,
+  }
+}
+
+export function editPropPath (state: Choreo, sectionId: string, propId: string, movement: Movement): Choreo {
+  const newSections = state.sections.map(section => {
+    if (!strEquals(section.id, sectionId)) return section;
+    const newMovement = {...section.formation.propMovements ?? {}};
+    newMovement[propId] = movement;
+
+    return {
+      ...section,
+      formation: {
+        ...section.formation,
+        propMovements: newMovement,
+      }
+    }
+  });
+
+  return {
+    ...state,
+    sections: newSections,
+  }
+}

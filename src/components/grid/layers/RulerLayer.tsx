@@ -1,6 +1,6 @@
 import { StageGeometry } from "../../../models/choreo";
 import { METER_PX } from "../../../lib/consts/consts";
-import { ReactNode, useEffect, useMemo } from "react";
+import { memo, ReactNode, useEffect, useMemo } from "react";
 import { Coordinates } from "../../../models/base";
 
 interface RulerLayerProps {
@@ -14,7 +14,7 @@ interface RulerLayerProps {
   setIsShowingHorizontalRuler: (value: boolean) => void,
 }
 
-export default function RulerLayer({
+const RulerLayer = memo(function RulerLayer({
   stageGeometry,
   gridSize,
   position,
@@ -167,4 +167,6 @@ export default function RulerLayer({
       <div className="flex border-l border-b border-gray-200 justify-center items-center h-6 font-bold fixed text-sm text-center px-1 w-8 top-[88px] right-0 bg-gray-200"/>
     }
   </>
-}
+});
+
+export default RulerLayer;

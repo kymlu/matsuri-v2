@@ -1,18 +1,20 @@
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { memo, ReactNode, useEffect, useRef, useState } from "react";
 import { Group } from "react-konva";
 import Konva from "konva";
 import { Shape, ShapeConfig } from "konva/lib/Shape";
 import { Stage } from "konva/lib/Stage";
 import { METER_PX } from "../../../lib/consts/consts";
-import { pxToStageMeters, snapCoordsToGrid, stageMetersToPx } from "../../../lib/helpers/editorCalculationHelper";
+import { cornerToCentre, easeInOut, getAnimationKey, pxToStageMeters, snapCoordsToGrid, stageMetersToPx } from "../../../lib/helpers/editorCalculationHelper";
 import { StageGeometry } from "../../../models/choreo";
 import { Coordinates } from "../../../models/base";
+import { PathSvgCacheBySectionId } from "../../../models/choreoSection";
 
 export interface BaseGridObjectProps {
   id: string,
   children: ReactNode
   rotation?: number,
   position: Coordinates,
+  width?: number,
   height?: number,
   updatePosition?: (x: number, y: number) => void,
   onClick?: (isAdditive?: boolean) => void,
@@ -26,14 +28,17 @@ export interface BaseGridObjectProps {
   snapToGrid?: boolean,
   animate: boolean,
   isZooming?: React.RefObject<boolean>;
+  sectionId?: string,
+  halfOpacity?: boolean,
+  animationCache?: PathSvgCacheBySectionId;
 }
 
-export default function BaseGridObject({
+const BaseGridObject = memo(function BaseGridObject({
   id,
   children,
   rotation,
   position,
-  height,
+  width, height,
   updatePosition,
   onClick,
   draggable,
@@ -46,29 +51,98 @@ export default function BaseGridObject({
   snapToGrid,
   animate,
   isZooming,
+  halfOpacity,
+  animationCache,
+  sectionId,
 }: BaseGridObjectProps) {
   const ref = useRef<Konva.Group>(null);
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
-
+  const prevSectionId = useRef<string>("");
+  const animation = useRef<Konva.Animation | undefined>(undefined);
+  const prevRotation = useRef<number | undefined>(undefined);
+  
   useEffect(() => {
     registerNode?.(id, ref.current);
     return () => registerNode?.(id, null);
   }, [id, registerNode]);
 
   useEffect(() => {
+    animation.current?.stop();
     const newPosition = stageMetersToPx({x: position.x, y: position.y}, stageGeometry, METER_PX, height);
     if (newPosition.x === ref.current?.x() && newPosition.y === ref.current?.y()) return;
-
-    setIsAnimating(true);
+    if (animate) setIsAnimating(true);
     if (ref.current) {
-      ref.current.to({
-        x: newPosition.x,
-        y: newPosition.y,
-        rotation: rotation ?? 0,
-        duration: animate ? 1 : 0,
-        easing: Konva.Easings.EaseInOut,
-        onFinish: () => {setIsAnimating(false)}
-      });
+      const key = sectionId ? getAnimationKey(prevSectionId.current, sectionId) : undefined;
+      const cachedPath = key ? animationCache?.[key]?.path : undefined;
+
+      if (cachedPath && animate) {
+        let path: Konva.Path = new Konva.Path({x: 0, y: 0, data: cachedPath});
+        const pathLen = path.getLength();
+        const duration = 1200;
+        const prevRot = prevRotation.current ?? 0;
+        const targetRot = rotation ?? 0;
+        let offsetX = 0;
+        let offsetY = 0;
+        if (height && height > 0 && width && width > 0) {
+          const centre = cornerToCentre(ref.current.x(), ref.current.y(), ref.current.rotation(), width * METER_PX, height * METER_PX, stageGeometry.yAxis);
+          offsetX = width * METER_PX / 2;
+          offsetY = height * METER_PX / 2;
+          ref.current.setAttrs({
+            offsetX,
+            offsetY,
+            x: centre.x,
+            y: centre.y,
+          });
+        }
+
+        animation.current = new Konva.Animation(function(frame) {
+          if (!frame) return;
+
+          const elapsed = frame.time; // ms since animation start
+          const t = Math.min(elapsed / duration, 1); // 0 to 1
+
+          if (t >= 1) {
+            animation.current?.stop();
+            ref?.current?.setAttrs({
+              rotation: rotation,
+              x: newPosition.x,
+              y: newPosition.y,
+              offsetX: 0,
+              offsetY: 0,
+            });
+            setIsAnimating(false);
+          } else {
+            const easedT = easeInOut(t);
+            const pt = path.getPointAtLength(easedT * pathLen);
+            const rot = prevRot + (targetRot - prevRot) * t;
+            if (ref.current && pt) {
+              ref.current.setAttrs({
+                rotation: rot,
+                x: pt.x,
+                y: pt.y,
+              });
+            }
+          }
+        }, ref.current.getLayer());
+        animation.current?.start();
+
+      } else {
+        animation?.current?.stop();
+        ref.current.to({
+          x: newPosition.x,
+          y: newPosition.y,
+          rotation: rotation ?? 0,
+          duration: animate ? 1.2 : 0,
+          easing: Konva.Easings.EaseInOut,
+          offsetX: 0,
+          offsetY: 0,
+          onFinish: () => {setIsAnimating(false)}
+        });
+      }
+      if (sectionId) {
+        prevSectionId.current = sectionId;
+      }
+      prevRotation.current = rotation ?? 0;
     }
   }, [position, stageGeometry, rotation]);
 
@@ -81,6 +155,8 @@ export default function BaseGridObject({
     <Group
       id={id} 
       ref={ref}
+      opacity={halfOpacity ? 0.8 : 1}
+      perfectDrawEnabled={false}
       draggable={draggable && !isAnimating}
       listening={listening}
       rotation={0}
@@ -145,6 +221,8 @@ export default function BaseGridObject({
       }}
       >
       {children}
-    </Group>
+      </Group>
   )
-}
+});
+
+export default BaseGridObject;

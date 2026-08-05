@@ -1,20 +1,22 @@
 import { Arrow, Layer } from "react-konva";
 import { DancerPosition } from "../../../models/dancer";
 import { colorPalette } from "../../../lib/consts/colors";
-import { useMemo } from "react";
+import { memo, useMemo } from "react";
 import { stageMetersToPx } from "../../../lib/helpers/editorCalculationHelper";
 import { StageGeometry } from "../../../models/choreo";
-import { METER_PX } from "../../../lib/consts/consts";
+import { METER_PX, PATH_DASH } from "../../../lib/consts/consts";
 import DancerGridObject from "../gridObjects/DancerGridObject";
+import { MovementCacheByObjectId } from "../../../models/choreoSection";
 
 type NextDirectionLayerProps = {
   geometry: StageGeometry
   currentPosition?: DancerPosition,
   nextPosition?: DancerPosition,
+  dancerMovementCache?: MovementCacheByObjectId,
 }
 
-export default function NextDirectionLayer({
-  geometry, currentPosition, nextPosition,
+const NextDirectionLayer = memo(function NextDirectionLayer({
+  geometry, currentPosition, nextPosition, dancerMovementCache
 }: NextDirectionLayerProps) {
   const hideLayer = useMemo(() => {
     return (!currentPosition ||
@@ -22,19 +24,42 @@ export default function NextDirectionLayer({
       (currentPosition.x === nextPosition.x && currentPosition.y === nextPosition.y))
   }, [currentPosition, nextPosition]);
 
+  const currentMovement =  useMemo(() => {
+    return dancerMovementCache?.[currentPosition!!.dancerId];
+  }, [dancerMovementCache, currentPosition]);
+
   const points = useMemo(() => {
     if (hideLayer) return [];
-
-    const currentPoints = stageMetersToPx(currentPosition!!, geometry, METER_PX);
-    const nextPoints = stageMetersToPx(nextPosition!!, geometry, METER_PX);
-    return [currentPoints.x, currentPoints.y, nextPoints.x, nextPoints.y]
-  }, [currentPosition, nextPosition]);
+    if (currentMovement) {
+      return currentMovement.points;
+    } else {
+      const currentPoints = stageMetersToPx(currentPosition!!, geometry, METER_PX);
+      const nextPoints = stageMetersToPx(nextPosition!!, geometry, METER_PX);
+      return [currentPoints.x, currentPoints.y, nextPoints.x, nextPoints.y]
+    }
+  }, [currentPosition, nextPosition, currentMovement]);
 
   return <>
     {
       !hideLayer &&
-      <Layer opacity={0.5} listening={false}>
+      <Layer listening={false}>
+        <Arrow
+          opacity={0.7} 
+          perfectDrawEnabled={false}
+          points={points}
+          strokeEnabled
+          stroke={colorPalette.white}
+          strokeWidth={4}
+          fill={colorPalette.white}
+          fillEnabled
+          dashEnabled
+          pointerWidth={5}
+          pointerLength={5}
+          lineJoin="round"
+          tension={currentMovement?.tension === "straight" ? 0 : 0.5}
+        />
         <DancerGridObject
+          halfOpacity={true} 
           dancer={{"id": "", "name": ""}}
           stageGeometry={geometry}
           position={nextPosition!!}
@@ -43,6 +68,7 @@ export default function NextDirectionLayer({
           animate={false}
         />
         <Arrow
+          perfectDrawEnabled={false}
           points={points}
           strokeEnabled
           stroke={colorPalette.primary}
@@ -50,9 +76,15 @@ export default function NextDirectionLayer({
           fill={colorPalette.primary}
           fillEnabled
           dashEnabled
-          dash={[2, 2]}
+          pointerWidth={5}
+          pointerLength={5}
+          lineJoin="round"
+          dash={PATH_DASH}
+          tension={currentMovement?.tension === "straight" ? 0 : 0.5}
         />
       </Layer>
     }
   </>
-}
+});
+
+export default NextDirectionLayer;

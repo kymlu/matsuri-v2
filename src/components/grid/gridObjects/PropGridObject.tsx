@@ -3,8 +3,10 @@ import { StageGeometry } from "../../../models/choreo";
 import BaseGridObject from "./BaseGridObject";
 import Konva from "konva";
 import { colorPalette } from "../../../lib/consts/colors";
-import { METER_PX } from "../../../lib/consts/consts";
+import { METER_PX, PATH_DASH } from "../../../lib/consts/consts";
 import { Prop, PropPosition } from "../../../models/prop";
+import { memo, useEffect, useRef } from "react";
+import { PathSvgCacheBySectionId } from "../../../models/choreoSection";
 
 type PropGridObjectProps = {
   prop: Prop;
@@ -18,11 +20,14 @@ type PropGridObjectProps = {
   canEdit: boolean;
   snapToGrid?: boolean;
   canSelect: boolean;
+  sectionId?: string,
   animate: boolean,
+  animationCache?: PathSvgCacheBySectionId;
+  halfOpacity?: boolean,
   isZooming?: React.RefObject<boolean>;
 };
 
-export default function PropGridObject({
+const PropGridObject = memo(function PropGridObject({
   prop,
   position,
   stageGeometry,
@@ -34,9 +39,30 @@ export default function PropGridObject({
   canEdit,
   snapToGrid,
   canSelect,
+  sectionId,
   animate,
+  animationCache,
+  halfOpacity,
   isZooming,
 }: PropGridObjectProps) {
+  const inUseOutline = useRef<Konva.Rect>(null);
+  const inUseOutlineAnimation = useRef<Konva.Animation>(null);
+
+  useEffect(() => {
+    inUseOutlineAnimation.current?.stop();
+    if (!inUseOutline.current) return;
+    if (!animate || canEdit) return;
+
+    inUseOutlineAnimation.current = new Konva.Animation((frame) => {
+      if (!frame) return;
+      const speed = 15;
+      const offset = (frame.time / 1000) * speed;
+      inUseOutline.current?.dashOffset(-offset);
+    }, inUseOutline.current.getLayer());
+
+    inUseOutlineAnimation.current.start();
+  }, [position.inUse, animate]);
+  
   return <>
     {
       prop &&
@@ -44,6 +70,7 @@ export default function PropGridObject({
         id={prop.id}
         draggable={canEdit}
         position={position}
+        width={prop.width}
         height={prop.length}
         onClick={(isAdditive) => {if (canSelect) onClick?.(isAdditive)}}
         updatePosition={(x, y) => {updatePosition?.(x, y);}}
@@ -55,21 +82,51 @@ export default function PropGridObject({
         rotation={position.rotation}
         animate={animate}
         isZooming={isZooming}
+        sectionId={sectionId}
+        halfOpacity={halfOpacity}
+        animationCache={animationCache}
       >
         <Rect
-          width={prop.width * METER_PX}
-          height={prop.length * METER_PX}
-          strokeEnabled={isSelected}
-          strokeWidth={2.5}
+          x={METER_PX*-0.15}
+          y={METER_PX*-0.15}
+          width={(prop.width + 0.3) * METER_PX}
+          height={(prop.length + 0.3) * METER_PX}
+          visible={isSelected}
+          strokeWidth={3}
           stroke={colorPalette.primary}
+          fill={colorPalette.white}
         />
         
         <Rect
-          x={isSelected ? METER_PX * 0.1 : 0}
-          y={isSelected ? METER_PX * 0.1 : 0}
-          width={(prop.width * METER_PX) - (isSelected ? METER_PX * 0.2 : 0)}
-          height={(prop.length * METER_PX) - (isSelected ? METER_PX * 0.2 : 0)}
-          fill={prop.color}/>
+          width={(prop.width * METER_PX)}
+          height={(prop.length * METER_PX)}
+          fill={prop.color}
+          stroke={prop.color}
+          strokeWidth={1}
+          />
+
+        {
+          position.inUse &&
+          <>
+            <Rect
+              width={(prop.width * METER_PX)}
+              height={(prop.length * METER_PX)}
+              stroke={colorPalette.white}
+              opacity={0.7}
+              strokeWidth={6}
+              lineJoin="round"
+              />
+            <Rect
+              ref={inUseOutline}
+              width={(prop.width * METER_PX)}
+              height={(prop.length * METER_PX)}
+              stroke={colorPalette.primary}
+              strokeWidth={4}
+              lineJoin="round"
+              dash={PATH_DASH}
+              />
+          </>
+        }
 
         <Text
           y={(prop.length / 2) * METER_PX}
@@ -84,4 +141,6 @@ export default function PropGridObject({
       </BaseGridObject>
     }
   </>
-}
+});
+
+export default PropGridObject;
