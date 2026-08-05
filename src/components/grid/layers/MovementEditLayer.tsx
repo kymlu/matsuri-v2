@@ -6,6 +6,7 @@ import { Movement } from "../../../models/choreoSection";
 import { BasePosition, Coordinates } from "../../../models/base";
 import { cornerToCentreFromProp, pxToStageMeters, stageMetersToPx } from "../../../lib/helpers/editorCalculationHelper";
 import { METER_PX, PATH_DASH } from "../../../lib/consts/consts";
+import { KonvaEventObject } from 'konva/lib/Node';
 import { Prop } from "../../../models/prop";
 
 type MovementEditLayerProps = {
