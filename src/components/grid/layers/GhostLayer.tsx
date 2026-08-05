@@ -67,37 +67,39 @@ const GhostLayer = React.memo(function GhostLayer({
     [propSvgCache]
   );
 
-  const allPaths = useMemo(() => {
+  const sectionPaths = useMemo(() => {
     const key = getAnimationKey(prevSectionId ?? "", sectionId ?? "");
-    const paths: string[] = [];
+    const entries: { objId: string; path: string }[] = [];
 
     const dancerPaths = sectionDancerPathMap[key];
     if (dancerPaths) {
-      for (const objId in dancerPaths) {
-        if (isEditingPaths && objId === selectedId) continue;
-        const item = dancerPaths[objId];
-        if (item?.path) paths.push(item.path);
+      for (const objId of Object.keys(dancerPaths)) {
+        const path = dancerPaths[objId]?.path;
+        if (path) entries.push({ objId, path });
       }
     }
 
     const propPaths = sectionPropPathMap[key];
     if (propPaths) {
-      for (const objId in propPaths) {
-        if (isEditingPaths && objId === selectedId) continue;
-        const item = propPaths[objId];
-        if (item?.path) paths.push(item.path);
+      for (const objId of Object.keys(propPaths)) {
+      const path = propPaths[objId]?.path;
+        if (path) entries.push({ objId, path });
       }
     }
 
-    return paths;
-  }, [
-    sectionDancerPathMap,
-    sectionPropPathMap,
-    prevSectionId,
-    sectionId,
-    selectedId,
-    isEditingPaths,
-  ]);
+    return entries;
+  }, [sectionDancerPathMap, sectionPropPathMap, prevSectionId, sectionId]);
+
+  const allPaths = useMemo(() => {
+    if (!isEditingPaths || !selectedId) {
+      return sectionPaths.map(e => e.path);
+    }
+    const filtered: string[] = [];
+    for (const entry of sectionPaths) {
+      if (entry.objId !== selectedId) filtered.push(entry.path);
+    }
+    return filtered;
+  }, [sectionPaths, isEditingPaths, selectedId]);
 
   const ghostData = useMemo(
     () => ({
