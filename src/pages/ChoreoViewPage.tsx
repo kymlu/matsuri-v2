@@ -28,7 +28,6 @@ export default function ChoreoViewPage(props: {
   teamId?: string,
 }) {
   const [currentSection, setCurrentSection] = useState<ChoreoSection>(props.currentChoreo.sections[0]);
-  const [nextSection, setNextSection] = useState<ChoreoSection | undefined>();
   const [selectedIds, setSelectedIds] = useState<StageEntities<string[]>>({props: [], dancers: [], obstacles: []});
   const [selectedTimingId, setSelectedTimingId] = useState<string | undefined>();
   const [showPaths, setShowPaths] = useState<boolean>(true);
@@ -77,10 +76,21 @@ export default function ChoreoViewPage(props: {
     obstacles: []
   } as StageEntities<PropPosition[], DancerPosition[], Obstacle[]>), [selectedIds, currentSection]);
 
-  useEffect(() => {
-    const currentSectionIndex = props.currentChoreo.sections.findIndex(x => strEquals(x.id, currentSection.id));
-    setNextSection(props.currentChoreo.sections[currentSectionIndex + 1]);
-  }, [currentSection]);
+  const nextSections = useMemo<Record<string, ChoreoSection>>(() => {
+    const result: Record<string, ChoreoSection> = {};
+    
+    props.currentChoreo.sections.forEach((section, index) => {
+      if (index < props.currentChoreo.sections.length - 1) {
+        result[section.id] = props.currentChoreo.sections[index + 1];
+      }
+    });
+    
+    return result;
+  }, [props.currentChoreo.sections]);
+
+  const nextSection = useMemo(() => {
+    return nextSections[currentSection.id];
+  }, [nextSections, currentSection.id]);
 
   const resetSelectedIds = () => setSelectedIds({props: [], dancers: [], obstacles: []});
 

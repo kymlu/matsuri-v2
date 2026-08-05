@@ -175,18 +175,21 @@ export default function ChoreoEditPage(props: {
     history.presentState.state.lastUpdated,
     history.presentState.state.stageGeometry]);
 
-  const [prevSection, setPrevSection] = useState<ChoreoSection | undefined>();
-  useEffect(() => {
-    const currentSectionIndex = history.presentState.state.sections.findIndex(x => strEquals(x.id, currentSection.id));
-    setPrevSection(history.presentState.state.sections[currentSectionIndex - 1]);
-  }, [
-    history.presentState.state.dancers,
-    history.presentState.state.props,
-    history.presentState.state.obstacles,
-    history.presentState.state.sections,
-    currentSection,
-    appSettings
-  ]);
+  const prevSections = useMemo<Record<string, ChoreoSection>>(() => {
+    const result: Record<string, ChoreoSection> = {};
+    
+    history.presentState.state.sections.forEach((section, index) => {
+      if (index > 0) {
+        result[section.id] = history.presentState.state.sections[index - 1];
+      }
+    });
+    
+    return result;
+  }, [history.presentState.state.sections]);
+
+  const prevSection = useMemo(() => {
+    return prevSections[currentSection.id];
+  }, [prevSections, currentSection.id]);
 
   const resetSelectedIds = () => setSelectedIds({props: [], dancers: [], obstacles: []});
 
