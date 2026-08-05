@@ -632,7 +632,7 @@ export default function MainStage({
           />
         }
         {
-          isEditingMovement &&
+          false &&
           <MovementEditLayer
             prevPosition={
               selectedIds.dancers[0] ?
