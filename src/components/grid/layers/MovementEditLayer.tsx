@@ -122,7 +122,7 @@ const MovementEditLayer = memo(function MovementEditLayer({
       {
         midPoints?.map((point, i) => {
           return <Circle
-            key={point.id ?? i}
+            key={i}
             draggable
             onDragMove={(evt) => handleDragMove(i, evt)}
             onDragEnd={handleDragEnd}
