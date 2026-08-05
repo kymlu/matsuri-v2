@@ -580,8 +580,6 @@ export default function MainStage({
           <GhostLayer
             dancerIds={allDancerIds}
             prevDancerPositions={previousSection?.formation.dancerPositions}
-            dancerMovementCache={dancerMovementCache[currentSection.id]}
-            propMovementCache={propMovementCache[currentSection.id]}
             dancerSvgCache={dancerAnimationCache}
             propSvgCache={propAnimationCache}
             props={currentChoreo.props}

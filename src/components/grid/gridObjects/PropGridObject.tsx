@@ -3,7 +3,7 @@ import { StageGeometry } from "../../../models/choreo";
 import BaseGridObject from "./BaseGridObject";
 import Konva from "konva";
 import { colorPalette } from "../../../lib/consts/colors";
-import { METER_PX } from "../../../lib/consts/consts";
+import { METER_PX, PATH_DASH } from "../../../lib/consts/consts";
 import { Prop, PropPosition } from "../../../models/prop";
 import { memo, useEffect, useRef } from "react";
 import { PathSvgCacheBySectionId } from "../../../models/choreoSection";
@@ -123,7 +123,7 @@ const PropGridObject = memo(function PropGridObject({
               stroke={colorPalette.primary}
               strokeWidth={4}
               lineJoin="round"
-              dash={[2, 2]}
+              dash={PATH_DASH}
               />
           </>
         }

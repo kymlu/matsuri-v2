@@ -5,7 +5,7 @@ import { memo, useEffect, useMemo, useState } from "react";
 import { Movement } from "../../../models/choreoSection";
 import { BasePosition, Coordinates } from "../../../models/base";
 import { cornerToCentreFromProp, pxToStageMeters, stageMetersToPx } from "../../../lib/helpers/editorCalculationHelper";
-import { METER_PX } from "../../../lib/consts/consts";
+import { METER_PX, PATH_DASH } from "../../../lib/consts/consts";
 import { Prop } from "../../../models/prop";
 
 type GhostLayerProps = {
@@ -70,6 +70,7 @@ const MovementEditLayer = memo(function MovementEditLayer({
       {
         points.length > 0 && <>
           <Line
+            listening={false}
             points={points}
             opacity={0.7}
             strokeEnabled
@@ -81,6 +82,7 @@ const MovementEditLayer = memo(function MovementEditLayer({
             tension={movement?.tension === "straight" ? 0 : 0.5}
           />
           <Line
+            listening={false}
             points={points}
             strokeEnabled
             stroke={colorPalette.primary}
@@ -91,7 +93,7 @@ const MovementEditLayer = memo(function MovementEditLayer({
             lineJoin="round"
             pointerWidth={5}
             pointerLength={5}
-            dash={[2, 2]}
+            dash={PATH_DASH}
             tension={movement?.tension === "straight" ? 0 : 0.5}
           />
         </>

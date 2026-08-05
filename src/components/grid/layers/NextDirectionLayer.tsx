@@ -4,7 +4,7 @@ import { colorPalette } from "../../../lib/consts/colors";
 import { memo, useMemo } from "react";
 import { stageMetersToPx } from "../../../lib/helpers/editorCalculationHelper";
 import { StageGeometry } from "../../../models/choreo";
-import { METER_PX } from "../../../lib/consts/consts";
+import { METER_PX, PATH_DASH } from "../../../lib/consts/consts";
 import DancerGridObject from "../gridObjects/DancerGridObject";
 import { MovementCacheByObjectId } from "../../../models/choreoSection";
 
@@ -79,7 +79,7 @@ const NextDirectionLayer = memo(function NextDirectionLayer({
           pointerWidth={5}
           pointerLength={5}
           lineJoin="round"
-          dash={[2, 2]}
+          dash={PATH_DASH}
           tension={currentMovement?.tension === "straight" ? 0 : 0.5}
         />
       </Layer>

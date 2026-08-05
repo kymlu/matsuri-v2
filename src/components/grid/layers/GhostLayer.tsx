@@ -5,18 +5,17 @@ import DancerGridObject from "../gridObjects/DancerGridObject";
 import { Prop, PropPosition } from "../../../models/prop";
 import { colorPalette } from "../../../lib/consts/colors";
 import React, { useDeferredValue, useMemo } from "react";
-import { MovementCacheByObjectId, PathSvgCacheByObjectIdBySectionId } from "../../../models/choreoSection";
+import { PathSvgCacheByObjectIdBySectionId } from "../../../models/choreoSection";
 import PropGridObject from "../gridObjects/PropGridObject";
 import { getAnimationKey } from "../../../lib/helpers/editorCalculationHelper";
+import { PATH_DASH } from "../../../lib/consts/consts";
 
 type GhostLayerProps = {
   dancerIds: string[],
   prevDancerPositions?: Record<string, DancerPosition>,
-  dancerMovementCache: MovementCacheByObjectId,
   dancerSvgCache: PathSvgCacheByObjectIdBySectionId,
   props: Record<string, Prop>,
   prevPropPositions?: Record<string, PropPosition>,
-  propMovementCache: MovementCacheByObjectId,
   propSvgCache: PathSvgCacheByObjectIdBySectionId,
   geometry: StageGeometry,
   selectedId?: string,
@@ -48,11 +47,9 @@ function invertPathMap(dancerPathMap: PathSvgCacheByObjectIdBySectionId): PathSv
 const GhostLayer = React.memo(function GhostLayer({
   dancerIds,
   prevDancerPositions,
-  dancerMovementCache,
   dancerSvgCache,
   props,
   prevPropPositions,
-  propMovementCache,
   propSvgCache,
   geometry,
   selectedId,
@@ -158,7 +155,6 @@ type DancerMovementProps = {
   geometry: StageGeometry,
 }
 const PREV_DANCER_BASE = { name: "", id: "" };
-const PATH_DASH = [2, 2];
 
 const DancerMovement = React.memo(function DancerMovement ({
   prev, geometry

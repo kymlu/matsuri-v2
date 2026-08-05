@@ -31,6 +31,8 @@ export const MIN_PASSWORD_LENGTH = 8;
 export const PASSWORD_ENTRY_LENGTH = 150;
 export const VERIFICATION_CODE_LENGTH = 8;
 
+export const PATH_DASH = [2, 2];
+
 export const SAMPLE_STAGE_ID = "0a002caf-611a-40aa-9989-a690e6791e0a";
 export const SAMPLE_PARADE_ID = "41221ff9-2647-4255-8189-fa4008bef93a";
 
