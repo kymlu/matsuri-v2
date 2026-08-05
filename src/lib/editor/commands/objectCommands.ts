@@ -778,7 +778,6 @@ export function swapPropPositions(
   
   return { ...state, sections: newSections }
 }
-// KATIE TODO: fix issue with not being able to reordering when adding props (and maybe others)
 export function setZOnAllPositions(
   state: Choreo
 ): Choreo {

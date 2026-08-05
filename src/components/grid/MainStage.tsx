@@ -367,14 +367,8 @@ export default function MainStage({
     e.evt.preventDefault();
 
     const oldScale = stageScale.x;
-    // const pointer = stage.getPointerPosition();
 
-    // const mousePointTo = {
-    //   x: (pointer.x - stage.x()) / oldScale,
-    //   y: (pointer.y - stage.y()) / oldScale,
-    // };
-
-    // how to scale? Zoom in? Or zoom out?
+    // zoom in on up and out on down
     let direction = e.evt.deltaY > 0 ? 1 : -1;
 
     // when we zoom on trackpad, e.evt.ctrlKey is true
@@ -390,12 +384,6 @@ export default function MainStage({
       setIsManualMovement(true);
     }
     setStageScale({ x: newScale, y: newScale });
-
-    // const newPos = {
-    //   x: pointer.x - mousePointTo.x * newScale,
-    //   y: pointer.y - mousePointTo.y * newScale,
-    // };
-    // stage.position(newPos);
   };
   
   const [lastCenter, setLastCenter] = useState<any>(null);

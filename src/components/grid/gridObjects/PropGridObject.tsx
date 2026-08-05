@@ -55,7 +55,7 @@ const PropGridObject = memo(function PropGridObject({
 
     inUseOutlineAnimation.current = new Konva.Animation((frame) => {
       if (!frame) return;
-      const speed = 15; // speed of movement
+      const speed = 15;
       const offset = (frame.time / 1000) * speed;
       inUseOutline.current?.dashOffset(-offset);
     }, inUseOutline.current.getLayer());
