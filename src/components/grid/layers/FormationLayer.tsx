@@ -181,7 +181,7 @@ const FormationLayer = memo(function FormationLayer({
         );
       })}
       {propPositions.map((propPosition) => {
-        const halfOpacity = shouldApplyHalfOpacity && !selectedIds.props.includes(propPosition.propId);
+        const halfOpacity = shouldApplyHalfOpacity && selectedIds.props.length === 1 && !selectedIds.props.includes(propPosition.propId);
   
         return (
           <PropGridObject
@@ -206,7 +206,7 @@ const FormationLayer = memo(function FormationLayer({
         );
       })}
       {dancerPositions.map((dancerPosition) => {
-        const halfOpacity = shouldApplyHalfOpacity && !selectedIds.dancers.includes(dancerPosition.dancerId);
+        const halfOpacity = shouldApplyHalfOpacity && selectedIds.dancers.length === 1 && !selectedIds.dancers.includes(dancerPosition.dancerId);
         return (
           <DancerGridObject
             key={dancerPosition.dancerId}
