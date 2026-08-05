@@ -118,9 +118,7 @@ const GhostLayer = React.memo(function GhostLayer({
       listening={false}
       opacity={0.5}
       >
-      {
-        // <BatchedPath2D allPaths={allPaths}/>
-      }
+      <BatchedPath2D allPaths={allPaths}/>
       {
         propKeys.map(([id]) => {
           const prev = syncPrevProps?.[id];
