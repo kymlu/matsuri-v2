@@ -7,7 +7,10 @@ import { BasePosition, Coordinates } from "../../../models/base";
 import { cornerToCentreFromProp, pxToStageMeters, stageMetersToPx } from "../../../lib/helpers/editorCalculationHelper";
 import { METER_PX, PATH_DASH } from "../../../lib/consts/consts";
 import { KonvaEventObject } from 'konva/lib/Node';
-import { Prop } from "../../../models/prop";
+import { Prop, PropPosition } from "../../../models/prop";
+import DancerGridObject from "../gridObjects/DancerGridObject";
+import { DancerPosition } from "../../../models/dancer";
+import PropGridObject from "../gridObjects/PropGridObject";
 
 type MovementEditLayerProps = {
   geometry: StageGeometry
@@ -91,9 +94,45 @@ const MovementEditLayer = memo(function MovementEditLayer({
       tension: movement?.tension ?? "curved",
     });
   }, [geometry, movement?.tension, onMidpointEdit]);
+  
+  const PREV_DANCER_BASE = { name: "", id: "" };
 
+  const prevPropObj = useMemo(
+    () => {
+      if (prop) {
+        return {...prop, name: "" } as Prop;
+      }
+    },
+    [prop]
+  );
   return (
     <Layer>
+      {
+        prevPosition && prevPosition.type === "dancer" && <>
+          <DancerGridObject
+            dancer={PREV_DANCER_BASE}
+            position={prevPosition as DancerPosition}
+            stageGeometry={geometry}
+            isSelected={false}
+            canEdit={false}
+            dancerDisplayType={"small"}
+            animate={false}
+          />
+        </>
+      }
+      {
+        prevPropObj && prevPosition && prevPosition.type === "prop" && <>
+          <PropGridObject
+            prop={prevPropObj}
+            position={prevPosition as PropPosition}
+            stageGeometry={geometry}
+            isSelected={false}
+            canEdit={false}
+            animate={false}
+            canSelect={false}
+          />
+        </>
+      }
       {
         points.length > 0 && <>
           <Line

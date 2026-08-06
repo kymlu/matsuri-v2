@@ -122,7 +122,7 @@ const GhostLayer = React.memo(function GhostLayer({
       >
       <BatchedPath2D allPaths={allPaths}/>
       {
-        propKeys.map(([id]) => {
+        propKeys.map((id) => {
           const prev = syncPrevProps?.[id];
           if (!prev) return null;
           return (
@@ -188,8 +188,8 @@ const PropMovement = React.memo(function PropMovement ({
   prop, prev, geometry
 }: PropMovementProps) {
   const prevPropObj = useMemo<Prop>(
-    () => ({ color: prop.color, name: "", width: prop.width, length: prop.length, id: prop.id }),
-    [prop.id, prop.color, prop.width, prop.length]
+    () => ({...prop, name: ""}),
+    [prop]
   );
   return <>
     {
