@@ -156,9 +156,6 @@ const FormationLayer = memo(function FormationLayer({
     return (selectedIds.dancers.length + selectedIds.props.length + selectedIds.obstacles.length) > 1
   }, [selectedIds]);
 
-  const totalSelected = selectedIds.props.length + selectedIds.dancers.length;
-  const shouldApplyHalfOpacity = isEditingMovement && totalSelected > 0;
-
   return ( 
     <Layer>
       {obstacleList.map((obstacle) => {
@@ -181,8 +178,6 @@ const FormationLayer = memo(function FormationLayer({
         );
       })}
       {propPositions.map((propPosition) => {
-        const halfOpacity = shouldApplyHalfOpacity && selectedIds.props.length === 1 && !selectedIds.props.includes(propPosition.propId);
-  
         return (
           <PropGridObject
             key={propPosition.propId}
@@ -201,12 +196,10 @@ const FormationLayer = memo(function FormationLayer({
             animate
             animationCache={propAnimationCache[propPosition.propId]}
             isZooming={isZooming}
-			      halfOpacity={halfOpacity}
           />
         );
       })}
       {dancerPositions.map((dancerPosition) => {
-        const halfOpacity = shouldApplyHalfOpacity && selectedIds.dancers.length === 1 && !selectedIds.dancers.includes(dancerPosition.dancerId);
         return (
           <DancerGridObject
             key={dancerPosition.dancerId}
@@ -227,7 +220,6 @@ const FormationLayer = memo(function FormationLayer({
             isZooming={isZooming}
             sectionId={sectionId}
             animationCache={dancerAnimationCache[dancerPosition.dancerId]}
-			      halfOpacity={halfOpacity}
           />
         );
       })}
