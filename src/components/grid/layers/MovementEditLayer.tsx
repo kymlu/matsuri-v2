@@ -95,8 +95,6 @@ const MovementEditLayer = memo(function MovementEditLayer({
     });
   }, [geometry, movement?.tension, onMidpointEdit]);
   
-  const PREV_DANCER_BASE = { name: "", id: "" };
-
   const prevPropObj = useMemo(
     () => {
       if (prop) {

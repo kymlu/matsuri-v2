@@ -26,6 +26,8 @@ const BasicPropGridObject = React.memo(function BasicPropGridObject ({
     {
       prev && coords && <>
         <Rect
+          listening={false}
+          perfectDrawEnabled={false}
           x={coords.x}
           y={coords.y}
           offset={{x: width / 2, y: length / 2}}

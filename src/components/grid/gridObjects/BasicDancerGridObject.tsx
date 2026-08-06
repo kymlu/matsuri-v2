@@ -26,6 +26,8 @@ const BasicDancerGridObject = React.memo(function BasicDancerGridObject ({
     {
       prev && coords && <>
         <Circle
+          listening={false}
+          perfectDrawEnabled={false}
           x={coords.x}
           y={coords.y}
           radius={METER_PX * 0.2}
