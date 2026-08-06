@@ -1,14 +1,14 @@
 import { Layer, Shape } from "react-konva";
 import { StageGeometry } from "../../../models/choreo";
 import { DancerPosition } from "../../../models/dancer";
-import DancerGridObject from "../gridObjects/DancerGridObject";
 import { Prop, PropPosition } from "../../../models/prop";
 import { colorPalette } from "../../../lib/consts/colors";
 import React, { useDeferredValue, useMemo } from "react";
 import { PathSvgCacheByObjectIdBySectionId } from "../../../models/choreoSection";
-import PropGridObject from "../gridObjects/PropGridObject";
 import { getAnimationKey } from "../../../lib/helpers/editorCalculationHelper";
 import { PATH_DASH } from "../../../lib/consts/consts";
+import BasicPropGridObject from "../gridObjects/BasicPropGridObject";
+import BasicDancerGridObject from "../gridObjects/BasicDancerGridObject";
 
 type GhostLayerProps = {
   dancerIds: string[],
@@ -125,21 +125,19 @@ const GhostLayer = React.memo(function GhostLayer({
         propKeys.map((id) => {
           const prev = syncPrevProps?.[id];
           if (!prev) return null;
-          return (
-            <PropMovement
-              key={id}
-              prop={props[id]}
-              prev={syncPrevProps[id]}
-              geometry={geometry}
-            />
-          );
+          return <BasicPropGridObject
+            key={id}
+            prop={props[id]}
+            prev={syncPrevProps[id]}
+            geometry={geometry}
+          />
         })
       }
       {
         dancerIds.map((id) => {
           const prev = syncPrevDancers?.[id];
           if (!prev) return null;
-          return <DancerMovement
+          return <BasicDancerGridObject
             key={id}
             prev={syncPrevDancers[id]}
             geometry={geometry}
@@ -151,62 +149,6 @@ const GhostLayer = React.memo(function GhostLayer({
 });
 
 export default GhostLayer;
-
-type DancerMovementProps = {
-  prev?: DancerPosition,
-  geometry: StageGeometry,
-}
-const PREV_DANCER_BASE = { name: "", id: "" };
-
-const DancerMovement = React.memo(function DancerMovement ({
-  prev, geometry
-}: DancerMovementProps) {
-  return <>
-    {
-      prev && <>
-        <DancerGridObject
-          dancer={PREV_DANCER_BASE}
-          position={prev}
-          stageGeometry={geometry}
-          isSelected={false}
-          canEdit={false}
-          dancerDisplayType={"small"}
-          animate={false}
-        />
-      </>
-    }
-  </>
-});
-
-type PropMovementProps = {
-  prop: Prop,
-  prev?: PropPosition,
-  geometry: StageGeometry,
-}
-
-const PropMovement = React.memo(function PropMovement ({
-  prop, prev, geometry
-}: PropMovementProps) {
-  const prevPropObj = useMemo<Prop>(
-    () => ({...prop, name: ""}),
-    [prop]
-  );
-  return <>
-    {
-      prev && <>
-        <PropGridObject
-          prop={prevPropObj}
-          position={prev}
-          stageGeometry={geometry}
-          isSelected={false}
-          canEdit={false}
-          animate={false}
-          canSelect={false}
-        />
-      </>
-    }
-  </>
-});
 
 const path2dCache = new Map<string, Path2D>();
 
