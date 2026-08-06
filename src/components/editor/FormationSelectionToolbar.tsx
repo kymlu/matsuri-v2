@@ -99,7 +99,7 @@ export default function FormationSelectionToolbar({
         </Drawer.Viewport>
       </Drawer.Portal>
     </Drawer.Root>
-    <div className="flex gap-2 overflow-auto">
+    <div className="flex gap-1 overflow-auto">
       <DndContext
         sensors={sensors}
         modifiers={[restrictToHorizontalAxis, restrictToParentElement]}
