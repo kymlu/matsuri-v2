@@ -110,6 +110,7 @@ const MovementEditLayer = memo(function MovementEditLayer({
           <BasicDancerGridObject
             prev={prevPosition as DancerPosition}
             geometry={geometry}
+            hasOutline
           />
         </>
       }
@@ -119,6 +120,7 @@ const MovementEditLayer = memo(function MovementEditLayer({
             prop={prevPropObj}
             prev={prevPosition as PropPosition}
             geometry={geometry}
+            hasOutline
           />
         </>
       }

@@ -4,15 +4,17 @@ import { METER_PX } from "../../../lib/consts/consts";
 import { Prop, PropPosition } from "../../../models/prop";
 import React, { useMemo } from "react";
 import { stageMetersToPx } from "../../../lib/helpers/editorCalculationHelper";
+import { colorPalette } from "../../../lib/consts/colors";
 
 type BasicPropGridObjectProps = {
   prop: Prop,
   prev?: PropPosition,
   geometry: StageGeometry,
+  hasOutline?: boolean,
 }
 
 const BasicPropGridObject = React.memo(function BasicPropGridObject ({
-  prop, prev, geometry
+  prop, prev, geometry, hasOutline = false
 }: BasicPropGridObjectProps) {
   const coords = useMemo(() => {
     if (prev) {
@@ -34,8 +36,8 @@ const BasicPropGridObject = React.memo(function BasicPropGridObject ({
           width={width}
           height={length}
           fill={prop.color}
-          stroke={prop.color}
-          strokeWidth={1}
+          stroke={hasOutline ? colorPalette.white : prop.color}
+          strokeWidth={2}
           />
       </>
     }
