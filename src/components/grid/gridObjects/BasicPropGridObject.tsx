@@ -16,7 +16,7 @@ const BasicPropGridObject = React.memo(function BasicPropGridObject ({
 }: BasicPropGridObjectProps) {
   const coords = useMemo(() => {
     if (prev) {
-      return stageMetersToPx(prev, geometry, METER_PX);
+      return stageMetersToPx(prev, geometry, METER_PX, prop.length);
     }
   }, [prev, geometry]);
   const width = prop.width * METER_PX;
@@ -30,7 +30,7 @@ const BasicPropGridObject = React.memo(function BasicPropGridObject ({
           perfectDrawEnabled={false}
           x={coords.x}
           y={coords.y}
-          offset={{x: width / 2, y: length / 2}}
+          rotation={prev.rotation}
           width={width}
           height={length}
           fill={prop.color}
