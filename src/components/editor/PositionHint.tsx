@@ -35,7 +35,7 @@ export default function PositionHint({
   return (
     <div>
       <div className="mb-2 space-y-1">
-        <div className="flex w-full gap-2">
+        <div className="flex w-full gap-1">
           <InfoBox title="現在の位置">
             <span className="font-bold">{currentY}m</span>
             <span className="text-sm text-gray-400">/</span>
@@ -81,7 +81,7 @@ export default function PositionHint({
       {
         actions && actions.length > 0 &&
         <>
-          <div className="flex flex-wrap w-full gap-2">
+          <div className="flex flex-wrap w-full gap-1">
             {
               actions.map(action => {
                 const assignedTiming = action.timings.find(t => t.dancerIds.includes(dancer.id));
