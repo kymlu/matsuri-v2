@@ -1021,6 +1021,7 @@ export default function ChoreoEditPage(props: {
             resetSelectedIds();
           }
           setIsEditingMovement(prev => !prev);
+          setIsPropResizeLocked(true);
         }}
         isEditingMovement={isEditingMovement}
         setIsEditingMovement={setIsEditingMovement}
