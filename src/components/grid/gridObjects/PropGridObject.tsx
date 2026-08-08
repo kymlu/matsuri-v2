@@ -95,8 +95,8 @@ const PropGridObject = memo(function PropGridObject({
           text={prop.name}
           fontSize={METER_PX/3}
           fontStyle="bold"
-          fill={position.isInUse ? 
-            colorPalette.grey[0] :
+          fill={position.inUse ? 
+            colorPalette.grey[1] :
             (colorPalette.getTextColor(prop.color) ?? "white")
           }
           verticalAlign="middle"
