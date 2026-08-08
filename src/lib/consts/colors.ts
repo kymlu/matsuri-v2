@@ -44,8 +44,7 @@ export const colorPalette = {
   gridObjectColors(): string[] {
     return [
       ...Object.values(this.rainbow).flat(),
-      ...this.browns,
-      ...this.greys,
+      ...this.browns
     ];
   },
 
