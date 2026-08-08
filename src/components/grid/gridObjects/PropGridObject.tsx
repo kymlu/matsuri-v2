@@ -45,24 +45,7 @@ const PropGridObject = memo(function PropGridObject({
   halfOpacity,
   isZooming,
 }: PropGridObjectProps) {
-  const inUseOutline = useRef<Konva.Rect>(null);
-  const inUseOutlineAnimation = useRef<Konva.Animation>(null);
 
-  useEffect(() => {
-    inUseOutlineAnimation.current?.stop();
-    if (!inUseOutline.current) return;
-    if (!animate || canEdit) return;
-
-    inUseOutlineAnimation.current = new Konva.Animation((frame) => {
-      if (!frame) return;
-      const speed = 15;
-      const offset = (frame.time / 1000) * speed;
-      inUseOutline.current?.dashOffset(-offset);
-    }, inUseOutline.current.getLayer());
-
-    inUseOutlineAnimation.current.start();
-  }, [position.inUse, animate]);
-  
   return <>
     {
       prop &&
@@ -100,33 +83,10 @@ const PropGridObject = memo(function PropGridObject({
         <Rect
           width={(prop.width * METER_PX)}
           height={(prop.length * METER_PX)}
-          fill={prop.color}
-          stroke={prop.color}
+          fill={position.inUse ? colorPalette.grey[0] : prop.color}
+          stroke={position.inUse ? colorPalette.grey[0] : prop.color}
           strokeWidth={1}
           />
-
-        {
-          position.inUse &&
-          <>
-            <Rect
-              width={(prop.width * METER_PX)}
-              height={(prop.length * METER_PX)}
-              stroke={colorPalette.white}
-              opacity={0.7}
-              strokeWidth={6}
-              lineJoin="round"
-              />
-            <Rect
-              ref={inUseOutline}
-              width={(prop.width * METER_PX)}
-              height={(prop.length * METER_PX)}
-              stroke={prop.color}
-              strokeWidth={4}
-              lineJoin="round"
-              dash={PATH_DASH}
-              />
-          </>
-        }
 
         <Text
           y={(prop.length / 2) * METER_PX}
