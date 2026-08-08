@@ -85,7 +85,7 @@ const PropGridObject = memo(function PropGridObject({
           height={(prop.length * METER_PX)}
           fill={position.inUse ? colorPalette.greys[2] : prop.color}
           stroke={prop.color}
-          dash={prop.inUse ? [2, 2] : []}
+          dash={position.inUse ? [2, 2] : []}
           strokeWidth={position.inUse ? 2 : 1}
           />
 
