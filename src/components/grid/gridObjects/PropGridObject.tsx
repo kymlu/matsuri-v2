@@ -83,8 +83,8 @@ const PropGridObject = memo(function PropGridObject({
         <Rect
           width={(prop.width * METER_PX)}
           height={(prop.length * METER_PX)}
-          fill={position.inUse ? colorPalette.grey[0] : prop.color}
-          stroke={position.inUse ? colorPalette.grey[0] : prop.color}
+          fill={position.inUse ? colorPalette.grey[2] : prop.color}
+          stroke={position.inUse ? colorPalette.grey[2] : prop.color}
           strokeWidth={1}
           />
 
@@ -95,7 +95,10 @@ const PropGridObject = memo(function PropGridObject({
           text={prop.name}
           fontSize={METER_PX/3}
           fontStyle="bold"
-          fill={colorPalette.getTextColor(prop.color) ?? "white"}
+          fill={position.isInUse ? 
+            colorPalette.grey[0] :
+            (colorPalette.getTextColor(prop.color) ?? "white")
+          }
           verticalAlign="middle"
           align="center" />
       </BaseGridObject>
