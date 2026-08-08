@@ -75,6 +75,7 @@ const PropGridObject = memo(function PropGridObject({
           width={(prop.width + 0.3) * METER_PX}
           height={(prop.length + 0.3) * METER_PX}
           visible={isSelected}
+          dash={[2, 2]}
           strokeWidth={3}
           stroke={colorPalette.primary}
           fill={colorPalette.white}
