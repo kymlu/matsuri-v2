@@ -128,6 +128,7 @@ export function addProp(state: Choreo, prop: Prop, x: number, y: number, z: numb
           x: x,
           y: y,
           z: z,
+          inUse: true,
         }
       }
     } as Formation
