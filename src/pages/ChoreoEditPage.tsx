@@ -766,6 +766,7 @@ export default function ChoreoEditPage(props: {
                   length: DEFAULT_PROP_LENGTH,
                   width: DEFAULT_PROP_WIDTH,
                   color: colorPalette.rainbow.blue[0],
+                  isInUse: true,
                 },
                 x - 2,
                 y - 0.5,
