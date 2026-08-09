@@ -44,7 +44,8 @@ export const colorPalette = {
   gridObjectColors(): string[] {
     return [
       ...Object.values(this.rainbow).flat(),
-      ...this.browns
+      ...this.browns,
+      ...this.greys,
     ];
   },
 
@@ -67,6 +68,41 @@ export const colorPalette = {
       return this.textContrast[bg];
     }
   },
+
+  lighterColors(): Record<string, string> {
+    return {
+      "#D9534F": "#E8706C",
+      "#E48B88": "#F0AAAB",
+      "#F1B8B5": "#F5D1CE",
+      "#F08A00": "#F5A933",
+      "#F5B04C": "#F8C870",
+      "#F9CF8A": "#FBE0B5",
+      "#F2D600": "#F5E033",
+      "#F7E44D": "#FAF080",
+      "#FBEF8A": "#FDF5B8",
+      "#5CB85C": "#7ED47E",
+      "#7BC77B": "#99D499",
+      "#A1D4A1": "#B8DFB8",
+      "#337AB7": "#6699CC",
+      "#6699CC": "#99BBDD",
+      "#99BBDD": "#BBD0E8",
+      "#5B4B9B": "#8170B5",
+      "#8170B5": "#A399CC",
+      "#A399CC": "#BAB3D9",
+      "#A366CC": "#B998D1",
+      "#B998D1": "#CEB8DD",
+      "#D1B2E0": "#DCC7E8",
+      "#E83E8C": "#EF7BB2",
+      "#EF7BB2": "#F5A6CB",
+      "#F5A6CB": "#F9C5DD",
+      "#5C4033": "#8B5E3C",
+      "#8B5E3C": "#B8927A",
+      "#D2B48C": "#E0C9A8",
+      "#333333": "#666666",
+      "#888888": "#BBBBBB",
+      "#DDDDDD": "#FFFFFF",
+    }
+  }
 };
 
 const hexToRgb = (hex: string): [number, number, number] => {

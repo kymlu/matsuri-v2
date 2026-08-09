@@ -35,7 +35,7 @@ const BasicPropGridObject = React.memo(function BasicPropGridObject ({
           rotation={prev.rotation}
           width={width}
           height={length}
-          fill={prop.color}
+          fill={prev.inUse ? prop.color : colorPalette.lighterColors()[prop.color]}
           stroke={hasOutline ? colorPalette.white : prop.color}
           strokeWidth={2}
           />

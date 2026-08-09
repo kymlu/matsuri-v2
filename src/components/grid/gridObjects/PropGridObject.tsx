@@ -5,7 +5,7 @@ import Konva from "konva";
 import { colorPalette } from "../../../lib/consts/colors";
 import { METER_PX, PATH_DASH } from "../../../lib/consts/consts";
 import { Prop, PropPosition } from "../../../models/prop";
-import { memo, useEffect, useRef } from "react";
+import { memo, useEffect, useMemo, useRef } from "react";
 import { PathSvgCacheBySectionId } from "../../../models/choreoSection";
 
 type PropGridObjectProps = {
@@ -46,6 +46,13 @@ const PropGridObject = memo(function PropGridObject({
   isZooming,
 }: PropGridObjectProps) {
 
+  const color = useMemo(() => {
+    if (prop.color) {
+      return position.inUse ? prop.color : colorPalette.lighterColors()[prop.color];
+    }
+    return colorPalette.rainbow.blue[0];
+  }, [position.inUse, prop])
+
   return <>
     {
       prop &&
@@ -83,10 +90,10 @@ const PropGridObject = memo(function PropGridObject({
         <Rect
           width={(prop.width * METER_PX)}
           height={(prop.length * METER_PX)}
-          fill={position.inUse ? colorPalette.greys[2] : prop.color}
+          fill={color}
           stroke={prop.color}
-          dash={position.inUse ? [2, 2] : []}
-          strokeWidth={position.inUse ? 2 : 1}
+          dash={!position.inUse ? [4, 4] : []}
+          strokeWidth={!position.inUse ? 4 : 1}
           />
 
         <Text
@@ -94,12 +101,10 @@ const PropGridObject = memo(function PropGridObject({
           width={prop.width * METER_PX}
           height={prop.length}
           text={prop.name}
+          opacity={position.inUse ? 1 : 1}
           fontSize={METER_PX/3}
           fontStyle="bold"
-          fill={position.inUse ? 
-            colorPalette.greys[1] :
-            (colorPalette.getTextColor(prop.color) ?? "white")
-          }
+          fill={colorPalette.getTextColor(color) ?? "white"}
           verticalAlign="middle"
           align="center" />
       </BaseGridObject>
