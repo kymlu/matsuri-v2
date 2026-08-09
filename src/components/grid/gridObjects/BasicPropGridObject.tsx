@@ -8,31 +8,31 @@ import { colorPalette } from "../../../lib/consts/colors";
 
 type BasicPropGridObjectProps = {
   prop: Prop,
-  prev?: PropPosition,
+  position?: PropPosition,
   geometry: StageGeometry,
   hasOutline?: boolean,
 }
 
 const BasicPropGridObject = React.memo(function BasicPropGridObject ({
-  prop, prev, geometry, hasOutline = false
+  prop, position, geometry, hasOutline = false
 }: BasicPropGridObjectProps) {
   const coords = useMemo(() => {
-    if (prev) {
-      return stageMetersToPx(prev, geometry, METER_PX, prop.length);
+    if (position) {
+      return stageMetersToPx(position, geometry, METER_PX, prop.length);
     }
-  }, [prev, geometry]);
+  }, [position, geometry]);
   const width = prop.width * METER_PX;
   const length = prop.length * METER_PX;
   
   return <>
     {
-      prev && coords && <>
+      position && coords && <>
         <Rect
           listening={false}
           perfectDrawEnabled={false}
           x={coords.x}
           y={coords.y}
-          rotation={prev.rotation}
+          rotation={position.rotation}
           width={width}
           height={length}
           fill={prop.color}

@@ -7,33 +7,33 @@ import { stageMetersToPx } from "../../../lib/helpers/editorCalculationHelper";
 import { colorPalette } from "../../../lib/consts/colors";
 
 type BasicDancerGridObjectProps = {
-  prev?: DancerPosition,
+  position?: DancerPosition,
   geometry?: StageGeometry,
   hasOutline?: boolean,
 }
 
 const BasicDancerGridObject = React.memo(function BasicDancerGridObject ({
-  prev, geometry, hasOutline = false
+  position, geometry, hasOutline = false
 }: BasicDancerGridObjectProps) {
   const coords = useMemo(() => {
-    if (prev) {
+    if (position) {
       if (geometry) {
-        return stageMetersToPx(prev, geometry, METER_PX);
+        return stageMetersToPx(position, geometry, METER_PX);
       } else {
-        return prev;
+        return position;
       }
     }
-  }, [prev, geometry]);
+  }, [position, geometry]);
   return <>
     {
-      prev && coords && <>
+      position && coords && <>
         <Circle
           listening={false}
           perfectDrawEnabled={false}
           x={coords.x}
           y={coords.y}
           radius={METER_PX * 0.2}
-          fill={prev.color}
+          fill={position.color}
           strokeEnabled={hasOutline}
           stroke={colorPalette.white}
           strokeWidth={2}

@@ -128,7 +128,7 @@ const GhostLayer = React.memo(function GhostLayer({
           return <BasicPropGridObject
             key={id}
             prop={props[id]}
-            prev={syncPrevProps[id]}
+            position={syncPrevProps[id]}
             geometry={geometry}
           />
         })
@@ -139,7 +139,7 @@ const GhostLayer = React.memo(function GhostLayer({
           if (!prev) return null;
           return <BasicDancerGridObject
             key={id}
-            prev={syncPrevDancers[id]}
+            position={syncPrevDancers[id]}
             geometry={geometry}
           />
         })
