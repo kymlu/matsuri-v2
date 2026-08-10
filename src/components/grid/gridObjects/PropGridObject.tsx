@@ -112,7 +112,6 @@ const PropGridObject = memo(function PropGridObject({
               width={(prop.width * METER_PX)}
               height={(prop.length * METER_PX)}
               stroke={colorPalette.white}
-              opacity={0.7}
               strokeWidth={6}
               lineJoin="round"
               />
@@ -120,7 +119,7 @@ const PropGridObject = memo(function PropGridObject({
               ref={inUseOutline}
               width={(prop.width * METER_PX)}
               height={(prop.length * METER_PX)}
-              stroke={colorPalette.primary}
+              stroke={prop.color}
               strokeWidth={4}
               lineJoin="round"
               dash={PATH_DASH}
