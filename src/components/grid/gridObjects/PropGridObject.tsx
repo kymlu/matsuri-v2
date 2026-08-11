@@ -3,9 +3,9 @@ import { StageGeometry } from "../../../models/choreo";
 import BaseGridObject from "./BaseGridObject";
 import Konva from "konva";
 import { colorPalette } from "../../../lib/consts/colors";
-import { METER_PX, PATH_DASH } from "../../../lib/consts/consts";
+import { METER_PX } from "../../../lib/consts/consts";
 import { Prop, PropPosition } from "../../../models/prop";
-import { memo, useEffect, useRef } from "react";
+import { memo } from "react";
 import { PathSvgCacheBySectionId } from "../../../models/choreoSection";
 
 type PropGridObjectProps = {
@@ -45,24 +45,6 @@ const PropGridObject = memo(function PropGridObject({
   halfOpacity,
   isZooming,
 }: PropGridObjectProps) {
-  const inUseOutline = useRef<Konva.Rect>(null);
-  const inUseOutlineAnimation = useRef<Konva.Animation>(null);
-
-  useEffect(() => {
-    inUseOutlineAnimation.current?.stop();
-    if (!inUseOutline.current) return;
-    if (!animate || canEdit) return;
-
-    inUseOutlineAnimation.current = new Konva.Animation((frame) => {
-      if (!frame) return;
-      const speed = 15;
-      const offset = (frame.time / 1000) * speed;
-      inUseOutline.current?.dashOffset(-offset);
-    }, inUseOutline.current.getLayer());
-
-    inUseOutlineAnimation.current.start();
-  }, [position.inUse, animate]);
-  
   return <>
     {
       prop &&
@@ -96,18 +78,17 @@ const PropGridObject = memo(function PropGridObject({
           stroke={colorPalette.primary}
           fill={colorPalette.white}
         />
-        
-        <Rect
-          width={(prop.width * METER_PX)}
-          height={(prop.length * METER_PX)}
-          fill={prop.color}
-          stroke={prop.color}
-          strokeWidth={1}
-          />
 
         {
           position.inUse &&
           <>
+            <Rect
+              width={(prop.width * METER_PX)}
+              height={(prop.length * METER_PX)}
+              fill={prop.color}
+              stroke={prop.color}
+              strokeWidth={1}
+              />
             <Rect
               width={(prop.width * METER_PX)}
               height={(prop.length * METER_PX)}
@@ -116,13 +97,22 @@ const PropGridObject = memo(function PropGridObject({
               lineJoin="round"
               />
             <Rect
-              ref={inUseOutline}
               width={(prop.width * METER_PX)}
               height={(prop.length * METER_PX)}
               stroke={prop.color}
-              strokeWidth={4}
+              strokeWidth={3}
               lineJoin="round"
-              dash={PATH_DASH}
+              />
+          </>
+        }
+        {
+          !position.inUse &&
+          <>
+            <Rect
+              width={(prop.width * METER_PX)}
+              height={(prop.length * METER_PX)}
+              fill={prop.color}
+              opacity={0.6}
               />
           </>
         }

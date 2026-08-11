@@ -118,7 +118,7 @@ const GhostLayer = React.memo(function GhostLayer({
   return ( 
     <Layer
       listening={false}
-      opacity={0.5}
+      opacity={0.35}
       >
       <BatchedPath2D allPaths={allPaths}/>
       {
