@@ -119,7 +119,7 @@ export default function LoginDialog({
       case "resetPassword":
         return isNullOrUndefinedOrBlank(password) || isNullOrUndefinedOrBlank(verificationCode) || isProcessing || password.length < MIN_PASSWORD_LENGTH;
     }
-  }, [email, password, isProcessing]);
+  }, [email, password, isProcessing, mode]);
 
   const actionButtonText = useMemo(() => {
     switch (mode) {
