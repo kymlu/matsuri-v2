@@ -12,7 +12,7 @@ import { sortDancers, sortObstacles, sortProps } from "../editor/commands/object
 const README_TEXT =
   "このZIPには本アプリ用のデータが含まれています。\n" +
   "ZIPファイル、または中の .mtr ファイルを本アプリで読み込んでください。\n\n" +
-  "複数 .mtr ファイルが存在する場合、manifest.txtでどのファイルがどの隊列表がわかります。" +
+  "複数 .mtr ファイルが存在する場合、manifest.txtでどのファイルがどの隊列表かがわかります。" +
   "一部のアプリでは .mtr ファイルを送信できない場合があります。\n" +
   "その場合は、このZIPファイルをそのまま共有してください。";
 

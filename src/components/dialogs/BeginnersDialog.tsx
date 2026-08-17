@@ -19,8 +19,8 @@ export default function BeginnersDialog() {
     full
     >
       <div className="flex flex-col justify-center gap-2 text-center">
-        <p>当アプリのご利用いただき誠にありがとうございます！♡</p>
-        <p>アプリの使い方を確認されたい場合は、下記のスクリーンショットを参考してください。</p>
+        <p>当アプリをご利用いただき誠にありがとうございます！♡</p>
+        <p>アプリの使い方を確認されたい場合は、下記のスクリーンショットを参考にしてください。</p>
         <p>
           <small className="text-primary">見た目はスクリーンショットと異なる場合がありますが、基本機能は同じです。</small>
         </p>

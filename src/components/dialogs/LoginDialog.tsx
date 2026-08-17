@@ -171,7 +171,7 @@ export default function LoginDialog({
         {
           error === "loginError" &&
           <p className="w-full font-semibold text-center text-primary">
-            メールアドレス、またはパスワードは正しくない
+            メールアドレス、またはパスワードは正しくありません
           </p>
         }
         {

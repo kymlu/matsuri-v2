@@ -65,7 +65,7 @@ export default function AcceptInviteDialog({
   }, [password]);
 
   return <BaseEditDialog
-    title="アカウント初期化"
+    title="アカウント初期設定"
     actionButtonText="設定"
     isActionButtonDisabled={isActionButtonDisabled}
     showCloseButton={false}

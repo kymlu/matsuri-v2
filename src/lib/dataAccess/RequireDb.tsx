@@ -16,7 +16,7 @@ export const RequireDB = ({ children }: { children: ReactNode }) => {
   )
   if (dbStatus === "FAILED") return (
     <div className='flex flex-col items-center justify-center h-[100svh] gap-2'>
-      <p>データベースの確認が失敗しました。</p>
+      <p>データベースの確認に失敗しました。</p>
       <p>ケイティーまで問い合わせてください。</p>
       <samp className='p-2 bg-gray-100'>{error}</samp>
     </div>

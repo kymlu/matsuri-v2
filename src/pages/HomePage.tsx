@@ -282,7 +282,7 @@ export default function HomePage({
       const parsed = JSON.parse(key) as EventDetails;
       const year = parsed.startDate
         ? `${new Date(parsed.startDate).getFullYear().toString()}年`
-        : "日程不明";
+        : "日程未定";
 
       if (!acc.has(year)) acc.set(year, new Map());
       acc.get(year)!.set(key, items);

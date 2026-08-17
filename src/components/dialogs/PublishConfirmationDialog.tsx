@@ -131,7 +131,7 @@ export default function PublishConfirmationDialog({
             {
               isActionButtonEnabled &&
               <>
-                <b>新公開バージョン</b>
+                <b>新しい公開バージョン</b>
                 <span className="text-right">{(oldVersion?.version ?? 0) + 1}</span>
               </>
             }

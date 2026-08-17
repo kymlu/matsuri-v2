@@ -94,7 +94,7 @@ export default function ExportDialog({
           {
             Object.values(choreo.dancers).length > 0 &&
             <CustomSelect
-              label="中心人物"
+              label="追跡ダンサー"
               items={dancerList}
               defaultValue={choreo.dancers[selectedId]?.name ?? "未設定"}
               setSelectValue={(newValue) => {

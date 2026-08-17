@@ -94,7 +94,7 @@ export default function SyncChoreoDialog ({
             greyText
             >
             <span className="font-semibold text-nowrap">
-              破棄して最公開版へ
+              破棄して公開版へ
             </span>
           </Button>
         </Dialog.Close>
