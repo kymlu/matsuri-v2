@@ -47,6 +47,7 @@ type HomePageProps = {
   eventList: EventDetails[],
   setEventList: (eventList: EventDetails[]) => void,
   goToAdminPage: () => void,
+  goToHelpPage: () => void,
   goToNewChoreoPage: (eventDetails?: EventDetails) => void,
   goToViewPage: (choreo: Choreo, status: ChoreoStatus, serverChoreo?: BasicChoreoDetails) => void,
   savedDancerName: string | null,
@@ -72,7 +73,7 @@ type ChoreoWithStatus = BasicChoreoDetails & {
 
 export default function HomePage({
   buildInfo, eventList, setEventList,
-  goToAdminPage, goToNewChoreoPage, goToViewPage,
+  goToAdminPage, goToHelpPage, goToNewChoreoPage, goToViewPage,
   savedDancerName, setSavedDancerName,
   dancerNamesByEvent, setDancerNamesByEvent,
   isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin,
@@ -635,7 +636,7 @@ export default function HomePage({
               <IconButton asDiv imgSrc="beginner" colour="primary"/>
             </div>
           </Dialog.Trigger>
-          <BeginnersDialog/>
+          <BeginnersDialog goToHelpPage={goToHelpPage}/>
         </Dialog.Root>
 
         <input

@@ -10,12 +10,13 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Team } from './models/team';
 import { checkLogin, verifyTeam } from './lib/helpers/apiHelper';
 import AdminPage from './pages/AdminPage';
+import HelpPage from './pages/HelpPage';
 import { isNullOrUndefinedOrBlank } from './lib/helpers/globalHelper';
 import { Oval } from 'react-loader-spinner';
 import { colorPalette } from './lib/consts/colors';
 import { useSearchParams } from 'react-router-dom';
 
-type Mode = "home" | "form" | "edit" | "view" | "admin";
+type Mode = "home" | "form" | "edit" | "view" | "admin" | "help";
 
 function App() {
   const [mode, setMode] = useState<Mode>("home");
@@ -110,6 +111,13 @@ function App() {
         )
       }
       {
+        mode === "help" && (
+          <HelpPage
+            goToHomePage={() => setMode("home")}
+          />
+        )
+      }
+      {
         isProcessing &&
         <div className='w-full h-svh'>
           <Oval
@@ -127,6 +135,9 @@ function App() {
           }}
           goToAdminPage={() => {
             setMode("admin");
+          }}
+          goToHelpPage={() => {
+            setMode("help");
           }}
           goToNewChoreoPage={(event) => {
             setSelectedEvent(event);

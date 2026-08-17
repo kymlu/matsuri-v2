@@ -4,7 +4,11 @@ import Button from "../basic/Button";
 import { getImgPath } from "../../lib/helpers/globalHelper";
 
 
-export default function BeginnersDialog() {
+type BeginnersDialogProps = {
+  goToHelpPage: () => void,
+}
+
+export default function BeginnersDialog({ goToHelpPage }: BeginnersDialogProps) {
   const [step, setStep] = useState<
     "home" |
     "view1" |
@@ -17,6 +21,11 @@ export default function BeginnersDialog() {
     title="はじめての方へ"
     hasX
     full
+    footer={
+      <div className="pt-4 mt-4 border-t border-gray-200">
+        <Button full onClick={() => goToHelpPage()}>より詳しい使い方はこちら</Button>
+      </div>
+    }
     >
       <div className="flex flex-col justify-center gap-2 text-center">
         <p>当アプリをご利用いただき誠にありがとうございます！♡</p>
