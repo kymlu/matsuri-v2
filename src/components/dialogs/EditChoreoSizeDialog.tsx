@@ -80,7 +80,7 @@ export default function EditChoreoSizeDialog({
     }}
     onSubmit={() => {onSave(stageGeometry, form.stageType)}}
     >
-      <div className="flex flex-col gap-2 md:flex-row">
+      <div className="flex flex-col h-full gap-2 md:flex-row">
         <GridPreview
           stageLength={form.stageLength}
           stageWidth={form.stageWidth}
@@ -91,6 +91,7 @@ export default function EditChoreoSizeDialog({
         <div className="grid grid-cols-2 gap-2 md:flex md:flex-col">
           <Button
             full
+            disabled
             primary={form.stageType === 'parade'}
             onClick={() => handleChange("stageType", "parade")}
           >
@@ -98,6 +99,7 @@ export default function EditChoreoSizeDialog({
           </Button>
           <Button
             full
+            disabled
             primary={form.stageType === 'stage'}
             onClick={() => handleChange("stageType", "stage")}
           >
