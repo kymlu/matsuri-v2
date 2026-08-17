@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useState } from "react";
+import { memo, ReactNode } from "react";
 import { StageGeometry } from "../../models/choreo";
 import { Dancer, DancerPosition } from "../../models/dancer";
 import { DancerAction } from "../../models/dancerAction";
@@ -12,7 +12,7 @@ type PositionHintProps = {
   geometry: StageGeometry;
 };
 
-export default function PositionHint({
+const PositionHint = memo(function PositionHint({
   dancer,
   position,
   nextPosition,
@@ -20,17 +20,10 @@ export default function PositionHint({
   geometry,
 }: PositionHintProps) {
 
-  const [currentX, setCurrentX] = useState<number>(0);
-  const [currentY, setCurrentY] = useState<number>(0);
-  const [deltaX, setDeltaX] = useState<number | undefined>();
-  const [deltaY, setDeltaY] = useState<number | undefined>();
-
-  useEffect(() => {
-    setCurrentX(roundToTenth(geometry.stageWidth / 2 - position.x));
-    setCurrentY(roundToTenth(position.y));
-    setDeltaX(nextPosition ? roundToTenth(roundToTenth(nextPosition.x) - roundToTenth(position.x)) : undefined);
-    setDeltaY(nextPosition ? roundToTenth(roundToTenth(nextPosition.y) - roundToTenth(position.y)) : undefined);
-  }, [position, nextPosition]);
+  const currentX = roundToTenth(geometry.stageWidth / 2 - position.x);
+  const currentY = roundToTenth(position.y);
+  const deltaX = nextPosition ? roundToTenth(roundToTenth(nextPosition.x) - roundToTenth(position.x)) : undefined;
+  const deltaY = nextPosition ? roundToTenth(roundToTenth(nextPosition.y) - roundToTenth(position.y)) : undefined;
 
   return (
     <div>
@@ -96,7 +89,9 @@ export default function PositionHint({
       }
     </div>
   );
-}
+});
+
+export default PositionHint;
 
 type InfoBoxProps = {
   title: string,

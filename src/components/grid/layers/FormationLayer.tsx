@@ -3,7 +3,7 @@ import { StageGeometry } from "../../../models/choreo";
 import { Dancer, DancerPosition } from "../../../models/dancer";
 import DancerGridObject from "../gridObjects/DancerGridObject";
 import Konva from "konva";
-import { memo, SetStateAction, useEffect, useMemo, useRef } from "react";
+import { memo, SetStateAction, useCallback, useEffect, useMemo, useRef } from "react";
 import { colorPalette } from "../../../lib/consts/colors";
 import { DancerDisplayType } from "../../../models/appSettings";
 import { Obstacle, Prop, PropPosition } from "../../../models/prop";
@@ -91,7 +91,7 @@ const FormationLayer = memo(function FormationLayer({
     }
   };
 
-  const toggleDancerSelect = (id: string, isAdditive: boolean = true) => {
+  const toggleDancerSelect = useCallback((id: string, isAdditive: boolean = true) => {
     if(canSelectDancers && !isDraggingOnEmpty) {
       setSelectedIds((prev) => ({
         props: isAdditive && canToggleSelection ? [...prev.props] : [],
@@ -103,8 +103,9 @@ const FormationLayer = memo(function FormationLayer({
         obstacles: isAdditive && canToggleSelection ? [...prev.obstacles] : [],
       }));
     }
-  }
-  const togglePropSelect = (id: string, isAdditive: boolean = true) => {
+  }, [canSelectDancers, isDraggingOnEmpty, canToggleSelection, setSelectedIds]);
+
+  const togglePropSelect = useCallback((id: string, isAdditive: boolean = true) => {
     if(canSelectProps && !isDraggingOnEmpty) {
       setSelectedIds((prev) => ({
         dancers: isAdditive && canToggleSelection ? [...prev.dancers] : [],
@@ -116,8 +117,9 @@ const FormationLayer = memo(function FormationLayer({
         obstacles: isAdditive && canToggleSelection ? [...prev.obstacles] : [],
       }));
     }
-  }
-  const toggleObstacleSelect = (id: string, isAdditive: boolean = true) => {
+  }, [canSelectProps, isDraggingOnEmpty, canToggleSelection, setSelectedIds]);
+
+  const toggleObstacleSelect = useCallback((id: string, isAdditive: boolean = true) => {
     if(canSelectObstacles && !isDraggingOnEmpty) {
       setSelectedIds((prev) => ({
         dancers: isAdditive && canToggleSelection ? [...prev.dancers] : [],
@@ -129,7 +131,7 @@ const FormationLayer = memo(function FormationLayer({
           [id],
       }));
     }
-  }
+  }, [canSelectObstacles, isDraggingOnEmpty, canToggleSelection, setSelectedIds]);
     
   useEffect(() => {
     const transformer = transformerRef.current;

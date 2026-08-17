@@ -65,10 +65,7 @@ export function DancerManagerDialog({
                   defaultValue={dancer.name}
                   hasError={dancerNames[dancer.name.trim()] > 1}
                   onContentChange={(newName) => {
-                    setDancerList(prev => {
-                      prev[i].name = newName;
-                      return [...prev];
-                    });
+                    setDancerList(prev => prev.map((d, index) => index === i ? { ...d, name: newName } : d));
                   }}
                   maxLength={SHORT_NAME_LENGTH}
                 />

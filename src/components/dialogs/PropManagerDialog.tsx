@@ -76,10 +76,7 @@ export function PropManagerDialog({
                             <button
                               key={color}
                               onClick={() => {
-                                setPropList(prev => {
-                                  prev[i].color = color;
-                                  return [...prev];
-                                });
+                                setPropList(prev => prev.map((p, index) => index === i ? { ...p, color } : p));
                               }}
                               style={{"backgroundColor": color, "color": colorPalette.textContrast[color]}}
                               className={"font-semibold rounded-full size-8 min-h-8 min-w-8 max-h-8 max-w-8 " + 
@@ -95,10 +92,7 @@ export function PropManagerDialog({
                       defaultValue={prop.name}
                       hasError={propNames[prop.name.trim()] > 1}
                       onContentChange={(newName) => {
-                        setPropList(prev => {
-                          prev[i].name = newName;
-                          return [...prev];
-                        });
+                        setPropList(prev => prev.map((p, index) => index === i ? { ...p, name: newName } : p));
                       }}
                       maxLength={SHORT_NAME_LENGTH}
                     />
@@ -112,10 +106,7 @@ export function PropManagerDialog({
                       baseStep={0.1}
                       buttonStep={0.5}
                       onChange={(number) => {
-                        setPropList(prev => {
-                          prev[i].length = number ?? MIN_PROP_DIMENSION;
-                          return [...prev];
-                        })
+                        setPropList(prev => prev.map((p, index) => index === i ? { ...p, length: number ?? MIN_PROP_DIMENSION } : p));
                       }}
                     />
                     <NumberInput
@@ -126,10 +117,7 @@ export function PropManagerDialog({
                       baseStep={0.1}
                       buttonStep={0.5}
                       onChange={(number) => {
-                        setPropList(prev => {
-                          prev[i].width = number ?? MIN_PROP_DIMENSION;
-                          return [...prev];
-                        })
+                        setPropList(prev => prev.map((p, index) => index === i ? { ...p, width: number ?? MIN_PROP_DIMENSION } : p));
                       }}
                     />
                 </div>
