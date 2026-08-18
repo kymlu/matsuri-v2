@@ -16,12 +16,13 @@ type ToolbarProps = {
   isAddingObstacle: boolean;
 
   // selection / attributes
-  showSelectDancer: boolean;
+  showSelectColour: boolean;
   onSelectColor: () => void;
-  onSelectType: (selectDancers: boolean, selectProps: boolean) => void;
+  onSelectType: (selectDancers: boolean, selectProps: boolean, selectObstacles: boolean) => void;
   showSelectDancersButton: boolean;
   showSelectPropsButton: boolean;
   showSelectAllButton: boolean;
+  showSelectObstaclesButton: boolean;
   onDeselect: () => void;
 
   // colour
@@ -101,12 +102,13 @@ export default function Toolbar({
   onAddProp, isAddingProp,
   onAddObstacle, isAddingObstacle,
 
-  showSelectDancer,
+  showSelectColour,
   onSelectColor,
   onSelectType,
   showSelectDancersButton,
   showSelectPropsButton,
   showSelectAllButton,
+  showSelectObstaclesButton,
   onDeselect,
 
   showChangeColour, onChangeColor,
@@ -208,10 +210,11 @@ export default function Toolbar({
           onEditMovement();
           setIsEditingMovement(true);
         }}/>}
-        {showSelectDancer && showSelectDancersButton && <IconButton src="select" subIconSrc="colors" label="同色選択" onClick={() => {onSelectColor()}} />}
-        {showSelectDancersButton && <IconButton src="select" subIconSrc="person" label="全員選択" onClick={() => {onSelectType(true,  false)}} />}
-        {showSelectPropsButton && <IconButton src="select" subIconSrc="flag" label="道具選択" onClick={() => {onSelectType(false, true)}} />}
-        {showSelectAllButton && <IconButton src="selectAll" label="全部選択" onClick={() => {onSelectType(true, true)}} />}
+        {showSelectColour && <IconButton src="select" subIconSrc="colors" label="同色選択" onClick={() => {onSelectColor()}} />}
+        {showSelectDancersButton && <IconButton src="select" subIconSrc="person" label="全員選択" onClick={() => {onSelectType(true, false, false)}} />}
+        {showSelectPropsButton && <IconButton src="select" subIconSrc="flag" label="道具選択" onClick={() => {onSelectType(false, true, false)}} />}
+        {showSelectObstaclesButton && <IconButton src="select" subIconSrc="emergencyHome" label="障害物選択" onClick={() => {onSelectType(false, false, true)}} />}
+        {showSelectAllButton && <IconButton src="selectAll" label="全部選択" onClick={() => {onSelectType(true, true, true)}} />}
         {
           showLockResizeProps && 
           <IconButton src={isResizePropsLocked ? "lock" : "lockOpenRight"} label="道具サイズ" onClick={() => onToggleResizePropsLock()}/>

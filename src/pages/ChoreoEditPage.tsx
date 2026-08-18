@@ -903,22 +903,33 @@ export default function ChoreoEditPage(props: {
         onCopyPosition={() => {onCopy()}}
         showPastePosition={Object.keys(copyBuffer.current.dancers).length > 0 || Object.keys(copyBuffer.current.props).length > 0}
         onPastePosition={() => {onPaste()}}
-        showSelectDancer={selectedIds.dancers.length > 0}
+        showSelectColour={(selectedIds.dancers.length + selectedIds.props.length + selectedIds.obstacles.length) > 0}
         onSelectColor={() => {
-          const positions = Object.entries(currentSection.formation.dancerPositions);
-          const currentColours = new Set(positions.filter(x => selectedIds.dancers.includes(x[0])).map(x => x[1].color));
-          setSelectedIds(prev => ({...prev, dancers: positions.filter(x => currentColours.has(x[1].color)).map(x => x[0])}));
+          const dancerPositions = Object.entries(currentSection.formation.dancerPositions);
+          const dancerColours = new Set(dancerPositions.filter(x => selectedIds.dancers.includes(x[0])).map(x => x[1].color));
+          const newDancerIds = dancerPositions.filter(x => dancerColours.has(x[1].color)).map(x => x[0]);
+
+          const propEntries = Object.entries(history.presentState.state.props);
+          const propColours = new Set(propEntries.filter(x => selectedIds.props.includes(x[0])).map(x => x[1].color));
+          const newPropIds = propEntries.filter(x => propColours.has(x[1].color)).map(x => x[0]);
+
+          const obstacleEntries = Object.entries(history.presentState.state.obstacles ?? {});
+          const obstacleColours = new Set(obstacleEntries.filter(x => selectedIds.obstacles.includes(x[0])).map(x => x[1].color));
+          const newObstacleIds = obstacleEntries.filter(x => obstacleColours.has(x[1].color)).map(x => x[0]);
+
+          setSelectedIds({ dancers: newDancerIds, props: newPropIds, obstacles: newObstacleIds });
         }}
-        onSelectType={(selectDancers: boolean, selectProps: boolean) => {
+        onSelectType={(selectDancers: boolean, selectProps: boolean, selectObstacles: boolean) => {
           setSelectedIds({
             props: selectProps ? Object.keys(history.presentState.state.props) : [],
             dancers: selectDancers ? Object.keys(history.presentState.state.dancers) : [],
-            obstacles: []
+            obstacles: (selectObstacles && !areObstaclesLocked) ? Object.keys(history.presentState.state.obstacles ?? {}) : []
           });
         }}
         showSelectDancersButton={entityCount.dancers > 0 && entityCount.dancers > selectedIds.dancers.length}
         showSelectPropsButton={entityCount.props > 0 && entityCount.props > selectedIds.props.length}
-        showSelectAllButton={entityCount.dancers > selectedIds.dancers.length || entityCount.props > selectedIds.props.length}
+        showSelectObstaclesButton={!areObstaclesLocked && entityCount.obstacles > 0 && entityCount.obstacles > selectedIds.obstacles.length}
+        showSelectAllButton={entityCount.dancers > selectedIds.dancers.length || entityCount.props > selectedIds.props.length || (!areObstaclesLocked && entityCount.obstacles > selectedIds.obstacles.length)}
         onDeselect={resetSelectedIds}
         onRearrange={(rearrangement) => {
           dispatch({
