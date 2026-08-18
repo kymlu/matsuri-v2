@@ -94,6 +94,11 @@ export default function HomePage({
     id: string
   ): Promise<Choreo | undefined> => {
     try {
+      if (strEquals(id, SAMPLE_PARADE_ID)) {
+        return SampleParade as Choreo;
+      } else if (strEquals(id, SAMPLE_STAGE_ID)) {
+        return SampleStage as Choreo;
+      }
       if (team?.id) {
         console.log(`Getting choreo from server with id ${id}`);
         return await getChoreoFile(team?.id, id, serverChoreoDetails[id].version ?? 0);
@@ -807,10 +812,12 @@ export default function HomePage({
                 deleteChoreo(editingChoreo.id, async () => {
                   syncChoreoDialog.close();
                   setSyncChoreoDialogOpen(false);
-                  setEditingChoreo(undefined);
+                  console.log("editing",editingChoreo.id);
                   await getChoreoFromServer(editingChoreo.id).then((choreo) => {
+                    console.log(choreo);
                     if (choreo) onSelectChoreo(choreo, "upToDate");
                   });
+                  setEditingChoreo(undefined);
                 });
               }
             }}
