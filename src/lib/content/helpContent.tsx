@@ -377,7 +377,7 @@ export const HELP_CONTENT: Record<HelpPageKey, HelpPageContent> = {
         content: <>
           <p>「公開する」を実行すると、現在のバージョンがサーバーにアップロードされ、チームの他のメンバーに公開されます。</p>
           {list([
-            "チームにログインしている場合のみ利用可能です。",
+            "編集者または管理者としてログインしている場合のみ利用可能です（閲覧者は不可）。",
             "サンプルの隊列表は公開できません。",
           ])}
           {orderedList([
@@ -476,6 +476,7 @@ export const HELP_CONTENT: Record<HelpPageKey, HelpPageContent> = {
         content: <HelpTable
           headers={["役割", "できること"]}
           rows={[
+            ["閲覧者", "隊列表の編集（公開を除く。ログインしていない場合と同様）"],
             ["編集者", "隊列表の編集・公開"],
             ["管理者", "編集者にできることに加えて、このページでのメンバー管理（招待、役割変更、削除）"],
           ]}
@@ -501,7 +502,7 @@ export const HELP_CONTENT: Record<HelpPageKey, HelpPageContent> = {
       {
         id: "changing-member-roles",
         title: "メンバーの役割を変更する",
-        content: <p>メンバーの役割を編集者と管理者の間で切り替えます。</p>,
+        content: <p>メンバーの役割を閲覧者・編集者・管理者の間で切り替えます。</p>,
       },
       {
         id: "removing-members",

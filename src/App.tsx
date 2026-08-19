@@ -30,6 +30,7 @@ function App() {
   const [buildInfo, setBuildInfo] = useState<string | undefined>();
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const [isViewer, setIsViewer] = useState<boolean>(false);
   const [currentTeamMemberId, setCurrentTeamMemberId] = useState<string | undefined>();
   const [isProcessing, setIsProcessing] = useState<boolean>(true);
   const [showNoTeamDialog, setShowNoTeamDialog] = useState<boolean>(false);
@@ -65,6 +66,7 @@ function App() {
         (name, role, teamMemberId) => {
           setNewName(name);
           setIsAdmin(role === "admin");
+          setIsViewer(role === "viewer");
           setIsLoggedIn(true);
           setCurrentTeamMemberId(teamMemberId);
         }, () => {
@@ -155,6 +157,8 @@ function App() {
           setDancerNamesByEvent={(groupedNames) => setDancerNamesByEvent(groupedNames)}
           isAdmin={isAdmin}
           setIsAdmin={setIsAdmin}
+          isViewer={isViewer}
+          setIsViewer={setIsViewer}
           isLoggedIn={isLoggedIn}
           setIsLoggedIn={setIsLoggedIn}
           team={team}
@@ -195,6 +199,7 @@ function App() {
           }}
           serverChoreo={serverChoreo}
           isLoggedIn={isLoggedIn}
+          isViewer={isViewer}
           teamId={team?.id}
         />
       )}
