@@ -429,7 +429,7 @@ export default function HomePage({
               <Dialog.Trigger>
                 <IconButton src="info" colour="primary" noBorder asDiv/>
               </Dialog.Trigger>
-              <SiteInfoDialog buildInfo={buildInfo}/>
+              <SiteInfoDialog buildInfo={buildInfo} goToHelpPage={goToHelpPage}/>
             </Dialog.Root>
             <Dialog.Root
               handle={editUserNameDialog}
