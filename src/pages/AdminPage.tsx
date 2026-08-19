@@ -99,6 +99,10 @@ export default function AdminPage({
               user.role === "editor" &&
               <Tag type="grey" text="編集者"/>
             }
+            {
+              user.role === "viewer" &&
+              <Tag type="grey" text="閲覧者"/>
+            }
             <div className="flex justify-end gap-2">
               <Dialog.Root>
                 <Dialog.Trigger disabled={strEquals(currentUserId, user.id)}>

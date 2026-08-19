@@ -819,6 +819,10 @@ export default {
 		}
 
 		if (request.method === "POST" && url.pathname === "/api/choreos/file") {
+			if (session.role === "viewer") {
+				return getErrorResponse("Not permitted to publish.", 403);
+			}
+
 			try {
 				const data = await request.json() as any;
 				const file = data.file;

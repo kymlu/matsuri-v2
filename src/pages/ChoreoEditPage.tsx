@@ -73,6 +73,7 @@ export default function ChoreoEditPage(props: {
   onChoreoEdited: () => void,
   serverChoreo?: BasicChoreoDetails,
   isLoggedIn: boolean,
+  isViewer: boolean,
   teamId?: string,
 }) {
   const [currentSection, setCurrentSection] = useState<ChoreoSection>(props.currentChoreo.sections[0]);
@@ -671,6 +672,7 @@ export default function ChoreoEditPage(props: {
           process.env.NODE_ENV === "development" ||
           (
             props.isLoggedIn &&
+            !props.isViewer &&
             !strEquals(history.presentState.state.id, SAMPLE_PARADE_ID) &&
             !strEquals(history.presentState.state.id, SAMPLE_STAGE_ID) &&
             !isNullOrUndefinedOrBlank(props.teamId)

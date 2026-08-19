@@ -58,6 +58,8 @@ type HomePageProps = {
   setIsLoggedIn: (value: boolean) => void,
   isAdmin: boolean,
   setIsAdmin: (value: boolean) => void,
+  isViewer: boolean,
+  setIsViewer: (value: boolean) => void,
   setCurrentTeamMemberId: (value: string) => void,
   team?: Team,
   showNoTeamDialog: boolean,
@@ -76,7 +78,7 @@ export default function HomePage({
   goToAdminPage, goToHelpPage, goToNewChoreoPage, goToViewPage,
   savedDancerName, setSavedDancerName,
   dancerNamesByEvent, setDancerNamesByEvent,
-  isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin,
+  isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin, isViewer, setIsViewer,
   setCurrentTeamMemberId, team, showNoTeamDialog, setShowNoTeamDialog, setupToken
 }: HomePageProps) {
   const [savedChoreos, setSavedChoreos] = useState<ChoreoWithStatus[]>([]);
@@ -920,6 +922,7 @@ export default function HomePage({
             onLogin={(name, role, teamMemberId) => {
               setSavedDancerName(name);
               setIsAdmin(role === "admin");
+              setIsViewer(role === "viewer");
               setCurrentTeamMemberId(teamMemberId);
               setIsLoggedIn(true);
             }}
@@ -950,9 +953,10 @@ export default function HomePage({
             onLogin={(name, role, teamMemberId) => {
               setSavedDancerName(name);
               setIsAdmin(role === "admin");
+              setIsViewer(role === "viewer");
               setCurrentTeamMemberId(teamMemberId);
               setIsLoggedIn(true);
-              
+
               const url = new URL(window.location.href);
               url.search = "";
               window.history.replaceState({}, "", url);
