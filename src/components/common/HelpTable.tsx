@@ -8,12 +8,12 @@ type HelpTableProps = {
 export default function HelpTable({ headers, rows }: HelpTableProps) {
   return (
     <div className="w-full overflow-x-auto border border-gray-400 rounded-md">
-      <table className="w-full text-sm text-start border-collapse">
+      <table className="w-full text-sm border-collapse text-start">
         <thead>
           <tr className="bg-gray-200">
             {
               headers.map((header, i) => (
-                <th key={i} className="p-2 font-bold text-primary border-b border-gray-400">
+                <th key={i} className="p-2 font-bold border-b border-gray-400 text-nowrap text-primary">
                   {header}
                 </th>
               ))
