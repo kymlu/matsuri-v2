@@ -8,6 +8,7 @@ import JSZip from "jszip";
 import { Obstacle } from "../../models/prop";
 import { PDF_METER_PX, STRIPES_PER_METRE } from "../consts/consts";
 import { sortDancers, sortObstacles, sortProps } from "../editor/commands/objectCommands";
+import { getPersonalSectionNote } from "../dataAccess/LocalStorageController";
 
 const README_TEXT =
   "このZIPには本アプリ用のデータが含まれています。\n" +
@@ -90,6 +91,7 @@ export async function exportToPdf (
   fileName: string,
   followingId: string,
   showFollowingPath: boolean = false,
+  includePersonalNotes: boolean = false,
   updateProgress: (progress: number) => void,
   onComplete: () => void,
 ) {
@@ -149,9 +151,11 @@ export async function exportToPdf (
     visualDiagramHeightPx = Math.max(...sectionDeltas, 8) * PDF_METER_PX;
   }
 
-  // only add memo space if there are notes, actions, or there is a dancer being followed 
+  // only add memo space if there are notes, actions, a personal note to include, or there is a dancer being followed
   const fileWidth = diagramWidthPx + pageMargin + (
-    followingDancer || choreo.sections.some(x => !isNullOrUndefinedOrBlank(x.note) || x.formation.dancerActions.length > 0) ?
+    followingDancer ||
+    choreo.sections.some(x => !isNullOrUndefinedOrBlank(x.note) || x.formation.dancerActions.length > 0) ||
+    (includePersonalNotes && choreo.sections.some(s => !isNullOrUndefinedOrBlank(getPersonalSectionNote(choreo.id, s.id)))) ?
     memoBuffer : pageMargin);
   const fileHeight = visualDiagramHeightPx + titleBuffer + pageMargin;
   
@@ -651,6 +655,28 @@ export async function exportToPdf (
 
       pdf.text(section.note, memoLeft, memoY, {maxWidth: (memoWidth)});
       memoY += pdf.getTextDimensions(section.note, {maxWidth: memoWidth}).h;
+    }
+
+    // write personal (device-only) note
+    if (includePersonalNotes) {
+      const personalNote = getPersonalSectionNote(choreo.id, section.id);
+      if (personalNote) {
+        if (memoY > (PDF_METER_PX)) {
+          drawLine(pdf, colorPalette.lightGrey, 1, [], memoLeft, memoY, memoLeft + memoWidth, memoY);
+          memoY += 14;
+        }
+
+        pdf.setFontSize(8);
+        pdf.setFont(font);
+        pdf.setTextColor(colorPalette.grey);
+        pdf.text("自分用メモ", memoLeft, memoY, {maxWidth: memoWidth});
+        memoY += 10;
+
+        pdf.setFontSize(10);
+        pdf.setTextColor(colorPalette.black);
+        pdf.text(personalNote, memoLeft, memoY, {maxWidth: (memoWidth)});
+        memoY += pdf.getTextDimensions(personalNote, {maxWidth: memoWidth}).h;
+      }
     }
 
     if (section.formation.dancerActions.length > 0) {

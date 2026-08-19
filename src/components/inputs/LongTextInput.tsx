@@ -22,6 +22,7 @@ export type TextInputProps = {
   maxLength?: number,
   showLength?: boolean,
   label?: string,
+  maxRows?: number,
 }
 
 export default function LongTextInput({
@@ -42,6 +43,7 @@ export default function LongTextInput({
   maxLength,
   showLength,
   label,
+  maxRows,
 }: TextInputProps) {
   const [value, setValue] = React.useState<string>(defaultValue ?? "");
 
@@ -57,8 +59,10 @@ export default function LongTextInput({
   }
 
   const inputClasses = classNames(
-    "w-full h-full col-start-1 row-start-1 pl-2 text-black p-3 border-gray-400 rounded-md border focus-within:border-primary focus:outline-none",
+    "w-full col-start-1 row-start-1 pl-2 text-black p-3 border-gray-400 rounded-md border focus-within:border-primary focus:outline-none",
     {
+      "h-full": !maxRows,
+      "resize-none": !!maxRows,
       "pr-6": clearable,
       "pr-2": !clearable,
       "text-center": centered,
@@ -79,6 +83,7 @@ export default function LongTextInput({
           disabled={disabled}
           name={name}
           maxLength={maxLength}
+          rows={maxRows}
           placeholder={placeholder ?? ""}
           value={value ?? ""}
           onInput={(event) => handleChange(event.currentTarget.value)}

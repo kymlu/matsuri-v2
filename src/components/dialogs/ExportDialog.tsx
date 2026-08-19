@@ -24,6 +24,7 @@ export default function ExportDialog({
   const [exportName, setExportName] = useState<string>("");
   const [followingId, setFollowingId] = useState<string>(selectedId);
   const [showFollowingPath, setShowFollowingPath] = useState<boolean>(showPaths ?? false);
+  const [includePersonalNotes, setIncludePersonalNotes] = useState<boolean>(true);
   const [progress, setProgress] = useState<number>(0);
 
   const isExportNameValid = useMemo(() => {
@@ -61,6 +62,7 @@ export default function ExportDialog({
             exportName,
             followingId,
             showFollowingPath,
+            includePersonalNotes,
             (progress) => {
               setProgress(progress);
             },
@@ -71,6 +73,7 @@ export default function ExportDialog({
           setFollowingId("");
           setStep("prep");
           setShowFollowingPath(false);
+          setIncludePersonalNotes(true);
         }}
         isActionButtonDisabled={isExportNameValid}
       >
@@ -110,6 +113,11 @@ export default function ExportDialog({
               onChange={(checked) => setShowFollowingPath(checked)}
             />
           }
+          <CustomSwitch
+            label="自分用メモを含める"
+            defaultChecked={true}
+            onChange={(checked) => setIncludePersonalNotes(checked)}
+          />
         </div>
       </BaseEditDialog>
     }

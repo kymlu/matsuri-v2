@@ -15,7 +15,7 @@ import { Dialog } from "@base-ui/react";
 import { ChoreoStatus } from "./HomePage";
 import BaseErrorDialog from "../components/dialogs/BaseErrorDialog";
 import CustomSwitch from "../components/inputs/CustomSwitch";
-import { checkShowingViewPageInfoDialog, stopShowingViewPageInfoDialog } from "../lib/dataAccess/LocalStorageController";
+import { checkShowingViewPageInfoDialog, stopShowingViewPageInfoDialog, getPersonalSectionNote, setPersonalSectionNote } from "../lib/dataAccess/LocalStorageController";
 import Divider from "../components/basic/Divider";
 import { calculateMovementCache } from "../lib/helpers/editorCalculationHelper";
 
@@ -39,6 +39,10 @@ export default function ChoreoViewPage(props: {
   });
 
   const [showHintDialog, setShowHintDialog] = useState<boolean>(false);
+  const personalNote = useMemo(
+    () => getPersonalSectionNote(props.currentChoreo.id, currentSection.id),
+    [props.currentChoreo.id, currentSection.id]
+  );
 
   const [sidebarHeight, setSidebarHeight] = useState<number>(0);
 
@@ -125,6 +129,11 @@ export default function ChoreoViewPage(props: {
         <ViewerSidebar
           actions={currentSection.formation.dancerActions}
           note={currentSection.note}
+          personalNote={personalNote}
+          sectionId={currentSection.id}
+          onPersonalNoteChange={(newNote) => {
+            setPersonalSectionNote(props.currentChoreo.id, currentSection.id, newNote);
+          }}
           dancer={props.currentChoreo.dancers[selectedIds.dancers[0]]}
           position={currentSection.formation.dancerPositions[selectedIds.dancers[0]]}
           nextPosition={nextSection?.formation.dancerPositions[selectedIds.dancers[0]]}
