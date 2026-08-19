@@ -152,6 +152,9 @@ export default function PublishConfirmationDialog({
             maxLength={PASSWORD_LENGTH}
             restrictFn={(s) => testAlphanumericSymbols(s)}
             onContentChange={(newContent) => setPassword(newContent)}/>
+          <span className="text-sm text-gray-600">
+            ログインしていないユーザーがこの隊列表を閲覧する際にパスワードの入力が必要になります。
+          </span>
         </div>
         {
           isProcessing &&
