@@ -1,7 +1,7 @@
 import React from "react";
 import HelpTable from "../../components/common/HelpTable";
 
-export type HelpPageKey = "home" | "view" | "edit" | "admin" | "exports";
+export type HelpPageKey = "home" | "view" | "edit" | "admin" | "exports" | "team";
 
 export type HelpSection = {
   id: string,
@@ -30,7 +30,7 @@ const orderedList = (items: React.ReactNode[]) => (
 export const HELP_CONTENT: Record<HelpPageKey, HelpPageContent> = {
   home: {
     title: "ホーム画面",
-    overview: <p>ホーム画面はチームのダッシュボードです。隊列表の一覧、検索、作成・管理のためのツールがまとめられています。</p>,
+    overview: <p>ホーム画面では、隊列表の一覧、検索、作成・管理ができます。招待リンクなしで開いた場合はローカルのみモードで動作し、隊列表はこの端末にのみ保存されます。チームへの参加やログインについては「チームとログイン」を参照してください。</p>,
     sections: [
       {
         id: "creating-a-chart",
@@ -170,32 +170,16 @@ export const HELP_CONTENT: Record<HelpPageKey, HelpPageContent> = {
         </>,
       },
       {
-        id: "joining-a-team",
-        title: "チームに参加する",
-        content: list([
-          "招待リンクからアプリを開くと、招待の承諾手順が案内されます。",
-          "メールアドレスはリンクから自動入力されます。",
-          "パスワードを設定すると参加が完了し、自動的にログインします。",
-          "招待リンクが無効または期限切れの場合はエラーが表示されます。管理者に新しい招待リンクを依頼してください。",
-        ]),
+        id: "display-name",
+        title: "表示名を設定する",
+        content: <p>表示名の設定・変更ができます。</p>,
       },
       {
-        id: "logging-in",
-        title: "ログインする",
+        id: "app-info",
+        title: "アプリ情報",
         content: list([
-          "ログインアイコンから、メールアドレスとパスワードでログインします。",
-          <><b>パスワードを忘れた場合：</b> リセットをリクエストすると、有効期限10分の認証コードがメールで届きます。認証コードと新しいパスワードを入力すればログインできます。</>,
-          <><b>初回ログイン時：</b> 表示名がまだ設定されていない場合は設定を求められます。この名前は閲覧モードで自分を自動選択するために使われます。</>,
-        ]),
-      },
-      {
-        id: "account-settings",
-        title: "アカウント設定",
-        content: list([
-          "表示名の設定・変更ができます。",
           "アプリの現在のビルド情報を確認できます。",
           "トラブルシューティングのために依頼された場合は、ここからアプリのログをダウンロードできます。",
-          "管理者ユーザーは、ユーザー管理ページに移動してチームを管理できます。",
         ]),
       },
       {
@@ -484,7 +468,7 @@ export const HELP_CONTENT: Record<HelpPageKey, HelpPageContent> = {
   },
   admin: {
     title: "ユーザー管理",
-    overview: <p>ユーザー管理では、チームの管理者がチームのメンバーと権限を管理できます。管理者ロールを持つユーザーのみが利用できます。</p>,
+    overview: <p>ユーザー管理では、チームの管理者がチームのメンバーと権限を管理できます。管理者ロールを持つユーザーのみが利用でき、ホーム画面のメニューから移動できます。</p>,
     sections: [
       {
         id: "roles",
@@ -564,6 +548,31 @@ export const HELP_CONTENT: Record<HelpPageKey, HelpPageContent> = {
         content: list([
           "強調表示する追跡ダンサー：デフォルトは現在選択中のダンサーです。",
           "動線を含めるかどうか：デフォルトは、動線の現在の表示状態に従います。",
+        ]),
+      },
+    ],
+  },
+  team: {
+    title: "チームとログイン",
+    overview: <p>招待リンクを使ってチームに参加すると、隊列表がチームで共有され、サーバーに同期されるようになります。参加していない場合は、ローカルのみモードのままです。</p>,
+    sections: [
+      {
+        id: "joining-a-team",
+        title: "チームに参加する",
+        content: list([
+          "招待リンクからアプリを開くと、招待の承諾手順が案内されます。",
+          "メールアドレスはリンクから自動入力されます。",
+          "パスワードを設定すると参加が完了し、自動的にログインします。",
+          "招待リンクが無効または期限切れの場合はエラーが表示されます。管理者に新しい招待リンクを依頼してください。",
+        ]),
+      },
+      {
+        id: "logging-in",
+        title: "ログインする",
+        content: list([
+          "ログインアイコンから、メールアドレスとパスワードでログインします。",
+          <><b>パスワードを忘れた場合：</b> リセットをリクエストすると、有効期限10分の認証コードがメールで届きます。認証コードと新しいパスワードを入力すればログインできます。</>,
+          <><b>初回ログイン時：</b> 表示名がまだ設定されていない場合は設定を求められます。この名前は閲覧モードで自分を自動選択するために使われます。</>,
         ]),
       },
     ],

@@ -13,8 +13,9 @@ const PAGE_ITEMS: Record<string, string> = {
   home: "ホーム画面",
   view: "閲覧モード",
   edit: "編集モード",
-  admin: "ユーザー管理",
   exports: "エクスポート",
+  team: "チームとログイン",
+  admin: "ユーザー管理",
 };
 
 export default function HelpPage({
