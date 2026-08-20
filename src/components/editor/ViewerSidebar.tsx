@@ -121,7 +121,7 @@ export default function ViewerSidebar({
         <Divider/>
       }
       <div className="flex items-center gap-1 mb-1">
-        <Icon src="group" size="xs" colour="grey"/>
+        <Icon src="globe" size="xs" colour="grey"/>
         <span className="text-sm text-gray-600">公開メモ</span>
       </div>
       {
@@ -138,7 +138,7 @@ export default function ViewerSidebar({
       }
       <Divider/>
       <div className="flex items-center gap-1 mb-1">
-        <Icon src="mobile" size="xs" colour="grey"/>
+        <Icon src="lock" size="xs" colour="grey"/>
         <span className="text-sm text-gray-600">自分用メモ</span>
         <span className="ml-auto text-xs text-gray-400">この端末にのみ保存</span>
       </div>
