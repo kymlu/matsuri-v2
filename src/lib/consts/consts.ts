@@ -131,7 +131,6 @@ export const ICON = {
   login: "login",
   logout: "logout",
   menu: "menu",
-  mobile: "mobile",
   moreVert: "more_vert",
   musicNote: "music_note",
   noteStack: "note_stack",
