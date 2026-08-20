@@ -122,7 +122,7 @@ export default function ViewerSidebar({
       }
       <div className="flex items-center gap-1 mb-1">
         <Icon src="group" size="xs" colour="grey"/>
-        <span className="text-sm text-gray-600">共有メモ</span>
+        <span className="text-sm text-gray-600">公開メモ</span>
       </div>
       {
         isNullOrUndefinedOrBlank(note) &&
