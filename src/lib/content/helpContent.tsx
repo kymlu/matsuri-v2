@@ -212,6 +212,7 @@ export const HELP_CONTENT: Record<HelpPageKey, HelpPageContent> = {
               ["削除", "確認のうえ、セクションを削除します。"],
             ]}
           />
+          <p>メモ編集は、舞台左上のメモアイコンからも開けます。</p>
         </>,
       },
       {
@@ -219,6 +220,7 @@ export const HELP_CONTENT: Record<HelpPageKey, HelpPageContent> = {
         title: "セクションのメモとカウント",
         content: list([
           <><b>メモ：</b>テキストを付けられます（例：立ち位置の指示）。</>,
+          <><b>自分用メモ：</b>閲覧モードで入力した自分専用メモ（この端末にのみ保存）を、メモ編集画面の下部に読み取り専用で表示します。</>,
           <><b>カウント管理（「カウント」）：</b>名前付きのアクションを定義し、ダンサーを割り当てられます。</>,
           <>
             <b>制限：</b>

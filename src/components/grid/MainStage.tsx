@@ -54,6 +54,7 @@ type MainStageProps = {
   canResizeProps?: boolean,
   editEnabled?: boolean,
   toggleEditEnabled?: () => void,
+  openNoteDialog?: () => void,
   showPaths?: boolean,
   isEditingMovement?: boolean,
   dancerMovementCache: MovementCacheBySectionIdByObjectId,
@@ -73,7 +74,7 @@ export default function MainStage({
   updatePropSizeAndRotate, updateObstacleSizeAndRotate,
   selectedIds, setSelectedIds, selectedObjects,
   addDancer, addProp, addObstacle, appSettings, previousSection, selectedDancerMovement,
-  onDancerSelected, bottomMarginPercent = 0, canResizeProps, editEnabled, toggleEditEnabled,
+  onDancerSelected, bottomMarginPercent = 0, canResizeProps, editEnabled, toggleEditEnabled, openNoteDialog,
   showPaths = false, isEditingMovement = false, dancerMovementCache, propMovementCache, onMidpointEdit, currentMovement,
   dancerAnimationCache, propAnimationCache,
 }: MainStageProps) {
@@ -655,6 +656,17 @@ export default function MainStage({
         setIsShowingHorizontalRuler={(value) => setIsShowingHorizontalRuler(value)}
         setIsShowingVerticalRuler={(value) => setIsShowingVerticalRuler(value)}
       />
+    }
+    {
+      canEdit && openNoteDialog &&
+      <div className={`absolute space-y-1 left-2 ${isShowingHorizontalRuler ? "top-7" : "top-1"}`}>
+        <IconButton
+          size="sm"
+          src="speakerNotes"
+          colour="black"
+          onClick={openNoteDialog}
+        />
+      </div>
     }
     {
       (isManualMovement || canEdit) &&

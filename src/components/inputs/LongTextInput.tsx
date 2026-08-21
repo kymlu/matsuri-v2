@@ -59,10 +59,9 @@ export default function LongTextInput({
   }
 
   const inputClasses = classNames(
-    "w-full col-start-1 row-start-1 pl-2 text-black p-3 border-gray-400 rounded-md border focus-within:border-primary focus:outline-none",
+    "w-full col-start-1 row-start-1 pl-2 text-black p-3 border-gray-400 rounded-md border focus-within:border-primary focus:outline-none resize-none",
     {
       "h-full": !maxRows,
-      "resize-none": !!maxRows,
       "pr-6": clearable,
       "pr-2": !clearable,
       "text-center": centered,

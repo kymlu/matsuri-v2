@@ -25,6 +25,7 @@ import { DancerAction, DancerActionTiming } from "../models/dancerAction";
 import ActionSelectionToolbar from "../components/editor/ActionSelectionToolbar";
 import ConfirmDeletionDialog from "../components/dialogs/ConfirmDeletionDialog";
 import EditSectionNoteDialog from "../components/dialogs/EditSectionNoteDialog";
+import { getPersonalNotesForChoreo } from "../lib/dataAccess/LocalStorageController";
 import { Coordinates } from "../models/base";
 import { colorPalette } from "../lib/consts/colors";
 import { addDancer, addObstacle, addObstacles, addProp, alignHorizontalPositions, alignVerticalPositions, changeObjectColours, changePropInUse, distributePositions, editAndDeleteProps, editDancerPath, editPropPath, moveObjectPositions, pastePositions, rearrangePositions, removeObjects, renameAndDeleteDancers, renameDancer, renameObstacle, renameProp, setZOnAllPositions, swapDancerPositions, swapPropPositions, updateObstacleSizeAndRotate, updatePropSizeAndRotate } from "../lib/editor/commands/objectCommands";
@@ -124,6 +125,16 @@ export default function ChoreoEditPage(props: {
     dancers: Object.keys(history.presentState.state.dancers).length,
     obstacles: history.presentState.state.obstacles ? Object.keys(history.presentState.state.obstacles).length : 0,
   } as StageEntities<number>), [history.presentState.state.dancers, history.presentState.state.props, history.presentState.state.obstacles]);
+
+  const [personalNotes, setPersonalNotes] = useState<Record<string, string>>({});
+  useEffect(() => {
+    setPersonalNotes(getPersonalNotesForChoreo(history.presentState.state.id));
+  }, [history.presentState.state.id]);
+
+  const personalNote = useMemo(
+    () => personalNotes[currentSection.id] ?? "",
+    [personalNotes, currentSection.id]
+  );
 
   const [dancerMovementCache, setDancerMovementCache] = useState<MovementCacheBySectionIdByObjectId>({});
   const [dancerAnimationCache, setDancerAnimationCache] = useState<PathSvgCacheByObjectIdBySectionId>({});
@@ -802,6 +813,10 @@ export default function ChoreoEditPage(props: {
           }
           editEnabled={editEnabled}
           toggleEditEnabled={() => setEditEnabled(prev => !prev)}
+          openNoteDialog={() => {
+            resetSelectedIds();
+            setAddNoteToSectionDialogOpen(true);
+          }}
           showPaths={showPaths}
           isEditingMovement={isEditingMovement}
           dancerMovementCache={dancerMovementCache}
@@ -1340,6 +1355,7 @@ export default function ChoreoEditPage(props: {
         >
         <EditSectionNoteDialog
           section={currentSection}
+          personalNote={personalNote}
           onSubmit={(note: string) => {
             dispatch({
               type: "SET_STATE",

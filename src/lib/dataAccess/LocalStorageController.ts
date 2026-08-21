@@ -37,14 +37,12 @@ export function checkShowingViewPageInfoDialog(): boolean {
   return localStorage.getItem(DO_NOT_SHOW_VIEW_INFO_DIALOG) === TRUE;
 }
 
-// Personal, per-device notes. Never synced to the server - unlike ChoreoSection.note,
-// these are just for the person using this device and are keyed by section id so they
-// survive edits/republishes of the chart.
+// Personal, per-device notes. Never synced to the server.
 function getPersonalNotesKey(choreoId: string): string {
   return `personal_notes_${choreoId}`;
 }
 
-function getPersonalNotesForChoreo(choreoId: string): Record<string, string> {
+export function getPersonalNotesForChoreo(choreoId: string): Record<string, string> {
   const raw = localStorage.getItem(getPersonalNotesKey(choreoId));
   if (!raw) return {};
   try {
