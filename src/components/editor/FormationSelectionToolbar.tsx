@@ -30,6 +30,11 @@ export default function FormationSelectionToolbar({
   const sectionRefs = useRef<Map<string, HTMLButtonElement | null>>(new Map());
   const dialogSectionRefs = useRef<Map<string, HTMLButtonElement | null>>(new Map());
   
+  useEffect(() => {
+    sectionRefs.current.get(currentSectionId)?.scrollIntoView({behavior: "instant", block: "center"});
+    dialogSectionRefs.current.get(currentSectionId)?.scrollIntoView({behavior: "instant", block: "center"});
+  }, []);
+
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {

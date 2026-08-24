@@ -2,10 +2,11 @@ import classNames from "classnames"
 import Icon from "../basic/Icon"
 import { ICON } from "../../lib/consts/consts"
 import { ChoreoStatus } from "../../pages/HomePage"
+import { ReactNode } from "react"
 
 type TagProps = {
   type: "primary" | "filled" | "grey",
-  text: string,
+  text: ReactNode,
   icon?: keyof typeof ICON,
   compact?: boolean,
   dottedLine?: boolean,

@@ -98,6 +98,14 @@ export default function ChoreoViewPage(props: {
 
   const resetSelectedIds = () => setSelectedIds({props: [], dancers: [], obstacles: []});
 
+  const changeSection = (section: ChoreoSection) => {
+    if (selectedTimingId) {
+      setSelectedTimingId(undefined);
+      resetSelectedIds();
+    }
+    setCurrentSection(section);
+  };
+
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
   const exportDialog = Dialog.createHandle<{}>();
   const handleExportDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
@@ -131,6 +139,8 @@ export default function ChoreoViewPage(props: {
           note={currentSection.note}
           personalNote={personalNote}
           sectionId={currentSection.id}
+          sections={props.currentChoreo.sections}
+          onChangeSection={changeSection}
           onPersonalNoteChange={(newNote) => {
             setPersonalSectionNote(props.currentChoreo.id, currentSection.id, newNote);
           }}
@@ -162,13 +172,7 @@ export default function ChoreoViewPage(props: {
             <FormationSelectionToolbar
               currentSectionId={currentSection.id}
               sections={props.currentChoreo.sections}
-              onChangeSection={(section) => {
-                if (selectedTimingId) {
-                  setSelectedTimingId(undefined);
-                  resetSelectedIds();
-                }
-                setCurrentSection(section);
-              }}
+              onChangeSection={changeSection}
             />
           }
           onChangeHeight={(height) => setSidebarHeight(height)}
