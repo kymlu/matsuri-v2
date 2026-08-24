@@ -48,7 +48,7 @@ export default function BottomDrawer ({
             </div>
             <Drawer.Content className="h-full px-4 pb-6">
               {header}
-              <div className="max-h-[calc(75svh-75px)] overflow-auto">
+              <div className="max-h-[calc(var(--drawer-frontmost-height)_-_var(--drawer-snap-point-offset)_-_75px)] overflow-auto">
                 {children}
               </div>
             </Drawer.Content>
