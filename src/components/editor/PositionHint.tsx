@@ -20,8 +20,6 @@ const PositionHint = memo(function PositionHint({
   geometry,
 }: PositionHintProps) {
 
-  const currentX = roundToTenth(geometry.stageWidth / 2 - position.x);
-  const currentY = roundToTenth(position.y);
   const deltaX = nextPosition ? roundToTenth(roundToTenth(nextPosition.x) - roundToTenth(position.x)) : undefined;
   const deltaY = nextPosition ? roundToTenth(roundToTenth(nextPosition.y) - roundToTenth(position.y)) : undefined;
 
@@ -30,10 +28,7 @@ const PositionHint = memo(function PositionHint({
       <div className="mb-2 space-y-1">
         <div className="flex w-full gap-1">
           <InfoBox title="現在の位置">
-            <span className="font-bold">{currentY}m</span>
-            <span className="text-sm text-gray-400">/</span>
-            <span>{currentX === 0 ? "↔︎" : currentX > 0 ? "←" : "→"}</span>
-            <span className="font-bold">{Math.abs(currentX)}m</span>
+            <DancerPositionText position={position} geometry={geometry}/>
           </InfoBox>
           {
             nextPosition && deltaX !== undefined && deltaY !== undefined &&
@@ -92,6 +87,27 @@ const PositionHint = memo(function PositionHint({
 });
 
 export default PositionHint;
+
+type DancerPositionTextProps = {
+  position: DancerPosition;
+  geometry: StageGeometry;
+  bold?: boolean;
+};
+
+export function DancerPositionText({ position, geometry, bold = true }: DancerPositionTextProps) {
+  const currentX = roundToTenth(geometry.stageWidth / 2 - position.x);
+  const currentY = roundToTenth(position.y);
+  const valueClasses = bold ? "font-bold" : "font-normal";
+
+  return (
+    <div className="flex items-center gap-1">
+      <span className={valueClasses}>{currentY}m</span>
+      <span className="text-sm text-gray-400">/</span>
+      <span>{currentX === 0 ? "↔︎" : currentX > 0 ? "←" : "→"}</span>
+      <span className={valueClasses}>{Math.abs(currentX)}m</span>
+    </div>
+  );
+}
 
 type InfoBoxProps = {
   title: string,
