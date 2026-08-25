@@ -43,7 +43,7 @@ export default function SectionSummaryList({
               ref={(el) => { rowRefs.current.set(section.id, el); }}
               onClick={() => onChangeSection(section)}
               className={classNames(
-                "flex flex-col w-full gap-1 p-2 rounded-md cursor-pointer bg-transparent",
+                "flex flex-col w-full gap-1 px-3 py-1.5 rounded-md cursor-pointer bg-transparent",
                 {
                   "border-2 border-primary": isActive,
                   "border border-gray-400": !isActive,
