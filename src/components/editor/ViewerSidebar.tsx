@@ -88,7 +88,7 @@ export default function ViewerSidebar({
         }
         {
           isPositionHintShown &&
-          <div className="flex w-full gap-2 px-4 pt-1">
+          <div className="flex w-full gap-2 px-2 pt-1">
             <Button full compact primary={mode === "detail"} onClick={() => setMode("detail")}>
               詳細
             </Button>

@@ -30,7 +30,7 @@ export default function SectionSummaryList({
   }, []);
 
   return (
-    <div className="flex flex-col w-full gap-1 pb-5">
+    <div className="flex flex-col w-full gap-1 pb-2">
       {
         sections.map(section => {
           const isActive = strEquals(currentSectionId, section.id);
@@ -43,9 +43,9 @@ export default function SectionSummaryList({
               ref={(el) => { rowRefs.current.set(section.id, el); }}
               onClick={() => onChangeSection(section)}
               className={classNames(
-                "flex flex-col w-full gap-1 px-3 py-1.5 rounded-md cursor-pointer bg-transparent",
+                "flex flex-col w-full gap-1 px-3 py-1.5 rounded-md cursor-pointer",
                 {
-                  "border-2 border-primary": isActive,
+                  "border border-primary bg-primary/5": isActive,
                   "border border-gray-400": !isActive,
                 }
               )}
