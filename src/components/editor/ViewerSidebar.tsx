@@ -185,7 +185,7 @@ export default function ViewerSidebar({
             <span className="text-sm text-gray-600">自分用メモ</span>
             <span className="ml-auto text-xs text-gray-400">この端末にのみ保存</span>
           </div>
-          <div className="pb-5">
+          <div className="pb-2">
             <LongTextInput
               key={sectionId}
               name="自分用メモ"
