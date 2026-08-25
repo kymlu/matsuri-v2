@@ -57,7 +57,7 @@ export default function SectionSummaryList({
                   </span>
                   {isActive && <Tag type="filled" text="現在" compact/>}
                 </div>
-                {hasPublicNote && <Icon src="speakerNotes" size="xs" colour="grey"/>}
+                {hasPublicNote && <Icon src="speakerNotes" size="xs" colour={isActive ? "primary" : "grey"}/>}
               </div>
               <div className="flex flex-wrap items-center gap-1">
                 {
