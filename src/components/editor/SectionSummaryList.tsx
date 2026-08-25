@@ -45,8 +45,8 @@ export default function SectionSummaryList({
               className={classNames(
                 "flex flex-col w-full gap-1 p-2 rounded-md cursor-pointer bg-transparent",
                 {
-                  "border-[1.5px] border-primary": isActive,
-                  "border border-gray-300": !isActive,
+                  "border-2 border-primary": isActive,
+                  "border border-gray-400": !isActive,
                 }
               )}
             >
