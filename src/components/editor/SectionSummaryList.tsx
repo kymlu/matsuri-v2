@@ -30,7 +30,7 @@ export default function SectionSummaryList({
   }, []);
 
   return (
-    <div className="flex flex-col w-full gap-2 pb-5">
+    <div className="flex flex-col w-full gap-1 pb-5">
       {
         sections.map(section => {
           const isActive = strEquals(currentSectionId, section.id);
