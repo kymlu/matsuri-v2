@@ -14,12 +14,13 @@ export interface NumberInputProps {
   onChange?: (newValue: number | null) => void,
   disabled?: boolean,
   compact?: boolean,
+  short?: boolean,
   ref?: React.Ref<any>,
   label?: string,
 }
 
 export default function NumberInput ({
-  name, defaultValue, min, max, baseStep, buttonStep, onChange, disabled, compact, ref, label
+  name, defaultValue, min, max, baseStep, buttonStep, onChange, disabled, compact, short, ref, label
 }: NumberInputProps) {
   const [value, setValue] = React.useState<number | null>(defaultValue ?? 0);
   const id = React.useId();
@@ -57,12 +58,12 @@ export default function NumberInput ({
         disabled={disabled}
         >
         <div className={wrapperClasses}>
-          <NumberField.Group className="grid grid-cols-[1fr,2fr,1fr] w-full bg-white data-[disabled]:bg-gray-200 border rounded-md border-gray-400 focus-within:border-primary">
-            <NumberField.Decrement className={"flex items-center justify-center select-none rounded-l-md min-w-4 bg-clip-padding" + ((value ?? 1) > (min ?? 0) ? " opacity-100" : " opacity-30")}>
+          <NumberField.Group className="grid grid-cols-[auto,1fr,auto] w-full bg-white data-[disabled]:bg-gray-200 border rounded-md border-gray-400 focus-within:border-primary">
+            <NumberField.Decrement className={"flex items-center mx-1 justify-center select-none rounded-l-md min-w-4 bg-clip-padding" + ((value ?? 1) > (min ?? 0) ? " opacity-100" : " opacity-30")}>
               <Icon src="remove" colour="black" size="sm"/>
             </NumberField.Decrement>
-            <NumberField.Input className="p-3 text-center text-gray-900 min-w-10 tabular-nums focus:z-1 focus:outline-none focus:-outline-offset-1" />
-            <NumberField.Increment className={"flex items-center justify-center select-none rounded-r-md min-w-4 bg-clip-padding" + ((value ?? 1) < (max ?? 100000000) ? " opacity-100" : " opacity-30")}>
+            <NumberField.Input className={classNames("p-3 text-center text-gray-900 min-w-10 tabular-nums focus:z-1 focus:outline-none focus:-outline-offset-1", { "h-6": short, "h-10": !short })} />
+            <NumberField.Increment className={"flex items-center mx-1 justify-center select-none rounded-r-md min-w-4 bg-clip-padding" + ((value ?? 1) < (max ?? 100000000) ? " opacity-100" : " opacity-30")}>
               <Icon src="add" colour="black" size="sm"/>
             </NumberField.Increment>
           </NumberField.Group>

@@ -10,7 +10,6 @@ export type DateInputProps = {
   defaultValue?: string,
   onDateChange: (newDate: string) => void,
   compact?: boolean,
-  tall?: boolean,
   short?: boolean,
   centered?: boolean,
   required?: boolean,
@@ -21,7 +20,7 @@ export type DateInputProps = {
 }
 
 export default function DateInput({
-  name, defaultValue, onDateChange, compact, tall, short, centered, required, disabled, hasError, ref, label
+  name, defaultValue, onDateChange, compact, short, centered, required, disabled, hasError, ref, label
 }: DateInputProps) {
   const [value, setValue] = React.useState<string | undefined>(defaultValue ?? undefined);
   const displayValue = useMemo(() => {
@@ -46,8 +45,8 @@ export default function DateInput({
   const inputClasses = classNames(
     "col-start-1 pointer-events-none row-start-1 px-2 py-3 text-black border border-gray-400 rounded-md focus-within:border-primary focus:outline-none",
     {
-      "h-10": tall,
       "h-6": short,
+      "h-10": !short,
       "text-center": centered,
       "bg-gray-200": disabled,
       "w-full": !compact,

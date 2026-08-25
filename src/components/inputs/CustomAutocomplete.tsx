@@ -18,7 +18,6 @@ export type CustomAutocompleteProps = {
   search?: boolean,
   clearable?: boolean,
   compact?: boolean,
-  tall?: boolean,
   short?: boolean,
   centered?: boolean,
   required?: boolean,
@@ -34,7 +33,7 @@ export type CustomAutocompleteProps = {
 
 export default function CustomAutocomplete({
   name, options, listItemFormat, itemToStringValueFunc, defaultValue, onContentChange, placeholder,
-  search, clearable, compact, tall, short, centered,
+  search, clearable, compact, short, centered,
   required, hasError, disabled, ref, maxLength,
   showLength, label, rightLabel, restrictFn
 }: CustomAutocompleteProps) {
@@ -62,8 +61,8 @@ export default function CustomAutocomplete({
       "pr-2": !clearable && !showLength,
       "pl-10": search,
       "pl-4": !search,
-      "h-10": tall,
       "h-6": short,
+      "h-10": !short,
       "text-center": centered,
       "bg-gray-200": disabled,
       "w-full": !compact,

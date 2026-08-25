@@ -150,7 +150,7 @@ export function NewChoreoPage({
           {stepTitles[step] || ""}
         </h2>
       </div>
-      <div className="flex-1">
+      <div className="flex-1 overflow-auto">
         {step === 1 && (
           <div className="flex flex-col h-full pt-10 pb-20 justify-evenly">
             <TextInput
@@ -298,7 +298,7 @@ export function NewChoreoPage({
         )}
       </div>
 
-      <div className="flex justify-between gap-4 pb-8">
+      <div className="flex justify-between h-10 gap-4 mb-8">
         { <Button
             full
             onClick={step === 1 ? goToHomePage : prevStep}

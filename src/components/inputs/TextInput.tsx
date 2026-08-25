@@ -14,7 +14,6 @@ export type TextInputProps = {
   search?: boolean,
   clearable?: boolean,
   compact?: boolean,
-  tall?: boolean,
   short?: boolean,
   centered?: boolean,
   required?: boolean,
@@ -32,7 +31,7 @@ export type TextInputProps = {
 
 export default function TextInput({
   name, defaultValue, onContentChange, placeholder,
-  search, clearable, compact, tall, short, centered,
+  search, clearable, compact, short, centered,
   required, hasError, errorMsg, disabled, ref, maxLength,
   showLength, label, rightLabel, restrictFn, type = "text"
 }: TextInputProps) {
@@ -61,8 +60,8 @@ export default function TextInput({
       "pl-10": search,
       "pl-4": !search && !compact,
       "pl-2": !search && compact,
-      "h-10": tall,
       "h-6": short,
+      "h-10": !short,
       "text-center": centered,
       "bg-gray-200": disabled,
       "w-full": !compact,
