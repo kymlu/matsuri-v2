@@ -1037,7 +1037,7 @@ export default function ChoreoEditPage(props: {
         onToggleObstacleLock={() => {setAreObstaclesLocked(prev => !prev)}}
         onToggleResizePropsLock={() => {setIsPropResizeLocked(prev => !prev)}}
         isResizePropsLocked={isPropResizeLocked}
-        showLockResizeProps={selectedObjects.props.length === 1}
+        showLockResizeProps={entityCount.props > 0}
         showMovementFunctions={(entityCount.dancers + entityCount.props) > 0}
         showPaths={showPaths}
         toggleShowPaths={() => setShowPaths(prev => !prev)}
