@@ -9,7 +9,7 @@ import Icon from "../basic/Icon";
 import { isNullOrUndefinedOrBlank, strEquals } from "../../lib/helpers/globalHelper";
 import Divider from "../basic/Divider";
 import Button from "../basic/Button";
-import React, { ReactNode, useState } from "react";
+import React, { memo, ReactNode, useState } from "react";
 import BottomDrawer from "../basic/BottomDrawer";
 import LongTextInput from "../inputs/LongTextInput";
 
@@ -35,7 +35,7 @@ type ViewerSidebarProps = {
   onChangeHeight: (height: number) => void,
 };
 
-export default function ViewerSidebar({
+function ViewerSidebar({
   note,
   personalNote,
   onPersonalNoteChange,
@@ -201,3 +201,5 @@ export default function ViewerSidebar({
     </>
   </BottomDrawer>
 }
+
+export default memo(ViewerSidebar);
