@@ -1,6 +1,6 @@
 import { Stage } from "react-konva";
 import GridLayer from "./layers/GridLayer";
-import { useState, useCallback, useEffect, useRef, SetStateAction, useMemo } from "react";
+import { memo, useState, useCallback, useEffect, useRef, SetStateAction, useMemo } from "react";
 import { Choreo, StageGeometry } from "../../models/choreo";
 import FormationLayer from "./layers/FormationLayer";
 import { ChoreoSection, Movement, MovementCacheBySectionIdByObjectId, PathSvgCacheByObjectIdBySectionId } from "../../models/choreoSection";
@@ -65,7 +65,7 @@ type MainStageProps = {
   propAnimationCache: PathSvgCacheByObjectIdBySectionId,
 }
 
-export default function MainStage({
+function MainStage({
   canEdit, canToggleSelection,
   canSelectDancers, canSelectProps, canSelectObstacles,
   isAddingDancer, isAddingProp, isAddingObstacles,
@@ -693,3 +693,5 @@ export default function MainStage({
     }
   </div>
 }
+
+export default memo(MainStage);

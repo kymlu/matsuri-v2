@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import IconButton from "../basic/IconButton";
 import { VerticalDivider } from "../basic/Divider";
 import { Distribution, HorizontalAlignment, Rearrangement, VerticalAlignment } from "../../models/alignment";
@@ -101,7 +101,7 @@ type ToolbarProps = {
   onDuplicateProp: () => void;
 };
 
-export default function Toolbar({
+function Toolbar({
   isEnabled,
   
   onAddDancer, isAddingDancer,
@@ -341,3 +341,5 @@ export default function Toolbar({
     }
   </div>
 }
+
+export default memo(Toolbar);
