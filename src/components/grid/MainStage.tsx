@@ -156,10 +156,10 @@ function MainStage({
 
   const [stagePos, setStagePos] = useState<Coordinates>({ x: 0, y: 0 });
   const stagePositionRef = useRef(stagePos);
-  const setStagePosition = (newValue: Coordinates) => {
+  const setStagePosition = useCallback((newValue: Coordinates) => {
     stagePositionRef.current = newValue;
     setStagePos(newValue);
-  }
+  }, []);
   const stageRef = useRef<Konva.Stage>(null);
   useEffect(() => {
     return () => {
@@ -319,7 +319,7 @@ function MainStage({
     }
   }, [stageRef, currentSection, selectedIds, selectedObjects, stagePositionRef.current, stageGeometry, bottomMarginPercent, size.width]);
 
-  const resetCamera = () => {
+  const resetCamera = useCallback(() => {
     setIsManualMovement(false);
     if (!stageGeometry) return;
     
@@ -362,9 +362,9 @@ function MainStage({
         }
       });
     }
-  };
+  }, [stageGeometry, selectedIds.dancers, selectedObjects.dancers, size.width, size.height, isShowingVerticalRuler, centerXPx, bottomMarginM, pixelsPerMeter, currentSection.formation.dancerPositions, setStagePosition]);
 
-  const handleWheel = (e: any) => {
+  const handleWheel = useCallback((e: any) => {
     e.evt.preventDefault();
 
     const oldScale = stageScale.x;
@@ -385,8 +385,8 @@ function MainStage({
       setIsManualMovement(true);
     }
     setStageScale({ x: newScale, y: newScale });
-  };
-  
+  }, [stageScale.x, isManualMovement]);
+
   const [lastCenter, setLastCenter] = useState<any>(null);
   const [lastDist, setLastDist] = useState(0);
   const [dragStopped, setDragStopped] = useState(false);
@@ -467,20 +467,20 @@ function MainStage({
       setLastDist(dist);
       setLastCenter(newCenter);
     }
-  }, [dragStopped, lastCenter, lastDist, stagePos, stageScale, isZooming]);
+  }, [dragStopped, lastCenter, lastDist, stagePos, stageScale, isZooming, setStagePosition]);
 
-  const handleTouchEnd = () => {
+  const handleTouchEnd = useCallback(() => {
     setLastDist(0);
     setLastCenter(null);
     if (isZooming.current) isZooming.current = false;
-  };
+  }, [isZooming]);
 
-  const handleDragEnd = (e: any) => {
+  const handleDragEnd = useCallback((e: any) => {
     setDragStopped(false);
     // Ensure stage position is synchronized with our reactive state
     const stage = e.target.getStage();
     setStagePosition({ x: stage.x(), y: stage.y() });
-  };
+  }, [setStagePosition]);
 
   const verticalGridIncrement = useMemo(() => {    
     if (pixelsPerMeter < 10) {
@@ -493,61 +493,74 @@ function MainStage({
       return 1;
     }
   }, [pixelsPerMeter])
+
+  const onStagePointerDown = useCallback((e: any) => {
+    setClickedOnEmpty(e.target === e.target.getStage());
+  }, []);
+
+  const onStageDragStart = useCallback(() => {
+    setIsDraggingOnEmpty(clickedOnEmpty);
+  }, [clickedOnEmpty]);
+
+  const onStageDragMove = useCallback((e: any) => {
+    if (e.target === e.target.getStage()) {
+      setRulerPos({x: e.target.x(), y: e.target.y()})
+      if (!isManualMovement) {
+        setIsManualMovement(true);
+      }
+    }
+  }, [isManualMovement]);
+
+  const onStagePointerUp = useCallback((e: any) => {
+    if (clickedOnEmpty && isDraggingOnEmpty === undefined) {
+      if (canEdit) {
+        setSelectedIds({props: [], dancers: [], obstacles: []});
+      }
+      const stagePosition = e.target.getStage();
+
+      if ((isAddingDancer || isAddingProp || isAddingObstacles) && stagePosition && stageGeometry) {
+        let position = {
+          x: (e.evt.x - stagePosition.attrs.x)/stagePosition.attrs.scaleX,
+          y: (e.evt.y - stagePosition.attrs.y - stageGeometry.margin.topMargin * METER_PX) / stagePosition.attrs.scaleY
+        }
+
+        if (appSettings.snapToGrid) {
+          position = snapCoordsToGrid(position, METER_PX/2)
+        }
+
+        const positionM = pxToStageMeters(position, stageGeometry, METER_PX, isAddingProp ? DEFAULT_PROP_LENGTH : 0);
+
+        if (
+          positionM.x >= -(stageGeometry.margin.leftMargin) &&
+          positionM.x <= (stageGeometry.margin.rightMargin + stageGeometry.stageWidth) &&
+          positionM.y >= -(stageGeometry.margin.topMargin) &&
+          positionM.y <= (stageGeometry.margin.bottomMargin + stageGeometry.stageLength)
+        ) {
+          if (isAddingDancer) {
+            addDancer?.(positionM.x, positionM.y);
+          } else if (isAddingProp) {
+            addProp?.(positionM.x, positionM.y);
+          } else if (isAddingObstacles) {
+            addObstacle?.(positionM.x, positionM.y);
+          }
+        }
+      }
+    } else if (isDraggingOnEmpty !== undefined) setIsDraggingOnEmpty(undefined);
+  }, [clickedOnEmpty, isDraggingOnEmpty, canEdit, isAddingDancer, isAddingProp, isAddingObstacles, stageGeometry, appSettings.snapToGrid, addDancer, addProp, addObstacle, setSelectedIds]);
+
+  const handleMidpointEdit = useCallback((newMovement: Movement) => {
+    onMidpointEdit?.(newMovement);
+  }, [onMidpointEdit]);
+
   return <div ref={containerRef} className="w-full h-full overflow-auto">
     {
       stageGeometry && 
       <Stage
         ref={stageRef}
-        onPointerDown={(e) => {
-          setClickedOnEmpty(e.target === e.target.getStage());
-        }}
-        onDragStart={(e) => {
-          setIsDraggingOnEmpty(clickedOnEmpty);
-        }}
-        onDragMove={(e) => {
-          if (e.target === e.target.getStage()) {
-            setRulerPos({x: e.target.x(), y: e.target.y()})
-            if (!isManualMovement) {
-              setIsManualMovement(true);
-            }
-          }
-        }}
-        onPointerUp={(e) => {
-          if (clickedOnEmpty && isDraggingOnEmpty === undefined) {
-            if (canEdit) {
-              setSelectedIds({props: [], dancers: [], obstacles: []});
-            }
-            const stagePosition = e.target.getStage();
-            
-            if ((isAddingDancer || isAddingProp || isAddingObstacles) && stagePosition) {
-              let position = {
-                x: (e.evt.x - stagePosition.attrs.x)/stagePosition.attrs.scaleX,
-                y: (e.evt.y - stagePosition.attrs.y - stageGeometry.margin.topMargin * METER_PX) / stagePosition.attrs.scaleY
-              }
-
-              if (appSettings.snapToGrid) {
-                position = snapCoordsToGrid(position, METER_PX/2)
-              }
-
-              const positionM = pxToStageMeters(position, stageGeometry, METER_PX, isAddingProp ? DEFAULT_PROP_LENGTH : 0);
-              
-              if (
-                positionM.x >= -(stageGeometry.margin.leftMargin) &&
-                positionM.x <= (stageGeometry.margin.rightMargin + stageGeometry.stageWidth) &&
-                positionM.y >= -(stageGeometry.margin.topMargin) &&
-                positionM.y <= (stageGeometry.margin.bottomMargin + stageGeometry.stageLength)
-              ) {
-                if (isAddingDancer) {
-                  addDancer?.(positionM.x, positionM.y);
-                } else if (isAddingProp) {
-                  addProp?.(positionM.x, positionM.y);
-                } else if (isAddingObstacles) {
-                  addObstacle?.(positionM.x, positionM.y);
-                }
-              }
-            }
-          } else if (isDraggingOnEmpty !== undefined) setIsDraggingOnEmpty(undefined);
-        }}
+        onPointerDown={onStagePointerDown}
+        onDragStart={onStageDragStart}
+        onDragMove={onStageDragMove}
+        onPointerUp={onStagePointerUp}
         width={size.width}
         height={size.height}
         draggable
@@ -632,7 +645,7 @@ function MainStage({
               currentSection?.formation.dancerPositions[selectedIds.dancers[0]] :
               currentSection?.formation.propPositions[selectedIds.props[0]]
             }
-            onMidpointEdit={(newMovement) => onMidpointEdit?.(newMovement)}
+            onMidpointEdit={handleMidpointEdit}
             movement={currentMovement}
             geometry={stageGeometry}
             prop={selectedObjects.props[0] ? currentChoreo.props[selectedObjects.props[0].propId] : undefined}
@@ -653,8 +666,8 @@ function MainStage({
         verticalGridIncrement={verticalGridIncrement}
         scale={stageScale}
         isSelectingNewSection={isSelectingNewSection}
-        setIsShowingHorizontalRuler={(value) => setIsShowingHorizontalRuler(value)}
-        setIsShowingVerticalRuler={(value) => setIsShowingVerticalRuler(value)}
+        setIsShowingHorizontalRuler={setIsShowingHorizontalRuler}
+        setIsShowingVerticalRuler={setIsShowingVerticalRuler}
       />
     }
     {
@@ -677,7 +690,7 @@ function MainStage({
             size="sm"
             src="centerFocusStrong"
             colour="black"
-            onClick={() => resetCamera()}
+            onClick={resetCamera}
           />
         }
         {
