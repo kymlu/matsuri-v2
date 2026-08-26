@@ -5,15 +5,15 @@ import Konva from "konva";
 import { colorPalette } from "../../../lib/consts/colors";
 import { METER_PX, PATH_DASH } from "../../../lib/consts/consts";
 import { Prop, PropPosition } from "../../../models/prop";
-import { memo, useEffect, useRef } from "react";
+import { memo, useCallback, useEffect, useRef } from "react";
 import { PathSvgCacheBySectionId } from "../../../models/choreoSection";
 
 type PropGridObjectProps = {
   prop: Prop;
   position: PropPosition;
   stageGeometry: StageGeometry;
-  updatePosition?: (x: number, y: number) => void;
-  onClick?: (isAdditive?: boolean) => void;
+  updatePosition?: (x: number, y: number, id: string) => void;
+  onClick?: (id: string, isAdditive?: boolean) => void;
   isSelected: boolean;
   registerNode?: (id: string, node: Konva.Node | null) => void;
   isTransformerActive?: boolean;
@@ -62,7 +62,11 @@ const PropGridObject = memo(function PropGridObject({
 
     inUseOutlineAnimation.current.start();
   }, [position.inUse, animate]);
-  
+
+  const handleClick = useCallback((id: string, isAdditive?: boolean) => {
+    if (canSelect) onClick?.(id, isAdditive);
+  }, [canSelect, onClick]);
+
   return <>
     {
       prop &&
@@ -72,8 +76,8 @@ const PropGridObject = memo(function PropGridObject({
         position={position}
         width={prop.width}
         height={prop.length}
-        onClick={(isAdditive) => {if (canSelect) onClick?.(isAdditive)}}
-        updatePosition={(x, y) => {updatePosition?.(x, y);}}
+        onClick={handleClick}
+        updatePosition={updatePosition}
         stageGeometry={stageGeometry}
         isSelected={isSelected}
         registerNode={registerNode}

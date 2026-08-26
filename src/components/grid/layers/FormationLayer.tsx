@@ -83,14 +83,27 @@ const FormationLayer = memo(function FormationLayer({
 		transformerRef.current?.forceUpdate();
 	}
 
-  const registerNode = (id: string, node: Konva.Node | null) => {
+  const updateTransformer = useCallback(() => {
+    const transformer = transformerRef.current;
+    if (!transformer) return;
+    const nodes = [
+      ...selectedIds.dancers.map((id) => nodeMap.current.get(id)).filter(Boolean),
+      ...selectedIds.props.map((id) => nodeMap.current.get(id)).filter(Boolean),
+      ...selectedIds.obstacles.map((id) => nodeMap.current.get(id)).filter(Boolean)
+    ] as Konva.Node[];
+
+    transformer.nodes(nodes);
+    transformer.getLayer()?.batchDraw();
+  }, [selectedIds]);
+
+  const registerNode = useCallback((id: string, node: Konva.Node | null) => {
     if (node) {
       nodeMap.current.set(id, node);
     } else {
       nodeMap.current.delete(id);
     }
     updateTransformer();
-  };
+  }, [updateTransformer]);
 
   const toggleDancerSelect = useCallback((id: string, isAdditive: boolean = true) => {
     if(canSelectDancers && !isDraggingOnEmpty) {
@@ -136,20 +149,7 @@ const FormationLayer = memo(function FormationLayer({
     
   useEffect(() => {
     updateTransformer();
-  }, [selectedIds]);
-
-  const updateTransformer = () => {
-    const transformer = transformerRef.current;
-    if (!transformer) return;
-    const nodes = [
-      ...selectedIds.dancers.map((id) => nodeMap.current.get(id)).filter(Boolean),
-      ...selectedIds.props.map((id) => nodeMap.current.get(id)).filter(Boolean),
-      ...selectedIds.obstacles.map((id) => nodeMap.current.get(id)).filter(Boolean)
-    ] as Konva.Node[];
-
-    transformer.nodes(nodes);
-    transformer.getLayer()?.batchDraw();
-  }
+  }, [selectedIds, updateTransformer]);
 
   const obstacleList = useMemo(() => {
     if (obstacles) {
@@ -163,7 +163,12 @@ const FormationLayer = memo(function FormationLayer({
     return (selectedIds.dancers.length + selectedIds.props.length + selectedIds.obstacles.length) > 1
   }, [selectedIds]);
 
-  return ( 
+  const handleDancerClick = useCallback((id: string, isAdditive?: boolean) => {
+    toggleDancerSelect(id, isAdditive);
+    onDancerSelected?.();
+  }, [toggleDancerSelect, onDancerSelected]);
+
+  return (
     <Layer>
       {obstacleList.map((obstacle) => {
         return (
@@ -171,8 +176,8 @@ const FormationLayer = memo(function FormationLayer({
             key={obstacle.id}
             obstacle={obstacle}
             stageGeometry={geometry}
-            updatePosition={(x, y) => updateObstaclePosition?.(x, y, obstacle.id)}
-            onClick={(isAdditive) => {toggleObstacleSelect(obstacle.id, isAdditive)}}
+            updatePosition={updateObstaclePosition}
+            onClick={toggleObstacleSelect}
             isSelected={selectedIds.obstacles.includes(obstacle.id)}
             isTransformerActive={isTransformerActive}
             registerNode={registerNode}
@@ -191,8 +196,8 @@ const FormationLayer = memo(function FormationLayer({
             prop={props[propPosition.propId]}
             position={propPosition}
             stageGeometry={geometry}
-            updatePosition={(x, y) => updatePropPosition?.(x, y, propPosition.propId)}
-            onClick={(isAdditive) => {togglePropSelect(propPosition.propId, isAdditive)}}
+            updatePosition={updatePropPosition}
+            onClick={togglePropSelect}
             isSelected={selectedIds.props.includes(propPosition.propId)}
             isTransformerActive={isTransformerActive}
             registerNode={registerNode}
@@ -213,11 +218,8 @@ const FormationLayer = memo(function FormationLayer({
             dancer={dancers[dancerPosition.dancerId]}
             position={dancerPosition}
             stageGeometry={geometry}
-            updatePosition={(x, y) => updateDancerPosition?.(x, y, dancerPosition.dancerId)}
-            onClick={(isAdditive) => {
-              toggleDancerSelect(dancerPosition.dancerId, isAdditive);
-              onDancerSelected?.();
-            }}
+            updatePosition={updateDancerPosition}
+            onClick={handleDancerClick}
             isSelected={selectedIds.dancers.includes(dancerPosition.dancerId)}
             registerNode={registerNode}
             canEdit={canEdit}
