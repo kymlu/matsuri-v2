@@ -23,6 +23,21 @@ import MovementEditLayer from "./layers/MovementEditLayer";
 
 Konva.hitOnDragEnabled = true;
 
+const getDistance = (p1: any, p2: any) => {
+  return Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
+};
+
+const getCenter = (p1: any, p2: any) => {
+  return {
+    x: (p1.x + p2.x) / 2,
+    y: (p1.y + p2.y) / 2,
+  };
+};
+
+const clampScale = (scale: number) => {
+  return Math.max(Math.min(scale, MAX_ZOOM), MIN_ZOOM);
+}
+
 type MainStageProps = {
   canEdit: boolean,
   canToggleSelection: boolean,
@@ -349,21 +364,6 @@ function MainStage({
     }
   };
 
-  const getDistance = (p1: any, p2: any) => {
-    return Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2));
-  };
-
-  const getCenter = (p1: any, p2: any) => {
-    return {
-      x: (p1.x + p2.x) / 2,
-      y: (p1.y + p2.y) / 2,
-    };
-  };
-
-  const clampScale = (scale: number) => {
-    return Math.max(Math.min(scale, MAX_ZOOM), MIN_ZOOM);
-  }
-
   const handleWheel = (e: any) => {
     e.evt.preventDefault();
 
@@ -492,7 +492,7 @@ function MainStage({
     } else {
       return 1;
     }
-  }, [stageScale])
+  }, [pixelsPerMeter])
   return <div ref={containerRef} className="w-full h-full overflow-auto">
     {
       stageGeometry && 
