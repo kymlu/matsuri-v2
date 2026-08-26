@@ -11,6 +11,7 @@ type HelpPageProps = {
 
 const PAGE_ITEMS: Record<string, string> = {
   home: "ホーム画面",
+  concepts: "隊列表の基本",
   view: "閲覧モード",
   edit: "編集モード",
   exports: "エクスポート",

@@ -18,6 +18,8 @@ type ToolbarProps = {
   // selection / attributes
   showSelectColour: boolean;
   onSelectColor: () => void;
+  showSelectName: boolean;
+  onSelectName: () => void;
   onSelectType: (selectDancers: boolean, selectProps: boolean, selectObstacles: boolean) => void;
   showSelectDancersButton: boolean;
   showSelectPropsButton: boolean;
@@ -93,6 +95,10 @@ type ToolbarProps = {
   onToggleResizePropsLock: () => void;
   isResizePropsLocked: boolean;
   showLockResizeProps: boolean;
+  onEditPropSize: () => void;
+  showEditPropSize: boolean;
+  showDuplicateProp: boolean;
+  onDuplicateProp: () => void;
 };
 
 export default function Toolbar({
@@ -104,6 +110,8 @@ export default function Toolbar({
 
   showSelectColour,
   onSelectColor,
+  showSelectName,
+  onSelectName,
   onSelectType,
   showSelectDancersButton,
   showSelectPropsButton,
@@ -146,6 +154,9 @@ export default function Toolbar({
   onToggleResizePropsLock,
   isResizePropsLocked,
   showLockResizeProps,
+  onEditPropSize,
+  showEditPropSize,
+  showDuplicateProp, onDuplicateProp,
 }: ToolbarProps) {
   const [isAddManagerVisible, setIsAddManagerVisible] = useState<boolean>(false);
   const [isArrangeVisible, setIsArrangeVisible] = useState<boolean>(false);
@@ -204,6 +215,7 @@ export default function Toolbar({
         {showPastePosition && <IconButton src="contentPaste" label="位置ペースト" onClick={() => {onPastePosition()}} />}
         {showSwapPosition && <IconButton src="swapHoriz" label="位置交換" onClick={() => {onSwapPosition()}} />}
         {showDuplicateObstacle && <IconButton src="contentCopy" label="複製" onClick={() => {onDuplicateObstacle()}} />}
+        {showDuplicateProp && <IconButton src="contentCopy" label="複製" onClick={() => {onDuplicateProp()}} />}
         {showDeleteObjects && <IconButton src="delete" label="削除" onClick={()=>{onDeleteObjects()}}/>}
         {showMovementFunctions && <IconButton src="conversionPath" crossedOut={!showPaths} label="動線表示" onClick={()=>{toggleShowPaths()}}/>}
         {showMovementFunctions && <IconButton src="rebaseEdit" label="動線編集" onClick={()=>{
@@ -211,12 +223,14 @@ export default function Toolbar({
           setIsEditingMovement(true);
         }}/>}
         {showSelectColour && <IconButton src="select" subIconSrc="colors" label="同色選択" onClick={() => {onSelectColor()}} />}
+        {showSelectName && <IconButton src="select" subIconSrc="textFieldsAlt" label="同名選択" onClick={() => {onSelectName()}} />}
         {showSelectDancersButton && <IconButton src="select" subIconSrc="person" label="全員選択" onClick={() => {onSelectType(true, false, false)}} />}
         {showSelectPropsButton && <IconButton src="select" subIconSrc="flag" label="道具選択" onClick={() => {onSelectType(false, true, false)}} />}
         {showSelectObstaclesButton && <IconButton src="select" subIconSrc="emergencyHome" label="障害物選択" onClick={() => {onSelectType(false, false, true)}} />}
         {showSelectAllButton && <IconButton src="selectAll" label="全部選択" onClick={() => {onSelectType(true, true, true)}} />}
+        {showEditPropSize && <IconButton src="resize" subIconSrc="flag" label="サイズ編集" onClick={() => {onEditPropSize()}} />}
         {
-          showLockResizeProps && 
+          showLockResizeProps &&
           <IconButton src={isResizePropsLocked ? "lock" : "lockOpenRight"} label="道具サイズ" onClick={() => onToggleResizePropsLock()}/>
         }
         {
