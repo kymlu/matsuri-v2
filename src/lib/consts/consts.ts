@@ -79,6 +79,7 @@ export const ICON = {
   colors: "colors",
   contentCopy: "content_copy",
   contentPaste: "content_paste",
+  controlPointDuplicate: "control_point_duplicate",
   conversionPath: "conversion_path",
   counter1: "counter_1",
   counter2: "counter_2",
