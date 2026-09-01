@@ -59,14 +59,14 @@ function ViewerSidebar({
 
   return <BottomDrawer
     header={
-      <div className="flex items-center self-end justify-between w-full mb-2">
-        <span className="h-8 text-base font-bold truncate">
+      <div className="flex items-center self-end justify-between w-full h-8 mb-2">
+        <span className="text-base font-bold truncate">
           {isPositionHintShown ? dancer.name : "詳細"}
         </span>
         {
           (isPositionHintShown || selectedTiming) && <IconButton
             size="sm"
-            src="clear"
+            src="personCancel"
             noBorder
             onClick={() => {
               if (isPositionHintShown) {
