@@ -65,11 +65,11 @@ const RulerLayer = memo(function RulerLayer({
     const pushElement = (meterFromTop: number) => {
       elements.push(
         <div key={`v${meterFromTop}`} className="h-0">
-          <div className={`rounded-full h-[2px] -translate-y-1/2 bg-lightGrey ${meterFromTop % verticalGridIncrement === 0 ? "w-1" : "w-1.5"}`
+          <div className={`rounded-full h-[2px] -translate-y-1/2 bg-lightGrey dark:bg-gray-600 ${meterFromTop % verticalGridIncrement === 0 ? "w-1" : "w-1.5"}`
           }/>
           {
             meterFromTop % verticalGridIncrement === 0 &&
-            <div className={`h-fit pl-2 py-0.5 -translate-y-1/2 text-xs font-bold ${(meterFromTop >= 0 && meterFromTop <= length ? "text-gray-600" :  "text-gray-400")}`}>
+            <div className={`h-fit pl-2 py-0.5 -translate-y-1/2 text-xs font-bold ${(meterFromTop >= 0 && meterFromTop <= length ? "text-muted" :  "text-faint")}`}>
               {meterFromTop}
             </div>
           }
@@ -111,7 +111,7 @@ const RulerLayer = memo(function RulerLayer({
       elements.push(
         <div key={`h${m}`} className="relative w-0">
           <div className={
-            "absolute rounded-full w-[2px] -translate-x-1/2 bg-lightGrey "
+            "absolute rounded-full w-[2px] -translate-x-1/2 bg-lightGrey dark:bg-gray-600 "
             + (meterFromCenter % 2 === 0 ? "translate-y-[20px] h-1" : "translate-y-4 h-1.5")}/>
           {
             meterFromCenter % 2 === 0 &&
@@ -128,7 +128,7 @@ const RulerLayer = memo(function RulerLayer({
   return <>
     {
       showVerticalMarks && <div
-        className="fixed border-gray-200 border-l top-[88px] w-8 right-0 flex flex-col h-full text-sm bg-white pointer-events-none overflow-hidden"
+        className="fixed border-subtle border-l top-[88px] w-8 right-0 flex flex-col h-full text-sm bg-surface pointer-events-none overflow-hidden"
       >
         <div
           className="flex flex-col"
@@ -149,7 +149,7 @@ const RulerLayer = memo(function RulerLayer({
     {
       showHorizontalMarks &&
       <div
-        className="text-gray-600 border-b-gray-200 border-b fixed top-[88px] h-6 left-0 flex flex-col w-full text-sm bg-white pointer-events-none overflow-hidden"
+        className="text-muted border-b-subtle border-b fixed top-[88px] h-6 left-0 flex flex-col w-full text-sm bg-surface pointer-events-none overflow-hidden"
       >
         <div
           className="flex items-end h-0"
@@ -164,7 +164,7 @@ const RulerLayer = memo(function RulerLayer({
     }
     {
       (showVerticalMarks || showHorizontalMarks) && 
-      <div className="flex border-l border-b border-gray-200 justify-center items-center h-6 font-bold fixed text-sm text-center px-1 w-8 top-[88px] right-0 bg-gray-200"/>
+      <div className="flex border-l border-b border-subtle justify-center items-center h-6 font-bold fixed text-sm text-center px-1 w-8 top-[88px] right-0 bg-subtle"/>
     }
   </>
 });

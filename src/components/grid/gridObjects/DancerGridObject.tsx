@@ -87,7 +87,7 @@ const DancerGridObject = memo(function DancerGridObject({
             listening={false}
             text={dancer.name}
             fontSize={METER_PX/2}
-            fill="black"
+            fill={colorPalette.black}
             offsetY={METER_PX * 0.7}
             offsetX={dancer.name.length * 3}
           />

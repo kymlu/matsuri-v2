@@ -67,7 +67,7 @@ function Header({
   dancerCount, propCount, stageLength, stageWidth, version, choreoStatus,
   showPublish, publish,
 }: HeaderProps) {
-  return <header className="py-2 space-y-1.5 border-b-2 border-subtle select-none from-white to-transparent">
+  return <header className="py-2 space-y-1.5 border-b-2 border-subtle select-none bg-surface from-white to-transparent">
     <div className="flex items-center justify-between w-screen gap-2 px-2">
       <div className="flex">
         <IconButton

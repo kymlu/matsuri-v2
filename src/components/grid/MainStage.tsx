@@ -20,6 +20,7 @@ import RulerLayer from "./layers/RulerLayer";
 import { sortDancers, sortProps } from "../../lib/editor/commands/objectCommands";
 import IconButton from "../basic/IconButton";
 import MovementEditLayer from "./layers/MovementEditLayer";
+import { useTheme } from "../../lib/helpers/themeHelper";
 
 Konva.hitOnDragEnabled = true;
 
@@ -93,6 +94,9 @@ function MainStage({
   showPaths = false, isEditingMovement = false, dancerMovementCache, propMovementCache, onMidpointEdit, currentMovement,
   dancerAnimationCache, propAnimationCache,
 }: MainStageProps) {
+  // Konva reads colours from the (non-reactive) colorPalette, so remount the
+  // whole Stage subtree when the theme flips to force every layer to redraw.
+  const [theme] = useTheme();
   const [dancerPositions, setDancerPositions] = useState<DancerPosition[]>([]);
   const [propPositions, setPropPositions] = useState<PropPosition[]>([]);
   const [stageGeometry, setStageGeometry] = useState<StageGeometry>();
@@ -556,6 +560,7 @@ function MainStage({
     {
       stageGeometry && 
       <Stage
+        key={theme}
         ref={stageRef}
         onPointerDown={onStagePointerDown}
         onDragStart={onStageDragStart}

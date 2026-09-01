@@ -43,7 +43,7 @@ const MarkingsLayer = memo(function MarkingsLayer({
           align="right"
           width={gridSizePx}
           strokeWidth={3}
-          stroke="white"
+          stroke={colorPalette.white}
           opacity={0.5}
         />
       );

@@ -1,3 +1,29 @@
+// --- Theme-aware structural colours -----------------------------------------
+// The canvas (Konva) can't use CSS `dark:` variants, so the structural colours
+// below are resolved through this module-level flag instead. `setPaletteTheme`
+// is called from themeHelper whenever the theme changes. User-picked colours
+// (rainbow / browns / greys / actionOutlineColours) are NOT theme-aware.
+type PaletteTheme = "light" | "dark";
+let paletteTheme: PaletteTheme = "light";
+
+export function setPaletteTheme(theme: PaletteTheme) {
+  paletteTheme = theme;
+}
+
+const STRUCTURAL = {
+  //            light        dark
+  white:     ["#FFFFFF",   "#1F2937"], // dance-floor / surface, and haloes drawn in it
+  offWhite:  ["#F2F2F2",   "#111827"], // out-of-bounds area around the stage
+  black:     ["#000000",   "#F3F4F6"], // ink: labels / marking numbers on the floor
+  grey:      ["#666666",   "#9CA3AF"], // muted lines & text
+  midGrey:   ["#999999",   "#6B7280"], // secondary grid lines
+  lightGrey: ["#CDCDCD",   "#374151"], // faint grid lines
+  primary:   ["#AB1010",   "#D9534F"], // accent (matches the CSS --color-primary)
+} as const;
+
+const structural = (key: keyof typeof STRUCTURAL) =>
+  STRUCTURAL[key][paletteTheme === "dark" ? 1 : 0];
+
 export const colorPalette = {
   // Rainbow with 2 tints each
   rainbow: {
@@ -15,14 +41,14 @@ export const colorPalette = {
   browns: ["#5C4033", "#8B5E3C", "#D2B48C"],
   greys: ["#333333", "#888888", "#DDDDDD"],
 
-  white: "#FFFFFF",
-  black: "#000000",
-  offWhite: "#F2F2F2",
-  grey: "#666666",
-  midGrey: "#999999",
-  lightGrey: "#CDCDCD",
+  get white() { return structural("white"); },
+  get black() { return structural("black"); },
+  get offWhite() { return structural("offWhite"); },
+  get grey() { return structural("grey"); },
+  get midGrey() { return structural("midGrey"); },
+  get lightGrey() { return structural("lightGrey"); },
+  get primary() { return structural("primary"); },
   paleGrey: "#D4D4D4",
-  primary: "#AB1010",
 
   actionOutlineColours: [
     "#F3C300", "#875692", "#F38400", "#A1CAF1",
