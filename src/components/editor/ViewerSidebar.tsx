@@ -9,7 +9,7 @@ import Icon from "../basic/Icon";
 import { isNullOrUndefinedOrBlank, strEquals } from "../../lib/helpers/globalHelper";
 import Divider from "../basic/Divider";
 import Button from "../basic/Button";
-import React, { ReactNode, useState } from "react";
+import React, { memo, ReactNode, useState } from "react";
 import BottomDrawer from "../basic/BottomDrawer";
 import LongTextInput from "../inputs/LongTextInput";
 
@@ -35,7 +35,7 @@ type ViewerSidebarProps = {
   onChangeHeight: (height: number) => void,
 };
 
-export default function ViewerSidebar({
+function ViewerSidebar({
   note,
   personalNote,
   onPersonalNoteChange,
@@ -59,14 +59,14 @@ export default function ViewerSidebar({
 
   return <BottomDrawer
     header={
-      <div className="flex items-center self-end justify-between w-full mb-2">
-        <span className="h-8 text-base font-bold truncate">
+      <div className="flex items-center self-end justify-between w-full h-8 mb-2">
+        <span className="text-base font-bold truncate">
           {isPositionHintShown ? dancer.name : "詳細"}
         </span>
         {
           (isPositionHintShown || selectedTiming) && <IconButton
             size="sm"
-            src="clear"
+            src={isPositionHintShown ? "personCancel" : "clear"}
             noBorder
             onClick={() => {
               if (isPositionHintShown) {
@@ -201,3 +201,5 @@ export default function ViewerSidebar({
     </>
   </BottomDrawer>
 }
+
+export default memo(ViewerSidebar);

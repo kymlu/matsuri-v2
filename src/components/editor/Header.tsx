@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Dialog, Menu } from "@base-ui/react";
 import IconButton from "../basic/IconButton";
 import { Choreo } from "../../models/choreo";
@@ -48,7 +49,7 @@ type HeaderProps = {
   publish?: () => void;
 };
 
-export default function Header({
+function Header({
   returnHome,
   hasSidebar = false,
   currentChoreo,
@@ -188,3 +189,5 @@ export default function Header({
     </div>
   </header>
 }
+
+export default memo(Header);

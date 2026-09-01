@@ -1,6 +1,6 @@
 import Header from "../components/editor/Header"
 import FormationSelectionToolbar from "../components/editor/FormationSelectionToolbar";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Choreo } from "../models/choreo";
 import { ChoreoSection, MovementCacheBySectionIdByObjectId, PathSvgCacheByObjectIdBySectionId } from "../models/choreoSection";
 import MainStage from "../components/grid/MainStage";
@@ -18,6 +18,10 @@ import CustomSwitch from "../components/inputs/CustomSwitch";
 import { checkShowingViewPageInfoDialog, stopShowingViewPageInfoDialog, getPersonalSectionNote, setPersonalSectionNote } from "../lib/dataAccess/LocalStorageController";
 import Divider from "../components/basic/Divider";
 import { calculateMovementCache } from "../lib/helpers/editorCalculationHelper";
+import { DancerActionTiming } from "../models/dancerAction";
+import { SetStateAction } from "react";
+
+const exportDialog = Dialog.createHandle<{}>();
 
 export default function ChoreoViewPage(props: {
   goToHomePage: () => void
@@ -55,6 +59,8 @@ export default function ChoreoViewPage(props: {
   const [dancerAnimationCache, setDancerAnimationCache] = useState<PathSvgCacheByObjectIdBySectionId>({});
   const [propAnimationCache, setPropAnimationCache] = useState<PathSvgCacheByObjectIdBySectionId>({});
 
+  const resetSelectedIds = useCallback(() => setSelectedIds({props: [], dancers: [], obstacles: []}), []);
+
   useEffect(() => {
     if (!isNullOrUndefinedOrBlank(props.savedDancerName)) {
       const dancer = Object.values(props.currentChoreo.dancers).find(x => strEquals(x.name, props.savedDancerName));
@@ -72,58 +78,93 @@ export default function ChoreoViewPage(props: {
     setDancerAnimationCache(res.newDancerAnimationCache);
     setDancerMovementCache(res.newDancerMovementCache);
     setPropAnimationCache(res.newPropAnimationCache);
-  }, [props.currentChoreo]);
-  
+  }, [props.currentChoreo, resetSelectedIds]);
+
   const selectedObjects = useMemo(() => ({
     dancers: Object.entries(currentSection.formation.dancerPositions).filter(x => selectedIds.dancers.includes(x[0])).map(x => x[1]),
     props: [],
     obstacles: []
   } as StageEntities<PropPosition[], DancerPosition[], Obstacle[]>), [selectedIds, currentSection]);
 
-  const nextSections = useMemo<Record<string, ChoreoSection>>(() => {
-    const result: Record<string, ChoreoSection> = {};
-    
-    props.currentChoreo.sections.forEach((section, index) => {
-      if (index < props.currentChoreo.sections.length - 1) {
-        result[section.id] = props.currentChoreo.sections[index + 1];
-      }
-    });
-    
-    return result;
-  }, [props.currentChoreo.sections]);
-
   const nextSection = useMemo(() => {
-    return nextSections[currentSection.id];
-  }, [nextSections, currentSection.id]);
+    const sections = props.currentChoreo.sections;
+    const index = sections.findIndex(s => strEquals(s.id, currentSection.id));
+    return index >= 0 && index < sections.length - 1 ? sections[index + 1] : undefined;
+  }, [props.currentChoreo.sections, currentSection.id]);
 
-  const resetSelectedIds = () => setSelectedIds({props: [], dancers: [], obstacles: []});
-
-  const changeSection = (section: ChoreoSection) => {
+  const changeSection = useCallback((section: ChoreoSection) => {
     if (selectedTimingId) {
       setSelectedTimingId(undefined);
       resetSelectedIds();
     }
     setCurrentSection(section);
-  };
+  }, [selectedTimingId, resetSelectedIds]);
 
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
-  const exportDialog = Dialog.createHandle<{}>();
-  const handleExportDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
+  const handleExportDialogOpen = useCallback((isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setExportDialogOpen(isOpen);
-  };
+  }, []);
+
+  // ---- Header handlers ----
+  const openExportDialog = useCallback(() => setExportDialogOpen(true), []);
+  const toggleShowGrid = useCallback(() => {
+    setAppSettings(prev => ({...prev, showGrid: !prev.showGrid}));
+  }, []);
+  const toggleShowPath = useCallback(() => setShowPaths(prev => !prev), []);
+
+  // ---- ViewerSidebar handlers ----
+  const onPersonalNoteChange = useCallback((newNote: string) => {
+    setPersonalSectionNote(props.currentChoreo.id, currentSection.id, newNote);
+  }, [props.currentChoreo.id, currentSection.id]);
+
+  const onSelectTiming = useCallback((timing?: DancerActionTiming) => {
+    if (timing) {
+      setSelectedIds({props: [], dancers: timing.dancerIds, obstacles: []});
+      setSelectedTimingId(timing.id);
+    } else {
+      resetSelectedIds();
+      setSelectedTimingId(undefined);
+    }
+  }, [resetSelectedIds]);
+
+  const onChangeHeight = useCallback((height: number) => setSidebarHeight(height), []);
+
+  const formationSelectionToolbar = useMemo(() => (
+    <FormationSelectionToolbar
+      currentSectionId={currentSection.id}
+      sections={props.currentChoreo.sections}
+      onChangeSection={changeSection}
+    />
+  ), [currentSection.id, props.currentChoreo.sections, changeSection]);
+
+  // ---- MainStage handlers ----
+  const onSetSelectedIds = useCallback((action: SetStateAction<StageEntities<string[]>>) => {
+    setSelectedIds(action);
+    setSelectedTimingId(undefined);
+  }, []);
+
+  const selectedDancerMovement = useMemo(() => (
+    showPaths && selectedIds.dancers.length === 1 && !selectedTimingId && nextSection ?
+    {
+      current: currentSection.formation.dancerPositions[selectedIds.dancers[0]],
+      next: nextSection.formation.dancerPositions[selectedIds.dancers[0]]
+     } :
+    undefined
+  ), [showPaths, selectedIds.dancers, selectedTimingId, nextSection, currentSection]);
+
+  const closeHintDialog = useCallback(() => setShowHintDialog(false), []);
+  const closeExportDialog = useCallback(() => setExportDialogOpen(false), []);
 
   return (
     <div className='flex flex-col h-[100svh] max-h-[100svh] overflow-hidden'>
       <Header
         returnHome={props.goToHomePage}
         currentChoreo={props.currentChoreo}
-        onDownload={() => {setExportDialogOpen(true)}}
-        changeShowGrid={() => {
-          setAppSettings(prev => {return {...prev, showGrid: !prev.showGrid}})
-        }}
+        onDownload={openExportDialog}
+        changeShowGrid={toggleShowGrid}
         appSettings={appSettings}
         goToEdit={props.goToEditPage}
-        toggleShowPath={() => setShowPaths(prev => !prev)}
+        toggleShowPath={toggleShowPath}
         showPath={showPaths}
         isShowPathBtnDisabled={selectedIds.dancers.length !== 1 || selectedTimingId !== undefined}
         stageLength={props.currentChoreo.stageGeometry.stageLength}
@@ -141,9 +182,7 @@ export default function ChoreoViewPage(props: {
           sectionId={currentSection.id}
           sections={props.currentChoreo.sections}
           onChangeSection={changeSection}
-          onPersonalNoteChange={(newNote) => {
-            setPersonalSectionNote(props.currentChoreo.id, currentSection.id, newNote);
-          }}
+          onPersonalNoteChange={onPersonalNoteChange}
           dancer={props.currentChoreo.dancers[selectedIds.dancers[0]]}
           position={currentSection.formation.dancerPositions[selectedIds.dancers[0]]}
           nextPosition={nextSection?.formation.dancerPositions[selectedIds.dancers[0]]}
@@ -155,27 +194,11 @@ export default function ChoreoViewPage(props: {
             selectedObjects.props.length === 0 &&
             props.currentChoreo.dancers[selectedIds.dancers[0]] !== undefined
           }
-          deselectPosition={() => {
-            resetSelectedIds();
-          }}
-          onSelectTiming={(timing) => {
-            if (timing) {
-              setSelectedIds({props: [], dancers: timing.dancerIds, obstacles: []});
-              setSelectedTimingId(timing.id);
-            } else {
-              resetSelectedIds();
-              setSelectedTimingId(undefined);
-            }
-          }}
+          deselectPosition={resetSelectedIds}
+          onSelectTiming={onSelectTiming}
           selectedTiming={selectedTimingId}
-          formationSelectionToolbar={
-            <FormationSelectionToolbar
-              currentSectionId={currentSection.id}
-              sections={props.currentChoreo.sections}
-              onChangeSection={changeSection}
-            />
-          }
-          onChangeHeight={(height) => setSidebarHeight(height)}
+          formationSelectionToolbar={formationSelectionToolbar}
+          onChangeHeight={onChangeHeight}
         />
         <MainStage
           appSettings={appSettings}
@@ -190,18 +213,8 @@ export default function ChoreoViewPage(props: {
           selectedIds={selectedIds}
           selectedObjects={selectedObjects}
           canResizeProps={false}
-          setSelectedIds={(action) => {
-            setSelectedIds(action);
-            setSelectedTimingId(undefined);
-          }}
-          selectedDancerMovement={
-            showPaths && selectedIds.dancers.length === 1 && !selectedTimingId && nextSection ?
-            {
-              current: currentSection.formation.dancerPositions[selectedIds.dancers[0]],
-              next: nextSection.formation.dancerPositions[selectedIds.dancers[0]]
-             } :
-            undefined
-          }
+          setSelectedIds={onSetSelectedIds}
+          selectedDancerMovement={selectedDancerMovement}
           bottomMarginPercent={sidebarHeight}
           dancerMovementCache={dancerMovementCache}
           dancerAnimationCache={dancerAnimationCache}
@@ -209,8 +222,8 @@ export default function ChoreoViewPage(props: {
         />
       </div>
 
-      <Dialog.Root onOpenChange={() => setShowHintDialog(false)} open={showHintDialog}>
-        <BaseErrorDialog title="利用方法" fullWidth onClose={() => setShowHintDialog(false)}>
+      <Dialog.Root onOpenChange={closeHintDialog} open={showHintDialog}>
+        <BaseErrorDialog title="利用方法" fullWidth onClose={closeHintDialog}>
           <div>名前をタップすると、位置情報が表示されます。</div>
           <Divider/>
           <CustomSwitch
@@ -219,7 +232,7 @@ export default function ChoreoViewPage(props: {
             onChange={(value) => stopShowingViewPageInfoDialog(value)}/>
         </BaseErrorDialog>
       </Dialog.Root>
-      
+
       <Dialog.Root
         handle={exportDialog}
         open={exportDialogOpen}
@@ -230,7 +243,7 @@ export default function ChoreoViewPage(props: {
           <ExportDialog
             choreo={props.currentChoreo}
             selectedId={selectedIds.dancers.length === 1 ? selectedIds.dancers[0] : ""}
-            onClose={() => setExportDialogOpen(false)}
+            onClose={closeExportDialog}
             showPaths={showPaths}
           />
         }

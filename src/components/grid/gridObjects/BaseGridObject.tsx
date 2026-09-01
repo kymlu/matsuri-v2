@@ -16,8 +16,8 @@ export interface BaseGridObjectProps {
   position: Coordinates,
   width?: number,
   height?: number,
-  updatePosition?: (x: number, y: number) => void,
-  onClick?: (isAdditive?: boolean) => void,
+  updatePosition?: (x: number, y: number, id: string) => void,
+  onClick?: (id: string, isAdditive?: boolean) => void,
   draggable?: boolean,
   listening?: boolean,
   onTransform?: (item: Shape<ShapeConfig> | Stage) => void,
@@ -173,7 +173,7 @@ const BaseGridObject = memo(function BaseGridObject({
       onDragMove={(e) => {
         if (isZooming?.current) return;
         if (!isSelected) {
-          onClick?.(false);
+          onClick?.(id, false);
         }
         
         if (!dragStartRef.current) {
@@ -196,7 +196,7 @@ const BaseGridObject = memo(function BaseGridObject({
       }}
       onPointerUp={(e) => {
         if (dragStartRef && !isDraggingRef.current && !isZooming?.current) {
-          onClick?.();
+          onClick?.(id);
         }
       }}
       onDragEnd={(e) => {
@@ -214,7 +214,7 @@ const BaseGridObject = memo(function BaseGridObject({
             y: position.y,
             onFinish: () => {
               const snappedPositionInM = pxToStageMeters({x: node.attrs.x, y: node.attrs.y}, stageGeometry, METER_PX, height);
-              updatePosition?.(snappedPositionInM.x, snappedPositionInM.y);
+              updatePosition?.(snappedPositionInM.x, snappedPositionInM.y, id);
             }
           });
         }

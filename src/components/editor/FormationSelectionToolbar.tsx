@@ -1,7 +1,7 @@
 import { isNullOrUndefinedOrBlank, strEquals } from "../../lib/helpers/globalHelper";
 import { ChoreoSection } from "../../models/choreoSection";
 import Button from "../basic/Button";
-import { useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import IconButton from "../basic/IconButton";
 import { DndContext, PointerSensor, useSensor, useSensors } from "@dnd-kit/core";
 import { arrayMove, SortableContext, useSortable } from "@dnd-kit/sortable";
@@ -20,7 +20,7 @@ type FormationSelectionToolbarProps = {
   onReorder?: (newSectionOrder: ChoreoSection[]) => void,
 }
 
-export default function FormationSelectionToolbar({
+function FormationSelectionToolbar({
   currentSectionId, sections, showAddButton, onClickAddButton, 
   onChangeSection, onOpenSectionMenu, onReorder
 }: FormationSelectionToolbarProps) {
@@ -155,6 +155,8 @@ export default function FormationSelectionToolbar({
     }
   </div>
 }
+
+export default memo(FormationSelectionToolbar);
 
 function FormationSectionItem (props: {
   section: ChoreoSection,

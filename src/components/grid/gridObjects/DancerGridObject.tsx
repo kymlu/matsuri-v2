@@ -13,8 +13,8 @@ type DancerGridObjectProps = {
   dancer: Dancer;
   position: DancerPosition;
   stageGeometry: StageGeometry;
-  updatePosition?: (x: number, y: number) => void;
-  onClick?: (isAdditive?: boolean) => void;
+  updatePosition?: (x: number, y: number, id: string) => void;
+  onClick?: (id: string, isAdditive?: boolean) => void;
   isSelected: boolean;
   registerNode?: (id: string, node: Konva.Node | null) => void;
   isTransformerActive?: boolean;
@@ -54,7 +54,7 @@ const DancerGridObject = memo(function DancerGridObject({
         draggable={canEdit}
         position={position}
         onClick={onClick}
-        updatePosition={(x, y) => {updatePosition?.(x, y);}}
+        updatePosition={updatePosition}
         stageGeometry={stageGeometry}
         isSelected={isSelected}
         registerNode={registerNode}
