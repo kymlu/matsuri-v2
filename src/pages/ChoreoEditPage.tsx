@@ -836,6 +836,13 @@ export default function ChoreoEditPage(props: {
     setIsAssigningActions(prev => !prev);
   }, [resetSelectedIds]);
 
+  const onSelectActionTiming = useCallback((action?: DancerAction, timing?: DancerActionTiming) => {
+    setCurrentAction(action);
+    setCurrentTiming(timing);
+    if (timing) setSelectedIds({props: [], dancers: timing.dancerIds, obstacles: []});
+    else resetSelectedIds();
+  }, [resetSelectedIds]);
+
   const openRenameDancerDialog = useCallback(() => setRenameDancerDialogOpen(true), []);
   const openRenamePropDialog = useCallback(() => setRenamePropDialogOpen(true), []);
   const openRenameObstacleDialog = useCallback(() => setRenameObstacleDialogOpen(true), []);
@@ -991,12 +998,7 @@ export default function ChoreoEditPage(props: {
               isAssigningActions &&
               <ActionSelectionToolbar
                 actions={currentSection.formation.dancerActions}
-                onSelectTiming={(action, timing) => {
-                  setCurrentAction(action);
-                  setCurrentTiming(timing);
-                  if (timing) setSelectedIds({props: [], dancers: timing.dancerIds, obstacles: []});
-                  else resetSelectedIds();
-                }}
+                onSelectTiming={onSelectActionTiming}
                 selectedTimingId={currentTiming?.id}
                 />
             }
