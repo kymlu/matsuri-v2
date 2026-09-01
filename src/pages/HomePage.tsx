@@ -38,6 +38,7 @@ import { Team } from "../models/team"
 import CustomMenu from "../components/inputs/CustomMenu"
 import ChoreoPasswordEntryDialog from "../components/dialogs/ChoreoPasswordEntryDialog"
 import { ChoreoHistoryDialog } from "../components/dialogs/ChoreoHistoryDialog"
+import { useTheme } from "../lib/helpers/themeHelper"
 import { DancerCount, PropCount, StageSize } from "../components/common/IconInfo"
 import { checkUnlockedChoreo, setUnlockedChoreo } from "../lib/dataAccess/LocalStorageController"
 import AcceptInviteDialog from "../components/dialogs/AcceptInviteDialog"
@@ -93,6 +94,7 @@ export default function HomePage({
   isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin, isViewer, setIsViewer,
   setCurrentTeamMemberId, team, showNoTeamDialog, setShowNoTeamDialog, setupToken
 }: HomePageProps) {
+  const [theme, toggleTheme] = useTheme();
   const [savedChoreos, setSavedChoreos] = useState<ChoreoWithStatus[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -489,6 +491,7 @@ export default function HomePage({
         <div className="flex items-center justify-between pb-1">
           <h1 onClick={() => {goToAdminPage()}} className='text-2xl font-bold text-nowrap'>隊列表一覧</h1>
           <div className="flex items-center ">
+            <IconButton onClick={toggleTheme} src={theme === "dark" ? "lightMode" : "darkMode"} colour="primary" noBorder asDiv/>
             <Dialog.Root>
               <Dialog.Trigger>
                 <IconButton src="info" colour="primary" noBorder asDiv/>
