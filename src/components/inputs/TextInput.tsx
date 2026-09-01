@@ -53,10 +53,13 @@ export default function TextInput({
   const inputClasses = classNames(
     "col-start-1 border row-start-1 text-body py-3 border-line rounded-md focus-within:border-primary focus:outline-none",
     {
-      "pr-20": clearable && showLength,
-      "pr-16": !clearable && showLength,
-      "pr-12": clearable && !showLength,
-      "pr-2": !clearable && !showLength,
+      "pr-28": clearable && showLength && rightLabel,
+      "pr-24": !clearable && showLength && rightLabel,
+      "pr-20": (clearable && showLength && !rightLabel) || (clearable && !showLength && rightLabel),
+      "pr-16": !clearable && showLength && !rightLabel,
+      "pr-12": clearable && !showLength && !rightLabel,
+      "pr-10": !clearable && !showLength && rightLabel,
+      "pr-2": !clearable && !showLength && !rightLabel,
       "pl-10": search,
       "pl-2": !search,
       "h-6": short,
@@ -99,8 +102,11 @@ export default function TextInput({
               </div>
             }
             {
-              (showLength || clearable) &&
+              (showLength || clearable || rightLabel) &&
               <div className="absolute flex items-center gap-1 right-2">
+                {
+                  rightLabel && <span className="text-sm select-none text-muted">{rightLabel}</span>
+                }
                 {
                   clearable && !isNullOrUndefinedOrBlank(value) && 
                   <div>
@@ -114,14 +120,11 @@ export default function TextInput({
                 }
                 {
                   showLength &&
-                  <span className="text-sm text-muted select-none text-end">{`${value.length}/${maxLength ?? 20}`}</span>
+                  <span className="text-sm select-none text-muted text-end">{`${value.length}/${maxLength ?? 20}`}</span>
                 }
               </div>
             }
           </div>
-          {
-            rightLabel && <span>{rightLabel}</span>
-          }
         </div>
       </div>
     </FieldWithLabel>
