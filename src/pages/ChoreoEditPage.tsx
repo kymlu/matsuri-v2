@@ -1021,10 +1021,44 @@ export default function ChoreoEditPage(props: {
         showPastePosition={Object.keys(copyBuffer.current.dancers).length > 0 || Object.keys(copyBuffer.current.props).length > 0}
         onPastePosition={onPaste}
         showSelectColour={(selectedIds.dancers.length + selectedIds.props.length + selectedIds.obstacles.length) > 0}
-        onSelectColor={onSelectColor}
+        onSelectColor={() => {
+          const dancerPositions = Object.entries(currentSection.formation.dancerPositions);
+          const dancerColours = new Set(dancerPositions.filter(x => selectedIds.dancers.includes(x[0])).map(x => x[1].color));
+          const newDancerIds = dancerPositions.filter(x => dancerColours.has(x[1].color)).map(x => x[0]);
+
+          const propEntries = Object.entries(history.presentState.state.props);
+          const propColours = new Set(propEntries.filter(x => selectedIds.props.includes(x[0])).map(x => x[1].color));
+          const newPropIds = propEntries.filter(x => propColours.has(x[1].color)).map(x => x[0]);
+
+          const obstacleEntries = Object.entries(history.presentState.state.obstacles ?? {});
+          const obstacleColours = new Set(obstacleEntries.filter(x => selectedIds.obstacles.includes(x[0])).map(x => x[1].color));
+          const newObstacleIds = obstacleEntries.filter(x => obstacleColours.has(x[1].color)).map(x => x[0]);
+
+          setSelectedIds({ dancers: newDancerIds, props: newPropIds, obstacles: newObstacleIds });
+        }}
         showSelectName={(selectedIds.dancers.length + selectedIds.props.length + selectedIds.obstacles.length) > 0}
-        onSelectName={onSelectName}
-        onSelectType={onSelectType}
+        onSelectName={() => {
+          const dancerPositions = Object.entries(currentSection.formation.dancerPositions);
+          const dancerNames = new Set(dancerPositions.filter(x => selectedIds.dancers.includes(x[0])).map(x => history.presentState.state.dancers[x[0]]?.name));
+          const newDancerIds = dancerPositions.filter(x => dancerNames.has(history.presentState.state.dancers[x[0]]?.name)).map(x => x[0]);
+
+          const propEntries = Object.entries(history.presentState.state.props);
+          const propNames = new Set(propEntries.filter(x => selectedIds.props.includes(x[0])).map(x => x[1].name));
+          const newPropIds = propEntries.filter(x => propNames.has(x[1].name)).map(x => x[0]);
+
+          const obstacleEntries = Object.entries(history.presentState.state.obstacles ?? {});
+          const obstacleNames = new Set(obstacleEntries.filter(x => selectedIds.obstacles.includes(x[0])).map(x => x[1].name));
+          const newObstacleIds = obstacleEntries.filter(x => obstacleNames.has(x[1].name)).map(x => x[0]);
+
+          setSelectedIds({ dancers: newDancerIds, props: newPropIds, obstacles: newObstacleIds });
+        }}
+        onSelectType={(selectDancers: boolean, selectProps: boolean, selectObstacles: boolean) => {
+          setSelectedIds({
+            props: selectProps ? Object.keys(history.presentState.state.props) : [],
+            dancers: selectDancers ? Object.keys(history.presentState.state.dancers) : [],
+            obstacles: (selectObstacles && !areObstaclesLocked) ? Object.keys(history.presentState.state.obstacles ?? {}) : []
+          });
+        }}
         showSelectDancersButton={entityCount.dancers > 0 && entityCount.dancers > selectedIds.dancers.length}
         showSelectPropsButton={entityCount.props > 0 && entityCount.props > selectedIds.props.length}
         showSelectObstaclesButton={!areObstaclesLocked && entityCount.obstacles > 0 && entityCount.obstacles > selectedIds.obstacles.length}
@@ -1055,16 +1089,41 @@ export default function ChoreoEditPage(props: {
         onRenameObstacle={openRenameObstacleDialog}
         showRenameObstacle={selectedIds.obstacles.length === 1 && (selectedIds.dancers.length + selectedIds.props.length === 0)}
         showDuplicateObstacle={selectedIds.obstacles.length > 0 && selectedIds.dancers.length === 0 && selectedIds.props.length === 0}
-        onDuplicateObstacle={onDuplicateObstacle}
+        onDuplicateObstacle={() => {
+          const newObstacles = selectedObjects.obstacles.map(o => ({
+            ...o,
+            id: crypto.randomUUID(),
+            x: o.x + 0.5,
+            y: o.y + (history.presentState.state.stageGeometry.yAxis === "bottom-up" ? -0.5 : +0.5)
+          }));
+          const newIds = newObstacles.map(o => o.id);
+          dispatch({
+            type: "SET_STATE",
+            newState: addObstacles(
+              history.presentState.state, 
+              newObstacles,
+            ),
+            currentSectionId: currentSection.id,
+            commit: true});
+          setSelectedIds({props: [], dancers: [], obstacles: newIds});
+        }}
         showDuplicateProp={selectedIds.props.length > 0 && selectedIds.dancers.length === 0 && selectedIds.obstacles.length === 0}
-        onDuplicateProp={onDuplicateProp}
+        onDuplicateProp={() => {
+          const idMap = Object.fromEntries(selectedIds.props.map(id => [id, crypto.randomUUID()]));
+          dispatch({
+            type: "SET_STATE",
+            newState: duplicateProps(history.presentState.state, idMap),
+            currentSectionId: currentSection.id,
+            commit: true});
+          setSelectedIds({props: Object.values(idMap), dancers: [], obstacles: []});
+        }}
         showLockObstacle={entityCount.obstacles > 0}
         areObstaclesLocked={areObstaclesLocked}
         onToggleObstacleLock={onToggleObstacleLock}
         onToggleResizePropsLock={onToggleResizePropsLock}
         isResizePropsLocked={isPropResizeLocked}
         showLockResizeProps={entityCount.props > 0}
-        onEditPropSize={openPropSizeDialog}
+        onEditPropSize={() => {setPropSizeDialogOpen(true)}}
         showEditPropSize={selectedIds.props.length >= 1 && (selectedIds.dancers.length + selectedIds.obstacles.length) === 0}
         showMovementFunctions={(entityCount.dancers + entityCount.props) > 0}
         showPaths={showPaths}
@@ -1284,10 +1343,14 @@ export default function ChoreoEditPage(props: {
           visiblePropIds={selectedIds.props}
           showDelete={false}
           onSubmit={(updatedProps) => {
-            commitState(editAndDeleteProps(
-              history.presentState.state,
-              { ...history.presentState.state.props, ...indexByKey(updatedProps, "id") },
-              new Set()));
+            dispatch({
+              type: "SET_STATE",
+              newState: editAndDeleteProps(
+                history.presentState.state,
+                { ...history.presentState.state.props, ...indexByKey(updatedProps, "id") },
+                new Set()),
+              currentSectionId: currentSection.id,
+              commit: true});
             propSizeDialog.close();
             setPropSizeDialogOpen(false);
           }}

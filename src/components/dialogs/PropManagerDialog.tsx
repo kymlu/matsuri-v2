@@ -62,7 +62,7 @@ export function PropManagerDialog({
           {
             propList.map((prop, i) =>
               <React.Fragment key={prop.id}>
-                <div className="py-2 border-b border-gray-200 md:grid md:grid-cols-[3fr,2fr] md:gap-3 md:border-0 md:py-1">
+                <div className="py-2 border-b border-gray-200 md:grid md:grid-cols-[3fr,2fr] md:gap-1 md:border-0 md:py-1">
                   <div className="flex items-center gap-2">
                     <CustomMenu
                       trigger={
@@ -96,7 +96,7 @@ export function PropManagerDialog({
                       maxLength={SHORT_NAME_LENGTH}
                     />
                   </div>
-                  <div className="flex gap-2 mt-1 md:mt-0">
+                  <div className="flex gap-1 mt-1 md:mt-0">
                     <NumberInput
                       label="縦"
                       compact

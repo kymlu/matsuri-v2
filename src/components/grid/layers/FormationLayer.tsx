@@ -149,7 +149,7 @@ const FormationLayer = memo(function FormationLayer({
     
   useEffect(() => {
     updateTransformer();
-  }, [selectedIds, updateTransformer]);
+  }, [selectedIds]);
 
   const obstacleList = useMemo(() => {
     if (obstacles) {

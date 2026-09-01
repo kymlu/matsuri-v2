@@ -39,7 +39,7 @@ export default function CustomSelect({
           setSelectValue?.(value);
           setValue(newValue ?? "");
         }}>
-        <Select.Trigger disabled={disabled} className={"flex flex-row items-center text-lg justify-between w-full p-3 rounded-md border-gray-400 border data-[popup-open]:border-primary " + (disabled ? "bg-gray-200 cursor-default" : "bg-white cursor-pointer")}>
+        <Select.Trigger disabled={disabled} className={"flex flex-row items-center text-lg h-10 justify-between w-full p-3 rounded-md border-gray-400 border data-[popup-open]:border-primary " + (disabled ? "bg-gray-200 cursor-default" : "bg-white cursor-pointer")}>
           <Select.Value>
             {isIcons ? <img className="size-8" src={value}/> : value}
           </Select.Value>
