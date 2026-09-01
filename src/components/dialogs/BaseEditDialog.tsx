@@ -30,7 +30,7 @@ export default function BaseEditDialog({
     title={title}
     onClose={onClose}
     footer={
-      <div className="flex w-full gap-2 mt-4">
+      <div className="flex w-full gap-1 mt-4">
         {
           showCloseButton &&
           <Dialog.Close

@@ -4,7 +4,7 @@ import { ICON } from "../../lib/consts/consts";
 type IconProps = {
   src: keyof typeof ICON;
   colour?: "primary" | "black" | "grey" | "white";
-  size?: "xs" | "sm" | "md" | "lg";
+  size?: "2xs" | "xs" | "sm" | "md" | "lg";
   crossedOut?: boolean;
   vertFlip?: boolean,
 };
@@ -21,6 +21,7 @@ export default function Icon({
     "text-4xl max-w-[2.25rem]": size === "md",
     "text-2xl max-w-[1.5rem]": size === "sm",
     "text-lg max-w-[1.125rem]": size === "xs",
+    "text-base max-w-[1rem]": size === "2xs",
     "text-white": colour === "white",
     "text-primary": colour === "primary",
     "text-black": colour === "black",

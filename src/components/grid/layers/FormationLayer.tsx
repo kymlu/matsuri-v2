@@ -89,6 +89,7 @@ const FormationLayer = memo(function FormationLayer({
     } else {
       nodeMap.current.delete(id);
     }
+    updateTransformer();
   };
 
   const toggleDancerSelect = useCallback((id: string, isAdditive: boolean = true) => {
@@ -134,6 +135,10 @@ const FormationLayer = memo(function FormationLayer({
   }, [canSelectObstacles, isDraggingOnEmpty, canToggleSelection, setSelectedIds]);
     
   useEffect(() => {
+    updateTransformer();
+  }, [selectedIds]);
+
+  const updateTransformer = () => {
     const transformer = transformerRef.current;
     if (!transformer) return;
     const nodes = [
@@ -144,7 +149,7 @@ const FormationLayer = memo(function FormationLayer({
 
     transformer.nodes(nodes);
     transformer.getLayer()?.batchDraw();
-  }, [selectedIds]);
+  }
 
   const obstacleList = useMemo(() => {
     if (obstacles) {

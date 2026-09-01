@@ -22,7 +22,7 @@ export default function CustomDialog({
         + (full ? " w-[95svw] h-[95svh]" : fullWidth ? " w-[95svw] md:w-[50svw]" : "")
       }>
         <div className="flex flex-col h-full min-h-0">
-          <div className="flex flex-row items-center justify-between gap-4 mb-4 shrink-0">
+          <div className="flex flex-row items-center justify-between gap-4 mb-2 shrink-0">
             <Dialog.Title className="text-lg font-bold break-words text-wrap">
               {title}
             </Dialog.Title>

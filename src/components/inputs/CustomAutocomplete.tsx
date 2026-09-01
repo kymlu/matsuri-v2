@@ -60,7 +60,7 @@ export default function CustomAutocomplete({
       "pr-12": clearable && !showLength,
       "pr-2": !clearable && !showLength,
       "pl-10": search,
-      "pl-4": !search,
+      "pl-2": !search,
       "h-6": short,
       "h-10": !short,
       "text-center": centered,

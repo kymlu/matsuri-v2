@@ -1,42 +1,25 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import TextInput from "../inputs/TextInput";
-import { isNullOrUndefinedOrBlank, strEquals } from "../../lib/helpers/globalHelper";
+import { isNullOrUndefinedOrBlank } from "../../lib/helpers/globalHelper";
 import BaseEditDialog from "./BaseEditDialog";
 import { LONG_NAME_LENGTH, SHORT_NAME_LENGTH } from "../../lib/consts/consts";
 
 type EditNameDialogProps = {
   name?: string,
   required?: boolean,
-  otherNames?: string[],
   type: "道具" | "隊列表" | "イベント" | "セクション" | "障害物",
   onSubmit: (name: string) => void,
   onClose?: () => void,
 }
 
 export default function EditNameDialog({
-  name, required = true, otherNames, type, onSubmit, onClose
+  name, required = true, type, onSubmit, onClose
 }: EditNameDialogProps) {
   const [newName, setNewName] = useState("");
 
   useEffect(() => {
     setNewName(name ?? "");
   }, [name]);
-
-  const nameCounts = useMemo(() => {
-    if (!otherNames || otherNames?.length === 0) {
-      return {};
-    };
-        
-    const nameSet = new Set(otherNames);
-    return Array.from(nameSet).reduce((acc, item) => {
-      acc[item] = otherNames.filter(x => strEquals(x, item)).length - (strEquals(item, name?.trim()) ? 1 : 0);
-      return acc;
-    }, {} as Record<string, number>);
-  }, [otherNames]);
-
-  const hasDuplicate = useMemo(() => {
-    return nameCounts && nameCounts[newName.trim()] !== null && nameCounts[newName.trim()] > 0;
-  }, [nameCounts, newName]);
 
   return <BaseEditDialog
     title={`${type}名`}
@@ -50,11 +33,5 @@ export default function EditNameDialog({
       onContentChange={ (newName) => { setNewName(newName) }}
       maxLength={type === "イベント" || type === "隊列表" ? LONG_NAME_LENGTH : SHORT_NAME_LENGTH}
       showLength/>
-    
-    {
-      hasDuplicate && <div className="font-bold text-center text-wrap text-primary">
-        この名前がすでに使用されています
-      </div>
-    }
   </BaseEditDialog>
 }

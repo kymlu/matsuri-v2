@@ -152,6 +152,63 @@ export function renameProp(state: Choreo, id: string, newName: string): Choreo {
   }
 }
 
+export function duplicateProps(state: Choreo, idMap: Record<string, string>): Choreo {
+  const oldIds = Object.keys(idMap);
+  const propCount = Object.keys(state.props).length;
+  const offsetX = 0.5;
+  const offsetY = state.stageGeometry.yAxis === "bottom-up" ? -0.5 : 0.5;
+
+  const newProps = { ...state.props };
+  oldIds.forEach(oldId => {
+    const source = state.props[oldId];
+    if (!source) return;
+    const newId = idMap[oldId];
+    newProps[newId] = { ...source, id: newId };
+  });
+
+  const newSections = state.sections.map(section => {
+    const newPropPositions = { ...section.formation.propPositions };
+    const newPropMovements = { ...(section.formation.propMovements ?? {}) };
+
+    oldIds.forEach((oldId, i) => {
+      const sourcePos = section.formation.propPositions[oldId];
+      if (!sourcePos) return;
+      const newId = idMap[oldId];
+
+      newPropPositions[newId] = {
+        ...sourcePos,
+        propId: newId,
+        x: sourcePos.x + offsetX,
+        y: sourcePos.y + offsetY,
+        z: propCount + i,
+      };
+
+      const sourceMovement = section.formation.propMovements?.[oldId];
+      if (sourceMovement) {
+        newPropMovements[newId] = {
+          ...sourceMovement,
+          points: sourceMovement.points.map(p => ({ ...p, x: p.x + offsetX, y: p.y + offsetY })),
+        };
+      }
+    });
+
+    return {
+      ...section,
+      formation: {
+        ...section.formation,
+        propPositions: newPropPositions,
+        propMovements: newPropMovements,
+      } as Formation
+    }
+  });
+
+  return {
+    ...state,
+    props: newProps,
+    sections: newSections,
+  }
+}
+
 export function addObstacle(state: Choreo, obstacle: Obstacle): Choreo {
   const newObstacles = { ...state.obstacles, [obstacle.id]: obstacle };
 

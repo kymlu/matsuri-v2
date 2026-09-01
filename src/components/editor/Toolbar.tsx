@@ -18,6 +18,8 @@ type ToolbarProps = {
   // selection / attributes
   showSelectColour: boolean;
   onSelectColor: () => void;
+  showSelectName: boolean;
+  onSelectName: () => void;
   onSelectType: (selectDancers: boolean, selectProps: boolean, selectObstacles: boolean) => void;
   showSelectDancersButton: boolean;
   showSelectPropsButton: boolean;
@@ -93,6 +95,10 @@ type ToolbarProps = {
   onToggleResizePropsLock: () => void;
   isResizePropsLocked: boolean;
   showLockResizeProps: boolean;
+  onEditPropSize: () => void;
+  showEditPropSize: boolean;
+  showDuplicateProp: boolean;
+  onDuplicateProp: () => void;
 };
 
 export default function Toolbar({
@@ -104,6 +110,8 @@ export default function Toolbar({
 
   showSelectColour,
   onSelectColor,
+  showSelectName,
+  onSelectName,
   onSelectType,
   showSelectDancersButton,
   showSelectPropsButton,
@@ -146,6 +154,9 @@ export default function Toolbar({
   onToggleResizePropsLock,
   isResizePropsLocked,
   showLockResizeProps,
+  onEditPropSize,
+  showEditPropSize,
+  showDuplicateProp, onDuplicateProp,
 }: ToolbarProps) {
   const [isAddManagerVisible, setIsAddManagerVisible] = useState<boolean>(false);
   const [isArrangeVisible, setIsArrangeVisible] = useState<boolean>(false);
@@ -153,6 +164,9 @@ export default function Toolbar({
 
   const isSubmenuOpen = isAddManagerVisible || isArrangeVisible || isActionManagerVisible || isEditingMovement;
   const areSelectionActionsActivated = showRenameDancer || showArrange || showDeleteObjects;
+  const areEditingActionsActivated = showRenameDancer || showRenameProp || showRenameObstacle ||
+    showInUse || showArrange || showChangeColour || showCopyPosition || showPastePosition ||
+    showSwapPosition || showDuplicateObstacle || showDuplicateProp || showDeleteObjects;
 
   const pointCountIcon = useMemo(() => {
     return pointCount === 3 ? "counter3" : pointCount === 2 ? "counter2" : "counter1"
@@ -173,7 +187,7 @@ export default function Toolbar({
     }
    }, [areSelectionActionsActivated]);
 
-  const className = classNames("z-10 flex items-center w-screen gap-2 px-4 pt-4 pb-8 overflow-y-auto bg-white border-t-2 border-gray-400", {
+  const className = classNames("z-10 flex items-start w-screen gap-2 px-4 pt-2 pb-10 h-28 overflow-y-hidden bg-white border-t-2 border-gray-400", {
     "pointer-events-none opacity-40": !isEnabled
   });
 
@@ -189,39 +203,45 @@ export default function Toolbar({
         }
         {
           areSelectionActionsActivated && 
-          <>
-            <IconButton src="deselect" label="選択解除" onClick={() => {onDeselect()}} />
-            <VerticalDivider/>
-          </>
+          <IconButton src="deselect" label={"選択解除"} onClick={() => {onDeselect()}} />
         }
-        {showRenameDancer && <IconButton src="textFieldsAlt" label="名前変更" onClick={() => {onRenameDancer()}} />}
-        {showRenameProp && <IconButton src="textFieldsAlt" label="名前変更" onClick={() => {onRenameProp()}} />}
-        {showRenameObstacle && <IconButton src="textFieldsAlt" label="名前変更" onClick={() => {onRenameObstacle()}} />}
+        <VerticalDivider/>
+        {showRenameDancer && <IconButton src="textFieldsAlt" label={"名前変更"} onClick={() => {onRenameDancer()}} />}
+        {showRenameProp && <IconButton src="textFieldsAlt" label={"名前変更"} onClick={() => {onRenameProp()}} />}
+        {showRenameObstacle && <IconButton src="textFieldsAlt" label={"名前変更"} onClick={() => {onRenameObstacle()}} />}
         {showInUse && <IconButton src="flagCheck" crossedOut={!isInUse} label="使用中" onClick={() => {onToggleInUse()}} />}
         {showArrange && <IconButton src="straighten" label="整理" onClick={()=>{setIsArrangeVisible(true)}}/>}
         {showChangeColour && <IconButton src="colors" label="色" onClick={() => {onChangeColor()}} />}
-        {showCopyPosition && <IconButton src="contentCopy" label="位置コピー" onClick={() => {onCopyPosition()}} />}
-        {showPastePosition && <IconButton src="contentPaste" label="位置ペースト" onClick={() => {onPastePosition()}} />}
-        {showSwapPosition && <IconButton src="swapHoriz" label="位置交換" onClick={() => {onSwapPosition()}} />}
-        {showDuplicateObstacle && <IconButton src="contentCopy" label="複製" onClick={() => {onDuplicateObstacle()}} />}
+        {showCopyPosition && <IconButton src="contentCopy" label={"位置\nコピー"} onClick={() => {onCopyPosition()}} />}
+        {showPastePosition && <IconButton src="contentPaste" label={"位置\nペースト"} onClick={() => {onPastePosition()}} />}
+        {showSwapPosition && <IconButton src="swapHoriz" label={"位置交換"} onClick={() => {onSwapPosition()}} />}
+        {showDuplicateObstacle && <IconButton src="controlPointDuplicate" label="複製" onClick={() => {onDuplicateObstacle()}} />}
+        {showDuplicateProp && <IconButton src="controlPointDuplicate" label="複製" onClick={() => {onDuplicateProp()}} />}
         {showDeleteObjects && <IconButton src="delete" label="削除" onClick={()=>{onDeleteObjects()}}/>}
-        {showMovementFunctions && <IconButton src="conversionPath" crossedOut={!showPaths} label="動線表示" onClick={()=>{toggleShowPaths()}}/>}
-        {showMovementFunctions && <IconButton src="rebaseEdit" label="動線編集" onClick={()=>{
+        {
+          areEditingActionsActivated && <VerticalDivider/>
+        }
+        {showMovementFunctions && <IconButton src="conversionPath" crossedOut={!showPaths} label={"動線表示"} onClick={()=>{toggleShowPaths()}}/>}
+        {showMovementFunctions && <IconButton src="rebaseEdit" label={"動線編集"} onClick={()=>{
           onEditMovement();
           setIsEditingMovement(true);
         }}/>}
-        {showSelectColour && <IconButton src="select" subIconSrc="colors" label="同色選択" onClick={() => {onSelectColor()}} />}
-        {showSelectDancersButton && <IconButton src="select" subIconSrc="person" label="全員選択" onClick={() => {onSelectType(true, false, false)}} />}
-        {showSelectPropsButton && <IconButton src="select" subIconSrc="flag" label="道具選択" onClick={() => {onSelectType(false, true, false)}} />}
-        {showSelectObstaclesButton && <IconButton src="select" subIconSrc="emergencyHome" label="障害物選択" onClick={() => {onSelectType(false, false, true)}} />}
-        {showSelectAllButton && <IconButton src="selectAll" label="全部選択" onClick={() => {onSelectType(true, true, true)}} />}
+        {showEditPropSize && <IconButton src="flag" subIconSrc="edit" subIconPosition="corner" label={"道具管理"} onClick={() => {onEditPropSize()}} />}
+        <VerticalDivider/>
+        {showSelectColour && <IconButton src="select" subIconSrc="colors" label={"同色選択"} onClick={() => {onSelectColor()}} />}
+        {showSelectName && <IconButton src="select" subIconSrc="textFieldsAlt" label={"同名選択"} onClick={() => {onSelectName()}} />}
+        {showSelectDancersButton && <IconButton src="select" subIconSrc="person" label={"全員選択"} onClick={() => {onSelectType(true, false, false)}} />}
+        {showSelectPropsButton && <IconButton src="select" subIconSrc="flag" label={"道具選択"} onClick={() => {onSelectType(false, true, false)}} />}
+        {showSelectObstaclesButton && <IconButton src="select" subIconSrc="emergencyHome" label={"障害物\n選択"} onClick={() => {onSelectType(false, false, true)}} />}
+        {showSelectAllButton && <IconButton src="selectAll" label={"全部選択"} onClick={() => {onSelectType(true, true, true)}} />}
+        <VerticalDivider/>
         {
-          showLockResizeProps && 
-          <IconButton src={isResizePropsLocked ? "lock" : "lockOpenRight"} label="道具サイズ" onClick={() => onToggleResizePropsLock()}/>
+          showLockResizeProps &&
+          <IconButton src={isResizePropsLocked ? "lock" : "lockOpenRight"} label={"道具\nサイズ"} onClick={() => onToggleResizePropsLock()}/>
         }
         {
           !areSelectionActionsActivated && <>
-            {showLockObstacle && <IconButton src={areObstaclesLocked ? "lock" : "lockOpenRight"} label="障害物変更" onClick={() => onToggleObstacleLock()} />}
+            {showLockObstacle && <IconButton src={areObstaclesLocked ? "lock" : "lockOpenRight"} label={"障害物\n変更"} onClick={() => onToggleObstacleLock()} />}
           </>
         }
       </>
