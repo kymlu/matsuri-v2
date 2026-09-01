@@ -1,7 +1,8 @@
 import jsPDF, { GState } from "jspdf";
 import { Choreo } from "../../models/choreo";
+import { Dancer } from "../../models/dancer";
 import { colorPalette } from "../consts/colors";
-import { getDefaultFileName, getSafeFileName, isNullOrUndefined, isNullOrUndefinedOrBlank, roundToTenth, strEquals } from "./globalHelper";
+import { getDefaultFileName, getSafeFileName, isNullOrUndefined, isNullOrUndefinedOrBlank, roundToTenth, strCompare, strEquals } from "./globalHelper";
 import { getPathLineOps, stageMetersToPx } from "./editorCalculationHelper";
 import { BaseModel, Coordinates } from "../../models/base";
 import JSZip from "jszip";
@@ -86,15 +87,13 @@ export async function exportEvent(
   await downloadZip(zip, isNullOrUndefinedOrBlank(eventName) ? "隊列表" : eventName);
 }
 
-export async function exportToPdf (
+async function generateChoreoPdfBlob(
   choreo: Choreo,
-  fileName: string,
   followingId: string,
   showFollowingPath: boolean = false,
   includePersonalNotes: boolean = false,
   updateProgress: (progress: number) => void,
-  onComplete: () => void,
-) {
+): Promise<Blob> {
   const titleBuffer = PDF_METER_PX * 1.5;
   const pageMargin = PDF_METER_PX * 0.5;
   const memoBuffer = PDF_METER_PX * 6;
@@ -189,7 +188,7 @@ export async function exportToPdf (
   pdf.setFont(boldFont);
 
   updateProgress(Math.round((1 / (choreo.sections.length + 1)) * 100));
-  console.log("Exporting to PDF: ", fileName);
+  console.log("Exporting to PDF");
 
   for (let i = 0; i < choreo.sections.length; i++) {
     const section = choreo.sections[i];
@@ -799,12 +798,30 @@ export async function exportToPdf (
     }
   }
 
-  let blob = pdf.output("blob");
-  
-  const fullFileName = `${getSafeFileName(fileName)}.pdf`
+  return pdf.output("blob");
+}
+
+export async function exportToPdf(
+  choreo: Choreo,
+  fileName: string,
+  followingId: string,
+  showFollowingPath: boolean = false,
+  includePersonalNotes: boolean = false,
+  updateProgress: (progress: number) => void,
+  onComplete: () => void,
+) {
+  const blob = await generateChoreoPdfBlob(
+    choreo,
+    followingId,
+    showFollowingPath,
+    includePersonalNotes,
+    updateProgress,
+  );
+
+  const fullFileName = `${getSafeFileName(fileName)}.pdf`;
 
   const url = URL.createObjectURL(blob);
-  
+
   const file = new File ([blob], fullFileName, {
     type: "application/pdf"
   });
@@ -829,6 +846,47 @@ export async function exportToPdf (
   link.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 
+  onComplete();
+}
+
+export async function exportAllDancersToPdf(
+  choreo: Choreo,
+  fileName: string,
+  showFollowingPath: boolean = false,
+  includePersonalNotes: boolean = false,
+  updateProgress: (progress: number) => void,
+  updateCurrentDancer: (info: { name: string; index: number; total: number }) => void,
+  onComplete: () => void,
+) {
+  const zip = new JSZip();
+  const dancers = Object.values(choreo.dancers)
+    .sort((a, b) => strCompare<Dancer>(a, b, "name"));
+  const total = dancers.length;
+  const usedNames = new Set<string>();
+
+  for (let i = 0; i < total; i++) {
+    const dancer = dancers[i];
+    updateCurrentDancer({ name: dancer.name, index: i + 1, total });
+
+    const blob = await generateChoreoPdfBlob(
+      choreo,
+      dancer.id,
+      showFollowingPath,
+      includePersonalNotes,
+      (inner) => updateProgress(Math.round(((i + inner / 100) / total) * 100)),
+    );
+
+    let entryName = `${getSafeFileName(dancer.name)} - ${getSafeFileName(fileName)}`;
+    if (usedNames.has(entryName)) {
+      entryName = `${entryName} (${dancer.id})`;
+    }
+    usedNames.add(entryName);
+
+    zip.file(`${entryName}.pdf`, blob);
+  }
+
+  updateProgress(100);
+  await downloadZip(zip, fileName);
   onComplete();
 }
 

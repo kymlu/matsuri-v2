@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { memo, useCallback, useEffect, useMemo, useState } from "react"
 import TextInput from "../inputs/TextInput"
 import BaseEditDialog from "./BaseEditDialog"
 import { Dancer } from "../../models/dancer"
@@ -6,7 +6,7 @@ import { getDefaultFileName, isNullOrUndefinedOrBlank, strCompare, testInvalidCh
 import CustomSelect from "../inputs/CustomSelect"
 import CustomDialog from "../basic/CustomDialog"
 import { Choreo } from "../../models/choreo"
-import { exportToPdf } from "../../lib/helpers/exportHelper"
+import { exportAllDancersToPdf, exportToPdf } from "../../lib/helpers/exportHelper"
 import CustomSwitch from "../inputs/CustomSwitch"
 import { EXPORT_NAME_LENGTH } from "../../lib/consts/consts"
 
@@ -17,7 +17,7 @@ type ExportDialogProps = {
   showPaths?: boolean,
 }
 
-export default function ExportDialog({
+function ExportDialog({
   choreo, selectedId, onClose, showPaths
 }: ExportDialogProps) {
   const [step, setStep] = useState<"prep" | "export">("prep");
@@ -25,7 +25,9 @@ export default function ExportDialog({
   const [followingId, setFollowingId] = useState<string>(selectedId);
   const [showFollowingPath, setShowFollowingPath] = useState<boolean>(showPaths ?? false);
   const [includePersonalNotes, setIncludePersonalNotes] = useState<boolean>(true);
+  const [exportAllDancers, setExportAllDancers] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
+  const [currentDancer, setCurrentDancer] = useState<{ name: string; index: number; total: number } | undefined>(undefined);
 
   const isExportNameValid = useMemo(() => {
     return !isNullOrUndefinedOrBlank(exportName.trim()) && RegExp(/[<>:"/\\|?*]|[. ]$/g).test(exportName.trim());
@@ -50,31 +52,45 @@ export default function ExportDialog({
     setExportName(defaultName);
   }, [defaultName]);
 
+  const handleSubmit = useCallback(async () => {
+    setStep("export");
+    if (exportAllDancers) {
+      await exportAllDancersToPdf(choreo,
+        exportName,
+        showFollowingPath,
+        includePersonalNotes,
+        setProgress,
+        setCurrentDancer,
+        onClose);
+    } else {
+      await exportToPdf(choreo,
+        exportName,
+        followingId,
+        showFollowingPath,
+        includePersonalNotes,
+        setProgress,
+        onClose);
+    }
+  }, [exportAllDancers, choreo, exportName, showFollowingPath, includePersonalNotes, followingId, onClose]);
+
+  const handleClose = useCallback(() => {
+    onClose();
+    setFollowingId("");
+    setStep("prep");
+    setShowFollowingPath(false);
+    setIncludePersonalNotes(true);
+    setExportAllDancers(false);
+    setCurrentDancer(undefined);
+  }, [onClose]);
+
   return <>
     {
       step === "prep" &&
       <BaseEditDialog
         title="PDFエクスポート"
         actionButtonText="エクスポート"
-        onSubmit={async () => {
-          setStep("export");
-          await exportToPdf(choreo,
-            exportName,
-            followingId,
-            showFollowingPath,
-            includePersonalNotes,
-            (progress) => {
-              setProgress(progress);
-            },
-            onClose);
-        }}
-        onClose={() => {
-          onClose();
-          setFollowingId("");
-          setStep("prep");
-          setShowFollowingPath(false);
-          setIncludePersonalNotes(true);
-        }}
+        onSubmit={handleSubmit}
+        onClose={handleClose}
         isActionButtonDisabled={isExportNameValid}
       >
         <div className="max-w-full w-[100svw] md:w-max">
@@ -87,36 +103,40 @@ export default function ExportDialog({
               hasError={isExportNameValid}
               defaultValue={defaultName}
               restrictFn={(s) => !testInvalidCharacters(s)}
-              onContentChange={(name) => {
-                setExportName(name);
-              }}
+              onContentChange={setExportName}
               showLength
               />
           </div>
 
           {
             Object.values(choreo.dancers).length > 0 &&
-            <CustomSelect
-              label="追跡ダンサー"
-              items={dancerList}
-              defaultValue={choreo.dancers[selectedId]?.name ?? "未設定"}
-              setSelectValue={(newValue) => {
-                setFollowingId(newValue);
-              }}
+            <>
+              <CustomSwitch
+                label="全ダンサー分をまとめて出力"
+                defaultChecked={false}
+                onChange={setExportAllDancers}
               />
+              <CustomSelect
+                label="追跡ダンサー"
+                items={dancerList}
+                defaultValue={choreo.dancers[selectedId]?.name ?? "未設定"}
+                disabled={exportAllDancers}
+                setSelectValue={setFollowingId}
+                />
+            </>
           }
           {
             <CustomSwitch
               label="動線表示"
-              disabled={isNullOrUndefinedOrBlank(followingId)}
+              disabled={isNullOrUndefinedOrBlank(followingId) && !exportAllDancers}
               defaultChecked={showPaths === undefined ? false : showPaths}
-              onChange={(checked) => setShowFollowingPath(checked)}
+              onChange={setShowFollowingPath}
             />
           }
           <CustomSwitch
             label="自分用メモを含める"
             defaultChecked={true}
-            onChange={(checked) => setIncludePersonalNotes(checked)}
+            onChange={setIncludePersonalNotes}
           />
         </div>
       </BaseEditDialog>
@@ -125,9 +145,17 @@ export default function ExportDialog({
       step === "export" &&
       <CustomDialog title="PDF生成中">
         <p className="max-w-full w-max">
-          <b>{choreo.name}</b>のPDFを生成しています。<br/>完了までしばらくお待ちください。<br/>進行状況：{progress}%
+          <b>{choreo.name}</b>のPDFを生成しています。<br/>
+          完了までしばらくお待ちください。<br/>
+          {
+            exportAllDancers && currentDancer &&
+            <><b>{currentDancer.name}</b>さん（{currentDancer.index}/{currentDancer.total}人）<br/></>
+          }
+          進行状況：{progress}%
         </p>
       </CustomDialog>
     }
   </>
 }
+
+export default memo(ExportDialog);
