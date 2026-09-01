@@ -66,7 +66,7 @@ function ViewerSidebar({
         {
           (isPositionHintShown || selectedTiming) && <IconButton
             size="sm"
-            src="personCancel"
+            src={isPositionHintShown ? "personCancel" : "clear"}
             noBorder
             onClick={() => {
               if (isPositionHintShown) {
