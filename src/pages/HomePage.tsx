@@ -450,6 +450,11 @@ export default function HomePage({
     });
   }, [getChoreo]);
 
+  const handlePdfExportClose = useCallback(() => {
+    setPdfExportDialogOpen(false);
+    setExportingChoreo(undefined);
+  }, []);
+
   const handleExportChoreo = useCallback((id: string) => {
     getChoreo(id).then((choreo) => {
       if (choreo) {
@@ -782,10 +787,7 @@ export default function HomePage({
             <ExportDialog
               choreo={exportingChoreo!}
               selectedId={Object.values(exportingChoreo.dancers).find(d => strEquals(d.name, savedDancerName))?.id ?? ""}
-              onClose={() => {
-                setPdfExportDialogOpen(false);
-                setExportingChoreo(undefined);
-              }}
+              onClose={handlePdfExportClose}
             />
           }
         </Dialog.Root>

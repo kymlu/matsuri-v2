@@ -623,6 +623,7 @@ export default function ChoreoEditPage(props: {
   const openEditChoreoInfoDialog = useCallback(() => setEditChoreoInfoDialogOpen(true), []);
   const openResizeDialog = useCallback(() => setResizeDialogOpen(true), []);
   const openExportDialog = useCallback(() => setExportDialogOpen(true), []);
+  const closeExportDialog = useCallback(() => setExportDialogOpen(false), []);
   const openDancerManagerDialog = useCallback(() => setDancerManagerDialogOpen(true), []);
   const openPropManagerDialog = useCallback(() => setPropManagerDialogOpen(true), []);
   const openDancerWarningDialog = useCallback(() => setDancerWarningDialogOpen(true), []);
@@ -1387,7 +1388,7 @@ export default function ChoreoEditPage(props: {
           <ExportDialog
             choreo={history.presentState.state}
             selectedId={selectedIds.dancers.length === 1 ? firstSelectedDancerProp!.id : ""}
-            onClose={() => setExportDialogOpen(false)}
+            onClose={closeExportDialog}
           />
         }
       </Dialog.Root>
