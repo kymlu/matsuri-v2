@@ -9,7 +9,7 @@ type LabelProps = {
 export default function Label({
   text, htmlFor
 }: LabelProps) {
-  return <label htmlFor={htmlFor} className="block text-base font-medium">{text}</label>
+  return <label htmlFor={htmlFor} className="block text-sm font-medium">{text}</label>
 }
 
 type FieldWithLabelProps = {
