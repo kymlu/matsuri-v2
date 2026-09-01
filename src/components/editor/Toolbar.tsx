@@ -203,33 +203,33 @@ function Toolbar({
         }
         {
           areSelectionActionsActivated && 
-          <IconButton src="deselect" label={"選択解除"} onClick={() => {onDeselect()}} />
+          <IconButton src="deselect" label={"選択解除"} onClick={onDeselect} />
         }
         <VerticalDivider/>
-        {showRenameDancer && <IconButton src="textFieldsAlt" label={"名前変更"} onClick={() => {onRenameDancer()}} />}
-        {showRenameProp && <IconButton src="textFieldsAlt" label={"名前変更"} onClick={() => {onRenameProp()}} />}
-        {showRenameObstacle && <IconButton src="textFieldsAlt" label={"名前変更"} onClick={() => {onRenameObstacle()}} />}
-        {showInUse && <IconButton src="flagCheck" crossedOut={!isInUse} label="使用中" onClick={() => {onToggleInUse()}} />}
+        {showRenameDancer && <IconButton src="textFieldsAlt" label={"名前変更"} onClick={onRenameDancer} />}
+        {showRenameProp && <IconButton src="textFieldsAlt" label={"名前変更"} onClick={onRenameProp} />}
+        {showRenameObstacle && <IconButton src="textFieldsAlt" label={"名前変更"} onClick={onRenameObstacle} />}
+        {showInUse && <IconButton src="flagCheck" crossedOut={!isInUse} label="使用中" onClick={onToggleInUse} />}
         {showArrange && <IconButton src="straighten" label="整理" onClick={()=>{setIsArrangeVisible(true)}}/>}
-        {showChangeColour && <IconButton src="colors" label="色" onClick={() => {onChangeColor()}} />}
-        {showCopyPosition && <IconButton src="contentCopy" label={"位置\nコピー"} onClick={() => {onCopyPosition()}} />}
-        {showPastePosition && <IconButton src="contentPaste" label={"位置\nペースト"} onClick={() => {onPastePosition()}} />}
-        {showSwapPosition && <IconButton src="swapHoriz" label={"位置交換"} onClick={() => {onSwapPosition()}} />}
-        {showDuplicateObstacle && <IconButton src="controlPointDuplicate" label="複製" onClick={() => {onDuplicateObstacle()}} />}
-        {showDuplicateProp && <IconButton src="controlPointDuplicate" label="複製" onClick={() => {onDuplicateProp()}} />}
-        {showDeleteObjects && <IconButton src="delete" label="削除" onClick={()=>{onDeleteObjects()}}/>}
+        {showChangeColour && <IconButton src="colors" label="色" onClick={onChangeColor} />}
+        {showCopyPosition && <IconButton src="contentCopy" label={"位置\nコピー"} onClick={onCopyPosition} />}
+        {showPastePosition && <IconButton src="contentPaste" label={"位置\nペースト"} onClick={onPastePosition} />}
+        {showSwapPosition && <IconButton src="swapHoriz" label={"位置交換"} onClick={onSwapPosition} />}
+        {showDuplicateObstacle && <IconButton src="controlPointDuplicate" label="複製" onClick={onDuplicateObstacle} />}
+        {showDuplicateProp && <IconButton src="controlPointDuplicate" label="複製" onClick={onDuplicateProp} />}
+        {showDeleteObjects && <IconButton src="delete" label="削除" onClick={onDeleteObjects}/>}
         {
           areEditingActionsActivated && <VerticalDivider/>
         }
-        {showMovementFunctions && <IconButton src="conversionPath" crossedOut={!showPaths} label={"動線表示"} onClick={()=>{toggleShowPaths()}}/>}
+        {showMovementFunctions && <IconButton src="conversionPath" crossedOut={!showPaths} label={"動線表示"} onClick={toggleShowPaths}/>}
         {showMovementFunctions && <IconButton src="rebaseEdit" label={"動線編集"} onClick={()=>{
           onEditMovement();
           setIsEditingMovement(true);
         }}/>}
-        {showEditPropSize && <IconButton src="flag" subIconSrc="edit" subIconPosition="corner" label={"道具管理"} onClick={() => {onEditPropSize()}} />}
+        {showEditPropSize && <IconButton src="flag" subIconSrc="edit" subIconPosition="corner" label={"道具管理"} onClick={onEditPropSize} />}
         <VerticalDivider/>
-        {showSelectColour && <IconButton src="select" subIconSrc="colors" label={"同色選択"} onClick={() => {onSelectColor()}} />}
-        {showSelectName && <IconButton src="select" subIconSrc="textFieldsAlt" label={"同名選択"} onClick={() => {onSelectName()}} />}
+        {showSelectColour && <IconButton src="select" subIconSrc="colors" label={"同色選択"} onClick={onSelectColor} />}
+        {showSelectName && <IconButton src="select" subIconSrc="textFieldsAlt" label={"同名選択"} onClick={onSelectName} />}
         {showSelectDancersButton && <IconButton src="select" subIconSrc="person" label={"全員選択"} onClick={() => {onSelectType(true, false, false)}} />}
         {showSelectPropsButton && <IconButton src="select" subIconSrc="flag" label={"道具選択"} onClick={() => {onSelectType(false, true, false)}} />}
         {showSelectObstaclesButton && <IconButton src="select" subIconSrc="emergencyHome" label={"障害物\n選択"} onClick={() => {onSelectType(false, false, true)}} />}
@@ -237,11 +237,11 @@ function Toolbar({
         <VerticalDivider/>
         {
           showLockResizeProps &&
-          <IconButton src={isResizePropsLocked ? "lock" : "lockOpenRight"} label={"道具\nサイズ"} onClick={() => onToggleResizePropsLock()}/>
+          <IconButton src={isResizePropsLocked ? "lock" : "lockOpenRight"} label={"道具\nサイズ"} onClick={onToggleResizePropsLock}/>
         }
         {
           !areSelectionActionsActivated && <>
-            {showLockObstacle && <IconButton src={areObstaclesLocked ? "lock" : "lockOpenRight"} label={"障害物\n変更"} onClick={() => onToggleObstacleLock()} />}
+            {showLockObstacle && <IconButton src={areObstaclesLocked ? "lock" : "lockOpenRight"} label={"障害物\n変更"} onClick={onToggleObstacleLock} />}
           </>
         }
       </>
@@ -265,17 +265,17 @@ function Toolbar({
               src={isAddingDancer ? "clear" : "person"}
               disabled={isAddingProp || isAddingObstacle}
               label="ダンサー"
-              onClick={() => {onAddDancer()}} />
+              onClick={onAddDancer} />
             <IconButton
               src={isAddingProp ? "clear" : "flag"}
               disabled={isAddingDancer || isAddingObstacle}
               label="道具"
-              onClick={() => {onAddProp()}} />
+              onClick={onAddProp} />
             <IconButton
               src={isAddingObstacle ? "clear" : "emergencyHome"}
               disabled={isAddingDancer || isAddingProp}
               label="障害物"
-              onClick={() => {onAddObstacle()}} />
+              onClick={onAddObstacle} />
           </>
         }
         {
@@ -309,12 +309,12 @@ function Toolbar({
               disabled={isAssigningActions}
               src="category"
               label="管理" // todo: show how many actions?
-              onClick={() => {onOpenActionManager()}} />
+              onClick={onOpenActionManager} />
             <IconButton
               disabled={!isAssigningActionsEnabled}
               src={isAssigningActions ? "clear" : "category"}
               label="割当"
-              onClick={() => {onAssignActions()}} />
+              onClick={onAssignActions} />
           </>
         }
         {
@@ -324,17 +324,17 @@ function Toolbar({
               disabled={!canEditMovement}
               src="restartAlt"
               label="リセット"
-              onClick={() => {onResetPath()}} />
+              onClick={onResetPath} />
             <IconButton
               disabled={!canEditMovement}
               src={pointCountIcon}
               label={pointCountLabel}
-              onClick={() => {togglePointCount()}} />
+              onClick={togglePointCount} />
             <IconButton
               disabled={!canEditMovement}
               src={curved ? "uTurnRight" : "turnRight"}
               label={curved ? "曲線" : "直線"}
-              onClick={() => {toggleCurved()}} />
+              onClick={toggleCurved} />
           </>
         }
       </>
