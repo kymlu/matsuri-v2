@@ -41,6 +41,7 @@ export enum CUSTOM_EVENT {
 
 export const IMG = {
   beginner: "beginner.svg",
+  beginnerDark: "beginner-dark.svg",
   moveBackward: "moveBackward.svg",
   moveForward: "moveForward.svg",
   moveToBack: "moveToBack.svg",
@@ -85,6 +86,7 @@ export const ICON = {
   counter2: "counter_2",
   counter3: "counter_3",
   curtains: "curtains",
+  darkMode: "dark_mode",
   delete: "delete",
   deselect: "deselect",
   doNotStep: "do_not_step",
@@ -121,6 +123,7 @@ export const ICON = {
   info: "info",
   label: "label",
   leftClick: "left_click",
+  lightMode: "light_mode",
   lineCurve: "line_curve",
   lineEndArrowNotch: "line_end_arrow_notch",
   lineEnd: "line_end",

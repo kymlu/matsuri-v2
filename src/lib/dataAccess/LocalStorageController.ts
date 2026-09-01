@@ -28,6 +28,15 @@ export function checkUnlockedChoreo(choreoId: string, version?: number): boolean
   return localStorage.getItem(getUnlockedChoreoKey(choreoId, version)) === TRUE;
 }
 
+const THEME = "THEME";
+export function getTheme(): "light" | "dark" {
+  return localStorage.getItem(THEME) === "dark" ? "dark" : "light";
+}
+
+export function setTheme(theme: "light" | "dark") {
+  localStorage.setItem(THEME, theme);
+}
+
 const DO_NOT_SHOW_VIEW_INFO_DIALOG = "DO_NOT_SHOW_VIEW_INFO_DIALOG"
 export function stopShowingViewPageInfoDialog(value: boolean) {
   localStorage.setItem(DO_NOT_SHOW_VIEW_INFO_DIALOG, value ? TRUE : FALSE);

@@ -19,7 +19,7 @@ export function Tag ({
     {
       "bg-primary text-white border-primary": type === "filled",
       "bg-transparent text-primary border-primary": type === "primary",
-      "bg-transparent text-gray-600 border-gray-600": type === "grey",
+      "bg-transparent text-muted border-line-strong": type === "grey",
       "px-0.5 py-0 text-xs": compact === true,
       "px-1 py-0.5 text-sm ": compact !== true,
       "border-dashed": dottedLine && type !== "filled"

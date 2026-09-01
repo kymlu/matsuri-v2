@@ -3,6 +3,7 @@ import { Stage } from "react-konva";
 import { METER_PX } from "../../lib/consts/consts";
 import GridLayer from "./layers/GridLayer";
 import { StageGeometry, StageType } from "../../models/choreo";
+import { useTheme } from "../../lib/helpers/themeHelper";
 
 type GridPreviewProps = {
   stageLength: number,
@@ -29,6 +30,7 @@ export default function GridPreview ({
     };
   }, [stageLength, stageWidth, xMargin, yMargin, stageType]);
 
+  const [theme] = useTheme();
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
 
@@ -56,7 +58,7 @@ export default function GridPreview ({
   }, [containerSize, stageWidth, stageLength, xMargin, yMargin]);
 
   return <div ref={containerRef} className="flex-1 min-h-[300px] overflow-hidden">
-    <Stage width={containerSize.width} height={containerSize.height} scaleX={scale} scaleY={scale}>
+    <Stage key={theme} width={containerSize.width} height={containerSize.height} scaleX={scale} scaleY={scale}>
       {
         stageGeometry &&
         <GridLayer

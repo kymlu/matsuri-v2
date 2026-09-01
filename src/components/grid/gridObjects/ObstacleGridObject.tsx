@@ -151,7 +151,7 @@ const ObstacleGridObject = memo(function ObstacleGridObject({
     <Rect
       width={(obstacle.width * METER_PX)}
       height={(obstacle.length * METER_PX)}
-      fill="white"
+      fill={colorPalette.white}
       />
 
     {

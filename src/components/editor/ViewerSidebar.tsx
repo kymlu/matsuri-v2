@@ -166,11 +166,11 @@ function ViewerSidebar({
           }
           <div className="flex items-center gap-1 mb-1">
             <Icon src="globe" size="xs" colour="grey"/>
-            <span className="text-sm text-gray-600">公開メモ</span>
+            <span className="text-sm text-muted">公開メモ</span>
           </div>
           {
             isNullOrUndefinedOrBlank(note) &&
-            <p className="italic text-gray-500 break-words whitespace-pre-line text-wrap">
+            <p className="italic text-muted break-words whitespace-pre-line text-wrap">
               メモなし
             </p>
           }
@@ -183,8 +183,8 @@ function ViewerSidebar({
           <Divider/>
           <div className="flex items-center gap-1 mb-1">
             <Icon src="lock" size="xs" colour="grey"/>
-            <span className="text-sm text-gray-600">自分用メモ</span>
-            <span className="ml-auto text-xs text-gray-400">この端末にのみ保存</span>
+            <span className="text-sm text-muted">自分用メモ</span>
+            <span className="ml-auto text-xs text-faint">この端末にのみ保存</span>
           </div>
           <div className="pb-2">
             <LongTextInput

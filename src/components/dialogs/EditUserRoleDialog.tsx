@@ -53,10 +53,10 @@ export default function EditUserRoleDialog({
     <div className="flex flex-col gap-5">
       <div className="grid grid-cols-[auto,1fr] gap-x-4 gap-y-1 text-sm">
         {!isNullOrUndefinedOrBlank(user.name) && <>
-          <span className="text-gray-600">名前</span>
+          <span className="text-muted">名前</span>
           <span className="font-medium">{user.name}</span>
         </>}
-        <span className="text-gray-600">メール</span>
+        <span className="text-muted">メール</span>
         <span className="font-medium">{user.email}</span>
       </div>
 
@@ -75,7 +75,7 @@ export default function EditUserRoleDialog({
             管理者
           </Button>
         </div>
-        <span className="text-sm text-gray-600">
+        <span className="text-sm text-muted">
           {
             role === "viewer" ? "隊列表の編集はできますが、公開はできません（ログインしていない場合と同様）。" :
             role === "editor" ? "隊列表の編集・公開ができます。" :

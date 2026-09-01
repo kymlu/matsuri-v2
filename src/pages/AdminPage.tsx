@@ -51,7 +51,7 @@ export default function AdminPage({
     }
   }
   
-  return <div className="w-full px-4 grid grid-rows-[auto,1fr] py-10 gap-4 text-center overflow-hide bg-gray-50 h-[100svh]">
+  return <div className="w-full px-4 grid grid-rows-[auto,1fr] py-10 gap-4 text-center overflow-hide bg-app h-[100svh]">
     <header className="flex items-center gap-2">
       <IconButton
         src="home"
@@ -89,7 +89,7 @@ export default function AdminPage({
                 !isNullOrUndefinedOrBlank(user.name) &&
                 <p className="font-semibold break-all">{user.name}</p>
               }
-              <p className="text-sm text-gray-600 break-all">{user.email}</p>
+              <p className="text-sm text-muted break-all">{user.email}</p>
             </div>
             {
               user.role === "admin" &&

@@ -42,7 +42,7 @@ export default function SiteInfoDialog({
       </div>
 
       <IconLabelButton label="ログをダウンロード" icon="download" onClick={downloadLogs}/>
-      <span className="text-center text-gray-600">{buildInfo}</span>
+      <span className="text-center text-muted">{buildInfo}</span>
     </div>
   </CustomDialog>
 }

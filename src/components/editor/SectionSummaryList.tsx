@@ -46,7 +46,7 @@ export default function SectionSummaryList({
                 "flex flex-col w-full px-3 py-1 rounded-md cursor-pointer",
                 {
                   "border border-primary bg-primary/5": isActive,
-                  "border border-gray-400": !isActive,
+                  "border border-line": !isActive,
                 }
               )}
             >
@@ -63,7 +63,7 @@ export default function SectionSummaryList({
                 {
                   position ?
                   <DancerPositionText position={position} geometry={geometry} bold={isActive}/> :
-                  <span className="text-sm text-gray-500">-</span>
+                  <span className="text-sm text-muted">-</span>
                 }
                 {
                   section.formation.dancerActions.map(action => {

@@ -24,8 +24,8 @@ export default function Icon({
     "text-base max-w-[1rem]": size === "2xs",
     "text-white": colour === "white",
     "text-primary": colour === "primary",
-    "text-black": colour === "black",
-    "text-gray-600": colour === "grey",
+    "text-body": colour === "black",
+    "text-muted": colour === "grey",
     "scale-y-[-1]": vertFlip,
   });
 

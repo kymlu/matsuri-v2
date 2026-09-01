@@ -51,7 +51,7 @@ export default function TextInput({
   }
 
   const inputClasses = classNames(
-    "col-start-1 border row-start-1 text-black py-3 border-gray-400 rounded-md focus-within:border-primary focus:outline-none",
+    "col-start-1 border row-start-1 text-body py-3 border-line rounded-md focus-within:border-primary focus:outline-none",
     {
       "pr-20": clearable && showLength,
       "pr-16": !clearable && showLength,
@@ -62,7 +62,8 @@ export default function TextInput({
       "h-6": short,
       "h-10": !short,
       "text-center": centered,
-      "bg-gray-200": disabled,
+      "bg-subtle": disabled,
+      "bg-surface": !disabled && !((required && isNullOrUndefinedOrBlank(value?.trim())) || hasError),
       "w-full": !compact,
       "min-w-32": compact,
       "border-primary bg-primary/20 placeholder:text-primary": (required && isNullOrUndefinedOrBlank(value?.trim())) || hasError,
@@ -113,7 +114,7 @@ export default function TextInput({
                 }
                 {
                   showLength &&
-                  <span className="text-sm text-gray-600 select-none text-end">{`${value.length}/${maxLength ?? 20}`}</span>
+                  <span className="text-sm text-muted select-none text-end">{`${value.length}/${maxLength ?? 20}`}</span>
                 }
               </div>
             }

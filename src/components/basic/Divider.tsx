@@ -14,7 +14,7 @@ export default function Divider({
     "my-1": medium,
     "h-0.5": compact,
     "bg-primary": primary,
-    "bg-gray-200": !primary,
+    "bg-subtle": !primary,
   })
 
   return (
@@ -26,7 +26,7 @@ export default function Divider({
 export function VerticalDivider() {
   return (
     <div
-      className={"mx-2 border-l h-full border-gray-400"}
+      className={"mx-2 border-l h-full border-line"}
     />
   );
 }

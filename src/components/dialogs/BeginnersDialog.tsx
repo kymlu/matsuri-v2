@@ -22,7 +22,7 @@ export default function BeginnersDialog({ goToHelpPage }: BeginnersDialogProps) 
     hasX
     full
     footer={
-      <div className="pt-4 mt-4 border-t border-gray-200">
+      <div className="pt-4 mt-4 border-t border-subtle">
         <Button full onClick={() => goToHelpPage()}>より詳しい使い方はこちら</Button>
       </div>
     }

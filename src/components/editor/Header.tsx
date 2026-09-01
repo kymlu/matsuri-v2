@@ -67,7 +67,7 @@ function Header({
   dancerCount, propCount, stageLength, stageWidth, version, choreoStatus,
   showPublish, publish,
 }: HeaderProps) {
-  return <header className="py-2 space-y-1.5 border-b-2 select-none from-white to-transparent">
+  return <header className="py-2 space-y-1.5 border-b-2 border-subtle select-none bg-surface from-white to-transparent">
     <div className="flex items-center justify-between w-screen gap-2 px-2">
       <div className="flex">
         <IconButton
@@ -81,7 +81,7 @@ function Header({
       <div
         className="w-full text-center truncate"
         onDoubleClick={downloadLogs}>
-        <p className="text-sm text-gray-400">{isNullOrUndefinedOrBlank(currentChoreo.event) ? "イベント不明" : currentChoreo.event}</p>
+        <p className="text-sm text-faint">{isNullOrUndefinedOrBlank(currentChoreo.event) ? "イベント不明" : currentChoreo.event}</p>
         <p className="font-bold">{currentChoreo.name}</p>
       </div>
       <div className="flex justify-end gap-2">
@@ -172,7 +172,7 @@ function Header({
         }
       </div>
     </div>
-    <div className="flex items-center justify-between px-3 text-sm text-gray-600">
+    <div className="flex items-center justify-between px-3 text-sm text-muted">
       <div className="flex gap-1">
         <StageSize stageLength={stageLength} stageWidth={stageWidth}/>
 

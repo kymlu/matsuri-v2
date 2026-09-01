@@ -53,7 +53,7 @@ export default function CustomAutocomplete({
   }
 
   const inputClasses = classNames(
-    "col-start-1 border row-start-1 text-black p-3 border-gray-400 rounded-md focus-within:border-primary focus:outline-none",
+    "col-start-1 border row-start-1 text-body p-3 border-line rounded-md focus-within:border-primary focus:outline-none",
     {
       "pr-20": clearable && showLength,
       "pr-16": !clearable && showLength,
@@ -64,7 +64,8 @@ export default function CustomAutocomplete({
       "h-6": short,
       "h-10": !short,
       "text-center": centered,
-      "bg-gray-200": disabled,
+      "bg-subtle": disabled,
+      "bg-surface": !disabled && !((required && isNullOrUndefinedOrBlank(value)) || hasError),
       "w-full": !compact,
       "min-w-32": compact,
       "border-primary bg-primary bg-opacity-20 placeholder:text-primary": (required && isNullOrUndefinedOrBlank(value)) || hasError,
@@ -99,7 +100,7 @@ export default function CustomAutocomplete({
             />
             <Autocomplete.Portal>
               <Autocomplete.Positioner className="z-50 outline-none" sideOffset={4}>
-                <Autocomplete.Popup className="rounded-md border-primary border overflow-y-auto scroll-py-[0.5rem] py-2 overscroll-contain max-h-[min(23rem,var(--available-height))] data-[empty]:hidden w-[var(--anchor-width)] max-w-[var(--available-width)] bg-[canvas] shadow-lg shadow-gray-200 outline-1 outline-gray-200 dark:shadow-none dark:-outline-offset-1 dark:outline-gray-300">
+                <Autocomplete.Popup className="rounded-md border-primary border overflow-y-auto scroll-py-[0.5rem] py-2 overscroll-contain max-h-[min(23rem,var(--available-height))] data-[empty]:hidden w-[var(--anchor-width)] max-w-[var(--available-width)] bg-surface shadow-lg shadow-subtle outline-1 outline-subtle dark:shadow-none dark:-outline-offset-1">
                   <Autocomplete.List>
                     {(item: string) => (
                       <React.Fragment key={item}>
@@ -116,7 +117,7 @@ export default function CustomAutocomplete({
               <div className="absolute flex items-center gap-1 right-2">
                 {
                   showLength &&
-                  <span className="text-sm text-gray-600 text-end">{`${value.length}/${maxLength ?? 20}`}</span>
+                  <span className="text-sm text-muted text-end">{`${value.length}/${maxLength ?? 20}`}</span>
                 }
                 {
                   clearable && !isNullOrUndefinedOrBlank(value) && 

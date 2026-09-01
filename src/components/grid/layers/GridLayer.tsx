@@ -56,7 +56,7 @@ const GridLayer = memo(function GridLayer({
         y={margins.topMargin * gridSizePx}
         width={width * gridSizePx}
         height={length * gridSizePx}
-        fill={"white"}
+        fill={colorPalette.white}
         />
     );
     
@@ -153,7 +153,7 @@ const GridLayer = memo(function GridLayer({
         y={stageTopPx - gridSizePx}
         width={gridSizePx * 1.4}
         align="center"
-        fill="white"
+        fill={colorPalette.white}
         fontStyle="bold"
         fontSize={12}
       />

@@ -6,6 +6,9 @@ import reportWebVitals from './reportWebVitals';
 import { DBProvider } from './lib/dataAccess/DBProvider';
 import { RequireDB } from './lib/dataAccess/RequireDb';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { initTheme } from './lib/helpers/themeHelper';
+
+initTheme();
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement

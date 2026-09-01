@@ -36,7 +36,7 @@ export default function CustomSlider({
           setValue(newValue);
         }}>
         <Slider.Control className="flex items-center w-full py-3 select-none touch-none">
-          <Slider.Track className="h-1 w-full rounded bg-gray-200 shadow-[inset_0_0_0_1px] shadow-gray-200 select-none">
+          <Slider.Track className="h-1 w-full rounded bg-subtle shadow-[inset_0_0_0_1px] shadow-subtle select-none">
             <Slider.Indicator className="rounded select-none bg-primary" />
             <Slider.Thumb className="size-4 rounded-full bg-white outline outline-2 outline-primary select-none has-[:focus-visible]:outline has-[:focus-visible]:outline-2" />
           </Slider.Track>

@@ -38,6 +38,7 @@ import { Team } from "../models/team"
 import CustomMenu from "../components/inputs/CustomMenu"
 import ChoreoPasswordEntryDialog from "../components/dialogs/ChoreoPasswordEntryDialog"
 import { ChoreoHistoryDialog } from "../components/dialogs/ChoreoHistoryDialog"
+import { useTheme } from "../lib/helpers/themeHelper"
 import { DancerCount, PropCount, StageSize } from "../components/common/IconInfo"
 import { checkUnlockedChoreo, setUnlockedChoreo } from "../lib/dataAccess/LocalStorageController"
 import AcceptInviteDialog from "../components/dialogs/AcceptInviteDialog"
@@ -93,6 +94,7 @@ export default function HomePage({
   isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin, isViewer, setIsViewer,
   setCurrentTeamMemberId, team, showNoTeamDialog, setShowNoTeamDialog, setupToken
 }: HomePageProps) {
+  const [theme, toggleTheme] = useTheme();
   const [savedChoreos, setSavedChoreos] = useState<ChoreoWithStatus[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -476,7 +478,7 @@ export default function HomePage({
   }, []);
 
   return (
-    <div className="bg-gray-50">
+    <div className="bg-app">
       <div className='grid py-10 px-6 h-[100svh] grid-rows-[auto,auto,auto,auto,1fr] overflow-hide w-full mx-auto'>
         <div className="text-sm text-primary">
           {
@@ -489,6 +491,7 @@ export default function HomePage({
         <div className="flex items-center justify-between pb-1">
           <h1 onClick={() => {goToAdminPage()}} className='text-2xl font-bold text-nowrap'>隊列表一覧</h1>
           <div className="flex items-center ">
+            <IconButton onClick={toggleTheme} src={theme === "dark" ? "lightMode" : "darkMode"} colour="primary" noBorder asDiv/>
             <Dialog.Root>
               <Dialog.Trigger>
                 <IconButton src="info" colour="primary" noBorder asDiv/>
@@ -650,7 +653,7 @@ export default function HomePage({
         <Dialog.Root>
           <Dialog.Trigger>
             <div className="fixed z-20 bottom-12 right-8">
-              <IconButton asDiv imgSrc="beginner" colour="primary"/>
+              <IconButton asDiv imgSrc={theme === "dark" ? "beginnerDark" : "beginner"} colour="primary"/>
             </div>
           </Dialog.Trigger>
           <BeginnersDialog goToHelpPage={goToHelpPage}/>
@@ -1060,13 +1063,13 @@ const EventSection = memo(function EventSection({
     defaultExpanded={isExpandedByDefault ?? true}
     level={2}
     title={
-      <div className="text-left">
+      <div className="py-1 text-left">
         <div>
           {event.event?.length === 0 ? "イベント不明" : event.event}
         </div>
         {
           (event.startDate || event.endDate) && (event.event?.length ?? 0) > 0 &&
-          <div className="text-sm font-bold text-gray-600">
+          <div className="text-sm font-bold text-muted">
             {formatDateRange(event.startDate, event.endDate, false)}
           </div>
         }
@@ -1088,7 +1091,7 @@ const EventSection = memo(function EventSection({
       </>
     }
   >
-    <div className="flex flex-col gap-2 md:grid md:grid-cols-2">
+    <div className="flex flex-col gap-2 py-2 md:grid md:grid-cols-2">
       {
         choreos.map((choreo) =>
           <ChoreoListItem
@@ -1321,7 +1324,7 @@ const ChoreoListItem = memo(function ChoreoListItem ({
         onClick={() => {
           onSelectChoreo(choreo, isUnlocked);
         }}
-        className="flex flex-col justify-between h-full p-2 gap-0.5 mx-[11px] transition-colors bg-white border border-gray-400 rounded-md cursor-pointer">
+        className="flex flex-col justify-between h-full p-2 gap-0.5 mx-[11px] transition-colors bg-surface border border-line rounded-md cursor-pointer">
         {/* Title */}
         <div className="relative flex flex-row items-start justify-between gap-2">
           <span className="flex items-center gap-0.5 font-semibold text-left break-words text-wrap">
@@ -1353,7 +1356,7 @@ const ChoreoListItem = memo(function ChoreoListItem ({
           </div>
         </div>
         {/* Meta row */}
-        <div className="flex flex-col items-start justify-between gap-0.5 text-sm text-gray-600 md:flex-row">
+        <div className="flex flex-col items-start justify-between gap-0.5 text-sm text-muted md:flex-row">
           {choreo.lastUpdated ? (
             <div className="flex items-center gap-0.5">
               <Icon

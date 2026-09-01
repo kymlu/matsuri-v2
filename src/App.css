@@ -1,3 +1,43 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  /* Light theme — these values match what the app used before dark mode,
+     so `bg-app` / `text-body` / etc. render identically to the old literals. */
+  :root {
+    --color-primary: #AB1010;
+    --color-app: #f9fafb;     /* gray-50  — page / body background */
+    --color-surface: #ffffff; /* white    — cards, dialogs, inputs, menus */
+    --color-subtle: #e5e7eb;  /* gray-200 — muted fills, dividers, disabled */
+    --color-line: #9ca3af;        /* gray-400 — default borders */
+    --color-line-strong: #4b5563; /* gray-600 — emphasised borders */
+    --color-body: #000000;    /* primary text */
+    --color-muted: #4b5563;   /* gray-600 — secondary text */
+    --color-faint: #9ca3af;   /* gray-400 — tertiary text */
+  }
+
+  .dark {
+    --color-primary: #D9534F;
+    --color-app: #030712;     /* gray-950 */
+    --color-surface: #1f2937; /* gray-800 */
+    --color-subtle: #374151;  /* gray-700 */
+    --color-line: #4b5563;        /* gray-600 */
+    --color-line-strong: #6b7280; /* gray-500 */
+    --color-body: #f3f4f6;    /* gray-100 */
+    --color-muted: #9ca3af;   /* gray-400 */
+    --color-faint: #6b7280;   /* gray-500 */
+  }
+
+  html {
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-app text-body;
+  }
+}

@@ -43,16 +43,16 @@ export default function DateInput({
   }
 
   const inputClasses = classNames(
-    "col-start-1 pointer-events-none row-start-1 px-2 py-3 text-black border border-gray-400 rounded-md focus-within:border-primary focus:outline-none",
+    "col-start-1 pointer-events-none row-start-1 px-2 py-3 text-body border border-line rounded-md focus-within:border-primary focus:outline-none",
     {
       "h-6": short,
       "h-10": !short,
       "text-center": centered,
-      "bg-gray-200": disabled,
+      "bg-subtle": disabled,
       "w-full": !compact,
       "min-w-32": compact,
       "border-primary bg-primary/20 text-primary-darker": (required && isNullOrUndefinedOrBlank(value)) || hasError,
-      "bg-white disabled:bg-white disabled:text-black": !(required && isNullOrUndefinedOrBlank(value)) && !hasError && !disabled,
+      "bg-surface": !(required && isNullOrUndefinedOrBlank(value)) && !hasError && !disabled,
     },)
 
   const wrapperClasses = classNames(

@@ -113,7 +113,7 @@ export default function InviteUserDialog({
               管理者
             </Button>
           </div>
-          <span className="text-sm text-gray-600">
+          <span className="text-sm text-muted">
             {
               role === "viewer" ? "隊列表の編集はできますが、公開はできません（ログインしていない場合と同様）。" :
               role === "editor" ? "隊列表の編集・公開ができます。" :

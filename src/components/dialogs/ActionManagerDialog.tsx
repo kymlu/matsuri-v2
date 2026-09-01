@@ -217,7 +217,7 @@ function SortableActionSection ({
     , {} as Record<string, number>));
   }, [action]);
 
-  return <div className="relative flex flex-row items-start gap-2 p-4 bg-white border border-gray-400 rounded-md" style={style} ref={setNodeRef}>
+  return <div className="relative flex flex-row items-start gap-2 p-4 bg-surface border border-line rounded-md" style={style} ref={setNodeRef}>
     <div {...attributes} {...listeners}>
       <Icon src="dragHandle"/>
     </div>

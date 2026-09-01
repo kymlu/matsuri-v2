@@ -41,7 +41,7 @@ export default function BottomDrawer ({
       >
       <Drawer.Portal>
         <Drawer.Viewport className="fixed bottom-0 flex flex-col w-full pointer-events-none">
-          <Drawer.Popup className="pointer-events-auto w-full h-[75svh] bg-white rounded-t-2xl overscroll-contain transition-transform duration-[450ms] ease-[cubic-bezier(0.32,0.72,0,1)] shadow-[0_-2px_16px_rgba(0,0,0,0.15)] [transform:translateY(calc(var(--drawer-snap-point-offset)+var(--drawer-swipe-movement-y)))]
+          <Drawer.Popup className="pointer-events-auto w-full h-[75svh] bg-surface rounded-t-2xl overscroll-contain transition-transform duration-[450ms] ease-[cubic-bezier(0.32,0.72,0,1)] shadow-[0_-2px_16px_rgba(0,0,0,0.15)] [transform:translateY(calc(var(--drawer-snap-point-offset)+var(--drawer-swipe-movement-y)))]
             will-change-transform outline-none data-[data-swiping]:select-none data-[starting-style]:translate-y-[calc(100%-var(--bleed))] data-[ending-style]:translate-y-[calc(100%-var(--bleed))] data-[ending-style]:duration-[calc(var(--drawer-swipe-strength)*400ms)]">
             <div className="flex-shrink-0 pt-5 pb-3 touch-none">
               <div className="w-1/3 h-1 mx-auto rounded-full bg-primary cursor-grab"/>
@@ -53,7 +53,7 @@ export default function BottomDrawer ({
               </div>
             </Drawer.Content>
           </Drawer.Popup>
-          <div className="z-50 pb-6 bg-white pointer-events-auto"
+          <div className="z-50 pb-6 bg-surface pointer-events-auto"
             onTouchStart={(e) => e.stopPropagation()}>
             {footer}
           </div>
