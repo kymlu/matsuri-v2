@@ -491,7 +491,7 @@ export default function HomePage({
         <div className="flex items-center justify-between pb-1">
           <h1 onClick={() => {goToAdminPage()}} className='text-2xl font-bold text-nowrap'>隊列表一覧</h1>
           <div className="flex items-center ">
-            <IconButton onClick={toggleTheme} src={theme === "dark" ? "lightMode" : "darkMode"} colour="primary" noBorder asDiv/>
+            <IconButton onClick={toggleTheme} src={theme === "dark" ? "lightMode" : "darkMode"} colour="primary" noBorder/>
             <Dialog.Root>
               <Dialog.Trigger>
                 <IconButton src="info" colour="primary" noBorder asDiv/>
