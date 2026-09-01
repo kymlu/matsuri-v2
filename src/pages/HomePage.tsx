@@ -4,7 +4,7 @@ import { LONG_NAME_LENGTH, SAMPLE_PARADE_ID, SAMPLE_STAGE_ID, SEARCH_NAME_LENGTH
 import { IconLabelButton } from "../components/basic/Button"
 import Icon from "../components/basic/Icon"
 import { readUploadedFile } from "../lib/helpers/uploadHelper"
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { memo, useCallback, useEffect, useMemo, useState } from "react"
 import { deleteChoreo, getAllChoreos, saveChoreo, saveChoreos } from "../lib/dataAccess/DataController"
 import { BasicChoreoDetails, Choreo, ChoreoSchema, EventDetails, getBasicChoreoDetails } from "../models/choreo"
 import { isNullOrUndefinedOrBlank, indexByKey, strCompare, strEquals, stringifyEvent, removeKey } from "../lib/helpers/globalHelper"
@@ -73,6 +73,18 @@ type ChoreoWithStatus = BasicChoreoDetails & {
   isDirty?: boolean,
 }
 
+// dialog handles — module scope so they aren't recreated every render
+const editChoreoInfoDialog = Dialog.createHandle<{}>();
+const editEventNameDialog = Dialog.createHandle<{}>();
+const deleteChoreoDialog = Dialog.createHandle<{}>();
+const syncChoreoDialog = Dialog.createHandle<{}>();
+const uploadFailedDialog = Dialog.createHandle<{}>();
+const uploadSucceededDialog = Dialog.createHandle<{}>();
+const pdfExportDialog = Dialog.createHandle<{}>();
+const uploadChoreoDialog = Dialog.createHandle<{}>();
+const loginDialog = Dialog.createHandle<{}>();
+const editUserNameDialog = Dialog.createHandle<{}>();
+
 export default function HomePage({
   buildInfo, eventList, setEventList,
   goToAdminPage, goToHelpPage, goToNewChoreoPage, goToViewPage,
@@ -92,7 +104,7 @@ export default function HomePage({
   const [showAcceptInviteDialog, setShowAcceptInviteDialog] = useState<boolean>(false);
   const [email, setEmail] = useState<string>("");
 
-  const getChoreoFromServer = async (
+  const getChoreoFromServer = useCallback(async (
     id: string
   ): Promise<Choreo | undefined> => {
     try {
@@ -111,9 +123,9 @@ export default function HomePage({
       console.error("Failed to load choreo with id", id);
       return undefined;
     }
-  };
+  }, [team, serverChoreoDetails]);
 
-  const getChoreo = async (
+  const getChoreo = useCallback(async (
     id: string
   ): Promise<Choreo | undefined> => {
     const local = localChoreos[id];
@@ -135,7 +147,7 @@ export default function HomePage({
     }
 
     return await getChoreoFromServer(id);
-  };
+  }, [localChoreos, team, getChoreoFromServer]);
 
   useEffect(() => {
     console.log("build", buildInfo)
@@ -154,7 +166,7 @@ export default function HomePage({
       let indexedLocal = indexByKey(local, "id");
       const indexedServer = indexByKey(server, "id");
       const allIds = new Set([...Object.keys(indexedLocal), ...Object.keys(indexedServer)]);
-      
+
       allIds.forEach((id) => {
         const localChoreo = indexedLocal[id];
         const serverChoreo = indexedServer[id];
@@ -298,13 +310,12 @@ export default function HomePage({
     }, new Map<string, Map<string, ChoreoWithStatus[]>>());
   }
 
-  const filteredChoreos = useMemo(() => 
+  const filteredChoreos = useMemo(() =>
     groupChoreos(savedChoreos.filter(c => c.name.toLowerCase().includes(searchTerm) || c.event?.toLowerCase().includes(searchTerm)))
   , [savedChoreos, searchTerm]);
 
   const [editingChoreo, setEditingChoreo] = useState<ChoreoWithStatus | undefined>();
   const [editChoreoInfoDialogOpen, setEditChoreoInfoDialogOpen] = useState(false);
-  const editChoreoInfoDialog = Dialog.createHandle<{}>();
   const handleEditChoreoInfoDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setEditChoreoInfoDialogOpen(isOpen);
   };
@@ -312,40 +323,34 @@ export default function HomePage({
   const [editingEventName, setEditingEventName] = useState<string | undefined>();
   const [editingEventNameIds, setEditingEventNameIds] = useState<string[] | undefined>();
   const [editEventNameDialogOpen, setEventNameDialogOpen] = useState(false);
-  const editEventNameDialog = Dialog.createHandle<{}>();
   const handleEventNameDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setEventNameDialogOpen(isOpen);
   }
 
   const [deleteChoreoVerb, setDeleteChoreoVerb] = useState<"削除"| "破棄">("削除");
   const [deleteChoreoDialogOpen, setDeleteChoreoDialogOpen] = useState(false);
-  const deleteChoreoDialog = Dialog.createHandle<{}>();
   const handleDeleteChoreoDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setDeleteChoreoDialogOpen(isOpen);
   };
 
   const [syncChoreoDialogOpen, setSyncChoreoDialogOpen] = useState(false);
-  const syncChoreoDialog = Dialog.createHandle<{}>();
   const handleSyncChoreoDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setSyncChoreoDialogOpen(isOpen);
   };
 
   const [uploadErrorMessage, setUploadErrorMessage] = useState<string>("");
   const [uploadFailedDialogOpen, setUploadFailedDialogOpen] = useState(false);
-  const uploadFailedDialog = Dialog.createHandle<{}>();
   const handleUploadFailedDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setUploadFailedDialogOpen(isOpen);
   };
-  
+
   const [uploadSucceededDialogOpen, setUploadSucceededDialogOpen] = useState(false);
-  const uploadSucceededDialog = Dialog.createHandle<{}>();
   const handleUploadSucceededDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setUploadSucceededDialogOpen(isOpen);
   };
 
   const [exportingChoreo, setExportingChoreo] = useState<Choreo | undefined>();
   const [pdfExportDialogOpen, setPdfExportDialogOpen] = useState(false);
-  const pdfExportDialog = Dialog.createHandle<{}>();
   const handlePdfExportDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setPdfExportDialogOpen(isOpen);
   };
@@ -353,19 +358,16 @@ export default function HomePage({
   const [uploadedChoreo, setUploadedChoreo] = useState<Choreo | undefined>();
   const [duplicatedChoreo, setDuplicatedChoreo] = useState<ChoreoWithStatus | undefined>();
   const [uploadChoreoDialogOpen, setUploadChoreoDialogOpen] = useState(false);
-  const uploadChoreoDialog = Dialog.createHandle<{}>();
   const handleUploadChoreoDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setUploadChoreoDialogOpen(isOpen);
   };
 
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
-  const loginDialog = Dialog.createHandle<{}>();
   const handleLoginDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setLoginDialogOpen(isOpen);
   };
-  
+
   const [editUserNameDialogOpen, setEditUserNameDialogOpen] = useState(false);
-  const editUserNameDialog = Dialog.createHandle<{}>();
   const handleEditUserNameDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setEditUserNameDialogOpen(isOpen);
   };
@@ -383,7 +385,7 @@ export default function HomePage({
     }
   }
 
-  const duplicateChoreo = (choreo: Choreo) => {
+  const duplicateChoreo = useCallback((choreo: Choreo) => {
     const newChoreo = {
       ...choreo,
       id: crypto.randomUUID(),
@@ -394,24 +396,84 @@ export default function HomePage({
     } as Choreo;
     saveChoreo(newChoreo, () => {
       setLocalChoreos(prev => ({...prev, [newChoreo.id]: newChoreo}));
-      const newChoreos = [...savedChoreos, {...getBasicChoreoDetails(newChoreo), status: "localOnly" as ChoreoStatus}];
-
-      // setDancerNamesByEvent(
-      //   newChoreos.reduce((acc, item) => {
-      //     const names = Object.values(item.dancers).map(d => d.name);
-      //     const stringifiedEvent = stringifyEvent(item);
-      //     return {
-      //       ...acc,
-      //       [stringifiedEvent]: {
-      //         ...(acc[stringifiedEvent] ?? {}),
-      //         [item.id]: names,
-      //       },
-      //     };
-      //   }, {} as Record<string, Record<string, string[]>>)
-      // );
-      setSavedChoreos(newChoreos);
+      setSavedChoreos(prev => [...prev, {...getBasicChoreoDetails(newChoreo), status: "localOnly" as ChoreoStatus}]);
     });
-  }
+  }, [team]);
+
+  // ---- stable, id-parameterized handlers shared across every EventSection / ChoreoListItem ----
+  const handleSelectChoreo = useCallback((id: string, status: ChoreoStatus) => {
+    getChoreo(id).then(c => {
+      if (c) {
+        onSelectChoreo(c, status);
+      }
+    });
+  }, [getChoreo, onSelectChoreo]);
+
+  const handleDuplicateChoreo = useCallback((choreo: ChoreoWithStatus) => {
+    getChoreo(choreo.id).then(c => {
+      if (c) {
+        duplicateChoreo(c);
+      }
+    });
+  }, [getChoreo, duplicateChoreo]);
+
+  const handleEditChoreoName = useCallback((choreo: ChoreoWithStatus) => {
+    setEditingChoreo(choreo);
+    setEditChoreoInfoDialogOpen(true);
+  }, []);
+
+  const handleDeleteChoreo = useCallback((choreo: ChoreoWithStatus) => {
+    setDeleteChoreoVerb("削除");
+    setEditingChoreo(choreo);
+    setDeleteChoreoDialogOpen(true);
+  }, []);
+
+  const handleRevertChoreo = useCallback((choreo: ChoreoWithStatus) => {
+    setDeleteChoreoVerb("破棄");
+    setEditingChoreo(choreo);
+    setDeleteChoreoDialogOpen(true);
+  }, []);
+
+  const handleSyncChoreo = useCallback((choreo: ChoreoWithStatus) => {
+    setEditingChoreo(choreo);
+    setSyncChoreoDialogOpen(true);
+  }, []);
+
+  const handlePdfExport = useCallback((choreo: ChoreoWithStatus) => {
+    getChoreo(choreo.id).then(c => {
+      if (c) {
+        setExportingChoreo(c);
+        setPdfExportDialogOpen(true);
+      }
+    });
+  }, [getChoreo]);
+
+  const handleExportChoreo = useCallback((id: string) => {
+    getChoreo(id).then((choreo) => {
+      if (choreo) {
+        exportChoreo(choreo);
+      }
+    });
+  }, [getChoreo]);
+
+  const handleExportEvent = useCallback((eventInfo: string, choreos: ChoreoWithStatus[]) => {
+    Promise.all(choreos.map((c) => getChoreo(c.id))).then((loadedChoreos) => {
+      exportEvent(
+        loadedChoreos.filter(c => !!c),
+        (JSON.parse(eventInfo) as EventDetails)?.event
+      );
+    });
+  }, [getChoreo]);
+
+  const handleAddEvent = useCallback((eventInfo: string) => {
+    goToNewChoreoPage(JSON.parse(eventInfo) as EventDetails);
+  }, [goToNewChoreoPage]);
+
+  const handleEditEventName = useCallback((eventInfo: string, choreos: ChoreoWithStatus[]) => {
+    setEditingEventName(eventInfo);
+    setEditingEventNameIds(choreos.map(x => x.id));
+    setEventNameDialogOpen(true);
+  }, []);
 
   return (
     <div className="bg-gray-50">
@@ -557,69 +619,17 @@ export default function HomePage({
                         dancerNamesByFormation={dancerNamesByEvent[eventDetails]}
                         choreos={choreos}
                         searchTerm={searchTerm}
-                        onSelectChoreo={(id, status) => {
-                          getChoreo(id).then(c => {
-                            if (c) {
-                              onSelectChoreo(c, status);
-                            }
-                          });
-                        }}
-                        duplicateChoreo={choreo => {
-                          getChoreo(choreo.id).then(c => {
-                            if (c) {
-                              duplicateChoreo(c);
-                            }
-                          });
-                        }}
-                        editChoreoName={(choreo) => {
-                          setEditingChoreo(choreo);
-                          setEditChoreoInfoDialogOpen(true);
-                        }}
-                        deleteChoreo={(choreo) => {
-                          setDeleteChoreoVerb("削除");
-                          setEditingChoreo(choreo);
-                          setDeleteChoreoDialogOpen(true);
-                        }}
-                        revertChoreo={(choreo) => {
-                          setDeleteChoreoVerb("破棄");
-                          setEditingChoreo(choreo);
-                          setDeleteChoreoDialogOpen(true);
-                        }}
-                        syncChoreo={(choreo) => {
-                          setEditingChoreo(choreo);
-                          setSyncChoreoDialogOpen(true);
-                        }}
-                        onPdfExport={(choreo) => {
-                          getChoreo(choreo.id).then(c => {
-                            if (c) {
-                              setExportingChoreo(c);
-                              setPdfExportDialogOpen(true);
-                            }
-                          })
-                        }}
-                        onExport={(id) => {
-                          getChoreo(id).then((choreo) => {
-                            if (choreo) {
-                              exportChoreo(choreo);
-                            }
-                          })
-                        }}
-                        onExportEvent={() => {
-                          Promise.all(choreos.map((c) => getChoreo(c.id))).then((choreos) => {
-                            exportEvent(
-                              choreos.filter(c => !!c), 
-                              (JSON.parse(eventDetails) as EventDetails)?.event
-                            );
-                          });
-                        }}
-                        addEvent={() => {
-                          goToNewChoreoPage(JSON.parse(eventDetails) as EventDetails);
-                        }}
-                        editEventName={() => {
-                          setEditingEventName(eventDetails);
-                          setEditingEventNameIds(choreos.map(x => x.id));
-                          setEventNameDialogOpen(true);
-                        }}
+                        onSelectChoreo={handleSelectChoreo}
+                        duplicateChoreo={handleDuplicateChoreo}
+                        editChoreoName={handleEditChoreoName}
+                        deleteChoreo={handleDeleteChoreo}
+                        revertChoreo={handleRevertChoreo}
+                        syncChoreo={handleSyncChoreo}
+                        onPdfExport={handlePdfExport}
+                        onExport={handleExportChoreo}
+                        onExportEvent={handleExportEvent}
+                        addEvent={handleAddEvent}
+                        editEventName={handleEditEventName}
                         isExpandedByDefault={!isNullOrUndefinedOrBlank(searchTerm) || (yearIndex === 0 && choreoIndex === 0)}
                         isLoggedIn={isLoggedIn}
                         teamId={team?.id}
@@ -653,7 +663,7 @@ export default function HomePage({
           accept=".mtr, application/zip"
           onChange={(event) => {
             if (!event.target.files || event.target.files.length === 0) {
-              console.log("No files were selected to upload.");              
+              console.log("No files were selected to upload.");
             } else {
               const file = event.target.files?.[0];
               readUploadedFile(
@@ -661,7 +671,7 @@ export default function HomePage({
                 (newChoreo: Choreo) => {
                   newChoreo.teamId = team?.id;
                   const existingChoreos = Object.values(savedChoreos).flat();
-                  const duplicateChoreo = existingChoreos.find(c => 
+                  const duplicateChoreo = existingChoreos.find(c =>
                     strEquals(c.name, newChoreo.name) &&
                     strEquals(c.event, newChoreo.event) &&
                     strEquals(c.startDate, newChoreo.startDate) &&
@@ -733,7 +743,7 @@ export default function HomePage({
           handle={editEventNameDialog}
           open={editEventNameDialogOpen}
           onOpenChange={handleEventNameDialogOpen}>
-            
+
           <EditEventInfoDialog
             eventInfo={JSON.parse(editingEventName ?? "{}") as EventDetails}
             eventList={eventList}
@@ -749,7 +759,7 @@ export default function HomePage({
                       startDate: startDate,
                       endDate: endDate,
                       teamId: team?.id,
-                    }}), 
+                    }}),
                     () => {
                       setEventNameDialogOpen(false);
                       loadChoreos();
@@ -763,7 +773,7 @@ export default function HomePage({
           handle={pdfExportDialog}
           open={pdfExportDialogOpen}
           onOpenChange={handlePdfExportDialogOpen}>
-            
+
           {
             exportingChoreo &&
             <ExportDialog
@@ -829,7 +839,7 @@ export default function HomePage({
           handle={deleteChoreoDialog}
           open={deleteChoreoDialogOpen}
           onOpenChange={handleDeleteChoreoDialogOpen}>
-            
+
           <BaseEditDialog
             title={`${deleteChoreoVerb}確認`}
             actionButtonText="OK"
@@ -851,7 +861,7 @@ export default function HomePage({
           handle={uploadFailedDialog}
           open={uploadFailedDialogOpen}
           onOpenChange={handleUploadFailedDialogOpen}>
-            
+
           <BaseErrorDialog
             title="アップロード失敗"
             onClose={() => {setUploadFailedDialogOpen(false)}}>
@@ -863,7 +873,7 @@ export default function HomePage({
           handle={uploadSucceededDialog}
           open={uploadSucceededDialogOpen}
           onOpenChange={handleUploadSucceededDialogOpen}>
-            
+
           <BaseErrorDialog
             title="アップロード成功"
             onClose={() => {setUploadSucceededDialogOpen(false)}}>
@@ -974,8 +984,8 @@ type EventSectionProps = {
   choreos: ChoreoWithStatus[],
   searchTerm: string,
   dancerNamesByFormation?: Record<string, string[]>,
-  addEvent: () => void,
-  editEventName: () => void,
+  addEvent: (eventInfo: string) => void,
+  editEventName: (eventInfo: string, choreos: ChoreoWithStatus[]) => void,
   onSelectChoreo: (id: string, status: ChoreoStatus) => void,
   duplicateChoreo: (choreo: ChoreoWithStatus) => void,
   editChoreoName: (choreo: ChoreoWithStatus) => void,
@@ -984,26 +994,26 @@ type EventSectionProps = {
   syncChoreo: (choreo: ChoreoWithStatus) => void,
   onPdfExport: (choreo: ChoreoWithStatus) => void,
   onExport: (id: string) => void,
-  onExportEvent: () => void,
+  onExportEvent: (eventInfo: string, choreos: ChoreoWithStatus[]) => void,
   isExpandedByDefault?: boolean,
   isLoggedIn: boolean,
   teamId?: string,
 }
 
-function EventSection({
+const EventSection = memo(function EventSection({
   eventInfo, dancerNamesByFormation, choreos, searchTerm, onSelectChoreo, addEvent, editEventName,
   duplicateChoreo, editChoreoName, deleteChoreo, revertChoreo, syncChoreo,
   onPdfExport, onExport, onExportEvent, isExpandedByDefault, isLoggedIn, teamId
 }: EventSectionProps) {
-  const optionsDialog = Dialog.createHandle<ChoreoWithStatus>();
   const [optionsDialogOpen, setOptionsDialogOpen] = React.useState(false);
   const [selectedChoreo, setSelectedChoreo] = useState<ChoreoWithStatus | undefined>();
   const [postPasswordAction, setPostPasswordAction] = useState<"none" | "open" | "rename" | "duplicate" | "export" | "pdf">("none");
   const dancerWarningDialog = Dialog.createHandle<Choreo>();
   const [dancerWarningDialogOpen, setDancerWarningDialogOpen] = React.useState(false);
+  const optionsDialog = Dialog.createHandle<ChoreoWithStatus>();
   const choreoPasswordEntryDialog = Dialog.createHandle<Choreo>();
-  const [choreoPasswordEntryDialogOpen, setChoreoPasswordEntryDialogOpen] = React.useState(false);
   const historyDialog = Dialog.createHandle<Choreo>();
+  const [choreoPasswordEntryDialogOpen, setChoreoPasswordEntryDialogOpen] = React.useState(false);
   const [historyDialogOpen, setHistoryDialogOpen] = React.useState(false);
 
   const event = JSON.parse(eventInfo) as EventDetails;
@@ -1023,19 +1033,29 @@ function EventSection({
     }
   }, [dancerNamesByFormation]);
 
-  const handleOptionsDialogOpenChange = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
-    setOptionsDialogOpen(isOpen);
-  };
   const handleDancerWarningDialogOpenChange = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setDancerWarningDialogOpen(isOpen);
   };
-  const handleChoreoPasswordEntryDialogOpenChange = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
-    setChoreoPasswordEntryDialogOpen(isOpen);
-  };
-  const handleHistoryDialogOpenChange = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
-    setHistoryDialogOpen(isOpen);
-  };
-  
+
+  const handleOpenOptionsDialog = useCallback((choreo: ChoreoWithStatus) => {
+    setSelectedChoreo(choreo);
+    setOptionsDialogOpen(true);
+  }, []);
+
+  const handleChoreoSelect = useCallback((choreo: ChoreoWithStatus, isUnlocked: boolean) => {
+    if (choreo.status === "syncRequired") {
+      syncChoreo(choreo);
+    } else {
+      if (choreo.hasPassword && !isLoggedIn && !isUnlocked) {
+        setSelectedChoreo(choreo);
+        setPostPasswordAction("open");
+        setChoreoPasswordEntryDialogOpen(true);
+      } else {
+        onSelectChoreo(choreo.id, choreo.status);
+      }
+    }
+  }, [isLoggedIn, syncChoreo, onSelectChoreo]);
+
   return <ExpandableSection
     defaultExpanded={isExpandedByDefault ?? true}
     level={2}
@@ -1055,15 +1075,15 @@ function EventSection({
     menuContents={ // todo: add a feature to see the upload history
       <>
         <Menu.Item>
-          <IconLabelButton full noBorder icon="add" label="追加" onClick={addEvent}/>
+          <IconLabelButton full noBorder icon="add" label="追加" onClick={() => addEvent(eventInfo)}/>
         </Menu.Item>
         <Divider compact/>
         <Menu.Item>
-          <IconLabelButton full noBorder icon="edit" label="情報変更" onClick={editEventName}/>
+          <IconLabelButton full noBorder icon="edit" label="情報変更" onClick={() => editEventName(eventInfo, choreos)}/>
         </Menu.Item>
         <Divider compact/>
         <Menu.Item>
-          <IconLabelButton full noBorder icon="download" label="共有" onClick={() => onExportEvent()}/>
+          <IconLabelButton full noBorder icon="download" label="共有" onClick={() => onExportEvent(eventInfo, choreos)}/>
         </Menu.Item>
       </>
     }
@@ -1076,30 +1096,14 @@ function EventSection({
             choreo={choreo}
             isLoggedIn={isLoggedIn}
             searchTerm={searchTerm}
-            openOptionsDialog={() => {
-              setSelectedChoreo(choreo);
-              setOptionsDialogOpen(true);
-            }}
-            onSelectChoreo={(isUnlocked: boolean) => {
-              if (choreo.status === "syncRequired") {
-                syncChoreo(choreo);
-              } else {
-                if (choreo.hasPassword && !isLoggedIn && !isUnlocked) {
-                  setSelectedChoreo(choreo);
-                  setPostPasswordAction("open");
-                  setChoreoPasswordEntryDialogOpen(true);
-                } else {
-                  onSelectChoreo(choreo.id, choreo.status);
-                }
-              }
-            }
-          }
-        />
+            openOptionsDialog={handleOpenOptionsDialog}
+            onSelectChoreo={handleChoreoSelect}
+          />
         )
       }
       <Dialog.Root
         open={optionsDialogOpen}
-        onOpenChange={handleOptionsDialogOpenChange}
+        onOpenChange={setOptionsDialogOpen}
         handle={optionsDialog}>
         {
           selectedChoreo &&
@@ -1120,7 +1124,7 @@ function EventSection({
                   }}
                   full />
               </Dialog.Close>
-              
+
               <Dialog.Close>
                 <IconLabelButton
                   icon="fileCopy"
@@ -1142,7 +1146,7 @@ function EventSection({
                 selectedChoreo.status !== "localOnly" &&
                 !strEquals(selectedChoreo.id, SAMPLE_PARADE_ID) &&
                 !strEquals(selectedChoreo.id, SAMPLE_STAGE_ID) &&
-                
+
                 <Dialog.Close>
                   <IconLabelButton
                     icon="history"
@@ -1170,7 +1174,7 @@ function EventSection({
                   }}
                   full />
               </Dialog.Close>
-              
+
               <Dialog.Close>
                 <IconLabelButton
                   icon="pictureAsPdf"
@@ -1242,7 +1246,7 @@ function EventSection({
       </Dialog.Root> */}
       <Dialog.Root
         open={historyDialogOpen}
-        onOpenChange={handleHistoryDialogOpenChange}
+        onOpenChange={setHistoryDialogOpen}
         handle={historyDialog}>
         <ChoreoHistoryDialog
           teamId={teamId ?? ""}
@@ -1254,7 +1258,7 @@ function EventSection({
       </Dialog.Root>
       <Dialog.Root
         open={choreoPasswordEntryDialogOpen}
-        onOpenChange={handleChoreoPasswordEntryDialogOpenChange}
+        onOpenChange={setChoreoPasswordEntryDialogOpen}
         handle={choreoPasswordEntryDialog}>
         <ChoreoPasswordEntryDialog
           choreoId={selectedChoreo?.id}
@@ -1279,7 +1283,7 @@ function EventSection({
                 case "pdf":
                   onPdfExport(selectedChoreo);
                   break;
-              
+
                 default:
                   break;
               }
@@ -1293,21 +1297,21 @@ function EventSection({
       </Dialog.Root>
     </div>
   </ExpandableSection>
-}
+});
 
 type ChoreoListItemProps = {
   choreo: ChoreoWithStatus;
   isLoggedIn: boolean;
   searchTerm: string;
-  onSelectChoreo: (hasPassword: boolean) => void,
-  openOptionsDialog: () => void,
+  onSelectChoreo: (choreo: ChoreoWithStatus, isUnlocked: boolean) => void,
+  openOptionsDialog: (choreo: ChoreoWithStatus) => void,
 }
 
-function ChoreoListItem ({
+const ChoreoListItem = memo(function ChoreoListItem ({
   choreo, isLoggedIn, searchTerm, onSelectChoreo, openOptionsDialog
 }: ChoreoListItemProps) {
   const isUnlocked = useMemo(() => isLoggedIn || checkUnlockedChoreo(choreo.id, choreo.version), [isLoggedIn, choreo]);
-  
+
   return <React.Fragment key={choreo.id}>
     {
       (isNullOrUndefinedOrBlank(searchTerm) ||
@@ -1315,7 +1319,7 @@ function ChoreoListItem ({
       choreo.event?.toLowerCase().includes(searchTerm.toLowerCase())) &&
       <div
         onClick={() => {
-          onSelectChoreo(isUnlocked);
+          onSelectChoreo(choreo, isUnlocked);
         }}
         className="flex flex-col justify-between h-full p-2 gap-0.5 mx-[11px] transition-colors bg-white border border-gray-400 rounded-md cursor-pointer">
         {/* Title */}
@@ -1343,7 +1347,7 @@ function ChoreoListItem ({
               noBorder
               onClick={(e) => {
                 e.stopPropagation();
-                openOptionsDialog();
+                openOptionsDialog(choreo);
               }}
             />
           </div>
@@ -1371,4 +1375,4 @@ function ChoreoListItem ({
       </div>
     }
   </React.Fragment>
-}
+});
