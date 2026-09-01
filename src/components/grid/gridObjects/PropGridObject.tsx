@@ -135,7 +135,7 @@ const PropGridObject = memo(function PropGridObject({
         <Text
           y={(prop.length / 2) * METER_PX}
           width={prop.width * METER_PX}
-          height={prop.length}
+          height={prop.length * METER_PX}
           text={prop.name}
           fontSize={METER_PX/3}
           fontStyle="bold"
