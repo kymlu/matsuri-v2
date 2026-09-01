@@ -9,6 +9,7 @@ import { Choreo } from "../../models/choreo"
 import { exportAllDancersToPdf, exportToPdf } from "../../lib/helpers/exportHelper"
 import CustomSwitch from "../inputs/CustomSwitch"
 import { EXPORT_NAME_LENGTH } from "../../lib/consts/consts"
+import Divider from "../basic/Divider"
 
 type ExportDialogProps = {
   choreo: Choreo,
@@ -108,6 +109,8 @@ function ExportDialog({
               />
           </div>
 
+          <Divider/>
+
           {
             Object.values(choreo.dancers).length > 0 &&
             <>
@@ -133,6 +136,9 @@ function ExportDialog({
               onChange={setShowFollowingPath}
             />
           }
+          
+          <Divider/>
+          
           <CustomSwitch
             label="自分用メモを含める"
             defaultChecked={true}
