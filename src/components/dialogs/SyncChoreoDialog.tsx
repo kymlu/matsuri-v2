@@ -30,7 +30,7 @@ export default function SyncChoreoDialog ({
         <p>この隊列表には公開版とは異なる内容があります。</p>
         <p>現在の変更をどうしますか？</p>
       </div>
-      <div className="py-2 border border-gray-400 rounded-md">
+      <div className="py-2 border border-line rounded-md">
         <div className="grid grid-cols-[auto,auto,1fr,auto] gap-2 items-center justify-between px-2">
           <Icon src="editDocument" size="sm"/>
           <span className="font-semibold text-nowrap">編集版</span>

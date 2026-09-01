@@ -187,7 +187,7 @@ function Toolbar({
     }
    }, [areSelectionActionsActivated]);
 
-  const className = classNames("z-10 flex items-start w-screen gap-2 px-4 pt-2 pb-10 h-28 overflow-y-hidden bg-white border-t-2 border-gray-400", {
+  const className = classNames("z-10 flex items-start w-screen gap-2 px-4 pt-2 pb-10 h-28 overflow-y-hidden bg-surface border-t-2 border-line", {
     "pointer-events-none opacity-40": !isEnabled
   });
 

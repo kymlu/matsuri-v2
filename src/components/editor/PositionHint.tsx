@@ -52,7 +52,7 @@ const PositionHint = memo(function PositionHint({
                 }
                 {
                   deltaX !== 0 && deltaY !== 0 && 
-                  <span className="text-sm text-gray-400">/</span>
+                  <span className="text-sm text-faint">/</span>
                 }
                 {
                   deltaX !== 0 && 
@@ -102,7 +102,7 @@ export function DancerPositionText({ position, geometry, bold = true }: DancerPo
   return (
     <div className="flex items-center gap-1">
       <span className={valueClasses}>{currentY}m</span>
-      <span className="text-sm text-gray-400">/</span>
+      <span className="text-sm text-faint">/</span>
       <span>{currentX === 0 ? "↔︎" : currentX > 0 ? "←" : "→"}</span>
       <span className={valueClasses}>{Math.abs(currentX)}m</span>
     </div>
@@ -116,8 +116,8 @@ type InfoBoxProps = {
 }
 
 function InfoBox({title, children, isSmall}: InfoBoxProps) {
-  return <div className={"flex flex-col justify-between p-2 border border-gray-400 rounded-md" + (isSmall ? "" : " flex-1")}>
-    <span className="text-sm font-semibold text-center text-gray-600">{title}</span>
+  return <div className={"flex flex-col justify-between p-2 border border-line rounded-md" + (isSmall ? "" : " flex-1")}>
+    <span className="text-sm font-semibold text-center text-muted">{title}</span>
     <div className="flex items-center justify-center gap-1">
       {children}
     </div>

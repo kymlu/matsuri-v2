@@ -25,7 +25,7 @@ export default function HelpPage({
   const [referencedPage, setReferencedPage] = useState<HelpPageKey>("home");
   const content = HELP_CONTENT[referencedPage];
 
-  return <div className="w-full px-4 grid grid-rows-[auto,auto,1fr] py-10 gap-4 text-center overflow-hide bg-gray-50 h-[100svh]">
+  return <div className="w-full px-4 grid grid-rows-[auto,auto,1fr] py-10 gap-4 text-center overflow-hide bg-app h-[100svh]">
     <header className="flex gap-2">
       <IconButton
         src="home"
@@ -43,11 +43,11 @@ export default function HelpPage({
         />
     </div>
     <div className="px-2 space-y-2 overflow-y-auto text-start">
-      <div className="text-gray-700">{content.overview}</div>
+      <div className="text-muted">{content.overview}</div>
       {
         content.sections.map((section) => (
           <ExpandableSection key={section.id} title={section.title} level={2} defaultExpanded={false}>
-            <div className="pl-2 space-y-2 text-gray-700 text-start">
+            <div className="pl-2 space-y-2 text-muted text-start">
               {section.content}
               <Divider compact/>
             </div>

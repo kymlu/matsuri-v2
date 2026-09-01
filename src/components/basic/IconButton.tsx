@@ -30,10 +30,10 @@ export default function IconButton ({
   const buttonClasses = classNames("relative flex justify-center items-center rounded-full", {
     "border-0": noBorder,
     "border-primary": noBorder !== true && colour === "primary",
-    "border-black": noBorder !== true && (colour === undefined || colour === "black"),
-    "border-gray-600": noBorder !== true && colour === "grey",
+    "border-black dark:border-gray-300": noBorder !== true && (colour === undefined || colour === "black"),
+    "border-line-strong": noBorder !== true && colour === "grey",
     "border-white": noBorder !== true && colour === "white",
-    "border-2 bg-white p-1": noBorder !== true,
+    "border-2 bg-surface p-1": noBorder !== true,
     "opacity-30": disabled,
     "min-w-16 min-h-16 size-16 max-w-16 max-h-16": noBorder !== true && size === "lg",
     "min-w-12 min-h-12 size-12 max-w-12 max-h-12": noBorder !== true && (size === undefined || size === "md"),
@@ -55,7 +55,7 @@ export default function IconButton ({
     {
       "size-6": size === "lg",
       "size-5": size === undefined || size === "md",
-      "size-4 rounded-full translate-x-1/4 translate-y-1/4 shadow-white/35 shadow bg-white ": size === "sm",
+      "size-4 rounded-full translate-x-1/4 translate-y-1/4 shadow-white/35 shadow bg-surface ": size === "sm",
     }
   );
 

@@ -17,7 +17,7 @@ export default function ChoreoInfo({
         <Icon src="label" size="sm"/>
       </div>
       <div>
-        <div className="text-sm text-gray-600">隊列名</div>
+        <div className="text-sm text-muted">隊列名</div>
         <b>{name}</b>
       </div>
     </div>
@@ -28,7 +28,7 @@ export default function ChoreoInfo({
           <Icon src="calendarToday" size="sm"/>
         </div>
         <div>
-          <div className="text-sm text-gray-600">イベント情報</div>
+          <div className="text-sm text-muted">イベント情報</div>
           <b>{event}</b>
           <div className="text-sm">{formatDateRange(startDate, endDate)}</div>
         </div>

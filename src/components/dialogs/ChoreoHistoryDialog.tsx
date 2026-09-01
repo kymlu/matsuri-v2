@@ -41,10 +41,10 @@ export function ChoreoHistoryDialog({
       {
         history.map((h, i) => (<Fragment key={h.version} >
           {
-            i === 0 && <div className="text-sm text-gray-600">最新版</div>
+            i === 0 && <div className="text-sm text-muted">最新版</div>
           }
           {
-            i === 1 && <div className="text-sm text-gray-600">過去の履歴</div>
+            i === 1 && <div className="text-sm text-muted">過去の履歴</div>
           }
           <div className="flex items-center gap-3 px-3 py-1">
             <Tag
@@ -52,7 +52,7 @@ export function ChoreoHistoryDialog({
               type={i === 0 ? "filled" : "grey"}
               icon={(i === 0 && isEditing) ? "edit" : undefined}/>
             <div className="flex flex-col flex-1 min-w-0">
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-muted">
                 {h.uploadedAt ? getJpDate(new Date(h.uploadedAt)) : ""}
               </div>
               {

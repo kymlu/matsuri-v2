@@ -144,7 +144,7 @@ export function NewChoreoPage({
   };
   
   return (
-    <div className="flex flex-col h-[100svh] p-4 mx-auto space-y-2 bg-gray-100">
+    <div className="flex flex-col h-[100svh] p-4 mx-auto space-y-2 bg-app">
       <div className="text-center">
         <h2 className="mb-2 text-xl font-bold">
           {stepTitles[step] || ""}

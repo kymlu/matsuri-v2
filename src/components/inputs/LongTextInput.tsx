@@ -59,13 +59,13 @@ export default function LongTextInput({
   }
 
   const inputClasses = classNames(
-    "w-full col-start-1 row-start-1 pl-2 text-black p-3 border-gray-400 rounded-md border focus-within:border-primary focus:outline-none resize-none",
+    "w-full col-start-1 row-start-1 pl-2 text-body bg-surface p-3 border-line rounded-md border focus-within:border-primary focus:outline-none resize-none",
     {
       "h-full": !maxRows,
       "pr-6": clearable,
       "pr-2": !clearable,
       "text-center": centered,
-      "bg-gray-200": disabled,
+      "bg-subtle": disabled,
       "border-primary bg-primary-lighter placeholder:text-primary-darker": (required && isNullOrUndefinedOrBlank(value)) || hasError,
     },);
 

@@ -39,7 +39,7 @@ export default function CustomSelect({
           setSelectValue?.(value);
           setValue(newValue ?? "");
         }}>
-        <Select.Trigger disabled={disabled} className={"flex flex-row items-center text-lg h-10 justify-between w-full p-3 rounded-md border-gray-400 border data-[popup-open]:border-primary " + (disabled ? "bg-gray-200 cursor-default" : "bg-white cursor-pointer")}>
+        <Select.Trigger disabled={disabled} className={"flex flex-row items-center text-lg h-10 justify-between w-full p-3 rounded-md border-line border data-[popup-open]:border-primary " + (disabled ? "bg-subtle cursor-default" : "bg-surface cursor-pointer")}>
           <Select.Value>
             {isIcons ? <img className="size-8" src={value}/> : value}
           </Select.Value>
@@ -48,14 +48,14 @@ export default function CustomSelect({
           </Select.Icon>
         </Select.Trigger>
         <Select.Portal>
-          <Select.Positioner sideOffset={4} side="bottom" className="z-50 bg-white border rounded-md select-none border-primary">
+          <Select.Positioner sideOffset={4} side="bottom" className="z-50 bg-surface border rounded-md select-none border-primary">
             <Select.Popup>
               <div className="flex flex-col gap-1 p-2 max-h-[40svh] overflow-y-auto">
                 { Object.entries(items).map(([itemValue, label]) => (
                   <Select.Item
                     key={itemValue}
                     value={label}
-                    className="flex p-2 cursor-pointer data-[highlighted]:bg-gray-200"
+                    className="flex p-2 cursor-pointer data-[highlighted]:bg-subtle"
                   >
                     {isIcons ? <img className="size-8" src={label}/> : label}
                   </Select.Item>

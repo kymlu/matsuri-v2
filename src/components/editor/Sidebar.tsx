@@ -45,14 +45,14 @@ export function Sidebar({
 }: SidebarProps) {
   return <Dialog.Portal>
     <Dialog.Backdrop className="fixed inset-0 bg-black transition-all duration-150 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 opacity-20 z-20" />
-    <Dialog.Popup className="fixed w-4/5 h-full bg-white overflow-hidden right-0 z-30 top-0 min-w-64 max-w-[calc(100vw-3rem)]bg-gray-50 p-6 text-gray-900">
+    <Dialog.Popup className="fixed w-4/5 h-full bg-surface overflow-hidden right-0 z-30 top-0 min-w-64 max-w-[calc(100vw-3rem)]bg-gray-50 p-6 text-body">
       <div className="flex flex-col h-full min-h-0 gap-2 overflow-y-auto">
         <div className="grid grid-cols-[minmax(0,1fr),auto] items-center max-w-full min-w-0 gap-2">
           <div className="flex flex-col min-w-0">
             <span className="max-w-full text-lg font-bold break-all text-wrap">
               {choreoName}
             </span>
-            <span className="text-gray-400">
+            <span className="text-faint">
               {isNullOrUndefinedOrBlank(choreoEvent) ? "イベント不明" : choreoEvent}
               {
                 !isNullOrUndefinedOrBlank(choreoDates) &&

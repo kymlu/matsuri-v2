@@ -41,6 +41,7 @@ export enum CUSTOM_EVENT {
 
 export const IMG = {
   beginner: "beginner.svg",
+  beginnerDark: "beginner-dark.svg",
   moveBackward: "moveBackward.svg",
   moveForward: "moveForward.svg",
   moveToBack: "moveToBack.svg",

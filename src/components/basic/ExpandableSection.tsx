@@ -14,8 +14,8 @@ export default function ExpandableSection({
   title, children, menuContents, defaultExpanded, level
 }: ExpandableSectionProps) {
   const [isExpanded, setIsExpanded] = useState<boolean>(defaultExpanded ?? true);
-  return <div className="space-y-2">
-    <div className={"sticky flex flex-row justify-between w-full" + (level === 1 ? (" top-0 z-20 py-1 bg-gray-200 " + (isExpanded ? "rounded-t-lg" : "rounded-lg")) : " z-10 bg-gray-50")}>
+  return <div>
+    <div className={"sticky flex flex-row justify-between w-full" + (level === 1 ? (" top-0 z-20 py-1 bg-subtle " + (isExpanded ? "rounded-t-lg" : "rounded-lg")) : " z-10 bg-surface")}>
       <button onClick={() => setIsExpanded(prev => !prev)} className='flex flex-row items-center w-full'>
         <IconButton
           src={isExpanded ? "arrowDropDown" : "arrowRight"}

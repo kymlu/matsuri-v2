@@ -125,7 +125,7 @@ export default function PublishConfirmationDialog({
             <PropCount propCount={currentVersion.propCount}/>
           </div>
           <Divider />
-          <div className="grid items-center gap-y-1 grid-cols-[auto,1fr] px-2 text-sm text-gray-600">
+          <div className="grid items-center gap-y-1 grid-cols-[auto,1fr] px-2 text-sm text-muted">
             <b>最終編集日時</b>
             <span className="text-right">{currentVersion.lastUpdated ? getJpDate(new Date(currentVersion.lastUpdated)) : ""}</span>
             {
@@ -152,7 +152,7 @@ export default function PublishConfirmationDialog({
             maxLength={PASSWORD_LENGTH}
             restrictFn={(s) => testAlphanumericSymbols(s)}
             onContentChange={(newContent) => setPassword(newContent)}/>
-          <span className="text-sm text-gray-600">
+          <span className="text-sm text-muted">
             ログインしていないユーザーがこの隊列表を閲覧する際にパスワードの入力が必要になります。
           </span>
         </div>
