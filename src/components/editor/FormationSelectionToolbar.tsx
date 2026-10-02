@@ -10,10 +10,13 @@ import { restrictToHorizontalAxis, restrictToParentElement } from "@dnd-kit/modi
 import Icon from "../basic/Icon";
 import { Dialog, DrawerPreview as Drawer } from "@base-ui/react";
 
+const FADE_DURATION_MS = 300;
+
 type FormationSelectionToolbarProps = {
   currentSectionId: string,
   sections: ChoreoSection[],
   showAddButton?: boolean,
+  showFirstSectionButton?: boolean,
   onClickAddButton?: (id: string) => void,
   onChangeSection: (section: ChoreoSection) => void,
   onOpenSectionMenu?: () => void,
@@ -21,11 +24,14 @@ type FormationSelectionToolbarProps = {
 }
 
 function FormationSelectionToolbar({
-  currentSectionId, sections, showAddButton, onClickAddButton, 
+  currentSectionId, sections, showAddButton, showFirstSectionButton, onClickAddButton, 
   onChangeSection, onOpenSectionMenu, onReorder
 }: FormationSelectionToolbarProps) {
 
   const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [isFirstSectionVisible, setIsFirstSectionVisible] = useState<boolean>(true);
+
+  const stripRef = useRef<HTMLDivElement | null>(null);
 
   const sectionRefs = useRef<Map<string, HTMLButtonElement | null>>(new Map());
   const dialogSectionRefs = useRef<Map<string, HTMLButtonElement | null>>(new Map());
@@ -34,6 +40,44 @@ function FormationSelectionToolbar({
     sectionRefs.current.get(currentSectionId)?.scrollIntoView({behavior: "instant", block: "center"});
     dialogSectionRefs.current.get(currentSectionId)?.scrollIntoView({behavior: "instant", block: "center"});
   }, []);
+
+  const firstSectionId = sections[0]?.id;
+
+  useEffect(() => {
+    if (!showFirstSectionButton || !firstSectionId) return;
+    const firstSectionButton = dialogSectionRefs.current.get(firstSectionId);
+    if (!firstSectionButton) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsFirstSectionVisible(entry.isIntersecting),
+      { root: stripRef.current, threshold: 0 }
+    );
+    observer.observe(firstSectionButton);
+    return () => observer.disconnect();
+  }, [showFirstSectionButton, firstSectionId]);
+
+  // Kept mounted while fading out so the opacity transition can finish before it's removed
+  const [isFirstSectionButtonMounted, setIsFirstSectionButtonMounted] = useState<boolean>(false);
+  const [isFirstSectionButtonShown, setIsFirstSectionButtonShown] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (showFirstSectionButton && !isFirstSectionVisible) {
+      setIsFirstSectionButtonMounted(true);
+      // Wait for the opacity-0 frame to paint before fading in
+      let innerFrame: number;
+      const outerFrame = requestAnimationFrame(() => {
+        innerFrame = requestAnimationFrame(() => setIsFirstSectionButtonShown(true));
+      });
+      return () => {
+        cancelAnimationFrame(outerFrame);
+        cancelAnimationFrame(innerFrame);
+      };
+    } else {
+      setIsFirstSectionButtonShown(false);
+      const timeout = setTimeout(() => setIsFirstSectionButtonMounted(false), FADE_DURATION_MS);
+      return () => clearTimeout(timeout);
+    }
+  }, [showFirstSectionButton, isFirstSectionVisible]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -51,7 +95,9 @@ function FormationSelectionToolbar({
     onChangeSection(s);
   }
 
-  return <div className="grid grid-cols-[auto,1fr,auto] w-full max-w-full gap-1 px-2 py-1 overflow-auto max-w-screen">
+  const hasTrailingButton = showAddButton || isFirstSectionButtonMounted;
+
+  return <div className={(hasTrailingButton ? "grid-cols-[auto,1fr,auto]" : "grid-cols-[auto,1fr]") + " grid w-full max-w-full gap-1 px-2 py-1 overflow-auto max-w-screen"}>
     <Drawer.Root
       swipeDirection="down"
       modal
@@ -104,7 +150,7 @@ function FormationSelectionToolbar({
         </Drawer.Viewport>
       </Drawer.Portal>
     </Drawer.Root>
-    <div className="flex gap-1 overflow-auto">
+    <div ref={stripRef} className="flex gap-1 overflow-auto">
       <DndContext
         sensors={sensors}
         modifiers={[restrictToHorizontalAxis, restrictToParentElement]}
@@ -144,6 +190,20 @@ function FormationSelectionToolbar({
         </SortableContext>
       </DndContext>
     </div>
+    {
+      isFirstSectionButtonMounted &&
+      <div
+        className={"transition-opacity " + (isFirstSectionButtonShown ? "opacity-100" : "opacity-0 pointer-events-none")}
+        style={{transitionDuration: `${FADE_DURATION_MS}ms`}}
+      >
+        <IconButton
+          size="sm"
+          src="firstPage"
+          colour="grey"
+          onClick={() => onClickSection(sections[0])}
+        />
+      </div>
+    }
     {
       showAddButton &&
       <IconButton

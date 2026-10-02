@@ -133,6 +133,7 @@ export default function ChoreoViewPage(props: {
     <FormationSelectionToolbar
       currentSectionId={currentSection.id}
       sections={props.currentChoreo.sections}
+      showFirstSectionButton
       onChangeSection={changeSection}
     />
   ), [currentSection.id, props.currentChoreo.sections, changeSection]);

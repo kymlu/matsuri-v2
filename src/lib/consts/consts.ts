@@ -105,6 +105,7 @@ export const ICON = {
   fileExport: "file_export",
   fileCopy: "file_copy",
   fileSave: "file_save",
+  firstPage: "first_page",
   footprint: "footprint",
   formatAlignCenter: "format_align_center",
   formatAlignLeft: "format_align_left",
