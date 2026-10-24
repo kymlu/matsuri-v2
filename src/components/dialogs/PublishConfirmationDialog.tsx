@@ -55,6 +55,7 @@ export default function PublishConfirmationDialog({
           if (serverVersion.version !== (oldVersion?.version ?? 0)) {
             setError("versionError");
             setIsProcessing(false);
+            return;
           }
         }
         let choreo = {...getChoreo()};
