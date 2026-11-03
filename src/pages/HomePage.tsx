@@ -50,7 +50,7 @@ type HomePageProps = {
   goToAdminPage: () => void,
   goToHelpPage: () => void,
   goToNewChoreoPage: (eventDetails?: EventDetails) => void,
-  goToViewPage: (choreo: Choreo, status: ChoreoStatus, serverChoreo?: BasicChoreoDetails) => void,
+  goToViewPage: (choreo: Choreo, status: ChoreoStatus, serverChoreo?: BasicChoreoDetails, pastVersion?: number) => void,
   savedDancerName: string | null,
   setSavedDancerName: (newName: string) => void,
   dancerNamesByEvent: Record<string, Record<string, string[]>>,
@@ -419,6 +419,18 @@ export default function HomePage({
     });
   }, [getChoreo, duplicateChoreo]);
 
+  const handleViewPastVersion = useCallback(async (choreo: ChoreoWithStatus, version: number) => {
+    if (!team?.id) {
+      return;
+    }
+    try {
+      const pastChoreo = await getChoreoFile(team.id, choreo.id, version);
+      goToViewPage(pastChoreo, "upToDate", serverChoreoDetails[choreo.id], version);
+    } catch (e: any) {
+      console.error(`Failed to load version ${version} of choreo with id`, choreo.id);
+    }
+  }, [team, serverChoreoDetails, goToViewPage]);
+
   const handleEditChoreoName = useCallback((choreo: ChoreoWithStatus) => {
     setEditingChoreo(choreo);
     setEditChoreoInfoDialogOpen(true);
@@ -629,6 +641,7 @@ export default function HomePage({
                         searchTerm={searchTerm}
                         onSelectChoreo={handleSelectChoreo}
                         duplicateChoreo={handleDuplicateChoreo}
+                        viewPastVersion={handleViewPastVersion}
                         editChoreoName={handleEditChoreoName}
                         deleteChoreo={handleDeleteChoreo}
                         revertChoreo={handleRevertChoreo}
@@ -993,6 +1006,7 @@ type EventSectionProps = {
   editEventName: (eventInfo: string, choreos: ChoreoWithStatus[]) => void,
   onSelectChoreo: (id: string, status: ChoreoStatus) => void,
   duplicateChoreo: (choreo: ChoreoWithStatus) => void,
+  viewPastVersion: (choreo: ChoreoWithStatus, version: number) => void,
   editChoreoName: (choreo: ChoreoWithStatus) => void,
   deleteChoreo: (choreo: ChoreoWithStatus) => void,
   revertChoreo: (choreo: ChoreoWithStatus) => void,
@@ -1007,12 +1021,12 @@ type EventSectionProps = {
 
 const EventSection = memo(function EventSection({
   eventInfo, dancerNamesByFormation, choreos, searchTerm, onSelectChoreo, addEvent, editEventName,
-  duplicateChoreo, editChoreoName, deleteChoreo, revertChoreo, syncChoreo,
+  duplicateChoreo, viewPastVersion, editChoreoName, deleteChoreo, revertChoreo, syncChoreo,
   onPdfExport, onExport, onExportEvent, isExpandedByDefault, isLoggedIn, teamId
 }: EventSectionProps) {
   const [optionsDialogOpen, setOptionsDialogOpen] = React.useState(false);
   const [selectedChoreo, setSelectedChoreo] = useState<ChoreoWithStatus | undefined>();
-  const [postPasswordAction, setPostPasswordAction] = useState<"none" | "open" | "rename" | "duplicate" | "export" | "pdf">("none");
+  const [postPasswordAction, setPostPasswordAction] = useState<"none" | "open" | "rename" | "duplicate" | "export" | "pdf" | "history">("none");
   const dancerWarningDialog = Dialog.createHandle<Choreo>();
   const [dancerWarningDialogOpen, setDancerWarningDialogOpen] = React.useState(false);
   const optionsDialog = Dialog.createHandle<ChoreoWithStatus>();
@@ -1158,7 +1172,12 @@ const EventSection = memo(function EventSection({
                     label="公開履歴"
                     asDiv
                     onClick={() => {
-                      setHistoryDialogOpen(true);
+                      if (!isLoggedIn && selectedChoreo.hasPassword) {
+                        setPostPasswordAction("history");
+                        setChoreoPasswordEntryDialogOpen(true);
+                      } else {
+                        setHistoryDialogOpen(true);
+                      }
                     }}
                     full />
                 </Dialog.Close>
@@ -1259,6 +1278,12 @@ const EventSection = memo(function EventSection({
           isEditing={selectedChoreo?.isDirty ?? false}
           isLoggedIn={isLoggedIn}
           onClose={() => setHistoryDialogOpen(false)}
+          onSelectVersion={(version) => {
+            setHistoryDialogOpen(false);
+            if (selectedChoreo) {
+              viewPastVersion(selectedChoreo, version);
+            }
+          }}
         />
       </Dialog.Root>
       <Dialog.Root
@@ -1287,6 +1312,9 @@ const EventSection = memo(function EventSection({
                   break;
                 case "pdf":
                   onPdfExport(selectedChoreo);
+                  break;
+                case "history":
+                  setHistoryDialogOpen(true);
                   break;
 
                 default:

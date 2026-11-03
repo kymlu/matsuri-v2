@@ -26,6 +26,7 @@ function App() {
   const [serverChoreo, setServerChoreo] = useState<BasicChoreoDetails | undefined>();
   const [currentChoreo, setCurrentChoreo] = useState<Choreo | undefined>();
   const [currentChoreoStatus, setCurrentChoreoStatus] = useState<ChoreoStatus>();
+  const [pastVersion, setPastVersion] = useState<number | undefined>();
   const [name, setName] = useState<string | null>(null);
   const [buildInfo, setBuildInfo] = useState<string | undefined>();
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
@@ -145,10 +146,11 @@ function App() {
             setSelectedEvent(event);
             setMode("form");
           }}
-          goToViewPage={(choreo: Choreo, status: ChoreoStatus, serverChoreo?: BasicChoreoDetails) => {
+          goToViewPage={(choreo: Choreo, status: ChoreoStatus, serverChoreo?: BasicChoreoDetails, pastVersion?: number) => {
             setServerChoreo(serverChoreo);
             setCurrentChoreo(choreo);
             setCurrentChoreoStatus(status);
+            setPastVersion(pastVersion);
             setMode("view");
           }}
           savedDancerName={name}
@@ -188,6 +190,7 @@ function App() {
           goToHomePage={() => setMode("home")}
           goToViewPage={(choreo) => {
             setCurrentChoreo(choreo);
+            setPastVersion(undefined);
             setMode("view");
           }}
           eventList={eventList}
@@ -209,6 +212,7 @@ function App() {
           currentChoreoStatus={currentChoreoStatus!!}
           goToHomePage={() => setMode("home")}
           goToEditPage={() => setMode("edit")}
+          pastVersion={pastVersion}
           savedDancerName={name}
           teamId={team?.id}
         />

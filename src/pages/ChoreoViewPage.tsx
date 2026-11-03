@@ -28,6 +28,7 @@ export default function ChoreoViewPage(props: {
   currentChoreo: Choreo,
   currentChoreoStatus: ChoreoStatus,
   goToEditPage: () => void,
+  pastVersion?: number,
   savedDancerName: string | null,
   teamId?: string,
 }) {
@@ -164,7 +165,7 @@ export default function ChoreoViewPage(props: {
         onDownload={openExportDialog}
         changeShowGrid={toggleShowGrid}
         appSettings={appSettings}
-        goToEdit={props.goToEditPage}
+        goToEdit={props.pastVersion === undefined ? props.goToEditPage : undefined}
         toggleShowPath={toggleShowPath}
         showPath={showPaths}
         isShowPathBtnDisabled={selectedIds.dancers.length !== 1 || selectedTimingId !== undefined}
@@ -175,6 +176,12 @@ export default function ChoreoViewPage(props: {
         version={props.currentChoreo.version}
         choreoStatus={props.currentChoreoStatus}
         />
+      {
+        props.pastVersion !== undefined &&
+        <div className="px-3 py-1 text-sm font-semibold text-center border-b-2 border-primary text-primary bg-surface">
+          過去の版（v{props.pastVersion}）を表示中です。最新版ではありません。
+        </div>
+      }
       <div className="relative flex-1 overflow-hidden border-b-2 md:flex">
         <ViewerSidebar
           actions={currentSection.formation.dancerActions}

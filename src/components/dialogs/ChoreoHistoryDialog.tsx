@@ -6,17 +6,19 @@ import { getJpDate } from "../../lib/helpers/dateHelper";
 import CustomDialog from "../basic/CustomDialog";
 import { Tag } from "../common/Tag";
 import Divider from "../basic/Divider";
+import Icon from "../basic/Icon";
 
 type ChoreoHistoryDialogProps = {
   teamId: string,
   choreoId: string,
   isLoggedIn: boolean,
   isEditing: boolean,
-  onClose: () => void
+  onClose: () => void,
+  onSelectVersion: (version: number) => void,
 }
 
 export function ChoreoHistoryDialog({
-  teamId, choreoId, isLoggedIn, isEditing, onClose
+  teamId, choreoId, isLoggedIn, isEditing, onClose, onSelectVersion
 }: ChoreoHistoryDialogProps) {
   const [history, setHistory] = useState<ChoreoVersion[]>([]);
 
@@ -46,7 +48,9 @@ export function ChoreoHistoryDialog({
           {
             i === 1 && <div className="text-sm text-muted">過去の履歴</div>
           }
-          <div className="flex items-center gap-3 px-3 py-1">
+          <div
+            className={`flex items-center gap-3 px-3 py-1 rounded-md ${i > 0 ? "cursor-pointer hover:bg-subtle" : ""}`}
+            onClick={i > 0 ? () => onSelectVersion(h.version) : undefined}>
             <Tag
               text={`v${h.version}`}
               type={i === 0 ? "filled" : "grey"}
@@ -62,6 +66,10 @@ export function ChoreoHistoryDialog({
                 </div>
               }
             </div>
+            {
+              i > 0 &&
+              <Icon src="visibility" colour="grey" size="sm"/>
+            }
           </div>
           { (i > 0  && i < history.length - 1) && <Divider compact/> }
         </Fragment>

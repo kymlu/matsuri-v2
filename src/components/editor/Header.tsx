@@ -85,17 +85,20 @@ function Header({
         <p className="font-bold">{currentChoreo.name}</p>
       </div>
       <div className="flex justify-end gap-2">
-        <IconButton
-          colour="primary"
-          src={goToEdit ? "edit" : "visibility"}
-          noBorder
-          onClick={() => {
-            if (goToEdit) {
-              goToEdit();
-            } else if (goToView) {
-              goToView();
-            } }}
-          />
+        {
+          (goToEdit || goToView) &&
+          <IconButton
+            colour="primary"
+            src={goToEdit ? "edit" : "visibility"}
+            noBorder
+            onClick={() => {
+              if (goToEdit) {
+                goToEdit();
+              } else if (goToView) {
+                goToView();
+              } }}
+            />
+        }
         {
           showDancerWarningMessage &&
           <IconButton
