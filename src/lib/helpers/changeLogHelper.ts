@@ -1,8 +1,9 @@
 import { BaseModel, Coordinates } from "../../models/base";
 import { Choreo, EventDetails, StageGeometry } from "../../models/choreo";
 import { ChoreoSection, Movement } from "../../models/choreoSection";
+import { DancerPosition } from "../../models/dancer";
 import { DancerAction } from "../../models/dancerAction";
-import { indexByKey } from "./globalHelper";
+import { indexByKey, roundToHundredth } from "./globalHelper";
 
 // Compares two versions of a choreo for the dancer change log.
 // Only returns data; all wording is done by the dialog.
@@ -17,7 +18,7 @@ export type DancerSectionChanges = {
   sectionId: string,
   oldSectionName?: string,
   isNew: boolean,
-  position?: { from?: Coordinates, to: Coordinates },
+  position?: { from?: DancerPosition, to: DancerPosition },
   counts: { actionName: string, from: string[], to: string[] }[],
   pathChanged: boolean, // path from this section to the next
 };
@@ -69,7 +70,6 @@ type Match<T> = {
   removed: T[],
 };
 
-const roundToHundredth = (value: number) => Math.round(100 * value) / 100;
 // Blank and missing text are the same (e.g. dates are saved as either).
 const sameText = (a?: string, b?: string) => (a ?? "").trim() === (b ?? "").trim();
 const samePoint = (a: Coordinates, b: Coordinates) =>

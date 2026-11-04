@@ -1,6 +1,6 @@
 import Header from "../components/editor/Header"
 import FormationSelectionToolbar from "../components/editor/FormationSelectionToolbar";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Choreo } from "../models/choreo";
 import { ChoreoSection, MovementCacheBySectionIdByObjectId, PathSvgCacheByObjectIdBySectionId } from "../models/choreoSection";
 import MainStage from "../components/grid/MainStage";
@@ -15,12 +15,15 @@ import { Dialog } from "@base-ui/react";
 import { ChoreoStatus } from "./HomePage";
 import BaseErrorDialog from "../components/dialogs/BaseErrorDialog";
 import CustomSwitch from "../components/inputs/CustomSwitch";
-import { checkShowingViewPageInfoDialog, stopShowingViewPageInfoDialog, getPersonalSectionNote, setPersonalSectionNote, setSeenVersion } from "../lib/dataAccess/LocalStorageController";
+import { checkShowingViewPageInfoDialog, stopShowingViewPageInfoDialog, getPersonalSectionNote, setPersonalSectionNote, getSeenVersion, setSeenVersion } from "../lib/dataAccess/LocalStorageController";
 import Divider from "../components/basic/Divider";
 import { calculateMovementCache } from "../lib/helpers/editorCalculationHelper";
 import { DancerActionTiming } from "../models/dancerAction";
 import { SetStateAction } from "react";
 import { SAMPLE_PARADE_ID, SAMPLE_STAGE_ID } from "../lib/consts/consts";
+import { getChoreoFile } from "../lib/helpers/apiHelper";
+import { buildChangeLog, ChangeLog, hasShownChanges } from "../lib/helpers/changeLogHelper";
+import ChangeLogDialog from "../components/dialogs/ChangeLogDialog";
 
 const exportDialog = Dialog.createHandle<{}>();
 
@@ -82,6 +85,8 @@ export default function ChoreoViewPage(props: {
     setPropAnimationCache(res.newPropAnimationCache);
   }, [props.currentChoreo, resetSelectedIds]);
 
+  // Read once, before the effect below stores the current version.
+  const [seenVersionAtOpen] = useState(() => getSeenVersion(props.currentChoreo.id));
   const isChangeLogEligible = props.pastVersion === undefined &&
     props.currentChoreoStatus === "upToDate" &&
     !isNullOrUndefinedOrBlank(props.teamId) &&
@@ -94,6 +99,30 @@ export default function ChoreoViewPage(props: {
       setSeenVersion(props.currentChoreo.id, props.currentChoreo.version!!);
     }
   }, [isChangeLogEligible, props.currentChoreo.id, props.currentChoreo.version]);
+
+  const hasNewVersion = isChangeLogEligible && seenVersionAtOpen !== undefined && seenVersionAtOpen < props.currentChoreo.version!!;
+  const [changeLog, setChangeLog] = useState<ChangeLog>();
+  const [isCheckingChangeLog, setIsCheckingChangeLog] = useState<boolean>(hasNewVersion);
+  const [changeLogSelection, setChangeLogSelection] = useState<string>(); // undefined when closed
+
+  useEffect(() => {
+    if (!hasNewVersion) return;
+    let cancelled = false;
+    getChoreoFile(props.teamId!!, props.currentChoreo.id, seenVersionAtOpen!!)
+      .then(oldChoreo => {
+        const log = buildChangeLog(oldChoreo, props.currentChoreo);
+        if (!cancelled && hasShownChanges(log)) {
+          setChangeLog(log);
+          // Replaces the hint dialog for this visit. Set together so the hint never shows in between.
+          setShowHintDialog(false);
+        }
+      })
+      .catch(e => console.error("Failed to build change log", e))
+      .finally(() => {
+        if (!cancelled) setIsCheckingChangeLog(false);
+      });
+    return () => { cancelled = true; };
+  }, [hasNewVersion, props.teamId, props.currentChoreo, seenVersionAtOpen]);
 
   const selectedObjects = useMemo(() => ({
     dancers: Object.entries(currentSection.formation.dancerPositions).filter(x => selectedIds.dancers.includes(x[0])).map(x => x[1]),
@@ -119,6 +148,22 @@ export default function ChoreoViewPage(props: {
   const handleExportDialogOpen = useCallback((isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setExportDialogOpen(isOpen);
   }, []);
+
+  // Opens on the selected dancer if they have changes, otherwise on 全体.
+  const openChangeLog = useCallback(() => {
+    const id = selectedIds.dancers.length === 1 ? selectedIds.dancers[0] : "";
+    setChangeLogSelection(changeLog?.dancers[id] ? id : "");
+  }, [selectedIds.dancers, changeLog]);
+  const closeChangeLog = useCallback(() => setChangeLogSelection(undefined), []);
+
+  // Opens automatically once, unless another dialog is open.
+  const hasAutoOpenedChangeLog = useRef<boolean>(false);
+  useEffect(() => {
+    if (changeLog && !hasAutoOpenedChangeLog.current) {
+      hasAutoOpenedChangeLog.current = true;
+      if (!exportDialogOpen) openChangeLog();
+    }
+  }, [changeLog, exportDialogOpen, openChangeLog]);
 
   // ---- Header handlers ----
   const openExportDialog = useCallback(() => setExportDialogOpen(true), []);
@@ -241,10 +286,11 @@ export default function ChoreoViewPage(props: {
           dancerMovementCache={dancerMovementCache}
           dancerAnimationCache={dancerAnimationCache}
           propAnimationCache={propAnimationCache}
+          openChangeLog={changeLog ? openChangeLog : undefined}
         />
       </div>
 
-      <Dialog.Root onOpenChange={closeHintDialog} open={showHintDialog}>
+      <Dialog.Root onOpenChange={closeHintDialog} open={showHintDialog && !isCheckingChangeLog}>
         <BaseErrorDialog title="利用方法" fullWidth onClose={closeHintDialog}>
           <div>名前をタップすると、位置情報が表示されます。</div>
           <Divider/>
@@ -253,6 +299,19 @@ export default function ChoreoViewPage(props: {
             defaultChecked={false}
             onChange={(value) => stopShowingViewPageInfoDialog(value)}/>
         </BaseErrorDialog>
+      </Dialog.Root>
+
+      <Dialog.Root onOpenChange={closeChangeLog} open={changeLogSelection !== undefined}>
+        {
+          changeLog && changeLogSelection !== undefined &&
+          <ChangeLogDialog
+            log={changeLog}
+            fromVersion={seenVersionAtOpen!!}
+            choreo={props.currentChoreo}
+            initialSelection={changeLogSelection}
+            onClose={closeChangeLog}
+          />
+        }
       </Dialog.Root>
 
       <Dialog.Root
