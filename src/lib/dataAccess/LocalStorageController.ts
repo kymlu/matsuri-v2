@@ -74,3 +74,29 @@ export function setPersonalSectionNote(choreoId: string, sectionId: string, note
   }
   localStorage.setItem(getPersonalNotesKey(choreoId), JSON.stringify(notes));
 }
+
+// Last version opened in view mode, per device. Used for the change log.
+function getSeenVersionKey(choreoId: string): string {
+  return `seen_version_${choreoId}`;
+}
+
+export function getSeenVersion(choreoId: string): number | undefined {
+  try {
+    const version = Number(localStorage.getItem(getSeenVersionKey(choreoId)));
+    return Number.isInteger(version) && version > 0 ? version : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+export function setSeenVersion(choreoId: string, version: number) {
+  try {
+    localStorage.setItem(getSeenVersionKey(choreoId), version.toString());
+  } catch {}
+}
+
+export function clearSeenVersion(choreoId: string) {
+  try {
+    localStorage.removeItem(getSeenVersionKey(choreoId));
+  } catch {}
+}

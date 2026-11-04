@@ -25,7 +25,7 @@ import { DancerAction, DancerActionTiming } from "../models/dancerAction";
 import ActionSelectionToolbar from "../components/editor/ActionSelectionToolbar";
 import ConfirmDeletionDialog from "../components/dialogs/ConfirmDeletionDialog";
 import EditSectionNoteDialog from "../components/dialogs/EditSectionNoteDialog";
-import { getPersonalNotesForChoreo } from "../lib/dataAccess/LocalStorageController";
+import { clearSeenVersion, getPersonalNotesForChoreo } from "../lib/dataAccess/LocalStorageController";
 import { Coordinates } from "../models/base";
 import { colorPalette } from "../lib/consts/colors";
 import { addDancer, addObstacle, addObstacles, addProp, alignHorizontalPositions, alignVerticalPositions, changeObjectColours, changePropInUse, distributePositions, duplicateProps, editAndDeleteProps, editDancerPath, editPropPath, moveObjectPositions, pastePositions, rearrangePositions, removeObjects, renameAndDeleteDancers, renameDancer, renameObstacle, renameProp, setZOnAllPositions, swapDancerPositions, swapPropPositions, updateObstacleSizeAndRotate, updatePropSizeAndRotate } from "../lib/editor/commands/objectCommands";
@@ -348,6 +348,7 @@ export default function ChoreoEditPage(props: {
   }, [history.presentState.state]);
 
   const onSaveAfterPublish = useCallback((newState: Choreo) => {
+    clearSeenVersion(newState.id);
     saveChoreo(newState, () => {
       publishConfirmationDialog.close();
       setPublishConfirmationDialogOpen(false);

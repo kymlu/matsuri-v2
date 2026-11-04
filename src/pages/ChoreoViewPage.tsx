@@ -15,11 +15,12 @@ import { Dialog } from "@base-ui/react";
 import { ChoreoStatus } from "./HomePage";
 import BaseErrorDialog from "../components/dialogs/BaseErrorDialog";
 import CustomSwitch from "../components/inputs/CustomSwitch";
-import { checkShowingViewPageInfoDialog, stopShowingViewPageInfoDialog, getPersonalSectionNote, setPersonalSectionNote } from "../lib/dataAccess/LocalStorageController";
+import { checkShowingViewPageInfoDialog, stopShowingViewPageInfoDialog, getPersonalSectionNote, setPersonalSectionNote, setSeenVersion } from "../lib/dataAccess/LocalStorageController";
 import Divider from "../components/basic/Divider";
 import { calculateMovementCache } from "../lib/helpers/editorCalculationHelper";
 import { DancerActionTiming } from "../models/dancerAction";
 import { SetStateAction } from "react";
+import { SAMPLE_PARADE_ID, SAMPLE_STAGE_ID } from "../lib/consts/consts";
 
 const exportDialog = Dialog.createHandle<{}>();
 
@@ -80,6 +81,19 @@ export default function ChoreoViewPage(props: {
     setDancerMovementCache(res.newDancerMovementCache);
     setPropAnimationCache(res.newPropAnimationCache);
   }, [props.currentChoreo, resetSelectedIds]);
+
+  const isChangeLogEligible = props.pastVersion === undefined &&
+    props.currentChoreoStatus === "upToDate" &&
+    !isNullOrUndefinedOrBlank(props.teamId) &&
+    props.currentChoreo.version !== undefined &&
+    !strEquals(props.currentChoreo.id, SAMPLE_STAGE_ID) &&
+    !strEquals(props.currentChoreo.id, SAMPLE_PARADE_ID);
+
+  useEffect(() => {
+    if (isChangeLogEligible) {
+      setSeenVersion(props.currentChoreo.id, props.currentChoreo.version!!);
+    }
+  }, [isChangeLogEligible, props.currentChoreo.id, props.currentChoreo.version]);
 
   const selectedObjects = useMemo(() => ({
     dancers: Object.entries(currentSection.formation.dancerPositions).filter(x => selectedIds.dancers.includes(x[0])).map(x => x[1]),
