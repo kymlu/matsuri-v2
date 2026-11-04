@@ -81,7 +81,7 @@ describe("ChangeLogDialog", () => {
     renderDialog("");
     expect(screen.getByText("前回からの変更")).toBeInTheDocument();
     expect(screen.getByText("v5 → v8・10月28日更新")).toBeInTheDocument();
-    expect(screen.getByText(/お知らせを閉じた後も/)).toBeInTheDocument();
+    expect(screen.getByText(/閉じた後も/)).toBeInTheDocument();
   });
 
   describe("per dancer", () => {

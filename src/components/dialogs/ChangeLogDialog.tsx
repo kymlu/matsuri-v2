@@ -56,7 +56,7 @@ export default function ChangeLogDialog({
         }
         <Divider compact/>
         <p className="flex items-center gap-1 text-sm text-muted">
-          お知らせを閉じた後も<Icon src="releaseAlert" colour="primary" size="xs"/>から確認できます。
+          閉じた後も<Icon src="releaseAlert" colour="primary" size="xs"/>から確認できます。
         </p>
       </div>
     </BaseErrorDialog>

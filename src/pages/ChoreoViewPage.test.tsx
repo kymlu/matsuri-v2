@@ -135,7 +135,7 @@ describe("ChoreoViewPage change log", () => {
     expect(await screen.findByText("名前を選ぶと、その人の変更を確認できます。")).toBeInTheDocument();
   });
 
-  it("keeps the banner after closing the dialog", async () => {
+  it("replaces the banner with the stage button after it's tapped", async () => {
     setSeenVersion("c1", 1);
     mockGetChoreoFile.mockResolvedValue(makeChoreo(1));
     renderPage({ savedDancerName: "さくら" });
@@ -143,7 +143,10 @@ describe("ChoreoViewPage change log", () => {
     fireEvent.click(await findBanner());
     fireEvent.click(await screen.findByText("OK"));
     await waitFor(() => expect(screen.queryByText(changeLogTitle)).not.toBeInTheDocument());
-    expect(queryBanner()).toBeInTheDocument();
+    expect(queryBanner()).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByText("change log button"));
+    expect(await screen.findByText(changeLogTitle)).toBeInTheDocument();
   });
 
   it("replaces the banner with the stage button once the banner is closed", async () => {

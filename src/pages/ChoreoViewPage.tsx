@@ -282,7 +282,13 @@ export default function ChoreoViewPage(props: {
         changeLog && isChangeLogBannerShown &&
         <InstructionMessage
           instruction={
-            <button className="flex items-center gap-1" onClick={openChangeLog}>
+            <button
+              className="flex items-center gap-1"
+              onClick={() => {
+                // Once seen, the stage button takes over from the message.
+                setIsChangeLogBannerShown(false);
+                openChangeLog();
+              }}>
               <Icon src="releaseAlert" colour="primary" size="xs"/>
               前回から変更があります。<b>タップして確認</b>
             </button>
