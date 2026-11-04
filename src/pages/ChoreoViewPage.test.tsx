@@ -123,7 +123,7 @@ describe("ChoreoViewPage change log", () => {
     renderPage({ savedDancerName: "さくら" });
 
     fireEvent.click(await findBanner());
-    expect(await screen.findByText("新しい位置：")).toBeInTheDocument();
+    expect(await screen.findByText("（前回：）")).toBeInTheDocument();
   });
 
   it("opens on 全体 when the saved name's dancer has no changes", async () => {

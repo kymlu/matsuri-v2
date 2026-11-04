@@ -18,10 +18,6 @@ export function roundToTenth(value: number) {
   return Math.round(10 * value)/10;
 }
 
-export function roundToHundredth(value: number) {
-  return Math.round(100 * value)/100;
-}
-
 export function debounce (func: Function, delay: number) {
   let timeout: ReturnType<typeof setTimeout>;
 

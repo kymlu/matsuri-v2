@@ -3,7 +3,7 @@ import { Choreo, EventDetails, StageGeometry } from "../../models/choreo";
 import { ChoreoSection, Movement } from "../../models/choreoSection";
 import { DancerPosition } from "../../models/dancer";
 import { DancerAction } from "../../models/dancerAction";
-import { indexByKey, roundToHundredth } from "./globalHelper";
+import { indexByKey, roundToTenth } from "./globalHelper";
 
 // Compares two versions of a choreo for the dancer change log.
 // Only returns data; all wording is done by the dialog.
@@ -73,7 +73,7 @@ type Match<T> = {
 // Blank and missing text are the same (e.g. dates are saved as either).
 const sameText = (a?: string, b?: string) => (a ?? "").trim() === (b ?? "").trim();
 const samePoint = (a: Coordinates, b: Coordinates) =>
-  roundToHundredth(a.x) === roundToHundredth(b.x) && roundToHundredth(a.y) === roundToHundredth(b.y);
+  roundToTenth(a.x) === roundToTenth(b.x) && roundToTenth(a.y) === roundToTenth(b.y);
 
 function matchById<T extends BaseModel>(oldItems: T[], newItems: T[]): Match<T> {
   const oldById = indexByKey(oldItems, "id");
@@ -230,7 +230,7 @@ function compareObstacles(oldChoreo: Choreo, newChoreo: Choreo, obstacleMatch: M
       const old = oldObstacles[obstacleMatch.oldOf[obstacle.id].id];
       const fields: ObstacleLine["fields"] = [];
       if (!samePoint(old, obstacle)) fields.push("position");
-      if (roundToHundredth(old.length) !== roundToHundredth(obstacle.length) || roundToHundredth(old.width) !== roundToHundredth(obstacle.width)) fields.push("size");
+      if (roundToTenth(old.length) !== roundToTenth(obstacle.length) || roundToTenth(old.width) !== roundToTenth(obstacle.width)) fields.push("size");
       if (Math.round(old.rotation ?? 0) !== Math.round(obstacle.rotation ?? 0)) fields.push("rotation");
       return { name: obstacle.name, fields };
     })

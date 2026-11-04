@@ -68,10 +68,14 @@ function makeLog(overall: Partial<ChangeLog["overall"]> = {}): ChangeLog {
   };
 }
 
-function renderDialog(initialSelection: string, log = makeLog()) {
+const positionLines = () => screen.getAllByRole("listitem")
+  .map(x => x.textContent ?? "")
+  .filter(text => text.startsWith("位置："));
+
+function renderDialog(initialSelection: string, log = makeLog(), currentChoreo = choreo) {
   return render(
     <Dialog.Root open>
-      <ChangeLogDialog log={log} fromVersion={5} choreo={choreo} initialSelection={initialSelection} onClose={() => {}}/>
+      <ChangeLogDialog log={log} fromVersion={5} choreo={currentChoreo} initialSelection={initialSelection} onClose={() => {}}/>
     </Dialog.Root>
   );
 }
@@ -85,12 +89,11 @@ describe("ChangeLogDialog", () => {
   });
 
   describe("per dancer", () => {
-    it("lists changes by section with the new position and the change from last time", () => {
+    it("lists changes by section with the old and new positions", () => {
       renderDialog("d1");
       expect(screen.getByText("サビ1")).toBeInTheDocument();
-      expect(screen.getByText("新しい位置：")).toBeInTheDocument();
-      // x 4 → 3.5 is 0.5m left; y 1 → 1.25 on a top-down stage is 0.25m down.
-      expect(screen.getByText(/^（前回から/)).toHaveTextContent("（前回から↓0.25m/←0.5m）");
+      // On a 10m stage, x 4 is 1m left of centre and x 3.5 is 1.5m left; y 1.25 shows as 1.3m.
+      expect(positionLines()[0]).toBe("位置：1.3m/←1.5m（前回：1m/←1m）");
       expect(screen.getByText("振りA：1回目 → 1回目、2回目")).toBeInTheDocument();
       expect(screen.getByText("大サビへの移動経路を変更")).toBeInTheDocument();
     });
@@ -104,8 +107,15 @@ describe("ChangeLogDialog", () => {
     it("shows a new section with its position and counts only", () => {
       renderDialog("d1");
       expect(screen.getByText("新規")).toBeInTheDocument();
-      expect(screen.getByText("位置：")).toBeInTheDocument();
+      expect(positionLines()[1]).toMatch(/^位置：2m\/↔\uFE0E?0m$/u);
       expect(screen.getByText("振りC：2回目")).toBeInTheDocument();
+    });
+
+    it("shows the old position against the old stage size", () => {
+      const wider = { ...geometry, stageWidth: 12 };
+      renderDialog("d1", makeLog({ stage: [geometry, wider] }), { ...choreo, stageGeometry: wider });
+      // x 4 is 1m left of centre on the old 10m stage (it would be 2m on the new 12m one).
+      expect(positionLines()[0]).toMatch(/（前回：1m\/←1m）$/);
     });
 
     it("shows only a message for a new dancer", () => {

@@ -33,7 +33,35 @@ const PositionHint = memo(function PositionHint({
           {
             nextPosition && deltaX !== undefined && deltaY !== undefined &&
             <InfoBox title="次への移動">
-              <PositionDeltaText deltaX={deltaX} deltaY={deltaY} geometry={geometry}/>
+              <div className="flex items-center justify-center gap-1">
+                {
+                  deltaX === 0 && deltaY === 0 && <span className="font-bold">なし</span>
+                }
+                {
+                  deltaY !== 0 && 
+                  <>
+                    <span>
+                      {
+                        ((deltaY > 0 && geometry.yAxis === "bottom-up") ||
+                          (deltaY < 0 && geometry.yAxis === "top-down")) ? 
+                        "↑" : "↓"
+                      }
+                    </span>
+                    <span className="font-bold">{Math.abs(deltaY)}m</span>
+                  </>
+                }
+                {
+                  deltaX !== 0 && deltaY !== 0 && 
+                  <span className="text-sm text-faint">/</span>
+                }
+                {
+                  deltaX !== 0 && 
+                  <>
+                    <span>{deltaX > 0 ? "→" : "←"}</span>
+                    <span className="font-bold">{Math.abs(deltaX)}m</span>
+                  </>
+                }
+              </div>
             </InfoBox>
           }
         </div>
@@ -77,49 +105,6 @@ export function DancerPositionText({ position, geometry, bold = true }: DancerPo
       <span className="text-sm text-faint">/</span>
       <span>{currentX === 0 ? "↔︎" : currentX > 0 ? "←" : "→"}</span>
       <span className={valueClasses}>{Math.abs(currentX)}m</span>
-    </div>
-  );
-}
-
-type PositionDeltaTextProps = {
-  deltaX: number;
-  deltaY: number;
-  geometry: StageGeometry;
-  bold?: boolean;
-};
-
-export function PositionDeltaText({ deltaX, deltaY, geometry, bold = true }: PositionDeltaTextProps) {
-  const valueClasses = bold ? "font-bold" : "font-normal";
-
-  return (
-    <div className="flex items-center justify-center gap-1">
-      {
-        deltaX === 0 && deltaY === 0 && <span className={valueClasses}>なし</span>
-      }
-      {
-        deltaY !== 0 && 
-        <>
-          <span>
-            {
-              ((deltaY > 0 && geometry.yAxis === "bottom-up") ||
-                (deltaY < 0 && geometry.yAxis === "top-down")) ? 
-              "↑" : "↓"
-            }
-          </span>
-          <span className={valueClasses}>{Math.abs(deltaY)}m</span>
-        </>
-      }
-      {
-        deltaX !== 0 && deltaY !== 0 && 
-        <span className="text-sm text-faint">/</span>
-      }
-      {
-        deltaX !== 0 && 
-        <>
-          <span>{deltaX > 0 ? "→" : "←"}</span>
-          <span className={valueClasses}>{Math.abs(deltaX)}m</span>
-        </>
-      }
     </div>
   );
 }

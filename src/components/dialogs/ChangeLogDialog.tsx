@@ -1,15 +1,15 @@
 import { Select } from "@base-ui/react";
 import { useMemo, useState } from "react";
-import { Choreo } from "../../models/choreo";
+import { Choreo, StageGeometry } from "../../models/choreo";
 import { Dancer } from "../../models/dancer";
 import { ActionLine, ChangeLog, DancerSectionChanges, ListChanges } from "../../lib/helpers/changeLogHelper";
 import { formatDateRange } from "../../lib/helpers/dateHelper";
-import { roundToHundredth, strCompare } from "../../lib/helpers/globalHelper";
+import { strCompare } from "../../lib/helpers/globalHelper";
 import BaseErrorDialog from "./BaseErrorDialog";
 import Icon from "../basic/Icon";
 import Divider from "../basic/Divider";
 import { Tag } from "../common/Tag";
-import { DancerPositionText, PositionDeltaText } from "../editor/PositionHint";
+import { DancerPositionText } from "../editor/PositionHint";
 
 const OVERALL = "";
 const COLLAPSED_LINE_COUNT = 5;
@@ -29,6 +29,8 @@ export default function ChangeLogDialog({
   const [selection, setSelection] = useState<string>(initialSelection);
   const sectionNames = useMemo(() => Object.fromEntries(choreo.sections.map(x => [x.id, x.name])), [choreo.sections]);
   const entry = log.dancers[selection];
+  // Positions are shown relative to the stage centre, so old ones need the old stage size.
+  const oldGeometry = log.overall.stage?.[0] ?? choreo.stageGeometry;
 
   return (
     <BaseErrorDialog title="前回からの変更" fullWidth onClose={onClose}>
@@ -51,7 +53,12 @@ export default function ChangeLogDialog({
         {
           entry?.kind === "changed" &&
           entry.sections.map(section =>
-            <DancerSection key={section.sectionId} section={section} choreo={choreo} sectionNames={sectionNames}/>
+            <DancerSection
+              key={section.sectionId}
+              section={section}
+              choreo={choreo}
+              oldGeometry={oldGeometry}
+              sectionNames={sectionNames}/>
           )
         }
         <Divider compact/>
@@ -131,10 +138,11 @@ function DancerSelect({ log, dancers, value, onChange }: DancerSelectProps) {
 type DancerSectionProps = {
   section: DancerSectionChanges,
   choreo: Choreo,
+  oldGeometry: StageGeometry,
   sectionNames: Record<string, string>,
 }
 
-function DancerSection({ section, choreo, sectionNames }: DancerSectionProps) {
+function DancerSection({ section, choreo, oldGeometry, sectionNames }: DancerSectionProps) {
   const { position, counts, pathChanged } = section;
   const index = choreo.sections.findIndex(x => x.id === section.sectionId);
   const nextSectionName = choreo.sections[index + 1]?.name;
@@ -151,19 +159,16 @@ function DancerSection({ section, choreo, sectionNames }: DancerSectionProps) {
           position &&
           <li>
             <div className="flex flex-wrap items-center gap-1">
-              {position.from ? "新しい位置：" : "位置："}
+              位置：
               <DancerPositionText position={position.to} geometry={choreo.stageGeometry} bold={false}/>
               {
+                // Not "old → new": the position text already uses ← and → for left and right.
                 position.from &&
-                <span className="flex items-center text-muted">
-                  （前回から
-                  <PositionDeltaText
-                    deltaX={roundToHundredth(position.to.x - position.from.x)}
-                    deltaY={roundToHundredth(position.to.y - position.from.y)}
-                    geometry={choreo.stageGeometry}
-                    bold={false}/>
+                <div className="flex items-center text-muted">
+                  （前回：
+                  <DancerPositionText position={position.from} geometry={oldGeometry} bold={false}/>
                   ）
-                </span>
+                </div>
               }
             </div>
           </li>

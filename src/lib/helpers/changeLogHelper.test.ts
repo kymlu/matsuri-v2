@@ -96,7 +96,7 @@ describe("buildChangeLog", () => {
       ["whitespace in a dancer name", c => { c.dancers.d1.name = " さくら "; }],
       ["whitespace in a memo", c => { c.sections[0].note = "  "; }],
       ["blank vs missing dates", c => { c.startDate = ""; c.endDate = ""; }],
-      ["a move under 0.01m", c => { c.sections[0].formation.dancerPositions.d1.x = 1.004; }],
+      ["a move under 0.1m", c => { c.sections[0].formation.dancerPositions.d1.x = 1.04; }],
     ])("ignores a change to the %s", (_, change) => {
       expect(hasShownChanges(compare(change))).toBe(false);
     });
@@ -131,14 +131,14 @@ describe("buildChangeLog", () => {
   });
 
   describe("dancer positions", () => {
-    it("reports a move of 0.01m or more with old and new positions", () => {
-      const log = compare(c => { c.sections[0].formation.dancerPositions.d1.x = 1.01; });
+    it("reports a move of 0.1m or more with old and new positions", () => {
+      const log = compare(c => { c.sections[0].formation.dancerPositions.d1.x = 1.1; });
       expect(log.dancers.d1).toEqual({
         kind: "changed",
         sections: [expect.objectContaining({
           sectionId: "s1",
           isNew: false,
-          position: { from: expect.objectContaining({ x: 1, y: 1 }), to: expect.objectContaining({ x: 1.01, y: 1 }) },
+          position: { from: expect.objectContaining({ x: 1, y: 1 }), to: expect.objectContaining({ x: 1.1, y: 1 }) },
         })],
       });
       expect(log.dancers.d2).toBeUndefined();
