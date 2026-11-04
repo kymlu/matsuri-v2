@@ -1,4 +1,4 @@
-import { act, render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { act, render, screen, fireEvent, waitFor, within } from "@testing-library/react";
 import { Choreo } from "../models/choreo";
 import { getChoreoFile } from "../lib/helpers/apiHelper";
 import { getSeenVersion, setSeenVersion } from "../lib/dataAccess/LocalStorageController";
@@ -71,7 +71,8 @@ function renderPage(overrides: Partial<Parameters<typeof ChoreoViewPage>[0]> = {
 
 const hintTitle = "利用方法";
 const changeLogTitle = "前回からの変更";
-const bannerText = "前回から変更があります。タップして確認";
+const findBanner = () => screen.findByRole("button", { name: /前回から変更があります/ });
+const queryBanner = () => screen.queryByRole("button", { name: /前回から変更があります/ });
 
 // Lets the stubbed download and the comparison finish.
 const settle = () => act(() => new Promise(resolve => setTimeout(resolve, 0)));
@@ -95,9 +96,10 @@ describe("ChoreoViewPage change log", () => {
     mockGetChoreoFile.mockResolvedValue(makeChoreo(1));
     renderPage();
 
-    expect(await screen.findByText(bannerText)).toBeInTheDocument();
+    expect(await screen.findByText(hintTitle)).toBeInTheDocument();
+    fireEvent.click(screen.getByText("OK"));
+    expect(await findBanner()).toBeInTheDocument();
     expect(mockGetChoreoFile).toHaveBeenCalledWith("team_1", "c1", 1);
-    expect(screen.getByText(hintTitle)).toBeInTheDocument();
     expect(screen.queryByText(changeLogTitle)).not.toBeInTheDocument();
     expect(screen.queryByText("change log button")).not.toBeInTheDocument();
     expect(getSeenVersion("c1")).toBe(2);
@@ -108,7 +110,8 @@ describe("ChoreoViewPage change log", () => {
     mockGetChoreoFile.mockResolvedValue(makeChoreo(1));
     renderPage();
 
-    fireEvent.click(await screen.findByText(bannerText));
+    fireEvent.click(await screen.findByText("OK"));
+    fireEvent.click(await findBanner());
     expect(await screen.findByText(changeLogTitle)).toBeInTheDocument();
     expect(screen.getByText("v1 → v2")).toBeInTheDocument();
     expect(screen.getByText("名前を選ぶと、その人の変更を確認できます。")).toBeInTheDocument();
@@ -119,7 +122,7 @@ describe("ChoreoViewPage change log", () => {
     mockGetChoreoFile.mockResolvedValue(makeChoreo(1));
     renderPage({ savedDancerName: "さくら" });
 
-    fireEvent.click(await screen.findByText(bannerText));
+    fireEvent.click(await findBanner());
     expect(await screen.findByText("新しい位置：")).toBeInTheDocument();
   });
 
@@ -128,7 +131,7 @@ describe("ChoreoViewPage change log", () => {
     mockGetChoreoFile.mockResolvedValue(makeChoreo(1));
     renderPage({ savedDancerName: "あおい" });
 
-    fireEvent.click(await screen.findByText(bannerText));
+    fireEvent.click(await findBanner());
     expect(await screen.findByText("名前を選ぶと、その人の変更を確認できます。")).toBeInTheDocument();
   });
 
@@ -137,10 +140,10 @@ describe("ChoreoViewPage change log", () => {
     mockGetChoreoFile.mockResolvedValue(makeChoreo(1));
     renderPage({ savedDancerName: "さくら" });
 
-    fireEvent.click(await screen.findByText(bannerText));
+    fireEvent.click(await findBanner());
     fireEvent.click(await screen.findByText("OK"));
     await waitFor(() => expect(screen.queryByText(changeLogTitle)).not.toBeInTheDocument());
-    expect(screen.getByText(bannerText)).toBeInTheDocument();
+    expect(queryBanner()).toBeInTheDocument();
   });
 
   it("replaces the banner with the stage button once the banner is closed", async () => {
@@ -148,9 +151,9 @@ describe("ChoreoViewPage change log", () => {
     mockGetChoreoFile.mockResolvedValue(makeChoreo(1));
     renderPage({ savedDancerName: "さくら" });
 
-    await screen.findByText(bannerText);
-    fireEvent.click(screen.getByLabelText("閉じる"));
-    expect(screen.queryByText(bannerText)).not.toBeInTheDocument();
+    const banner = await findBanner();
+    fireEvent.click(within(banner.closest("div")!).getByRole("button", { name: "clear" }));
+    expect(queryBanner()).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByText("change log button"));
     expect(await screen.findByText(changeLogTitle)).toBeInTheDocument();
@@ -162,7 +165,7 @@ describe("ChoreoViewPage change log", () => {
     renderPage();
     await settle();
 
-    expect(screen.queryByText(bannerText)).not.toBeInTheDocument();
+    expect(queryBanner()).not.toBeInTheDocument();
     expect(screen.queryByText("change log button")).not.toBeInTheDocument();
   });
 
@@ -173,7 +176,7 @@ describe("ChoreoViewPage change log", () => {
     renderPage();
     await settle();
 
-    expect(screen.queryByText(bannerText)).not.toBeInTheDocument();
+    expect(queryBanner()).not.toBeInTheDocument();
     expect(getSeenVersion("c1")).toBe(2);
   });
 

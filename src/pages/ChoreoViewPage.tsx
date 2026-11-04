@@ -25,6 +25,7 @@ import { getChoreoFile } from "../lib/helpers/apiHelper";
 import { buildChangeLog, ChangeLog, hasShownChanges } from "../lib/helpers/changeLogHelper";
 import ChangeLogDialog from "../components/dialogs/ChangeLogDialog";
 import Icon from "../components/basic/Icon";
+import InstructionMessage from "../components/basic/InstructionMessage";
 
 const exportDialog = Dialog.createHandle<{}>();
 
@@ -228,18 +229,6 @@ export default function ChoreoViewPage(props: {
           過去の版（v{props.pastVersion}）を表示中です。最新版ではありません。
         </div>
       }
-      {
-        changeLog && isChangeLogBannerShown &&
-        <div className="flex items-center gap-1 px-3 py-1 text-sm font-semibold border-b-2 border-primary text-primary bg-surface">
-          <button className="flex items-center justify-center flex-1 gap-1" onClick={openChangeLog}>
-            <Icon src="releaseAlert" colour="primary" size="xs"/>
-            前回から変更があります。タップして確認
-          </button>
-          <button aria-label="閉じる" className="flex" onClick={() => setIsChangeLogBannerShown(false)}>
-            <Icon src="clear" colour="primary" size="xs"/>
-          </button>
-        </div>
-      }
       <div className="relative flex-1 overflow-hidden border-b-2 md:flex">
         <ViewerSidebar
           actions={currentSection.formation.dancerActions}
@@ -288,6 +277,19 @@ export default function ChoreoViewPage(props: {
           openChangeLog={changeLog && !isChangeLogBannerShown ? openChangeLog : undefined}
         />
       </div>
+
+      {
+        changeLog && isChangeLogBannerShown &&
+        <InstructionMessage
+          instruction={
+            <button className="flex items-center gap-1" onClick={openChangeLog}>
+              <Icon src="releaseAlert" colour="primary" size="xs"/>
+              前回から変更があります。<b>タップして確認</b>
+            </button>
+          }
+          onClose={() => setIsChangeLogBannerShown(false)}
+        />
+      }
 
       <Dialog.Root onOpenChange={closeHintDialog} open={showHintDialog}>
         <BaseErrorDialog title="利用方法" fullWidth onClose={closeHintDialog}>
