@@ -1,6 +1,6 @@
 import Header from "../components/editor/Header"
 import FormationSelectionToolbar from "../components/editor/FormationSelectionToolbar";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Choreo } from "../models/choreo";
 import { ChoreoSection, MovementCacheBySectionIdByObjectId, PathSvgCacheByObjectIdBySectionId } from "../models/choreoSection";
 import MainStage from "../components/grid/MainStage";
@@ -24,6 +24,7 @@ import { SAMPLE_PARADE_ID, SAMPLE_STAGE_ID } from "../lib/consts/consts";
 import { getChoreoFile } from "../lib/helpers/apiHelper";
 import { buildChangeLog, ChangeLog, hasShownChanges } from "../lib/helpers/changeLogHelper";
 import ChangeLogDialog from "../components/dialogs/ChangeLogDialog";
+import Icon from "../components/basic/Icon";
 
 const exportDialog = Dialog.createHandle<{}>();
 
@@ -102,7 +103,7 @@ export default function ChoreoViewPage(props: {
 
   const hasNewVersion = isChangeLogEligible && seenVersionAtOpen !== undefined && seenVersionAtOpen < props.currentChoreo.version!!;
   const [changeLog, setChangeLog] = useState<ChangeLog>();
-  const [isCheckingChangeLog, setIsCheckingChangeLog] = useState<boolean>(hasNewVersion);
+  const [isChangeLogBannerShown, setIsChangeLogBannerShown] = useState<boolean>(true);
   const [changeLogSelection, setChangeLogSelection] = useState<string>(); // undefined when closed
 
   useEffect(() => {
@@ -113,14 +114,9 @@ export default function ChoreoViewPage(props: {
         const log = buildChangeLog(oldChoreo, props.currentChoreo);
         if (!cancelled && hasShownChanges(log)) {
           setChangeLog(log);
-          // Replaces the hint dialog for this visit. Set together so the hint never shows in between.
-          setShowHintDialog(false);
         }
       })
-      .catch(e => console.error("Failed to build change log", e))
-      .finally(() => {
-        if (!cancelled) setIsCheckingChangeLog(false);
-      });
+      .catch(e => console.error("Failed to build change log", e));
     return () => { cancelled = true; };
   }, [hasNewVersion, props.teamId, props.currentChoreo, seenVersionAtOpen]);
 
@@ -155,15 +151,6 @@ export default function ChoreoViewPage(props: {
     setChangeLogSelection(changeLog?.dancers[id] ? id : "");
   }, [selectedIds.dancers, changeLog]);
   const closeChangeLog = useCallback(() => setChangeLogSelection(undefined), []);
-
-  // Opens automatically once, unless another dialog is open.
-  const hasAutoOpenedChangeLog = useRef<boolean>(false);
-  useEffect(() => {
-    if (changeLog && !hasAutoOpenedChangeLog.current) {
-      hasAutoOpenedChangeLog.current = true;
-      if (!exportDialogOpen) openChangeLog();
-    }
-  }, [changeLog, exportDialogOpen, openChangeLog]);
 
   // ---- Header handlers ----
   const openExportDialog = useCallback(() => setExportDialogOpen(true), []);
@@ -241,6 +228,18 @@ export default function ChoreoViewPage(props: {
           過去の版（v{props.pastVersion}）を表示中です。最新版ではありません。
         </div>
       }
+      {
+        changeLog && isChangeLogBannerShown &&
+        <div className="flex items-center gap-1 px-3 py-1 text-sm font-semibold border-b-2 border-primary text-primary bg-surface">
+          <button className="flex items-center justify-center flex-1 gap-1" onClick={openChangeLog}>
+            <Icon src="releaseAlert" colour="primary" size="xs"/>
+            前回から変更があります。タップして確認
+          </button>
+          <button aria-label="閉じる" className="flex" onClick={() => setIsChangeLogBannerShown(false)}>
+            <Icon src="clear" colour="primary" size="xs"/>
+          </button>
+        </div>
+      }
       <div className="relative flex-1 overflow-hidden border-b-2 md:flex">
         <ViewerSidebar
           actions={currentSection.formation.dancerActions}
@@ -286,11 +285,11 @@ export default function ChoreoViewPage(props: {
           dancerMovementCache={dancerMovementCache}
           dancerAnimationCache={dancerAnimationCache}
           propAnimationCache={propAnimationCache}
-          openChangeLog={changeLog ? openChangeLog : undefined}
+          openChangeLog={changeLog && !isChangeLogBannerShown ? openChangeLog : undefined}
         />
       </div>
 
-      <Dialog.Root onOpenChange={closeHintDialog} open={showHintDialog && !isCheckingChangeLog}>
+      <Dialog.Root onOpenChange={closeHintDialog} open={showHintDialog}>
         <BaseErrorDialog title="利用方法" fullWidth onClose={closeHintDialog}>
           <div>名前をタップすると、位置情報が表示されます。</div>
           <Divider/>

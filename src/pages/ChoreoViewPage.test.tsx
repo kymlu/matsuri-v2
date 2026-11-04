@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { act, render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { Choreo } from "../models/choreo";
 import { getChoreoFile } from "../lib/helpers/apiHelper";
 import { getSeenVersion, setSeenVersion } from "../lib/dataAccess/LocalStorageController";
@@ -71,6 +71,10 @@ function renderPage(overrides: Partial<Parameters<typeof ChoreoViewPage>[0]> = {
 
 const hintTitle = "利用方法";
 const changeLogTitle = "前回からの変更";
+const bannerText = "前回から変更があります。タップして確認";
+
+// Lets the stubbed download and the comparison finish.
+const settle = () => act(() => new Promise(resolve => setTimeout(resolve, 0)));
 
 describe("ChoreoViewPage change log", () => {
   beforeEach(() => {
@@ -86,17 +90,28 @@ describe("ChoreoViewPage change log", () => {
     expect(screen.queryByText("change log button")).not.toBeInTheDocument();
   });
 
-  it("opens on 全体 after an update when nobody is selected, and skips the hint", async () => {
+  it("shows a banner after an update, alongside the usual hint", async () => {
     setSeenVersion("c1", 1);
     mockGetChoreoFile.mockResolvedValue(makeChoreo(1));
     renderPage();
 
-    expect(await screen.findByText(changeLogTitle)).toBeInTheDocument();
+    expect(await screen.findByText(bannerText)).toBeInTheDocument();
     expect(mockGetChoreoFile).toHaveBeenCalledWith("team_1", "c1", 1);
+    expect(screen.getByText(hintTitle)).toBeInTheDocument();
+    expect(screen.queryByText(changeLogTitle)).not.toBeInTheDocument();
+    expect(screen.queryByText("change log button")).not.toBeInTheDocument();
+    expect(getSeenVersion("c1")).toBe(2);
+  });
+
+  it("opens on 全体 from the banner when nobody is selected", async () => {
+    setSeenVersion("c1", 1);
+    mockGetChoreoFile.mockResolvedValue(makeChoreo(1));
+    renderPage();
+
+    fireEvent.click(await screen.findByText(bannerText));
+    expect(await screen.findByText(changeLogTitle)).toBeInTheDocument();
     expect(screen.getByText("v1 → v2")).toBeInTheDocument();
     expect(screen.getByText("名前を選ぶと、その人の変更を確認できます。")).toBeInTheDocument();
-    expect(screen.queryByText(hintTitle)).not.toBeInTheDocument();
-    expect(getSeenVersion("c1")).toBe(2);
   });
 
   it("opens on the saved name's dancer when they have changes", async () => {
@@ -104,6 +119,7 @@ describe("ChoreoViewPage change log", () => {
     mockGetChoreoFile.mockResolvedValue(makeChoreo(1));
     renderPage({ savedDancerName: "さくら" });
 
+    fireEvent.click(await screen.findByText(bannerText));
     expect(await screen.findByText("新しい位置：")).toBeInTheDocument();
   });
 
@@ -112,29 +128,41 @@ describe("ChoreoViewPage change log", () => {
     mockGetChoreoFile.mockResolvedValue(makeChoreo(1));
     renderPage({ savedDancerName: "あおい" });
 
+    fireEvent.click(await screen.findByText(bannerText));
     expect(await screen.findByText("名前を選ぶと、その人の変更を確認できます。")).toBeInTheDocument();
   });
 
-  it("reopens from the button after closing", async () => {
+  it("keeps the banner after closing the dialog", async () => {
     setSeenVersion("c1", 1);
     mockGetChoreoFile.mockResolvedValue(makeChoreo(1));
-    renderPage();
+    renderPage({ savedDancerName: "さくら" });
 
-    await screen.findByText(changeLogTitle);
-    fireEvent.click(screen.getByText("OK"));
+    fireEvent.click(await screen.findByText(bannerText));
+    fireEvent.click(await screen.findByText("OK"));
     await waitFor(() => expect(screen.queryByText(changeLogTitle)).not.toBeInTheDocument());
+    expect(screen.getByText(bannerText)).toBeInTheDocument();
+  });
+
+  it("replaces the banner with the stage button once the banner is closed", async () => {
+    setSeenVersion("c1", 1);
+    mockGetChoreoFile.mockResolvedValue(makeChoreo(1));
+    renderPage({ savedDancerName: "さくら" });
+
+    await screen.findByText(bannerText);
+    fireEvent.click(screen.getByLabelText("閉じる"));
+    expect(screen.queryByText(bannerText)).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByText("change log button"));
     expect(await screen.findByText(changeLogTitle)).toBeInTheDocument();
   });
 
-  it("shows no dialog or button when only hidden things changed", async () => {
+  it("shows no banner or button when only hidden things changed", async () => {
     setSeenVersion("c1", 1);
     mockGetChoreoFile.mockResolvedValue({ ...makeChoreo(1, 5), name: "旧名" });
     renderPage();
+    await settle();
 
-    expect(await screen.findByText(hintTitle)).toBeInTheDocument();
-    expect(screen.queryByText(changeLogTitle)).not.toBeInTheDocument();
+    expect(screen.queryByText(bannerText)).not.toBeInTheDocument();
     expect(screen.queryByText("change log button")).not.toBeInTheDocument();
   });
 
@@ -143,9 +171,9 @@ describe("ChoreoViewPage change log", () => {
     setSeenVersion("c1", 1);
     mockGetChoreoFile.mockRejectedValue(new Error("404"));
     renderPage();
+    await settle();
 
-    expect(await screen.findByText(hintTitle)).toBeInTheDocument();
-    expect(screen.queryByText(changeLogTitle)).not.toBeInTheDocument();
+    expect(screen.queryByText(bannerText)).not.toBeInTheDocument();
     expect(getSeenVersion("c1")).toBe(2);
   });
 
