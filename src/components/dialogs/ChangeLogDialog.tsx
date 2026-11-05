@@ -5,7 +5,6 @@ import { Dancer } from "../../models/dancer";
 import { ActionLine, ChangeLog, DancerSectionChanges, ListChanges } from "../../lib/helpers/changeLogHelper";
 import { formatDateRange } from "../../lib/helpers/dateHelper";
 import { strCompare } from "../../lib/helpers/globalHelper";
-import BaseErrorDialog from "./BaseErrorDialog";
 import Icon from "../basic/Icon";
 import Divider from "../basic/Divider";
 import { Tag } from "../common/Tag";
