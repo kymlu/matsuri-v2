@@ -1,5 +1,5 @@
 import { Select } from "@base-ui/react";
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { Choreo, StageGeometry } from "../../models/choreo";
 import { Dancer } from "../../models/dancer";
 import { ActionLine, ChangeLog, DancerSectionChanges, ListChanges } from "../../lib/helpers/changeLogHelper";
@@ -12,7 +12,6 @@ import { Tag } from "../common/Tag";
 import { DancerPositionText } from "../editor/PositionHint";
 
 const OVERALL = "";
-const COLLAPSED_LINE_COUNT = 5;
 const OBSTACLE_FIELD_NAMES = { position: "位置", size: "サイズ", rotation: "向き" };
 
 type ChangeLogDialogProps = {
@@ -34,18 +33,34 @@ export default function ChangeLogDialog({
   const oldGeometry = log.overall.stage?.[0] ?? choreo.stageGeometry;
 
   return (
-    <BaseErrorDialog title="前回からの変更" fullWidth onClose={onClose}>
-      <div className="space-y-2">
-        <p className="text-sm text-muted">
-          v{fromVersion} → v{choreo.version}{publishedAt ? `・${formatDateRange(publishedAt, undefined, false)}更新` : ""}
+    <BaseErrorDialog
+      title="前回からの変更"
+      fullWidth
+      onClose={onClose}
+      header={
+        <div className="pb-2 space-y-2 border-b border-line">
+          <div className="flex items-center gap-1 text-sm text-muted">
+            <Tag compact type="primary" text={`v${fromVersion}`}/>
+            <Icon src="arrowRightAlt" colour="grey" size="xs"/>
+            <Tag compact type="filled" text={`v${choreo.version}`}/>
+            {publishedAt && `・${formatDateRange(publishedAt, undefined, false)}更新`}
+          </div>
+          <DancerSelect log={log} dancers={choreo.dancers} value={selection} onChange={setSelection}/>
+          {
+            selection === OVERALL &&
+            <p className="text-sm text-muted">名前を選ぶと、その人の変更を確認できます。</p>
+          }
+        </div>
+      }
+      footerNote={
+        <p className="flex items-center gap-1 pt-2 text-sm border-t text-muted border-line">
+          閉じた後も<Icon src="releaseAlert" colour="primary" size="xs"/>から確認できます。
         </p>
-        <DancerSelect log={log} dancers={choreo.dancers} value={selection} onChange={setSelection}/>
+      }>
+      <div className="py-2 space-y-2">
         {
           selection === OVERALL &&
-          <>
-            <OverallChanges log={log} sectionNames={sectionNames}/>
-            <p className="text-sm text-muted">名前を選ぶと、その人の変更を確認できます。</p>
-          </>
+          <OverallChanges log={log} sectionNames={sectionNames}/>
         }
         {
           entry?.kind === "new" &&
@@ -62,10 +77,6 @@ export default function ChangeLogDialog({
               sectionNames={sectionNames}/>
           )
         }
-        <Divider compact/>
-        <p className="flex items-center gap-1 text-sm text-muted">
-          閉じた後も<Icon src="releaseAlert" colour="primary" size="xs"/>から確認できます。
-        </p>
       </div>
     </BaseErrorDialog>
   );
@@ -201,81 +212,105 @@ function OverallChanges({ log, sectionNames }: OverallChangesProps) {
   const { event, stage, sections, memos, dancers, actions, props, obstacles } = log.overall;
   const sectionList = (ids: string[]) => ids.map(id => sectionNames[id]).join("、");
 
-  const groups: [string, string[]][] = [
-    ["イベント", [
-      ...(event.name ? [`イベント名：${event.name[0]} → ${event.name[1]}`] : []),
-      ...(event.dates ? [`日程：${event.dates.map(x => formatDateRange(x.startDate, x.endDate)).join(" → ")}`] : []),
-    ]],
-    ["ステージ", stage ? [`サイズ：${stage.map(x => `縦${x.stageLength}m × 幅${x.stageWidth}m`).join(" → ")}`] : []],
-    ["セクション", [
-      ...listChangeLines(sections),
-      ...(sections.reordered ? ["並び順を変更"] : []),
-    ]],
-    ["メモ", memos.map(id => `${sectionNames[id]}のメモを変更`)],
-    ["ダンサー", listChangeLines(dancers)],
-    ["振り", actions.map(x => actionLine(x, sectionNames))],
-    ["道具", [
-      ...listChangeLines(props),
-      ...props.lines.map(x => `「${x.name}」：${[
+  const rows = (list: ChangeRow[]) => list.length > 0 && <ChangeRows rows={list}/>;
+
+  const groups: [string, React.ReactNode][] = [
+    ["イベント", rows([
+      ...(event.name ? [{ label: "イベント名", text: `${event.name[0]} → ${event.name[1]}` }] : []),
+      ...(event.dates ? [{ label: "日程", text: event.dates.map(x => formatDateRange(x.startDate, x.endDate)).join(" → ") }] : []),
+    ])],
+    ["ステージ", rows(stage ? [{ label: "サイズ", text: stage.map(x => `縦${x.stageLength}m × 幅${x.stageWidth}m`).join(" → ") }] : [])],
+    ["セクション", rows([
+      ...listChangeRows(sections),
+      ...(sections.reordered ? [{ label: "並び順", text: "変更あり" }] : []),
+    ])],
+    ["メモ", rows(memos.length > 0 ? [{ label: "変更", text: sectionList(memos) }] : [])],
+    ["ダンサー", rows(listChangeRows(dancers))],
+    ["振り", actions.length > 0 && <ActionChanges lines={actions} sectionNames={sectionNames}/>],
+    ["道具", rows([
+      ...listChangeRows(props),
+      ...props.lines.map(x => ({ text: `「${x.name}」：${[
         x.moved.length > 0 ? `${sectionList(x.moved)}で移動` : "",
         x.nowInUse.length > 0 ? `${sectionList(x.nowInUse)}で使用中に` : "",
         x.nowUnused.length > 0 ? `${sectionList(x.nowUnused)}で未使用に` : "",
-      ].filter(Boolean).join("・")}`),
-    ]],
-    ["障害物", [
-      ...listChangeLines(obstacles),
-      ...obstacles.lines.map(x => `「${x.name}」：${x.fields.map(field => OBSTACLE_FIELD_NAMES[field]).join("・")}を変更`),
-    ]],
+      ].filter(Boolean).join("・")}` })),
+    ])],
+    ["障害物", rows([
+      ...listChangeRows(obstacles),
+      ...obstacles.lines.map(x => ({ text: `「${x.name}」：${x.fields.map(field => OBSTACLE_FIELD_NAMES[field]).join("・")}を変更` })),
+    ])],
   ];
 
   return <>
     {
-      groups.filter(([, lines]) => lines.length > 0).map(([title, lines]) =>
+      groups.filter(([, content]) => content).map(([title, content]) =>
         <div key={title}>
           <div className="font-semibold">{title}</div>
-          <CollapsibleList lines={lines}/>
+          {content}
         </div>
       )
     }
   </>;
 }
 
-function listChangeLines(changes: ListChanges) {
+// A row without a label spans the full width, for lines about one named item.
+type ChangeRow = { label?: string, text: string };
+
+function ChangeRows({ rows, nested }: { rows: ChangeRow[], nested?: boolean }) {
+  return <div className={"grid grid-cols-[4.5em,1fr] gap-x-2 text-sm break-keep " + (nested ? "pl-6" : "pl-2")}>
+    {
+      rows.map((row, i) => row.label === undefined ?
+        <span key={i} className="col-span-2">{row.text}</span> :
+        <Fragment key={i}>
+          <span className="text-muted text-nowrap">{row.label}</span>
+          <span>{row.text}</span>
+        </Fragment>
+      )
+    }
+  </div>;
+}
+
+// Names side by side in 「」, and one rename per row so the arrows don't run together.
+function listChangeRows(changes: ListChanges): ChangeRow[] {
+  const names = (list: string[]) => list.map(name => `「${name}」`).join("");
   return [
-    ...changes.added.map(name => `「${name}」を追加`),
-    ...changes.removed.map(name => `「${name}」を削除`),
-    ...changes.renamed.map(([oldName, name]) => `「${oldName}」→「${name}」`),
+    ...(changes.added.length > 0 ? [{ label: "追加", text: names(changes.added) }] : []),
+    ...(changes.removed.length > 0 ? [{ label: "削除", text: names(changes.removed) }] : []),
+    ...changes.renamed.map(([oldName, name], i) => ({ label: i === 0 ? "名前変更" : "", text: `「${oldName}」→「${name}」` })),
   ];
 }
 
-function actionLine({ sectionId, actionName, countName, change, oldName }: ActionLine, sectionNames: Record<string, string>) {
-  const section = sectionNames[sectionId];
-  if (countName === undefined) {
-    return change === "renamed" ?
-      `${section}『${oldName}』→『${actionName}』` :
-      `${section}『${actionName}』を${change === "added" ? "追加" : "削除"}`;
-  }
-  return change === "added" ? `${section}『${actionName}』に『${countName}』を追加` :
-    change === "removed" ? `${section}『${actionName}』の『${countName}』を削除` :
-    `${section}『${actionName}』の『${oldName}』→『${countName}』`;
+function toListChanges(lines: ActionLine[], getName: (line: ActionLine) => string): ListChanges {
+  return {
+    added: lines.filter(x => x.change === "added").map(getName),
+    removed: lines.filter(x => x.change === "removed").map(getName),
+    renamed: lines.filter(x => x.change === "renamed").map(x => [x.oldName!!, getName(x)]),
+  };
 }
 
-// Collapses only when that hides at least 2 lines, so there's never a 「他1件」.
-function CollapsibleList({ lines }: { lines: string[] }) {
-  const [isExpanded, setIsExpanded] = useState<boolean>(false);
-  const canCollapse = lines.length > COLLAPSED_LINE_COUNT + 1;
-  const shownLines = canCollapse && !isExpanded ? lines.slice(0, COLLAPSED_LINE_COUNT) : lines;
+// Grouped by section, then the section's actions, then each action's counts.
+function ActionChanges({ lines, sectionNames }: { lines: ActionLine[], sectionNames: Record<string, string> }) {
+  const sectionIds = Array.from(new Set(lines.map(x => x.sectionId)));
 
   return <>
-    <ul className="pl-5 text-sm list-disc">
-      {shownLines.map((line, i) => <li key={i}>{line}</li>)}
-    </ul>
     {
-      canCollapse &&
-      <button className="flex items-center ml-5 text-sm text-primary" onClick={() => setIsExpanded(prev => !prev)}>
-        {isExpanded ? "閉じる" : `他${lines.length - COLLAPSED_LINE_COUNT}件`}
-        <Icon src={isExpanded ? "expandLess" : "expandMore"} colour="primary" size="xs"/>
-      </button>
+      sectionIds.map(sectionId => {
+        const sectionLines = lines.filter(x => x.sectionId === sectionId);
+        const countLines = sectionLines.filter(x => x.countName !== undefined);
+        const actionNames = Array.from(new Set(countLines.map(x => x.actionName)));
+        return <div key={sectionId}>
+          <div className="pl-2 text-sm font-semibold">{sectionNames[sectionId]}</div>
+          <ChangeRows rows={listChangeRows(toListChanges(sectionLines.filter(x => x.countName === undefined), x => x.actionName))}/>
+          {
+            actionNames.map(actionName =>
+              <Fragment key={actionName}>
+                <ChangeRows rows={[{ text: `「${actionName}」のカウント` }]}/>
+                <ChangeRows nested rows={listChangeRows(toListChanges(countLines.filter(x => x.actionName === actionName), x => x.countName!!))}/>
+              </Fragment>
+            )
+          }
+        </div>;
+      })
     }
   </>;
 }

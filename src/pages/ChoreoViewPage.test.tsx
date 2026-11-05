@@ -117,8 +117,9 @@ describe("ChoreoViewPage change log", () => {
 
     fireEvent.click(await screen.findByText("OK"));
     fireEvent.click(await findBanner());
-    expect(await screen.findByText(changeLogTitle)).toBeInTheDocument();
-    expect(screen.getByText("v1 → v2")).toBeInTheDocument();
+    const dialog = within((await screen.findByText(changeLogTitle)).closest<HTMLElement>("[role=dialog]")!);
+    expect(dialog.getByText("v1")).toBeInTheDocument();
+    expect(dialog.getByText("v2")).toBeInTheDocument();
     expect(screen.getByText("名前を選ぶと、その人の変更を確認できます。")).toBeInTheDocument();
   });
 
@@ -129,7 +130,7 @@ describe("ChoreoViewPage change log", () => {
 
     fireEvent.click(await screen.findByText("OK"));
     fireEvent.click(await findBanner());
-    expect(await screen.findByText("v1 → v2・11月2日更新")).toBeInTheDocument();
+    expect(await screen.findByText("・11月2日更新")).toBeInTheDocument();
   });
 
   it("opens on the saved name's dancer when they have changes", async () => {

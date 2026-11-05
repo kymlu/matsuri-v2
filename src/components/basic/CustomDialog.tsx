@@ -5,6 +5,7 @@ import Icon from "./Icon";
 export type CustomDialogProps = {
   children: React.ReactNode,
   title: string,
+  header?: React.ReactNode, // stays in place above the scrolling content
   footer?: React.ReactNode,
   hasX?: boolean,
   full?: boolean
@@ -13,7 +14,7 @@ export type CustomDialogProps = {
 }
 
 export default function CustomDialog({
-  children, title, footer, hasX, full, fullWidth, onClose
+  children, title, header, footer, hasX, full, fullWidth, onClose
 }: CustomDialogProps) {
   return (
     <Dialog.Portal>
@@ -35,6 +36,13 @@ export default function CustomDialog({
               </Dialog.Close>
             )}
           </div>
+
+          {
+            header &&
+            <div className="shrink-0">
+              {header}
+            </div>
+          }
 
           <div className="flex-1 min-h-0 overflow-y-auto">
             {children}

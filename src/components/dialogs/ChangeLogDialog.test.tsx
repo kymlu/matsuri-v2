@@ -85,7 +85,9 @@ describe("ChangeLogDialog", () => {
     // The file's own lastUpdated (10/20) is when it was last edited, not published.
     renderDialog("");
     expect(screen.getByText("前回からの変更")).toBeInTheDocument();
-    expect(screen.getByText("v5 → v8・10月28日更新")).toBeInTheDocument();
+    expect(screen.getByText("v5")).toBeInTheDocument();
+    expect(screen.getByText("v8")).toBeInTheDocument();
+    expect(screen.getByText(/・10月28日更新/)).toBeInTheDocument();
     expect(screen.getByText(/閉じた後も/)).toBeInTheDocument();
   });
 
@@ -127,21 +129,26 @@ describe("ChangeLogDialog", () => {
   });
 
   describe("全体", () => {
-    it("shows each group with its lines and the hint", () => {
+    // Reads the rows as "label text", or just the text for full-width rows.
+    const rowsOf = (title: string) => {
+      const rows: string[] = [];
+      screen.getByText(title, { selector: "div" }).parentElement!.querySelectorAll(".grid > span").forEach(cell => {
+        if (cell.classList.contains("col-span-2") || cell.classList.contains("text-muted")) {
+          rows.push(cell.textContent ?? "");
+        } else {
+          rows[rows.length - 1] += ` ${cell.textContent}`;
+        }
+      });
+      return rows;
+    };
+
+    it("shows each group as condensed rows, with the hint", () => {
       renderDialog("", makeLog({
         event: { name: ["祭り", "秋祭り"], dates: [{}, { startDate: "2026-11-02" }] },
         stage: [geometry, { ...geometry, stageWidth: 12 }],
-        sections: { added: ["間奏"], removed: ["Aメロ"], renamed: [["サビ2", "大サビ"]], reordered: true },
-        memos: ["s1"],
+        sections: { added: ["間奏", "ソロ"], removed: ["Aメロ"], renamed: [["サビ2", "大サビ"], ["間奏1", "ブリッジ"]], reordered: true },
+        memos: ["s1", "s3"],
         dancers: { added: ["ゆい"], removed: [], renamed: [["さくら", "さくら（A）"]] },
-        actions: [
-          { sectionId: "s1", actionName: "振りA", countName: "3回目", change: "added" },
-          { sectionId: "s1", actionName: "振りA", countName: "1回目", change: "removed" },
-          { sectionId: "s1", actionName: "振りA", countName: "最初", change: "renamed", oldName: "1回目" },
-          { sectionId: "s2", actionName: "振りB", change: "added" },
-          { sectionId: "s2", actionName: "振りC", change: "removed" },
-          { sectionId: "s2", actionName: "振りD", change: "renamed", oldName: "振りE" },
-        ],
         props: {
           added: ["旗"], removed: [], renamed: [],
           lines: [{ name: "旗", moved: ["s1", "s2"], nowInUse: ["s3"], nowUnused: [] }, { name: "扇", moved: [], nowInUse: [], nowUnused: ["s1"] }],
@@ -149,51 +156,45 @@ describe("ChangeLogDialog", () => {
         obstacles: { added: [], removed: [], renamed: [["段差", "スロープ"]], lines: [{ name: "花道", fields: ["position", "size"] }] },
       }));
 
-      [
-        "イベント名：祭り → 秋祭り",
-        "日程：日程未定 → 2026年11月2日",
-        "サイズ：縦8m × 幅10m → 縦8m × 幅12m",
-        "「間奏」を追加", "「Aメロ」を削除", "「サビ2」→「大サビ」", "並び順を変更",
-        "サビ1のメモを変更",
-        "「ゆい」を追加", "「さくら」→「さくら（A）」",
-        "サビ1『振りA』に『3回目』を追加",
-        "サビ1『振りA』の『1回目』を削除",
-        "サビ1『振りA』の『1回目』→『最初』",
-        "大サビ『振りB』を追加",
-        "大サビ『振りC』を削除",
-        "大サビ『振りE』→『振りD』",
-        "「旗」を追加",
-        "「旗」：サビ1、大サビで移動・間奏で使用中に",
-        "「扇」：サビ1で未使用に",
-        "「段差」→「スロープ」",
-        "「花道」：位置・サイズを変更",
-        "名前を選ぶと、その人の変更を確認できます。",
-      ].forEach(text => expect(screen.getByText(text)).toBeInTheDocument());
+      expect(rowsOf("イベント")).toEqual(["イベント名 祭り → 秋祭り", "日程 日程未定 → 2026年11月2日"]);
+      expect(rowsOf("ステージ")).toEqual(["サイズ 縦8m × 幅10m → 縦8m × 幅12m"]);
+      // One rename per row, labelled only on the first.
+      expect(rowsOf("セクション")).toEqual(["追加 「間奏」「ソロ」", "削除 「Aメロ」", "名前変更 「サビ2」→「大サビ」", " 「間奏1」→「ブリッジ」", "並び順 変更あり"]);
+      expect(rowsOf("メモ")).toEqual(["変更 サビ1、間奏"]);
+      expect(rowsOf("ダンサー")).toEqual(["追加 「ゆい」", "名前変更 「さくら」→「さくら（A）」"]);
+      expect(rowsOf("道具")).toEqual(["追加 「旗」", "「旗」：サビ1、大サビで移動・間奏で使用中に", "「扇」：サビ1で未使用に"]);
+      expect(rowsOf("障害物")).toEqual(["名前変更 「段差」→「スロープ」", "「花道」：位置・サイズを変更"]);
+      expect(screen.getByText("名前を選ぶと、その人の変更を確認できます。")).toBeInTheDocument();
+    });
+
+    it("groups 振り by section, then by action for count changes", () => {
+      renderDialog("", makeLog({
+        actions: [
+          { sectionId: "s1", actionName: "振りA", countName: "3回目", change: "added" },
+          { sectionId: "s1", actionName: "振りA", countName: "1回目", change: "removed" },
+          { sectionId: "s1", actionName: "振りA", countName: "最初", change: "renamed", oldName: "1回目" },
+          { sectionId: "s2", actionName: "振りB", change: "added" },
+          { sectionId: "s2", actionName: "振りC", change: "removed" },
+          { sectionId: "s2", actionName: "振りD", change: "renamed", oldName: "振りE" },
+          { sectionId: "s2", actionName: "振りF", change: "renamed", oldName: "振りG" },
+        ],
+      }));
+
+      expect(rowsOf("サビ1")).toEqual(["「振りA」のカウント", "追加 「3回目」", "削除 「1回目」", "名前変更 「1回目」→「最初」"]);
+      expect(rowsOf("大サビ")).toEqual(["追加 「振りB」", "削除 「振りC」", "名前変更 「振りE」→「振りD」", " 「振りG」→「振りF」"]);
     });
 
     it("hides empty groups", () => {
       renderDialog("", makeLog({ memos: ["s1"] }));
       expect(screen.getByText("メモ")).toBeInTheDocument();
       expect(screen.queryByText("イベント")).not.toBeInTheDocument();
+      expect(screen.queryByText("振り")).not.toBeInTheDocument();
       expect(screen.queryByText("道具")).not.toBeInTheDocument();
     });
 
-    it("shows up to 6 lines in full", () => {
-      renderDialog("", makeLog({ dancers: { added: ["1", "2", "3", "4", "5", "6"], removed: [], renamed: [] } }));
-      expect(screen.getByText("「6」を追加")).toBeInTheDocument();
-      expect(screen.queryByText(/他\d+件/)).not.toBeInTheDocument();
-    });
-
-    it("collapses more than 6 lines and expands in place", () => {
-      renderDialog("", makeLog({ dancers: { added: ["1", "2", "3", "4", "5", "6", "7", "8"], removed: [], renamed: [] } }));
-      expect(screen.getByText("「5」を追加")).toBeInTheDocument();
-      expect(screen.queryByText("「6」を追加")).not.toBeInTheDocument();
-
-      fireEvent.click(screen.getByText("他3件"));
-      expect(screen.getByText("「8」を追加")).toBeInTheDocument();
-
-      fireEvent.click(screen.getByText("閉じる"));
-      expect(screen.queryByText("「8」を追加")).not.toBeInTheDocument();
+    it("hides the 全体 hint once a dancer is chosen", () => {
+      renderDialog("d1");
+      expect(screen.queryByText("名前を選ぶと、その人の変更を確認できます。")).not.toBeInTheDocument();
     });
   });
 });

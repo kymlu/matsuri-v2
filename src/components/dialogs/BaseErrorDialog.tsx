@@ -6,20 +6,24 @@ type BaseErrorDialogProps = {
   title: string,
   actionButtonText?: string,
   children: React.ReactNode,
+  header?: React.ReactNode,
+  footerNote?: React.ReactNode,
   onClose?: () => void,
   fullWidth?: boolean
 }
 
 export default function BaseErrorDialog({
-  title, actionButtonText, children, onClose, fullWidth
+  title, actionButtonText, children, header, footerNote, onClose, fullWidth
 }: BaseErrorDialogProps) {
   return <CustomDialog
     hasX
     onClose={onClose}
     fullWidth={fullWidth}
     title={title}
-    footer={
-      <div className="flex w-full gap-2 mt-6">
+    header={header}
+    footer={<>
+      {footerNote}
+      <div className={"flex w-full gap-2 " + (footerNote ? "mt-3" : "mt-6")}>
         <Dialog.Close onClick={onClose} className="w-full">
           <Button
             asDiv
@@ -31,7 +35,7 @@ export default function BaseErrorDialog({
           </Button>
         </Dialog.Close>
       </div>
-    }>
+    </>}>
       <>
         {children}
       </>
