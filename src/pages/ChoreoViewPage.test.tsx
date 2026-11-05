@@ -157,7 +157,8 @@ describe("ChoreoViewPage change log", () => {
     renderPage({ savedDancerName: "さくら" });
 
     fireEvent.click(await findBanner());
-    fireEvent.click(await screen.findByText("OK"));
+    const dialog = (await screen.findByText(changeLogTitle)).closest<HTMLElement>("[role=dialog]")!;
+    fireEvent.click(within(dialog).getByText("clear"));
     await waitFor(() => expect(screen.queryByText(changeLogTitle)).not.toBeInTheDocument());
     expect(queryBanner()).not.toBeInTheDocument();
 
