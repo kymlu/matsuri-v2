@@ -14,7 +14,12 @@ jest.mock("../components/grid/MainStage", () => ({
 
 // Not part of the change log, and need browser APIs jsdom lacks (jsPDF, IntersectionObserver, scrollIntoView).
 jest.mock("../components/dialogs/ExportDialog", () => ({ __esModule: true, default: () => null }));
-jest.mock("../components/editor/ViewerSidebar", () => ({ __esModule: true, default: () => null }));
+// Keeps only a way to select さくら's count, as tapping one in the real sidebar does.
+jest.mock("../components/editor/ViewerSidebar", () => ({
+  __esModule: true,
+  default: ({ onSelectTiming }: { onSelectTiming: (timing: { id: string, name: string, dancerIds: string[] }) => void }) =>
+    <button onClick={() => onSelectTiming({ id: "t1", name: "1回目", dancerIds: ["d1"] })}>select count</button>,
+}));
 
 jest.mock("../lib/helpers/apiHelper", () => ({
   ...jest.requireActual("../lib/helpers/apiHelper"),
@@ -172,8 +177,20 @@ describe("ChoreoViewPage change log", () => {
     expect(screen.queryByText("change log button")).not.toBeInTheDocument();
   });
 
+  it("opens on 全体 when a count with one dancer is selected", async () => {
+    setSeenVersion("c1", 1);
+    mockGetChoreoFile.mockResolvedValue(makeChoreo(1));
+    renderPage();
+
+    fireEvent.click(await screen.findByText("OK"));
+    fireEvent.click(screen.getByText("select count"));
+    fireEvent.click(await findBanner());
+    expect(await screen.findByText("名前を選ぶと、その人の変更を確認できます。")).toBeInTheDocument();
+  });
+
   it("shows nothing but still stores the version when the old file can't be loaded", async () => {
-    jest.spyOn(console, "error").mockImplementation(() => {});
+    // The real getChoreoFile logs its own failures, so the page shouldn't log again.
+    const consoleError = jest.spyOn(console, "error").mockImplementation(() => {});
     setSeenVersion("c1", 1);
     mockGetChoreoFile.mockRejectedValue(new Error("404"));
     renderPage();
@@ -181,6 +198,20 @@ describe("ChoreoViewPage change log", () => {
 
     expect(queryBanner()).not.toBeInTheDocument();
     expect(getSeenVersion("c1")).toBe(2);
+    expect(consoleError).not.toHaveBeenCalled();
+    consoleError.mockRestore();
+  });
+
+  it("logs and shows nothing when the old file can't be compared", async () => {
+    const consoleError = jest.spyOn(console, "error").mockImplementation(() => {});
+    setSeenVersion("c1", 1);
+    mockGetChoreoFile.mockResolvedValue({});
+    renderPage();
+    await settle();
+
+    expect(queryBanner()).not.toBeInTheDocument();
+    expect(consoleError).toHaveBeenCalledWith("Failed to build change log", expect.anything());
+    consoleError.mockRestore();
   });
 
   it("stores the current version and compares nothing when the stored one is newer", async () => {

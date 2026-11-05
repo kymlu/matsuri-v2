@@ -42,7 +42,7 @@ export default function ChangeLogDialog({
         {
           selection === OVERALL &&
           <>
-            <OverallChanges log={log} choreo={choreo} sectionNames={sectionNames}/>
+            <OverallChanges log={log} sectionNames={sectionNames}/>
             <p className="text-sm text-muted">名前を選ぶと、その人の変更を確認できます。</p>
           </>
         }
@@ -193,11 +193,10 @@ const countNames = (names: string[]) => names.length > 0 ? names.join("、") : "
 
 type OverallChangesProps = {
   log: ChangeLog,
-  choreo: Choreo,
   sectionNames: Record<string, string>,
 }
 
-function OverallChanges({ log, choreo, sectionNames }: OverallChangesProps) {
+function OverallChanges({ log, sectionNames }: OverallChangesProps) {
   const { event, stage, sections, memos, dancers, actions, props, obstacles } = log.overall;
   const sectionList = (ids: string[]) => ids.map(id => sectionNames[id]).join("、");
 
@@ -220,7 +219,7 @@ function OverallChanges({ log, choreo, sectionNames }: OverallChangesProps) {
         x.moved.length > 0 ? `${sectionList(x.moved)}で移動` : "",
         x.nowInUse.length > 0 ? `${sectionList(x.nowInUse)}で使用中に` : "",
         x.nowUnused.length > 0 ? `${sectionList(x.nowUnused)}で未使用に` : "",
-      ].filter(x => x).join("・")}`),
+      ].filter(Boolean).join("・")}`),
     ]],
     ["障害物", [
       ...listChangeLines(obstacles),

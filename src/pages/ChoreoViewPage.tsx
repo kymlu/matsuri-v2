@@ -112,12 +112,16 @@ export default function ChoreoViewPage(props: {
     let cancelled = false;
     getChoreoFile(props.teamId!!, props.currentChoreo.id, seenVersionAtOpen!!)
       .then(oldChoreo => {
-        const log = buildChangeLog(oldChoreo, props.currentChoreo);
-        if (!cancelled && hasShownChanges(log)) {
-          setChangeLog(log);
+        try {
+          const log = buildChangeLog(oldChoreo, props.currentChoreo);
+          if (!cancelled && hasShownChanges(log)) {
+            setChangeLog(log);
+          }
+        } catch (e) {
+          console.error("Failed to build change log", e);
         }
       })
-      .catch(e => console.error("Failed to build change log", e));
+      .catch(() => {}); // getChoreoFile already logs download failures
     return () => { cancelled = true; };
   }, [hasNewVersion, props.teamId, props.currentChoreo, seenVersionAtOpen]);
 
@@ -146,11 +150,11 @@ export default function ChoreoViewPage(props: {
     setExportDialogOpen(isOpen);
   }, []);
 
-  // Opens on the selected dancer if they have changes, otherwise on 全体.
+  // Opens on the selected dancer if they have changes, otherwise on 全体 (including when a count is selected).
   const openChangeLog = useCallback(() => {
-    const id = selectedIds.dancers.length === 1 ? selectedIds.dancers[0] : "";
+    const id = selectedIds.dancers.length === 1 && selectedTimingId === undefined ? selectedIds.dancers[0] : "";
     setChangeLogSelection(changeLog?.dancers[id] ? id : "");
-  }, [selectedIds.dancers, changeLog]);
+  }, [selectedIds.dancers, selectedTimingId, changeLog]);
   const closeChangeLog = useCallback(() => setChangeLogSelection(undefined), []);
 
   // ---- Header handlers ----
