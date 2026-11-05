@@ -74,6 +74,7 @@ type Match<T> = {
 const sameText = (a?: string, b?: string) => (a ?? "").trim() === (b ?? "").trim();
 const samePoint = (a: Coordinates, b: Coordinates) =>
   roundToTenth(a.x) === roundToTenth(b.x) && roundToTenth(a.y) === roundToTenth(b.y);
+const sameRotation = (a?: number, b?: number) => Math.round(a ?? 0) === Math.round(b ?? 0);
 
 function matchById<T extends BaseModel>(oldItems: T[], newItems: T[]): Match<T> {
   const oldById = indexByKey(oldItems, "id");
@@ -213,7 +214,7 @@ function compareProps(newChoreo: Choreo, sectionMatch: Match<ChoreoSection>, pro
         const oldPosition = sectionMatch.oldOf[section.id]?.formation.propPositions[oldPropId];
         const newPosition = section.formation.propPositions[prop.id];
         if (!oldPosition || !newPosition) return;
-        if (!samePoint(oldPosition, newPosition)) line.moved.push(section.id);
+        if (!samePoint(oldPosition, newPosition) || !sameRotation(oldPosition.rotation, newPosition.rotation)) line.moved.push(section.id);
         if (!oldPosition.inUse && newPosition.inUse) line.nowInUse.push(section.id);
         if (oldPosition.inUse && !newPosition.inUse) line.nowUnused.push(section.id);
       });
@@ -231,7 +232,7 @@ function compareObstacles(oldChoreo: Choreo, newChoreo: Choreo, obstacleMatch: M
       const fields: ObstacleLine["fields"] = [];
       if (!samePoint(old, obstacle)) fields.push("position");
       if (roundToTenth(old.length) !== roundToTenth(obstacle.length) || roundToTenth(old.width) !== roundToTenth(obstacle.width)) fields.push("size");
-      if (Math.round(old.rotation ?? 0) !== Math.round(obstacle.rotation ?? 0)) fields.push("rotation");
+      if (!sameRotation(old.rotation, obstacle.rotation)) fields.push("rotation");
       return { name: obstacle.name, fields };
     })
     .filter(x => x.fields.length > 0);

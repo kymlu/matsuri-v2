@@ -91,7 +91,6 @@ describe("buildChangeLog", () => {
       ["dancer front/back order", c => { c.sections[0].formation.dancerPositions.d1.z = 5; }],
       ["prop colour", c => { c.props.p1.color = "#ffffff"; }],
       ["prop size", c => { c.props.p1.length = 3; }],
-      ["prop rotation", c => { c.sections[0].formation.propPositions.p1.rotation = 45; }],
       ["stage margins", c => { c.stageGeometry.margin.topMargin = 3; }],
       ["whitespace in a dancer name", c => { c.dancers.d1.name = " さくら "; }],
       ["whitespace in a memo", c => { c.sections[0].note = "  "; }],
@@ -388,6 +387,16 @@ describe("buildChangeLog", () => {
         c.sections[1].formation.propPositions.p1.inUse = true;
       });
       expect(log.overall.props.lines).toEqual([{ name: "旗", moved: ["s1"], nowInUse: ["s2"], nowUnused: [] }]);
+    });
+
+    it("reports a rotation as a move, even when the corner stays put", () => {
+      const log = compare(c => { c.sections[0].formation.propPositions.p1.rotation = 180; });
+      expect(log.overall.props.lines).toEqual([{ name: "旗", moved: ["s1"], nowInUse: [], nowUnused: [] }]);
+    });
+
+    it("ignores a prop rotation under half a degree", () => {
+      const log = compare(c => { c.sections[0].formation.propPositions.p1.rotation = 0.4; });
+      expect(hasShownChanges(log)).toBe(false);
     });
 
     it("reports a prop no longer in use", () => {
