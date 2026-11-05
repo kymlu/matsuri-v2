@@ -19,12 +19,13 @@ type ChangeLogDialogProps = {
   log: ChangeLog,
   fromVersion: number,
   choreo: Choreo,
+  publishedAt?: string,
   initialSelection: string,
   onClose: () => void,
 }
 
 export default function ChangeLogDialog({
-  log, fromVersion, choreo, initialSelection, onClose
+  log, fromVersion, choreo, publishedAt, initialSelection, onClose
 }: ChangeLogDialogProps) {
   const [selection, setSelection] = useState<string>(initialSelection);
   const sectionNames = useMemo(() => Object.fromEntries(choreo.sections.map(x => [x.id, x.name])), [choreo.sections]);
@@ -36,7 +37,7 @@ export default function ChangeLogDialog({
     <BaseErrorDialog title="前回からの変更" fullWidth onClose={onClose}>
       <div className="space-y-2">
         <p className="text-sm text-muted">
-          v{fromVersion} → v{choreo.version}{choreo.lastUpdated ? `・${formatDateRange(choreo.lastUpdated, undefined, false)}更新` : ""}
+          v{fromVersion} → v{choreo.version}{publishedAt ? `・${formatDateRange(publishedAt, undefined, false)}更新` : ""}
         </p>
         <DancerSelect log={log} dancers={choreo.dancers} value={selection} onChange={setSelection}/>
         {

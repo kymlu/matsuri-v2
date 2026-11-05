@@ -18,7 +18,7 @@ const choreo: Choreo = {
   name: "隊列",
   event: "祭り",
   version: 8,
-  lastUpdated: "2026-10-28T10:00:00Z",
+  lastUpdated: "2026-10-20T10:00:00Z",
   stageType: "stage",
   stageGeometry: geometry,
   sections: ["サビ1", "大サビ", "間奏"].map((name, i) => ({
@@ -75,13 +75,14 @@ const positionLines = () => screen.getAllByRole("listitem")
 function renderDialog(initialSelection: string, log = makeLog(), currentChoreo = choreo) {
   return render(
     <Dialog.Root open>
-      <ChangeLogDialog log={log} fromVersion={5} choreo={currentChoreo} initialSelection={initialSelection} onClose={() => {}}/>
+      <ChangeLogDialog log={log} fromVersion={5} choreo={currentChoreo} publishedAt="2026-10-28T10:00:00Z" initialSelection={initialSelection} onClose={() => {}}/>
     </Dialog.Root>
   );
 }
 
 describe("ChangeLogDialog", () => {
-  it("shows the versions, update date and footer", () => {
+  it("shows the versions, publish date and footer", () => {
+    // The file's own lastUpdated (10/20) is when it was last edited, not published.
     renderDialog("");
     expect(screen.getByText("前回からの変更")).toBeInTheDocument();
     expect(screen.getByText("v5 → v8・10月28日更新")).toBeInTheDocument();

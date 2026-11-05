@@ -215,6 +215,7 @@ function App() {
           pastVersion={pastVersion}
           savedDancerName={name}
           teamId={team?.id}
+          serverChoreo={serverChoreo}
         />
       )}
     </div>

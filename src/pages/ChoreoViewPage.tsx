@@ -1,7 +1,7 @@
 import Header from "../components/editor/Header"
 import FormationSelectionToolbar from "../components/editor/FormationSelectionToolbar";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Choreo } from "../models/choreo";
+import { BasicChoreoDetails, Choreo } from "../models/choreo";
 import { ChoreoSection, MovementCacheBySectionIdByObjectId, PathSvgCacheByObjectIdBySectionId } from "../models/choreoSection";
 import MainStage from "../components/grid/MainStage";
 import { AppSetting } from "../models/appSettings";
@@ -37,6 +37,7 @@ export default function ChoreoViewPage(props: {
   pastVersion?: number,
   savedDancerName: string | null,
   teamId?: string,
+  serverChoreo?: BasicChoreoDetails,
 }) {
   const [currentSection, setCurrentSection] = useState<ChoreoSection>(props.currentChoreo.sections[0]);
   const [selectedIds, setSelectedIds] = useState<StageEntities<string[]>>({props: [], dancers: [], obstacles: []});
@@ -319,6 +320,7 @@ export default function ChoreoViewPage(props: {
             log={changeLog}
             fromVersion={seenVersionAtOpen!!}
             choreo={props.currentChoreo}
+            publishedAt={props.serverChoreo?.lastUpdated}
             initialSelection={changeLogSelection}
             onClose={closeChangeLog}
           />

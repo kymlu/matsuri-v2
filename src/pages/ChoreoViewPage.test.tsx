@@ -1,5 +1,5 @@
 import { act, render, screen, fireEvent, waitFor, within } from "@testing-library/react";
-import { Choreo } from "../models/choreo";
+import { BasicChoreoDetails, Choreo } from "../models/choreo";
 import { getChoreoFile } from "../lib/helpers/apiHelper";
 import { getSeenVersion, setSeenVersion } from "../lib/dataAccess/LocalStorageController";
 import { SAMPLE_STAGE_ID } from "../lib/consts/consts";
@@ -120,6 +120,16 @@ describe("ChoreoViewPage change log", () => {
     expect(await screen.findByText(changeLogTitle)).toBeInTheDocument();
     expect(screen.getByText("v1 → v2")).toBeInTheDocument();
     expect(screen.getByText("名前を選ぶと、その人の変更を確認できます。")).toBeInTheDocument();
+  });
+
+  it("shows the publish date from the server", async () => {
+    setSeenVersion("c1", 1);
+    mockGetChoreoFile.mockResolvedValue(makeChoreo(1));
+    renderPage({ currentChoreo: { ...current, lastUpdated: "2026-10-20T10:00:00Z" }, serverChoreo: { lastUpdated: "2026-11-02T10:00:00Z" } as BasicChoreoDetails });
+
+    fireEvent.click(await screen.findByText("OK"));
+    fireEvent.click(await findBanner());
+    expect(await screen.findByText("v1 → v2・11月2日更新")).toBeInTheDocument();
   });
 
   it("opens on the saved name's dancer when they have changes", async () => {
