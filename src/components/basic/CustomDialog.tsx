@@ -21,7 +21,7 @@ export default function CustomDialog({
       <Dialog.Popup className={"fixed max-h-[95vh] overflow-hidden top-1/2 z-30 left-1/2 min-w-64 max-w-[calc(100vw-3rem)] -translate-x-1/2 -translate-y-1/2 rounded-lg bg-surface p-6 text-body outline outline-1 outline-subtle transition-all duration-150 data-[ending-style]:scale-90 data-[ending-style]:opacity-0 data-[starting-style]:scale-90 data-[starting-style]:opacity-0" 
         + (full ? " w-[95svw] h-[95svh]" : fullWidth ? " w-[95svw] md:w-[50svw]" : "")
       }>
-        <div className="flex flex-col h-full min-h-0">
+        <div className="flex flex-col h-full min-h-0 max-h-[calc(95svh-3rem)]">
           <div className="flex flex-row items-center justify-between gap-4 mb-2 shrink-0">
             <Dialog.Title className="text-lg font-bold break-words text-wrap">
               {title}
