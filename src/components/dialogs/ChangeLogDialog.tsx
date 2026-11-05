@@ -10,6 +10,7 @@ import Icon from "../basic/Icon";
 import Divider from "../basic/Divider";
 import { Tag } from "../common/Tag";
 import { DancerPositionText } from "../editor/PositionHint";
+import CustomDialog from "../basic/CustomDialog";
 
 const OVERALL = "";
 const OBSTACLE_FIELD_NAMES = { position: "位置", size: "サイズ", rotation: "向き" };
@@ -33,10 +34,11 @@ export default function ChangeLogDialog({
   const oldGeometry = log.overall.stage?.[0] ?? choreo.stageGeometry;
 
   return (
-    <BaseErrorDialog
+    <CustomDialog
       title="前回からの変更"
       fullWidth
       onClose={onClose}
+      hasX
       header={
         <div className="pb-2 space-y-2 border-b border-line">
           <div className="flex items-center gap-1 text-sm text-muted">
@@ -52,7 +54,7 @@ export default function ChangeLogDialog({
           }
         </div>
       }
-      footerNote={
+      footer={
         <p className="flex items-center gap-1 pt-2 text-sm border-t text-muted border-line">
           閉じた後も<Icon src="releaseAlert" colour="primary" size="xs"/>から確認できます。
         </p>
@@ -78,7 +80,7 @@ export default function ChangeLogDialog({
           )
         }
       </div>
-    </BaseErrorDialog>
+    </CustomDialog>
   );
 }
 
