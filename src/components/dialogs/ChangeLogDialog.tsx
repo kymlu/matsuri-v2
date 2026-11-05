@@ -110,7 +110,7 @@ function DancerSelect({ log, dancers, value, onChange }: DancerSelectProps) {
       </Select.Trigger>
       <Select.Portal>
         <Select.Positioner sideOffset={4} side="bottom" className="z-50 border rounded-md select-none bg-surface border-primary">
-          <Select.Popup>
+          <Select.Popup className="w-[var(--anchor-width)]">
             <div className="flex flex-col gap-1 p-2 max-h-[40svh] overflow-y-auto">
               <Select.Item value={OVERALL} className="flex p-2 cursor-pointer data-[highlighted]:bg-subtle">
                 全体
