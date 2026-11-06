@@ -5,6 +5,8 @@ import NumberInput from "../inputs/NumberInput";
 import BaseEditDialog from "./BaseEditDialog";
 import GridPreview from "../grid/GridPreview";
 import Button from "../basic/Button";
+import Icon from "../basic/Icon";
+import { getObjectsOutsideStage } from "../../lib/editor/commands/choreoCommands";
 
 interface EditChoreoMetaForm {
   name: string;
@@ -16,6 +18,16 @@ interface EditChoreoMetaForm {
   yMargin: number;
 }
 
+const getForm = (choreo: Choreo): EditChoreoMetaForm => ({
+  name: choreo.name,
+  eventName: choreo.event,
+  stageType: choreo.stageType,
+  stageLength: choreo.stageGeometry.stageLength,
+  stageWidth: choreo.stageGeometry.stageWidth,
+  xMargin: choreo.stageGeometry.margin.leftMargin,
+  yMargin: choreo.stageGeometry.margin.topMargin,
+});
+
 type EditChoreoSizeDialogProps = {
   currentChoreo: Choreo;
   onSave: (geometry: StageGeometry, stageType: StageType) => void;
@@ -24,26 +36,10 @@ type EditChoreoSizeDialogProps = {
 export default function EditChoreoSizeDialog({
   currentChoreo, onSave
 }: EditChoreoSizeDialogProps) {
-  const [form, setForm] = useState<EditChoreoMetaForm>({
-    name: "",
-    eventName: "",
-    stageType: "parade",
-    stageLength: 0,
-    stageWidth: 0,
-    xMargin: 0,
-    yMargin: 0,
-  });
+  const [form, setForm] = useState<EditChoreoMetaForm>(() => getForm(currentChoreo));
 
   useEffect(() => {
-    setForm({
-      name: currentChoreo.name,
-      eventName: currentChoreo.event,
-      stageType: currentChoreo.stageType,
-      stageLength: currentChoreo.stageGeometry.stageLength,
-      stageWidth: currentChoreo.stageGeometry.stageWidth,
-      xMargin: currentChoreo.stageGeometry.margin.leftMargin,
-      yMargin: currentChoreo.stageGeometry.margin.topMargin,
-    });
+    setForm(getForm(currentChoreo));
   }, [currentChoreo]);
 
   const handleChange = (field: keyof EditChoreoMetaForm, value: any) => {
@@ -64,19 +60,24 @@ export default function EditChoreoSizeDialog({
     };
   }, [form]);
 
+  const overflowMessage = useMemo(() => {
+    const overflow = getObjectsOutsideStage(currentChoreo, stageGeometry);
+    const counts = [
+      overflow.dancerIds.length > 0 ? `ダンサー${overflow.dancerIds.length}人` : "",
+      overflow.propIds.length > 0 ? `道具${overflow.propIds.length}個` : "",
+      overflow.obstacleIds.length > 0 ? `障害物${overflow.obstacleIds.length}個` : "",
+    ].filter(Boolean);
+    if (counts.length === 0) return undefined;
+    const sectionNames = currentChoreo.sections.filter(x => overflow.sectionIds.includes(x.id)).map(x => x.name);
+    return `${counts.join("・")}が範囲外になるため、端に移動します${sectionNames.length > 0 ? `（${sectionNames.join("、")}）` : ""}。`;
+  }, [currentChoreo, stageGeometry]);
+
   return <BaseEditDialog
     full
     title="舞台サイズを変更"
+    actionButtonText={overflowMessage ? "移動して保存" : undefined}
     onClose={() => {
-      setForm({
-        name: currentChoreo.name,
-        eventName: currentChoreo.event,
-        stageType: currentChoreo.stageType,
-        stageLength: currentChoreo.stageGeometry.stageLength,
-        stageWidth: currentChoreo.stageGeometry.stageWidth,
-        xMargin: currentChoreo.stageGeometry.margin.leftMargin,
-        yMargin: currentChoreo.stageGeometry.margin.topMargin,
-      });
+      setForm(getForm(currentChoreo));
     }}
     onSubmit={() => {onSave(stageGeometry, form.stageType)}}
     >
@@ -145,6 +146,13 @@ export default function EditChoreoSizeDialog({
             onChange={(newValue) => {handleChange("yMargin", Number(newValue))}}
             label="上下余白 (m)"
           />
+          {
+            overflowMessage &&
+            <p className="flex items-start col-span-2 gap-1 text-sm text-primary">
+              <Icon src="warning" colour="primary" size="xs"/>
+              {overflowMessage}
+            </p>
+          }
         </div>
       </div>
   </BaseEditDialog>

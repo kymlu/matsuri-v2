@@ -74,6 +74,8 @@ type Match<T> = {
 const sameText = (a?: string, b?: string) => (a ?? "").trim() === (b ?? "").trim();
 const samePoint = (a: Coordinates, b: Coordinates) =>
   roundToTenth(a.x) === roundToTenth(b.x) && roundToTenth(a.y) === roundToTenth(b.y);
+// Compares an old position with a new one, each against its own version's stage.
+type SamePosition = (oldPosition: Coordinates, newPosition: Coordinates) => boolean;
 const sameRotation = (a?: number, b?: number) => Math.round(a ?? 0) === Math.round(b ?? 0);
 
 function matchById<T extends BaseModel>(oldItems: T[], newItems: T[]): Match<T> {
@@ -117,11 +119,11 @@ function getListChanges<T extends BaseModel>(match: Match<T>, newItems: T[]): Li
 }
 
 // A missing movement is drawn curved. With no midpoints the path is straight whatever the tension.
-function samePath(a?: Movement, b?: Movement) {
+function samePath(samePosition: SamePosition, a?: Movement, b?: Movement) {
   const pointsA = a?.points ?? [];
   const pointsB = b?.points ?? [];
   return pointsA.length === pointsB.length &&
-    pointsA.every((p, i) => samePoint(p, pointsB[i])) &&
+    pointsA.every((p, i) => samePosition(p, pointsB[i])) &&
     (pointsA.length === 0 || (a?.tension ?? "curved") === (b?.tension ?? "curved"));
 }
 
@@ -152,7 +154,7 @@ function compareCounts(oldActions: DancerAction[], newActions: DancerAction[], o
 }
 
 function compareDancer(
-  newChoreo: Choreo, sectionMatch: Match<ChoreoSection>, oldDancerId: string, newDancerId: string
+  newChoreo: Choreo, samePosition: SamePosition, sectionMatch: Match<ChoreoSection>, oldDancerId: string, newDancerId: string
 ): DancerSectionChanges[] {
   const changes: DancerSectionChanges[] = newChoreo.sections.map(section => {
     const oldSection = sectionMatch.oldOf[section.id];
@@ -164,7 +166,7 @@ function compareDancer(
       isNew: !oldSection,
       position: !newPosition ? undefined :
         !oldPosition ? { to: newPosition } :
-        samePoint(oldPosition, newPosition) ? undefined :
+        samePosition(oldPosition, newPosition) ? undefined :
         { from: oldPosition, to: newPosition },
       counts: compareCounts(oldSection?.formation.dancerActions ?? [], section.formation.dancerActions, oldDancerId, newDancerId),
       pathChanged: false,
@@ -174,7 +176,7 @@ function compareDancer(
   // Paths are stored on the section they lead to, but listed under the section they start from.
   newChoreo.sections.forEach((section, i) => {
     const oldSection = sectionMatch.oldOf[section.id];
-    if (i > 0 && oldSection && !samePath(oldSection.formation.dancerMovements?.[oldDancerId], section.formation.dancerMovements?.[newDancerId])) {
+    if (i > 0 && oldSection && !samePath(samePosition, oldSection.formation.dancerMovements?.[oldDancerId], section.formation.dancerMovements?.[newDancerId])) {
       changes[i - 1].pathChanged = true;
     }
   });
@@ -204,7 +206,7 @@ function compareActions(oldSection: ChoreoSection, newSection: ChoreoSection): A
   return lines;
 }
 
-function compareProps(newChoreo: Choreo, sectionMatch: Match<ChoreoSection>, propMatch: Match<BaseModel>): PropLine[] {
+function compareProps(newChoreo: Choreo, samePosition: SamePosition, sectionMatch: Match<ChoreoSection>, propMatch: Match<BaseModel>): PropLine[] {
   return Object.values(newChoreo.props)
     .filter(prop => propMatch.oldOf[prop.id])
     .map(prop => {
@@ -214,7 +216,7 @@ function compareProps(newChoreo: Choreo, sectionMatch: Match<ChoreoSection>, pro
         const oldPosition = sectionMatch.oldOf[section.id]?.formation.propPositions[oldPropId];
         const newPosition = section.formation.propPositions[prop.id];
         if (!oldPosition || !newPosition) return;
-        if (!samePoint(oldPosition, newPosition) || !sameRotation(oldPosition.rotation, newPosition.rotation)) line.moved.push(section.id);
+        if (!samePosition(oldPosition, newPosition) || !sameRotation(oldPosition.rotation, newPosition.rotation)) line.moved.push(section.id);
         if (!oldPosition.inUse && newPosition.inUse) line.nowInUse.push(section.id);
         if (oldPosition.inUse && !newPosition.inUse) line.nowUnused.push(section.id);
       });
@@ -223,14 +225,14 @@ function compareProps(newChoreo: Choreo, sectionMatch: Match<ChoreoSection>, pro
     .filter(x => x.moved.length + x.nowInUse.length + x.nowUnused.length > 0);
 }
 
-function compareObstacles(oldChoreo: Choreo, newChoreo: Choreo, obstacleMatch: Match<BaseModel>): ObstacleLine[] {
+function compareObstacles(oldChoreo: Choreo, newChoreo: Choreo, samePosition: SamePosition, obstacleMatch: Match<BaseModel>): ObstacleLine[] {
   const oldObstacles = oldChoreo.obstacles ?? {};
   return Object.values(newChoreo.obstacles ?? {})
     .filter(obstacle => obstacleMatch.oldOf[obstacle.id])
     .map(obstacle => {
       const old = oldObstacles[obstacleMatch.oldOf[obstacle.id].id];
       const fields: ObstacleLine["fields"] = [];
-      if (!samePoint(old, obstacle)) fields.push("position");
+      if (!samePosition(old, obstacle)) fields.push("position");
       if (roundToTenth(old.length) !== roundToTenth(obstacle.length) || roundToTenth(old.width) !== roundToTenth(obstacle.width)) fields.push("size");
       if (!sameRotation(old.rotation, obstacle.rotation)) fields.push("rotation");
       return { name: obstacle.name, fields };
@@ -246,6 +248,10 @@ function isReordered(oldSections: ChoreoSection[], newSections: ChoreoSection[],
 }
 
 export function buildChangeLog(oldChoreo: Choreo, newChoreo: Choreo): ChangeLog {
+  // x is compared from the stage centre, as displayed, so a resize that keeps everyone centred isn't a move.
+  const fromCentre = (position: Coordinates, geometry: StageGeometry) => ({ x: position.x - geometry.stageWidth / 2, y: position.y });
+  const samePosition: SamePosition = (oldPosition, newPosition) =>
+    samePoint(fromCentre(oldPosition, oldChoreo.stageGeometry), fromCentre(newPosition, newChoreo.stageGeometry));
   const sectionMatch = matchByIdThenName(oldChoreo.sections, newChoreo.sections);
   const newDancers = Object.values(newChoreo.dancers);
   const dancerMatch = matchByIdThenName(Object.values(oldChoreo.dancers), newDancers);
@@ -261,7 +267,7 @@ export function buildChangeLog(oldChoreo: Choreo, newChoreo: Choreo): ChangeLog 
       dancers[dancer.id] = { kind: "new" };
       return;
     }
-    const sections = compareDancer(newChoreo, sectionMatch, oldDancer.id, dancer.id);
+    const sections = compareDancer(newChoreo, samePosition, sectionMatch, oldDancer.id, dancer.id);
     if (sections.length > 0) {
       dancers[dancer.id] = { kind: "changed", sections };
     }
@@ -296,11 +302,11 @@ export function buildChangeLog(oldChoreo: Choreo, newChoreo: Choreo): ChangeLog 
       actions: matchedSections.flatMap(x => compareActions(sectionMatch.oldOf[x.id], x)),
       props: {
         ...getListChanges(propMatch, newProps),
-        lines: compareProps(newChoreo, sectionMatch, propMatch),
+        lines: compareProps(newChoreo, samePosition, sectionMatch, propMatch),
       },
       obstacles: {
         ...getListChanges(obstacleMatch, newObstacles),
-        lines: compareObstacles(oldChoreo, newChoreo, obstacleMatch),
+        lines: compareObstacles(oldChoreo, newChoreo, samePosition, obstacleMatch),
       },
     },
     dancers,

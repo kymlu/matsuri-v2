@@ -5,6 +5,7 @@ import { Obstacle } from "../../models/prop";
 import SampleStage from "../samples/SampleStageFormation.json";
 import SampleParade from "../samples/SampleParadeFormation.json";
 import { buildChangeLog, hasShownChanges } from "./changeLogHelper";
+import { changeStageGeometryAndType } from "../editor/commands/choreoCommands";
 
 // Two sections (s1, s2), two dancers (d1, d2), one prop (p1). Each test edits a fresh copy.
 function makeChoreo(): Choreo {
@@ -122,10 +123,35 @@ describe("buildChangeLog", () => {
       ]);
     });
 
-    it("reports a stage size change without moving dancers", () => {
-      const log = compare(c => { c.stageGeometry.stageWidth = 12; });
+    it("reports only the size when a resize keeps everything centred", () => {
+      const old = edit(c => {
+        c.obstacles = { o1: obstacle };
+        setPath(c, [{ x: 2, y: 1 }], "curved");
+      });
+      const log = buildChangeLog(old, changeStageGeometryAndType(old, { ...old.stageGeometry, stageWidth: 12 }, "stage"));
       expect(log.overall.stage?.map(x => x.stageWidth)).toEqual([10, 12]);
       expect(log.dancers).toEqual({});
+      expect(log.overall.props.lines).toEqual([]);
+      expect(log.overall.obstacles.lines).toEqual([]);
+    });
+
+    it("compares x from the stage centre, so the same stored x on a wider stage is a move", () => {
+      const log = compare(c => {
+        c.stageGeometry.stageWidth = 12;
+        c.obstacles = { o1: obstacle };
+      }, c => { c.obstacles = { o1: obstacle }; });
+      expect(log.dancers.d1).toMatchObject({ kind: "changed", sections: [{ sectionId: "s1" }, { sectionId: "s2" }] });
+      expect(log.overall.props.lines).toEqual([{ name: "旗", moved: ["s1", "s2"], nowInUse: [], nowUnused: [] }]);
+      expect(log.overall.obstacles.lines).toEqual([{ name: "柱", fields: ["position"] }]);
+    });
+
+    it("compares path midpoints from the stage centre", () => {
+      const log = compare(c => {
+        c.stageGeometry.stageWidth = 12;
+        c.sections.forEach(section => Object.values(section.formation.dancerPositions).forEach(p => { p.x += 1; }));
+        setPath(c, [{ x: 2, y: 1 }], "curved");
+      }, c => setPath(c, [{ x: 2, y: 1 }], "curved"));
+      expect(log.dancers.d1).toEqual({ kind: "changed", sections: [expect.objectContaining({ sectionId: "s1", pathChanged: true })] });
     });
   });
 

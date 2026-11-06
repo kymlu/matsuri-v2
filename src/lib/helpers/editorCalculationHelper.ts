@@ -370,3 +370,27 @@ export function centreToCorner(x: number, y: number, rotation: number, width: nu
 export function easeInOut(t: number): number {
   return t < 0.5 ? 2 * Math.pow(t, 2) : 1 - Math.pow(-2 * t + 2, 2) / 2;
 }
+export type AnchorRange = { minX: number, maxX: number, minY: number, maxY: number };
+
+// Where an object's anchor can be on screen, in metres from the stage's top-left corner, so all of it stays within the stage plus its margins.
+// Props and obstacles are anchored at a corner and rotate around it; dancers have no size here, so their anchor can reach the edge.
+export function getAnchorRange(geo: StageGeometry, rotation = 0, width = 0, length = 0): AnchorRange {
+  const theta = (rotation * Math.PI) / 180;
+  const corners = [[0, 0], [width, 0], [0, length], [width, length]];
+  const xs = corners.map(([x, y]) => x * Math.cos(theta) - y * Math.sin(theta));
+  const ys = corners.map(([x, y]) => x * Math.sin(theta) + y * Math.cos(theta));
+  const { leftMargin, rightMargin, topMargin, bottomMargin } = geo.margin;
+  return {
+    minX: -leftMargin - Math.min(...xs),
+    maxX: geo.stageWidth + rightMargin - Math.max(...xs),
+    minY: -topMargin - Math.min(...ys),
+    maxY: geo.stageLength + bottomMargin - Math.max(...ys),
+  };
+}
+
+// Moves an anchor the least distance into its range. An object too big for the range is centred in it.
+export function clampToAnchorRange({ x, y }: Coordinates, { minX, maxX, minY, maxY }: AnchorRange): Coordinates {
+  const clamp = (value: number, min: number, max: number) =>
+    min > max ? (min + max) / 2 : Math.min(max, Math.max(min, value));
+  return { x: clamp(x, minX, maxX), y: clamp(y, minY, maxY) };
+}
