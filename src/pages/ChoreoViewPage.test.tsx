@@ -200,18 +200,36 @@ describe("ChoreoViewPage change log", () => {
     expect(await screen.findByText("名前を選ぶと、その人の変更を確認できます。")).toBeInTheDocument();
   });
 
-  it("shows nothing but still stores the version when the old file can't be loaded", async () => {
+  it("shows nothing and tries again next time when the old file can't be loaded", async () => {
     // The real getChoreoFile logs its own failures, so the page shouldn't log again.
     const consoleError = jest.spyOn(console, "error").mockImplementation(() => {});
     setSeenVersion("c1", 1);
     mockGetChoreoFile.mockRejectedValue(new Error("404"));
+    const { unmount } = renderPage();
+    await settle();
+
+    expect(queryBanner()).not.toBeInTheDocument();
+    expect(getSeenVersion("c1")).toBe(1);
+    expect(consoleError).not.toHaveBeenCalled();
+    consoleError.mockRestore();
+
+    unmount();
+    mockGetChoreoFile.mockResolvedValue(makeChoreo(1));
+    renderPage();
+    fireEvent.click(await screen.findByText("OK"));
+    expect(await findBanner()).toBeInTheDocument();
+    expect(mockGetChoreoFile).toHaveBeenLastCalledWith("team_1", "c1", 1);
+    expect(getSeenVersion("c1")).toBe(2);
+  });
+
+  it("stores the version when the update has nothing to show", async () => {
+    setSeenVersion("c1", 1);
+    mockGetChoreoFile.mockResolvedValue(makeChoreo(1, 5));
     renderPage();
     await settle();
 
     expect(queryBanner()).not.toBeInTheDocument();
     expect(getSeenVersion("c1")).toBe(2);
-    expect(consoleError).not.toHaveBeenCalled();
-    consoleError.mockRestore();
   });
 
   it("logs and shows nothing when the old file can't be compared", async () => {
@@ -222,6 +240,7 @@ describe("ChoreoViewPage change log", () => {
     await settle();
 
     expect(queryBanner()).not.toBeInTheDocument();
+    expect(getSeenVersion("c1")).toBe(1);
     expect(consoleError).toHaveBeenCalledWith("Failed to build change log", expect.anything());
     consoleError.mockRestore();
   });

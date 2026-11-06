@@ -97,13 +97,14 @@ export default function ChoreoViewPage(props: {
     !strEquals(props.currentChoreo.id, SAMPLE_STAGE_ID) &&
     !strEquals(props.currentChoreo.id, SAMPLE_PARADE_ID);
 
+  const hasNewVersion = isChangeLogEligible && seenVersionAtOpen !== undefined && seenVersionAtOpen < props.currentChoreo.version!!;
+
+  // With a newer version, it's only stored once compared below, so a failed load is retried next time.
   useEffect(() => {
-    if (isChangeLogEligible) {
+    if (isChangeLogEligible && !hasNewVersion) {
       setSeenVersion(props.currentChoreo.id, props.currentChoreo.version!!);
     }
-  }, [isChangeLogEligible, props.currentChoreo.id, props.currentChoreo.version]);
-
-  const hasNewVersion = isChangeLogEligible && seenVersionAtOpen !== undefined && seenVersionAtOpen < props.currentChoreo.version!!;
+  }, [isChangeLogEligible, hasNewVersion, props.currentChoreo.id, props.currentChoreo.version]);
   const [changeLog, setChangeLog] = useState<ChangeLog>();
   const [isChangeLogBannerShown, setIsChangeLogBannerShown] = useState<boolean>(true);
   const [changeLogSelection, setChangeLogSelection] = useState<string>(); // undefined when closed
@@ -115,7 +116,9 @@ export default function ChoreoViewPage(props: {
       .then(oldChoreo => {
         try {
           const log = buildChangeLog(oldChoreo, props.currentChoreo);
-          if (!cancelled && hasShownChanges(log)) {
+          if (cancelled) return;
+          setSeenVersion(props.currentChoreo.id, props.currentChoreo.version!!);
+          if (hasShownChanges(log)) {
             setChangeLog(log);
           }
         } catch (e) {
