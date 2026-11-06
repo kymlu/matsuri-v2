@@ -1,4 +1,5 @@
 import { Choreo, StageGeometry } from "../../../models/choreo";
+import { getAnchorRange } from "../../helpers/editorCalculationHelper";
 import { changeStageGeometryAndType, getObjectsOutsideStage } from "./choreoCommands";
 
 // A 10m × 8m stage with 1m margins: anchors can be at x -1 to 11 and y -1 to 9.
@@ -133,6 +134,14 @@ describe("changeStageGeometryAndType with props and obstacles", () => {
     choreo.obstacles!.o1.width = 14;
     // The stage plus margins is 12m wide, so it sticks out 1m on each side.
     expect(changeStageGeometryAndType(choreo, geometry({}), "stage").obstacles?.o1.x).toBe(-2);
+  });
+
+  it("leaves an object a rounding error past the edge where it is", () => {
+    // Dragging saves positions from canvas pixels, so a rotated prop at the edge can be a hair past it.
+    const { maxX } = getAnchorRange(geometry({}), 45, 1, 1);
+    const choreo = withProp(maxX + 1e-12, 2, 45);
+    expect(getObjectsOutsideStage(choreo, geometry({})).propIds).toEqual([]);
+    expect(prop(changeStageGeometryAndType(choreo, geometry({}), "stage")).x).toBe(maxX + 1e-12);
   });
 
   it("counts an object that only sticks out past the edge", () => {

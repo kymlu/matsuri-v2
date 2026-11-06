@@ -388,9 +388,14 @@ export function getAnchorRange(geo: StageGeometry, rotation = 0, width = 0, leng
   };
 }
 
+// Positions saved from canvas pixels can be a rounding error past the edge, so those count as inside.
+const ANCHOR_TOLERANCE = 1e-6;
+
 // Moves an anchor the least distance into its range. An object too big for the range is centred in it.
 export function clampToAnchorRange({ x, y }: Coordinates, { minX, maxX, minY, maxY }: AnchorRange): Coordinates {
-  const clamp = (value: number, min: number, max: number) =>
-    min > max ? (min + max) / 2 : Math.min(max, Math.max(min, value));
+  const clamp = (value: number, min: number, max: number) => {
+    const [low, high] = min > max ? [(min + max) / 2, (min + max) / 2] : [min, max];
+    return value < low - ANCHOR_TOLERANCE ? low : value > high + ANCHOR_TOLERANCE ? high : value;
+  };
   return { x: clamp(x, minX, maxX), y: clamp(y, minY, maxY) };
 }
