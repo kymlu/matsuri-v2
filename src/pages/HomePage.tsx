@@ -419,15 +419,18 @@ export default function HomePage({
     });
   }, [getChoreo, duplicateChoreo]);
 
+  // Returns false if the version couldn't be loaded, so the history dialog can say so.
   const handleViewPastVersion = useCallback(async (choreo: ChoreoWithStatus, version: number) => {
     if (!team?.id) {
-      return;
+      return false;
     }
     try {
       const pastChoreo = await getChoreoFile(team.id, choreo.id, version);
       goToViewPage(pastChoreo, "upToDate", serverChoreoDetails[choreo.id], version);
+      return true;
     } catch (e: any) {
       console.error(`Failed to load version ${version} of choreo with id`, choreo.id);
+      return false;
     }
   }, [team, serverChoreoDetails, goToViewPage]);
 
@@ -1006,7 +1009,7 @@ type EventSectionProps = {
   editEventName: (eventInfo: string, choreos: ChoreoWithStatus[]) => void,
   onSelectChoreo: (id: string, status: ChoreoStatus) => void,
   duplicateChoreo: (choreo: ChoreoWithStatus) => void,
-  viewPastVersion: (choreo: ChoreoWithStatus, version: number) => void,
+  viewPastVersion: (choreo: ChoreoWithStatus, version: number) => Promise<boolean>,
   editChoreoName: (choreo: ChoreoWithStatus) => void,
   deleteChoreo: (choreo: ChoreoWithStatus) => void,
   revertChoreo: (choreo: ChoreoWithStatus) => void,
@@ -1278,11 +1281,12 @@ const EventSection = memo(function EventSection({
           isEditing={selectedChoreo?.isDirty ?? false}
           isLoggedIn={isLoggedIn}
           onClose={() => setHistoryDialogOpen(false)}
-          onSelectVersion={(version) => {
-            setHistoryDialogOpen(false);
-            if (selectedChoreo) {
-              viewPastVersion(selectedChoreo, version);
+          onSelectVersion={async (version) => {
+            const isLoaded = !!selectedChoreo && await viewPastVersion(selectedChoreo, version);
+            if (isLoaded) {
+              setHistoryDialogOpen(false);
             }
+            return isLoaded;
           }}
         />
       </Dialog.Root>
