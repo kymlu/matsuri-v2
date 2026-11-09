@@ -4,7 +4,7 @@ import Konva from "konva";
 import { Shape, ShapeConfig } from "konva/lib/Shape";
 import { Stage } from "konva/lib/Stage";
 import { METER_PX } from "../../../lib/consts/consts";
-import { clampToAnchorRange, cornerToCentre, getAnchorRange, easeInOut, getAnimationKey, pxToStageMeters, snapCoordsToGrid, stageMetersToPx } from "../../../lib/helpers/editorCalculationHelper";
+import { clampToAnchorRange, cornerToCentre, easeInOut, getAnchorRange, getAnimationKey, pxToStageMeters, snapCoordsToGrid, stageMetersToPx } from "../../../lib/helpers/editorCalculationHelper";
 import { StageGeometry } from "../../../models/choreo";
 import { Coordinates } from "../../../models/base";
 import { PathSvgCacheBySectionId } from "../../../models/choreoSection";
