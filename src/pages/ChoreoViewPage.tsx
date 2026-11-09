@@ -169,6 +169,8 @@ export default function ChoreoViewPage(props: {
   const toggleShowPath = useCallback(() => setShowPaths(prev => !prev), []);
 
   // ---- ViewerSidebar handlers ----
+  // Notes are saved per choreo, not per version, so they're hidden on past versions.
+  const isPersonalNoteShown = props.pastVersion === undefined;
   const onPersonalNoteChange = useCallback((newNote: string) => {
     setPersonalSectionNote(props.currentChoreo.id, currentSection.id, newNote);
   }, [props.currentChoreo.id, currentSection.id]);
@@ -241,11 +243,11 @@ export default function ChoreoViewPage(props: {
         <ViewerSidebar
           actions={currentSection.formation.dancerActions}
           note={currentSection.note}
-          personalNote={personalNote}
+          personalNote={isPersonalNoteShown ? personalNote : undefined}
           sectionId={currentSection.id}
           sections={props.currentChoreo.sections}
           onChangeSection={changeSection}
-          onPersonalNoteChange={onPersonalNoteChange}
+          onPersonalNoteChange={isPersonalNoteShown ? onPersonalNoteChange : undefined}
           dancer={props.currentChoreo.dancers[selectedIds.dancers[0]]}
           position={currentSection.formation.dancerPositions[selectedIds.dancers[0]]}
           nextPosition={nextSection?.formation.dancerPositions[selectedIds.dancers[0]]}
@@ -342,6 +344,7 @@ export default function ChoreoViewPage(props: {
             selectedId={selectedIds.dancers.length === 1 ? selectedIds.dancers[0] : ""}
             onClose={closeExportDialog}
             showPaths={showPaths}
+            canIncludePersonalNotes={isPersonalNoteShown}
           />
         }
       </Dialog.Root>

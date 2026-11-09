@@ -18,7 +18,7 @@ type ViewerSidebarMode = "detail" | "list";
 type ViewerSidebarProps = {
   note?: string;
   personalNote?: string;
-  onPersonalNoteChange: (newNote: string) => void;
+  onPersonalNoteChange?: (newNote: string) => void; // personal notes are hidden without it
   sectionId: string;
   sections: ChoreoSection[];
   onChangeSection: (section: ChoreoSection) => void;
@@ -181,37 +181,42 @@ function ViewerSidebar({
               {note}
             </p>
           }
-          <Divider/>
-          <div className="flex items-center gap-1 mb-1">
-            <Icon src="lock" size="xs" colour="grey"/>
-            <span className="text-sm text-muted">自分用メモ</span>
-            <div className="flex items-center gap-1 ml-auto text-xs text-faint">
-              <span>この端末にのみ保存。</span>
-              <button
-                className="flex items-center"
-                aria-label="詳細"
-                aria-expanded={isPersonalNoteInfoShown}
-                onClick={() => setIsPersonalNoteInfoShown(prev => !prev)}>
-                <Icon src="info" size="2xs" colour={isPersonalNoteInfoShown ? "primary" : "grey"}/>
-              </button>
-            </div>
-          </div>
-          <div className="pb-2 text-xs text-faint">
-            {
-              isPersonalNoteInfoShown &&
-              <div>アプリ内ブラウザやシークレットモードでは消える場合があります。</div>
-            }
-          </div>
-          <div className="pb-2">
-            <LongTextInput
-              key={sectionId}
-              name="自分用メモ"
-              defaultValue={personalNote ?? ""}
-              onContentChange={onPersonalNoteChange}
-              placeholder="自分用メモを追加..."
-              maxRows={2}
-              compact/>
-          </div>
+          {
+            onPersonalNoteChange &&
+            <>
+              <Divider/>
+              <div className="flex items-center gap-1 mb-1">
+                <Icon src="lock" size="xs" colour="grey"/>
+                <span className="text-sm text-muted">自分用メモ</span>
+                <div className="flex items-center gap-1 ml-auto text-xs text-faint">
+                  <span>この端末にのみ保存。</span>
+                  <button
+                    className="flex items-center"
+                    aria-label="詳細"
+                    aria-expanded={isPersonalNoteInfoShown}
+                    onClick={() => setIsPersonalNoteInfoShown(prev => !prev)}>
+                    <Icon src="info" size="2xs" colour={isPersonalNoteInfoShown ? "primary" : "grey"}/>
+                  </button>
+                </div>
+              </div>
+              <div className="pb-2 text-xs text-faint">
+                {
+                  isPersonalNoteInfoShown &&
+                  <div>アプリ内ブラウザやシークレットモードでは消える場合があります。</div>
+                }
+              </div>
+              <div className="pb-2">
+                <LongTextInput
+                  key={sectionId}
+                  name="自分用メモ"
+                  defaultValue={personalNote ?? ""}
+                  onContentChange={onPersonalNoteChange}
+                  placeholder="自分用メモを追加..."
+                  maxRows={2}
+                  compact/>
+              </div>
+            </>
+          }
         </>
       }
     </>
