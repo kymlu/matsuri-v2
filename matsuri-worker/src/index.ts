@@ -771,11 +771,12 @@ export default {
 		if (url.pathname === "/api/choreos/get-password" && request.method === "POST") {
 			try {
 				const data = await request.json() as any;
+				// The session's team, not the body's: the session is only checked against the query's team_id.
 				const password = await env.DB.prepare(`
 					SELECT c.password
 					FROM choreos c
 					WHERE c.id = ? AND c.team_id = ?
-				`).bind(data.choreo_id as string, data.team_id as string).first<{password: string | null}>();
+				`).bind(data.choreo_id as string, session.team_id).first<{password: string | null}>();
 				return getSuccessResponse(password);
 			} catch (e) {
 				return getErrorResponse(`Internal server error: ${(e as Error).message}`, 500);
@@ -843,6 +844,14 @@ export default {
 					return getErrorResponse("file, choreo_id, and name are required", 400);
 				}
 
+				// Choreo IDs and file names aren't per team, so check an existing choreo is this team's before writing anything.
+				const owner = await env.DB.prepare(
+					"SELECT team_id FROM choreos WHERE id = ?"
+				).bind(choreoId).first<{ team_id: string | null }>();
+				if (owner && owner.team_id !== session.team_id) {
+					return getErrorResponse("Choreo not found", 404);
+				}
+
 				// get next version number
 				let version = 1;
 				if (!isNew) {
@@ -882,7 +891,8 @@ export default {
 						event_name = excluded.event_name,
 						event_start_date = excluded.event_start_date,
 						event_end_date = excluded.event_end_date,
-						password = excluded.password`
+						password = excluded.password
+					WHERE choreos.team_id = excluded.team_id`
 				).bind(choreoId, name, eventName, eventStartDate, eventEndDate, session.team_id, password ?? null).run()
 				.catch(e => { throw new Error(`Failed to upsert choreo info into db: ${e}`) });
 

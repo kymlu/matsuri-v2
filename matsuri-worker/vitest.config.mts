@@ -5,6 +5,8 @@ export default defineWorkersConfig({
 		poolOptions: {
 			workers: {
 				wrangler: { configPath: "./wrangler.jsonc" },
+				// The worker creates its email client on every request, so it needs a key even in tests.
+				miniflare: { bindings: { RESEND_API_KEY: "re_test" } },
 			},
 		},
 	},
