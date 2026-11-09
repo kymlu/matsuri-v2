@@ -116,6 +116,11 @@ describe("POST /api/roster/names/add", () => {
 		expect(result.roster.names.every(n => n.categoryIds.length === 2)).toBe(true);
 	});
 
+	it("keeps quotes and backslashes intact through the JSON insert", async () => {
+		const result = await addNames([`O'Neil`, `"あ"`, `a\\b`]);
+		expect(new Set(result.roster.names.map(n => n.name))).toEqual(new Set([`O'Neil`, `"あ"`, `a\\b`]));
+	});
+
 	it("rejects more than 200 lines", async () => {
 		const response = await call("/names/add", { names: Array.from({ length: 201 }, (_, i) => `n${i}`), category_ids: [] });
 		expect(response.status).toBe(400);
@@ -175,6 +180,11 @@ describe("POST /api/roster/names/update", () => {
 	it("can't touch another team's name", async () => {
 		expect((await call("/names/update", { id: "name_b", name: "x", category_ids: [] })).status).toBe(404);
 	});
+
+	it("rejects another team's category", async () => {
+		const { roster } = await addNames(["さくら"]);
+		expect((await call("/names/update", { id: roster.names[0].id, name: "さくら", category_ids: ["cat_b"] })).status).toBe(400);
+	});
 });
 
 describe("POST /api/roster/names/remove", () => {
@@ -224,6 +234,32 @@ describe("POST /api/roster/categories/save", () => {
 		const { categories: [seiki, ippan] } = await saveCategories([{ name: "正規" }, { name: "一般" }]);
 		const roster = await saveCategories([{ id: seiki.id, name: "一般" }], [ippan.id]);
 		expect(roster.categories).toEqual([{ id: seiki.id, name: "一般" }]);
+	});
+
+	it("renames, reorders and deletes many categories in one save", async () => {
+		const first = await saveCategories(Array.from({ length: 60 }, (_, i) => ({ name: `c${i}` })));
+		const kept = first.categories.slice(0, 40).reverse();
+		const roster = await saveCategories(
+			[...kept.map(c => ({ id: c.id, name: `r${c.name}` })), { name: "new" }],
+			first.categories.slice(40).map(c => c.id),
+		);
+		expect(roster.categories.map(c => c.name)).toEqual([...kept.map(c => `r${c.name}`), "new"]);
+		expect(roster.categories.slice(0, 40).map(c => c.id)).toEqual(kept.map(c => c.id));
+	});
+
+	it("saves an empty list unchanged", async () => {
+		expect(await saveCategories([])).toEqual({ categories: [], names: [] });
+	});
+
+	it("keeps quotes and backslashes intact when renaming", async () => {
+		const { categories: [a] } = await saveCategories([{ name: "a" }]);
+		const roster = await saveCategories([{ id: a.id, name: `O'"\\` }, { name: `"new"` }]);
+		expect(roster.categories.map(c => c.name)).toEqual([`O'"\\`, `"new"`]);
+	});
+
+	it("rejects more than 100 categories", async () => {
+		const response = await call("/categories/save", { categories: Array.from({ length: 101 }, (_, i) => ({ name: `c${i}` })), deleted_ids: [] });
+		expect(response.status).toBe(400);
 	});
 
 	it("rejects duplicates, blanks and long names", async () => {

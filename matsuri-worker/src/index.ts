@@ -77,21 +77,19 @@ const isStringArray = (value: unknown): value is string[] =>
 
 const isUniqueConstraintError = (e: unknown) => String((e as Error)?.message ?? e).includes("UNIQUE constraint failed");
 
-// Multi-row INSERTs kept under D1's limit of 100 bound parameters per statement,
-// so a large paste is a handful of statements rather than one per row.
-const prepareInsertRows = (db: D1Database, insertInto: string, rows: unknown[][]): D1PreparedStatement[] => {
-	if (rows.length === 0) {
-		return [];
-	}
-	const rowsPerStatement = Math.floor(100 / rows[0].length);
-	const statements: D1PreparedStatement[] = [];
-	for (let i = 0; i < rows.length; i += rowsPerStatement) {
-		const chunk = rows.slice(i, i + rowsPerStatement);
-		const placeholders = chunk.map(row => `(${row.map(() => "?").join(", ")})`).join(", ");
-		statements.push(db.prepare(`${insertInto} VALUES ${placeholders}`).bind(...chunk.flat()));
-	}
-	return statements;
-};
+// The columns of each row in a JSON array of arrays, for use with json_each.
+const jsonColumns = (count: number) =>
+	Array.from({ length: count }, (_, i) => `json_extract(value, '$[${i}]')`).join(", ");
+
+// One INSERT for any number of rows. The rows go in as a single JSON parameter, which stays clear of
+// D1's 100 bound parameters per query and keeps a large paste to one statement.
+const prepareInsertRows = (db: D1Database, insertInto: string, rows: unknown[][]): D1PreparedStatement[] =>
+	rows.length === 0
+		? []
+		: [db.prepare(`${insertInto} SELECT ${jsonColumns(rows[0].length)} FROM json_each(?)`).bind(JSON.stringify(rows))];
+
+// For WHERE id IN (...) with any number of ids, as a single bound parameter.
+const IDS_IN_JSON = "(SELECT value FROM json_each(?))";
 
 const getRoster = async (db: D1Database, teamId: string): Promise<RosterResponse> => {
 	const [categories, names, links] = await Promise.all([
@@ -819,7 +817,7 @@ export default {
 						"SELECT id FROM roster_names WHERE team_id = ? AND deleted = 0 AND name_key = ? AND id != ?"
 					).bind(rosterTeamId, key, id).first();
 					if (conflict) {
-						return getErrorResponse("Name already in the roster.", 409);
+						return getErrorResponse("Already in the roster.", 409);
 					}
 
 					await env.DB.batch([
@@ -883,37 +881,46 @@ export default {
 						return getErrorResponse("Category not found.", 404);
 					}
 
-					await env.DB.batch([
+					const deletedJson = JSON.stringify([...deleted]);
+					const keptJson = JSON.stringify(keptIds);
+					const updates = items.flatMap((c, i) => c.id ? [[c.id, c.name, c.key, i]] : []);
+					const inserts = items.flatMap((c, i) => c.id ? [] : [[crypto.randomUUID(), rosterTeamId, c.name, c.key, i]]);
+
+					// At most five statements however many categories there are.
+					const statements = [
 						// Deletions first, so a deleted category's name can be reused in the same save.
-						...[...deleted].flatMap(id => [
+						...(deleted.size === 0 ? [] : [
 							env.DB.prepare(`
 								UPDATE roster_categories SET deleted = 1, updated_at = datetime('now')
-								WHERE id = ?
-							`).bind(id),
-							env.DB.prepare("DELETE FROM roster_name_categories WHERE category_id = ?").bind(id),
+								WHERE id IN ${IDS_IN_JSON}
+							`).bind(deletedJson),
+							env.DB.prepare(`DELETE FROM roster_name_categories WHERE category_id IN ${IDS_IN_JSON}`).bind(deletedJson),
 						]),
-						// Park every kept category on a unique placeholder key, so swapping two names
-						// (正規 ↔ スポット) doesn't hit the unique index halfway through.
-						...keptIds.map(id => env.DB.prepare(
-							"UPDATE roster_categories SET name_key = id WHERE id = ?"
-						).bind(id)),
-						...items.map((c, i) => c.id
-							? env.DB.prepare(`
-								UPDATE roster_categories SET name = ?, name_key = ?, sort_order = ?, updated_at = datetime('now')
-								WHERE id = ?
-							`).bind(c.name, c.key, i, c.id)
-							: env.DB.prepare(`
-								INSERT INTO roster_categories (id, team_id, name, name_key, sort_order)
-								VALUES (?, ?, ?, ?, ?)
-							`).bind(crypto.randomUUID(), rosterTeamId, c.name, c.key, i)),
-					]);
+						...(updates.length === 0 ? [] : [
+							// Park every kept category on a unique placeholder key first, so swapping two names
+							// (正規 ↔ スポット) doesn't hit the unique index halfway through.
+							env.DB.prepare(`UPDATE roster_categories SET name_key = id WHERE id IN ${IDS_IN_JSON}`).bind(keptJson),
+							env.DB.prepare(`
+								UPDATE roster_categories
+								SET name = json_extract(j.value, '$[1]'), name_key = json_extract(j.value, '$[2]'),
+									sort_order = json_extract(j.value, '$[3]'), updated_at = datetime('now')
+								FROM json_each(?) AS j
+								WHERE roster_categories.id = json_extract(j.value, '$[0]')
+							`).bind(JSON.stringify(updates)),
+						]),
+						...prepareInsertRows(env.DB, "INSERT INTO roster_categories (id, team_id, name, name_key, sort_order)", inserts),
+					];
+					// D1 rejects an empty batch, e.g. saving a team's empty list unchanged.
+					if (statements.length > 0) {
+						await env.DB.batch(statements);
+					}
 
 					return getSuccessResponse(await getRoster(env.DB, rosterTeamId));
 				}
 			} catch (e) {
 				// Another editor saved the same name between our check and our write.
 				if (isUniqueConstraintError(e)) {
-					return getErrorResponse("Name already in the roster.", 409);
+					return getErrorResponse("Already in the roster.", 409);
 				}
 				return getErrorResponse(`Internal server error: ${(e as Error).message}`, 500);
 			}
