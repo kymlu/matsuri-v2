@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import classNames from "classnames";
 import { Roster } from "../../models/roster";
 import { addRosterNames } from "../../lib/helpers/apiHelper";
@@ -24,6 +24,7 @@ export default function RosterAddBar({ teamId, roster, filter, onRosterChange }:
   const [lastResult, setLastResult] = useState<{ message: string, isError: boolean }>();
   // The roster this bar last received from the server, to tell its own changes from edits elsewhere on the page.
   const ownRoster = useRef<Roster | undefined>(undefined);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Filtering to a category pre-selects it here; after that the two are independent.
   useEffect(() => {
@@ -45,6 +46,15 @@ export default function RosterAddBar({ teamId, roster, filter, onRosterChange }:
       setLastResult(undefined);
     }
   }, [roster]);
+
+  // Grow with the content, including long lines that wrap; max-h caps it at about four lines, then it scrolls.
+  useLayoutEffect(() => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = "auto";
+      textarea.style.height = `${textarea.scrollHeight + textarea.offsetHeight - textarea.clientHeight}px`;
+    }
+  }, [text]);
 
   const state = useMemo(() => getAddBarState(text, categoryIds, roster), [text, categoryIds, roster]);
   const lineCount = text.split("\n").length;
@@ -85,15 +95,18 @@ export default function RosterAddBar({ teamId, roster, filter, onRosterChange }:
       <div className="relative">
         {/* Enter adds a new line rather than submitting: the IME also uses Enter to confirm. */}
         <textarea
+          ref={textareaRef}
           aria-label="名前を追加"
           value={text}
-          rows={Math.min(4, Math.max(1, lineCount))}
+          rows={1}
+          // Read-only while saving: the box is reset from what was sent, so anything typed meanwhile would be lost.
+          readOnly={isSaving}
           placeholder="名前を追加（1行に1名）"
           onChange={(e) => {
             setText(e.target.value);
             setLastResult(undefined);
           }}
-          className={classNames("block w-full pl-2 py-2 border rounded-md resize-none bg-surface text-body border-line focus:border-primary focus:outline-none placeholder:text-faint",
+          className={classNames("block w-full max-h-[7.125rem] pl-2 py-2 border rounded-md resize-none bg-surface text-body border-line focus:border-primary focus:outline-none placeholder:text-faint",
             lineCount === 1 && text !== "" ? "pr-14" : "pr-2")}/>
         {
           lineCount === 1 && text !== "" &&
