@@ -4,7 +4,7 @@ import Konva from "konva";
 import { Shape, ShapeConfig } from "konva/lib/Shape";
 import { Stage } from "konva/lib/Stage";
 import { METER_PX } from "../../../lib/consts/consts";
-import { cornerToCentre, easeInOut, getAnimationKey, pxToStageMeters, snapCoordsToGrid, stageMetersToPx } from "../../../lib/helpers/editorCalculationHelper";
+import { clampToAnchorRange, cornerToCentre, easeInOut, getAnchorRange, getAnimationKey, pxToStageMeters, snapCoordsToGrid, stageMetersToPx } from "../../../lib/helpers/editorCalculationHelper";
 import { StageGeometry } from "../../../models/choreo";
 import { Coordinates } from "../../../models/base";
 import { PathSvgCacheBySectionId } from "../../../models/choreoSection";
@@ -148,6 +148,14 @@ const BaseGridObject = memo(function BaseGridObject({
 
   const snapSize = METER_PX/2;
 
+  // Keeps all of the object within the stage plus its margins, in canvas pixels.
+  const clampToStage = (px: Coordinates, rotation: number): Coordinates => {
+    const { leftMargin, topMargin } = stageGeometry.margin;
+    const range = getAnchorRange(stageGeometry, rotation, width, height);
+    const clamped = clampToAnchorRange({ x: px.x / METER_PX - leftMargin, y: px.y / METER_PX - topMargin }, range);
+    return { x: (clamped.x + leftMargin) * METER_PX, y: (clamped.y + topMargin) * METER_PX };
+  };
+
   const dragStartRef = useRef<{ x: number; y: number } | null>(null);
   const isDraggingRef = useRef(false);
   
@@ -184,8 +192,7 @@ const BaseGridObject = memo(function BaseGridObject({
           isDraggingRef.current = false;
         }
 
-        e.target.x(Math.min(METER_PX * (stageGeometry.stageWidth + stageGeometry.margin.leftMargin + stageGeometry.margin.rightMargin), Math.max(e.target.x(), 0)));
-        e.target.y(Math.min(METER_PX * (stageGeometry.stageLength + stageGeometry.margin.topMargin + stageGeometry.margin.bottomMargin), Math.max(e.target.y(), 0)));
+        e.target.position(clampToStage(e.target.position(), e.target.rotation()));
 
         const dx = e.target.x() - dragStartRef.current.x;
         const dy = e.target.y() - dragStartRef.current.y;
@@ -206,7 +213,7 @@ const BaseGridObject = memo(function BaseGridObject({
           let position: Coordinates = {x: node.x(), y: node.y()};
 
           if (snapToGrid) {
-            position = snapCoordsToGrid({x: node.x(), y: node.y()}, snapSize)
+            position = clampToStage(snapCoordsToGrid({x: node.x(), y: node.y()}, snapSize), node.rotation());
           }
 
           node.to({

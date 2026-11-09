@@ -38,7 +38,6 @@ type HeaderProps = {
   toggleShowPath?: () => void;
   showPath?: boolean,
   isShowPathBtnDisabled?: boolean,
-  showDancerWarningMessage?: () => void;
   dancerCount: number,
   propCount: number,
   stageWidth: number,
@@ -63,7 +62,6 @@ function Header({
   appSettings,
   goToEdit, goToView,
   toggleShowPath, showPath, isShowPathBtnDisabled,
-  showDancerWarningMessage,
   dancerCount, propCount, stageLength, stageWidth, version, choreoStatus,
   showPublish, publish,
 }: HeaderProps) {
@@ -85,25 +83,19 @@ function Header({
         <p className="font-bold">{currentChoreo.name}</p>
       </div>
       <div className="flex justify-end gap-2">
-        <IconButton
-          colour="primary"
-          src={goToEdit ? "edit" : "visibility"}
-          noBorder
-          onClick={() => {
-            if (goToEdit) {
-              goToEdit();
-            } else if (goToView) {
-              goToView();
-            } }}
-          />
         {
-          showDancerWarningMessage &&
+          (goToEdit || goToView) &&
           <IconButton
             colour="primary"
-            src="personAlert"
+            src={goToEdit ? "edit" : "visibility"}
             noBorder
-            onClick={showDancerWarningMessage}
-          />
+            onClick={() => {
+              if (goToEdit) {
+                goToEdit();
+              } else if (goToView) {
+                goToView();
+              } }}
+            />
         }
         {
           toggleShowPath &&

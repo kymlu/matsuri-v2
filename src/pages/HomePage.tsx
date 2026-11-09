@@ -27,7 +27,6 @@ import { colorPalette } from "../lib/consts/colors"
 import EditChoreoInfoDialog from "../components/dialogs/EditChoreoInfoDialog"
 import SyncChoreoDialog from "../components/dialogs/SyncChoreoDialog"
 import ExpandableSection from "../components/basic/ExpandableSection"
-import AbsentDancersWarningDialog from "../components/dialogs/AbsentDancersWarningDialog"
 import BeginnersDialog from "../components/dialogs/BeginnersDialog"
 import EditEventInfoDialog from "../components/dialogs/EditEventInfoDialog"
 import SiteInfoDialog from "../components/dialogs/SiteInfoDialog"
@@ -50,11 +49,9 @@ type HomePageProps = {
   goToAdminPage: () => void,
   goToHelpPage: () => void,
   goToNewChoreoPage: (eventDetails?: EventDetails) => void,
-  goToViewPage: (choreo: Choreo, status: ChoreoStatus, serverChoreo?: BasicChoreoDetails) => void,
+  goToViewPage: (choreo: Choreo, status: ChoreoStatus, serverChoreo?: BasicChoreoDetails, pastVersion?: number) => void,
   savedDancerName: string | null,
   setSavedDancerName: (newName: string) => void,
-  dancerNamesByEvent: Record<string, Record<string, string[]>>,
-  setDancerNamesByEvent: (groupedNames: Record<string, Record<string, string[]>>) => void,
   isLoggedIn: boolean,
   setIsLoggedIn: (value: boolean) => void,
   isAdmin: boolean,
@@ -90,7 +87,6 @@ export default function HomePage({
   buildInfo, eventList, setEventList,
   goToAdminPage, goToHelpPage, goToNewChoreoPage, goToViewPage,
   savedDancerName, setSavedDancerName,
-  dancerNamesByEvent, setDancerNamesByEvent,
   isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin, isViewer, setIsViewer,
   setCurrentTeamMemberId, team, showNoTeamDialog, setShowNoTeamDialog, setupToken
 }: HomePageProps) {
@@ -197,19 +193,6 @@ export default function HomePage({
           }
         }
       });
-      // setDancerNamesByEvent(
-      //   choreos.reduce((acc, item) => {
-      //     const names = Object.values(item.dancers).map(d => d.name);
-      //     const stringifiedEvent = stringifyEvent(item);
-      //     return {
-      //       ...acc,
-      //       [stringifiedEvent]: {
-      //         ...(acc[stringifiedEvent] ?? {}),
-      //         [item.id]: names,
-      //       },
-      //     };
-      //   }, {} as Record<string, Record<string, string[]>>)
-      // );
       setSavedChoreos(choreos);
       setServerChoreoDetails(indexedServer);
       setLocalChoreos(indexedLocal);
@@ -419,6 +402,21 @@ export default function HomePage({
     });
   }, [getChoreo, duplicateChoreo]);
 
+  // Returns false if the version couldn't be loaded, so the history dialog can say so.
+  const handleViewPastVersion = useCallback(async (choreo: ChoreoWithStatus, version: number) => {
+    if (!team?.id) {
+      return false;
+    }
+    try {
+      const pastChoreo = await getChoreoFile(team.id, choreo.id, version);
+      goToViewPage(pastChoreo, "upToDate", serverChoreoDetails[choreo.id], version);
+      return true;
+    } catch (e: any) {
+      console.error(`Failed to load version ${version} of choreo with id`, choreo.id);
+      return false;
+    }
+  }, [team, serverChoreoDetails, goToViewPage]);
+
   const handleEditChoreoName = useCallback((choreo: ChoreoWithStatus) => {
     setEditingChoreo(choreo);
     setEditChoreoInfoDialogOpen(true);
@@ -624,11 +622,11 @@ export default function HomePage({
                       <EventSection
                         key={eventDetails}
                         eventInfo={eventDetails}
-                        dancerNamesByFormation={dancerNamesByEvent[eventDetails]}
                         choreos={choreos}
                         searchTerm={searchTerm}
                         onSelectChoreo={handleSelectChoreo}
                         duplicateChoreo={handleDuplicateChoreo}
+                        viewPastVersion={handleViewPastVersion}
                         editChoreoName={handleEditChoreoName}
                         deleteChoreo={handleDeleteChoreo}
                         revertChoreo={handleRevertChoreo}
@@ -988,11 +986,11 @@ type EventSectionProps = {
   eventInfo: string,
   choreos: ChoreoWithStatus[],
   searchTerm: string,
-  dancerNamesByFormation?: Record<string, string[]>,
   addEvent: (eventInfo: string) => void,
   editEventName: (eventInfo: string, choreos: ChoreoWithStatus[]) => void,
   onSelectChoreo: (id: string, status: ChoreoStatus) => void,
   duplicateChoreo: (choreo: ChoreoWithStatus) => void,
+  viewPastVersion: (choreo: ChoreoWithStatus, version: number) => Promise<boolean>,
   editChoreoName: (choreo: ChoreoWithStatus) => void,
   deleteChoreo: (choreo: ChoreoWithStatus) => void,
   revertChoreo: (choreo: ChoreoWithStatus) => void,
@@ -1006,15 +1004,13 @@ type EventSectionProps = {
 }
 
 const EventSection = memo(function EventSection({
-  eventInfo, dancerNamesByFormation, choreos, searchTerm, onSelectChoreo, addEvent, editEventName,
-  duplicateChoreo, editChoreoName, deleteChoreo, revertChoreo, syncChoreo,
+  eventInfo, choreos, searchTerm, onSelectChoreo, addEvent, editEventName,
+  duplicateChoreo, viewPastVersion, editChoreoName, deleteChoreo, revertChoreo, syncChoreo,
   onPdfExport, onExport, onExportEvent, isExpandedByDefault, isLoggedIn, teamId
 }: EventSectionProps) {
   const [optionsDialogOpen, setOptionsDialogOpen] = React.useState(false);
   const [selectedChoreo, setSelectedChoreo] = useState<ChoreoWithStatus | undefined>();
-  const [postPasswordAction, setPostPasswordAction] = useState<"none" | "open" | "rename" | "duplicate" | "export" | "pdf">("none");
-  const dancerWarningDialog = Dialog.createHandle<Choreo>();
-  const [dancerWarningDialogOpen, setDancerWarningDialogOpen] = React.useState(false);
+  const [postPasswordAction, setPostPasswordAction] = useState<"none" | "open" | "rename" | "duplicate" | "export" | "pdf" | "history">("none");
   const optionsDialog = Dialog.createHandle<ChoreoWithStatus>();
   const choreoPasswordEntryDialog = Dialog.createHandle<Choreo>();
   const historyDialog = Dialog.createHandle<Choreo>();
@@ -1022,25 +1018,6 @@ const EventSection = memo(function EventSection({
   const [historyDialogOpen, setHistoryDialogOpen] = React.useState(false);
 
   const event = JSON.parse(eventInfo) as EventDetails;
-
-  const missingNames = useMemo(() => {
-    if (dancerNamesByFormation) {
-      const allNames = new Set(Object.values(dancerNamesByFormation ?? {}).flat());
-      const returnVal = Object.entries(dancerNamesByFormation).reduce((acc, [id, names]) => {
-        return {
-          ...acc,
-          [id]: allNames.difference(new Set(names)),
-        }
-      }, {} as Record<string, Set<string>>);
-      return returnVal;
-    } else {
-      return {}
-    }
-  }, [dancerNamesByFormation]);
-
-  const handleDancerWarningDialogOpenChange = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
-    setDancerWarningDialogOpen(isOpen);
-  };
 
   const handleOpenOptionsDialog = useCallback((choreo: ChoreoWithStatus) => {
     setSelectedChoreo(choreo);
@@ -1158,7 +1135,12 @@ const EventSection = memo(function EventSection({
                     label="公開履歴"
                     asDiv
                     onClick={() => {
-                      setHistoryDialogOpen(true);
+                      if (!isLoggedIn && selectedChoreo.hasPassword) {
+                        setPostPasswordAction("history");
+                        setChoreoPasswordEntryDialogOpen(true);
+                      } else {
+                        setHistoryDialogOpen(true);
+                      }
                     }}
                     full />
                 </Dialog.Close>
@@ -1239,16 +1221,6 @@ const EventSection = memo(function EventSection({
           </CustomDialog>
         }
       </Dialog.Root>
-      {/* <Dialog.Root
-        open={dancerWarningDialogOpen}
-        onOpenChange={handleDancerWarningDialogOpenChange}
-        handle={dancerWarningDialog}>
-        <AbsentDancersWarningDialog
-          choreoName={selectedChoreo?.name}
-          eventName={selectedChoreo?.event}
-          dancerNames={selectedChoreo ? Array.from(missingNames[selectedChoreo.id]): []}
-        />
-      </Dialog.Root> */}
       <Dialog.Root
         open={historyDialogOpen}
         onOpenChange={setHistoryDialogOpen}
@@ -1259,6 +1231,13 @@ const EventSection = memo(function EventSection({
           isEditing={selectedChoreo?.isDirty ?? false}
           isLoggedIn={isLoggedIn}
           onClose={() => setHistoryDialogOpen(false)}
+          onSelectVersion={async (version) => {
+            const isLoaded = !!selectedChoreo && await viewPastVersion(selectedChoreo, version);
+            if (isLoaded) {
+              setHistoryDialogOpen(false);
+            }
+            return isLoaded;
+          }}
         />
       </Dialog.Root>
       <Dialog.Root
@@ -1287,6 +1266,9 @@ const EventSection = memo(function EventSection({
                   break;
                 case "pdf":
                   onPdfExport(selectedChoreo);
+                  break;
+                case "history":
+                  setHistoryDialogOpen(true);
                   break;
 
                 default:
@@ -1334,16 +1316,6 @@ const ChoreoListItem = memo(function ChoreoListItem ({
             <span>{choreo.name}</span>
           </span>
           <div className="flex flex-row items-center gap-2">
-            {/* {
-              event.event && event.event.length > 0 && missingNames[choreo.id]?.size > 0 &&
-              <Dialog.Trigger handle={dancerWarningDialog} onClick={(e) => {
-                e.stopPropagation();
-                setSelectedChoreo(choreo);
-                setDancerWarningDialogOpen(true);
-              }}>
-                <IconButton asDiv noBorder size="sm" src="personAlert" colour="primary"/>
-              </Dialog.Trigger>
-            } */}
             <ChoreoStatusTag choreoStatus={choreo.status} version={choreo.version}/>
             <IconButton
               src="moreVert"

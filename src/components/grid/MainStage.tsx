@@ -71,6 +71,7 @@ type MainStageProps = {
   editEnabled?: boolean,
   toggleEditEnabled?: () => void,
   openNoteDialog?: () => void,
+  openChangeLog?: () => void,
   showPaths?: boolean,
   isEditingMovement?: boolean,
   dancerMovementCache: MovementCacheBySectionIdByObjectId,
@@ -90,7 +91,7 @@ function MainStage({
   updatePropSizeAndRotate, updateObstacleSizeAndRotate,
   selectedIds, setSelectedIds, selectedObjects,
   addDancer, addProp, addObstacle, appSettings, previousSection, selectedDancerMovement,
-  onDancerSelected, bottomMarginPercent = 0, canResizeProps, editEnabled, toggleEditEnabled, openNoteDialog,
+  onDancerSelected, bottomMarginPercent = 0, canResizeProps, editEnabled, toggleEditEnabled, openNoteDialog, openChangeLog,
   showPaths = false, isEditingMovement = false, dancerMovementCache, propMovementCache, onMidpointEdit, currentMovement,
   dancerAnimationCache, propAnimationCache,
 }: MainStageProps) {
@@ -676,14 +677,26 @@ function MainStage({
       />
     }
     {
-      canEdit && openNoteDialog &&
+      ((canEdit && openNoteDialog) || openChangeLog) &&
       <div className={`absolute space-y-1 left-2 ${isShowingHorizontalRuler ? "top-7" : "top-1"}`}>
-        <IconButton
-          size="sm"
-          src="speakerNotes"
-          colour="black"
-          onClick={openNoteDialog}
-        />
+        {
+          canEdit && openNoteDialog &&
+          <IconButton
+            size="sm"
+            src="speakerNotes"
+            colour="black"
+            onClick={openNoteDialog}
+          />
+        }
+        {
+          openChangeLog &&
+          <IconButton
+            size="sm"
+            src="releaseAlert"
+            colour="primary"
+            onClick={openChangeLog}
+          />
+        }
       </div>
     }
     {

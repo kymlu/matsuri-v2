@@ -8,7 +8,7 @@ import { BasicChoreoDetails, Choreo, EventDetails, getBasicChoreoDetails } from 
 import { EditHistory, StageEntities } from "../models/history";
 import { addSection, assignDancersToTiming, duplicateSection, editDancerActions, editSectionNote, removeSection, renameSection, reorderSections } from "../lib/editor/commands/sectionCommands";
 import { ChoreoSection, Movement, MovementCacheBySectionIdByObjectId, MovementType, PathSvgCacheByObjectIdBySectionId } from "../models/choreoSection";
-import { debounce, indexByKey, isNullOrUndefinedOrBlank, strEquals, stringifyEvent } from "../lib/helpers/globalHelper";
+import { debounce, indexByKey, isNullOrUndefinedOrBlank, strEquals } from "../lib/helpers/globalHelper";
 import MainStage from "../components/grid/MainStage";
 import { Dialog } from "@base-ui/react";
 import EditChoreoSizeDialog from "../components/dialogs/EditChoreoSizeDialog";
@@ -25,7 +25,7 @@ import { DancerAction, DancerActionTiming } from "../models/dancerAction";
 import ActionSelectionToolbar from "../components/editor/ActionSelectionToolbar";
 import ConfirmDeletionDialog from "../components/dialogs/ConfirmDeletionDialog";
 import EditSectionNoteDialog from "../components/dialogs/EditSectionNoteDialog";
-import { getPersonalNotesForChoreo } from "../lib/dataAccess/LocalStorageController";
+import { clearSeenVersion, getPersonalNotesForChoreo } from "../lib/dataAccess/LocalStorageController";
 import { Coordinates } from "../models/base";
 import { colorPalette } from "../lib/consts/colors";
 import { addDancer, addObstacle, addObstacles, addProp, alignHorizontalPositions, alignVerticalPositions, changeObjectColours, changePropInUse, distributePositions, duplicateProps, editAndDeleteProps, editDancerPath, editPropPath, moveObjectPositions, pastePositions, rearrangePositions, removeObjects, renameAndDeleteDancers, renameDancer, renameObstacle, renameProp, setZOnAllPositions, swapDancerPositions, swapPropPositions, updateObstacleSizeAndRotate, updatePropSizeAndRotate } from "../lib/editor/commands/objectCommands";
@@ -37,7 +37,6 @@ import EditNameDialog from "../components/dialogs/EditNameDialog";
 import CustomDialog from "../components/basic/CustomDialog";
 import { IconLabelButton } from "../components/basic/Button";
 import EditDancerNameDialog from "../components/dialogs/EditDancerNameDialog";
-import AbsentDancersWarningDialog from "../components/dialogs/AbsentDancersWarningDialog";
 import InstructionMessage from "../components/basic/InstructionMessage";
 import { ChoreoStatus } from "./HomePage";
 import PublishConfirmationDialog from "../components/dialogs/PublishConfirmationDialog";
@@ -60,7 +59,6 @@ const propSizeDialog = Dialog.createHandle<string>();
 const renameSectionDialog = Dialog.createHandle<ChoreoSection>();
 const addNoteToSectionDialog = Dialog.createHandle<ChoreoSection>();
 const deleteSectionDialog = Dialog.createHandle<ChoreoSection>();
-const dancerWarningDialog = Dialog.createHandle<Choreo>();
 const publishConfirmationDialog = Dialog.createHandle<null>();
 const publishSuccessDialog = Dialog.createHandle<null>();
 const exportDialog = Dialog.createHandle<{}>();
@@ -75,7 +73,6 @@ export default function ChoreoEditPage(props: {
   currentChoreoStatus: ChoreoStatus,
   goToViewPage: (newChoreo: Choreo) => void,
   eventList: EventDetails[],
-  dancerNamesByEvent: Record<string, Record<string, string[]>>,
   onChoreoEdited: () => void,
   serverChoreo?: BasicChoreoDetails,
   isLoggedIn: boolean,
@@ -348,6 +345,7 @@ export default function ChoreoEditPage(props: {
   }, [history.presentState.state]);
 
   const onSaveAfterPublish = useCallback((newState: Choreo) => {
+    clearSeenVersion(newState.id);
     saveChoreo(newState, () => {
       publishConfirmationDialog.close();
       setPublishConfirmationDialogOpen(false);
@@ -433,7 +431,6 @@ export default function ChoreoEditPage(props: {
   const [renameSectionDialogOpen, setRenameSectionDialogOpen] = useState(false);
   const [addNoteToSectionDialogOpen, setAddNoteToSectionDialogOpen] = useState(false);
   const [deleteSectionDialogOpen, setDeleteSectionDialogOpen] = useState(false);
-  const [dancerWarningDialogOpen, setDancerWarningDialogOpen] = useState(false);
   const [publishConfirmationDialogOpen, setPublishConfirmationDialogOpen] = useState(false);
   const [publishSuccessDialogOpen, setPublishSuccessDialogOpen] = useState(false);
 
@@ -493,10 +490,6 @@ export default function ChoreoEditPage(props: {
     setPropSizeDialogOpen(isOpen);
   };
 
-  const handleDancerWarningDialogOpenChange = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
-    setDancerWarningDialogOpen(isOpen);
-  };
-
   const handlePublishConfirmationDialogOpenChange = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setPublishConfirmationDialogOpen(isOpen);
   };
@@ -536,14 +529,6 @@ export default function ChoreoEditPage(props: {
     commitState(moveObjectPositions(history.presentState.state, currentSection.id, movementUpdateGroup));
     setMovementUpdateGroup({props: {}, dancers: {}, obstacles: {}});
   }, [movementUpdateGroup]);
-
-  const missingNames = useMemo(() => {
-    const pool = new Set(Object.entries(props.dancerNamesByEvent[stringifyEvent(history.presentState.state)] ?? {})
-      .filter(([id]) => id !== history.presentState.state.id)
-      .flatMap(([, names]) => names));
-    const currentNames = new Set(Object.values(history.presentState.state.dancers).map(x => x.name));
-    return Array.from(new Set(pool).difference(currentNames)).sort();
-  }, [props.dancerNamesByEvent, history.presentState.state.dancers, history.presentState.state.event, history.presentState.state.startDate, history.presentState.state.endDate]);
 
   const editMovement = useCallback((points: Coordinates[], tension: MovementType) => {
     if (!firstSelectedDancerProp) return;
@@ -626,7 +611,6 @@ export default function ChoreoEditPage(props: {
   const closeExportDialog = useCallback(() => setExportDialogOpen(false), []);
   const openDancerManagerDialog = useCallback(() => setDancerManagerDialogOpen(true), []);
   const openPropManagerDialog = useCallback(() => setPropManagerDialogOpen(true), []);
-  const openDancerWarningDialog = useCallback(() => setDancerWarningDialogOpen(true), []);
 
   const toggleShowGrid = useCallback(() => {
     setAppSettings(prev => ({...prev, showGrid: !prev.showGrid}));
@@ -907,7 +891,6 @@ export default function ChoreoEditPage(props: {
         changeDancerSize={changeDancerSize}
         appSettings={appSettings}
         goToView={goToView}
-        showDancerWarningMessage={missingNames.length > 0 ? openDancerWarningDialog : undefined}
         dancerCount={entityCount.dancers}
         propCount={entityCount.props}
         stageWidth={history.presentState.state.stageGeometry.stageWidth}
@@ -1216,7 +1199,6 @@ export default function ChoreoEditPage(props: {
         <EditDancerNameDialog
           name={history.presentState.state.dancers[firstSelectedDancerProp?.id ?? ""]?.name}
           otherNames={Object.values(history.presentState.state.dancers).map(x => x.name)}
-          missingNames={missingNames}
           onSubmit={(name) => {
             commitState(renameDancer(history.presentState.state, firstSelectedDancerProp!.id, name));
             renameDancerDialog.close();
@@ -1391,16 +1373,6 @@ export default function ChoreoEditPage(props: {
             onClose={closeExportDialog}
           />
         }
-      </Dialog.Root>
-      <Dialog.Root
-        open={dancerWarningDialogOpen}
-        onOpenChange={handleDancerWarningDialogOpenChange}
-        handle={dancerWarningDialog}>
-        <AbsentDancersWarningDialog
-          choreoName={history.presentState.state?.name}
-          eventName={history.presentState.state?.event}
-          dancerNames={missingNames}
-        />
       </Dialog.Root>
       <Dialog.Root
         open={publishConfirmationDialogOpen}

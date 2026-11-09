@@ -16,16 +16,17 @@ type ExportDialogProps = {
   selectedId: string,
   onClose: () => void,
   showPaths?: boolean,
+  canIncludePersonalNotes?: boolean,
 }
 
 function ExportDialog({
-  choreo, selectedId, onClose, showPaths
+  choreo, selectedId, onClose, showPaths, canIncludePersonalNotes = true
 }: ExportDialogProps) {
   const [step, setStep] = useState<"prep" | "export">("prep");
   const [exportName, setExportName] = useState<string>("");
   const [followingId, setFollowingId] = useState<string>(selectedId);
   const [showFollowingPath, setShowFollowingPath] = useState<boolean>(showPaths ?? false);
-  const [includePersonalNotes, setIncludePersonalNotes] = useState<boolean>(true);
+  const [includePersonalNotes, setIncludePersonalNotes] = useState<boolean>(canIncludePersonalNotes);
   const [exportAllDancers, setExportAllDancers] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
   const [currentDancer, setCurrentDancer] = useState<{ name: string; index: number; total: number } | undefined>(undefined);
@@ -79,10 +80,10 @@ function ExportDialog({
     setFollowingId("");
     setStep("prep");
     setShowFollowingPath(false);
-    setIncludePersonalNotes(true);
+    setIncludePersonalNotes(canIncludePersonalNotes);
     setExportAllDancers(false);
     setCurrentDancer(undefined);
-  }, [onClose]);
+  }, [onClose, canIncludePersonalNotes]);
 
   return <>
     {
@@ -137,13 +138,17 @@ function ExportDialog({
             />
           }
           
-          <Divider/>
-          
-          <CustomSwitch
-            label="自分用メモを含める"
-            defaultChecked={true}
-            onChange={setIncludePersonalNotes}
-          />
+          {
+            canIncludePersonalNotes &&
+            <>
+              <Divider/>
+              <CustomSwitch
+                label="自分用メモを含める"
+                defaultChecked={true}
+                onChange={setIncludePersonalNotes}
+              />
+            </>
+          }
         </div>
       </BaseEditDialog>
     }

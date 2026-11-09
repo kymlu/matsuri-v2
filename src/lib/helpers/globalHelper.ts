@@ -39,7 +39,8 @@ export function throttle(func: (...args: any[]) => void, limit: number) {
 }
 
 export function strCompare<T>(a: T, b: T, key: keyof T) {
-  return (a[key]?.toString() ?? "").localeCompare(b[key]?.toString() ?? "");
+  // numeric so that default dancer names sort as 1, 2, … 10 rather than 1, 10, 2
+  return (a[key]?.toString() ?? "").localeCompare(b[key]?.toString() ?? "", "ja", { numeric: true });
 }
 
 export function groupByKey<T extends Record<string, any>, K extends keyof T>(

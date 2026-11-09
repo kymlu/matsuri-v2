@@ -1,7 +1,7 @@
 import Header from "../components/editor/Header"
 import FormationSelectionToolbar from "../components/editor/FormationSelectionToolbar";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Choreo } from "../models/choreo";
+import { BasicChoreoDetails, Choreo } from "../models/choreo";
 import { ChoreoSection, MovementCacheBySectionIdByObjectId, PathSvgCacheByObjectIdBySectionId } from "../models/choreoSection";
 import MainStage from "../components/grid/MainStage";
 import { AppSetting } from "../models/appSettings";
@@ -15,11 +15,17 @@ import { Dialog } from "@base-ui/react";
 import { ChoreoStatus } from "./HomePage";
 import BaseErrorDialog from "../components/dialogs/BaseErrorDialog";
 import CustomSwitch from "../components/inputs/CustomSwitch";
-import { checkShowingViewPageInfoDialog, stopShowingViewPageInfoDialog, getPersonalSectionNote, setPersonalSectionNote } from "../lib/dataAccess/LocalStorageController";
+import { checkShowingViewPageInfoDialog, stopShowingViewPageInfoDialog, getPersonalSectionNote, setPersonalSectionNote, getSeenVersion, setSeenVersion } from "../lib/dataAccess/LocalStorageController";
 import Divider from "../components/basic/Divider";
 import { calculateMovementCache } from "../lib/helpers/editorCalculationHelper";
 import { DancerActionTiming } from "../models/dancerAction";
 import { SetStateAction } from "react";
+import { SAMPLE_PARADE_ID, SAMPLE_STAGE_ID } from "../lib/consts/consts";
+import { getChoreoFile } from "../lib/helpers/apiHelper";
+import { buildChangeLog, ChangeLog, hasShownChanges } from "../lib/helpers/changeLogHelper";
+import ChangeLogDialog from "../components/dialogs/ChangeLogDialog";
+import Icon from "../components/basic/Icon";
+import InstructionMessage from "../components/basic/InstructionMessage";
 
 const exportDialog = Dialog.createHandle<{}>();
 
@@ -28,8 +34,10 @@ export default function ChoreoViewPage(props: {
   currentChoreo: Choreo,
   currentChoreoStatus: ChoreoStatus,
   goToEditPage: () => void,
+  pastVersion?: number,
   savedDancerName: string | null,
   teamId?: string,
+  serverChoreo?: BasicChoreoDetails,
 }) {
   const [currentSection, setCurrentSection] = useState<ChoreoSection>(props.currentChoreo.sections[0]);
   const [selectedIds, setSelectedIds] = useState<StageEntities<string[]>>({props: [], dancers: [], obstacles: []});
@@ -80,6 +88,47 @@ export default function ChoreoViewPage(props: {
     setPropAnimationCache(res.newPropAnimationCache);
   }, [props.currentChoreo, resetSelectedIds]);
 
+  // Read once, before the effect below stores the current version.
+  const [seenVersionAtOpen] = useState(() => getSeenVersion(props.currentChoreo.id));
+  const isChangeLogEligible = props.pastVersion === undefined &&
+    props.currentChoreoStatus === "upToDate" &&
+    !isNullOrUndefinedOrBlank(props.teamId) &&
+    props.currentChoreo.version !== undefined &&
+    !strEquals(props.currentChoreo.id, SAMPLE_STAGE_ID) &&
+    !strEquals(props.currentChoreo.id, SAMPLE_PARADE_ID);
+
+  const hasNewVersion = isChangeLogEligible && seenVersionAtOpen !== undefined && seenVersionAtOpen < props.currentChoreo.version!!;
+
+  // With a newer version, it's only stored once compared below, so a failed load is retried next time.
+  useEffect(() => {
+    if (isChangeLogEligible && !hasNewVersion) {
+      setSeenVersion(props.currentChoreo.id, props.currentChoreo.version!!);
+    }
+  }, [isChangeLogEligible, hasNewVersion, props.currentChoreo.id, props.currentChoreo.version]);
+  const [changeLog, setChangeLog] = useState<ChangeLog>();
+  const [isChangeLogBannerShown, setIsChangeLogBannerShown] = useState<boolean>(true);
+  const [changeLogSelection, setChangeLogSelection] = useState<string>(); // undefined when closed
+
+  useEffect(() => {
+    if (!hasNewVersion) return;
+    let cancelled = false;
+    getChoreoFile(props.teamId!!, props.currentChoreo.id, seenVersionAtOpen!!)
+      .then(oldChoreo => {
+        try {
+          const log = buildChangeLog(oldChoreo, props.currentChoreo);
+          if (cancelled) return;
+          setSeenVersion(props.currentChoreo.id, props.currentChoreo.version!!);
+          if (hasShownChanges(log)) {
+            setChangeLog(log);
+          }
+        } catch (e) {
+          console.error("Failed to build change log", e);
+        }
+      })
+      .catch(() => {}); // getChoreoFile already logs download failures
+    return () => { cancelled = true; };
+  }, [hasNewVersion, props.teamId, props.currentChoreo, seenVersionAtOpen]);
+
   const selectedObjects = useMemo(() => ({
     dancers: Object.entries(currentSection.formation.dancerPositions).filter(x => selectedIds.dancers.includes(x[0])).map(x => x[1]),
     props: [],
@@ -105,6 +154,13 @@ export default function ChoreoViewPage(props: {
     setExportDialogOpen(isOpen);
   }, []);
 
+  // Opens on the selected dancer if they have changes, otherwise on 全体 (including when a count is selected).
+  const openChangeLog = useCallback(() => {
+    const id = selectedIds.dancers.length === 1 && selectedTimingId === undefined ? selectedIds.dancers[0] : "";
+    setChangeLogSelection(changeLog?.dancers[id] ? id : "");
+  }, [selectedIds.dancers, selectedTimingId, changeLog]);
+  const closeChangeLog = useCallback(() => setChangeLogSelection(undefined), []);
+
   // ---- Header handlers ----
   const openExportDialog = useCallback(() => setExportDialogOpen(true), []);
   const toggleShowGrid = useCallback(() => {
@@ -113,6 +169,8 @@ export default function ChoreoViewPage(props: {
   const toggleShowPath = useCallback(() => setShowPaths(prev => !prev), []);
 
   // ---- ViewerSidebar handlers ----
+  // Notes are saved per choreo, not per version, so they're hidden on past versions.
+  const isPersonalNoteShown = props.pastVersion === undefined;
   const onPersonalNoteChange = useCallback((newNote: string) => {
     setPersonalSectionNote(props.currentChoreo.id, currentSection.id, newNote);
   }, [props.currentChoreo.id, currentSection.id]);
@@ -164,7 +222,7 @@ export default function ChoreoViewPage(props: {
         onDownload={openExportDialog}
         changeShowGrid={toggleShowGrid}
         appSettings={appSettings}
-        goToEdit={props.goToEditPage}
+        goToEdit={props.pastVersion === undefined ? props.goToEditPage : undefined}
         toggleShowPath={toggleShowPath}
         showPath={showPaths}
         isShowPathBtnDisabled={selectedIds.dancers.length !== 1 || selectedTimingId !== undefined}
@@ -175,15 +233,21 @@ export default function ChoreoViewPage(props: {
         version={props.currentChoreo.version}
         choreoStatus={props.currentChoreoStatus}
         />
+      {
+        props.pastVersion !== undefined &&
+        <div className="px-3 py-1 text-sm font-semibold text-center border-b-2 border-primary text-primary bg-surface">
+          過去の版（v{props.pastVersion}）を表示中です。最新版ではありません。
+        </div>
+      }
       <div className="relative flex-1 overflow-hidden border-b-2 md:flex">
         <ViewerSidebar
           actions={currentSection.formation.dancerActions}
           note={currentSection.note}
-          personalNote={personalNote}
+          personalNote={isPersonalNoteShown ? personalNote : undefined}
           sectionId={currentSection.id}
           sections={props.currentChoreo.sections}
           onChangeSection={changeSection}
-          onPersonalNoteChange={onPersonalNoteChange}
+          onPersonalNoteChange={isPersonalNoteShown ? onPersonalNoteChange : undefined}
           dancer={props.currentChoreo.dancers[selectedIds.dancers[0]]}
           position={currentSection.formation.dancerPositions[selectedIds.dancers[0]]}
           nextPosition={nextSection?.formation.dancerPositions[selectedIds.dancers[0]]}
@@ -220,8 +284,28 @@ export default function ChoreoViewPage(props: {
           dancerMovementCache={dancerMovementCache}
           dancerAnimationCache={dancerAnimationCache}
           propAnimationCache={propAnimationCache}
+          openChangeLog={changeLog && !isChangeLogBannerShown ? openChangeLog : undefined}
         />
       </div>
+
+      {
+        changeLog && isChangeLogBannerShown &&
+        <InstructionMessage
+          instruction={
+            <button
+              className="flex items-center gap-1"
+              onClick={() => {
+                // Once seen, the stage button takes over from the message.
+                setIsChangeLogBannerShown(false);
+                openChangeLog();
+              }}>
+              <Icon src="releaseAlert" colour="primary" size="xs"/>
+              前回から変更があります。<b>タップして確認</b>
+            </button>
+          }
+          onClose={() => setIsChangeLogBannerShown(false)}
+        />
+      }
 
       <Dialog.Root onOpenChange={closeHintDialog} open={showHintDialog}>
         <BaseErrorDialog title="利用方法" fullWidth onClose={closeHintDialog}>
@@ -232,6 +316,20 @@ export default function ChoreoViewPage(props: {
             defaultChecked={false}
             onChange={(value) => stopShowingViewPageInfoDialog(value)}/>
         </BaseErrorDialog>
+      </Dialog.Root>
+
+      <Dialog.Root onOpenChange={closeChangeLog} open={changeLogSelection !== undefined}>
+        {
+          changeLog && changeLogSelection !== undefined &&
+          <ChangeLogDialog
+            log={changeLog}
+            fromVersion={seenVersionAtOpen!!}
+            choreo={props.currentChoreo}
+            publishedAt={props.serverChoreo?.lastUpdated}
+            initialSelection={changeLogSelection}
+            onClose={closeChangeLog}
+          />
+        }
       </Dialog.Root>
 
       <Dialog.Root
@@ -246,6 +344,7 @@ export default function ChoreoViewPage(props: {
             selectedId={selectedIds.dancers.length === 1 ? selectedIds.dancers[0] : ""}
             onClose={closeExportDialog}
             showPaths={showPaths}
+            canIncludePersonalNotes={isPersonalNoteShown}
           />
         }
       </Dialog.Root>
