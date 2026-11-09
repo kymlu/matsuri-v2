@@ -121,9 +121,18 @@ describe("POST /api/roster/names/add", () => {
 		expect(new Set(result.roster.names.map(n => n.name))).toEqual(new Set([`O'Neil`, `"あ"`, `a\\b`]));
 	});
 
-	it("rejects more than 200 lines", async () => {
+	it("rejects more than 200 distinct names", async () => {
 		const response = await call("/names/add", { names: Array.from({ length: 201 }, (_, i) => `n${i}`), category_ids: [] });
 		expect(response.status).toBe(400);
+	});
+
+	it("doesn't count blank lines or repeats toward the 200 limit", async () => {
+		const names = Array.from({ length: 200 }, (_, i) => `n${i}`);
+		// 200 names, each followed by blank lines, then all 200 again.
+		const pasted = [...names.flatMap(n => [n, "", "  "]), ...names].join("\n");
+		const result = await addNames([pasted]);
+		expect(result.added).toBe(200);
+		expect(result.skipped).toEqual([]);
 	});
 
 	it("rejects going over 1000 names", async () => {

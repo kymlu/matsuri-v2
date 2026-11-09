@@ -709,7 +709,8 @@ export default {
 					}
 
 					const lines = body.names.flatMap(n => n.split(/\r?\n/));
-					if (lines.length > ROSTER_MAX_ADD) {
+					// Blank lines and repeats are dropped below, so only distinct names count toward the limit.
+					if (new Set(lines.map(toNameKey).filter(key => key !== "")).size > ROSTER_MAX_ADD) {
 						return getErrorResponse(`At most ${ROSTER_MAX_ADD} names can be added at once.`);
 					}
 
