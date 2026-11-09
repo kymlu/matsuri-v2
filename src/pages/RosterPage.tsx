@@ -79,7 +79,7 @@ export default function RosterPage({ goToHomePage, team }: RosterPageProps) {
   const categoryName = (id: string) => roster?.categories.find(c => c.id === id)?.name ?? "";
 
   return <div className="bg-app h-[100svh]">
-    <div className="w-full h-full grid grid-rows-[auto,1fr,auto] overflow-hidden">
+    <div className="w-full max-w-full h-full grid grid-rows-[auto,1fr,auto] overflow-hidden">
       <div className="px-4 pt-10 space-y-2">
         <header className="flex items-center gap-2">
           <IconButton src="home" noBorder onClick={goToHomePage}/>

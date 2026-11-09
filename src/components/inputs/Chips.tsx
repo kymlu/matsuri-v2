@@ -14,7 +14,7 @@ const chipClasses = (selected: boolean) => classNames(
     "bg-surface border-line text-body": !selected,
   });
 
-const rowClasses = "flex gap-1.5 overflow-x-auto pb-1";
+const rowClasses = "flex gap-1.5 overflow-x-auto max-w-full pb-1";
 
 type ChipFilterProps = {
   label: string, // for screen readers
