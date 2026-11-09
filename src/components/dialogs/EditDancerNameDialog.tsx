@@ -10,6 +10,8 @@ import ExpandableSection from "../basic/ExpandableSection";
 import { ChipFilter } from "../inputs/Chips";
 
 type EditDancerNameDialogProps = {
+  // This component stays mounted while the dialog is closed, so it resets each time it opens.
+  isOpen?: boolean,
   name?: string,
   required?: boolean,
   otherNames?: string[],
@@ -25,7 +27,7 @@ type EditDancerNameDialogProps = {
 }
 
 export default function EditDancerNameDialog({
-  name, required = true, otherNames, onSubmit, onClose,
+  isOpen, name, required = true, otherNames, onSubmit, onClose,
   roster, isPickerOpen = true, onPickerOpenChange, pickerFilter = "all", onPickerFilterChange,
 }: EditDancerNameDialogProps) {
   const [newName, setNewName] = useState("");
@@ -33,9 +35,13 @@ export default function EditDancerNameDialog({
   const [isTyping, setIsTyping] = useState(false);
   const inputRef = useRef<{ changeValue: (value: string) => void }>(null);
 
+  // Otherwise a name picked or typed before キャンセル would be saved on the next open.
   useEffect(() => {
-    setNewName(name ?? "");
-  }, [name]);
+    if (isOpen !== false) {
+      setNewName(name ?? "");
+      setIsTyping(false);
+    }
+  }, [isOpen, name]);
 
   const nameCounts = useMemo(() => {
     if (!otherNames || otherNames?.length === 0) {
@@ -105,11 +111,14 @@ export default function EditDancerNameDialog({
         expanded={isPickerOpen}
         onExpandedChange={(isOpen) => onPickerOpenChange?.(isOpen)}>
         <div className="mt-1 space-y-2">
-          <ChipFilter
-            label="表示する区分"
-            options={[{ value: "all", label: "全員" }, ...roster.categories.map(c => ({ value: c.id, label: c.name }))]}
-            value={filter}
-            onChange={(value) => onPickerFilterChange?.(value)}/>
+          {
+            roster.categories.length > 0 &&
+            <ChipFilter
+              label="表示する区分"
+              options={[{ value: "all", label: "全員" }, ...roster.categories.map(c => ({ value: c.id, label: c.name }))]}
+              value={filter}
+              onChange={(value) => onPickerFilterChange?.(value)}/>
+          }
           <div className="grid grid-cols-3 gap-1.5 max-h-[40svh] overflow-y-auto pb-1">
             {
               pickerNames.map(n => {
