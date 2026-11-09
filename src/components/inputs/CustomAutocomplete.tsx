@@ -69,7 +69,7 @@ export default function CustomAutocomplete({
       "bg-surface": !disabled && !((required && isNullOrUndefinedOrBlank(value)) || hasError),
       "w-full": !compact,
       "min-w-32": compact,
-      "border-primary bg-primary bg-opacity-20 placeholder:text-primary": (required && isNullOrUndefinedOrBlank(value)) || hasError,
+      "border-primary bg-primary/20 placeholder:text-primary": (required && isNullOrUndefinedOrBlank(value)) || hasError,
     },);
 
   const wrapperClasses = classNames(
