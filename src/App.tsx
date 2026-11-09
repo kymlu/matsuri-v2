@@ -10,13 +10,14 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Team } from './models/team';
 import { checkLogin, verifyTeam } from './lib/helpers/apiHelper';
 import AdminPage from './pages/AdminPage';
+import RosterPage from './pages/RosterPage';
 import HelpPage from './pages/HelpPage';
 import { isNullOrUndefinedOrBlank } from './lib/helpers/globalHelper';
 import { Oval } from 'react-loader-spinner';
 import { colorPalette } from './lib/consts/colors';
 import { useSearchParams } from 'react-router-dom';
 
-type Mode = "home" | "form" | "edit" | "view" | "admin" | "help";
+type Mode = "home" | "form" | "edit" | "view" | "admin" | "roster" | "help";
 
 function App() {
   const [mode, setMode] = useState<Mode>("home");
@@ -113,6 +114,14 @@ function App() {
         )
       }
       {
+        team && isLoggedIn && !isViewer && mode === "roster" && (
+          <RosterPage
+            goToHomePage={() => setMode("home")}
+            team={team}
+          />
+        )
+      }
+      {
         mode === "help" && (
           <HelpPage
             goToHomePage={() => setMode("home")}
@@ -137,6 +146,9 @@ function App() {
           }}
           goToAdminPage={() => {
             setMode("admin");
+          }}
+          goToRosterPage={() => {
+            setMode("roster");
           }}
           goToHelpPage={() => {
             setMode("help");
