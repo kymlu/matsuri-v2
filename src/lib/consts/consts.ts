@@ -142,7 +142,6 @@ export const ICON = {
   password: "password",
   person: "person",
   personAdd: "person_add",
-  personAlert: "person_alert",
   personCancel: "person_cancel",
   personEdit: "person_edit",
   pictureAsPdf: "picture_as_pdf",

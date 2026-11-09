@@ -1,20 +1,19 @@
 import { useEffect, useMemo, useState } from "react";
 import { isNullOrUndefinedOrBlank, strEquals } from "../../lib/helpers/globalHelper";
 import BaseEditDialog from "./BaseEditDialog";
-import CustomAutocomplete from "../inputs/CustomAutocomplete";
+import TextInput from "../inputs/TextInput";
 import { SHORT_NAME_LENGTH } from "../../lib/consts/consts";
 
 type EditDancerNameDialogProps = {
   name?: string,
   required?: boolean,
   otherNames?: string[],
-  missingNames: string[],
   onSubmit: (name: string) => void,
   onClose?: () => void,
 }
 
 export default function EditDancerNameDialog({
-  name, required = true, otherNames, missingNames, onSubmit, onClose
+  name, required = true, otherNames, onSubmit, onClose
 }: EditDancerNameDialogProps) {
   const [newName, setNewName] = useState("");
 
@@ -44,11 +43,10 @@ export default function EditDancerNameDialog({
     onClose={() => onClose?.()}
     isActionButtonDisabled={required && isNullOrUndefinedOrBlank(newName.trim())}
     >
-    <CustomAutocomplete
+    <TextInput
       defaultValue={name ?? ""}
       onContentChange={ (newName) => { setNewName(newName) }}
       maxLength={SHORT_NAME_LENGTH}
-      options={missingNames}
       showLength
     />
     

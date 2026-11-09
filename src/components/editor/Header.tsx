@@ -38,7 +38,6 @@ type HeaderProps = {
   toggleShowPath?: () => void;
   showPath?: boolean,
   isShowPathBtnDisabled?: boolean,
-  showDancerWarningMessage?: () => void;
   dancerCount: number,
   propCount: number,
   stageWidth: number,
@@ -63,7 +62,6 @@ function Header({
   appSettings,
   goToEdit, goToView,
   toggleShowPath, showPath, isShowPathBtnDisabled,
-  showDancerWarningMessage,
   dancerCount, propCount, stageLength, stageWidth, version, choreoStatus,
   showPublish, publish,
 }: HeaderProps) {
@@ -98,15 +96,6 @@ function Header({
                 goToView();
               } }}
             />
-        }
-        {
-          showDancerWarningMessage &&
-          <IconButton
-            colour="primary"
-            src="personAlert"
-            noBorder
-            onClick={showDancerWarningMessage}
-          />
         }
         {
           toggleShowPath &&

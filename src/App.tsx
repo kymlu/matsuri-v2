@@ -22,7 +22,6 @@ function App() {
   const [mode, setMode] = useState<Mode>("home");
   const [selectedEvent, setSelectedEvent] = useState<EventDetails>();
   const [eventList, setEventList] = useState<EventDetails[]>([]);
-  const [dancerNamesByEvent, setDancerNamesByEvent] = useState<Record<string, Record<string, string[]>>>({});
   const [serverChoreo, setServerChoreo] = useState<BasicChoreoDetails | undefined>();
   const [currentChoreo, setCurrentChoreo] = useState<Choreo | undefined>();
   const [currentChoreoStatus, setCurrentChoreoStatus] = useState<ChoreoStatus>();
@@ -155,8 +154,6 @@ function App() {
           }}
           savedDancerName={name}
           setSavedDancerName={(newName) => setNewName(newName)}
-          dancerNamesByEvent={dancerNamesByEvent}
-          setDancerNamesByEvent={(groupedNames) => setDancerNamesByEvent(groupedNames)}
           isAdmin={isAdmin}
           setIsAdmin={setIsAdmin}
           isViewer={isViewer}
@@ -194,7 +191,6 @@ function App() {
             setMode("view");
           }}
           eventList={eventList}
-          dancerNamesByEvent={dancerNamesByEvent}
           onChoreoEdited={() => {
             if (currentChoreoStatus === "upToDate") {
               setCurrentChoreoStatus("edited");
