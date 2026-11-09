@@ -1,5 +1,5 @@
 import { Resend } from 'resend';
-import { ErrorResponse } from './models/models';
+import { ErrorResponse, RosterResponse } from './models/models';
 
 const allowedOrigins = [
   "http://localhost:3000",
@@ -63,6 +63,66 @@ interface Env {
 
 const getFileName = (id: string, version: string) => {return `${id}_v${version}.json`};
 const setSessionCookie = (token: string) => `token=${token}; HttpOnly; Secure; SameSite=None; Max-Age=2592000; Path=/`;
+
+const ROSTER_NAME_LENGTH = 15; // same as SHORT_NAME_LENGTH in the app, since a roster name becomes a dancer name
+const ROSTER_CATEGORY_LENGTH = 10;
+const ROSTER_MAX_ADD = 200;
+const ROSTER_MAX_NAMES = 1000;
+const ROSTER_MAX_CATEGORIES = 100;
+// Used only to stop duplicates: full/half-width and stray spaces count as the same name.
+const toNameKey = (name: string) => name.normalize("NFKC").trim();
+
+const isStringArray = (value: unknown): value is string[] =>
+	Array.isArray(value) && value.every(x => typeof x === "string");
+
+const isUniqueConstraintError = (e: unknown) => String((e as Error)?.message ?? e).includes("UNIQUE constraint failed");
+
+// Multi-row INSERTs kept under D1's limit of 100 bound parameters per statement,
+// so a large paste is a handful of statements rather than one per row.
+const prepareInsertRows = (db: D1Database, insertInto: string, rows: unknown[][]): D1PreparedStatement[] => {
+	if (rows.length === 0) {
+		return [];
+	}
+	const rowsPerStatement = Math.floor(100 / rows[0].length);
+	const statements: D1PreparedStatement[] = [];
+	for (let i = 0; i < rows.length; i += rowsPerStatement) {
+		const chunk = rows.slice(i, i + rowsPerStatement);
+		const placeholders = chunk.map(row => `(${row.map(() => "?").join(", ")})`).join(", ");
+		statements.push(db.prepare(`${insertInto} VALUES ${placeholders}`).bind(...chunk.flat()));
+	}
+	return statements;
+};
+
+const getRoster = async (db: D1Database, teamId: string): Promise<RosterResponse> => {
+	const [categories, names, links] = await Promise.all([
+		db.prepare(`
+			SELECT id, name FROM roster_categories
+			WHERE team_id = ? AND deleted = 0
+			ORDER BY sort_order
+		`).bind(teamId).all<{ id: string, name: string }>(),
+		db.prepare(`
+			SELECT id, name FROM roster_names
+			WHERE team_id = ? AND deleted = 0
+		`).bind(teamId).all<{ id: string, name: string }>(),
+		db.prepare(`
+			SELECT l.name_id, l.category_id
+			FROM roster_name_categories l
+			JOIN roster_categories c ON c.id = l.category_id
+			WHERE c.team_id = ? AND c.deleted = 0
+			ORDER BY c.sort_order
+		`).bind(teamId).all<{ name_id: string, category_id: string }>(),
+	]);
+
+	const categoryIdsByName = new Map<string, string[]>();
+	for (const link of links.results) {
+		categoryIdsByName.set(link.name_id, [...(categoryIdsByName.get(link.name_id) ?? []), link.category_id]);
+	}
+
+	return {
+		categories: categories.results,
+		names: names.results.map(n => ({ id: n.id, name: n.name, categoryIds: categoryIdsByName.get(n.id) ?? [] })),
+	};
+};
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -621,6 +681,244 @@ export default {
 				200,
 				setSessionCookie(token)
 			);
+		}
+
+		// Outside /api/team/, which only admins can use: editors maintain the roster too.
+		if (url.pathname === "/api/roster" || url.pathname.startsWith("/api/roster/")) {
+			if (session.role !== "admin" && session.role !== "editor") {
+				return getErrorResponse("Not permitted to use the roster.", 403);
+			}
+
+			const rosterTeamId = session.team_id as string;
+			const readBody = () => request.json().catch(() => null) as Promise<Record<string, unknown> | null>;
+			const getLiveCategoryIds = async () => {
+				const { results } = await env.DB.prepare(
+					"SELECT id FROM roster_categories WHERE team_id = ? AND deleted = 0"
+				).bind(rosterTeamId).all<{ id: string }>();
+				return new Set(results.map(r => r.id));
+			};
+
+			try {
+				if (url.pathname === "/api/roster" && request.method === "GET") {
+					return getSuccessResponse(await getRoster(env.DB, rosterTeamId));
+				}
+
+				// One request covers a single name, a paste of many, and adding categories to names already in the roster.
+				if (url.pathname === "/api/roster/names/add" && request.method === "POST") {
+					const body = await readBody();
+					if (!isStringArray(body?.names) || !isStringArray(body?.category_ids)) {
+						return getErrorResponse("names and category_ids must be arrays of strings.");
+					}
+
+					const lines = body.names.flatMap(n => n.split(/\r?\n/));
+					if (lines.length > ROSTER_MAX_ADD) {
+						return getErrorResponse(`At most ${ROSTER_MAX_ADD} names can be added at once.`);
+					}
+
+					const categoryIds = [...new Set(body.category_ids)];
+					const liveCategoryIds = await getLiveCategoryIds();
+					if (categoryIds.some(id => !liveCategoryIds.has(id))) {
+						return getErrorResponse("Unknown category.");
+					}
+
+					const { results: existingNames } = await env.DB.prepare(
+						"SELECT id, name_key FROM roster_names WHERE team_id = ? AND deleted = 0"
+					).bind(rosterTeamId).all<{ id: string, name_key: string }>();
+					const { results: existingLinks } = await env.DB.prepare(`
+						SELECT l.name_id, l.category_id
+						FROM roster_name_categories l
+						JOIN roster_names n ON n.id = l.name_id
+						WHERE n.team_id = ? AND n.deleted = 0
+					`).bind(rosterTeamId).all<{ name_id: string, category_id: string }>();
+					const idByKey = new Map(existingNames.map(n => [n.name_key, n.id]));
+					const linkSet = new Set(existingLinks.map(l => `${l.name_id}:${l.category_id}`));
+
+					const seenKeys = new Set<string>();
+					const newNames: unknown[][] = [];
+					const newLinks: unknown[][] = [];
+					const skipped: { name: string, reason: "too_long" | "exists" }[] = [];
+					let updated = 0;
+
+					for (const line of lines) {
+						const name = line.trim();
+						const key = toNameKey(name);
+						if (key === "" || seenKeys.has(key)) {
+							continue;
+						}
+						seenKeys.add(key);
+
+						if (name.length > ROSTER_NAME_LENGTH) {
+							skipped.push({ name, reason: "too_long" });
+							continue;
+						}
+
+						const existingId = idByKey.get(key);
+						if (existingId) {
+							const missing = categoryIds.filter(c => !linkSet.has(`${existingId}:${c}`));
+							if (missing.length === 0) {
+								skipped.push({ name, reason: "exists" });
+							} else {
+								newLinks.push(...missing.map(c => [existingId, c]));
+								updated++;
+							}
+						} else {
+							const id = crypto.randomUUID();
+							newNames.push([id, rosterTeamId, name, key, session.team_member_id]);
+							newLinks.push(...categoryIds.map(c => [id, c]));
+						}
+					}
+
+					if (existingNames.length + newNames.length > ROSTER_MAX_NAMES) {
+						return getErrorResponse(`A roster can have at most ${ROSTER_MAX_NAMES} names.`);
+					}
+
+					const statements = [
+						...prepareInsertRows(env.DB, "INSERT INTO roster_names (id, team_id, name, name_key, created_by)", newNames),
+						...prepareInsertRows(env.DB, "INSERT OR IGNORE INTO roster_name_categories (name_id, category_id)", newLinks),
+					];
+					if (statements.length > 0) {
+						await env.DB.batch(statements);
+					}
+
+					return getSuccessResponse({
+						roster: await getRoster(env.DB, rosterTeamId),
+						added: newNames.length,
+						updated,
+						skipped,
+					});
+				}
+
+				// Replaces the name and its whole set of categories.
+				if (url.pathname === "/api/roster/names/update" && request.method === "POST") {
+					const body = await readBody();
+					if (typeof body?.id !== "string" || typeof body?.name !== "string" || !isStringArray(body?.category_ids)) {
+						return getErrorResponse("id, name and category_ids are required.");
+					}
+					const id = body.id;
+
+					const current = await env.DB.prepare(
+						"SELECT id FROM roster_names WHERE id = ? AND team_id = ? AND deleted = 0"
+					).bind(id, rosterTeamId).first();
+					if (!current) {
+						return getErrorResponse("Name not found.", 404);
+					}
+
+					const name = body.name.trim();
+					const key = toNameKey(name);
+					if (key === "" || name.length > ROSTER_NAME_LENGTH) {
+						return getErrorResponse(`Names must be 1–${ROSTER_NAME_LENGTH} characters.`);
+					}
+
+					const categoryIds = [...new Set(body.category_ids)];
+					const liveCategoryIds = await getLiveCategoryIds();
+					if (categoryIds.some(c => !liveCategoryIds.has(c))) {
+						return getErrorResponse("Unknown category.");
+					}
+
+					const conflict = await env.DB.prepare(
+						"SELECT id FROM roster_names WHERE team_id = ? AND deleted = 0 AND name_key = ? AND id != ?"
+					).bind(rosterTeamId, key, id).first();
+					if (conflict) {
+						return getErrorResponse("Name already in the roster.", 409);
+					}
+
+					await env.DB.batch([
+						env.DB.prepare(`
+							UPDATE roster_names SET name = ?, name_key = ?, updated_at = datetime('now')
+							WHERE id = ?
+						`).bind(name, key, id),
+						env.DB.prepare("DELETE FROM roster_name_categories WHERE name_id = ?").bind(id),
+						...prepareInsertRows(env.DB, "INSERT INTO roster_name_categories (name_id, category_id)", categoryIds.map(c => [id, c])),
+					]);
+
+					return getSuccessResponse(await getRoster(env.DB, rosterTeamId));
+				}
+
+				if (url.pathname === "/api/roster/names/remove" && request.method === "POST") {
+					const body = await readBody();
+					if (typeof body?.id !== "string") {
+						return getErrorResponse("id is required.");
+					}
+
+					const result = await env.DB.prepare(`
+						UPDATE roster_names SET deleted = 1, updated_at = datetime('now')
+						WHERE id = ? AND team_id = ? AND deleted = 0
+					`).bind(body.id, rosterTeamId).run();
+					if (result.meta.changes === 0) {
+						return getErrorResponse("Name not found.", 404);
+					}
+
+					return getSuccessResponse(await getRoster(env.DB, rosterTeamId));
+				}
+
+				// The categories dialog saves the whole list at once, in display order.
+				if (url.pathname === "/api/roster/categories/save" && request.method === "POST") {
+					const body = await readBody();
+					const categories = body?.categories;
+					const deletedIds = body?.deleted_ids;
+					if (!Array.isArray(categories) || !isStringArray(deletedIds) || !categories.every(c =>
+						typeof c?.name === "string" && (c.id === undefined || typeof c.id === "string"))) {
+						return getErrorResponse("categories and deleted_ids are required.");
+					}
+					if (categories.length > ROSTER_MAX_CATEGORIES) {
+						return getErrorResponse(`A roster can have at most ${ROSTER_MAX_CATEGORIES} categories.`);
+					}
+
+					const items = (categories as { id?: string, name: string }[]).map(c => ({ id: c.id, name: c.name.trim(), key: toNameKey(c.name) }));
+					if (items.some(c => c.key === "" || c.name.length > ROSTER_CATEGORY_LENGTH)) {
+						return getErrorResponse(`Category names must be 1–${ROSTER_CATEGORY_LENGTH} characters.`);
+					}
+					if (new Set(items.map(c => c.key)).size !== items.length) {
+						return getErrorResponse("Category names must be unique.");
+					}
+
+					const keptIds = items.flatMap(c => c.id ? [c.id] : []);
+					const deleted = new Set(deletedIds);
+					if (new Set(keptIds).size !== keptIds.length || keptIds.some(id => deleted.has(id))) {
+						return getErrorResponse("Each category can only appear once.");
+					}
+
+					const liveCategoryIds = await getLiveCategoryIds();
+					if ([...keptIds, ...deleted].some(id => !liveCategoryIds.has(id))) {
+						return getErrorResponse("Category not found.", 404);
+					}
+
+					await env.DB.batch([
+						// Deletions first, so a deleted category's name can be reused in the same save.
+						...[...deleted].flatMap(id => [
+							env.DB.prepare(`
+								UPDATE roster_categories SET deleted = 1, updated_at = datetime('now')
+								WHERE id = ?
+							`).bind(id),
+							env.DB.prepare("DELETE FROM roster_name_categories WHERE category_id = ?").bind(id),
+						]),
+						// Park every kept category on a unique placeholder key, so swapping two names
+						// (正規 ↔ スポット) doesn't hit the unique index halfway through.
+						...keptIds.map(id => env.DB.prepare(
+							"UPDATE roster_categories SET name_key = id WHERE id = ?"
+						).bind(id)),
+						...items.map((c, i) => c.id
+							? env.DB.prepare(`
+								UPDATE roster_categories SET name = ?, name_key = ?, sort_order = ?, updated_at = datetime('now')
+								WHERE id = ?
+							`).bind(c.name, c.key, i, c.id)
+							: env.DB.prepare(`
+								INSERT INTO roster_categories (id, team_id, name, name_key, sort_order)
+								VALUES (?, ?, ?, ?, ?)
+							`).bind(crypto.randomUUID(), rosterTeamId, c.name, c.key, i)),
+					]);
+
+					return getSuccessResponse(await getRoster(env.DB, rosterTeamId));
+				}
+			} catch (e) {
+				// Another editor saved the same name between our check and our write.
+				if (isUniqueConstraintError(e)) {
+					return getErrorResponse("Name already in the roster.", 409);
+				}
+				return getErrorResponse(`Internal server error: ${(e as Error).message}`, 500);
+			}
+
+			return getErrorResponse(`Endpoint not found`, 404);
 		}
 
 		if (url.pathname.startsWith("/api/team/")) {

@@ -79,3 +79,30 @@ export type PasswordResetTokenRow = {
   attempts: number,
   created_at: string,
 }
+
+export type RosterCategoryRow = {
+  id: string,
+  team_id: string,
+  name: string,
+  name_key: string, // toNameKey(name), for uniqueness only
+  sort_order: number,
+  deleted: 0 | 1,
+  created_at: string,
+  updated_at: string,
+}
+
+export type RosterNameRow = {
+  id: string,
+  team_id: string,
+  name: string,
+  name_key: string, // toNameKey(name), for uniqueness only
+  deleted: 0 | 1,
+  created_by: string | null, // team_members.id
+  created_at: string,
+  updated_at: string,
+}
+
+export type RosterNameCategoryRow = {
+  name_id: string,
+  category_id: string,
+}
