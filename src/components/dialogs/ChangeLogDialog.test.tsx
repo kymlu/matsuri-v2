@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { Dialog } from "@base-ui/react";
 import { Choreo } from "../../models/choreo";
 import { ChangeLog } from "../../lib/helpers/changeLogHelper";
@@ -130,17 +130,8 @@ describe("ChangeLogDialog", () => {
 
   describe("全体", () => {
     // Reads the rows as "label text", or just the text for full-width rows.
-    const rowsOf = (title: string) => {
-      const rows: string[] = [];
-      screen.getByText(title, { selector: "div" }).parentElement!.querySelectorAll(".grid > span").forEach(cell => {
-        if (cell.classList.contains("col-span-2") || cell.classList.contains("text-muted")) {
-          rows.push(cell.textContent ?? "");
-        } else {
-          rows[rows.length - 1] += ` ${cell.textContent}`;
-        }
-      });
-      return rows;
-    };
+    const rowsOf = (title: string) =>
+      within(screen.getByRole("group", { name: title })).getAllByRole("listitem").map(row => row.textContent);
 
     it("shows each group as condensed rows, with the hint", () => {
       renderDialog("", makeLog({
@@ -170,18 +161,29 @@ describe("ChangeLogDialog", () => {
     it("groups 振り by section, then by action for count changes", () => {
       renderDialog("", makeLog({
         actions: [
-          { sectionId: "s1", actionName: "振りA", countName: "3回目", change: "added" },
-          { sectionId: "s1", actionName: "振りA", countName: "1回目", change: "removed" },
-          { sectionId: "s1", actionName: "振りA", countName: "最初", change: "renamed", oldName: "1回目" },
-          { sectionId: "s2", actionName: "振りB", change: "added" },
-          { sectionId: "s2", actionName: "振りC", change: "removed" },
-          { sectionId: "s2", actionName: "振りD", change: "renamed", oldName: "振りE" },
-          { sectionId: "s2", actionName: "振りF", change: "renamed", oldName: "振りG" },
+          { sectionId: "s1", actionId: "a1", actionName: "振りA", countName: "3回目", change: "added" },
+          { sectionId: "s1", actionId: "a1", actionName: "振りA", countName: "1回目", change: "removed" },
+          { sectionId: "s1", actionId: "a1", actionName: "振りA", countName: "最初", change: "renamed", oldName: "1回目" },
+          { sectionId: "s2", actionId: "a2", actionName: "振りB", change: "added" },
+          { sectionId: "s2", actionId: "a3", actionName: "振りC", change: "removed" },
+          { sectionId: "s2", actionId: "a4", actionName: "振りD", change: "renamed", oldName: "振りE" },
+          { sectionId: "s2", actionId: "a5", actionName: "振りF", change: "renamed", oldName: "振りG" },
         ],
       }));
 
       expect(rowsOf("サビ1")).toEqual(["「振りA」のカウント", "追加 「3回目」", "削除 「1回目」", "名前変更 「1回目」→「最初」"]);
       expect(rowsOf("大サビ")).toEqual(["追加 「振りB」", "削除 「振りC」", "名前変更 「振りE」→「振りD」", " 「振りG」→「振りF」"]);
+    });
+
+    it("keeps count changes of two actions with the same name apart", () => {
+      renderDialog("", makeLog({
+        actions: [
+          { sectionId: "s1", actionId: "a1", actionName: "振りA", countName: "1回目", change: "added" },
+          { sectionId: "s1", actionId: "a2", actionName: "振りA", countName: "2回目", change: "added" },
+        ],
+      }));
+
+      expect(rowsOf("サビ1")).toEqual(["「振りA」のカウント", "追加 「1回目」", "「振りA」のカウント", "追加 「2回目」"]);
     });
 
     it("hides empty groups", () => {

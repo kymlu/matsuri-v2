@@ -245,7 +245,7 @@ function OverallChanges({ log, sectionNames }: OverallChangesProps) {
   return <>
     {
       groups.filter(([, content]) => content).map(([title, content]) =>
-        <div key={title}>
+        <div key={title} role="group" aria-label={title}>
           <div className="font-semibold">{title}</div>
           {content}
         </div>
@@ -257,15 +257,21 @@ function OverallChanges({ log, sectionNames }: OverallChangesProps) {
 // A row without a label spans the full width, for lines about one named item.
 type ChangeRow = { label?: string, text: string };
 
+// Each row's cells sit directly in the grid; the space between them is only for screen readers and tests.
 function ChangeRows({ rows, nested }: { rows: ChangeRow[], nested?: boolean }) {
-  return <div className={"grid grid-cols-[4.5em,1fr] gap-x-2 text-sm break-keep " + (nested ? "pl-6" : "pl-2")}>
+  return <div role="list" className={"grid grid-cols-[4.5em,1fr] gap-x-2 text-sm break-keep " + (nested ? "pl-6" : "pl-2")}>
     {
-      rows.map((row, i) => row.label === undefined ?
-        <span key={i} className="col-span-2">{row.text}</span> :
-        <Fragment key={i}>
-          <span className="text-muted text-nowrap">{row.label}</span>
-          <span>{row.text}</span>
-        </Fragment>
+      rows.map((row, i) =>
+        <div key={i} role="listitem" className="contents">
+          {
+            row.label === undefined ?
+            <span className="col-span-2">{row.text}</span> :
+            <>
+              <span className="text-muted text-nowrap">{row.label}</span>{" "}
+              <span>{row.text}</span>
+            </>
+          }
+        </div>
       )
     }
   </div>;
@@ -298,17 +304,18 @@ function ActionChanges({ lines, sectionNames }: { lines: ActionLine[], sectionNa
       sectionIds.map(sectionId => {
         const sectionLines = lines.filter(x => x.sectionId === sectionId);
         const countLines = sectionLines.filter(x => x.countName !== undefined);
-        const actionNames = Array.from(new Set(countLines.map(x => x.actionName)));
-        return <div key={sectionId}>
+        const actionIds = Array.from(new Set(countLines.map(x => x.actionId)));
+        return <div key={sectionId} role="group" aria-label={sectionNames[sectionId]}>
           <div className="pl-2 text-sm font-semibold">{sectionNames[sectionId]}</div>
           <ChangeRows rows={listChangeRows(toListChanges(sectionLines.filter(x => x.countName === undefined), x => x.actionName))}/>
           {
-            actionNames.map(actionName =>
-              <Fragment key={actionName}>
-                <ChangeRows rows={[{ text: `「${actionName}」のカウント` }]}/>
-                <ChangeRows nested rows={listChangeRows(toListChanges(countLines.filter(x => x.actionName === actionName), x => x.countName!!))}/>
-              </Fragment>
-            )
+            actionIds.map(actionId => {
+              const actionLines = countLines.filter(x => x.actionId === actionId);
+              return <Fragment key={actionId}>
+                <ChangeRows rows={[{ text: `「${actionLines[0].actionName}」のカウント` }]}/>
+                <ChangeRows nested rows={listChangeRows(toListChanges(actionLines, x => x.countName!!))}/>
+              </Fragment>;
+            })
           }
         </div>;
       })

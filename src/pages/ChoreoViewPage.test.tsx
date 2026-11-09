@@ -117,7 +117,7 @@ describe("ChoreoViewPage change log", () => {
 
     fireEvent.click(await screen.findByText("OK"));
     fireEvent.click(await findBanner());
-    const dialog = within((await screen.findByText(changeLogTitle)).closest<HTMLElement>("[role=dialog]")!);
+    const dialog = within(await screen.findByRole("dialog", { name: changeLogTitle }));
     expect(dialog.getByText("v1")).toBeInTheDocument();
     expect(dialog.getByText("v2")).toBeInTheDocument();
     expect(screen.getByText("名前を選ぶと、その人の変更を確認できます。")).toBeInTheDocument();
@@ -157,7 +157,7 @@ describe("ChoreoViewPage change log", () => {
     renderPage({ savedDancerName: "さくら" });
 
     fireEvent.click(await findBanner());
-    const dialog = (await screen.findByText(changeLogTitle)).closest<HTMLElement>("[role=dialog]")!;
+    const dialog = await screen.findByRole("dialog", { name: changeLogTitle });
     fireEvent.click(within(dialog).getByText("clear"));
     await waitFor(() => expect(screen.queryByText(changeLogTitle)).not.toBeInTheDocument());
     expect(queryBanner()).not.toBeInTheDocument();
@@ -171,8 +171,8 @@ describe("ChoreoViewPage change log", () => {
     mockGetChoreoFile.mockResolvedValue(makeChoreo(1));
     renderPage({ savedDancerName: "さくら" });
 
-    const banner = await findBanner();
-    fireEvent.click(within(banner.closest("div")!).getByRole("button", { name: "clear" }));
+    await findBanner();
+    fireEvent.click(screen.getByRole("button", { name: "clear" }));
     expect(queryBanner()).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByText("change log button"));

@@ -29,6 +29,7 @@ export type DancerChangeEntry =
 
 export type ActionLine = {
   sectionId: string,
+  actionId: string, // the new ID, or the old one for a removed action
   actionName: string,
   countName?: string, // set when the change is to a count in the action
   change: "added" | "removed" | "renamed",
@@ -191,18 +192,18 @@ function compareActions(oldSection: ChoreoSection, newSection: ChoreoSection): A
   newSection.formation.dancerActions.forEach(action => {
     const oldAction = actionMatch.oldOf[action.id];
     if (!oldAction) {
-      lines.push({ sectionId, actionName: action.name, change: "added" });
+      lines.push({ sectionId, actionId: action.id, actionName: action.name, change: "added" });
       return;
     }
     if (!sameText(oldAction.name, action.name)) {
-      lines.push({ sectionId, actionName: action.name, change: "renamed", oldName: oldAction.name });
+      lines.push({ sectionId, actionId: action.id, actionName: action.name, change: "renamed", oldName: oldAction.name });
     }
     const countChanges = getListChanges(matchById(oldAction.timings, action.timings), action.timings);
-    countChanges.added.forEach(name => lines.push({ sectionId, actionName: action.name, countName: name, change: "added" }));
-    countChanges.removed.forEach(name => lines.push({ sectionId, actionName: action.name, countName: name, change: "removed" }));
-    countChanges.renamed.forEach(([oldName, name]) => lines.push({ sectionId, actionName: action.name, countName: name, change: "renamed", oldName }));
+    countChanges.added.forEach(name => lines.push({ sectionId, actionId: action.id, actionName: action.name, countName: name, change: "added" }));
+    countChanges.removed.forEach(name => lines.push({ sectionId, actionId: action.id, actionName: action.name, countName: name, change: "removed" }));
+    countChanges.renamed.forEach(([oldName, name]) => lines.push({ sectionId, actionId: action.id, actionName: action.name, countName: name, change: "renamed", oldName }));
   });
-  actionMatch.removed.forEach(action => lines.push({ sectionId, actionName: action.name, change: "removed" }));
+  actionMatch.removed.forEach(action => lines.push({ sectionId, actionId: action.id, actionName: action.name, change: "removed" }));
   return lines;
 }
 

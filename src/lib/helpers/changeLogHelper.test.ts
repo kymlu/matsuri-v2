@@ -337,7 +337,7 @@ describe("buildChangeLog", () => {
     it("reports a count rename only in the overall actions", () => {
       const log = compare(c => setActions(c, 0, action("a1", "振りA", [["t1", "最初", ["d1"]], ["t2", "2回目", []]])), old);
       expect(log.dancers).toEqual({});
-      expect(log.overall.actions).toEqual([{ sectionId: "s1", actionName: "振りA", countName: "最初", change: "renamed", oldName: "1回目" }]);
+      expect(log.overall.actions).toEqual([{ sectionId: "s1", actionId: "a1", actionName: "振りA", countName: "最初", change: "renamed", oldName: "1回目" }]);
     });
 
     it("does not match counts by name", () => {
@@ -359,12 +359,12 @@ describe("buildChangeLog", () => {
         },
       );
       expect(log.overall.actions).toEqual([
-        { sectionId: "s1", actionName: "振りA2", change: "renamed", oldName: "振りA" },
-        { sectionId: "s1", actionName: "振りA2", countName: "3回目", change: "added" },
-        { sectionId: "s1", actionName: "振りA2", countName: "2回目", change: "removed" },
-        { sectionId: "s1", actionName: "振りC", change: "added" },
-        { sectionId: "s1", actionName: "振りB", change: "removed" },
-        { sectionId: "s2", actionName: "振りD", change: "added" },
+        { sectionId: "s1", actionId: "a1", actionName: "振りA2", change: "renamed", oldName: "振りA" },
+        { sectionId: "s1", actionId: "a1", actionName: "振りA2", countName: "3回目", change: "added" },
+        { sectionId: "s1", actionId: "a1", actionName: "振りA2", countName: "2回目", change: "removed" },
+        { sectionId: "s1", actionId: "a3", actionName: "振りC", change: "added" },
+        { sectionId: "s1", actionId: "a2", actionName: "振りB", change: "removed" },
+        { sectionId: "s2", actionId: "a4", actionName: "振りD", change: "added" },
       ]);
     });
 
