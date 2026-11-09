@@ -5,14 +5,18 @@ import { strCompare, strEquals } from "../../lib/helpers/globalHelper";
 import TextInput from "../inputs/TextInput";
 import IconButton from "../basic/IconButton";
 import { SHORT_NAME_LENGTH } from "../../lib/consts/consts";
+import CustomAutocomplete from "../inputs/CustomAutocomplete";
+import { Roster } from "../../models/roster";
+import { sortRosterNames } from "../../lib/helpers/rosterHelper";
 
 type DancerManagerDialogProps = {
   dancers: Record<string, Dancer>,
   onSubmit: (dancers: Dancer[], deletedDancerIds: string[]) => void,
+  roster?: Roster, // 名簿 names to suggest on each row, when there are any
 }
 
 export function DancerManagerDialog({
-  dancers, onSubmit
+  dancers, onSubmit, roster
 }: DancerManagerDialogProps) {
 
   const [dancerList, setDancerList] = useState<Dancer[]>([]);
@@ -40,6 +44,20 @@ export function DancerManagerDialog({
     return Object.entries(dancerNames).filter(([, count]) => count > 1).map(([name, ]) => name);
   }, [dancerNames]);
 
+  // Names not yet used in this dialog come first, so picking one moves it down for the other rows.
+  const rosterOptions = useMemo(() => {
+    if (!roster || roster.names.length === 0) {
+      return undefined;
+    }
+    const names = sortRosterNames(roster.names).map(n => n.name);
+    return [...names.filter(n => !dancerNames[n]), ...names.filter(n => dancerNames[n])];
+  }, [roster, dancerNames]);
+
+  const categoryNamesByName = useMemo(() => {
+    const categoryNames = new Map(roster?.categories.map(c => [c.id, c.name]));
+    return new Map(roster?.names.map(n => [n.name, n.categoryIds.map(id => categoryNames.get(id)).join("・")]));
+  }, [roster]);
+
   return <BaseEditDialog
       title="ダンサー管理"
       full
@@ -59,16 +77,31 @@ export function DancerManagerDialog({
           {
             dancerList.map((dancer, i) => 
               <div className="flex flex-row items-center gap-1" key={dancer.id}>
-                <TextInput
-                  label="ダンサー名"
-                  required
-                  defaultValue={dancer.name}
-                  hasError={dancerNames[dancer.name.trim()] > 1}
-                  onContentChange={(newName) => {
-                    setDancerList(prev => prev.map((d, index) => index === i ? { ...d, name: newName } : d));
-                  }}
-                  maxLength={SHORT_NAME_LENGTH}
-                />
+                {
+                  rosterOptions
+                    ? <CustomAutocomplete
+                        label="ダンサー名"
+                        required
+                        defaultValue={dancer.name}
+                        hasError={dancerNames[dancer.name.trim()] > 1}
+                        options={rosterOptions}
+                        itemSuffix={(item) => <span className="text-xs opacity-75">{categoryNamesByName.get(item)}</span>}
+                        onContentChange={(newName) => {
+                          setDancerList(prev => prev.map((d, index) => index === i ? { ...d, name: newName } : d));
+                        }}
+                        maxLength={SHORT_NAME_LENGTH}
+                      />
+                    : <TextInput
+                        label="ダンサー名"
+                        required
+                        defaultValue={dancer.name}
+                        hasError={dancerNames[dancer.name.trim()] > 1}
+                        onContentChange={(newName) => {
+                          setDancerList(prev => prev.map((d, index) => index === i ? { ...d, name: newName } : d));
+                        }}
+                        maxLength={SHORT_NAME_LENGTH}
+                      />
+                }
                 <div className="px-2 pt-4">
                   <IconButton
                     noBorder

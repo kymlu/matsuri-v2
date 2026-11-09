@@ -37,6 +37,7 @@ import EditNameDialog from "../components/dialogs/EditNameDialog";
 import CustomDialog from "../components/basic/CustomDialog";
 import { IconLabelButton } from "../components/basic/Button";
 import EditDancerNameDialog from "../components/dialogs/EditDancerNameDialog";
+import { useRoster } from "../lib/hooks/useRoster";
 import InstructionMessage from "../components/basic/InstructionMessage";
 import { ChoreoStatus } from "./HomePage";
 import PublishConfirmationDialog from "../components/dialogs/PublishConfirmationDialog";
@@ -426,6 +427,10 @@ export default function ChoreoEditPage(props: {
   const [editDancerColourDialogOpen, setEditDancerColourDialogOpen] = useState(false);
   const [editDancerActionsDialogOpen, setEditDancerActionsDialogOpen] = useState(false);
   const [dancerManagerDialogOpen, setDancerManagerDialogOpen] = useState(false);
+  // 名簿 suggestions for dancer names; the picker's open state and filter last while this choreo is open.
+  const roster = useRoster(props.teamId, props.isLoggedIn && !props.isViewer);
+  const [isRosterPickerOpen, setIsRosterPickerOpen] = useState(true);
+  const [rosterFilter, setRosterFilter] = useState("all");
   const [propManagerDialogOpen, setPropManagerDialogOpen] = useState(false);
   const [propSizeDialogOpen, setPropSizeDialogOpen] = useState(false);
   const [renameSectionDialogOpen, setRenameSectionDialogOpen] = useState(false);
@@ -1199,6 +1204,11 @@ export default function ChoreoEditPage(props: {
         <EditDancerNameDialog
           name={history.presentState.state.dancers[firstSelectedDancerProp?.id ?? ""]?.name}
           otherNames={Object.values(history.presentState.state.dancers).map(x => x.name)}
+          roster={roster}
+          isPickerOpen={isRosterPickerOpen}
+          onPickerOpenChange={setIsRosterPickerOpen}
+          pickerFilter={rosterFilter}
+          onPickerFilterChange={setRosterFilter}
           onSubmit={(name) => {
             commitState(renameDancer(history.presentState.state, firstSelectedDancerProp!.id, name));
             renameDancerDialog.close();
@@ -1239,6 +1249,7 @@ export default function ChoreoEditPage(props: {
         onOpenChange={handleDancerManagerDialogOpen}>
         <DancerManagerDialog
           dancers={history.presentState.state.dancers}
+          roster={roster}
           onSubmit={(dancers, deletedDancerIds) => {
             commitState(renameAndDeleteDancers(history.presentState.state, indexByKey(dancers, "id"), new Set(deletedDancerIds)));
             dancerManagerDialog.close();

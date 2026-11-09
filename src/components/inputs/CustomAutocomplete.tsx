@@ -13,6 +13,7 @@ export type CustomAutocompleteProps = {
   options: string[],
   itemToStringValueFunc?: (item: string) => string,
   listItemFormat?: (item: string) => React.ReactNode,
+  itemSuffix?: (item: string) => React.ReactNode, // extra text after an option, keeping the default item styling
   onContentChange: (newContent: string) => void,
   placeholder?: string,
   search?: boolean,
@@ -32,7 +33,7 @@ export type CustomAutocompleteProps = {
 }
 
 export default function CustomAutocomplete({
-  name, options, listItemFormat, itemToStringValueFunc, defaultValue, onContentChange, placeholder,
+  name, options, listItemFormat, itemSuffix, itemToStringValueFunc, defaultValue, onContentChange, placeholder,
   search, clearable, compact, short, centered,
   required, hasError, disabled, ref, maxLength,
   showLength, label, rightLabel, restrictFn
@@ -104,7 +105,7 @@ export default function CustomAutocomplete({
                   <Autocomplete.List>
                     {(item: string) => (
                       <React.Fragment key={item}>
-                        {!listItemFormat && <AutocompleteItem item={item}/>}
+                        {!listItemFormat && <AutocompleteItem item={item} suffix={itemSuffix?.(item)}/>}
                         {listItemFormat && listItemFormat(item) }
                       </React.Fragment>
                     )}
@@ -151,13 +152,14 @@ export default function CustomAutocomplete({
   )
 }
 
-function AutocompleteItem(props: {item: string, onClick?: () => void}) {
-  const {item, onClick} = props;
+function AutocompleteItem(props: {item: string, suffix?: React.ReactNode, onClick?: () => void}) {
+  const {item, suffix, onClick} = props;
   return <Autocomplete.Item
     className="flex cursor-default items-center gap-2 py-2 pr-8 pl-4 text-base leading-4 outline-none select-none data-[highlighted]:relative data-[highlighted]:z-0 data-[highlighted]:text-gray-50 data-[highlighted]:before:absolute data-[highlighted]:before:inset-x-2 data-[highlighted]:before:inset-y-0 data-[highlighted]:before:z-[-1] data-[highlighted]:before:rounded-md data-[highlighted]:before:bg-primary data-[highlighted]:before:text-white"
     value={item}
     onClick={onClick}
   >
-    {item}
+    <span className="flex-1">{item}</span>
+    {suffix}
   </Autocomplete.Item>
 }
