@@ -6,13 +6,13 @@ import TextInput from "../inputs/TextInput";
 import IconButton from "../basic/IconButton";
 import { SHORT_NAME_LENGTH } from "../../lib/consts/consts";
 import CustomAutocomplete from "../inputs/CustomAutocomplete";
-import { Roster } from "../../models/roster";
+import { RosterList } from "../../models/roster";
 import { sortRosterNames } from "../../lib/helpers/rosterHelper";
 
 type DancerManagerDialogProps = {
   dancers: Record<string, Dancer>,
   onSubmit: (dancers: Dancer[], deletedDancerIds: string[]) => void,
-  roster?: Roster, // 名簿 names to suggest on each row, when there are any
+  roster?: RosterList, // 名簿 dancer names to suggest on each row, when there are any
 }
 
 export function DancerManagerDialog({

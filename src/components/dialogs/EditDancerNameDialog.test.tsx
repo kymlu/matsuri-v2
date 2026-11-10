@@ -1,9 +1,9 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { Dialog } from "@base-ui/react";
-import { Roster } from "../../models/roster";
+import { RosterList } from "../../models/roster";
 import EditDancerNameDialog from "./EditDancerNameDialog";
 
-const roster: Roster = {
+const roster: RosterList = {
   categories: [{ id: "c1", name: "正規" }, { id: "c2", name: "旗士" }],
   names: [
     { id: "n1", name: "はると", categoryIds: ["c1", "c2"] },

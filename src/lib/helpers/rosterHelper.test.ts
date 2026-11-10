@@ -1,7 +1,7 @@
-import { Roster } from "../../models/roster";
-import { getAddBarState, getAddedSummary, sortRosterNames, splitNames, toNameKey } from "./rosterHelper";
+import { RosterList } from "../../models/roster";
+import { formatPropSize, getAddBarState, getAddedSummary, getPropDefaultsChange, sortRosterNames, splitNames, toNameKey } from "./rosterHelper";
 
-const roster: Roster = {
+const roster: RosterList = {
   categories: [{ id: "c1", name: "正規" }, { id: "c2", name: "旗士" }],
   names: [
     { id: "n1", name: "さくら", categoryIds: ["c1"] },
@@ -67,5 +67,35 @@ describe("getAddedSummary", () => {
     expect(getAddedSummary(1, 1, ["旗士"])).toBe("1名を追加・1名に旗士を追加しました");
     expect(getAddedSummary(0, 3, ["正規", "旗士"])).toBe("3名に正規・旗士を追加しました");
     expect(getAddedSummary(0, 0, [])).toBe("変更はありません");
+  });
+});
+
+describe("props", () => {
+  it("counts props with 件 and names the list in the summary", () => {
+    expect(getAddedSummary(3, 0, [], "prop")).toBe("3件の道具を追加しました");
+    expect(getAddedSummary(3, 0, ["旗"], "prop")).toBe("3件の道具を追加しました（旗）");
+    expect(getAddedSummary(1, 1, ["旗"], "prop")).toBe("1件の道具を追加・1件に旗を追加しました");
+    const names = Array.from({ length: 201 }, (_, i) => `p${i}`).join("\n");
+    expect(getAddBarState(names, [], { categories: [], names: [] }, "prop").error).toBe("一度に追加できるのは200件までです");
+  });
+
+  const prop = { length: 1, width: 1, color: "#000000" };
+  const name = (defaults: { length?: number, width?: number, color?: string }) => ({ id: "n", name: "大旗", categoryIds: [], ...defaults });
+
+  it("finds only the defaults that are set and differ", () => {
+    expect(getPropDefaultsChange(prop, name({}))).toBeUndefined();
+    expect(getPropDefaultsChange(prop, name({ length: 1, width: 1, color: "#000000" }))).toBeUndefined();
+    expect(getPropDefaultsChange(prop, name({ width: 4 }))).toEqual({ width: 4 });
+    expect(getPropDefaultsChange(prop, name({ length: 1, width: 4, color: "#F08A00" }))).toEqual({ width: 4, color: "#F08A00" });
+  });
+
+  it("compares colours ignoring case", () => {
+    expect(getPropDefaultsChange({ ...prop, color: "#f08a00" }, name({ color: "#F08A00" }))).toBeUndefined();
+  });
+
+  it("formats a size, or the part that's set", () => {
+    expect(formatPropSize({ length: 1, width: 4 })).toBe("縦1m × 幅4m");
+    expect(formatPropSize({ width: 4 })).toBe("幅4m");
+    expect(formatPropSize({})).toBe("");
   });
 });

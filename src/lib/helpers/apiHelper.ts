@@ -2,7 +2,7 @@ import { ErrorResponse } from "../../models/api";
 import { BasicChoreoDetails, Choreo, ChoreoVersion } from "../../models/choreo";
 import { Team } from "../../models/team";
 import { RoleType, User } from "../../models/user";
-import { AddRosterNamesResult, AddRosterNamesResultSchema, Roster, RosterSchema } from "../../models/roster";
+import { AddRosterNamesResult, AddRosterNamesResultSchema, PropDefaults, Roster, RosterKind, RosterSchema } from "../../models/roster";
 import * as z from "zod";
 
 const getApiUrl = (endpoint: 
@@ -612,20 +612,23 @@ const postRoster = async <T,>(
 
 export const addRosterNames = (
   teamId: string,
+  kind: RosterKind,
   names: string[],
   categoryIds: string[],
   onSuccess: (result: AddRosterNamesResult) => void,
   onFailure: (status: number) => void,
-) => postRoster("roster/names/add", teamId, { names, category_ids: categoryIds }, AddRosterNamesResultSchema, onSuccess, onFailure);
+) => postRoster("roster/names/add", teamId, { kind, names, category_ids: categoryIds }, AddRosterNamesResultSchema, onSuccess, onFailure);
 
+// Prop names can also set their default size and colour; leave defaults out to keep them.
 export const updateRosterName = (
   teamId: string,
   id: string,
   name: string,
   categoryIds: string[],
+  defaults: PropDefaults | undefined,
   onSuccess: (roster: Roster) => void,
   onFailure: (status: number) => void,
-) => postRoster("roster/names/update", teamId, { id, name, category_ids: categoryIds }, RosterSchema, onSuccess, onFailure);
+) => postRoster("roster/names/update", teamId, { id, name, category_ids: categoryIds, ...defaults }, RosterSchema, onSuccess, onFailure);
 
 export const removeRosterName = (
   teamId: string,
@@ -636,8 +639,9 @@ export const removeRosterName = (
 
 export const saveRosterCategories = (
   teamId: string,
+  kind: RosterKind,
   categories: { id?: string, name: string }[],
   deletedIds: string[],
   onSuccess: (roster: Roster) => void,
   onFailure: (status: number) => void,
-) => postRoster("roster/categories/save", teamId, { categories, deleted_ids: deletedIds }, RosterSchema, onSuccess, onFailure);
+) => postRoster("roster/categories/save", teamId, { kind, categories, deleted_ids: deletedIds }, RosterSchema, onSuccess, onFailure);

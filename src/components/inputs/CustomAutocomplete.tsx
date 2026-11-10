@@ -14,6 +14,7 @@ export type CustomAutocompleteProps = {
   itemToStringValueFunc?: (item: string) => string,
   listItemFormat?: (item: string) => React.ReactNode,
   itemSuffix?: (item: string) => React.ReactNode, // extra text after an option, keeping the default item styling
+  onItemSelect?: (item: string) => void, // only when an option is chosen (tap or Enter), not when typing
   onContentChange: (newContent: string) => void,
   placeholder?: string,
   search?: boolean,
@@ -33,7 +34,7 @@ export type CustomAutocompleteProps = {
 }
 
 export default function CustomAutocomplete({
-  name, options, listItemFormat, itemSuffix, itemToStringValueFunc, defaultValue, onContentChange, placeholder,
+  name, options, listItemFormat, itemSuffix, onItemSelect, itemToStringValueFunc, defaultValue, onContentChange, placeholder,
   search, clearable, compact, short, centered,
   required, hasError, disabled, ref, maxLength,
   showLength, label, rightLabel, restrictFn
@@ -86,7 +87,12 @@ export default function CustomAutocomplete({
             defaultValue={defaultValue}
             openOnInputClick
             items={options}
-            onValueChange={(newValue: string) => handleChange(newValue)}
+            onValueChange={(newValue: string, eventDetails) => {
+              handleChange(newValue);
+              if (eventDetails.reason === "item-press") {
+                onItemSelect?.(newValue);
+              }
+            }}
             filter={(item: string, query: string) => {return item.toLowerCase().includes(query.toLowerCase())}}
             highlightItemOnHover
             itemToStringValue={itemToStringValueFunc}

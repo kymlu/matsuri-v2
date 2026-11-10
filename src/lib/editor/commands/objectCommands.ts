@@ -9,6 +9,7 @@ import { Obstacle, Prop, PropPosition } from "../../../models/prop"
 import { colorPalette } from "../../consts/colors"
 import { strEquals, roundToTenth, indexByKey } from "../../helpers/globalHelper"
 import { centreToCorner, centreToCornerFromProp, cornerToCentreFromProp } from "../../helpers/editorCalculationHelper"
+import { fitPropsInside } from "./choreoCommands"
 
 export function addDancer(state: Choreo, dancer: Dancer, x: number, y: number, z: number): Choreo {
   const newDancers = { ...state.dancers, [dancer.id]: dancer }
@@ -105,11 +106,16 @@ export function editAndDeleteProps(state: Choreo, editedProps: Record<string, Pr
     }
   });
 
-  return {
+  // A prop that grew could now stick out past the stage, so it's moved back inside.
+  const resizedPropIds = new Set(Object.values(editedProps)
+    .filter(prop => state.props[prop.id] && (state.props[prop.id].length !== prop.length || state.props[prop.id].width !== prop.width))
+    .map(prop => prop.id));
+
+  return fitPropsInside({
     ...state,
     props: editedProps,
     sections: newSections,
-  }
+  }, resizedPropIds);
 }
 
 export function addProp(state: Choreo, prop: Prop, x: number, y: number, z: number): Choreo {

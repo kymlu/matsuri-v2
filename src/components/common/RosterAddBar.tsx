@@ -1,29 +1,31 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import classNames from "classnames";
-import { Roster } from "../../models/roster";
+import { Roster, RosterKind, RosterList, rosterListOf } from "../../models/roster";
 import { addRosterNames } from "../../lib/helpers/apiHelper";
-import { getAddBarState, getAddedSummary, splitNames, toNameKey } from "../../lib/helpers/rosterHelper";
+import { getAddBarState, getAddedSummary, rosterCounter, splitNames, toNameKey } from "../../lib/helpers/rosterHelper";
 import { SHORT_NAME_LENGTH } from "../../lib/consts/consts";
 import { ChipToggles } from "../inputs/Chips";
 import Icon from "../basic/Icon";
 
 type RosterAddBarProps = {
   teamId: string,
-  roster: Roster,
+  kind: RosterKind, // which tab's list this bar adds to
+  isVisible?: boolean, // false while its tab is hidden; the box can only be measured when shown
+  list: RosterList,
   filter: string, // the page's filter: a category id, "all" or "none"
   onRosterChange: (roster: Roster) => void,
 }
 
 // Fixed to the bottom of the 名簿 page. One name per line, so a single name and a pasted list
 // are the same action; names already in the roster just get the selected categories.
-export default function RosterAddBar({ teamId, roster, filter, onRosterChange }: RosterAddBarProps) {
+export default function RosterAddBar({ teamId, kind, isVisible = true, list: roster, filter, onRosterChange }: RosterAddBarProps) {
   const [text, setText] = useState("");
   const [categoryIds, setCategoryIds] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   // Shown until the next edit: the result of the last add, or why it failed.
   const [lastResult, setLastResult] = useState<{ message: string, isError: boolean }>();
   // The roster this bar last received from the server, to tell its own changes from edits elsewhere on the page.
-  const ownRoster = useRef<Roster | undefined>(undefined);
+  const ownRoster = useRef<RosterList | undefined>(undefined);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Filtering to a category pre-selects it here; after that the two are independent.
@@ -50,13 +52,13 @@ export default function RosterAddBar({ teamId, roster, filter, onRosterChange }:
   // Grow with the content, including long lines that wrap; max-h caps it at about four lines, then it scrolls.
   useLayoutEffect(() => {
     const textarea = textareaRef.current;
-    if (textarea) {
+    if (textarea && isVisible) {
       textarea.style.height = "auto";
       textarea.style.height = `${textarea.scrollHeight + textarea.offsetHeight - textarea.clientHeight}px`;
     }
-  }, [text]);
+  }, [text, isVisible]);
 
-  const state = useMemo(() => getAddBarState(text, categoryIds, roster), [text, categoryIds, roster]);
+  const state = useMemo(() => getAddBarState(text, categoryIds, roster, kind), [text, categoryIds, roster, kind]);
   const lineCount = text.split("\n").length;
 
   const submit = () => {
@@ -65,14 +67,14 @@ export default function RosterAddBar({ teamId, roster, filter, onRosterChange }:
     }
     setIsSaving(true);
     const categoryNames = roster.categories.filter(c => categoryIds.includes(c.id)).map(c => c.name);
-    addRosterNames(teamId, state.toSend, categoryIds,
+    addRosterNames(teamId, kind, state.toSend, categoryIds,
       (result) => {
-        ownRoster.current = result.roster;
+        ownRoster.current = rosterListOf(result.roster, kind);
         onRosterChange(result.roster);
         // Leave only the names that still need fixing.
         const leftOver = new Set([...state.tooLong, ...result.skipped.filter(s => s.reason === "too_long").map(s => s.name)].map(toNameKey));
         setText(splitNames(text).filter(n => leftOver.has(toNameKey(n))).join("\n"));
-        setLastResult({ message: getAddedSummary(result.added, result.updated, categoryNames), isError: false });
+        setLastResult({ message: getAddedSummary(result.added, result.updated, categoryNames, kind), isError: false });
         setIsSaving(false);
       },
       () => {
@@ -96,12 +98,12 @@ export default function RosterAddBar({ teamId, roster, filter, onRosterChange }:
         {/* Enter adds a new line rather than submitting: the IME also uses Enter to confirm. */}
         <textarea
           ref={textareaRef}
-          aria-label="名前を追加"
+          aria-label={kind === "dancer" ? "名前を追加" : "道具名を追加"}
           value={text}
           rows={1}
           // Read-only while saving: the box is reset from what was sent, so anything typed meanwhile would be lost.
           readOnly={isSaving}
-          placeholder="名前を追加（1行に1名）"
+          placeholder={kind === "dancer" ? "名前を追加（1行に1名）" : "道具名を追加（1行に1つ）"}
           onChange={(e) => {
             setText(e.target.value);
             setLastResult(undefined);
@@ -121,7 +123,7 @@ export default function RosterAddBar({ teamId, roster, filter, onRosterChange }:
         onClick={submit}
         className={buttonClasses}>
         <Icon src="add" size="xs" colour={state.toSend.length > 0 && !isSaving ? "white" : "grey"}/>
-        {state.toSend.length > 1 ? `${state.toSend.length}名` : "追加"}
+        {state.toSend.length > 1 ? `${state.toSend.length}${rosterCounter(kind)}` : "追加"}
       </button>
       {
         roster.categories.length > 0

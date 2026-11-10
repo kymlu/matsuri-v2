@@ -1,5 +1,5 @@
 import { SHORT_NAME_LENGTH } from "../consts/consts";
-import { Roster, RosterName } from "../../models/roster";
+import { RosterKind, RosterList, RosterName } from "../../models/roster";
 import { strCompare } from "./globalHelper";
 
 export const ROSTER_CATEGORY_LENGTH = 10;
@@ -37,8 +37,11 @@ export type AddBarState = {
   error?: string,      // the one-line message under the chips
 }
 
+// 名 counts people; 件 counts prop entries.
+export const rosterCounter = (kind: RosterKind) => kind === "dancer" ? "名" : "件";
+
 // What the add bar shows for the typed text and selected categories, before anything is sent.
-export function getAddBarState(text: string, categoryIds: string[], roster: Roster): AddBarState {
+export function getAddBarState(text: string, categoryIds: string[], roster: RosterList, kind: RosterKind = "dancer"): AddBarState {
   const names = splitNames(text);
   const byKey = new Map(roster.names.map(n => [toNameKey(n.name), n]));
 
@@ -55,7 +58,7 @@ export function getAddBarState(text: string, categoryIds: string[], roster: Rost
   } else if (tooLong.length > 1) {
     error = `長すぎる名前が${tooLong.length}件あります（${SHORT_NAME_LENGTH}文字まで）`;
   } else if (toSend.length > ROSTER_MAX_ADD) {
-    error = `一度に追加できるのは${ROSTER_MAX_ADD}名までです`;
+    error = `一度に追加できるのは${ROSTER_MAX_ADD}${rosterCounter(kind)}までです`;
   } else if (unchanged.length === 1) {
     error = `${quoteName(unchanged[0])}はすでに名簿にあります`;
   } else if (unchanged.length > 1) {
@@ -65,16 +68,45 @@ export function getAddBarState(text: string, categoryIds: string[], roster: Rost
   return { toSend, tooLong, unchanged, error };
 }
 
-// The grey line after a successful add, e.g. 2名を追加・1名に旗士を追加しました.
-export function getAddedSummary(added: number, updated: number, categoryNames: string[]): string {
+// The grey line after a successful add, e.g. 2名を追加・1名に旗士を追加しました, or for props
+// 3件の道具を追加しました, naming the list so it's clear which tab took them.
+export function getAddedSummary(added: number, updated: number, categoryNames: string[], kind: RosterKind = "dancer"): string {
   const categories = categoryNames.join("・");
+  const counter = rosterCounter(kind);
   const parts = [
-    added > 0 ? `${added}名を追加` : "",
-    updated > 0 ? `${updated}名に${categories}を追加` : "",
+    added > 0 ? `${added}${counter}${kind === "prop" ? "の道具" : ""}を追加` : "",
+    updated > 0 ? `${updated}${counter}に${categories}を追加` : "",
   ].filter(x => x !== "");
   if (parts.length === 0) {
     return "変更はありません";
   }
   const withCategories = added > 0 && updated === 0 && categories !== "" ? `（${categories}）` : "";
   return `${parts.join("・")}しました${withCategories}`;
+}
+
+export type PropLook = { length: number, width: number, color: string };
+
+// What picking a prop name would change on a placed prop: only its defaults that are set and differ.
+// Returns undefined when there's nothing to change, so no checkbox is shown.
+export function getPropDefaultsChange(prop: PropLook, rosterName: RosterName): Partial<PropLook> | undefined {
+  const change: Partial<PropLook> = {};
+  if (rosterName.length !== undefined && rosterName.length !== prop.length) {
+    change.length = rosterName.length;
+  }
+  if (rosterName.width !== undefined && rosterName.width !== prop.width) {
+    change.width = rosterName.width;
+  }
+  // Colours are compared ignoring case: the palette and stored values may differ only in that.
+  if (rosterName.color !== undefined && rosterName.color.toLowerCase() !== prop.color.toLowerCase()) {
+    change.color = rosterName.color;
+  }
+  return Object.keys(change).length > 0 ? change : undefined;
+}
+
+// A name's default size as text, e.g. 縦1m × 幅4m, or just the one that's set.
+export function formatPropSize(size: { length?: number, width?: number }): string {
+  return [
+    size.length !== undefined ? `縦${size.length}m` : "",
+    size.width !== undefined ? `幅${size.width}m` : "",
+  ].filter(x => x !== "").join(" × ");
 }

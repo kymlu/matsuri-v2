@@ -4,7 +4,7 @@ import { DndContext } from "@dnd-kit/core";
 import { arrayMove, SortableContext, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { restrictToParentElement, restrictToVerticalAxis } from "@dnd-kit/modifiers";
-import { Roster } from "../../models/roster";
+import { Roster, RosterKind, RosterList } from "../../models/roster";
 import { saveRosterCategories } from "../../lib/helpers/apiHelper";
 import { ROSTER_CATEGORY_LENGTH, toNameKey } from "../../lib/helpers/rosterHelper";
 import BaseEditDialog from "./BaseEditDialog";
@@ -22,12 +22,13 @@ type CategoryRow = {
 
 type RosterCategoriesDialogProps = {
   teamId: string,
-  roster: Roster,
+  kind: RosterKind, // edits only this tab's categories
+  list: RosterList,
   onSaved: (roster: Roster) => void,
 }
 
 // Add, rename, reorder and delete categories, saved together like ダンサー管理.
-export default function RosterCategoriesDialog({ teamId, roster, onSaved }: RosterCategoriesDialogProps) {
+export default function RosterCategoriesDialog({ teamId, kind, list: roster, onSaved }: RosterCategoriesDialogProps) {
   const [rows, setRows] = useState<CategoryRow[]>(() => roster.categories.map(c => ({
     rowId: c.id,
     id: c.id,
@@ -68,7 +69,7 @@ export default function RosterCategoriesDialog({ teamId, roster, onSaved }: Rost
 
   const save = () => {
     setIsSaving(true);
-    saveRosterCategories(teamId, rows.map(r => ({ id: r.id, name: r.name.trim() })), deletedIds,
+    saveRosterCategories(teamId, kind, rows.map(r => ({ id: r.id, name: r.name.trim() })), deletedIds,
       onSaved,
       (status) => {
         setError(status === 409 ? "同じ名前の区分がすでにあります" : "保存できませんでした。もう一度お試しください");
@@ -77,7 +78,8 @@ export default function RosterCategoriesDialog({ teamId, roster, onSaved }: Rost
   };
 
   return <BaseEditDialog
-    title="区分"
+    // Names the list, so nobody deletes a category from the wrong tab.
+    title={kind === "dancer" ? "区分（ダンサー）" : "区分（道具）"}
     fullWidth
     onSubmit={save}
     isActionButtonDisabled={isSaving || rows.some(r => isInvalid(r.name))}>
