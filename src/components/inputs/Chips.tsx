@@ -5,6 +5,8 @@ export type ChipOption = {
   value: string,
   label: string,
   count?: number,
+  note?: string, // small text after the label, e.g. 1名にあり
+  disabled?: boolean,
 }
 
 const chipClasses = (selected: boolean) => classNames(
@@ -62,13 +64,15 @@ export function ChipToggles({ label, options, values, onChange, wrap }: ChipTogg
           key={option.value}
           type="button"
           aria-pressed={selected}
-          className={chipClasses(selected)}
+          disabled={option.disabled}
+          className={classNames(chipClasses(selected), { "border-dashed text-faint": option.disabled })}
           onClick={() => onChange(selected
             ? values.filter(v => v !== option.value)
             // keep the options' order, so categories stay in display order
             : options.map(o => o.value).filter(v => v === option.value || values.includes(v)))}>
           {selected && <Icon src="check" colour="white" size="2xs"/>}
           {option.label}
+          {option.note && <span className="text-xs opacity-75">{option.note}</span>}
         </button>
       })
     }

@@ -60,3 +60,31 @@ export const AddRosterNamesResultSchema = z.object({
 });
 
 export type AddRosterNamesResult = z.infer<typeof AddRosterNamesResultSchema>;
+
+// [name id, category id]
+const RosterLinkSchema = z.tuple([z.string(), z.string()]);
+export type RosterLink = z.infer<typeof RosterLinkSchema>;
+
+// The links that actually changed, so an undo can replay exactly those reversed.
+export const RosterLinksResultSchema = z.object({
+  roster: RosterSchema,
+  added: z.array(RosterLinkSchema),
+  removed: z.array(RosterLinkSchema),
+});
+
+export type RosterLinksResult = z.infer<typeof RosterLinksResultSchema>;
+
+export const RosterRemoveResultSchema = z.object({
+  roster: RosterSchema,
+  removed: z.array(z.string()),
+});
+
+export type RosterRemoveResult = z.infer<typeof RosterRemoveResultSchema>;
+
+export const RosterRestoreResultSchema = z.object({
+  roster: RosterSchema,
+  restored: z.array(z.string()),
+  skipped: z.array(z.string()),
+});
+
+export type RosterRestoreResult = z.infer<typeof RosterRestoreResultSchema>;

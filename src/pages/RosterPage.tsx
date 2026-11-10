@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Dialog } from "@base-ui/react";
 import { Oval } from "react-loader-spinner";
 import classNames from "classnames";
 import { Team } from "../models/team";
-import { Roster, RosterKind, RosterName, rosterListOf } from "../models/roster";
-import { getRoster } from "../lib/helpers/apiHelper";
-import { formatPropSize, sortRosterNames, toNameKey } from "../lib/helpers/rosterHelper";
+import { Roster, RosterKind, RosterLinksResult, RosterName, rosterListOf } from "../models/roster";
+import { getRoster, removeRosterNames, restoreRosterNames, updateRosterLinks } from "../lib/helpers/apiHelper";
+import { countHidden, formatPropSize, getLinksSummary, getRemovedSummary, getSelectAllState, rosterCounter, sortRosterNames, toNameKey } from "../lib/helpers/rosterHelper";
 import { colorPalette } from "../lib/consts/colors";
 import IconButton from "../components/basic/IconButton";
 import { IconLabelButton } from "../components/basic/Button";
@@ -16,6 +16,9 @@ import { ChipFilter } from "../components/inputs/Chips";
 import RosterAddBar from "../components/common/RosterAddBar";
 import EditRosterNameDialog from "../components/dialogs/EditRosterNameDialog";
 import RosterCategoriesDialog from "../components/dialogs/RosterCategoriesDialog";
+import RosterSelectionBar from "../components/common/RosterSelectionBar";
+import BulkCategoryDialog from "../components/dialogs/BulkCategoryDialog";
+import ConfirmDeletionDialog from "../components/dialogs/ConfirmDeletionDialog";
 import { SEARCH_NAME_LENGTH } from "../lib/consts/consts";
 
 type RosterPageProps = {
@@ -39,8 +42,19 @@ export default function RosterPage({ goToHomePage, team, tab, onTabChange }: Ros
   const [search, setSearch] = useState("");
   const [editingName, setEditingName] = useState<RosterName>();
   const [isCategoriesDialogOpen, setIsCategoriesDialogOpen] = useState(false);
+  // Selection mode, for adding or removing categories on many names, or deleting them, at once.
+  const [isSelecting, setIsSelecting] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkMode, setBulkMode] = useState<"add" | "remove">();
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+  const [isBusy, setIsBusy] = useState(false);
+  // The result of the last selection action, with one level of undo.
+  const [lastAction, setLastAction] = useState<{ message: string, isError?: boolean, undo?: () => void }>();
+  // The roster the last selection action got back, to tell its changes from any other.
+  const ownRoster = useRef<Roster | undefined>(undefined);
 
   const list = roster && rosterListOf(roster, tab);
+  const counter = rosterCounter(tab);
 
   const loadRoster = () => {
     setLoadFailed(false);
@@ -62,6 +76,101 @@ export default function RosterPage({ goToHomePage, team, tab, onTabChange }: Ros
     setFilter("all");
     setSearch("");
     onTabChange(kind);
+  };
+
+  // Names that disappear (deleted here or by someone else) drop out of the selection.
+  useEffect(() => {
+    if (list) {
+      setSelectedIds(prev => {
+        const ids = new Set(list.names.map(n => n.id));
+        return [...prev].every(id => ids.has(id)) ? prev : new Set([...prev].filter(id => ids.has(id)));
+      });
+    }
+  }, [list]);
+
+  // Undo only reverses the last selection action, so any other change to the roster ends it.
+  useEffect(() => {
+    if (roster !== ownRoster.current) {
+      setLastAction(undefined);
+    }
+  }, [roster]);
+
+  // Changes that came from a selection action, which keep the result line and its undo.
+  const setOwnRoster = (newRoster: Roster) => {
+    ownRoster.current = newRoster;
+    setRoster(newRoster);
+  };
+
+  const failed = () => {
+    setLastAction({ message: "保存できませんでした。もう一度お試しください", isError: true });
+    setIsBusy(false);
+  };
+
+  const startSelecting = () => {
+    setIsSelecting(true);
+    setSelectedIds(new Set());
+    setLastAction(undefined);
+  };
+
+  const stopSelecting = () => {
+    setIsSelecting(false);
+    setSelectedIds(new Set());
+    setLastAction(undefined);
+  };
+
+  const toggleSelected = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const onLinksApplied = (result: RosterLinksResult) => {
+    setBulkMode(undefined);
+    setOwnRoster(result.roster);
+    const hasChanges = result.added.length + result.removed.length > 0;
+    setLastAction({
+      message: list ? getLinksSummary(result.added, result.removed, list, tab) : "",
+      // Replays exactly what changed, reversed.
+      undo: hasChanges ? () => {
+        setIsBusy(true);
+        updateRosterLinks(team.id, result.removed, result.added, (undone) => {
+          setOwnRoster(undone.roster);
+          setLastAction({ message: "元に戻しました" });
+          setIsBusy(false);
+        }, failed);
+      } : undefined,
+    });
+  };
+
+  const deleteSelected = () => {
+    setIsConfirmingDelete(false);
+    setIsBusy(true);
+    removeRosterNames(team.id, [...selectedIds], (result) => {
+      setOwnRoster(result.roster);
+      setSelectedIds(new Set());
+      setLastAction({
+        message: getRemovedSummary(result.removed.length, tab),
+        undo: result.removed.length > 0 ? () => {
+          setIsBusy(true);
+          restoreRosterNames(team.id, result.removed, (restored) => {
+            setOwnRoster(restored.roster);
+            setLastAction({
+              message: restored.skipped.length > 0
+                ? `${restored.skipped.length}${counter}は同じ名前がすでにあるため戻せませんでした`
+                : "元に戻しました",
+            });
+            setIsBusy(false);
+          }, failed);
+        } : undefined,
+      });
+      setIsBusy(false);
+    }, failed);
   };
 
   // A filter on a category that was just deleted falls back to everyone.
@@ -107,8 +216,11 @@ export default function RosterPage({ goToHomePage, team, tab, onTabChange }: Ros
             </div>
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
               <h2 className="text-2xl font-bold text-nowrap">名簿</h2>
-              {/* In the header rather than a row of their own, to leave the list room on a phone. */}
-              <div role="tablist" aria-label="名簿の種類" className="flex overflow-hidden border rounded-md border-primary">
+              {/* In the header rather than a row of their own, to leave the list room on a phone.
+                  Hidden while selecting, so a selection never mixes dancers and props. */}
+              {
+                !isSelecting &&
+                <div role="tablist" aria-label="名簿の種類" className="flex overflow-hidden border rounded-md border-primary">
                 {
                   TABS.map(t =>
                     <button
@@ -125,15 +237,20 @@ export default function RosterPage({ goToHomePage, team, tab, onTabChange }: Ros
                     </button>
                   )
                 }
-              </div>
+                </div>
+              }
             </div>
           </div>
-          <IconLabelButton
-            icon="sell"
-            label="区分"
-            primaryText
-            disabled={!roster}
-            onClick={() => setIsCategoriesDialogOpen(true)}/>
+          {
+            isSelecting
+              ? <IconLabelButton icon="check" label="完了" primary onClick={stopSelecting}/>
+              : <IconLabelButton
+                  icon="sell"
+                  label="区分"
+                  primaryText
+                  disabled={!roster}
+                  onClick={() => setIsCategoriesDialogOpen(true)}/>
+          }
         </header>
         {
           list && list.names.length > 0 && <>
@@ -145,7 +262,18 @@ export default function RosterPage({ goToHomePage, team, tab, onTabChange }: Ros
               search
               clearable
               maxLength={SEARCH_NAME_LENGTH}/>
-            <ChipFilter label="表示する区分" options={filterOptions} value={filter} onChange={setFilter}/>
+            <div className="flex items-center gap-2">
+              <div className="flex-1 min-w-0">
+                <ChipFilter label="表示する区分" options={filterOptions} value={filter} onChange={setFilter}/>
+              </div>
+              {
+                // At the end of the filter row, since it acts on the list; keeps the header as it was.
+                !isSelecting &&
+                <button type="button" onClick={startSelecting} className="flex items-center gap-0.5 pb-1 text-sm font-semibold text-primary whitespace-nowrap">
+                  <Icon src="checklist" size="xs" colour="primary"/>選択
+                </button>
+              }
+            </div>
           </>
         }
       </div>
@@ -177,14 +305,37 @@ export default function RosterPage({ goToHomePage, team, tab, onTabChange }: Ros
           list && list.names.length > 0 && visibleNames.length === 0 &&
           <p className="py-10 text-center text-muted">該当する名前はありません</p>
         }
+        {
+          isSelecting && visibleNames.length > 0 && (() => {
+            const state = getSelectAllState(visibleNames.map(n => n.id), selectedIds);
+            return <button
+              type="button"
+              role="checkbox"
+              aria-checked={state === "all" ? true : state === "some" ? "mixed" : false}
+              onClick={() => setSelectedIds(prev => {
+                const next = new Set(prev);
+                visibleNames.forEach(n => state === "all" ? next.delete(n.id) : next.add(n.id));
+                return next;
+              })}
+              className="flex items-center w-full gap-2 px-1 py-2 text-sm text-left border-b border-line text-muted">
+              <SelectBox state={state}/>
+              すべて選択（表示中の{visibleNames.length}{counter}）
+            </button>;
+          })()
+        }
         <ul>
           {
             visibleNames.map(n =>
               <li key={n.id}>
                 <button
                   type="button"
-                  onClick={() => setEditingName(n)}
-                  className="flex items-center w-full gap-2 px-1 py-2.5 text-left border-b border-subtle">
+                  role={isSelecting ? "checkbox" : undefined}
+                  aria-checked={isSelecting ? selectedIds.has(n.id) : undefined}
+                  onClick={() => isSelecting ? toggleSelected(n.id) : setEditingName(n)}
+                  className={classNames("flex items-center w-full gap-2 px-1 py-2.5 text-left border-b border-subtle", {
+                    "bg-subtle": isSelecting && selectedIds.has(n.id),
+                  })}>
+                  {isSelecting && <SelectBox state={selectedIds.has(n.id) ? "all" : "none"}/>}
                   <span className="font-semibold break-all">{n.name}</span>
                   {
                     (n.color || n.length !== undefined || n.width !== undefined) &&
@@ -201,7 +352,7 @@ export default function RosterPage({ goToHomePage, team, tab, onTabChange }: Ros
                           <Tag key={id} type={id === filter ? "primary" : "grey"} compact text={categoryName(id)}/>)
                     }
                   </span>
-                  <Icon src="chevronForward" size="xs" colour="grey"/>
+                  {!isSelecting && <Icon src="chevronForward" size="xs" colour="grey"/>}
                 </button>
               </li>
             )
@@ -212,16 +363,31 @@ export default function RosterPage({ goToHomePage, team, tab, onTabChange }: Ros
       {/* One bar per tab, so a half-typed list on one tab survives a look at the other. */}
       {
         roster && TABS.map(t =>
-          <div key={t.kind} hidden={tab !== t.kind}>
+          <div key={t.kind} hidden={isSelecting || tab !== t.kind}>
             <RosterAddBar
               teamId={team.id}
               kind={t.kind}
-              isVisible={tab === t.kind}
+              isVisible={!isSelecting && tab === t.kind}
               list={rosterListOf(roster, t.kind)}
-              filter={tab === t.kind ? filter : "all"}
+              // Filtering to pick names in selection mode shouldn't pre-select categories for adding.
+              filter={!isSelecting && tab === t.kind ? filter : "all"}
               onRosterChange={setRoster}/>
           </div>
         )
+      }
+      {
+        isSelecting && list &&
+        <RosterSelectionBar
+          kind={tab}
+          selectedCount={selectedIds.size}
+          hiddenCount={countHidden(selectedIds, visibleNames.map(n => n.id))}
+          hasCategories={list.categories.length > 0}
+          canRemoveCategories={list.names.some(n => selectedIds.has(n.id) && n.categoryIds.length > 0)}
+          isBusy={isBusy}
+          onAddCategories={() => setBulkMode("add")}
+          onRemoveCategories={() => setBulkMode("remove")}
+          onDelete={() => setIsConfirmingDelete(true)}
+          lastAction={lastAction}/>
       }
     </div>
 
@@ -259,5 +425,47 @@ export default function RosterPage({ goToHomePage, team, tab, onTabChange }: Ros
         }
       </Dialog.Root>
     }
+    {
+      roster && list &&
+      <Dialog.Root open={bulkMode !== undefined} onOpenChange={(open) => { if (!open) setBulkMode(undefined); }}>
+        {
+          bulkMode &&
+          <BulkCategoryDialog
+            teamId={team.id}
+            kind={tab}
+            list={list}
+            selectedIds={selectedIds}
+            mode={bulkMode}
+            onApplied={onLinksApplied}/>
+        }
+      </Dialog.Root>
+    }
+    {
+      list &&
+      <Dialog.Root open={isConfirmingDelete} onOpenChange={setIsConfirmingDelete}>
+        {
+          isConfirmingDelete && (() => {
+            const names = list.names.filter(n => selectedIds.has(n.id)).map(n => n.name);
+            return <ConfirmDeletionDialog
+              name={`${names.length}${counter}`}
+              note={`${names.slice(0, 3).join("・")}${names.length > 3 ? `、他${names.length - 3}${counter}` : ""}。この名前を使っている隊列表は変わりません。`}
+              verb="削除"
+              onSubmit={deleteSelected}/>;
+          })()
+        }
+      </Dialog.Root>
+    }
   </div>;
+}
+
+// A checkbox for selection mode: empty, ticked, or a dash when only some are selected.
+function SelectBox({ state }: { state: "none" | "some" | "all" }) {
+  return <span aria-hidden className={classNames("flex items-center justify-center rounded shrink-0 size-5 border-2", {
+    "border-line-strong": state === "none",
+    "border-primary bg-primary": state === "all",
+    "border-primary": state === "some",
+  })}>
+    {state === "all" && <Icon src="check" size="2xs" colour="white"/>}
+    {state === "some" && <span className="w-2.5 h-0.5 bg-primary"/>}
+  </span>;
 }

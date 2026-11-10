@@ -1,5 +1,5 @@
 import { RosterList } from "../../models/roster";
-import { formatPropSize, getAddBarState, getAddedSummary, getPropDefaultsChange, sortRosterNames, splitNames, toNameKey } from "./rosterHelper";
+import { countHidden, formatPropSize, getAddBarState, getAddedSummary, getBulkCategoryOptions, getLinksSummary, getPairs, getPropDefaultsChange, getRemovedSummary, getSelectAllState, sortRosterNames, splitNames, toNameKey } from "./rosterHelper";
 
 const roster: RosterList = {
   categories: [{ id: "c1", name: "正規" }, { id: "c2", name: "旗士" }],
@@ -97,5 +97,54 @@ describe("props", () => {
     expect(formatPropSize({ length: 1, width: 4 })).toBe("縦1m × 幅4m");
     expect(formatPropSize({ width: 4 })).toBe("幅4m");
     expect(formatPropSize({})).toBe("");
+  });
+});
+
+describe("selection mode", () => {
+  const list = {
+    categories: [{ id: "c1", name: "正規" }, { id: "c2", name: "旗士" }, { id: "c3", name: "スポット" }],
+    names: [
+      { id: "a", name: "あおい", categoryIds: ["c1"] },
+      { id: "s", name: "さくら", categoryIds: ["c1"] },
+      { id: "h", name: "はると", categoryIds: ["c1", "c2"] },
+      { id: "k", name: "かな", categoryIds: ["c3"] },
+    ],
+  };
+
+  it("works out the すべて選択 state from what's shown", () => {
+    expect(getSelectAllState(["a", "s"], new Set())).toBe("none");
+    expect(getSelectAllState(["a", "s"], new Set(["a", "k"]))).toBe("some");
+    expect(getSelectAllState(["a", "s"], new Set(["a", "s", "k"]))).toBe("all");
+  });
+
+  it("counts selected names that are hidden", () => {
+    expect(countHidden(new Set(["a", "s", "k"]), ["k"])).toBe(2);
+    expect(countHidden(new Set(["k"]), ["k", "a"])).toBe(0);
+  });
+
+  it("disables a category everyone selected has, and says how many have the rest", () => {
+    expect(getBulkCategoryOptions(list, new Set(["a", "s", "h"]), "add", "dancer")).toEqual([
+      { id: "c1", name: "正規", isDisabled: true, note: "3名とも追加済み" },
+      { id: "c2", name: "旗士", isDisabled: false, note: "1名にあり" },
+      { id: "c3", name: "スポット", isDisabled: false, note: undefined },
+    ]);
+  });
+
+  it("offers only categories someone selected has when removing", () => {
+    expect(getBulkCategoryOptions(list, new Set(["a", "h"]), "remove", "prop")).toEqual([
+      { id: "c1", name: "正規", isDisabled: false, note: "2件" },
+      { id: "c2", name: "旗士", isDisabled: false, note: "1件" },
+    ]);
+  });
+
+  it("pairs every selected name with every chosen category", () => {
+    expect(getPairs(["a", "s"], ["c1", "c2"])).toEqual([["a", "c1"], ["a", "c2"], ["s", "c1"], ["s", "c2"]]);
+  });
+
+  it("describes what actually changed", () => {
+    expect(getLinksSummary([["a", "c2"], ["s", "c2"]], [], list, "dancer")).toBe("2名に旗士を追加しました");
+    expect(getLinksSummary([], [["a", "c1"], ["a", "c3"]], list, "prop")).toBe("1件から正規・スポットを外しました");
+    expect(getLinksSummary([], [], list, "dancer")).toBe("変更はありません");
+    expect(getRemovedSummary(3, "dancer")).toBe("3名を名簿から削除しました");
   });
 });

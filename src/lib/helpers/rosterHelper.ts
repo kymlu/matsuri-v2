@@ -1,5 +1,5 @@
 import { SHORT_NAME_LENGTH } from "../consts/consts";
-import { RosterKind, RosterList, RosterName } from "../../models/roster";
+import { RosterKind, RosterLink, RosterList, RosterName } from "../../models/roster";
 import { strCompare } from "./globalHelper";
 
 export const ROSTER_CATEGORY_LENGTH = 10;
@@ -110,3 +110,71 @@ export function formatPropSize(size: { length?: number, width?: number }): strin
     size.width !== undefined ? `幅${size.width}m` : "",
   ].filter(x => x !== "").join(" × ");
 }
+
+// Selection mode
+
+export type SelectAllState = "none" | "some" | "all";
+
+// The すべて選択 row: whether everything shown is selected.
+export function getSelectAllState(visibleIds: string[], selectedIds: Set<string>): SelectAllState {
+  const count = visibleIds.filter(id => selectedIds.has(id)).length;
+  return count === 0 ? "none" : count === visibleIds.length ? "all" : "some";
+}
+
+// Selected names that the filter or search currently hides.
+export function countHidden(selectedIds: Set<string>, visibleIds: string[]): number {
+  const visible = new Set(visibleIds);
+  return [...selectedIds].filter(id => !visible.has(id)).length;
+}
+
+export type BulkCategoryOption = {
+  id: string,
+  name: string,
+  isDisabled: boolean,
+  note?: string, // e.g. 3名とも追加済み, 1名にあり, or for removing, 3名
+}
+
+// The category chips in the 区分を追加 / 区分を外す dialog, with how many selected names have each.
+// Adding: one everyone has is disabled. Removing: only categories at least one selected name has.
+export function getBulkCategoryOptions(list: RosterList, selectedIds: Set<string>, mode: "add" | "remove", kind: RosterKind): BulkCategoryOption[] {
+  const counter = rosterCounter(kind);
+  const selected = list.names.filter(n => selectedIds.has(n.id));
+  const options = list.categories.map(c => ({ ...c, count: selected.filter(n => n.categoryIds.includes(c.id)).length }));
+  if (mode === "remove") {
+    return options.filter(o => o.count > 0).map(o => ({ id: o.id, name: o.name, isDisabled: false, note: `${o.count}${counter}` }));
+  }
+  return options.map(o => ({
+    id: o.id,
+    name: o.name,
+    isDisabled: selected.length > 0 && o.count === selected.length,
+    note: selected.length > 0 && o.count === selected.length
+      ? `${o.count}${counter}とも追加済み`
+      : o.count > 0 ? `${o.count}${counter}にあり` : undefined,
+  }));
+}
+
+// Every selected name with every chosen category.
+export function getPairs(nameIds: string[], categoryIds: string[]): RosterLink[] {
+  return nameIds.flatMap(nameId => categoryIds.map(categoryId => [nameId, categoryId] as RosterLink));
+}
+
+// The result line after adding or removing, from what the server reports actually changed.
+export function getLinksSummary(added: RosterLink[], removed: RosterLink[], list: RosterList, kind: RosterKind): string {
+  const counter = rosterCounter(kind);
+  const describe = (links: RosterLink[], verb: string) => {
+    const names = new Set(links.map(([nameId]) => nameId)).size;
+    const categories = [...new Set(links.map(([, categoryId]) => categoryId))]
+      .map(id => list.categories.find(c => c.id === id)?.name ?? "")
+      .join("・");
+    return `${names}${counter}${verb === "add" ? "に" : "から"}${categories}を${verb === "add" ? "追加" : "外"}しました`;
+  };
+  if (added.length > 0) {
+    return describe(added, "add");
+  }
+  if (removed.length > 0) {
+    return describe(removed, "remove");
+  }
+  return "変更はありません";
+}
+
+export const getRemovedSummary = (count: number, kind: RosterKind) => `${count}${rosterCounter(kind)}を名簿から削除しました`;

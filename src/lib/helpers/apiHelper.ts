@@ -2,7 +2,7 @@ import { ErrorResponse } from "../../models/api";
 import { BasicChoreoDetails, Choreo, ChoreoVersion } from "../../models/choreo";
 import { Team } from "../../models/team";
 import { RoleType, User } from "../../models/user";
-import { AddRosterNamesResult, AddRosterNamesResultSchema, PropDefaults, Roster, RosterKind, RosterSchema } from "../../models/roster";
+import { AddRosterNamesResult, AddRosterNamesResultSchema, PropDefaults, Roster, RosterKind, RosterLink, RosterLinksResult, RosterLinksResultSchema, RosterRemoveResult, RosterRemoveResultSchema, RosterRestoreResult, RosterRestoreResultSchema, RosterSchema } from "../../models/roster";
 import * as z from "zod";
 
 const getApiUrl = (endpoint: 
@@ -30,7 +30,9 @@ const getApiUrl = (endpoint:
   "roster/names/add" |
   "roster/names/update" |
   "roster/names/remove" |
-  "roster/categories/save") => {
+  "roster/categories/save" |
+  "roster/links" |
+  "roster/names/restore") => {
   return `/api/${endpoint}`
 }
 
@@ -577,7 +579,7 @@ export const getRoster = async (teamId: string): Promise<Roster> => {
 // The roster routes all POST a body and answer with JSON in a known shape.
 // A response in the wrong shape is reported as 500, so it isn't mistaken for a network failure.
 const postRoster = async <T,>(
-  endpoint: "roster/names/add" | "roster/names/update" | "roster/names/remove" | "roster/categories/save",
+  endpoint: "roster/names/add" | "roster/names/update" | "roster/names/remove" | "roster/categories/save" | "roster/links" | "roster/names/restore",
   teamId: string,
   body: object,
   schema: z.ZodType<T>,
@@ -645,3 +647,28 @@ export const saveRosterCategories = (
   onSuccess: (roster: Roster) => void,
   onFailure: (status: number) => void,
 ) => postRoster("roster/categories/save", teamId, { kind, categories, deleted_ids: deletedIds }, RosterSchema, onSuccess, onFailure);
+
+// Selection mode: add and remove exact name–category links, reporting the ones that changed.
+export const updateRosterLinks = (
+  teamId: string,
+  add: RosterLink[],
+  remove: RosterLink[],
+  onSuccess: (result: RosterLinksResult) => void,
+  onFailure: (status: number) => void,
+) => postRoster("roster/links", teamId, { add, remove }, RosterLinksResultSchema, onSuccess, onFailure);
+
+// All or nothing; reports the names actually removed.
+export const removeRosterNames = (
+  teamId: string,
+  ids: string[],
+  onSuccess: (result: RosterRemoveResult) => void,
+  onFailure: (status: number) => void,
+) => postRoster("roster/names/remove", teamId, { ids }, RosterRemoveResultSchema, onSuccess, onFailure);
+
+// Undoes removeRosterNames, skipping names whose spelling has been added again since.
+export const restoreRosterNames = (
+  teamId: string,
+  ids: string[],
+  onSuccess: (result: RosterRestoreResult) => void,
+  onFailure: (status: number) => void,
+) => postRoster("roster/names/restore", teamId, { ids }, RosterRestoreResultSchema, onSuccess, onFailure);
