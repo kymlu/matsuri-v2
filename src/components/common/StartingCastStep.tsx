@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import classNames from "classnames";
 import { RosterList } from "../../models/roster";
 import { StageType } from "../../models/choreo";
@@ -39,28 +39,13 @@ export default function StartingCastStep({
   stage, layout, rosterState, dancerList, propList, onRetry,
   pickedIds, onPickedIdsChange, unnamedCount, onUnnamedCountChange, propCounts, onPropCountsChange,
 }: StartingCastStepProps) {
-  const [tab, setTab] = useState<"dancer" | "prop">("dancer");
-  const [isPreviewCollapsed, setIsPreviewCollapsed] = useState(false);
-  const lastScrollTop = useRef(0);
+  const [tab, setTab] = useState<"dancer" | "prop" | "preview">("dancer");
   const hasRoster = rosterState === "loaded" && dancerList !== undefined && propList !== undefined;
 
   const dancerCount = Object.keys(layout.dancers).length;
   const propCount = Object.keys(layout.props).length;
   const isParade = stage.stageType === "parade";
   const visibleLength = isParade ? getParadeWindow(layout.depth, stage.stageLength) : undefined;
-
-  // Scrolling the list down folds the preview away; reaching the top again, or tapping the bar, brings it back.
-  const onListScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    const top = e.currentTarget.scrollTop;
-    if (top <= 0) {
-      setIsPreviewCollapsed(false);
-    } else if (top > lastScrollTop.current + 4) {
-      setIsPreviewCollapsed(true);
-    }
-    lastScrollTop.current = top;
-  };
-
-  const namesById = useMemo(() => new Map(dancerList?.names.map(n => [n.id, n.name]) ?? []), [dancerList]);
   const isFull = dancerCount >= MAX_STARTING_DANCERS;
 
   const unnamedField = <div className="flex items-center justify-between gap-2">
@@ -77,54 +62,27 @@ export default function StartingCastStep({
     </div>
   </div>;
 
-  return <div className="flex flex-col h-full min-h-0 gap-2">
-    {
-      isPreviewCollapsed
-        ? <button
-          type="button"
-          onClick={() => setIsPreviewCollapsed(false)}
-          className="flex items-center justify-between w-full px-3 py-1.5 text-sm border rounded-md bg-surface border-line">
-          <b>プレビュー</b>
-          <span className="text-muted">{stage.stageWidth} × {stage.stageLength}m</span>
-          <Icon src="expandMore" size="sm" colour="primary"/>
-        </button>
-        : <div>
-          <GridPreview
-            stageWidth={stage.stageWidth}
-            stageLength={stage.stageLength}
-            stageType={stage.stageType}
-            xMargin={stage.xMargin}
-            yMargin={stage.yMargin}
-            layout={layout}
-            visibleLength={visibleLength}
-            className="w-full h-[25svh] overflow-hidden"
-            label={`舞台プレビュー：ダンサー${dancerCount}名${propCount > 0 ? `・道具${propCount}件` : ""}`}/>
-          <div className="flex justify-end text-xs text-muted">
-            {isParade && visibleLength! < stage.stageLength ? `先頭から${visibleLength}mを表示（${stage.stageWidth} × ${stage.stageLength}m）` : `${stage.stageWidth} × ${stage.stageLength}m`}
-          </div>
-        </div>
-    }
+  const preview = <div className="flex flex-col flex-1 min-h-0">
+    <GridPreview
+      stageWidth={stage.stageWidth}
+      stageLength={stage.stageLength}
+      stageType={stage.stageType}
+      xMargin={stage.xMargin}
+      yMargin={stage.yMargin}
+      layout={layout}
+      visibleLength={visibleLength}
+      className="flex-1 min-h-[200px] overflow-hidden"
+      label={`舞台プレビュー：ダンサー${dancerCount}名${propCount > 0 ? `・道具${propCount}件` : ""}`}/>
+    <div className="flex justify-end text-xs text-muted">
+      {isParade && visibleLength! < stage.stageLength ? `先頭から${visibleLength}mを表示（${stage.stageWidth} × ${stage.stageLength}m）` : `${stage.stageWidth} × ${stage.stageLength}m`}
+    </div>
+  </div>;
 
-    {
-      hasRoster && pickedIds.length > 0 &&
-      // The placement order. × takes a dancer out.
-      <div className="flex gap-1 pb-1 overflow-x-auto shrink-0">
-        {
-          pickedIds.map((id, i) =>
-            <button
-              key={id}
-              type="button"
-              aria-label={`${namesById.get(id)}を外す`}
-              onClick={() => onPickedIdsChange(pickedIds.filter(p => p !== id))}
-              className="flex items-center gap-1 px-2 text-sm border rounded-full shrink-0 border-line bg-surface whitespace-nowrap">
-              <span className="text-xs text-muted">{i + 1}</span>{namesById.get(id)}<Icon src="clear" size="xs" colour="grey"/>
-            </button>)
-        }
-      </div>
-    }
-
-    {
-      !hasRoster && <div className="pt-2 space-y-2">
+  // Without a 名簿 (not logged in, a viewer, or it couldn't load): the preview above the dancer count.
+  if (!hasRoster) {
+    return <div className="flex flex-col h-full min-h-0 gap-2">
+      {preview}
+      <div className="pt-2 space-y-2">
         {unnamedField}
         {
           rosterState === "loading" &&
@@ -138,28 +96,32 @@ export default function StartingCastStep({
           </div>
         }
       </div>
-    }
+    </div>;
+  }
 
+  // With a 名簿: one tab row, each view gets the whole height.
+  return <div className="flex flex-col h-full min-h-0 gap-2">
+    <div role="tablist" aria-label="ダンサー・道具・プレビュー" className="flex overflow-hidden border rounded-md shrink-0 border-primary">
+      {
+        ([["dancer", "ダンサー"], ["prop", "道具"], ["preview", "プレビュー"]] as const).map(([kind, label]) =>
+          <button
+            key={kind}
+            type="button"
+            role="tab"
+            aria-selected={tab === kind}
+            onClick={() => setTab(kind)}
+            className={classNames("flex-1 py-1 text-sm font-semibold", {
+              "bg-primary text-white": tab === kind,
+              "bg-surface text-primary": tab !== kind,
+            })}>
+            {label}
+          </button>)
+      }
+    </div>
     {
-      hasRoster && <>
-        <div role="tablist" aria-label="追加するもの" className="flex overflow-hidden border rounded-md shrink-0 border-primary">
-          {
-            ([["dancer", "ダンサー"], ["prop", "道具"]] as const).map(([kind, label]) =>
-              <button
-                key={kind}
-                type="button"
-                role="tab"
-                aria-selected={tab === kind}
-                onClick={() => setTab(kind)}
-                className={classNames("flex-1 py-1 text-sm font-semibold", {
-                  "bg-primary text-white": tab === kind,
-                  "bg-surface text-primary": tab !== kind,
-                })}>
-                {label}
-              </button>)
-          }
-        </div>
-        <div className="flex-1 min-h-0 overflow-y-auto" onScroll={onListScroll}>
+      tab === "preview"
+        ? preview
+        : <div className="flex-1 min-h-0 overflow-y-auto">
           {
             tab === "dancer"
               ? <DancerList
@@ -171,36 +133,37 @@ export default function StartingCastStep({
               : <PropList list={propList!} counts={propCounts} onChange={onPropCountsChange}/>
           }
         </div>
-      </>
     }
   </div>;
 }
 
-function useFilteredNames(list: RosterList, filter: string, search: string) {
+// "picked" shows only what's been picked.
+function useFilteredNames(list: RosterList, filter: string, search: string, picked: Set<string>) {
   return useMemo(() => {
     const searchKey = toNameKey(search);
     return sortRosterNames(list.names.filter(n =>
-      (filter === "all" || (filter === "none" ? n.categoryIds.length === 0 : n.categoryIds.includes(filter))) &&
+      (filter === "all" ||
+        (filter === "picked" ? picked.has(n.id) : filter === "none" ? n.categoryIds.length === 0 : n.categoryIds.includes(filter))) &&
       (searchKey === "" || n.name.includes(search.trim()) || toNameKey(n.name).includes(searchKey))
     ));
-  }, [list, filter, search]);
+  }, [list, filter, search, picked]);
 }
 
-function NameFilters({ list, allLabel, placeholder, filter, onFilterChange, onSearchChange }: {
-  list: RosterList, allLabel: string, placeholder: string,
+function NameFilters({ list, allLabel, placeholder, pickedCount, filter, onFilterChange, onSearchChange }: {
+  list: RosterList, allLabel: string, placeholder: string, pickedCount: number,
   filter: string, onFilterChange: (value: string) => void, onSearchChange: (value: string) => void,
 }) {
   const uncategorised = list.names.filter(n => n.categoryIds.length === 0).length;
   return <div className="pt-1 space-y-1">
     <TextInput placeholder={placeholder} onContentChange={onSearchChange} search clearable maxLength={SEARCH_NAME_LENGTH}/>
     {
-      list.categories.length > 0 &&
       <ChipFilter
         label="表示する区分"
         value={filter}
         onChange={onFilterChange}
         options={[
           { value: "all", label: allLabel, count: list.names.length },
+          { value: "picked", label: "選択中", count: pickedCount },
           ...list.categories.map(c => ({ value: c.id, label: c.name, count: list.names.filter(n => n.categoryIds.includes(c.id)).length })),
           ...(uncategorised > 0 ? [{ value: "none", label: "未分類", count: uncategorised }] : []),
         ]}/>
@@ -213,8 +176,8 @@ function DancerList({ list, pickedIds, isFull, unnamedField, onChange }: {
 }) {
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
-  const names = useFilteredNames(list, filter, search);
-  const picked = new Set(pickedIds);
+  const picked = useMemo(() => new Set(pickedIds), [pickedIds]);
+  const names = useFilteredNames(list, filter, search, picked);
   const unpickedShown = names.filter(n => !picked.has(n.id));
 
   return <div className="space-y-1">
@@ -223,7 +186,7 @@ function DancerList({ list, pickedIds, isFull, unnamedField, onChange }: {
       list.names.length === 0
         ? <p className="py-6 text-center text-muted">名簿にダンサーがいません</p>
         : <>
-          <NameFilters list={list} allLabel="全員" placeholder="名前を探す" filter={filter} onFilterChange={setFilter} onSearchChange={setSearch}/>
+          <NameFilters list={list} allLabel="全員" placeholder="名前を探す" pickedCount={pickedIds.length} filter={filter} onFilterChange={setFilter} onSearchChange={setSearch}/>
           {isFull && <p className="text-sm font-semibold text-primary">{MAX_STARTING_DANCERS}名までです</p>}
           {
             unpickedShown.length > 0 && !isFull &&
@@ -262,7 +225,7 @@ function DancerList({ list, pickedIds, isFull, unnamedField, onChange }: {
               })
             }
           </ul>
-          {names.length === 0 && <p className="py-6 text-center text-muted">該当する名前はありません</p>}
+          {names.length === 0 && <p className="py-6 text-center text-muted">{filter === "picked" ? "まだ選択していません" : "該当する名前はありません"}</p>}
         </>
     }
   </div>;
@@ -271,8 +234,9 @@ function DancerList({ list, pickedIds, isFull, unnamedField, onChange }: {
 function PropList({ list, counts, onChange }: { list: RosterList, counts: [string, number][], onChange: (counts: [string, number][]) => void }) {
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
-  const names = useFilteredNames(list, filter, search);
-  const countById = new Map(counts);
+  const countById = useMemo(() => new Map(counts), [counts]);
+  const picked = useMemo(() => new Set(counts.map(([id]) => id)), [counts]);
+  const names = useFilteredNames(list, filter, search, picked);
 
   const setCount = (id: string, count: number) => {
     if (count <= 0) {
@@ -288,7 +252,7 @@ function PropList({ list, counts, onChange }: { list: RosterList, counts: [strin
     return <p className="py-6 text-center text-muted">名簿に道具がありません</p>;
   }
   return <div className="space-y-1">
-    <NameFilters list={list} allLabel="すべて" placeholder="道具名を探す" filter={filter} onFilterChange={setFilter} onSearchChange={setSearch}/>
+    <NameFilters list={list} allLabel="すべて" placeholder="道具名を探す" pickedCount={counts.length} filter={filter} onFilterChange={setFilter} onSearchChange={setSearch}/>
     <ul>
       {
         names.map(n => {
@@ -325,6 +289,6 @@ function PropList({ list, counts, onChange }: { list: RosterList, counts: [strin
         })
       }
     </ul>
-    {names.length === 0 && <p className="py-6 text-center text-muted">該当する道具はありません</p>}
+    {names.length === 0 && <p className="py-6 text-center text-muted">{filter === "picked" ? "まだ追加していません" : "該当する道具はありません"}</p>}
   </div>;
 }

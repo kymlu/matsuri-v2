@@ -357,7 +357,8 @@ export function NewChoreoPage({
       </div>
 
       {
-        step === 3 &&
+        // Only with a 名簿: without one there's just the dancer count, so a total would repeat it.
+        step === 3 && rosterState === "loaded" &&
         <p className="text-sm text-center text-muted">
           {
             dancerTotal === 0
