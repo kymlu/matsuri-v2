@@ -91,7 +91,8 @@ export default function StartingCastStep({
           </button>)
       }
     </div>
-    <div className="flex-1 min-h-0 overflow-y-auto">
+    {/* Only the list of names scrolls; search, filters and 名前なし stay put. */}
+    <div className="flex flex-col flex-1 min-h-0">
       {
         tab === "dancer"
           ? <DancerList
@@ -150,11 +151,10 @@ function DancerList({ list, pickedIds, isFull, room, unnamedField, onChange }: {
   const names = useFilteredNames(list, filter, search, picked);
   const unpickedShown = names.filter(n => !picked.has(n.id));
 
-  return <div className="space-y-1">
-    <div className="pt-1">{unnamedField}</div>
+  return <div className="flex flex-col flex-1 min-h-0 gap-1">
     {
       list.names.length === 0
-        ? <p className="py-6 text-center text-muted">名簿にダンサーがいません</p>
+        ? <p className="flex-1 py-6 text-center text-muted">名簿にダンサーがいません</p>
         : <>
           <NameFilters list={list} allLabel="全員" placeholder="名前を探す" pickedCount={pickedIds.length} filter={filter} onFilterChange={setFilter} onSearchChange={setSearch}/>
           {isFull && <p className="text-sm font-semibold text-primary">{MAX_STARTING_DANCERS}名までです</p>}
@@ -181,7 +181,7 @@ function DancerList({ list, pickedIds, isFull, room, unnamedField, onChange }: {
               </button>;
             })()
           }
-          <ul>
+          <ul className="flex-1 min-h-0 overflow-y-auto">
             {
               names.map(n => {
                 const isPicked = picked.has(n.id);
@@ -203,10 +203,11 @@ function DancerList({ list, pickedIds, isFull, room, unnamedField, onChange }: {
                 </li>;
               })
             }
+            {names.length === 0 && <li className="py-6 text-center text-muted">{filter === "picked" ? "まだ選択していません" : "該当する名前はありません"}</li>}
           </ul>
-          {names.length === 0 && <p className="py-6 text-center text-muted">{filter === "picked" ? "まだ選択していません" : "該当する名前はありません"}</p>}
         </>
     }
+    <div className="pt-2 border-t border-line">{unnamedField}</div>
   </div>;
 }
 
@@ -230,9 +231,9 @@ function PropList({ list, counts, onChange }: { list: RosterList, counts: [strin
   if (list.names.length === 0) {
     return <p className="py-6 text-center text-muted">名簿に道具がありません</p>;
   }
-  return <div className="space-y-1">
+  return <div className="flex flex-col flex-1 min-h-0 gap-1">
     <NameFilters list={list} allLabel="すべて" placeholder="道具名を探す" pickedCount={counts.length} filter={filter} onFilterChange={setFilter} onSearchChange={setSearch}/>
-    <ul>
+    <ul className="flex-1 min-h-0 overflow-y-auto">
       {
         names.map(n => {
           const count = countById.get(n.id);
@@ -267,8 +268,8 @@ function PropList({ list, counts, onChange }: { list: RosterList, counts: [strin
           </li>;
         })
       }
+      {names.length === 0 && <li className="py-6 text-center text-muted">{filter === "picked" ? "まだ追加していません" : "該当する道具はありません"}</li>}
     </ul>
-    {names.length === 0 && <p className="py-6 text-center text-muted">{filter === "picked" ? "まだ追加していません" : "該当する道具はありません"}</p>}
   </div>;
 }
 
