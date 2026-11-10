@@ -24,6 +24,22 @@ export function ActionManagerDialog({
   const [actions, setActions] = useState<DancerAction[]>([]);
   const [actionNames, setActionNames] = useState<Record<string, number>>({});
   const [errorMessage, setErrorMessage] = useState<string | null>();
+  // Marked for deletion; they stay, struck through, until 保存 so they can be brought back.
+  const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set());
+  const toggleDeleted = (id: string) => setDeletedIds(prev => {
+    const next = new Set(prev);
+    if (next.has(id)) {
+      next.delete(id);
+    } else {
+      next.add(id);
+    }
+    return next;
+  });
+
+  // What 保存 would keep: actions and counts not marked for deletion.
+  const liveActions = useMemo(() => actions
+    .filter(a => !deletedIds.has(a.id))
+    .map(a => ({ ...a, timings: a.timings.filter(t => !deletedIds.has(t.id)) })), [actions, deletedIds]);
 
   useEffect(() => {
     setActions([...section.formation.dancerActions]);
@@ -73,20 +89,18 @@ export function ActionManagerDialog({
   };
 
   useEffect(() => {
-    if (actions.length === 0) return;
-    
-    const names = actions.map(x => x.name.trim());
+    const names = liveActions.map(x => x.name.trim());
     const nameSet = new Set(names);
     setActionNames(Array.from(nameSet).reduce((acc, item) => {
-      acc[item] = actions.filter(x => strEquals(x.name.trim(), item)).length;
+      acc[item] = liveActions.filter(x => strEquals(x.name.trim(), item)).length;
       return acc;}
     , {} as Record<string, number>));
-  }, [actions]);
+  }, [liveActions]);
 
   const canSubmit = useMemo(() => {
-    if (actions.length === 0) return true;
+    if (liveActions.length === 0) return true;
     
-    const names = actions.map(x => x.name.trim());
+    const names = liveActions.map(x => x.name.trim());
     const nameSet = new Set(names);
     if (names.length !== nameSet.size) {
       setErrorMessage("重複のアクション名があります。");
@@ -96,7 +110,7 @@ export function ActionManagerDialog({
       return false;
     }
 
-    for (const action of actions) {
+    for (const action of liveActions) {
       const timingNames = action.timings.map(x => x.name.trim());
       const timingNameSet = new Set(timingNames);
       if (timingNames.length !== timingNameSet.size){
@@ -110,7 +124,7 @@ export function ActionManagerDialog({
 
     setErrorMessage(null);
     return true;
-  }, [actions]);
+  }, [liveActions]);
 
   return <BaseEditDialog
     title={`カウント管理 - ${section.name}`}
@@ -118,9 +132,10 @@ export function ActionManagerDialog({
     isActionButtonDisabled={!canSubmit}
     actionButtonText="保存"
     onClose={() => {
+      setDeletedIds(new Set());
       setActions([...section.formation.dancerActions]);
     }}
-    onSubmit={() => {onSubmit(actions)}}>
+    onSubmit={() => {onSubmit(liveActions)}}>
     <div className="h-full max-h-full grid gap-2 grid-rows-[1fr,auto]">
       <div className="max-h-full space-y-4 overflow-auto">
         <IconLabelButton
@@ -128,7 +143,7 @@ export function ActionManagerDialog({
           full
           onClick={addAction}
           primary
-          disabled={actions.length >= 5}
+          disabled={liveActions.length >= 5}
           label="アクション追加"
           />
         <DndContext
@@ -151,18 +166,15 @@ export function ActionManagerDialog({
                     key={action.id}
                     action={action}
                     actionNames={actionNames}
+                    deletedIds={deletedIds}
+                    canRestoreAction={liveActions.length < 5}
+                    onToggleDeleted={toggleDeleted}
+                    // New objects, never edits of the old ones: those belong to the chart's saved state.
                     onRenameAction={(name) => {
-                      const newActions = [...actions];
-                      newActions[i].name = name;
-                      setActions(newActions);
-                    }}
-                    onDeleteAction={() => {
-                      const newActions = [...actions.slice(0, i), ...actions.slice(i + 1)];
-                      setActions(newActions);
+                      setActions(prev => prev.map((a, index) => index === i ? { ...a, name } : a));
                     }}
                     onAddTiming={() => {addTiming(i)}}
-                    onRenameTiming={(newTimings) => setNewTimings(i, newTimings)}
-                    onDeleteTiming={(newTimings) => setNewTimings(i, newTimings)}/>
+                    onRenameTiming={(newTimings) => setNewTimings(i, newTimings)}/>
                 )
               }
             </SortableContext>
@@ -180,16 +192,17 @@ export function ActionManagerDialog({
 type SortableActionSectionProps = {
   action: DancerAction,
   actionNames: Record<string, number>,
+  deletedIds: Set<string>, // actions and counts marked for deletion
+  canRestoreAction: boolean, // false at the 5-action limit
+  onToggleDeleted: (id: string) => void,
   onRenameAction: (name: string) => void,
-  onDeleteAction: () => void,
   onAddTiming: () => void,
   onRenameTiming: (newTimings: DancerActionTiming[]) => void,
-  onDeleteTiming: (newTimings: DancerActionTiming[]) => void,
 }
 
 function SortableActionSection ({
-  action, actionNames, 
-  onRenameAction, onDeleteAction, onAddTiming, onRenameTiming, onDeleteTiming
+  action, actionNames, deletedIds, canRestoreAction, onToggleDeleted,
+  onRenameAction, onAddTiming, onRenameTiming,
 }: SortableActionSectionProps) {
   const {
     attributes,
@@ -206,16 +219,28 @@ function SortableActionSection ({
 
   const [timingNames, setTimingNames] = useState<Record<string, number>>({});
 
+  const liveTimings = action.timings.filter(t => !deletedIds.has(t.id));
+
+  // Deleted counts don't count: their names are free to reuse.
   useEffect(() => {
-    if (action.timings.length === 0) return;
-    
-    const names = action.timings.map(x => x.name.trim());
+    const live = action.timings.filter(t => !deletedIds.has(t.id));
+    const names = live.map(x => x.name.trim());
     const nameSet = new Set(names);
     setTimingNames(Array.from(nameSet).reduce((acc, item) => {
-      acc[item] = action.timings.filter(x => strEquals(x.name.trim(), item)).length;
+      acc[item] = live.filter(x => strEquals(x.name.trim(), item)).length;
       return acc;}
     , {} as Record<string, number>));
-  }, [action]);
+  }, [action, deletedIds]);
+
+  if (deletedIds.has(action.id)) {
+    // Greyed and struck through, with undo in place of the trash icon.
+    return <div className="relative flex flex-row items-center gap-2 px-4 py-3 border border-dashed rounded-md bg-surface border-line" style={style} ref={setNodeRef}>
+      <span className="opacity-30"><Icon src="dragHandle"/></span>
+      <span className="flex-1 min-w-0 line-through break-all text-muted">{action.name.trim() || "（名前なし）"}</span>
+      <span className="text-xs text-muted whitespace-nowrap">カウント{liveTimings.length}個</span>
+      <IconButton size="sm" colour="grey" noBorder src="undo" disabled={!canRestoreAction} onClick={() => onToggleDeleted(action.id)}/>
+    </div>;
+  }
 
   return <div className="relative flex flex-row items-start gap-2 p-4 bg-surface border border-line rounded-md" style={style} ref={setNodeRef}>
     <div {...attributes} {...listeners}>
@@ -237,24 +262,25 @@ function SortableActionSection ({
               key={timing.id}
               timing={timing}
               timingNames={timingNames}
+              isDeleted={deletedIds.has(timing.id)}
+              canRestore={liveTimings.length < 16}
               onRenameTiming={(name) => {
-                const newTimings = [...action.timings];
-                newTimings[i].name = name;
-                onRenameTiming(newTimings);
+                onRenameTiming(action.timings.map((t, index) => index === i ? { ...t, name } : t));
               }}
-              onDeleteTiming={() => {onDeleteTiming([...action.timings.slice(0, i), ...action.timings.slice(i + 1)])}}
-              showDeleteButton={action.timings.length > 1}
+              onToggleDeleted={() => onToggleDeleted(timing.id)}
+              // An action keeps at least one count, but a deleted one can always come back.
+              showDeleteButton={liveTimings.length > 1}
               />
           )
         }
         {
-          action.timings.length < 16 &&
+          liveTimings.length < 16 &&
           <IconButton onClick={onAddTiming} src="add" size="sm"/>
         }
       </div>
     </div>
     <div className="absolute top-2 right-2">
-      <IconButton size="sm" colour="primary" noBorder src="delete" onClick={() => onDeleteAction()}/>
+      <IconButton size="sm" colour="primary" noBorder src="delete" onClick={() => onToggleDeleted(action.id)}/>
     </div>
   </div>
 }
@@ -262,14 +288,22 @@ function SortableActionSection ({
 type TimingItemProps = {
   timing: DancerActionTiming,
   timingNames: Record<string, number>,
+  isDeleted: boolean,
+  canRestore: boolean, // false at the 16-count limit
   onRenameTiming: (name: string) => void,
-  onDeleteTiming: () => void,
+  onToggleDeleted: () => void,
   showDeleteButton: boolean,
 }
 
 function TimingItem ({
-  timing, timingNames, onRenameTiming, onDeleteTiming, showDeleteButton}: TimingItemProps
+  timing, timingNames, isDeleted, canRestore, onRenameTiming, onToggleDeleted, showDeleteButton}: TimingItemProps
 ) {
+  if (isDeleted) {
+    return <div className="flex items-center gap-0.5">
+      <span className="px-2 py-1.5 line-through border border-dashed rounded-md text-muted border-line">{timing.name.trim() || "（名前なし）"}</span>
+      <IconButton colour="grey" size="sm" noBorder src="undo" disabled={!canRestore} onClick={onToggleDeleted}/>
+    </div>;
+  }
   return <div className="flex items-center gap-0.5">
     <TextInput 
       required
@@ -280,6 +314,6 @@ function TimingItem ({
       onContentChange={(newName) => {onRenameTiming(newName)}}/>
     <Icon size="sm" src="group"/>
     <span>{timing.dancerIds.length}</span>
-    {showDeleteButton && <IconButton colour="primary" size="sm" noBorder src="delete" onClick={() => {onDeleteTiming()}}/>}
+    {showDeleteButton && <IconButton colour="primary" size="sm" noBorder src="delete" onClick={onToggleDeleted}/>}
   </div>
 }
