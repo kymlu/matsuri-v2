@@ -1005,11 +1005,15 @@ export default {
 						if (live.length !== ids.length) {
 							return getErrorResponse("Name not found.", 404);
 						}
-						await env.DB.prepare(`
+						// Report what this request actually removed: if another editor removed one of these in the
+						// meantime, undoing this mustn't bring theirs back.
+						const { results: removed } = await env.DB.prepare(`
 							UPDATE roster_names SET deleted = 1, updated_at = datetime('now')
 							WHERE team_id = ? AND deleted = 0 AND id IN ${IDS_IN_JSON}
-						`).bind(rosterTeamId, JSON.stringify(ids)).run();
-						return getSuccessResponse({ roster: await getRoster(env.DB, rosterTeamId), removed: ids });
+							RETURNING id
+						`).bind(rosterTeamId, JSON.stringify(ids)).all<{ id: string }>();
+						const removedIds = new Set(removed.map(r => r.id));
+						return getSuccessResponse({ roster: await getRoster(env.DB, rosterTeamId), removed: ids.filter(id => removedIds.has(id)) });
 					}
 					if (typeof body?.id !== "string") {
 						return getErrorResponse("id or ids is required.");
