@@ -89,6 +89,7 @@ export type RosterCategoryRow = {
   deleted: 0 | 1,
   created_at: string,
   updated_at: string,
+  kind: "dancer" | "prop",
 }
 
 export type RosterNameRow = {
@@ -100,6 +101,11 @@ export type RosterNameRow = {
   created_by: string | null, // team_members.id
   created_at: string,
   updated_at: string,
+  kind: "dancer" | "prop",
+  // Prop defaults, always null for dancers. Metres, and #RRGGBB.
+  default_length: number | null,
+  default_width: number | null,
+  default_color: string | null,
 }
 
 export type RosterNameCategoryRow = {

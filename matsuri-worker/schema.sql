@@ -87,7 +87,7 @@ CREATE TABLE roster_categories (
   deleted    INTEGER NOT NULL DEFAULT 0,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-);
+, kind TEXT NOT NULL DEFAULT 'dancer');
 
 CREATE TABLE roster_names (
   id         TEXT PRIMARY KEY,
@@ -98,7 +98,7 @@ CREATE TABLE roster_names (
   created_by TEXT REFERENCES team_members(id),
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-);
+, kind TEXT NOT NULL DEFAULT 'dancer', default_length REAL, default_width REAL, default_color TEXT);
 
 CREATE TABLE roster_name_categories (
   name_id     TEXT NOT NULL REFERENCES roster_names(id),
@@ -106,6 +106,6 @@ CREATE TABLE roster_name_categories (
   PRIMARY KEY (name_id, category_id)
 );
 
-CREATE UNIQUE INDEX roster_names_team_key ON roster_names(team_id, name_key) WHERE deleted = 0;
-CREATE UNIQUE INDEX roster_categories_team_key ON roster_categories(team_id, name_key) WHERE deleted = 0;
+CREATE UNIQUE INDEX roster_names_team_key ON roster_names(team_id, kind, name_key) WHERE deleted = 0;
+CREATE UNIQUE INDEX roster_categories_team_key ON roster_categories(team_id, kind, name_key) WHERE deleted = 0;
 CREATE INDEX roster_name_categories_category ON roster_name_categories(category_id);
