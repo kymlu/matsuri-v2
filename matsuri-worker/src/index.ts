@@ -880,8 +880,67 @@ export default {
 					return getSuccessResponse(await getRoster(env.DB, rosterTeamId));
 				}
 
+				// Sets or clears the default size and colour of many prop names at once. Each item gives its own values
+				// (null clears one; leaving it out keeps it). Reports which names actually changed.
+				if (url.pathname === "/api/roster/names/defaults" && request.method === "POST") {
+					const body = await readBody();
+					const items: unknown = body?.items;
+					if (!Array.isArray(items) || items.length === 0 || items.length > ROSTER_MAX_NAMES ||
+						!items.every(i => typeof i === "object" && i !== null && typeof i.id === "string")) {
+						return getErrorResponse(`items must be 1–${ROSTER_MAX_NAMES} objects with an id.`);
+					}
+					const ids = items.map(i => i.id as string);
+					if (new Set(ids).size !== ids.length) {
+						return getErrorResponse("Each name can appear only once.");
+					}
+					for (const item of items) {
+						if ((item.length !== undefined && item.length !== null && !isPropDimension(item.length)) ||
+							(item.width !== undefined && item.width !== null && !isPropDimension(item.width))) {
+							return getErrorResponse(`Sizes must be ${PROP_MIN_DIMENSION}–${PROP_MAX_DIMENSION}.`);
+						}
+						if (item.color !== undefined && item.color !== null && !isHexColor(item.color)) {
+							return getErrorResponse("color must be #RRGGBB.");
+						}
+					}
+
+					type Defaults = { id: string, kind: RosterKind, default_length: number | null, default_width: number | null, default_color: string | null };
+					const { results: current } = await env.DB.prepare(`
+						SELECT id, kind, default_length, default_width, default_color FROM roster_names
+						WHERE team_id = ? AND deleted = 0 AND id IN ${IDS_IN_JSON}
+					`).bind(rosterTeamId, JSON.stringify(ids)).all<Defaults>();
+					if (current.length !== ids.length) {
+						return getErrorResponse("Name not found.", 404);
+					}
+					if (current.some(n => n.kind !== "prop")) {
+						return getErrorResponse("Only prop names have a default size and colour.");
+					}
+
+					const byId = new Map(current.map(n => [n.id, n]));
+					const fields = [["length", "default_length"], ["width", "default_width"], ["color", "default_color"]] as const;
+					// Colours are compared ignoring case, as in the app.
+					const same = (a: unknown, b: unknown) =>
+						typeof a === "string" && typeof b === "string" ? a.toLowerCase() === b.toLowerCase() : a === b;
+					const changed = items.filter(item => {
+						const old = byId.get(item.id)!;
+						return fields.some(([field, column]) => item[field] !== undefined && !same(item[field], old[column]));
+					});
+
+					if (changed.length > 0) {
+						// json_type is NULL for a missing field (keep) and 'null' for a JSON null (clear).
+						const setColumn = (field: string, column: string) =>
+							`${column} = CASE WHEN json_type(j.value, '$.${field}') IS NULL THEN ${column} ELSE json_extract(j.value, '$.${field}') END`;
+						await env.DB.prepare(`
+							UPDATE roster_names SET ${fields.map(([field, column]) => setColumn(field, column)).join(", ")}, updated_at = datetime('now')
+							FROM json_each(?) AS j
+							WHERE roster_names.id = json_extract(j.value, '$.id') AND roster_names.team_id = ?
+						`).bind(JSON.stringify(changed), rosterTeamId).run();
+					}
+
+					return getSuccessResponse({ roster: await getRoster(env.DB, rosterTeamId), changed: changed.map(item => item.id as string) });
+				}
+
 				// Adds and removes name–category links. Takes exact pairs and reports the ones that actually changed,
-				// so an undo can replay just those: adding 旗士 to 3 people when 1 already had it changes 2.
+				// so the app can count just those: adding 旗士 to 3 people when 1 already had it changes 2.
 				if (url.pathname === "/api/roster/links" && request.method === "POST") {
 					const body = await readBody();
 					if (!isPairArray(body?.add) || !isPairArray(body?.remove)) {
