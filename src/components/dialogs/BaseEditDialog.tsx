@@ -15,6 +15,8 @@ type BaseEditDialogProps = {
   children: React.ReactNode,
   hasX?: boolean,
   initialFocus?: CustomDialogProps["initialFocus"],
+  // Replaces キャンセル with a button that stays in the dialog, e.g. to back out of a confirmation step.
+  backButton?: { label: string, onClick: () => void },
 }
 
 export default function BaseEditDialog({
@@ -22,7 +24,7 @@ export default function BaseEditDialog({
   isActionButtonDisabled, actionButtonText,
   noDetachedTrigger, full, fullWidth,
   onClose, showCloseButton = true,
-  onSubmit, children, hasX = true, initialFocus
+  onSubmit, children, hasX = true, initialFocus, backButton,
 }: BaseEditDialogProps) {
   return <CustomDialog
     hasX={hasX}
@@ -34,7 +36,13 @@ export default function BaseEditDialog({
     footer={
       <div className="flex w-full gap-1 mt-4">
         {
-          showCloseButton &&
+          showCloseButton && backButton &&
+          <Button full onClick={backButton.onClick}>
+            <span className="font-semibold text-nowrap">{backButton.label}</span>
+          </Button>
+        }
+        {
+          showCloseButton && !backButton &&
           <Dialog.Close
             onClick={() => {
               onClose?.();
