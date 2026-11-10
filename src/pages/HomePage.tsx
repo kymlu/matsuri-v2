@@ -1,7 +1,7 @@
 import { Dialog, Menu } from "@base-ui/react"
 import CustomDialog from "../components/basic/CustomDialog"
 import { LONG_NAME_LENGTH, SAMPLE_PARADE_ID, SAMPLE_STAGE_ID, SEARCH_NAME_LENGTH } from "../lib/consts/consts"
-import { IconLabelButton } from "../components/basic/Button"
+import Button, { IconLabelButton } from "../components/basic/Button"
 import Icon from "../components/basic/Icon"
 import { readUploadedFile } from "../lib/helpers/uploadHelper"
 import { memo, useCallback, useEffect, useMemo, useState } from "react"
@@ -481,9 +481,12 @@ export default function HomePage({
     setEventNameDialogOpen(true);
   }, []);
 
+  // Only editors can open the 名簿, so the button only shows for them.
+  const canUseRoster = isLoggedIn && !!team?.id && !isViewer;
+
   return (
     <div className="bg-app">
-      <div className='grid py-10 px-6 h-[100svh] grid-rows-[auto,auto,auto,auto,1fr] overflow-hide w-full mx-auto'>
+      <div className='grid py-10 px-4 h-[100svh] grid-rows-[auto,auto,auto,auto,1fr] overflow-hide w-full mx-auto'>
         <div className="text-sm text-primary">
           {
             team &&
@@ -539,19 +542,6 @@ export default function HomePage({
                     </>
                   }
                   {
-                    !isViewer && <>
-                      <Menu.Item>
-                        <IconLabelButton
-                          full noBorder
-                          icon="patientList"
-                          label="名簿"
-                          alignment="left"
-                          onClick={goToRosterPage}/>
-                      </Menu.Item>
-                      {!isAdmin && <Divider compact/>}
-                    </>
-                  }
-                  {
                     isAdmin && <>
                       <Menu.Item>
                         <IconLabelButton
@@ -589,20 +579,31 @@ export default function HomePage({
             }
           </div>
         </div>
-        <div className="flex gap-2 mb-2">
-          <IconLabelButton
-            full
-            primary
-            label="新規作成"
-            icon="add"
-            onClick={() => goToNewChoreoPage()}
-            />
-          <IconLabelButton
-            full
-            label="アップロード"
-            icon="upload"
-            onClick={triggerUpload}
-            />
+        <div className="flex gap-2 mb-2 whitespace-nowrap">
+          <div className="flex-1 min-w-0">
+            <IconLabelButton
+              full
+              primary
+              label="新規作成"
+              icon="add"
+              onClick={() => goToNewChoreoPage()}
+              />
+          </div>
+          {
+            canUseRoster
+              ? <>
+                  <CompactActionButton icon="upload" label="アップロード" onClick={triggerUpload}/>
+                  <CompactActionButton icon="patientList" label="名簿" onClick={goToRosterPage}/>
+                </>
+              : <div className="flex-1 min-w-0">
+                  <IconLabelButton
+                    full
+                    label="アップロード"
+                    icon="upload"
+                    onClick={triggerUpload}
+                    />
+                </div>
+          }
         </div>
         <div className="flex items-center gap-2">
           <TextInput
@@ -1367,3 +1368,12 @@ const ChoreoListItem = memo(function ChoreoListItem ({
     }
   </React.Fragment>
 });
+// Smaller than the main buttons so 新規作成 keeps most of the row on a phone.
+function CompactActionButton({icon, label, onClick}: {icon: React.ComponentProps<typeof Icon>["src"], label: string, onClick: () => void}) {
+  return <Button fontSize="text-sm" onClick={onClick}>
+    <div className="flex items-center gap-1 font-semibold">
+      <Icon src={icon} size="sm" colour="black"/>
+      {label}
+    </div>
+  </Button>;
+}
