@@ -221,7 +221,7 @@ export default function ChoreoViewPage(props: {
       <Header
         returnHome={props.goToHomePage}
         currentChoreo={props.currentChoreo}
-        onDownload={openExportDialog}
+        onDownload={props.pastVersion === undefined ? openExportDialog : undefined}
         changeShowGrid={toggleShowGrid}
         appSettings={appSettings}
         goToEdit={props.pastVersion === undefined ? props.goToEditPage : undefined}
