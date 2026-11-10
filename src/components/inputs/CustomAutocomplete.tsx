@@ -13,6 +13,8 @@ export type CustomAutocompleteProps = {
   options: string[],
   itemToStringValueFunc?: (item: string) => string,
   listItemFormat?: (item: string) => React.ReactNode,
+  itemSuffix?: (item: string) => React.ReactNode, // extra text after an option, keeping the default item styling
+  onItemSelect?: (item: string) => void, // only when an option is chosen (tap or Enter), not when typing
   onContentChange: (newContent: string) => void,
   placeholder?: string,
   search?: boolean,
@@ -32,7 +34,7 @@ export type CustomAutocompleteProps = {
 }
 
 export default function CustomAutocomplete({
-  name, options, listItemFormat, itemToStringValueFunc, defaultValue, onContentChange, placeholder,
+  name, options, listItemFormat, itemSuffix, onItemSelect, itemToStringValueFunc, defaultValue, onContentChange, placeholder,
   search, clearable, compact, short, centered,
   required, hasError, disabled, ref, maxLength,
   showLength, label, rightLabel, restrictFn
@@ -68,7 +70,7 @@ export default function CustomAutocomplete({
       "bg-surface": !disabled && !((required && isNullOrUndefinedOrBlank(value)) || hasError),
       "w-full": !compact,
       "min-w-32": compact,
-      "border-primary bg-primary bg-opacity-20 placeholder:text-primary": (required && isNullOrUndefinedOrBlank(value)) || hasError,
+      "border-primary bg-primary/20 placeholder:text-primary": (required && isNullOrUndefinedOrBlank(value)) || hasError,
     },);
 
   const wrapperClasses = classNames(
@@ -85,7 +87,12 @@ export default function CustomAutocomplete({
             defaultValue={defaultValue}
             openOnInputClick
             items={options}
-            onValueChange={(newValue: string) => handleChange(newValue)}
+            onValueChange={(newValue: string, eventDetails) => {
+              handleChange(newValue);
+              if (eventDetails.reason === "item-press") {
+                onItemSelect?.(newValue);
+              }
+            }}
             filter={(item: string, query: string) => {return item.toLowerCase().includes(query.toLowerCase())}}
             highlightItemOnHover
             itemToStringValue={itemToStringValueFunc}
@@ -104,7 +111,7 @@ export default function CustomAutocomplete({
                   <Autocomplete.List>
                     {(item: string) => (
                       <React.Fragment key={item}>
-                        {!listItemFormat && <AutocompleteItem item={item}/>}
+                        {!listItemFormat && <AutocompleteItem item={item} suffix={itemSuffix?.(item)}/>}
                         {listItemFormat && listItemFormat(item) }
                       </React.Fragment>
                     )}
@@ -151,13 +158,14 @@ export default function CustomAutocomplete({
   )
 }
 
-function AutocompleteItem(props: {item: string, onClick?: () => void}) {
-  const {item, onClick} = props;
+function AutocompleteItem(props: {item: string, suffix?: React.ReactNode, onClick?: () => void}) {
+  const {item, suffix, onClick} = props;
   return <Autocomplete.Item
     className="flex cursor-default items-center gap-2 py-2 pr-8 pl-4 text-base leading-4 outline-none select-none data-[highlighted]:relative data-[highlighted]:z-0 data-[highlighted]:text-gray-50 data-[highlighted]:before:absolute data-[highlighted]:before:inset-x-2 data-[highlighted]:before:inset-y-0 data-[highlighted]:before:z-[-1] data-[highlighted]:before:rounded-md data-[highlighted]:before:bg-primary data-[highlighted]:before:text-white"
     value={item}
     onClick={onClick}
   >
-    {item}
+    <span className="flex-1">{item}</span>
+    {suffix}
   </Autocomplete.Item>
 }

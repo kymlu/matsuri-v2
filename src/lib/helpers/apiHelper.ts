@@ -2,6 +2,8 @@ import { ErrorResponse } from "../../models/api";
 import { BasicChoreoDetails, Choreo, ChoreoVersion } from "../../models/choreo";
 import { Team } from "../../models/team";
 import { RoleType, User } from "../../models/user";
+import { AddRosterNamesResult, AddRosterNamesResultSchema, PropDefaults, Roster, RosterKind, RosterDefaultsItem, RosterDefaultsResult, RosterDefaultsResultSchema, RosterLink, RosterLinksResult, RosterLinksResultSchema, RosterRemoveResult, RosterRemoveResultSchema, RosterRestoreResult, RosterRestoreResultSchema, RosterSchema } from "../../models/roster";
+import * as z from "zod";
 
 const getApiUrl = (endpoint: 
   "auth/login" | 
@@ -23,7 +25,15 @@ const getApiUrl = (endpoint:
   "choreos/verify" |
   "choreos/get-password" |
   "choreos/file" | 
-  "choreos/file/current-version") => {
+  "choreos/file/current-version" |
+  "roster" |
+  "roster/names/add" |
+  "roster/names/update" |
+  "roster/names/remove" |
+  "roster/categories/save" |
+  "roster/links" |
+  "roster/names/restore" |
+  "roster/names/defaults") => {
   return `/api/${endpoint}`
 }
 
@@ -550,3 +560,124 @@ export const publishChoreo = async (
     onFailure(400);
   }
 }
+
+export const getRoster = async (teamId: string): Promise<Roster> => {
+  const response = await fetch(`${getApiUrl("roster")}?team_id=${teamId}`, {
+    method: "GET",
+    credentials: "include",
+  });
+  if (!response.ok) {
+    const data = await response.json() as ErrorResponse;
+    throw new Error(`getRoster failed: ${response.status} message: ${data.message}`);
+  }
+  const parsed = RosterSchema.safeParse(await response.json());
+  if (!parsed.success) {
+    throw new Error(`getRoster returned an unexpected shape: ${parsed.error.message}`);
+  }
+  return parsed.data;
+}
+
+// The roster routes all POST a body and answer with JSON in a known shape.
+// A response in the wrong shape is reported as 500, so it isn't mistaken for a network failure.
+const postRoster = async <T,>(
+  endpoint: "roster/names/add" | "roster/names/update" | "roster/names/remove" | "roster/categories/save" | "roster/links" | "roster/names/restore" | "roster/names/defaults",
+  teamId: string,
+  body: object,
+  schema: z.ZodType<T>,
+  onSuccess: (result: T) => void,
+  onFailure: (status: number) => void,
+): Promise<void> => {
+  try {
+    const response = await fetch(`${getApiUrl(endpoint)}?team_id=${teamId}`, {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      console.error(`${endpoint} failed: ${response.status} message: ${(data as ErrorResponse).message}`);
+      onFailure(response.status);
+      return;
+    }
+    const parsed = schema.safeParse(data);
+    if (!parsed.success) {
+      console.error(`${endpoint} returned an unexpected shape: ${parsed.error.message}`);
+      onFailure(500);
+      return;
+    }
+    onSuccess(parsed.data);
+  } catch (e: any) {
+    console.error(`${endpoint} failed: ${(e as Error)?.message}`);
+    onFailure(400);
+  }
+}
+
+export const addRosterNames = (
+  teamId: string,
+  kind: RosterKind,
+  names: string[],
+  categoryIds: string[],
+  onSuccess: (result: AddRosterNamesResult) => void,
+  onFailure: (status: number) => void,
+) => postRoster("roster/names/add", teamId, { kind, names, category_ids: categoryIds }, AddRosterNamesResultSchema, onSuccess, onFailure);
+
+// Prop names can also set their default size and colour; leave defaults out to keep them.
+export const updateRosterName = (
+  teamId: string,
+  id: string,
+  name: string,
+  categoryIds: string[],
+  defaults: PropDefaults | undefined,
+  onSuccess: (roster: Roster) => void,
+  onFailure: (status: number) => void,
+) => postRoster("roster/names/update", teamId, { id, name, category_ids: categoryIds, ...defaults }, RosterSchema, onSuccess, onFailure);
+
+export const removeRosterName = (
+  teamId: string,
+  id: string,
+  onSuccess: (roster: Roster) => void,
+  onFailure: (status: number) => void,
+) => postRoster("roster/names/remove", teamId, { id }, RosterSchema, onSuccess, onFailure);
+
+export const saveRosterCategories = (
+  teamId: string,
+  kind: RosterKind,
+  categories: { id?: string, name: string }[],
+  deletedIds: string[],
+  onSuccess: (roster: Roster) => void,
+  onFailure: (status: number) => void,
+) => postRoster("roster/categories/save", teamId, { kind, categories, deleted_ids: deletedIds }, RosterSchema, onSuccess, onFailure);
+
+// Selection mode: add and remove exact name–category links, reporting the ones that changed.
+export const updateRosterLinks = (
+  teamId: string,
+  add: RosterLink[],
+  remove: RosterLink[],
+  onSuccess: (result: RosterLinksResult) => void,
+  onFailure: (status: number) => void,
+) => postRoster("roster/links", teamId, { add, remove }, RosterLinksResultSchema, onSuccess, onFailure);
+
+// All or nothing; reports the names actually removed.
+export const removeRosterNames = (
+  teamId: string,
+  ids: string[],
+  onSuccess: (result: RosterRemoveResult) => void,
+  onFailure: (status: number) => void,
+) => postRoster("roster/names/remove", teamId, { ids }, RosterRemoveResultSchema, onSuccess, onFailure);
+
+// Sets or clears the default size and colour of many prop names, each with its own values.
+export const updateRosterDefaults = (
+  teamId: string,
+  items: RosterDefaultsItem[],
+  onSuccess: (result: RosterDefaultsResult) => void,
+  onFailure: (status: number) => void,
+) => postRoster("roster/names/defaults", teamId, { items }, RosterDefaultsResultSchema, onSuccess, onFailure);
+
+// Undoes removeRosterNames, skipping names whose spelling has been added again since.
+export const restoreRosterNames = (
+  teamId: string,
+  ids: string[],
+  onSuccess: (result: RosterRestoreResult) => void,
+  onFailure: (status: number) => void,
+) => postRoster("roster/names/restore", teamId, { ids }, RosterRestoreResultSchema, onSuccess, onFailure);

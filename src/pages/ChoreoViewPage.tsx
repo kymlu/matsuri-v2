@@ -70,6 +70,8 @@ export default function ChoreoViewPage(props: {
   const resetSelectedIds = useCallback(() => setSelectedIds({props: [], dancers: [], obstacles: []}), []);
 
   useEffect(() => {
+    // The how-to hint is for a first look at the current version, not for checking an old one.
+    const shouldShowHint = props.pastVersion === undefined && !checkShowingViewPageInfoDialog();
     if (!isNullOrUndefinedOrBlank(props.savedDancerName)) {
       const dancer = Object.values(props.currentChoreo.dancers).find(x => strEquals(x.name, props.savedDancerName));
       if (dancer) {
@@ -77,16 +79,16 @@ export default function ChoreoViewPage(props: {
         setShowHintDialog(false);
       } else {
         resetSelectedIds();
-        setShowHintDialog(!checkShowingViewPageInfoDialog());
+        setShowHintDialog(shouldShowHint);
       }
     } else {
-      setShowHintDialog(!checkShowingViewPageInfoDialog());
+      setShowHintDialog(shouldShowHint);
     }
     const res = calculateMovementCache(props.currentChoreo, false);
     setDancerAnimationCache(res.newDancerAnimationCache);
     setDancerMovementCache(res.newDancerMovementCache);
     setPropAnimationCache(res.newPropAnimationCache);
-  }, [props.currentChoreo, resetSelectedIds]);
+  }, [props.currentChoreo, props.pastVersion, resetSelectedIds]);
 
   // Read once, before the effect below stores the current version.
   const [seenVersionAtOpen] = useState(() => getSeenVersion(props.currentChoreo.id));

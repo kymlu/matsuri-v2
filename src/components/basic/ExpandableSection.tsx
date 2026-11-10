@@ -7,16 +7,24 @@ type ExpandableSectionProps = {
   children: React.ReactNode,
   menuContents?: React.ReactNode,
   defaultExpanded ?: boolean,
+  // Pass both to keep the open state outside, e.g. so it lasts after a dialog closes.
+  expanded?: boolean,
+  onExpandedChange?: (expanded: boolean) => void,
   level: 1 | 2,
 }
 
 export default function ExpandableSection({
-  title, children, menuContents, defaultExpanded, level
+  title, children, menuContents, defaultExpanded, expanded, onExpandedChange, level
 }: ExpandableSectionProps) {
-  const [isExpanded, setIsExpanded] = useState<boolean>(defaultExpanded ?? true);
+  const [ownIsExpanded, setOwnIsExpanded] = useState<boolean>(defaultExpanded ?? true);
+  const isExpanded = expanded ?? ownIsExpanded;
+  const setIsExpanded = (value: boolean) => {
+    setOwnIsExpanded(value);
+    onExpandedChange?.(value);
+  };
   return <div>
     <div className={"sticky flex flex-row justify-between w-full" + (level === 1 ? (" top-0 z-20 py-1 bg-subtle " + (isExpanded ? "rounded-t-lg" : "rounded-lg")) : " z-10 bg-surface")}>
-      <button onClick={() => setIsExpanded(prev => !prev)} className='flex flex-row items-center w-full'>
+      <button onClick={() => setIsExpanded(!isExpanded)} className='flex flex-row items-center w-full'>
         <IconButton
           src={isExpanded ? "arrowDropDown" : "arrowRight"}
           size="sm"

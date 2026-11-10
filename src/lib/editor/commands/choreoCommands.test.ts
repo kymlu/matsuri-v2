@@ -1,6 +1,7 @@
 import { Choreo, StageGeometry } from "../../../models/choreo";
 import { getAnchorRange } from "../../helpers/editorCalculationHelper";
 import { changeStageGeometryAndType, getObjectsOutsideStage } from "./choreoCommands";
+import { editAndDeleteProps } from "./objectCommands";
 
 // A 10m × 8m stage with 1m margins: anchors can be at x -1 to 11 and y -1 to 9.
 // さくら is on stage, あおい is in the back-right margin.
@@ -170,5 +171,23 @@ describe("getObjectsOutsideStage", () => {
     // Top-down measures from the top (1m margin); bottom-up from the bottom (3m margin).
     expect(getObjectsOutsideStage(choreo, uneven("top-down")).dancerIds).toEqual(["d1"]);
     expect(getObjectsOutsideStage(choreo, uneven("bottom-up")).dancerIds).toEqual([]);
+  });
+});
+
+describe("editAndDeleteProps", () => {
+  const propPosition = (choreo: Choreo) => choreo.sections[0].formation.propPositions.p1;
+
+  it("moves a prop that grew past the stage edge back inside", () => {
+    // The 1m × 1m 旗 sits at x 5; 8m wide on a 10m stage with 1m margins, it can start at x 3 at most.
+    const state = makeChoreo();
+    const grown = editAndDeleteProps(state, { p1: { ...state.props.p1, width: 8 } }, new Set());
+    expect(propPosition(grown).x).toBe(3);
+    expect(propPosition(grown).y).toBe(2);
+  });
+
+  it("leaves positions alone when only the name or colour changes", () => {
+    const state = makeChoreo();
+    const renamed = editAndDeleteProps(state, { p1: { ...state.props.p1, name: "大旗", color: "#FF0000" } }, new Set());
+    expect(propPosition(renamed)).toBe(propPosition(state));
   });
 });

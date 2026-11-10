@@ -45,6 +45,25 @@ function getFitter(state: Choreo, newGeometry: StageGeometry) {
 const propSize = (state: Choreo, position: PropPosition): ObjectSize =>
   ({ ...state.props[position.propId], rotation: position.rotation });
 
+// Moves the given props back inside the stage in every section, the least distance, e.g. after they grow.
+export function fitPropsInside(state: Choreo, propIds: Set<string>): Choreo {
+  if (propIds.size === 0) {
+    return state;
+  }
+  return {
+    ...state,
+    sections: state.sections.map(section => ({
+      ...section,
+      formation: {
+        ...section.formation,
+        propPositions: mapValues(section.formation.propPositions, position => propIds.has(position.propId)
+          ? fitInside(position, state.stageGeometry, propSize(state, position))
+          : position),
+      },
+    })),
+  };
+}
+
 export type StageOverflow = { dancerIds: string[], propIds: string[], obstacleIds: string[], sectionIds: string[] };
 
 // What a resize would move to the edge, so the user can be told before saving.

@@ -37,6 +37,7 @@ import EditNameDialog from "../components/dialogs/EditNameDialog";
 import CustomDialog from "../components/basic/CustomDialog";
 import { IconLabelButton } from "../components/basic/Button";
 import EditDancerNameDialog from "../components/dialogs/EditDancerNameDialog";
+import { useRoster } from "../lib/hooks/useRoster";
 import InstructionMessage from "../components/basic/InstructionMessage";
 import { ChoreoStatus } from "./HomePage";
 import PublishConfirmationDialog from "../components/dialogs/PublishConfirmationDialog";
@@ -426,6 +427,13 @@ export default function ChoreoEditPage(props: {
   const [editDancerColourDialogOpen, setEditDancerColourDialogOpen] = useState(false);
   const [editDancerActionsDialogOpen, setEditDancerActionsDialogOpen] = useState(false);
   const [dancerManagerDialogOpen, setDancerManagerDialogOpen] = useState(false);
+  // 名簿 suggestions for dancer names; the picker's open state and filter last while this choreo is open.
+  const roster = useRoster(props.teamId, props.isLoggedIn && !props.isViewer);
+  const [isRosterPickerOpen, setIsRosterPickerOpen] = useState(true);
+  const [rosterFilter, setRosterFilter] = useState("all");
+  // Props are a different list with their own categories, so their picker keeps its own state.
+  const [isPropRosterPickerOpen, setIsPropRosterPickerOpen] = useState(true);
+  const [propRosterFilter, setPropRosterFilter] = useState("all");
   const [propManagerDialogOpen, setPropManagerDialogOpen] = useState(false);
   const [propSizeDialogOpen, setPropSizeDialogOpen] = useState(false);
   const [renameSectionDialogOpen, setRenameSectionDialogOpen] = useState(false);
@@ -1197,8 +1205,14 @@ export default function ChoreoEditPage(props: {
         open={renameDancerDialogOpen}
         onOpenChange={handleRenameDancerDialogOpen}>
         <EditDancerNameDialog
+          isOpen={renameDancerDialogOpen}
           name={history.presentState.state.dancers[firstSelectedDancerProp?.id ?? ""]?.name}
           otherNames={Object.values(history.presentState.state.dancers).map(x => x.name)}
+          roster={roster?.dancers}
+          isPickerOpen={isRosterPickerOpen}
+          onPickerOpenChange={setIsRosterPickerOpen}
+          pickerFilter={rosterFilter}
+          onPickerFilterChange={setRosterFilter}
           onSubmit={(name) => {
             commitState(renameDancer(history.presentState.state, firstSelectedDancerProp!.id, name));
             renameDancerDialog.close();
@@ -1239,6 +1253,7 @@ export default function ChoreoEditPage(props: {
         onOpenChange={handleDancerManagerDialogOpen}>
         <DancerManagerDialog
           dancers={history.presentState.state.dancers}
+          roster={roster?.dancers}
           onSubmit={(dancers, deletedDancerIds) => {
             commitState(renameAndDeleteDancers(history.presentState.state, indexByKey(dancers, "id"), new Set(deletedDancerIds)));
             dancerManagerDialog.close();
@@ -1252,6 +1267,7 @@ export default function ChoreoEditPage(props: {
         onOpenChange={handlePropManagerDialogOpen}>
         <PropManagerDialog
           props={history.presentState.state.props}
+          roster={roster?.props}
           onSubmit={(props, deletedPropIds) => {
             commitState(editAndDeleteProps(history.presentState.state, indexByKey(props, "id"), new Set(deletedPropIds)));
             propManagerDialog.close();
@@ -1288,10 +1304,22 @@ export default function ChoreoEditPage(props: {
         onOpenChange={handleRenamePropDialogOpen}
         >
         <EditNameDialog
+          isOpen={renamePropDialogOpen}
           name={history.presentState.state.props[selectedIds.props[0]]?.name}
           type="道具"
-          onSubmit={(name) => {
-            commitState(renameProp(history.presentState.state, selectedIds.props[0], name));
+          roster={roster?.props}
+          prop={history.presentState.state.props[selectedIds.props[0]]}
+          isPickerOpen={isPropRosterPickerOpen}
+          onPickerOpenChange={setIsPropRosterPickerOpen}
+          pickerFilter={propRosterFilter}
+          onPickerFilterChange={setPropRosterFilter}
+          onSubmit={(name, look) => {
+            const state = history.presentState.state;
+            const propId = selectedIds.props[0];
+            // With a 名簿 name's size and colour, all three change in one step, so one undo reverts them.
+            commitState(look
+              ? editAndDeleteProps(state, { ...state.props, [propId]: { ...state.props[propId], name, ...look } }, new Set())
+              : renameProp(state, propId, name));
             renamePropDialog.close();
             setRenamePropDialogOpen(false);
           }}/>

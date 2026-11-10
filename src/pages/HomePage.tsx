@@ -47,6 +47,7 @@ type HomePageProps = {
   eventList: EventDetails[],
   setEventList: (eventList: EventDetails[]) => void,
   goToAdminPage: () => void,
+  goToRosterPage: () => void,
   goToHelpPage: () => void,
   goToNewChoreoPage: (eventDetails?: EventDetails) => void,
   goToViewPage: (choreo: Choreo, status: ChoreoStatus, serverChoreo?: BasicChoreoDetails, pastVersion?: number) => void,
@@ -85,7 +86,7 @@ const editUserNameDialog = Dialog.createHandle<{}>();
 
 export default function HomePage({
   buildInfo, eventList, setEventList,
-  goToAdminPage, goToHelpPage, goToNewChoreoPage, goToViewPage,
+  goToAdminPage, goToRosterPage, goToHelpPage, goToNewChoreoPage, goToViewPage,
   savedDancerName, setSavedDancerName,
   isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin, isViewer, setIsViewer,
   setCurrentTeamMemberId, team, showNoTeamDialog, setShowNoTeamDialog, setupToken
@@ -535,6 +536,19 @@ export default function HomePage({
                     !isNullOrUndefinedOrBlank(savedDancerName) && <>
                       <b className="pl-2">{savedDancerName}</b><small>さん</small>
                       <Divider compact/>
+                    </>
+                  }
+                  {
+                    !isViewer && <>
+                      <Menu.Item>
+                        <IconLabelButton
+                          full noBorder
+                          icon="patientList"
+                          label="名簿"
+                          alignment="left"
+                          onClick={goToRosterPage}/>
+                      </Menu.Item>
+                      {!isAdmin && <Divider compact/>}
                     </>
                   }
                   {

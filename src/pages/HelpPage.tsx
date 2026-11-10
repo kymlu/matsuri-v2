@@ -16,6 +16,7 @@ const PAGE_ITEMS: Record<string, string> = {
   edit: "編集モード",
   exports: "エクスポート",
   team: "チームとログイン",
+  roster: "名簿",
   admin: "ユーザー管理",
 };
 

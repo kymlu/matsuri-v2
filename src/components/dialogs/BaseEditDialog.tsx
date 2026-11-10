@@ -1,5 +1,5 @@
 import Button from "../basic/Button";
-import CustomDialog from "../basic/CustomDialog";
+import CustomDialog, { CustomDialogProps } from "../basic/CustomDialog";
 import { Dialog } from "@base-ui/react";
 
 type BaseEditDialogProps = {
@@ -14,6 +14,7 @@ type BaseEditDialogProps = {
   onSubmit: () => void,
   children: React.ReactNode,
   hasX?: boolean,
+  initialFocus?: CustomDialogProps["initialFocus"],
 }
 
 export default function BaseEditDialog({
@@ -21,10 +22,11 @@ export default function BaseEditDialog({
   isActionButtonDisabled, actionButtonText,
   noDetachedTrigger, full, fullWidth,
   onClose, showCloseButton = true,
-  onSubmit, children, hasX = true
+  onSubmit, children, hasX = true, initialFocus
 }: BaseEditDialogProps) {
   return <CustomDialog
     hasX={hasX}
+    initialFocus={initialFocus}
     full={full}
     fullWidth={fullWidth}
     title={title}

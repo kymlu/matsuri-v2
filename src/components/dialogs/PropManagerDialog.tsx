@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Prop } from "../../models/prop";
 import BaseEditDialog from "./BaseEditDialog";
 import { isNullOrUndefinedOrBlank, strCompare, strEquals } from "../../lib/helpers/globalHelper";
@@ -7,7 +7,10 @@ import IconButton from "../basic/IconButton";
 import { MAX_PROP_DIMENSION, MIN_PROP_DIMENSION, SHORT_NAME_LENGTH } from "../../lib/consts/consts";
 import NumberInput from "../inputs/NumberInput";
 import CustomMenu from "../inputs/CustomMenu";
-import { colorPalette } from "../../lib/consts/colors";
+import CustomAutocomplete from "../inputs/CustomAutocomplete";
+import ColorSwatchGrid from "../inputs/ColorSwatchGrid";
+import { RosterList } from "../../models/roster";
+import { formatPropSize, sortRosterNames } from "../../lib/helpers/rosterHelper";
 
 type PropManagerDialogProps = {
   props: Record<string, Prop>,
@@ -16,6 +19,7 @@ type PropManagerDialogProps = {
   showDelete?: boolean,
   title?: string,
   onSubmit: (props: Prop[], deletedPropIds: string[]) => void,
+  roster?: RosterList, // 名簿 prop names to suggest on each row, when there are any
 }
 
 type NumberInputHandle = {
@@ -23,7 +27,7 @@ type NumberInputHandle = {
 }
 
 export function PropManagerDialog({
-  props, visiblePropIds, showDelete = true, title = "道具管理", onSubmit
+  props, visiblePropIds, showDelete = true, title = "道具管理", onSubmit, roster
 }: PropManagerDialogProps) {
 
   const [propList, setPropList] = useState<Prop[]>([]);
@@ -43,6 +47,43 @@ export function PropManagerDialog({
   useEffect(() => {
     resetPropList();
   }, [props, visiblePropIds]);
+
+  // Plain name order: props often share a name, so nothing is marked as used.
+  const rosterOptions = useMemo(() =>
+    roster && roster.names.length > 0 ? sortRosterNames(roster.names).map(n => n.name) : undefined,
+  [roster]);
+
+  const rosterSuffix = (item: string) => {
+    const rosterName = roster?.names.find(n => n.name === item);
+    if (!rosterName) {
+      return null;
+    }
+    const categories = rosterName.categoryIds.map(id => roster?.categories.find(c => c.id === id)?.name).join("・");
+    return <span className="flex items-center gap-1 text-xs opacity-75">
+      {rosterName.color && <span aria-hidden className="inline-block border rounded-full size-2.5 border-line" style={{ backgroundColor: rosterName.color }}/>}
+      {[formatPropSize(rosterName), categories].filter(x => x !== "").join("・")}
+    </span>;
+  };
+
+  // Picking a suggestion (not typing) also gives the row that name's default size and colour, still editable before 保存.
+  const applyRosterDefaults = (index: number, propId: string, item: string) => {
+    const rosterName = roster?.names.find(n => n.name === item);
+    if (!rosterName) {
+      return;
+    }
+    if (rosterName.length !== undefined) {
+      lengthInputRefs.current.get(propId)?.changeValue(rosterName.length);
+    }
+    if (rosterName.width !== undefined) {
+      widthInputRefs.current.get(propId)?.changeValue(rosterName.width);
+    }
+    setPropList(prev => prev.map((p, i) => i === index ? {
+      ...p,
+      length: rosterName.length ?? p.length,
+      width: rosterName.width ?? p.width,
+      color: rosterName.color ?? p.color,
+    } : p));
+  };
 
   return <BaseEditDialog
       title={title}
@@ -70,31 +111,36 @@ export function PropManagerDialog({
                           className="rounded-full size-7 min-h-7 min-w-7 max-h-7 max-w-7"
                           style={{backgroundColor: prop.color}}/>
                     }>
-                      <div className="grid grid-cols-6 gap-2">
-                        {
-                          colorPalette.gridObjectColors().map((color) =>
-                            <button
-                              key={color}
-                              onClick={() => {
-                                setPropList(prev => prev.map((p, index) => index === i ? { ...p, color } : p));
-                              }}
-                              style={{"backgroundColor": color, "color": colorPalette.textContrast[color]}}
-                              className={"font-semibold rounded-full size-8 min-h-8 min-w-8 max-h-8 max-w-8 " +
-                                (strEquals(color, prop.color) ? "border border-primary" : "")
-                              }>文</button>
-                          )
-                        }
-                      </div>
+                      <ColorSwatchGrid
+                        value={prop.color}
+                        onChange={(color) => {
+                          setPropList(prev => prev.map((p, index) => index === i ? { ...p, color } : p));
+                        }}/>
                     </CustomMenu>
-                    <TextInput
-                      label="道具名"
-                      required
-                      defaultValue={prop.name}
-                      onContentChange={(newName) => {
-                        setPropList(prev => prev.map((p, index) => index === i ? { ...p, name: newName } : p));
-                      }}
-                      maxLength={SHORT_NAME_LENGTH}
-                    />
+                    {
+                      rosterOptions
+                        ? <CustomAutocomplete
+                            label="道具名"
+                            required
+                            defaultValue={prop.name}
+                            options={rosterOptions}
+                            itemSuffix={rosterSuffix}
+                            onItemSelect={(item) => applyRosterDefaults(i, prop.id, item)}
+                            onContentChange={(newName) => {
+                              setPropList(prev => prev.map((p, index) => index === i ? { ...p, name: newName } : p));
+                            }}
+                            maxLength={SHORT_NAME_LENGTH}
+                          />
+                        : <TextInput
+                            label="道具名"
+                            required
+                            defaultValue={prop.name}
+                            onContentChange={(newName) => {
+                              setPropList(prev => prev.map((p, index) => index === i ? { ...p, name: newName } : p));
+                            }}
+                            maxLength={SHORT_NAME_LENGTH}
+                          />
+                    }
                   </div>
                   <div className="flex gap-1 mt-1 md:mt-0">
                     <NumberInput
