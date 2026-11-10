@@ -151,6 +151,13 @@ const FormationLayer = memo(function FormationLayer({
     updateTransformer();
   }, [selectedIds]);
 
+  // A resize changes the shapes inside a prop or obstacle, which the transformer doesn't notice on its own.
+  // Refresh it once React has drawn the new size, so the frame fits the object again.
+  useEffect(() => {
+    refreshTransformer();
+    transformerRef.current?.getLayer()?.batchDraw();
+  }, [props, obstacles]);
+
   const obstacleList = useMemo(() => {
     if (obstacles) {
       return Object.values(obstacles);

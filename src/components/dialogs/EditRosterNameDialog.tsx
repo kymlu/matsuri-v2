@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import { Dialog } from "@base-ui/react";
 import { PropDefaults, Roster, RosterKind, RosterList, RosterName } from "../../models/roster";
 import { removeRosterName, updateRosterName } from "../../lib/helpers/apiHelper";
 import { toNameKey } from "../../lib/helpers/rosterHelper";
@@ -7,7 +6,6 @@ import { DEFAULT_PROP_LENGTH, DEFAULT_PROP_WIDTH, MAX_PROP_DIMENSION, MIN_PROP_D
 import ColorSwatchGrid from "../inputs/ColorSwatchGrid";
 import { colorPalette } from "../../lib/consts/colors";
 import BaseEditDialog from "./BaseEditDialog";
-import ConfirmDeletionDialog from "./ConfirmDeletionDialog";
 import TextInput from "../inputs/TextInput";
 import NumberInput from "../inputs/NumberInput";
 import { ChipToggles } from "../inputs/Chips";
@@ -57,7 +55,6 @@ export default function EditRosterNameDialog({ teamId, kind, rosterName, list, o
   };
 
   const remove = () => {
-    setIsConfirmingDelete(false);
     setIsSaving(true);
     removeRosterName(teamId, rosterName.id,
       onSaved,
@@ -69,15 +66,30 @@ export default function EditRosterNameDialog({ teamId, kind, rosterName, list, o
 
   const message = isTaken ? NAME_TAKEN : error;
 
+  // Deleting asks first, inside this dialog rather than in a second one on top.
+  if (isConfirmingDelete) {
+    return <BaseEditDialog
+      title={`「${rosterName.name}」を名簿から削除しますか？`}
+      actionButtonText="削除"
+      isActionButtonDisabled={isSaving}
+      backButton={{ label: "やめる", onClick: () => setIsConfirmingDelete(false) }}
+      onSubmit={remove}>
+      <div className="space-y-3">
+        <p className="text-muted">この名前を使っている隊列表は変わりません。</p>
+        {error && <p aria-live="polite" className="font-bold text-center text-primary">{error}</p>}
+      </div>
+    </BaseEditDialog>;
+  }
+
   return <BaseEditDialog
     title={kind === "dancer" ? "名前を編集" : "道具名を編集"}
     // Room for the size fields and colour grid, like the prop rename dialog.
-    fullWidth={kind === "prop"}
+    fullWidth
     onSubmit={save}
     isActionButtonDisabled={toNameKey(name) === "" || isTaken || isSaving}>
     <div className="space-y-3">
       <TextInput
-        defaultValue={rosterName.name}
+        defaultValue={name} // the current edit, so it survives a trip to the delete confirmation
         onContentChange={(value) => {
           setName(value);
           setError(undefined);
@@ -154,12 +166,5 @@ export default function EditRosterNameDialog({ teamId, kind, rosterName, list, o
         message && <p aria-live="polite" className="font-bold text-center text-primary">{message}</p>
       }
     </div>
-    <Dialog.Root open={isConfirmingDelete} onOpenChange={setIsConfirmingDelete}>
-      <ConfirmDeletionDialog
-        name={`「${rosterName.name}」`}
-        note="この名前を使っている隊列表は変わりません。"
-        verb="削除"
-        onSubmit={remove}/>
-    </Dialog.Root>
   </BaseEditDialog>
 }

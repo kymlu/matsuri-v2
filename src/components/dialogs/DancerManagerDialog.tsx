@@ -21,7 +21,9 @@ export function DancerManagerDialog({
 
   const [dancerList, setDancerList] = useState<Dancer[]>([]);
   const [dancerNames, setDancerNames] = useState<Record<string, number>>({});
+  // Marked for deletion; the rows stay, struck through, until 保存 so they can be brought back.
   const [deletedDancerIds, setDeletedDancerIds] = useState<string[]>([]);
+  const liveDancers = useMemo(() => dancerList.filter(d => !deletedDancerIds.includes(d.id)), [dancerList, deletedDancerIds]);
 
   useEffect(() => {
     setDancerList([...Object.values(dancers)].sort((a, b) => {
@@ -29,16 +31,15 @@ export function DancerManagerDialog({
     }))
   }, [dancers]);
 
+  // Deleted dancers don't count: their names are free to reuse.
   useEffect(() => {
-    if (dancerList.length === 0) return;
-    
-    const names = dancerList.map(x => x.name.trim());
+    const names = liveDancers.map(x => x.name.trim());
     const nameSet = new Set(names);
     setDancerNames(Array.from(nameSet).reduce((acc, item) => {
-      acc[item] = dancerList.filter(x => strEquals(x.name.trim(), item)).length;
+      acc[item] = liveDancers.filter(x => strEquals(x.name.trim(), item)).length;
       return acc;}
     , {} as Record<string, number>));
-  }, [dancerList]);
+  }, [liveDancers]);
 
   const namesWithDuplicates = useMemo(() => {
     return Object.entries(dancerNames).filter(([, count]) => count > 1).map(([name, ]) => name);
@@ -64,19 +65,24 @@ export function DancerManagerDialog({
       isActionButtonDisabled={dancerNames[""] === null || dancerNames[""] > 0}
       actionButtonText="保存"
       onClose={() => {
+        setDeletedDancerIds([]);
         setDancerList([...Object.values(dancers)].sort((a, b) => {
           return strCompare<Dancer>(a, b, "name");
         }));
       }}
       onSubmit={() => {
-        const trimmedDancers: Dancer[] = dancerList.map(x => ({id: x.id, name: x.name.trim()} as Dancer));
+        const trimmedDancers: Dancer[] = liveDancers.map(x => ({id: x.id, name: x.name.trim()} as Dancer));
         onSubmit(trimmedDancers, deletedDancerIds);
       }}>
       <div className="max-h-full grid grid-rows-[1fr,auto]">
         <div className="justify-center max-h-full space-y-2 overflow-auto md:flex md:flex-wrap md:gap-4">
           {
-            dancerList.map((dancer, i) => 
-              <div className="flex flex-row items-center gap-1" key={dancer.id}>
+            dancerList.map((dancer, i) => deletedDancerIds.includes(dancer.id)
+              ? <DeletedRow
+                  key={dancer.id}
+                  name={dancer.name}
+                  onUndo={() => setDeletedDancerIds(prev => prev.filter(id => id !== dancer.id))}/>
+              : <div className="flex flex-row items-center gap-1" key={dancer.id}>
                 {
                   rosterOptions
                     ? <CustomAutocomplete
@@ -108,10 +114,7 @@ export function DancerManagerDialog({
                     size="sm"
                     colour="primary"
                     src="delete"
-                    onClick={() => {
-                      setDeletedDancerIds(prev => [...prev, dancer.id]);
-                      setDancerList(prev => prev.filter(x => !strEquals(x.id, dancer.id)));
-                    }}
+                    onClick={() => setDeletedDancerIds(prev => [...prev, dancer.id])}
                     />
                 </div>
               </div>
@@ -125,4 +128,17 @@ export function DancerManagerDialog({
         }
       </div>
     </BaseEditDialog>
+}
+
+// A row marked for deletion: the name greyed and struck through, with undo in place of the trash icon.
+export function DeletedRow({ name, onUndo }: { name: string, onUndo: () => void }) {
+  return <div className="flex flex-row items-center gap-1">
+    {/* As wide as a name field, so marking a row doesn't reflow the wrapped grid on wide screens. */}
+    <div className="flex-1 min-w-0 pt-4 md:flex-none md:w-[12.2rem]">
+      <div className="px-3 py-2 line-through break-all border border-dashed rounded-md text-muted border-line">{name.trim() || "（名前なし）"}</div>
+    </div>
+    <div className="px-2 pt-4">
+      <IconButton noBorder size="sm" colour="grey" src="undo" onClick={onUndo}/>
+    </div>
+  </div>;
 }

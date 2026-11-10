@@ -37,3 +37,24 @@ describe("PropManagerDialog with 名簿", () => {
     expect(onSubmit).toHaveBeenCalledWith([{ ...props.p1, name: "特大旗" }], []);
   });
 });
+
+describe("PropManagerDialog deleting", () => {
+  const two = {
+    p1: { id: "p1", name: "大旗", length: 1, width: 4, color: "#000000" },
+    p2: { id: "p2", name: "扇", length: 1, width: 1, color: "#000000" },
+  };
+
+  it("keeps a deleted row until 保存, and undo brings it back", async () => {
+    const onSubmit = jest.fn();
+    render(<Dialog.Root open><PropManagerDialog props={two} onSubmit={onSubmit}/></Dialog.Root>);
+    const deletes = await screen.findAllByRole("button", { name: "delete" });
+    fireEvent.click(deletes[0]); // 扇 sorts first
+    expect(screen.getByText("扇")).toHaveClass("line-through");
+    fireEvent.click(screen.getByRole("button", { name: "undo" }));
+    expect(screen.queryByText("扇")).not.toBeInTheDocument(); // back to an editable field
+    fireEvent.click(screen.getAllByRole("button", { name: "delete" })[1]);
+    fireEvent.click(screen.getByRole("button", { name: "保存" }));
+    expect(onSubmit).toHaveBeenCalledWith([two.p2], ["p1"]);
+  });
+});
+
