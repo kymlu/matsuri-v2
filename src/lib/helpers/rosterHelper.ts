@@ -178,3 +178,42 @@ export function getLinksSummary(added: RosterLink[], removed: RosterLink[], list
 }
 
 export const getRemovedSummary = (count: number, kind: RosterKind) => `${count}${rosterCounter(kind)}を名簿から削除しました`;
+
+// Bulk prop defaults
+
+export type BulkLookField = "size" | "color";
+
+// What the selected prop names have for one field, to start the 大きさ / 色 dialog from:
+// the value they all share (undefined when none of them has one), or "mixed" when they differ.
+export function getSharedLook(names: RosterName[], field: "size"): { length: number, width: number } | undefined | "mixed";
+export function getSharedLook(names: RosterName[], field: "color"): string | undefined | "mixed";
+export function getSharedLook(names: RosterName[], field: BulkLookField) {
+  const keyOf = (n: RosterName) => field === "size"
+    ? (n.length === undefined && n.width === undefined ? "" : `${n.length}×${n.width}`)
+    : (n.color?.toLowerCase() ?? "");
+  const keys = new Set(names.map(keyOf));
+  if (keys.size > 1) {
+    return "mixed";
+  }
+  const first = names[0];
+  if (!first || keyOf(first) === "") {
+    return undefined;
+  }
+  return field === "size"
+    ? (first.length !== undefined && first.width !== undefined ? { length: first.length, width: first.width } : "mixed")
+    : first.color;
+}
+
+// Whether any of the selected names has a default to clear.
+export const hasAnyDefaults = (names: RosterName[]) =>
+  names.some(n => n.length !== undefined || n.width !== undefined || n.color !== undefined);
+
+// The result line after a bulk size or colour change, counted from the names that actually changed.
+export function getDefaultsSummary(count: number, change: BulkLookField | "clear"): string {
+  if (count === 0) {
+    return "変更はありません";
+  }
+  return change === "size" ? `${count}件の大きさを変更しました`
+    : change === "color" ? `${count}件の色を変更しました`
+    : `${count}件の大きさと色を消しました`;
+}

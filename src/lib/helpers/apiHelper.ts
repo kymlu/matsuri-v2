@@ -2,7 +2,7 @@ import { ErrorResponse } from "../../models/api";
 import { BasicChoreoDetails, Choreo, ChoreoVersion } from "../../models/choreo";
 import { Team } from "../../models/team";
 import { RoleType, User } from "../../models/user";
-import { AddRosterNamesResult, AddRosterNamesResultSchema, PropDefaults, Roster, RosterKind, RosterLink, RosterLinksResult, RosterLinksResultSchema, RosterRemoveResult, RosterRemoveResultSchema, RosterRestoreResult, RosterRestoreResultSchema, RosterSchema } from "../../models/roster";
+import { AddRosterNamesResult, AddRosterNamesResultSchema, PropDefaults, Roster, RosterKind, RosterDefaultsItem, RosterDefaultsResult, RosterDefaultsResultSchema, RosterLink, RosterLinksResult, RosterLinksResultSchema, RosterRemoveResult, RosterRemoveResultSchema, RosterRestoreResult, RosterRestoreResultSchema, RosterSchema } from "../../models/roster";
 import * as z from "zod";
 
 const getApiUrl = (endpoint: 
@@ -32,7 +32,8 @@ const getApiUrl = (endpoint:
   "roster/names/remove" |
   "roster/categories/save" |
   "roster/links" |
-  "roster/names/restore") => {
+  "roster/names/restore" |
+  "roster/names/defaults") => {
   return `/api/${endpoint}`
 }
 
@@ -579,7 +580,7 @@ export const getRoster = async (teamId: string): Promise<Roster> => {
 // The roster routes all POST a body and answer with JSON in a known shape.
 // A response in the wrong shape is reported as 500, so it isn't mistaken for a network failure.
 const postRoster = async <T,>(
-  endpoint: "roster/names/add" | "roster/names/update" | "roster/names/remove" | "roster/categories/save" | "roster/links" | "roster/names/restore",
+  endpoint: "roster/names/add" | "roster/names/update" | "roster/names/remove" | "roster/categories/save" | "roster/links" | "roster/names/restore" | "roster/names/defaults",
   teamId: string,
   body: object,
   schema: z.ZodType<T>,
@@ -664,6 +665,14 @@ export const removeRosterNames = (
   onSuccess: (result: RosterRemoveResult) => void,
   onFailure: (status: number) => void,
 ) => postRoster("roster/names/remove", teamId, { ids }, RosterRemoveResultSchema, onSuccess, onFailure);
+
+// Sets or clears the default size and colour of many prop names, each with its own values.
+export const updateRosterDefaults = (
+  teamId: string,
+  items: RosterDefaultsItem[],
+  onSuccess: (result: RosterDefaultsResult) => void,
+  onFailure: (status: number) => void,
+) => postRoster("roster/names/defaults", teamId, { items }, RosterDefaultsResultSchema, onSuccess, onFailure);
 
 // Undoes removeRosterNames, skipping names whose spelling has been added again since.
 export const restoreRosterNames = (

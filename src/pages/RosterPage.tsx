@@ -3,9 +3,9 @@ import { Dialog } from "@base-ui/react";
 import { Oval } from "react-loader-spinner";
 import classNames from "classnames";
 import { Team } from "../models/team";
-import { Roster, RosterKind, RosterLinksResult, RosterName, rosterListOf } from "../models/roster";
-import { getRoster, removeRosterNames, restoreRosterNames, updateRosterLinks } from "../lib/helpers/apiHelper";
-import { countHidden, formatPropSize, getLinksSummary, getRemovedSummary, getSelectAllState, rosterCounter, sortRosterNames, toNameKey } from "../lib/helpers/rosterHelper";
+import { Roster, RosterDefaultsItem, RosterDefaultsResult, RosterKind, RosterLinksResult, RosterName, rosterListOf } from "../models/roster";
+import { getRoster, removeRosterNames, restoreRosterNames, updateRosterDefaults } from "../lib/helpers/apiHelper";
+import { BulkLookField, countHidden, formatPropSize, getDefaultsSummary, getLinksSummary, getRemovedSummary, getSelectAllState, hasAnyDefaults, rosterCounter, sortRosterNames, toNameKey } from "../lib/helpers/rosterHelper";
 import { colorPalette } from "../lib/consts/colors";
 import IconButton from "../components/basic/IconButton";
 import { IconLabelButton } from "../components/basic/Button";
@@ -18,7 +18,9 @@ import EditRosterNameDialog from "../components/dialogs/EditRosterNameDialog";
 import RosterCategoriesDialog from "../components/dialogs/RosterCategoriesDialog";
 import RosterSelectionBar from "../components/common/RosterSelectionBar";
 import BulkCategoryDialog from "../components/dialogs/BulkCategoryDialog";
+import BulkPropLookDialog from "../components/dialogs/BulkPropLookDialog";
 import ConfirmDeletionDialog from "../components/dialogs/ConfirmDeletionDialog";
+import BaseEditDialog from "../components/dialogs/BaseEditDialog";
 import { SEARCH_NAME_LENGTH } from "../lib/consts/consts";
 
 type RosterPageProps = {
@@ -46,9 +48,11 @@ export default function RosterPage({ goToHomePage, team, tab, onTabChange }: Ros
   const [isSelecting, setIsSelecting] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkMode, setBulkMode] = useState<"add" | "remove">();
+  const [lookField, setLookField] = useState<BulkLookField>();
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+  const [isConfirmingClear, setIsConfirmingClear] = useState(false);
   const [isBusy, setIsBusy] = useState(false);
-  // The result of the last selection action, with one level of undo.
+  // The result of the last selection action. Only a delete can be undone.
   const [lastAction, setLastAction] = useState<{ message: string, isError?: boolean, undo?: () => void }>();
   // The roster the last selection action got back, to tell its changes from any other.
   const ownRoster = useRef<Roster | undefined>(undefined);
@@ -88,14 +92,14 @@ export default function RosterPage({ goToHomePage, team, tab, onTabChange }: Ros
     }
   }, [list]);
 
-  // Undo only reverses the last selection action, so any other change to the roster ends it.
+  // Undo only reverses the last delete, so any other change to the roster ends it.
   useEffect(() => {
     if (roster !== ownRoster.current) {
       setLastAction(undefined);
     }
   }, [roster]);
 
-  // Changes that came from a selection action, which keep the result line and its undo.
+  // Changes that came from a selection action, which keep the result line (and a delete's undo).
   const setOwnRoster = (newRoster: Roster) => {
     ownRoster.current = newRoster;
     setRoster(newRoster);
@@ -133,19 +137,22 @@ export default function RosterPage({ goToHomePage, team, tab, onTabChange }: Ros
   const onLinksApplied = (result: RosterLinksResult) => {
     setBulkMode(undefined);
     setOwnRoster(result.roster);
-    const hasChanges = result.added.length + result.removed.length > 0;
-    setLastAction({
-      message: list ? getLinksSummary(result.added, result.removed, list, tab) : "",
-      // Replays exactly what changed, reversed.
-      undo: hasChanges ? () => {
-        setIsBusy(true);
-        updateRosterLinks(team.id, result.removed, result.added, (undone) => {
-          setOwnRoster(undone.roster);
-          setLastAction({ message: "元に戻しました" });
-          setIsBusy(false);
-        }, failed);
-      } : undefined,
-    });
+    setLastAction({ message: list ? getLinksSummary(result.added, result.removed, list, tab) : "" });
+  };
+
+  // Size, colour or clearing both. No undo: setting goes through a dialog and clearing is confirmed first.
+  const onDefaultsApplied = (result: RosterDefaultsResult, change: BulkLookField | "clear") => {
+    setLookField(undefined);
+    setOwnRoster(result.roster);
+    setLastAction({ message: getDefaultsSummary(result.changed.length, change) });
+    setIsBusy(false);
+  };
+
+  const clearLook = () => {
+    setIsConfirmingClear(false);
+    setIsBusy(true);
+    const items: RosterDefaultsItem[] = [...selectedIds].map(id => ({ id, length: null, width: null, color: null }));
+    updateRosterDefaults(team.id, items, (result) => onDefaultsApplied(result, "clear"), failed);
   };
 
   const deleteSelected = () => {
@@ -383,9 +390,13 @@ export default function RosterPage({ goToHomePage, team, tab, onTabChange }: Ros
           hiddenCount={countHidden(selectedIds, visibleNames.map(n => n.id))}
           hasCategories={list.categories.length > 0}
           canRemoveCategories={list.names.some(n => selectedIds.has(n.id) && n.categoryIds.length > 0)}
+          canClearLook={hasAnyDefaults(list.names.filter(n => selectedIds.has(n.id)))}
           isBusy={isBusy}
           onAddCategories={() => setBulkMode("add")}
           onRemoveCategories={() => setBulkMode("remove")}
+          onSetSize={() => setLookField("size")}
+          onSetColor={() => setLookField("color")}
+          onClearLook={() => setIsConfirmingClear(true)}
           onDelete={() => setIsConfirmingDelete(true)}
           lastAction={lastAction}/>
       }
@@ -437,6 +448,34 @@ export default function RosterPage({ goToHomePage, team, tab, onTabChange }: Ros
             selectedIds={selectedIds}
             mode={bulkMode}
             onApplied={onLinksApplied}/>
+        }
+      </Dialog.Root>
+    }
+    {
+      list && tab === "prop" &&
+      <Dialog.Root open={lookField !== undefined} onOpenChange={(open) => { if (!open) setLookField(undefined); }}>
+        {
+          lookField &&
+          <BulkPropLookDialog
+            teamId={team.id}
+            list={list}
+            selectedIds={selectedIds}
+            field={lookField}
+            onApplied={(result) => onDefaultsApplied(result, lookField)}/>
+        }
+      </Dialog.Root>
+    }
+    {
+      list && tab === "prop" &&
+      <Dialog.Root open={isConfirmingClear} onOpenChange={setIsConfirmingClear}>
+        {
+          isConfirmingClear &&
+          <BaseEditDialog
+            title={`${selectedIds.size}件の大きさと色を消しますか？`}
+            actionButtonText="消す"
+            onSubmit={clearLook}>
+            <p className="text-muted">元に戻せません。隊列表の道具は変わりません。</p>
+          </BaseEditDialog>
         }
       </Dialog.Root>
     }

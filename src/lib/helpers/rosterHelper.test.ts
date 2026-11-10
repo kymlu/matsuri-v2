@@ -1,5 +1,5 @@
 import { RosterList } from "../../models/roster";
-import { countHidden, formatPropSize, getAddBarState, getAddedSummary, getBulkCategoryOptions, getLinksSummary, getPairs, getPropDefaultsChange, getRemovedSummary, getSelectAllState, sortRosterNames, splitNames, toNameKey } from "./rosterHelper";
+import { countHidden, formatPropSize, getAddBarState, getAddedSummary, getBulkCategoryOptions, getDefaultsSummary, getLinksSummary, getSharedLook, hasAnyDefaults, getPairs, getPropDefaultsChange, getRemovedSummary, getSelectAllState, sortRosterNames, splitNames, toNameKey } from "./rosterHelper";
 
 const roster: RosterList = {
   categories: [{ id: "c1", name: "正規" }, { id: "c2", name: "旗士" }],
@@ -146,5 +146,36 @@ describe("selection mode", () => {
     expect(getLinksSummary([], [["a", "c1"], ["a", "c3"]], list, "prop")).toBe("1件から正規・スポットを外しました");
     expect(getLinksSummary([], [], list, "dancer")).toBe("変更はありません");
     expect(getRemovedSummary(3, "dancer")).toBe("3名を名簿から削除しました");
+  });
+});
+
+describe("bulk prop defaults", () => {
+  const flag = { id: "a", name: "大旗", categoryIds: [], length: 1, width: 4, color: "#F08A00" };
+  const flag2 = { id: "b", name: "中旗", categoryIds: [], length: 1, width: 4, color: "#f08a00" };
+  const plain = { id: "c", name: "扇", categoryIds: [] };
+
+  it("finds the size or colour every selected name shares", () => {
+    expect(getSharedLook([flag, flag2], "size")).toEqual({ length: 1, width: 4 });
+    expect(getSharedLook([flag, flag2], "color")).toBe("#F08A00");
+    expect(getSharedLook([plain], "size")).toBeUndefined();
+    expect(getSharedLook([plain], "color")).toBeUndefined();
+  });
+
+  it("calls it mixed when they differ, including some with none", () => {
+    expect(getSharedLook([flag, { ...flag2, width: 2 }], "size")).toBe("mixed");
+    expect(getSharedLook([flag, plain], "color")).toBe("mixed");
+    expect(getSharedLook([{ ...plain, length: 2 }], "size")).toBe("mixed");
+  });
+
+  it("knows whether there is anything to clear", () => {
+    expect(hasAnyDefaults([plain])).toBe(false);
+    expect(hasAnyDefaults([plain, { ...plain, color: "#000000" }])).toBe(true);
+  });
+
+  it("words the result from what changed", () => {
+    expect(getDefaultsSummary(3, "size")).toBe("3件の大きさを変更しました");
+    expect(getDefaultsSummary(2, "color")).toBe("2件の色を変更しました");
+    expect(getDefaultsSummary(1, "clear")).toBe("1件の大きさと色を消しました");
+    expect(getDefaultsSummary(0, "color")).toBe("変更はありません");
   });
 });

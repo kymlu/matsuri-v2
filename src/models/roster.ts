@@ -65,7 +65,7 @@ export type AddRosterNamesResult = z.infer<typeof AddRosterNamesResultSchema>;
 const RosterLinkSchema = z.tuple([z.string(), z.string()]);
 export type RosterLink = z.infer<typeof RosterLinkSchema>;
 
-// The links that actually changed, so an undo can replay exactly those reversed.
+// The links that actually changed, so the result line counts only those.
 export const RosterLinksResultSchema = z.object({
   roster: RosterSchema,
   added: z.array(RosterLinkSchema),
@@ -88,3 +88,19 @@ export const RosterRestoreResultSchema = z.object({
 });
 
 export type RosterRestoreResult = z.infer<typeof RosterRestoreResultSchema>;
+
+// One prop name's defaults to set, for /api/roster/names/defaults: null clears a value, leaving it out keeps it.
+export type RosterDefaultsItem = {
+  id: string,
+  length?: number | null,
+  width?: number | null,
+  color?: string | null,
+}
+
+// changed: the names whose values actually changed, for the result count.
+export const RosterDefaultsResultSchema = z.object({
+  roster: RosterSchema,
+  changed: z.array(z.string()),
+});
+
+export type RosterDefaultsResult = z.infer<typeof RosterDefaultsResultSchema>;

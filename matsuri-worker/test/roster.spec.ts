@@ -525,3 +525,60 @@ describe("POST /api/roster/names/restore", () => {
 		expect((await call("/names/restore", { ids: [] })).status).toBe(400);
 	});
 });
+
+describe("POST /api/roster/names/defaults", () => {
+	type DefaultsResult = { roster: RosterResponse, changed: string[] };
+	const setDefaults = (items: unknown[]) => call("/names/defaults", { items });
+	const addProps = async (names: string[]) => (await addNames(names, [], "prop")).roster.names.map(n => n.id);
+
+	it("sets, keeps and clears each name's own values", async () => {
+		const [flag, fan] = await addProps(["大旗", "扇"]);
+		await call("/names/update", { id: flag, name: "大旗", category_ids: [], length: 1, width: 4, color: "#F08A00" });
+
+		const response = await setDefaults([{ id: flag, color: "#112233" }, { id: fan, color: "#112233" }]);
+		expect(response.status).toBe(200);
+		const result = await response.json() as DefaultsResult;
+		expect(result.changed).toEqual([flag, fan]);
+		expect(result.roster.props.names.find(n => n.id === flag)).toMatchObject({ length: 1, width: 4, color: "#112233" });
+		expect(result.roster.props.names.find(n => n.id === fan)).toEqual({ id: fan, name: "扇", categoryIds: [], color: "#112233" });
+
+		const cleared = await (await setDefaults([{ id: flag, length: null, width: null, color: null }])).json() as DefaultsResult;
+		expect(cleared.roster.props.names.find(n => n.id === flag)).toEqual({ id: flag, name: "大旗", categoryIds: [] });
+		expect(cleared.changed).toEqual([flag]);
+	});
+
+	it("leaves out names that didn't change, comparing colours ignoring case", async () => {
+		const [flag, fan] = await addProps(["大旗", "扇"]);
+		await setDefaults([{ id: flag, length: 2, width: 1, color: "#ABCDEF" }]);
+
+		const result = await (await setDefaults([
+			{ id: flag, length: 2, width: 1, color: "#abcdef" },
+			{ id: fan, length: 2, width: 1 },
+		])).json() as DefaultsResult;
+		expect(result.changed).toEqual([fan]);
+		expect(result.roster.props.names.find(n => n.id === flag)?.color).toBe("#ABCDEF");
+	});
+
+	it("rejects dancer names, bad values and repeated ids", async () => {
+		const [flag] = await addProps(["大旗"]);
+		const { roster } = await addNames(["さくら"]);
+		expect((await setDefaults([{ id: roster.names[0].id, color: "#112233" }])).status).toBe(400);
+		expect((await setDefaults([{ id: flag, length: 0.1 }])).status).toBe(400);
+		expect((await setDefaults([{ id: flag, color: "red" }])).status).toBe(400);
+		expect((await setDefaults([{ id: flag, color: "#112233" }, { id: flag, color: null }])).status).toBe(400);
+		expect((await setDefaults([])).status).toBe(400);
+		expect((await getRoster("prop")).names[0]).toEqual({ id: flag, name: "大旗", categoryIds: [] });
+	});
+
+	it("can't touch another team's or a removed name, and changes nothing then", async () => {
+		const [flag, fan] = await addProps(["大旗", "扇"]);
+		await call("/names/remove", { id: fan });
+		expect((await setDefaults([{ id: flag, color: "#112233" }, { id: "name_b", color: "#112233" }])).status).toBe(404);
+		expect((await setDefaults([{ id: flag, color: "#112233" }, { id: fan, color: "#112233" }])).status).toBe(404);
+		expect((await getRoster("prop")).names[0].color).toBeUndefined();
+	});
+
+	it("is closed to viewers", async () => {
+		expect((await call("/names/defaults", { items: [] }, viewerHeaders)).status).toBe(403);
+	});
+});
