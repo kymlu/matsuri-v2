@@ -1,4 +1,4 @@
-import { buildStartingLayout, getParadeWindow, OVERFLOW_OFFSET, placeDancers, placeProps } from "./startingLayoutHelper";
+import { buildStartingLayout, OVERFLOW_OFFSET, placeDancers, placeProps } from "./startingLayoutHelper";
 
 const stage = { stageWidth: 4, stageLength: 3 }; // 5 × 4 = 20 dancer spots
 
@@ -56,16 +56,5 @@ describe("buildStartingLayout", () => {
     expect(layout.dancerPositions.id3).toMatchObject({ x: 3, y: 0 });
     expect(layout.props.id4).toEqual({ id: "id4", name: "大旗", width: 4, length: 1, color: "#F08A00" });
     expect(layout.propPositions.id4).toMatchObject({ x: 0, y: 1, propId: "id4", type: "prop" });
-    expect(layout.depth).toBe(2);
-  });
-});
-
-describe("getParadeWindow", () => {
-  it("shows at least 10m, growing in 5m steps, never past the course", () => {
-    expect(getParadeWindow(0, 60)).toBe(10);
-    expect(getParadeWindow(8, 60)).toBe(10);
-    expect(getParadeWindow(9, 60)).toBe(15);
-    expect(getParadeWindow(59, 60)).toBe(60);
-    expect(getParadeWindow(3, 8)).toBe(8);
   });
 });

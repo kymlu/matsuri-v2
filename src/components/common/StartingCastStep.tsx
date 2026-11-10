@@ -1,11 +1,8 @@
 import { useMemo, useState } from "react";
 import classNames from "classnames";
 import { RosterList } from "../../models/roster";
-import { StageType } from "../../models/choreo";
-import { getParadeWindow, StartingLayout } from "../../lib/helpers/startingLayoutHelper";
 import { sortRosterNames, toNameKey, formatPropSize } from "../../lib/helpers/rosterHelper";
 import { SEARCH_NAME_LENGTH } from "../../lib/consts/consts";
-import GridPreview from "../grid/GridPreview";
 import NumberInput from "../inputs/NumberInput";
 import TextInput from "../inputs/TextInput";
 import { ChipFilter } from "../inputs/Chips";
@@ -17,11 +14,8 @@ export const MAX_STARTING_PER_PROP = 100;
 
 export type RosterLoadState = "off" | "loading" | "failed" | "loaded";
 
-type Stage = { stageWidth: number, stageLength: number, xMargin: number, yMargin: number, stageType: StageType };
-
 type StartingCastStepProps = {
-  stage: Stage,
-  layout: StartingLayout,
+  dancerCount: number, // picked + unnamed, for the 150 limit
   rosterState: RosterLoadState,
   dancerList?: RosterList,
   propList?: RosterList,
@@ -34,18 +28,14 @@ type StartingCastStepProps = {
   onPropCountsChange: (counts: [string, number][]) => void,
 }
 
-// Step 3 of 新規作成: a preview of the starting layout, then (with a 名簿) dancers and props to pick.
+// Step 3 of 新規作成: the dancer count, or (with a 名簿) dancers and props to pick.
 export default function StartingCastStep({
-  stage, layout, rosterState, dancerList, propList, onRetry,
+  dancerCount, rosterState, dancerList, propList, onRetry,
   pickedIds, onPickedIdsChange, unnamedCount, onUnnamedCountChange, propCounts, onPropCountsChange,
 }: StartingCastStepProps) {
-  const [tab, setTab] = useState<"dancer" | "prop" | "preview">("dancer");
+  const [tab, setTab] = useState<"dancer" | "prop">("dancer");
   const hasRoster = rosterState === "loaded" && dancerList !== undefined && propList !== undefined;
 
-  const dancerCount = Object.keys(layout.dancers).length;
-  const propCount = Object.keys(layout.props).length;
-  const isParade = stage.stageType === "parade";
-  const visibleLength = isParade ? getParadeWindow(layout.depth, stage.stageLength) : undefined;
   const isFull = dancerCount >= MAX_STARTING_DANCERS;
 
   const unnamedField = <div className="flex items-center justify-between gap-2">
@@ -62,27 +52,10 @@ export default function StartingCastStep({
     </div>
   </div>;
 
-  const preview = <div className="flex flex-col flex-1 min-h-0">
-    <GridPreview
-      stageWidth={stage.stageWidth}
-      stageLength={stage.stageLength}
-      stageType={stage.stageType}
-      xMargin={stage.xMargin}
-      yMargin={stage.yMargin}
-      layout={layout}
-      visibleLength={visibleLength}
-      className="flex-1 min-h-[200px] overflow-hidden"
-      label={`舞台プレビュー：ダンサー${dancerCount}名${propCount > 0 ? `・道具${propCount}件` : ""}`}/>
-    <div className="flex justify-end text-xs text-muted">
-      {isParade && visibleLength! < stage.stageLength ? `先頭から${visibleLength}mを表示（${stage.stageWidth} × ${stage.stageLength}m）` : `${stage.stageWidth} × ${stage.stageLength}m`}
-    </div>
-  </div>;
-
-  // Without a 名簿 (not logged in, a viewer, or it couldn't load): the preview above the dancer count.
+  // Without a 名簿 (not logged in, a viewer, or it couldn't load): just the dancer count, as before.
   if (!hasRoster) {
-    return <div className="flex flex-col h-full min-h-0 gap-2">
-      {preview}
-      <div className="pt-2 space-y-2">
+    return <div className="flex flex-col items-center justify-center h-full gap-2">
+      <div className="w-full space-y-2">
         {unnamedField}
         {
           rosterState === "loading" &&
@@ -99,11 +72,11 @@ export default function StartingCastStep({
     </div>;
   }
 
-  // With a 名簿: one tab row, each view gets the whole height.
+  // With a 名簿: dancers and props on two tabs.
   return <div className="flex flex-col h-full min-h-0 gap-2">
-    <div role="tablist" aria-label="ダンサー・道具・プレビュー" className="flex overflow-hidden border rounded-md shrink-0 border-primary">
+    <div role="tablist" aria-label="ダンサー・道具" className="flex overflow-hidden border rounded-md shrink-0 border-primary">
       {
-        ([["dancer", "ダンサー"], ["prop", "道具"], ["preview", "プレビュー"]] as const).map(([kind, label]) =>
+        ([["dancer", "ダンサー"], ["prop", "道具"]] as const).map(([kind, label]) =>
           <button
             key={kind}
             type="button"
@@ -118,22 +91,19 @@ export default function StartingCastStep({
           </button>)
       }
     </div>
-    {
-      tab === "preview"
-        ? preview
-        : <div className="flex-1 min-h-0 overflow-y-auto">
-          {
-            tab === "dancer"
-              ? <DancerList
-                list={dancerList!}
-                pickedIds={pickedIds}
-                isFull={isFull}
-                unnamedField={unnamedField}
-                onChange={onPickedIdsChange}/>
-              : <PropList list={propList!} counts={propCounts} onChange={onPropCountsChange}/>
-          }
-        </div>
-    }
+    <div className="flex-1 min-h-0 overflow-y-auto">
+      {
+        tab === "dancer"
+          ? <DancerList
+            list={dancerList!}
+            pickedIds={pickedIds}
+            isFull={isFull}
+            room={Math.max(0, MAX_STARTING_DANCERS - dancerCount)}
+            unnamedField={unnamedField}
+            onChange={onPickedIdsChange}/>
+          : <PropList list={propList!} counts={propCounts} onChange={onPropCountsChange}/>
+      }
+    </div>
   </div>;
 }
 
@@ -171,8 +141,8 @@ function NameFilters({ list, allLabel, placeholder, pickedCount, filter, onFilte
   </div>;
 }
 
-function DancerList({ list, pickedIds, isFull, unnamedField, onChange }: {
-  list: RosterList, pickedIds: string[], isFull: boolean, unnamedField: React.ReactNode, onChange: (ids: string[]) => void,
+function DancerList({ list, pickedIds, isFull, room, unnamedField, onChange }: {
+  list: RosterList, pickedIds: string[], isFull: boolean, room: number, unnamedField: React.ReactNode, onChange: (ids: string[]) => void,
 }) {
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
@@ -189,13 +159,27 @@ function DancerList({ list, pickedIds, isFull, unnamedField, onChange }: {
           <NameFilters list={list} allLabel="全員" placeholder="名前を探す" pickedCount={pickedIds.length} filter={filter} onFilterChange={setFilter} onSearchChange={setSearch}/>
           {isFull && <p className="text-sm font-semibold text-primary">{MAX_STARTING_DANCERS}名までです</p>}
           {
-            unpickedShown.length > 0 && !isFull &&
-            <button
-              type="button"
-              onClick={() => onChange([...pickedIds, ...unpickedShown.slice(0, MAX_STARTING_DANCERS - pickedIds.length).map(n => n.id)])}
-              className="flex items-center w-full gap-2 px-1 py-2 text-sm text-left border-b border-line text-muted">
-              <Icon src="checklist" size="xs" colour="grey"/>表示中の残り{unpickedShown.length}名をすべて選択
-            </button>
+            // As on the 名簿 page: selects everything shown, or clears it when it's all selected.
+            names.length > 0 && (() => {
+              const state = unpickedShown.length === 0 ? "all" : unpickedShown.length === names.length ? "none" : "some";
+              return <button
+                type="button"
+                role="checkbox"
+                aria-checked={state === "all" ? true : state === "some" ? "mixed" : false}
+                disabled={state !== "all" && room === 0}
+                onClick={() => {
+                  if (state === "all") {
+                    const shown = new Set(names.map(n => n.id));
+                    onChange(pickedIds.filter(id => !shown.has(id)));
+                  } else {
+                    onChange([...pickedIds, ...unpickedShown.slice(0, room).map(n => n.id)]);
+                  }
+                }}
+                className="flex items-center w-full gap-2 px-1 py-2 text-sm text-left border-b border-line text-muted disabled:opacity-50">
+                <SelectBox state={state}/>
+                すべて選択（表示中の{names.length}名）
+              </button>;
+            })()
           }
           <ul>
             {
@@ -213,12 +197,7 @@ function DancerList({ list, pickedIds, isFull, unnamedField, onChange }: {
                       "bg-subtle": isPicked,
                       "opacity-50": isDisabled,
                     })}>
-                    <span aria-hidden className={classNames("flex items-center justify-center rounded shrink-0 size-5 border-2", {
-                      "border-line-strong": !isPicked,
-                      "border-primary bg-primary": isPicked,
-                    })}>
-                      {isPicked && <Icon src="check" size="2xs" colour="white"/>}
-                    </span>
+                    <SelectBox state={isPicked ? "all" : "none"}/>
                     <span className="font-semibold break-all">{n.name}</span>
                   </button>
                 </li>;
@@ -291,4 +270,16 @@ function PropList({ list, counts, onChange }: { list: RosterList, counts: [strin
     </ul>
     {names.length === 0 && <p className="py-6 text-center text-muted">{filter === "picked" ? "まだ追加していません" : "該当する道具はありません"}</p>}
   </div>;
+}
+
+// The same checkbox as selection mode on the 名簿 page: empty, ticked, or a dash when only some are selected.
+function SelectBox({ state }: { state: "none" | "some" | "all" }) {
+  return <span aria-hidden className={classNames("flex items-center justify-center rounded shrink-0 size-5 border-2", {
+    "border-line-strong": state === "none",
+    "border-primary bg-primary": state === "all",
+    "border-primary": state === "some",
+  })}>
+    {state === "all" && <Icon src="check" size="2xs" colour="white"/>}
+    {state === "some" && <span className="w-2.5 h-0.5 bg-primary"/>}
+  </span>;
 }

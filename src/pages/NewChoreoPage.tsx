@@ -150,7 +150,7 @@ export function NewChoreoPage({
   };
 
   const handleSubmit = () => {
-    // Exactly what the preview shows.
+    // Placed in pick order: 名簿 dancers, unnamed dancers, then props.
     const { dancers, dancerPositions, props, propPositions } = layout;
     const choreo: Choreo = {
       id: crypto.randomUUID(),
@@ -338,8 +338,7 @@ export function NewChoreoPage({
         {
           step === 3 && (
           <StartingCastStep
-            stage={{ stageWidth: form.stageWidth, stageLength: form.stageLength, xMargin: form.xMargin, yMargin: form.yMargin, stageType: form.stageType }}
-            layout={layout}
+            dancerCount={dancerTotal}
             rosterState={rosterState}
             dancerList={roster?.dancers}
             propList={roster?.props}

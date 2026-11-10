@@ -3,18 +3,16 @@ import { Prop, PropPosition } from "../../models/prop";
 import { colorPalette } from "../consts/colors";
 
 // The starting layout for a new choreo: where step 3 of 新規作成 puts each dancer and prop.
-// The preview and 作成 both use this, so what's created is exactly what was shown.
 
 export const PROP_GAP_FROM_DANCERS = 1; // metres between the last row of dancers and the first props
 const PROP_GAP = 0.5;                   // metres between props
-export const OVERFLOW_OFFSET = 0.15;    // each pass after the stage is full shifts by this, so stacked items stay visible
+export const OVERFLOW_OFFSET = 0.15;    // each pass after the stage is full shifts by this, so stacked items aren't hidden in the editor
 
 export type StartingLayout = {
   dancers: Record<string, Dancer>,
   dancerPositions: Record<string, DancerPosition>,
   props: Record<string, Prop>,
   propPositions: Record<string, PropPosition>,
-  depth: number, // metres from the front (y = 0) to the far edge of the furthest item, for the parade preview
 }
 
 type Size = { stageWidth: number, stageLength: number };
@@ -85,7 +83,7 @@ export function buildStartingLayout(
   const dancerSpots = placeDancers(names.length, size);
   const propSpots = placeProps(props, names.length, size);
 
-  const layout: StartingLayout = { dancers: {}, dancerPositions: {}, props: {}, propPositions: {}, depth: 0 };
+  const layout: StartingLayout = { dancers: {}, dancerPositions: {}, props: {}, propPositions: {} };
   names.forEach((name, i) => {
     const id = newId();
     layout.dancers[id] = { id, name };
@@ -98,7 +96,6 @@ export function buildStartingLayout(
       type: "dancer",
       rotation: 0,
     };
-    layout.depth = Math.max(layout.depth, dancerSpots[i].y);
   });
   props.forEach((prop, i) => {
     const id = newId();
@@ -111,14 +108,6 @@ export function buildStartingLayout(
       type: "prop",
       rotation: 0,
     };
-    layout.depth = Math.max(layout.depth, propSpots[i].y + prop.length);
   });
   return layout;
-}
-
-// For a parade, how much of the course to show: from the front to just past the furthest item,
-// at least 10m and growing in 5m steps so the scale doesn't change on every addition.
-export function getParadeWindow(depth: number, stageLength: number): number {
-  const wanted = Math.max(10, Math.ceil((depth + 2) / 5) * 5);
-  return Math.min(stageLength, wanted);
 }
