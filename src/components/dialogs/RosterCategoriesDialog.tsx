@@ -1,5 +1,4 @@
 import { useMemo, useRef, useState } from "react";
-import { Dialog } from "@base-ui/react";
 import { DndContext } from "@dnd-kit/core";
 import { arrayMove, SortableContext, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -8,7 +7,6 @@ import { Roster, RosterKind, RosterList } from "../../models/roster";
 import { saveRosterCategories } from "../../lib/helpers/apiHelper";
 import { ROSTER_CATEGORY_LENGTH, toNameKey } from "../../lib/helpers/rosterHelper";
 import BaseEditDialog from "./BaseEditDialog";
-import ConfirmDeletionDialog from "./ConfirmDeletionDialog";
 import TextInput from "../inputs/TextInput";
 import IconButton from "../basic/IconButton";
 import Icon from "../basic/Icon";
@@ -18,6 +16,7 @@ type CategoryRow = {
   id?: string,
   name: string,
   count: number, // names in this category
+  isDeleted?: boolean, // marked for deletion; stays in the list until 保存 so it can be undone
 }
 
 type RosterCategoriesDialogProps = {
@@ -35,14 +34,13 @@ export default function RosterCategoriesDialog({ teamId, kind, list: roster, onS
     name: c.name,
     count: roster.names.filter(n => n.categoryIds.includes(c.id)).length,
   })));
-  const [deletedIds, setDeletedIds] = useState<string[]>([]);
   const [newName, setNewName] = useState("");
   const newNameRef = useRef<{ changeValue: (value: string) => void }>(null);
-  const [pendingDelete, setPendingDelete] = useState<CategoryRow>();
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string>();
 
-  const keyCounts = useMemo(() => rows.reduce((acc, row) => {
+  // Deleted rows don't count: their names are free to reuse.
+  const keyCounts = useMemo(() => rows.filter(r => !r.isDeleted).reduce((acc, row) => {
     const key = toNameKey(row.name);
     acc[key] = (acc[key] ?? 0) + 1;
     return acc;
@@ -60,16 +58,17 @@ export default function RosterCategoriesDialog({ teamId, kind, list: roster, onS
     newNameRef.current?.changeValue("");
   };
 
-  const removeRow = (row: CategoryRow) => {
-    setRows(prev => prev.filter(r => r.rowId !== row.rowId));
-    if (row.id) {
-      setDeletedIds(prev => [...prev, row.id!]);
-    }
+  // Nothing is deleted until 保存, so a row is only marked, and the same button brings it back.
+  const toggleDeleted = (row: CategoryRow) => {
+    setRows(prev => prev.map(r => r.rowId === row.rowId ? { ...r, isDeleted: !r.isDeleted } : r));
+    setError(undefined);
   };
 
   const save = () => {
     setIsSaving(true);
-    saveRosterCategories(teamId, kind, rows.map(r => ({ id: r.id, name: r.name.trim() })), deletedIds,
+    const live = rows.filter(r => !r.isDeleted);
+    const deletedIds = rows.filter(r => r.isDeleted && r.id).map(r => r.id!);
+    saveRosterCategories(teamId, kind, live.map(r => ({ id: r.id, name: r.name.trim() })), deletedIds,
       onSaved,
       (status) => {
         setError(status === 409 ? "同じ名前の区分がすでにあります" : "保存できませんでした。もう一度お試しください");
@@ -82,7 +81,7 @@ export default function RosterCategoriesDialog({ teamId, kind, list: roster, onS
     title={kind === "dancer" ? "区分（ダンサー）" : "区分（道具）"}
     fullWidth
     onSubmit={save}
-    isActionButtonDisabled={isSaving || rows.some(r => isInvalid(r.name))}>
+    isActionButtonDisabled={isSaving || rows.some(r => !r.isDeleted && isInvalid(r.name))}>
     <div className="space-y-1">
       <DndContext
         modifiers={[restrictToVerticalAxis, restrictToParentElement]}
@@ -102,12 +101,12 @@ export default function RosterCategoriesDialog({ teamId, kind, list: roster, onS
                 <SortableCategoryRow
                   key={row.rowId}
                   row={row}
-                  hasError={isInvalid(row.name)}
+                  hasError={!row.isDeleted && isInvalid(row.name)}
                   onRename={(name) => {
                     setRows(prev => prev.map(r => r.rowId === row.rowId ? { ...r, name } : r));
                     setError(undefined);
                   }}
-                  onDelete={() => row.count > 0 ? setPendingDelete(row) : removeRow(row)}/>
+                  onToggleDeleted={() => toggleDeleted(row)}/>
               )
             }
           </div>
@@ -132,19 +131,6 @@ export default function RosterCategoriesDialog({ teamId, kind, list: roster, onS
         error && <p aria-live="polite" className="font-bold text-center text-primary">{error}</p>
       }
     </div>
-    <Dialog.Root open={pendingDelete !== undefined} onOpenChange={(open) => { if (!open) setPendingDelete(undefined); }}>
-      {
-        pendingDelete &&
-        <ConfirmDeletionDialog
-          name={`「${pendingDelete.name}」`}
-          note={`${pendingDelete.count}名から外れます（名前は名簿に残ります）`}
-          verb="削除"
-          onSubmit={() => {
-            removeRow(pendingDelete);
-            setPendingDelete(undefined);
-          }}/>
-      }
-    </Dialog.Root>
   </BaseEditDialog>
 }
 
@@ -152,11 +138,24 @@ type SortableCategoryRowProps = {
   row: CategoryRow,
   hasError: boolean,
   onRename: (name: string) => void,
-  onDelete: () => void,
+  onToggleDeleted: () => void,
 }
 
-function SortableCategoryRow({ row, hasError, onRename, onDelete }: SortableCategoryRowProps) {
-  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: row.rowId });
+function SortableCategoryRow({ row, hasError, onRename, onToggleDeleted }: SortableCategoryRowProps) {
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: row.rowId, disabled: row.isDeleted });
+
+  if (row.isDeleted) {
+    // Greyed and struck through, saying what 保存 will do, with undo in place of the trash icon.
+    return <div
+      ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition }}
+      className="flex items-center gap-2 py-1 bg-surface">
+      <span className="opacity-30"><Icon src="dragHandle" size="sm" colour="grey"/></span>
+      <span className="flex-1 min-w-0 px-2 py-1.5 line-through break-all text-muted">{row.name}</span>
+      <span className="text-xs text-right text-muted whitespace-nowrap">{row.count > 0 ? `${row.count}名から外れます` : "削除"}</span>
+      <IconButton src="undo" colour="grey" size="sm" noBorder onClick={onToggleDeleted}/>
+    </div>;
+  }
 
   return <div
     ref={setNodeRef}
@@ -176,6 +175,6 @@ function SortableCategoryRow({ row, hasError, onRename, onDelete }: SortableCate
         compact/>
     </div>
     <span className="w-8 text-xs text-right text-muted">{row.count}名</span>
-    <IconButton src="delete" colour="primary" size="sm" noBorder onClick={onDelete}/>
+    <IconButton src="delete" colour="primary" size="sm" noBorder onClick={onToggleDeleted}/>
   </div>
 }
