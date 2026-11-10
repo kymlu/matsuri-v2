@@ -3,9 +3,8 @@ import NumberInput from "../components/inputs/NumberInput";
 import TextInput from "../components/inputs/TextInput";
 import { isNullOrUndefinedOrBlank, testInvalidCharacters } from "../lib/helpers/globalHelper";
 import { Choreo, EventDetails, StageType } from "../models/choreo";
-import { Dancer, DancerPosition } from "../models/dancer";
 import { colorPalette } from "../lib/consts/colors";
-import { LONG_NAME_LENGTH, MAX_STAGE_DIMENSION, MAX_STAGE_MARGIN, MIN_STAGE_DIMENSION, MIN_STAGE_MARGIN } from "../lib/consts/consts";
+import { DEFAULT_PROP_LENGTH, DEFAULT_PROP_WIDTH, LONG_NAME_LENGTH, MAX_STAGE_DIMENSION, MAX_STAGE_MARGIN, MIN_STAGE_DIMENSION, MIN_STAGE_MARGIN } from "../lib/consts/consts";
 import { saveChoreo } from "../lib/dataAccess/DataController";
 import GridPreview from "../components/grid/GridPreview";
 import Button from "../components/basic/Button";
@@ -13,6 +12,12 @@ import CustomAutocomplete from "../components/inputs/CustomAutocomplete";
 import DateInput from "../components/inputs/DateInput";
 import { Autocomplete } from "@base-ui/react";
 import { formatDateRange } from "../lib/helpers/dateHelper";
+import { Dialog } from "@base-ui/react";
+import { Roster } from "../models/roster";
+import { getRoster } from "../lib/helpers/apiHelper";
+import { buildStartingLayout, StartingProp } from "../lib/helpers/startingLayoutHelper";
+import StartingCastStep, { RosterLoadState } from "../components/common/StartingCastStep";
+import BaseEditDialog from "../components/dialogs/BaseEditDialog";
 
 interface FormationForm {
   name: string;
@@ -33,10 +38,11 @@ type NewChoreoPageProps = {
   eventList: EventDetails[],
   selectedEvent?: EventDetails,
   teamId?: string,
+  canUseRoster?: boolean, // logged in as an editor or admin
 }
 
 export function NewChoreoPage({
-  goToEditPage, goToHomePage, eventList, selectedEvent, teamId
+  goToEditPage, goToHomePage, eventList, selectedEvent, teamId, canUseRoster = false,
 }: NewChoreoPageProps) {
   const [step, setStep] = useState(1);
   const [form, setForm] = useState<FormationForm>({
@@ -51,6 +57,71 @@ export function NewChoreoPage({
     xMargin: 2,
     yMargin: 2,
   });
+
+  // Step 3: the starting cast. Dancers picked from the 名簿 (in pick order), unnamed dancers, and props.
+  const [roster, setRoster] = useState<Roster>();
+  const [rosterState, setRosterState] = useState<RosterLoadState>("off");
+  const [pickedIds, setPickedIds] = useState<string[]>([]);
+  const [unnamedCount, setUnnamedCount] = useState(form.dancerCount);
+  const [hasChangedUnnamed, setHasChangedUnnamed] = useState(false);
+  const [propCounts, setPropCounts] = useState<[string, number][]>([]);
+  const [sectionId] = useState(() => crypto.randomUUID());
+  const [isConfirmingLeave, setIsConfirmingLeave] = useState(false);
+
+  // The 名簿 loads when step 3 first opens, so steps 1 and 2 don't wait for it.
+  const loadRoster = () => {
+    if (!teamId) {
+      return;
+    }
+    setRosterState("loading");
+    getRoster(teamId)
+      .then(result => {
+        setRoster(result);
+        setRosterState("loaded");
+        // With a 名簿, nobody is added unless asked for.
+        if (!hasChangedUnnamed) {
+          setUnnamedCount(0);
+        }
+      })
+      .catch(e => {
+        console.error((e as Error)?.message);
+        setRosterState("failed");
+      });
+  };
+
+  useEffect(() => {
+    if (step === 3 && canUseRoster && rosterState === "off") {
+      loadRoster();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, canUseRoster]);
+
+  const layout = useMemo(() => {
+    const dancerNames = new Map(roster?.dancers.names.map(n => [n.id, n.name]) ?? []);
+    const propNames = new Map(roster?.props.names.map(n => [n.id, n]) ?? []);
+    const props: StartingProp[] = propCounts.flatMap(([id, count]) => {
+      const name = propNames.get(id);
+      return name ? Array.from({ length: count }, () => ({
+        name: name.name,
+        width: name.width ?? DEFAULT_PROP_WIDTH,
+        length: name.length ?? DEFAULT_PROP_LENGTH,
+        color: name.color ?? colorPalette.rainbow.blue[0],
+      })) : [];
+    });
+    return buildStartingLayout(
+      pickedIds.map(id => dancerNames.get(id)).filter((n): n is string => n !== undefined),
+      rosterState === "loaded" ? unnamedCount : Math.max(unnamedCount, 1),
+      props,
+      { stageWidth: form.stageWidth, stageLength: form.stageLength },
+      sectionId);
+  }, [roster, pickedIds, unnamedCount, propCounts, rosterState, form.stageWidth, form.stageLength, sectionId]);
+
+  const dancerTotal = Object.keys(layout.dancers).length;
+  const propTotal = Object.keys(layout.props).length;
+
+  // Anything typed or picked that 戻る on step 1 would throw away.
+  const hasInput = form.name.trim() !== "" || (form.eventName.trim() !== "" && form.eventName !== (selectedEvent?.event ?? "")) ||
+    pickedIds.length > 0 || propCounts.length > 0;
 
   const hasDateError = (!isNullOrUndefinedOrBlank(form.startDate) &&
     !isNullOrUndefinedOrBlank(form.endDate) &&
@@ -79,26 +150,8 @@ export function NewChoreoPage({
   };
 
   const handleSubmit = () => {
-    const sectionId = crypto.randomUUID();
-    const dancers: Record<string, Dancer> = {};
-    const dancerPositions: Record<string, DancerPosition> = {};
-    for (let i = 0; i < form.dancerCount; i++) {
-      const id = crypto.randomUUID();
-      dancers[id] = {
-        id: id,
-        name: (i + 1).toString(),
-      }
-      dancerPositions[id] = {
-        sectionId: sectionId,
-        dancerId: id,
-        x: i % (form.stageWidth + 1),
-        y: Math.floor(i / (form.stageWidth + 1)),
-        z: i,
-        color: colorPalette.rainbow.blue[0],
-        type: "dancer",
-        rotation: 0,
-      }
-    }
+    // Exactly what the preview shows.
+    const { dancers, dancerPositions, props, propPositions } = layout;
     const choreo: Choreo = {
       id: crypto.randomUUID(),
       teamId: teamId,
@@ -119,7 +172,7 @@ export function NewChoreoPage({
         yAxis: form.stageType === "parade" ? "bottom-up" : "top-down",
       },
       dancers: dancers,
-      props: {},
+      props: props,
       obstacles: {},
       sections: [{
         id: sectionId,
@@ -128,7 +181,7 @@ export function NewChoreoPage({
         formation: {
           dancerActions: [],
           dancerPositions: dancerPositions,
-          propPositions: {}
+          propPositions: propPositions
         }}],
     };
     console.log("Creating new choreo:", choreo);
@@ -140,7 +193,7 @@ export function NewChoreoPage({
   const stepTitles: Record<number, string> = {
     1: "隊列基本情報",
     2: "舞台情報",
-    3: "ダンサー情報",
+    3: "ダンサー・道具",
   };
   
   return (
@@ -150,7 +203,7 @@ export function NewChoreoPage({
           {stepTitles[step] || ""}
         </h2>
       </div>
-      <div className="flex-1 overflow-auto">
+      <div className={step === 3 ? "flex-1 min-h-0" : "flex-1 overflow-auto"}>
         {step === 1 && (
           <div className="flex flex-col h-full pt-10 pb-20 justify-evenly">
             <TextInput
@@ -284,24 +337,40 @@ export function NewChoreoPage({
 
         {
           step === 3 && (
-          <div className="flex items-center justify-center h-full">
-            <NumberInput
-              defaultValue={form.dancerCount}
-              min={1}
-              max={150}
-              baseStep={1}
-              buttonStep={1}
-              onChange={(newValue) => {handleChange("dancerCount", Number(newValue))}}
-              label="ダンサー数"
-            />
-          </div>
+          <StartingCastStep
+            stage={{ stageWidth: form.stageWidth, stageLength: form.stageLength, xMargin: form.xMargin, yMargin: form.yMargin, stageType: form.stageType }}
+            layout={layout}
+            rosterState={rosterState}
+            dancerList={roster?.dancers}
+            propList={roster?.props}
+            onRetry={loadRoster}
+            pickedIds={pickedIds}
+            onPickedIdsChange={setPickedIds}
+            unnamedCount={unnamedCount}
+            onUnnamedCountChange={(count) => {
+              setUnnamedCount(count);
+              setHasChangedUnnamed(true);
+            }}
+            propCounts={propCounts}
+            onPropCountsChange={setPropCounts}/>
         )}
       </div>
+
+      {
+        step === 3 &&
+        <p className="text-sm text-center text-muted">
+          {
+            dancerTotal === 0
+              ? <span className="font-semibold text-primary">ダンサーを1名以上追加してください</span>
+              : `合計${dancerTotal}名${propTotal > 0 ? `・道具${propTotal}件` : ""}`
+          }
+        </p>
+      }
 
       <div className="flex justify-between h-10 gap-4 mb-8">
         { <Button
             full
-            onClick={step === 1 ? goToHomePage : prevStep}
+            onClick={step === 1 ? (hasInput ? () => setIsConfirmingLeave(true) : goToHomePage) : prevStep}
           >
             <span className="font-semibold">
               戻る
@@ -324,6 +393,7 @@ export function NewChoreoPage({
           <Button
             primary
             full
+            disabled={dancerTotal === 0}
             onClick={handleSubmit}
           >
           <span className="font-semibold">
@@ -332,6 +402,14 @@ export function NewChoreoPage({
           </Button>
         )}
       </div>
+      <Dialog.Root open={isConfirmingLeave} onOpenChange={setIsConfirmingLeave}>
+        {
+          isConfirmingLeave &&
+          <BaseEditDialog title="戻りますか？" actionButtonText="戻る" onSubmit={goToHomePage}>
+            <p className="text-muted">入力した内容はすべて失われます。</p>
+          </BaseEditDialog>
+        }
+      </Dialog.Root>
     </div>
   );
 }

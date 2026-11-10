@@ -195,6 +195,7 @@ function App() {
           eventList={eventList}
           selectedEvent={selectedEvent}
           teamId={team?.id}
+          canUseRoster={!!team && isLoggedIn && !isViewer}
         />
       )}
       {mode === "edit" && (
