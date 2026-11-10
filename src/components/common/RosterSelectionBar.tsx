@@ -31,7 +31,7 @@ export default function RosterSelectionBar({
     <p className="font-bold">
       {
         selectedCount === 0
-          ? <span className="font-normal text-muted">名前をタップして選択</span>
+          ? <span className="font-normal text-muted">{kind === "prop" ? "道具名" : "名前"}をタップして選択</span>
           : <>
             {selectedCount}{counter}を選択中
             {hiddenCount > 0 && <span className="ml-1 text-sm font-normal text-primary">（うち{hiddenCount}{counter}は非表示）</span>}

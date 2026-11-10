@@ -24,6 +24,11 @@ describe("RosterSelectionBar", () => {
     expect(screen.getByRole("button", { name: /区分を外す/ })).toBeDisabled();
   });
 
+  it("asks for prop names on the 道具 tab", () => {
+    renderBar({ kind: "prop", selectedCount: 0 });
+    expect(screen.getByText("道具名をタップして選択")).toBeInTheDocument();
+  });
+
   it("says how many selected names are hidden", () => {
     renderBar({ selectedCount: 4, hiddenCount: 3 });
     expect(screen.getByText(/4名を選択中/)).toBeInTheDocument();
