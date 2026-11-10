@@ -265,9 +265,22 @@ describe("ChoreoViewPage change log", () => {
     setSeenVersion(SAMPLE_STAGE_ID, 1);
     renderPage(overrides);
 
-    expect(await screen.findByText(hintTitle)).toBeInTheDocument();
+    await settle();
     expect(mockGetChoreoFile).not.toHaveBeenCalled();
     expect(getSeenVersion("c1")).toBe(1);
     expect(getSeenVersion(SAMPLE_STAGE_ID)).toBe(1);
+  });
+});
+
+describe("ChoreoViewPage hint", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    mockGetChoreoFile.mockReset();
+  });
+
+  it("doesn't show 利用方法 for a past version", async () => {
+    renderPage({ pastVersion: 1 });
+    await settle();
+    expect(screen.queryByText(hintTitle)).not.toBeInTheDocument();
   });
 });

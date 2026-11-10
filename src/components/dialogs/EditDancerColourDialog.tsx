@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import BaseEditDialog from "./BaseEditDialog";
-import { colorPalette } from "../../lib/consts/colors";
-import { isNullOrUndefinedOrBlank, strEquals } from "../../lib/helpers/globalHelper";
+import { isNullOrUndefinedOrBlank } from "../../lib/helpers/globalHelper";
 import Button from "../basic/Button";
+import ColorSwatchGrid from "../inputs/ColorSwatchGrid";
 
 export type colourMode = "all" | "current" | "currentAndAfter";
 
@@ -60,18 +60,6 @@ export default function EditDancerColourDialog({
           </div>
         </div>
       }
-      <div className="grid grid-cols-6 gap-2 w-max">
-        {
-          colorPalette.gridObjectColors().map((color) => 
-            <button
-              key={color}
-              onClick={() => setSelectedColour(color)}
-              style={{"backgroundColor": color, "color": colorPalette.textContrast[color]}}
-              className={"font-semibold rounded-full size-8 min-h-8 min-w-8 max-h-8 max-w-8 " + 
-                (strEquals(color, selectedColour) ? "border-4 border-primary" : "")
-              }>文</button>
-          )
-        }
-      </div>
+      <ColorSwatchGrid value={selectedColour} onChange={setSelectedColour}/>
   </BaseEditDialog>
 }

@@ -117,13 +117,13 @@ export default function RosterCategoriesDialog({ teamId, kind, list: roster, onS
         rows.length === 0 && <p className="py-2 text-sm text-center text-muted">区分はまだありません</p>
       }
       <div className="flex items-center gap-2 pt-2">
-        <div className="flex-1">
+        {/* Not compact: a compact input keeps its own width and ran under the ＋ button on narrow screens. */}
+        <div className="flex-1 min-w-0">
           <TextInput
             ref={newNameRef}
             placeholder="新しい区分"
             onContentChange={setNewName}
             maxLength={ROSTER_CATEGORY_LENGTH}
-            compact
             showLength/>
         </div>
         <IconButton src="add" colour="primary" size="sm" disabled={!canAdd} onClick={addRow}/>

@@ -70,6 +70,26 @@ describe("EditNameDialog for props", () => {
     expect(onSubmit).toHaveBeenCalledWith("大旗", undefined);
   });
 
+  it("offers the size and colour of the prop's own name, unticked, when they differ", async () => {
+    const onSubmit = jest.fn();
+    render(dialog(true, { name: "大旗", onSubmit }));
+    await screen.findByText("名簿から選ぶ");
+    expect(checkbox()?.checked).toBe(false);
+
+    fireEvent.click(screen.getByRole("button", { name: "保存" }));
+    expect(onSubmit).toHaveBeenLastCalledWith("大旗", undefined);
+
+    fireEvent.click(checkbox()!);
+    fireEvent.click(screen.getByRole("button", { name: "保存" }));
+    expect(onSubmit).toHaveBeenLastCalledWith("大旗", { width: 4, color: "#F08A00" });
+  });
+
+  it("offers nothing for the prop's own name when its size and colour already match", async () => {
+    render(dialog(true, { name: "大旗", prop: { length: 1, width: 4, color: "#f08a00" } }));
+    await screen.findByText("名簿から選ぶ");
+    expect(checkbox()).toBeNull();
+  });
+
   it("starts fresh when reopened after キャンセル", async () => {
     const onSubmit = jest.fn();
     const { rerender } = render(dialog(true, { onSubmit }));

@@ -7,8 +7,8 @@ import IconButton from "../basic/IconButton";
 import { MAX_PROP_DIMENSION, MIN_PROP_DIMENSION, SHORT_NAME_LENGTH } from "../../lib/consts/consts";
 import NumberInput from "../inputs/NumberInput";
 import CustomMenu from "../inputs/CustomMenu";
-import { colorPalette } from "../../lib/consts/colors";
 import CustomAutocomplete from "../inputs/CustomAutocomplete";
+import ColorSwatchGrid from "../inputs/ColorSwatchGrid";
 import { RosterList } from "../../models/roster";
 import { formatPropSize, sortRosterNames } from "../../lib/helpers/rosterHelper";
 
@@ -111,21 +111,11 @@ export function PropManagerDialog({
                           className="rounded-full size-7 min-h-7 min-w-7 max-h-7 max-w-7"
                           style={{backgroundColor: prop.color}}/>
                     }>
-                      <div className="grid grid-cols-6 gap-2">
-                        {
-                          colorPalette.gridObjectColors().map((color) =>
-                            <button
-                              key={color}
-                              onClick={() => {
-                                setPropList(prev => prev.map((p, index) => index === i ? { ...p, color } : p));
-                              }}
-                              style={{"backgroundColor": color, "color": colorPalette.textContrast[color]}}
-                              className={"font-semibold rounded-full size-8 min-h-8 min-w-8 max-h-8 max-w-8 " +
-                                (strEquals(color, prop.color) ? "border border-primary" : "")
-                              }>文</button>
-                          )
-                        }
-                      </div>
+                      <ColorSwatchGrid
+                        value={prop.color}
+                        onChange={(color) => {
+                          setPropList(prev => prev.map((p, index) => index === i ? { ...p, color } : p));
+                        }}/>
                     </CustomMenu>
                     {
                       rosterOptions

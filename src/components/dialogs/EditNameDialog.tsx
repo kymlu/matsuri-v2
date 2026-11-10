@@ -4,7 +4,7 @@ import { isNullOrUndefinedOrBlank } from "../../lib/helpers/globalHelper";
 import BaseEditDialog from "./BaseEditDialog";
 import { LONG_NAME_LENGTH, SHORT_NAME_LENGTH } from "../../lib/consts/consts";
 import { RosterList, RosterName } from "../../models/roster";
-import { formatPropSize, getPropDefaultsChange, PropLook } from "../../lib/helpers/rosterHelper";
+import { formatPropSize, getPropDefaultsChange, PropLook, toNameKey } from "../../lib/helpers/rosterHelper";
 import RosterPicker from "../inputs/RosterPicker";
 
 type EditNameDialogProps = {
@@ -30,19 +30,23 @@ export default function EditNameDialog({
 }: EditNameDialogProps) {
   const [newName, setNewName] = useState("");
   const [isTyping, setIsTyping] = useState(false);
-  // The name last picked from 名簿; typing clears it, so a typed name never changes size or colour.
+  // The 名簿 name whose size and colour are on offer: the prop's own name when it opens, or one picked since.
+  // Typing clears it, so a typed name never changes size or colour.
   const [pickedName, setPickedName] = useState<RosterName>();
-  const [isApplyingLook, setIsApplyingLook] = useState(true);
+  // Ticked when a name is picked; unticked for the prop's own name, which the user didn't choose just now.
+  const [isApplyingLook, setIsApplyingLook] = useState(false);
   const inputRef = useRef<{ changeValue: (value: string) => void }>(null);
 
   // Otherwise a name picked or typed before キャンセル would be saved on the next open.
+  // If the prop's name is already in 名簿 but its size or colour differ, that's offered, unticked.
   useEffect(() => {
     if (isOpen !== false) {
       setNewName(name ?? "");
       setIsTyping(false);
-      setPickedName(undefined);
-      setIsApplyingLook(true);
+      setPickedName(type === "道具" ? roster?.names.find(n => toNameKey(n.name) === toNameKey(name ?? "")) : undefined);
+      setIsApplyingLook(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, name]);
 
   const showPicker = type === "道具" && roster !== undefined && roster.names.length > 0;
@@ -71,21 +75,6 @@ export default function EditNameDialog({
       maxLength={type === "イベント" || type === "隊列表" ? LONG_NAME_LENGTH : SHORT_NAME_LENGTH}
       showLength/>
     {
-      lookChange && pickedName &&
-      <label className="flex items-center gap-2 mb-2 text-sm">
-        <input type="checkbox" checked={isApplyingLook} onChange={(e) => setIsApplyingLook(e.target.checked)} className="accent-primary"/>
-        <span>
-          「{pickedName.name}」の大きさと色にする
-          <span className="inline-flex items-center gap-1 ml-1 text-muted">
-            （
-            {formatPropSize(lookChange)}
-            {lookChange.color && <span aria-label="色" className="inline-block border rounded-full size-3 border-line" style={{ backgroundColor: lookChange.color }}/>}
-            ）
-          </span>
-        </span>
-      </label>
-    }
-    {
       showPicker &&
       <RosterPicker
         list={roster}
@@ -104,6 +93,22 @@ export default function EditNameDialog({
         onOpenChange={onPickerOpenChange}
         filter={pickerFilter}
         onFilterChange={onPickerFilterChange}/>
+    }
+    {
+      lookChange && pickedName &&
+      // Last, so it sits just above 保存, which is where it takes effect.
+      <label className="flex items-center gap-2 mt-3 text-sm">
+        <input type="checkbox" checked={isApplyingLook} onChange={(e) => setIsApplyingLook(e.target.checked)} className="accent-primary"/>
+        <span>
+          「{pickedName.name}」の大きさと色にする
+          <span className="inline-flex items-center gap-1 ml-1 text-muted">
+            （
+            {formatPropSize(lookChange)}
+            {lookChange.color && <span aria-label="色" className="inline-block border rounded-full size-3 border-line" style={{ backgroundColor: lookChange.color }}/>}
+            ）
+          </span>
+        </span>
+      </label>
     }
   </BaseEditDialog>
 }

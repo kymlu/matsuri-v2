@@ -1,10 +1,10 @@
 import { useMemo, useState } from "react";
 import { Dialog } from "@base-ui/react";
-import classNames from "classnames";
 import { PropDefaults, Roster, RosterKind, RosterList, RosterName } from "../../models/roster";
 import { removeRosterName, updateRosterName } from "../../lib/helpers/apiHelper";
 import { toNameKey } from "../../lib/helpers/rosterHelper";
 import { DEFAULT_PROP_LENGTH, DEFAULT_PROP_WIDTH, MAX_PROP_DIMENSION, MIN_PROP_DIMENSION, SHORT_NAME_LENGTH } from "../../lib/consts/consts";
+import ColorSwatchGrid from "../inputs/ColorSwatchGrid";
 import { colorPalette } from "../../lib/consts/colors";
 import BaseEditDialog from "./BaseEditDialog";
 import ConfirmDeletionDialog from "./ConfirmDeletionDialog";
@@ -27,11 +27,13 @@ const SAVE_FAILED = "保存できませんでした。もう一度お試しく�
 export default function EditRosterNameDialog({ teamId, kind, rosterName, list, onSaved }: EditRosterNameDialogProps) {
   const [name, setName] = useState(rosterName.name);
   const [categoryIds, setCategoryIds] = useState(rosterName.categoryIds);
-  // Prop defaults. Size is set or cleared as a pair; each colour swatch, or なし, is one choice.
+  // Prop defaults, each switched on with its own checkbox. Size is set or cleared as a pair.
+  // Both start from a new prop's defaults when ticked.
   const [hasSize, setHasSize] = useState(rosterName.length !== undefined || rosterName.width !== undefined);
   const [length, setLength] = useState(rosterName.length ?? DEFAULT_PROP_LENGTH);
   const [width, setWidth] = useState(rosterName.width ?? DEFAULT_PROP_WIDTH);
-  const [color, setColor] = useState<string | undefined>(rosterName.color);
+  const [hasColor, setHasColor] = useState(rosterName.color !== undefined);
+  const [color, setColor] = useState(rosterName.color ?? colorPalette.rainbow.blue[0]);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string>();
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
@@ -44,7 +46,7 @@ export default function EditRosterNameDialog({ teamId, kind, rosterName, list, o
   const save = () => {
     setIsSaving(true);
     const defaults: PropDefaults | undefined = kind === "prop"
-      ? { length: hasSize ? length : null, width: hasSize ? width : null, color: color ?? null }
+      ? { length: hasSize ? length : null, width: hasSize ? width : null, color: hasColor ? color : null }
       : undefined;
     updateRosterName(teamId, rosterName.id, name.trim(), categoryIds, defaults,
       onSaved,
@@ -69,6 +71,8 @@ export default function EditRosterNameDialog({ teamId, kind, rosterName, list, o
 
   return <BaseEditDialog
     title={kind === "dancer" ? "名前を編集" : "道具名を編集"}
+    // Room for the size fields and colour grid, like the prop rename dialog.
+    fullWidth={kind === "prop"}
     onSubmit={save}
     isActionButtonDisabled={toNameKey(name) === "" || isTaken || isSaving}>
     <div className="space-y-3">
@@ -128,30 +132,14 @@ export default function EditRosterNameDialog({ teamId, kind, rosterName, list, o
             }
           </div>
           <div>
-            <div className="mb-1 text-sm font-semibold">色</div>
-            <div role="radiogroup" aria-label="色" className="flex flex-wrap gap-1.5">
-              <button
-                type="button"
-                role="radio"
-                aria-checked={color === undefined}
-                onClick={() => setColor(undefined)}
-                className={classNames("px-2 text-xs border rounded-full h-8", color === undefined ? "border-primary text-primary font-semibold" : "border-line text-muted")}>
-                なし
-              </button>
-              {
-                colorPalette.gridObjectColors().map(c =>
-                  <button
-                    key={c}
-                    type="button"
-                    role="radio"
-                    aria-checked={color?.toLowerCase() === c.toLowerCase()}
-                    aria-label={c}
-                    onClick={() => setColor(c)}
-                    style={{ backgroundColor: c }}
-                    className={classNames("rounded-full size-8", color?.toLowerCase() === c.toLowerCase() ? "ring-2 ring-primary ring-offset-2" : "")}/>
-                )
-              }
-            </div>
+            <label className="flex items-center gap-2 mb-1 text-sm font-semibold">
+              <input type="checkbox" checked={hasColor} onChange={(e) => setHasColor(e.target.checked)} className="accent-primary"/>
+              色
+            </label>
+            {
+              hasColor &&
+              <ColorSwatchGrid value={color} onChange={setColor}/>
+            }
           </div>
         </>
       }
