@@ -12,13 +12,13 @@ import { checkLogin, verifyTeam } from './lib/helpers/apiHelper';
 import AdminPage from './pages/AdminPage';
 import RosterPage from './pages/RosterPage';
 import { RosterKind } from './models/roster';
-import HelpPage from './pages/HelpPage';
+import { HelpProvider } from './components/help/HelpContext';
 import { isNullOrUndefinedOrBlank } from './lib/helpers/globalHelper';
 import { Oval } from 'react-loader-spinner';
 import { colorPalette } from './lib/consts/colors';
 import { useSearchParams } from 'react-router-dom';
 
-type Mode = "home" | "form" | "edit" | "view" | "admin" | "roster" | "help";
+type Mode = "home" | "form" | "edit" | "view" | "admin" | "roster";
 
 function App() {
   const [mode, setMode] = useState<Mode>("home");
@@ -106,6 +106,7 @@ function App() {
   }, [mode]);
 
   return (
+    <HelpProvider reader={{ hasTeam: !!team, isLoggedIn, isViewer, isAdmin }}>
     <div>
       {
         currentTeamMemberId && team && mode === "admin" && (
@@ -123,13 +124,6 @@ function App() {
             team={team}
             tab={rosterTab}
             onTabChange={setRosterTab}
-          />
-        )
-      }
-      {
-        mode === "help" && (
-          <HelpPage
-            goToHomePage={() => setMode("home")}
           />
         )
       }
@@ -154,9 +148,6 @@ function App() {
           }}
           goToRosterPage={() => {
             setMode("roster");
-          }}
-          goToHelpPage={() => {
-            setMode("help");
           }}
           goToNewChoreoPage={(event) => {
             setSelectedEvent(event);
@@ -233,6 +224,7 @@ function App() {
         />
       )}
     </div>
+    </HelpProvider>
   );
 }
 

@@ -22,6 +22,7 @@ import BulkPropLookDialog from "../components/dialogs/BulkPropLookDialog";
 import ConfirmDeletionDialog from "../components/dialogs/ConfirmDeletionDialog";
 import BaseEditDialog from "../components/dialogs/BaseEditDialog";
 import { SEARCH_NAME_LENGTH } from "../lib/consts/consts";
+import { useHelp } from "../components/help/HelpContext";
 
 type RosterPageProps = {
   goToHomePage: () => void,
@@ -38,6 +39,7 @@ const TABS: { kind: RosterKind, label: string }[] = [
 
 // 名簿: the team's lists of dancer and prop names and their categories, kept by editors and admins.
 export default function RosterPage({ goToHomePage, team, tab, onTabChange }: RosterPageProps) {
+  const openHelp = useHelp();
   const [roster, setRoster] = useState<Roster>();
   const [loadFailed, setLoadFailed] = useState(false);
   const [filter, setFilter] = useState("all"); // a category id, "all" or "none" (未分類)
@@ -306,6 +308,9 @@ export default function RosterPage({ goToHomePage, team, tab, onTabChange }: Ros
               下から名前を追加してください。<br/>
               複数行を貼り付けると、まとめて追加できます。
             </p>
+            <button type="button" onClick={() => openHelp({ article: "roster-add" })} className="text-sm font-semibold text-primary">
+              使い方を見る
+            </button>
           </div>
         }
         {

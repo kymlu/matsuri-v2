@@ -72,6 +72,8 @@ type MainStageProps = {
   toggleEditEnabled?: () => void,
   openNoteDialog?: () => void,
   openChangeLog?: () => void,
+  // Shows the 🔰 help button at the top left.
+  openHelp?: () => void,
   showPaths?: boolean,
   isEditingMovement?: boolean,
   dancerMovementCache: MovementCacheBySectionIdByObjectId,
@@ -91,7 +93,7 @@ function MainStage({
   updatePropSizeAndRotate, updateObstacleSizeAndRotate,
   selectedIds, setSelectedIds, selectedObjects,
   addDancer, addProp, addObstacle, appSettings, previousSection, selectedDancerMovement,
-  onDancerSelected, bottomMarginPercent = 0, canResizeProps, editEnabled, toggleEditEnabled, openNoteDialog, openChangeLog,
+  onDancerSelected, bottomMarginPercent = 0, canResizeProps, editEnabled, toggleEditEnabled, openNoteDialog, openChangeLog, openHelp,
   showPaths = false, isEditingMovement = false, dancerMovementCache, propMovementCache, onMidpointEdit, currentMovement,
   dancerAnimationCache, propAnimationCache,
 }: MainStageProps) {
@@ -677,8 +679,17 @@ function MainStage({
       />
     }
     {
-      ((canEdit && openNoteDialog) || openChangeLog) &&
+      ((canEdit && openNoteDialog) || openChangeLog || openHelp) &&
       <div className={`absolute space-y-1 left-2 ${isShowingHorizontalRuler ? "top-7" : "top-1"}`}>
+        {
+          openHelp &&
+          <IconButton
+            size="sm"
+            imgSrc={theme === "dark" ? "beginnerDark" : "beginner"}
+            colour="primary"
+            onClick={openHelp}
+          />
+        }
         {
           canEdit && openNoteDialog &&
           <IconButton

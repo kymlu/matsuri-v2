@@ -27,7 +27,7 @@ import { colorPalette } from "../lib/consts/colors"
 import EditChoreoInfoDialog from "../components/dialogs/EditChoreoInfoDialog"
 import SyncChoreoDialog from "../components/dialogs/SyncChoreoDialog"
 import ExpandableSection from "../components/basic/ExpandableSection"
-import BeginnersDialog from "../components/dialogs/BeginnersDialog"
+import { useHelp } from "../components/help/HelpContext"
 import EditEventInfoDialog from "../components/dialogs/EditEventInfoDialog"
 import SiteInfoDialog from "../components/dialogs/SiteInfoDialog"
 import { ChoreoStatusTag } from "../components/common/Tag"
@@ -48,7 +48,6 @@ type HomePageProps = {
   setEventList: (eventList: EventDetails[]) => void,
   goToAdminPage: () => void,
   goToRosterPage: () => void,
-  goToHelpPage: () => void,
   goToNewChoreoPage: (eventDetails?: EventDetails) => void,
   goToViewPage: (choreo: Choreo, status: ChoreoStatus, serverChoreo?: BasicChoreoDetails, pastVersion?: number) => void,
   savedDancerName: string | null,
@@ -86,12 +85,13 @@ const editUserNameDialog = Dialog.createHandle<{}>();
 
 export default function HomePage({
   buildInfo, eventList, setEventList,
-  goToAdminPage, goToRosterPage, goToHelpPage, goToNewChoreoPage, goToViewPage,
+  goToAdminPage, goToRosterPage, goToNewChoreoPage, goToViewPage,
   savedDancerName, setSavedDancerName,
   isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin, isViewer, setIsViewer,
   setCurrentTeamMemberId, team, showNoTeamDialog, setShowNoTeamDialog, setupToken
 }: HomePageProps) {
   const [theme, toggleTheme] = useTheme();
+  const openHelp = useHelp();
   const [savedChoreos, setSavedChoreos] = useState<ChoreoWithStatus[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -503,7 +503,7 @@ export default function HomePage({
               <Dialog.Trigger>
                 <IconButton src="info" colour="primary" noBorder asDiv/>
               </Dialog.Trigger>
-              <SiteInfoDialog buildInfo={buildInfo} goToHelpPage={goToHelpPage}/>
+              <SiteInfoDialog buildInfo={buildInfo} goToHelpPage={() => openHelp()}/>
             </Dialog.Root>
             <Dialog.Root
               handle={editUserNameDialog}
@@ -668,14 +668,13 @@ export default function HomePage({
           }
         </div>
 
-        <Dialog.Root>
-          <Dialog.Trigger>
-            <div className="fixed z-20 bottom-12 right-8">
-              <IconButton asDiv imgSrc={theme === "dark" ? "beginnerDark" : "beginner"} colour="primary"/>
-            </div>
-          </Dialog.Trigger>
-          <BeginnersDialog goToHelpPage={goToHelpPage}/>
-        </Dialog.Root>
+        <button
+          type="button"
+          aria-label="使い方"
+          className="fixed z-20 bottom-12 right-8"
+          onClick={() => openHelp({ beginner: true })}>
+          <IconButton asDiv imgSrc={theme === "dark" ? "beginnerDark" : "beginner"} colour="primary"/>
+        </button>
 
         <input
           className='hidden'
