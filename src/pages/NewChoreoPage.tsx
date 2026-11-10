@@ -197,15 +197,20 @@ export function NewChoreoPage({
   };
   
   return (
-    <div className="flex flex-col h-[100svh] p-4 mx-auto space-y-2 bg-app">
-      <div className="text-center">
-        <h2 className="mb-2 text-xl font-bold">
+    <div className="flex flex-col h-[100svh] bg-app">
+      {/* Left-aligned with a small line above, like the other pages' headers. */}
+      <header className="px-4 pt-10 pb-2 text-start">
+        <div className="text-sm text-primary">
+          <b>新規作成</b><span>（{step}/3）</span>
+        </div>
+        <h2 className="text-2xl font-bold text-nowrap">
           {stepTitles[step] || ""}
         </h2>
-      </div>
-      <div className={step === 3 ? "flex-1 min-h-0" : "flex-1 overflow-auto"}>
+      </header>
+      <div className={step === 3 ? "flex-1 min-h-0 px-4" : "flex-1 px-4 overflow-auto"}>
         {step === 1 && (
-          <div className="flex flex-col h-full pt-10 pb-20 justify-evenly">
+          // Top-aligned with even gaps, so the fields stay together and above the keyboard.
+          <div className="flex flex-col pt-2 space-y-4">
             <TextInput
               defaultValue={form.name}
               onContentChange={newValue => handleChange("name", newValue)}
@@ -261,6 +266,10 @@ export function NewChoreoPage({
                   disabled={!hasEventName}
                 />
               </div>
+            }
+            {
+              !hasEventName &&
+              <p className="!mt-1 text-sm text-muted">イベント名を入力すると日程を設定できます</p>
             }
           </div>
         )}
@@ -355,52 +364,54 @@ export function NewChoreoPage({
         )}
       </div>
 
-      {
-        // Only with a 名簿: without one there's just the dancer count, so a total would repeat it.
-        step === 3 && rosterState === "loaded" &&
-        <p className="text-sm text-center text-muted">
-          {
-            dancerTotal === 0
-              ? <span className="font-semibold text-primary">ダンサーを1名以上追加してください</span>
-              : `合計${dancerTotal}名${propTotal > 0 ? `・道具${propTotal}件` : ""}`
-          }
-        </p>
-      }
-
-      <div className="flex justify-between h-10 gap-4 mb-8">
-        { <Button
-            full
-            onClick={step === 1 ? (hasInput ? () => setIsConfirmingLeave(true) : goToHomePage) : prevStep}
-          >
-            <span className="font-semibold">
-              戻る
-            </span>
-          </Button>
+      <div className="px-4 pt-3 pb-8 mt-2 space-y-2 border-t bg-surface border-line">
+        {
+          // Only with a 名簿: without one there's just the dancer count, so a total would repeat it.
+          step === 3 && rosterState === "loaded" &&
+          <p className="text-sm text-center text-muted">
+            {
+              dancerTotal === 0
+                ? <span className="font-semibold text-primary">ダンサーを1名以上追加してください</span>
+                : `合計${dancerTotal}名${propTotal > 0 ? `・道具${propTotal}件` : ""}`
+            }
+          </p>
         }
-        {step < 3 && (
-          <Button
-            primary
-            full
-            onClick={nextStep}
-            disabled={step === 1 &&(isNullOrUndefinedOrBlank(form.name.trim()) || (hasEventName && hasDateError))}
-          >
-          <span className="font-semibold">
-            次へ
-          </span>
-          </Button>
-        )}
-        {step === 3 && (
-          <Button
-            primary
-            full
-            disabled={dancerTotal === 0}
-            onClick={handleSubmit}
-          >
-          <span className="font-semibold">
-            隊列作成開始
-          </span>
-          </Button>
-        )}
+
+        <div className="flex justify-between h-10 gap-4">
+          { <Button
+              full
+              onClick={step === 1 ? (hasInput ? () => setIsConfirmingLeave(true) : goToHomePage) : prevStep}
+            >
+              <span className="font-semibold">
+                戻る
+              </span>
+            </Button>
+          }
+          {step < 3 && (
+            <Button
+              primary
+              full
+              onClick={nextStep}
+              disabled={step === 1 &&(isNullOrUndefinedOrBlank(form.name.trim()) || (hasEventName && hasDateError))}
+            >
+            <span className="font-semibold">
+              次へ
+            </span>
+            </Button>
+          )}
+          {step === 3 && (
+            <Button
+              primary
+              full
+              disabled={dancerTotal === 0}
+              onClick={handleSubmit}
+            >
+            <span className="font-semibold">
+              隊列作成開始
+            </span>
+            </Button>
+          )}
+        </div>
       </div>
       <Dialog.Root open={isConfirmingLeave} onOpenChange={setIsConfirmingLeave}>
         {

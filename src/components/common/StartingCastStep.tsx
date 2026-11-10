@@ -54,9 +54,10 @@ export default function StartingCastStep({
 
   // Without a 名簿 (not logged in, a viewer, or it couldn't load): just the dancer count, as before.
   if (!hasRoster) {
-    return <div className="flex flex-col items-center justify-center h-full gap-2">
+    return <div className="flex flex-col h-full gap-2 pt-2">
       <div className="w-full space-y-2">
         {unnamedField}
+        <p className="text-sm text-muted">舞台に自動で配置されます。位置は編集モードで変更できます。</p>
         {
           rosterState === "loading" &&
           <p className="text-sm text-muted">名簿を読み込んでいます…</p>
