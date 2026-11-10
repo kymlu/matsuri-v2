@@ -399,3 +399,129 @@ describe("prop defaults", () => {
 		expect((await getRoster()).names[0]).toEqual({ id: roster.names[0].id, name: "さくら", categoryIds: [] });
 	});
 });
+
+describe("POST /api/roster/links", () => {
+	type LinksResult = { roster: RosterResponse, added: [string, string][], removed: [string, string][] };
+	const links = (add: [string, string][], remove: [string, string][] = []) => call("/links", { add, remove });
+
+	it("adds and removes, reporting only the links that changed", async () => {
+		const { categories: [seiki, hata] } = await saveCategories([{ name: "正規" }, { name: "旗士" }]);
+		const { roster } = await addNames(["あおい", "さくら", "はると"], [seiki.id]);
+		const id = (name: string) => roster.names.find(n => n.name === name)!.id;
+		await addNames(["はると"], [hata.id]);
+
+		// はると already has 旗士, so only 2 links are added.
+		const response = await links([[id("あおい"), hata.id], [id("さくら"), hata.id], [id("はると"), hata.id]], [[id("あおい"), seiki.id]]);
+		expect(response.status).toBe(200);
+		const result = await response.json() as LinksResult;
+		expect(result.added).toEqual([[id("あおい"), hata.id], [id("さくら"), hata.id]]);
+		expect(result.removed).toEqual([[id("あおい"), seiki.id]]);
+		expect(categoryNames(result.roster.dancers, "あおい")).toEqual(["旗士"]);
+		expect(categoryNames(result.roster.dancers, "はると")).toEqual(["正規", "旗士"]);
+
+		// Replaying the reported changes reversed is an exact undo.
+		const undo = await (await links(result.removed, result.added)).json() as LinksResult;
+		expect(categoryNames(undo.roster.dancers, "あおい")).toEqual(["正規"]);
+		expect(categoryNames(undo.roster.dancers, "さくら")).toEqual(["正規"]);
+		expect(categoryNames(undo.roster.dancers, "はると")).toEqual(["正規", "旗士"]);
+	});
+
+	it("reports nothing for links already in place or already gone", async () => {
+		const { categories: [seiki, hata] } = await saveCategories([{ name: "正規" }, { name: "旗士" }]);
+		const { roster } = await addNames(["さくら"], [seiki.id]);
+		const id = roster.names[0].id;
+		const result = await (await links([[id, seiki.id]], [[id, hata.id]])).json() as LinksResult;
+		expect(result).toMatchObject({ added: [], removed: [] });
+	});
+
+	it("rejects a name and category of different kinds", async () => {
+		const { roster } = await addNames(["扇"], [], "prop");
+		const { categories: [seiki] } = await saveCategories([{ name: "正規" }]);
+		expect((await links([[roster.names[0].id, seiki.id]])).status).toBe(400);
+	});
+
+	it("rejects another team's names and categories", async () => {
+		const { categories: [seiki] } = await saveCategories([{ name: "正規" }]);
+		const { roster } = await addNames(["さくら"]);
+		expect((await links([["name_b", seiki.id]])).status).toBe(404);
+		expect((await links([[roster.names[0].id, "cat_b"]])).status).toBe(404);
+	});
+
+	it("rejects a link in both lists, too many links, and a bad body", async () => {
+		const { categories: [seiki] } = await saveCategories([{ name: "正規" }]);
+		const { roster } = await addNames(["さくら"]);
+		const pair: [string, string] = [roster.names[0].id, seiki.id];
+		expect((await links([pair], [pair])).status).toBe(400);
+		expect((await links(Array.from({ length: 5001 }, (_, i) => [`n${i}`, seiki.id] as [string, string]))).status).toBe(400);
+		expect((await call("/links", { add: [["only one"]], remove: [] })).status).toBe(400);
+	});
+
+	it("is closed to viewers", async () => {
+		expect((await call("/links", { add: [], remove: [] }, viewerHeaders)).status).toBe(403);
+	});
+});
+
+describe("POST /api/roster/names/remove with ids", () => {
+	it("removes every listed name", async () => {
+		const { roster } = await addNames(["あおい", "さくら", "はると"]);
+		const ids = roster.names.filter(n => n.name !== "はると").map(n => n.id);
+		const response = await call("/names/remove", { ids });
+		expect(response.status).toBe(200);
+		const result = await response.json() as { roster: RosterResponse, removed: string[] };
+		expect(result.removed).toEqual(ids);
+		expect(result.roster.dancers.names.map(n => n.name)).toEqual(["はると"]);
+	});
+
+	it("removes nothing if any id isn't a live name of this team", async () => {
+		const { roster } = await addNames(["あおい", "さくら"]);
+		const response = await call("/names/remove", { ids: [roster.names[0].id, "name_b"] });
+		expect(response.status).toBe(404);
+		expect((await getRoster()).names).toHaveLength(2);
+	});
+});
+
+describe("POST /api/roster/names/restore", () => {
+	type RestoreResult = { roster: RosterResponse, restored: string[], skipped: string[] };
+
+	it("brings names back with their categories and prop defaults", async () => {
+		const { categories: [seiki] } = await saveCategories([{ name: "正規" }]);
+		const { roster } = await addNames(["さくら"], [seiki.id]);
+		const { roster: props } = await addNames(["大旗"], [], "prop");
+		await call("/names/update", { id: props.names[0].id, name: "大旗", category_ids: [], length: 1, width: 4, color: "#F08A00" });
+		const ids = [roster.names[0].id, props.names[0].id];
+		await call("/names/remove", { ids });
+
+		const result = await (await call("/names/restore", { ids })).json() as RestoreResult;
+		expect(result).toMatchObject({ restored: ids, skipped: [] });
+		expect(result.roster.dancers.names).toEqual([{ id: ids[0], name: "さくら", categoryIds: [seiki.id] }]);
+		expect(result.roster.props.names).toEqual([{ id: ids[1], name: "大旗", categoryIds: [], length: 1, width: 4, color: "#F08A00" }]);
+	});
+
+	it("skips a name added again since, and ids it can't restore", async () => {
+		const { roster } = await addNames(["みお", "そら"]);
+		const ids = roster.names.map(n => n.id);
+		await call("/names/remove", { ids });
+		await addNames(["みお"]);
+
+		const mio = roster.names.find(n => n.name === "みお")!.id;
+		const sora = roster.names.find(n => n.name === "そら")!.id;
+		const result = await (await call("/names/restore", { ids: [...ids, "name_b", "unknown"] })).json() as RestoreResult;
+		expect(result.restored).toEqual([sora]);
+		expect(result.skipped).toEqual([mio, "name_b", "unknown"]);
+		expect((await getRoster()).names.map(n => n.name).sort()).toEqual(["そら", "みお"]);
+	});
+
+	it("restores only one of two deleted rows with the same spelling", async () => {
+		const first = (await addNames(["みお"])).roster.names[0].id;
+		await call("/names/remove", { ids: [first] });
+		const second = (await addNames(["みお"])).roster.names[0].id;
+		await call("/names/remove", { ids: [second] });
+
+		const result = await (await call("/names/restore", { ids: [second, first] })).json() as RestoreResult;
+		expect(result).toMatchObject({ restored: [second], skipped: [first] });
+	});
+
+	it("needs at least one id", async () => {
+		expect((await call("/names/restore", { ids: [] })).status).toBe(400);
+	});
+});

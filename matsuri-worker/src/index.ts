@@ -69,11 +69,16 @@ const ROSTER_CATEGORY_LENGTH = 10;
 const ROSTER_MAX_ADD = 200;
 const ROSTER_MAX_NAMES = 1000;
 const ROSTER_MAX_CATEGORIES = 100;
+const ROSTER_MAX_LINK_PAIRS = 5000; // far beyond real use: 1000 names × several categories
 // Used only to stop duplicates: full/half-width and stray spaces count as the same name.
 const toNameKey = (name: string) => name.normalize("NFKC").trim();
 
 const isStringArray = (value: unknown): value is string[] =>
 	Array.isArray(value) && value.every(x => typeof x === "string");
+
+// [name id, category id] pairs, as sent to /api/roster/links.
+const isPairArray = (value: unknown): value is [string, string][] =>
+	Array.isArray(value) && value.every(x => Array.isArray(x) && x.length === 2 && typeof x[0] === "string" && typeof x[1] === "string");
 
 const isUniqueConstraintError = (e: unknown) => String((e as Error)?.message ?? e).includes("UNIQUE constraint failed");
 
@@ -875,10 +880,139 @@ export default {
 					return getSuccessResponse(await getRoster(env.DB, rosterTeamId));
 				}
 
+				// Adds and removes name–category links. Takes exact pairs and reports the ones that actually changed,
+				// so an undo can replay just those: adding 旗士 to 3 people when 1 already had it changes 2.
+				if (url.pathname === "/api/roster/links" && request.method === "POST") {
+					const body = await readBody();
+					if (!isPairArray(body?.add) || !isPairArray(body?.remove)) {
+						return getErrorResponse("add and remove must be arrays of [name id, category id].");
+					}
+					const pairKey = ([nameId, categoryId]: [string, string]) => `${nameId}:${categoryId}`;
+					const unique = (pairs: [string, string][]) => [...new Map(pairs.map(p => [pairKey(p), p])).values()];
+					const add = unique(body.add);
+					const remove = unique(body.remove);
+					if (add.length + remove.length > ROSTER_MAX_LINK_PAIRS) {
+						return getErrorResponse(`At most ${ROSTER_MAX_LINK_PAIRS} links can be changed at once.`);
+					}
+					const removeKeys = new Set(remove.map(pairKey));
+					if (add.some(p => removeKeys.has(pairKey(p)))) {
+						return getErrorResponse("A link can't be both added and removed.");
+					}
+
+					const [{ results: names }, { results: categories }, { results: links }] = await Promise.all([
+						env.DB.prepare("SELECT id, kind FROM roster_names WHERE team_id = ? AND deleted = 0")
+							.bind(rosterTeamId).all<{ id: string, kind: RosterKind }>(),
+						env.DB.prepare("SELECT id, kind FROM roster_categories WHERE team_id = ? AND deleted = 0")
+							.bind(rosterTeamId).all<{ id: string, kind: RosterKind }>(),
+						env.DB.prepare(`
+							SELECT l.name_id, l.category_id
+							FROM roster_name_categories l
+							JOIN roster_names n ON n.id = l.name_id
+							WHERE n.team_id = ? AND n.deleted = 0
+						`).bind(rosterTeamId).all<{ name_id: string, category_id: string }>(),
+					]);
+					const nameKinds = new Map(names.map(n => [n.id, n.kind]));
+					const categoryKinds = new Map(categories.map(c => [c.id, c.kind]));
+					for (const [nameId, categoryId] of [...add, ...remove]) {
+						if (!nameKinds.has(nameId) || !categoryKinds.has(categoryId)) {
+							return getErrorResponse("Name or category not found.", 404);
+						}
+						if (nameKinds.get(nameId) !== categoryKinds.get(categoryId)) {
+							return getErrorResponse("A name and its category must be the same kind.");
+						}
+					}
+
+					const linked = new Set(links.map(l => `${l.name_id}:${l.category_id}`));
+					const added = add.filter(p => !linked.has(pairKey(p)));
+					const removed = remove.filter(p => linked.has(pairKey(p)));
+
+					const statements = [
+						...prepareInsertRows(env.DB, "INSERT OR IGNORE INTO roster_name_categories (name_id, category_id)", added),
+						...(removed.length === 0 ? [] : [env.DB.prepare(`
+							DELETE FROM roster_name_categories
+							WHERE (name_id, category_id) IN (SELECT json_extract(value, '$[0]'), json_extract(value, '$[1]') FROM json_each(?))
+						`).bind(JSON.stringify(removed))]),
+					];
+					if (statements.length > 0) {
+						await env.DB.batch(statements);
+					}
+
+					return getSuccessResponse({ roster: await getRoster(env.DB, rosterTeamId), added, removed });
+				}
+
+				// Brings back names removed by names/remove, with their categories and prop defaults.
+				// A name whose spelling has been added again since stays deleted and is reported as skipped,
+				// since two live names can't share a spelling.
+				if (url.pathname === "/api/roster/names/restore" && request.method === "POST") {
+					const body = await readBody();
+					if (!isStringArray(body?.ids) || body.ids.length === 0 || body.ids.length > ROSTER_MAX_NAMES) {
+						return getErrorResponse(`ids must be 1–${ROSTER_MAX_NAMES} name ids.`);
+					}
+					const ids = [...new Set(body.ids)];
+
+					const { results: candidates } = await env.DB.prepare(`
+						SELECT r.id, r.kind, r.name_key FROM roster_names r
+						WHERE r.team_id = ? AND r.deleted = 1 AND r.id IN ${IDS_IN_JSON}
+						AND NOT EXISTS (
+							SELECT 1 FROM roster_names l
+							WHERE l.team_id = r.team_id AND l.kind = r.kind AND l.name_key = r.name_key AND l.deleted = 0
+						)
+					`).bind(rosterTeamId, JSON.stringify(ids)).all<{ id: string, kind: RosterKind, name_key: string }>();
+					// Two deleted rows with one spelling can't both come back either: keep the first asked for.
+					const order = new Map(ids.map((id, i) => [id, i]));
+					const byKey = new Map<string, string>();
+					for (const c of [...candidates].sort((a, b) => order.get(a.id)! - order.get(b.id)!)) {
+						const key = `${c.kind}:${c.name_key}`;
+						if (!byKey.has(key)) {
+							byKey.set(key, c.id);
+						}
+					}
+					const restored = [...byKey.values()];
+
+					if (restored.length > 0) {
+						const { results: counts } = await env.DB.prepare(`
+							SELECT kind, COUNT(*) AS count FROM roster_names WHERE team_id = ? AND deleted = 0 GROUP BY kind
+						`).bind(rosterTeamId).all<{ kind: RosterKind, count: number }>();
+						const restoredKinds = candidates.filter(c => restored.includes(c.id)).map(c => c.kind);
+						if (counts.some(c => c.count + restoredKinds.filter(k => k === c.kind).length > ROSTER_MAX_NAMES)) {
+							return getErrorResponse(`A roster can have at most ${ROSTER_MAX_NAMES} names of each kind.`);
+						}
+						await env.DB.prepare(`
+							UPDATE roster_names SET deleted = 0, updated_at = datetime('now')
+							WHERE team_id = ? AND id IN ${IDS_IN_JSON}
+						`).bind(rosterTeamId, JSON.stringify(restored)).run();
+					}
+
+					return getSuccessResponse({
+						roster: await getRoster(env.DB, rosterTeamId),
+						restored,
+						skipped: ids.filter(id => !restored.includes(id)),
+					});
+				}
+
+				// One name ({ id }, from the edit dialog) or several ({ ids }, from selection mode).
+				// Several is all or nothing, so the count the user confirmed is what gets deleted.
 				if (url.pathname === "/api/roster/names/remove" && request.method === "POST") {
 					const body = await readBody();
+					if (isStringArray(body?.ids)) {
+						const ids = [...new Set(body.ids)];
+						if (ids.length === 0 || ids.length > ROSTER_MAX_NAMES) {
+							return getErrorResponse(`ids must be 1–${ROSTER_MAX_NAMES} name ids.`);
+						}
+						const { results: live } = await env.DB.prepare(`
+							SELECT id FROM roster_names WHERE team_id = ? AND deleted = 0 AND id IN ${IDS_IN_JSON}
+						`).bind(rosterTeamId, JSON.stringify(ids)).all<{ id: string }>();
+						if (live.length !== ids.length) {
+							return getErrorResponse("Name not found.", 404);
+						}
+						await env.DB.prepare(`
+							UPDATE roster_names SET deleted = 1, updated_at = datetime('now')
+							WHERE team_id = ? AND deleted = 0 AND id IN ${IDS_IN_JSON}
+						`).bind(rosterTeamId, JSON.stringify(ids)).run();
+						return getSuccessResponse({ roster: await getRoster(env.DB, rosterTeamId), removed: ids });
+					}
 					if (typeof body?.id !== "string") {
-						return getErrorResponse("id is required.");
+						return getErrorResponse("id or ids is required.");
 					}
 
 					const result = await env.DB.prepare(`
