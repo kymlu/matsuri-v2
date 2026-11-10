@@ -31,7 +31,9 @@ export function PropManagerDialog({
 }: PropManagerDialogProps) {
 
   const [propList, setPropList] = useState<Prop[]>([]);
+  // Marked for deletion; the rows stay, struck through, until 保存 so they can be brought back.
   const [deletedPropIds, setDeletedPropIds] = useState<string[]>([]);
+  const liveProps = useMemo(() => propList.filter(p => !deletedPropIds.includes(p.id)), [propList, deletedPropIds]);
 
   const lengthInputRefs = useRef<Map<string, NumberInputHandle | null>>(new Map());
   const widthInputRefs = useRef<Map<string, NumberInputHandle | null>>(new Map());
@@ -88,21 +90,29 @@ export function PropManagerDialog({
   return <BaseEditDialog
       title={title}
       full
-      isActionButtonDisabled={propList.some(p => isNullOrUndefinedOrBlank(p.name.trim()))}
+      isActionButtonDisabled={liveProps.some(p => isNullOrUndefinedOrBlank(p.name.trim()))}
       actionButtonText="保存"
       onClose={() => {
         setDeletedPropIds([]);
         resetPropList();
       }}
       onSubmit={() => {
-        const trimmedProps: Prop[] = propList.map(x => ({...x, name: x.name.trim()}))
+        const trimmedProps: Prop[] = liveProps.map(x => ({...x, name: x.name.trim()}))
         onSubmit(trimmedProps, deletedPropIds);
       }}>
       <div className="max-h-full grid grid-rows-[1fr,auto]">
         <div className="justify-center max-h-full overflow-auto grid grid-cols-[1fr,auto] gap-2">
           {
-            propList.map((prop, i) =>
-              <React.Fragment key={prop.id}>
+            propList.map((prop, i) => deletedPropIds.includes(prop.id)
+              ? <React.Fragment key={prop.id}>
+                <div className="flex items-center py-2 border-b border-subtle md:border-0 md:py-1">
+                  <span className="flex-1 px-3 py-2 line-through break-all border border-dashed rounded-md text-muted border-line">{prop.name.trim() || "（名前なし）"}</span>
+                </div>
+                <div className="flex items-center">
+                  <IconButton noBorder size="sm" colour="grey" src="undo" onClick={() => setDeletedPropIds(prev => prev.filter(id => id !== prop.id))}/>
+                </div>
+              </React.Fragment>
+              : <React.Fragment key={prop.id}>
                 <div className="py-2 border-b border-subtle md:grid md:grid-cols-[3fr,2fr] md:gap-1 md:border-0 md:py-1">
                   <div className="flex items-center gap-2">
                     <CustomMenu
@@ -173,15 +183,15 @@ export function PropManagerDialog({
               </div>
               <div className="flex items-center gap-1">
                 {
-                  propList.length > 1 &&
+                  liveProps.length > 1 &&
                   <IconButton
                     noBorder
                     size="sm"
                     colour="primary"
                     src="fileCopy"
                     onClick={() => {
-                      setPropList(prev => prev.map(p => strEquals(p.id, prop.id) ? p : { ...p, length: prop.length, width: prop.width }));
-                      propList.forEach(p => {
+                      setPropList(prev => prev.map(p => strEquals(p.id, prop.id) || deletedPropIds.includes(p.id) ? p : { ...p, length: prop.length, width: prop.width }));
+                      liveProps.forEach(p => {
                         if (strEquals(p.id, prop.id)) return;
                         lengthInputRefs.current.get(p.id)?.changeValue(prop.length);
                         widthInputRefs.current.get(p.id)?.changeValue(prop.width);
@@ -196,10 +206,7 @@ export function PropManagerDialog({
                     size="sm"
                     colour="primary"
                     src="delete"
-                    onClick={() => {
-                      setDeletedPropIds(prev => [...prev, prop.id]);
-                      setPropList(prev => prev.filter(x => !strEquals(x.id, prop.id)));
-                    }}
+                    onClick={() => setDeletedPropIds(prev => [...prev, prop.id])}
                     />
                 }
               </div>
