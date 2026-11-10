@@ -46,14 +46,14 @@ export default function RosterSelectionBar({
     </p>
     <div className="flex gap-1.5 mt-2">
       <BarMenu icon="sell" label="区分" disabled={!hasSelection} items={[
-        { icon: "add", label: "区分を追加…", disabled: !hasCategories, onClick: onAddCategories },
-        { icon: "remove", label: "区分を外す…", disabled: !canRemoveCategories, onClick: onRemoveCategories },
+        { icon: "add", label: "区分を追加", disabled: !hasCategories, onClick: onAddCategories },
+        { icon: "remove", label: "区分を外す", disabled: !canRemoveCategories, onClick: onRemoveCategories },
       ]}/>
       {
         kind === "prop" &&
         <BarMenu icon="colors" label="大きさ・色" disabled={!hasSelection} items={[
-          { icon: "resize", label: "大きさを設定…", onClick: onSetSize },
-          { icon: "colors", label: "色を設定…", onClick: onSetColor },
+          { icon: "resize", label: "大きさを設定", onClick: onSetSize },
+          { icon: "colors", label: "色を設定", onClick: onSetColor },
           { icon: "clear", label: "大きさと色を消す", disabled: !canClearLook, onClick: onClearLook },
         ]}/>
       }
@@ -100,11 +100,11 @@ function BarMenu({ icon, label, disabled, items }: { icon: BarMenuItem["icon"], 
             key={item.label}
             disabled={item.disabled}
             onClick={item.disabled ? undefined : item.onClick}
-            className={classNames("flex items-center gap-2 px-3 py-1.5 font-semibold rounded-md text-primary whitespace-nowrap", {
+            className={classNames("flex items-center gap-2 px-3 py-1.5 font-semibold rounded-md whitespace-nowrap", {
               "opacity-50 cursor-default": item.disabled,
               "cursor-pointer lg:hover:bg-subtle data-[highlighted]:bg-subtle": !item.disabled,
             })}>
-            <Icon src={item.icon} size="sm" colour="primary"/>
+            <Icon src={item.icon} size="sm"/>
             {item.label}
           </Menu.Item>
         )
