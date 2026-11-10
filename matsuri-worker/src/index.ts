@@ -1,5 +1,5 @@
 import { Resend } from 'resend';
-import { ErrorResponse, RosterResponse } from './models/models';
+import { ErrorResponse, RosterKind, RosterList, RosterResponse } from './models/models';
 
 const allowedOrigins = [
   "http://localhost:3000",
@@ -64,7 +64,7 @@ interface Env {
 const getFileName = (id: string, version: string) => {return `${id}_v${version}.json`};
 const setSessionCookie = (token: string) => `token=${token}; HttpOnly; Secure; SameSite=None; Max-Age=2592000; Path=/`;
 
-const ROSTER_NAME_LENGTH = 15; // same as SHORT_NAME_LENGTH in the app, since a roster name becomes a dancer name
+const ROSTER_NAME_LENGTH = 15; // same as SHORT_NAME_LENGTH in the app, since a roster name becomes a dancer or prop name
 const ROSTER_CATEGORY_LENGTH = 10;
 const ROSTER_MAX_ADD = 200;
 const ROSTER_MAX_NAMES = 1000;
@@ -91,17 +91,26 @@ const prepareInsertRows = (db: D1Database, insertInto: string, rows: unknown[][]
 // For WHERE id IN (...) with any number of ids, as a single bound parameter.
 const IDS_IN_JSON = "(SELECT value FROM json_each(?))";
 
+const ROSTER_KINDS = ["dancer", "prop"] as const;
+const isRosterKind = (value: unknown): value is RosterKind => ROSTER_KINDS.includes(value as RosterKind);
+
+const PROP_MIN_DIMENSION = 0.5; // same as MIN_PROP_DIMENSION / MAX_PROP_DIMENSION in the app
+const PROP_MAX_DIMENSION = 20;
+const isPropDimension = (value: unknown) =>
+	typeof value === "number" && Number.isFinite(value) && value >= PROP_MIN_DIMENSION && value <= PROP_MAX_DIMENSION;
+const isHexColor = (value: unknown) => typeof value === "string" && /^#[0-9a-fA-F]{6}$/.test(value);
+
 const getRoster = async (db: D1Database, teamId: string): Promise<RosterResponse> => {
 	const [categories, names, links] = await Promise.all([
 		db.prepare(`
-			SELECT id, name FROM roster_categories
+			SELECT id, name, kind FROM roster_categories
 			WHERE team_id = ? AND deleted = 0
 			ORDER BY sort_order
-		`).bind(teamId).all<{ id: string, name: string }>(),
+		`).bind(teamId).all<{ id: string, name: string, kind: RosterKind }>(),
 		db.prepare(`
-			SELECT id, name FROM roster_names
+			SELECT id, name, kind, default_length, default_width, default_color FROM roster_names
 			WHERE team_id = ? AND deleted = 0
-		`).bind(teamId).all<{ id: string, name: string }>(),
+		`).bind(teamId).all<{ id: string, name: string, kind: RosterKind, default_length: number | null, default_width: number | null, default_color: string | null }>(),
 		db.prepare(`
 			SELECT l.name_id, l.category_id
 			FROM roster_name_categories l
@@ -116,10 +125,19 @@ const getRoster = async (db: D1Database, teamId: string): Promise<RosterResponse
 		categoryIdsByName.set(link.name_id, [...(categoryIdsByName.get(link.name_id) ?? []), link.category_id]);
 	}
 
-	return {
-		categories: categories.results,
-		names: names.results.map(n => ({ id: n.id, name: n.name, categoryIds: categoryIdsByName.get(n.id) ?? [] })),
-	};
+	const listOf = (kind: RosterKind): RosterList => ({
+		categories: categories.results.filter(c => c.kind === kind).map(c => ({ id: c.id, name: c.name })),
+		names: names.results.filter(n => n.kind === kind).map(n => ({
+			id: n.id,
+			name: n.name,
+			categoryIds: categoryIdsByName.get(n.id) ?? [],
+			...(n.default_length !== null ? { length: n.default_length } : {}),
+			...(n.default_width !== null ? { width: n.default_width } : {}),
+			...(n.default_color !== null ? { color: n.default_color } : {}),
+		})),
+	});
+
+	return { dancers: listOf("dancer"), props: listOf("prop") };
 };
 
 export default {
@@ -689,10 +707,11 @@ export default {
 
 			const rosterTeamId = session.team_id as string;
 			const readBody = () => request.json().catch(() => null) as Promise<Record<string, unknown> | null>;
-			const getLiveCategoryIds = async () => {
+			// Categories belong to one kind: a prop name can't take a dancer category.
+			const getLiveCategoryIds = async (kind: RosterKind) => {
 				const { results } = await env.DB.prepare(
-					"SELECT id FROM roster_categories WHERE team_id = ? AND deleted = 0"
-				).bind(rosterTeamId).all<{ id: string }>();
+					"SELECT id FROM roster_categories WHERE team_id = ? AND kind = ? AND deleted = 0"
+				).bind(rosterTeamId, kind).all<{ id: string }>();
 				return new Set(results.map(r => r.id));
 			};
 
@@ -707,6 +726,10 @@ export default {
 					if (!isStringArray(body?.names) || !isStringArray(body?.category_ids)) {
 						return getErrorResponse("names and category_ids must be arrays of strings.");
 					}
+					if (!isRosterKind(body.kind)) {
+						return getErrorResponse("kind must be dancer or prop.");
+					}
+					const kind = body.kind;
 
 					const lines = body.names.flatMap(n => n.split(/\r?\n/));
 					// Blank lines and repeats are dropped below, so only distinct names count toward the limit.
@@ -715,20 +738,20 @@ export default {
 					}
 
 					const categoryIds = [...new Set(body.category_ids)];
-					const liveCategoryIds = await getLiveCategoryIds();
+					const liveCategoryIds = await getLiveCategoryIds(kind);
 					if (categoryIds.some(id => !liveCategoryIds.has(id))) {
 						return getErrorResponse("Unknown category.");
 					}
 
 					const { results: existingNames } = await env.DB.prepare(
-						"SELECT id, name_key FROM roster_names WHERE team_id = ? AND deleted = 0"
-					).bind(rosterTeamId).all<{ id: string, name_key: string }>();
+						"SELECT id, name_key FROM roster_names WHERE team_id = ? AND kind = ? AND deleted = 0"
+					).bind(rosterTeamId, kind).all<{ id: string, name_key: string }>();
 					const { results: existingLinks } = await env.DB.prepare(`
 						SELECT l.name_id, l.category_id
 						FROM roster_name_categories l
 						JOIN roster_names n ON n.id = l.name_id
-						WHERE n.team_id = ? AND n.deleted = 0
-					`).bind(rosterTeamId).all<{ name_id: string, category_id: string }>();
+						WHERE n.team_id = ? AND n.kind = ? AND n.deleted = 0
+					`).bind(rosterTeamId, kind).all<{ name_id: string, category_id: string }>();
 					const idByKey = new Map(existingNames.map(n => [n.name_key, n.id]));
 					const linkSet = new Set(existingLinks.map(l => `${l.name_id}:${l.category_id}`));
 
@@ -762,17 +785,17 @@ export default {
 							}
 						} else {
 							const id = crypto.randomUUID();
-							newNames.push([id, rosterTeamId, name, key, session.team_member_id]);
+							newNames.push([id, rosterTeamId, kind, name, key, session.team_member_id]);
 							newLinks.push(...categoryIds.map(c => [id, c]));
 						}
 					}
 
 					if (existingNames.length + newNames.length > ROSTER_MAX_NAMES) {
-						return getErrorResponse(`A roster can have at most ${ROSTER_MAX_NAMES} names.`);
+						return getErrorResponse(`A roster can have at most ${ROSTER_MAX_NAMES} names of each kind.`);
 					}
 
 					const statements = [
-						...prepareInsertRows(env.DB, "INSERT INTO roster_names (id, team_id, name, name_key, created_by)", newNames),
+						...prepareInsertRows(env.DB, "INSERT INTO roster_names (id, team_id, kind, name, name_key, created_by)", newNames),
 						...prepareInsertRows(env.DB, "INSERT OR IGNORE INTO roster_name_categories (name_id, category_id)", newLinks),
 					];
 					if (statements.length > 0) {
@@ -787,7 +810,8 @@ export default {
 					});
 				}
 
-				// Replaces the name and its whole set of categories.
+				// Replaces the name and its whole set of categories. For props, length, width and color set the
+				// defaults (null clears one; leaving it out keeps it).
 				if (url.pathname === "/api/roster/names/update" && request.method === "POST") {
 					const body = await readBody();
 					if (typeof body?.id !== "string" || typeof body?.name !== "string" || !isStringArray(body?.category_ids)) {
@@ -796,10 +820,28 @@ export default {
 					const id = body.id;
 
 					const current = await env.DB.prepare(
-						"SELECT id FROM roster_names WHERE id = ? AND team_id = ? AND deleted = 0"
-					).bind(id, rosterTeamId).first();
+						"SELECT id, kind FROM roster_names WHERE id = ? AND team_id = ? AND deleted = 0"
+					).bind(id, rosterTeamId).first<{ id: string, kind: RosterKind }>();
 					if (!current) {
 						return getErrorResponse("Name not found.", 404);
+					}
+					const kind = current.kind;
+
+					const defaults = {
+						default_length: body.length,
+						default_width: body.width,
+						default_color: body.color,
+					};
+					const givenDefaults = Object.entries(defaults).filter(([, value]) => value !== undefined);
+					if (kind !== "prop" && givenDefaults.length > 0) {
+						return getErrorResponse("Only prop names have a default size and colour.");
+					}
+					if ((body.length !== undefined && body.length !== null && !isPropDimension(body.length)) ||
+						(body.width !== undefined && body.width !== null && !isPropDimension(body.width))) {
+						return getErrorResponse(`Sizes must be ${PROP_MIN_DIMENSION}–${PROP_MAX_DIMENSION}.`);
+					}
+					if (body.color !== undefined && body.color !== null && !isHexColor(body.color)) {
+						return getErrorResponse("color must be #RRGGBB.");
 					}
 
 					const name = body.name.trim();
@@ -809,23 +851,23 @@ export default {
 					}
 
 					const categoryIds = [...new Set(body.category_ids)];
-					const liveCategoryIds = await getLiveCategoryIds();
+					const liveCategoryIds = await getLiveCategoryIds(kind);
 					if (categoryIds.some(c => !liveCategoryIds.has(c))) {
 						return getErrorResponse("Unknown category.");
 					}
 
 					const conflict = await env.DB.prepare(
-						"SELECT id FROM roster_names WHERE team_id = ? AND deleted = 0 AND name_key = ? AND id != ?"
-					).bind(rosterTeamId, key, id).first();
+						"SELECT id FROM roster_names WHERE team_id = ? AND kind = ? AND deleted = 0 AND name_key = ? AND id != ?"
+					).bind(rosterTeamId, kind, key, id).first();
 					if (conflict) {
 						return getErrorResponse("Already in the roster.", 409);
 					}
 
 					await env.DB.batch([
 						env.DB.prepare(`
-							UPDATE roster_names SET name = ?, name_key = ?, updated_at = datetime('now')
+							UPDATE roster_names SET name = ?, name_key = ?, ${givenDefaults.map(([column]) => `${column} = ?, `).join("")}updated_at = datetime('now')
 							WHERE id = ?
-						`).bind(name, key, id),
+						`).bind(name, key, ...givenDefaults.map(([, value]) => value), id),
 						env.DB.prepare("DELETE FROM roster_name_categories WHERE name_id = ?").bind(id),
 						...prepareInsertRows(env.DB, "INSERT INTO roster_name_categories (name_id, category_id)", categoryIds.map(c => [id, c])),
 					]);
@@ -859,6 +901,10 @@ export default {
 						typeof c?.name === "string" && (c.id === undefined || typeof c.id === "string"))) {
 						return getErrorResponse("categories and deleted_ids are required.");
 					}
+					if (!isRosterKind(body?.kind)) {
+						return getErrorResponse("kind must be dancer or prop.");
+					}
+					const kind = body.kind;
 					if (categories.length > ROSTER_MAX_CATEGORIES) {
 						return getErrorResponse(`A roster can have at most ${ROSTER_MAX_CATEGORIES} categories.`);
 					}
@@ -877,7 +923,8 @@ export default {
 						return getErrorResponse("Each category can only appear once.");
 					}
 
-					const liveCategoryIds = await getLiveCategoryIds();
+					// Only this kind's categories: a save on one tab can't touch the other's.
+					const liveCategoryIds = await getLiveCategoryIds(kind);
 					if ([...keptIds, ...deleted].some(id => !liveCategoryIds.has(id))) {
 						return getErrorResponse("Category not found.", 404);
 					}
@@ -885,7 +932,7 @@ export default {
 					const deletedJson = JSON.stringify([...deleted]);
 					const keptJson = JSON.stringify(keptIds);
 					const updates = items.flatMap((c, i) => c.id ? [[c.id, c.name, c.key, i]] : []);
-					const inserts = items.flatMap((c, i) => c.id ? [] : [[crypto.randomUUID(), rosterTeamId, c.name, c.key, i]]);
+					const inserts = items.flatMap((c, i) => c.id ? [] : [[crypto.randomUUID(), rosterTeamId, kind, c.name, c.key, i]]);
 
 					// At most five statements however many categories there are.
 					const statements = [
@@ -909,7 +956,7 @@ export default {
 								WHERE roster_categories.id = json_extract(j.value, '$[0]')
 							`).bind(JSON.stringify(updates)),
 						]),
-						...prepareInsertRows(env.DB, "INSERT INTO roster_categories (id, team_id, name, name_key, sort_order)", inserts),
+						...prepareInsertRows(env.DB, "INSERT INTO roster_categories (id, team_id, kind, name, name_key, sort_order)", inserts),
 					];
 					// D1 rejects an empty batch, e.g. saving a team's empty list unchanged.
 					if (statements.length > 0) {
