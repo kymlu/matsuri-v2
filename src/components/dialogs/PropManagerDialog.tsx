@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Prop } from "../../models/prop";
 import BaseEditDialog from "./BaseEditDialog";
-import { isNullOrUndefinedOrBlank, strCompare, strEquals } from "../../lib/helpers/globalHelper";
+import { isNullOrUndefinedOrBlank, strCompare } from "../../lib/helpers/globalHelper";
 import TextInput from "../inputs/TextInput";
 import IconButton from "../basic/IconButton";
 import { MAX_PROP_DIMENSION, MIN_PROP_DIMENSION, SHORT_NAME_LENGTH } from "../../lib/consts/consts";
@@ -182,23 +182,6 @@ export function PropManagerDialog({
                 </div>
               </div>
               <div className="flex items-center gap-1">
-                {
-                  liveProps.length > 1 &&
-                  <IconButton
-                    noBorder
-                    size="sm"
-                    colour="primary"
-                    src="fileCopy"
-                    onClick={() => {
-                      setPropList(prev => prev.map(p => strEquals(p.id, prop.id) || deletedPropIds.includes(p.id) ? p : { ...p, length: prop.length, width: prop.width }));
-                      liveProps.forEach(p => {
-                        if (strEquals(p.id, prop.id)) return;
-                        lengthInputRefs.current.get(p.id)?.changeValue(prop.length);
-                        widthInputRefs.current.get(p.id)?.changeValue(prop.width);
-                      });
-                    }}
-                    />
-                }
                 {
                   showDelete &&
                   <IconButton
