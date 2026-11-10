@@ -3,9 +3,17 @@ import { ChoreoSection } from "../../../models/choreoSection"
 import { DancerAction } from "../../../models/dancerAction";
 import { incrementBracketSuffix } from "../../helpers/globalHelper";
 
+// Copies of a section's positions for another section: new objects with that section's id, so the
+// source section (and the undo history that holds it) is never changed.
+const copyPositions = <T extends { sectionId: string }>(positions: Record<string, T> | undefined, sectionId: string): Record<string, T> =>
+  Object.fromEntries(Object.entries(positions ?? {}).map(([id, position]) => [id, { ...position, sectionId }]));
+
+const copyMovements = (movements: ChoreoSection["formation"]["dancerMovements"]) =>
+  movements && Object.fromEntries(Object.entries(movements).map(([id, movement]) => [id, { ...movement, points: movement.points.map(p => ({ ...p })) }]));
+
+// Starts from where everyone ended in the last section, with no actions or paths.
 export function addSection(state: Choreo, id: string): Choreo {
-  const previousSection = {...state.sections[state.sections.length - 1]};
-  Object.values(previousSection.formation.dancerPositions).forEach(x => x.sectionId = id);
+  const previousSection = state.sections[state.sections.length - 1];
 
   return {
     ...state,
@@ -13,25 +21,37 @@ export function addSection(state: Choreo, id: string): Choreo {
       ...state.sections,
       {
         id: id,
-        name: incrementBracketSuffix(previousSection.name),
-        formation: previousSection
-          ? { 
-            dancerPositions: previousSection.formation.dancerPositions,
-            propPositions: previousSection.formation.propPositions,
-            dancerActions: [],
-          }
-          : {}
+        name: previousSection ? incrementBracketSuffix(previousSection.name) : "セクション1",
+        formation: {
+          dancerPositions: copyPositions(previousSection?.formation.dancerPositions, id),
+          propPositions: copyPositions(previousSection?.formation.propPositions, id),
+          dancerActions: [],
+        },
       } as ChoreoSection
     ]
   };
 }
 
+// A full copy, inserted before the original. Actions and counts get new ids so the two sections never share them.
 export function duplicateSection(state: Choreo, section: ChoreoSection, index: number): Choreo {
-  const duplicatedSection = { ...section };
   const newId = crypto.randomUUID();
-  duplicatedSection.id = newId;
-  Object.values(duplicatedSection.formation.dancerPositions).forEach(position => position.sectionId = newId)
-  const newSections = [ ...state.sections.slice(0, index), ...[duplicatedSection], ...state.sections.slice(index) ];
+  const duplicatedSection: ChoreoSection = {
+    ...section,
+    id: newId,
+    formation: {
+      ...section.formation,
+      dancerPositions: copyPositions(section.formation.dancerPositions, newId),
+      propPositions: copyPositions(section.formation.propPositions, newId),
+      dancerMovements: copyMovements(section.formation.dancerMovements),
+      propMovements: copyMovements(section.formation.propMovements),
+      dancerActions: section.formation.dancerActions.map(action => ({
+        ...action,
+        id: crypto.randomUUID(),
+        timings: action.timings.map(timing => ({ ...timing, id: crypto.randomUUID(), dancerIds: [...timing.dancerIds] })),
+      })),
+    },
+  };
+  const newSections = [ ...state.sections.slice(0, index), duplicatedSection, ...state.sections.slice(index) ];
   return { ...state, sections: newSections };
 }
 
