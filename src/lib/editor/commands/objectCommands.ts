@@ -419,11 +419,12 @@ export function updatePropSizeAndRotate(
     }
   });
 
-  const newProps = {...state.props};
-  newProps[propId].width = width;
-  newProps[propId].length = length;
-  
-  return { ...state, sections: newSections }
+  // A new prop object, never an edit of the old one: earlier history states share it, so changing it
+  // in place would change them too and undo would have nothing to go back to.
+  const prop = state.props[propId];
+  const newProps = prop ? { ...state.props, [propId]: { ...prop, width, length } } : state.props;
+
+  return { ...state, props: newProps, sections: newSections }
 }
 
 export function updateObstacleSizeAndRotate(
@@ -435,13 +436,11 @@ export function updateObstacleSizeAndRotate(
   y: number,
   itemId: string): Choreo {
 
-  const newObstacles = {...state.obstacles};
-  newObstacles[itemId].width = width;
-  newObstacles[itemId].length = length;
-  newObstacles[itemId].rotation = rotation;
-  newObstacles[itemId].x = x;
-  newObstacles[itemId].y = y;
-  
+  // As with props: a new object, so undo still has the old one.
+  const obstacle = state.obstacles?.[itemId];
+  if (!obstacle) return state;
+  const newObstacles = { ...state.obstacles, [itemId]: { ...obstacle, width, length, rotation, x, y } };
+
   return { ...state, obstacles: newObstacles }
 }
 
