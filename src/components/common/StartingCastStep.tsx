@@ -8,6 +8,7 @@ import TextInput from "../inputs/TextInput";
 import { ChipFilter } from "../inputs/Chips";
 import Icon from "../basic/Icon";
 import { IconLabelButton } from "../basic/Button";
+import { useHelp } from "../help/HelpContext";
 
 export const MAX_STARTING_DANCERS = 150;
 export const MAX_STARTING_PER_PROP = 100;
@@ -155,7 +156,7 @@ function DancerList({ list, pickedIds, isFull, room, unnamedField, onChange }: {
   return <div className="flex flex-col flex-1 min-h-0 gap-1">
     {
       list.names.length === 0
-        ? <p className="flex-1 py-6 text-center text-muted">名簿にダンサーがいません</p>
+        ? <div className="flex-1 py-6 space-y-1 text-center text-muted"><p>名簿にダンサーがいません</p><RosterHelpLink/></div>
         : <>
           <NameFilters list={list} allLabel="全員" placeholder="名前を探す" pickedCount={pickedIds.length} filter={filter} onFilterChange={setFilter} onSearchChange={setSearch}/>
           {isFull && <p className="text-sm font-semibold text-primary">{MAX_STARTING_DANCERS}名までです</p>}
@@ -230,7 +231,7 @@ function PropList({ list, counts, onChange }: { list: RosterList, counts: [strin
   };
 
   if (list.names.length === 0) {
-    return <p className="py-6 text-center text-muted">名簿に道具がありません</p>;
+    return <div className="py-6 space-y-1 text-center text-muted"><p>名簿に道具がありません</p><RosterHelpLink/></div>;
   }
   return <div className="flex flex-col flex-1 min-h-0 gap-1">
     <NameFilters list={list} allLabel="すべて" placeholder="道具名を探す" pickedCount={counts.length} filter={filter} onFilterChange={setFilter} onSearchChange={setSearch}/>
@@ -284,4 +285,12 @@ function SelectBox({ state }: { state: "none" | "some" | "all" }) {
     {state === "all" && <Icon src="check" size="2xs" colour="white"/>}
     {state === "some" && <span className="w-2.5 h-0.5 bg-primary"/>}
   </span>;
+}
+
+// Opens help over the form, so nothing typed so far is lost.
+function RosterHelpLink() {
+  const openHelp = useHelp();
+  return <button type="button" onClick={() => openHelp({ article: "roster-add" })} className="text-sm font-semibold text-primary">
+    名簿の使い方を見る
+  </button>;
 }

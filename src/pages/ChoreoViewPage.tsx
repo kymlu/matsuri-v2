@@ -26,6 +26,7 @@ import { buildChangeLog, ChangeLog, hasShownChanges } from "../lib/helpers/chang
 import ChangeLogDialog from "../components/dialogs/ChangeLogDialog";
 import Icon from "../components/basic/Icon";
 import InstructionMessage from "../components/basic/InstructionMessage";
+import { useHelp } from "../components/help/HelpContext";
 
 const exportDialog = Dialog.createHandle<{}>();
 
@@ -39,6 +40,8 @@ export default function ChoreoViewPage(props: {
   teamId?: string,
   serverChoreo?: BasicChoreoDetails,
 }) {
+  const openHelp = useHelp();
+  const openHelpHere = useCallback(() => openHelp({ group: "view" }), [openHelp]);
   const [currentSection, setCurrentSection] = useState<ChoreoSection>(props.currentChoreo.sections[0]);
   const [selectedIds, setSelectedIds] = useState<StageEntities<string[]>>({props: [], dancers: [], obstacles: []});
   const [selectedTimingId, setSelectedTimingId] = useState<string | undefined>();
@@ -287,6 +290,7 @@ export default function ChoreoViewPage(props: {
           dancerAnimationCache={dancerAnimationCache}
           propAnimationCache={propAnimationCache}
           openChangeLog={changeLog && !isChangeLogBannerShown ? openChangeLog : undefined}
+          openHelp={openHelpHere}
         />
       </div>
 

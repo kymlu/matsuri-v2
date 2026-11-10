@@ -45,6 +45,7 @@ import BaseEditDialog from "../components/dialogs/BaseEditDialog";
 import { getChoreoPassword } from "../lib/helpers/apiHelper";
 import { calculateMovementCache, cornerToCentreFromProp } from "../lib/helpers/editorCalculationHelper";
 import { Distribution, HorizontalAlignment, Rearrangement, VerticalAlignment } from "../models/alignment";
+import { useHelp } from "../components/help/HelpContext";
 
 const resizeDialog = Dialog.createHandle<Choreo>();
 const editChoreoInfoDialog = Dialog.createHandle<string>();
@@ -80,6 +81,8 @@ export default function ChoreoEditPage(props: {
   isViewer: boolean,
   teamId?: string,
 }) {
+  const openHelp = useHelp();
+  const openHelpHere = useCallback(() => openHelp({ group: "edit" }), [openHelp]);
   const [currentSection, setCurrentSection] = useState<ChoreoSection>(props.currentChoreo.sections[0]);
   const [currentAction, setCurrentAction] = useState<DancerAction | undefined>();
   const [currentTiming, setCurrentTiming] = useState<DancerActionTiming | undefined>();
@@ -947,6 +950,7 @@ export default function ChoreoEditPage(props: {
           editEnabled={editEnabled}
           toggleEditEnabled={toggleEditEnabled}
           openNoteDialog={openNoteDialog}
+          openHelp={openHelpHere}
           showPaths={showPaths}
           isEditingMovement={isEditingMovement}
           dancerMovementCache={dancerMovementCache}
