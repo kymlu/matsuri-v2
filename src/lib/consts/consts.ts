@@ -56,6 +56,7 @@ export const ICON = {
   "123": "123",
   add: "add",
   mail: "mail",
+  contactSupport: "contact_support",
   adminPanelSettings: "admin_panel_settings",
   alignHorizontalCenter: "align_horizontal_center",
   alignHorizontalLeft: "align_horizontal_left",

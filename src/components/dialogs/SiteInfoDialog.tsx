@@ -12,7 +12,7 @@ type SiteInfoDialogProps = {
 
 function InfoRow({
   icon, label, children
-}: { icon: "help" | "warning" | "group", label: string, children: React.ReactNode }) {
+}: { icon: "help" | "contactSupport" | "group", label: string, children: React.ReactNode }) {
   return <div className="flex items-center justify-between gap-3 py-2.5">
     <span className="flex items-center gap-2 text-sm text-nowrap">
       <Icon src={icon} size="sm" colour="grey"/>
@@ -33,9 +33,9 @@ export default function SiteInfoDialog({
           <Button compact primaryText onClick={() => goToHelpPage()}>ガイドを見る</Button>
         </InfoRow>
         <Divider compact/>
-        <InfoRow icon="warning" label="アプリの不具合">
+        <InfoRow icon="contactSupport" label="お問い合わせ">
           {/* The contact's name is the mail link. */}
-          <a href={contactMailto("アプリの不具合について")} aria-label="ケイティーにメールする">
+          <a href={contactMailto("お問い合わせ")} aria-label="ケイティーにメールする">
             <Button asDiv compact primaryText>
               <span className="flex items-center gap-1 px-0.5">
                 <Icon src="mail" size="xs" colour="primary"/>
