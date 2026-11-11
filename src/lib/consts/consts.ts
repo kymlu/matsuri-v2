@@ -26,6 +26,10 @@ export const COUNT_NAME_LENGTH = 5;
 export const EXPORT_NAME_LENGTH = 100;
 export const SEARCH_NAME_LENGTH = 100;
 export const EMAIL_LENGTH = 254;
+
+// App contact address, opened in the user's mail app from the welcome and site info dialogs.
+export const CONTACT_EMAIL = "tairetsu.app@gmail.com";
+export const contactMailto = (subject: string) => `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}`;
 export const PASSWORD_LENGTH = 25;
 export const MIN_PASSWORD_LENGTH = 8;
 export const PASSWORD_ENTRY_LENGTH = 150;
@@ -51,6 +55,7 @@ export const IMG = {
 export const ICON = {
   "123": "123",
   add: "add",
+  mail: "mail",
   adminPanelSettings: "admin_panel_settings",
   alignHorizontalCenter: "align_horizontal_center",
   alignHorizontalLeft: "align_horizontal_left",

@@ -1,6 +1,6 @@
 import { Dialog, Menu } from "@base-ui/react"
 import CustomDialog from "../components/basic/CustomDialog"
-import { LONG_NAME_LENGTH, SAMPLE_PARADE_ID, SAMPLE_STAGE_ID, SEARCH_NAME_LENGTH } from "../lib/consts/consts"
+import { contactMailto, LONG_NAME_LENGTH, SAMPLE_PARADE_ID, SAMPLE_STAGE_ID, SEARCH_NAME_LENGTH } from "../lib/consts/consts"
 import Button, { IconLabelButton } from "../components/basic/Button"
 import Icon from "../components/basic/Icon"
 import { readUploadedFile } from "../lib/helpers/uploadHelper"
@@ -960,7 +960,15 @@ export default function HomePage({
             teamId={team?.id ?? ""}/>
         </Dialog.Root>
         <Dialog.Root open={showNoTeamDialog} onOpenChange={() => setShowNoTeamDialog(false)}>
-          <CustomDialog title="ようこそ！" hasX fullWidth>
+          <CustomDialog
+            title="ようこそ！"
+            hasX
+            fullWidth
+            footer={
+              <a href={contactMailto("チームへの参加について")} className="block mt-4">
+                <IconLabelButton asDiv full primaryText icon="mail" label="メールで問い合わせる"/>
+              </a>
+            }>
             <div className="space-y-2">
               <p>チームに参加すると、隊列表の保存・公開ができます。</p>
               <p>参加をご希望の方はチームの管理者にお問い合わせください。</p>

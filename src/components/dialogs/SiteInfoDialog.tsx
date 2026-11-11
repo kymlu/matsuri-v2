@@ -3,6 +3,7 @@ import Button, { IconLabelButton } from "../basic/Button";
 import CustomDialog from "../basic/CustomDialog";
 import Divider from "../basic/Divider";
 import Icon from "../basic/Icon";
+import { contactMailto } from "../../lib/consts/consts";
 
 type SiteInfoDialogProps = {
   buildInfo: string | undefined,
@@ -13,7 +14,7 @@ function InfoRow({
   icon, label, children
 }: { icon: "help" | "warning" | "group", label: string, children: React.ReactNode }) {
   return <div className="flex items-center justify-between gap-3 py-2.5">
-    <span className="flex items-center gap-2 text-sm">
+    <span className="flex items-center gap-2 text-sm text-nowrap">
       <Icon src={icon} size="sm" colour="grey"/>
       {label}
     </span>
@@ -33,7 +34,15 @@ export default function SiteInfoDialog({
         </InfoRow>
         <Divider compact/>
         <InfoRow icon="warning" label="アプリの不具合">
-          <span className="font-semibold">ケイティー</span>
+          {/* The contact's name is the mail link. */}
+          <a href={contactMailto("アプリの不具合について")} aria-label="ケイティーにメールする">
+            <Button asDiv compact primaryText>
+              <span className="flex items-center gap-1 px-0.5">
+                <Icon src="mail" size="xs" colour="primary"/>
+                ケイティー
+              </span>
+            </Button>
+          </a>
         </InfoRow>
         <Divider compact/>
         <InfoRow icon="group" label="隊列の内容">
