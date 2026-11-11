@@ -14,11 +14,12 @@ type FindDancerDialogProps = {
   shownId?: string, // the dancer selected on the stage when the dialog opened
   myDancerId?: string,
   myDancerName: string | null,
+  canSaveAsMe: boolean,
   onConfirm: (dancerId: string, saveAsMe: boolean) => void,
 }
 
 // Viewer: find a dancer by name and select them on the stage, optionally saving them as "me".
-export default function FindDancerDialog({ dancers, shownId, myDancerId, myDancerName, onConfirm }: FindDancerDialogProps) {
+export default function FindDancerDialog({ dancers, shownId, myDancerId, myDancerName, canSaveAsMe, onConfirm }: FindDancerDialogProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [chosenId, setPickedId] = useState<string | undefined>(shownId);
   const [saveAsMe, setSaveAsMe] = useState(false);
@@ -64,9 +65,10 @@ export default function FindDancerDialog({ dancers, shownId, myDancerId, myDance
       </div>
     }
     footer={
-      <div className="pt-3 mt-2 border-t border-line">
+      <div className={classNames("mt-2", { "pt-3 border-t border-line": canSaveAsMe })}>
         {
-          isAlreadyMe
+          !canSaveAsMe ? null
+          : isAlreadyMe
             ? <p className="text-sm text-muted min-h-9">この端末では自分として登録済み</p>
             : <label className={classNames("flex items-start gap-2 text-sm min-h-9", { "text-muted opacity-60": !picked })}>
                 <Checkbox.Root
@@ -79,14 +81,14 @@ export default function FindDancerDialog({ dancers, shownId, myDancerId, myDance
                 <span>{checkboxLabel}</span>
               </label>
         }
-        <div className="grid w-full grid-flow-col gap-2 mt-3 auto-cols-fr">
+        <div className={classNames("grid w-full grid-flow-col gap-2 auto-cols-fr", { "mt-3": canSaveAsMe })}>
           <Dialog.Close className="w-full">
             <Button asDiv full><span className="font-semibold text-nowrap">キャンセル</span></Button>
           </Dialog.Close>
           <Dialog.Close
             className="w-full"
             disabled={!picked}
-            onClick={() => { if (pickedId) onConfirm(pickedId, saveAsMe && !isAlreadyMe); }}>
+            onClick={() => { if (pickedId) onConfirm(pickedId, canSaveAsMe && saveAsMe && !isAlreadyMe); }}>
             <Button asDiv full primary disabled={!picked}><span className="font-semibold text-nowrap">表示する</span></Button>
           </Dialog.Close>
         </div>

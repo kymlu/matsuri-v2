@@ -6,7 +6,6 @@ import ChoreoEditPage from './pages/ChoreoEditPage';
 import ChoreoViewPage from './pages/ChoreoViewPage';
 import { BasicChoreoDetails, Choreo, EventDetails } from './models/choreo';
 import { getMyDancerName, setMyDancerName } from './lib/dataAccess/LocalStorageController';
-import { resolveMyDancerName } from './lib/helpers/myDancerHelper';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Team } from './models/team';
 import { checkLogin, verifyTeam } from './lib/helpers/apiHelper';
@@ -31,9 +30,8 @@ function App() {
   const [currentChoreo, setCurrentChoreo] = useState<Choreo | undefined>();
   const [currentChoreoStatus, setCurrentChoreoStatus] = useState<ChoreoStatus>();
   const [pastVersion, setPastVersion] = useState<number | undefined>();
-  // The saved "me" for this team (null if never saved) and the logged-in account name, kept apart.
+  // The user's name: the account name when logged in, otherwise saved on this device (per team).
   const [savedDancerName, setSavedDancerName] = useState<string | null>(null);
-  const [accountName, setAccountName] = useState<string | null>(null);
   const [buildInfo, setBuildInfo] = useState<string | undefined>();
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
@@ -73,7 +71,8 @@ function App() {
         setSavedDancerName(getMyDancerName(t?.id));
         checkLogin(t?.id!,
         (name, role, teamMemberId) => {
-          setAccountName(name);
+          setMyDancerName(t?.id, name);
+          setSavedDancerName(name.trim());
           setIsAdmin(role === "admin");
           setIsViewer(role === "viewer");
           setIsLoggedIn(true);
@@ -105,9 +104,6 @@ function App() {
     setMyDancerName(team?.id, newName);
     setSavedDancerName(newName.trim());
   }
-
-  // Used to find "me" in a choreo. Logged out, the account name no longer counts as a guess.
-  const myDancerName = resolveMyDancerName(savedDancerName, isLoggedIn ? accountName : null);
 
   useEffect(() => {
     console.log("Changing mode:", mode);
@@ -170,11 +166,8 @@ function App() {
             setPastVersion(pastVersion);
             setMode("view");
           }}
-          myDancerName={myDancerName}
           savedDancerName={savedDancerName}
           setSavedDancerName={saveDancerName}
-          accountName={accountName}
-          setAccountName={setAccountName}
           isAdmin={isAdmin}
           setIsAdmin={setIsAdmin}
           isViewer={isViewer}
@@ -231,8 +224,8 @@ function App() {
           goToHomePage={() => setMode("home")}
           goToEditPage={() => setMode("edit")}
           pastVersion={pastVersion}
-          myDancerName={myDancerName}
-          setSavedDancerName={saveDancerName}
+          myDancerName={savedDancerName}
+          setSavedDancerName={isLoggedIn ? undefined : saveDancerName}
           teamId={team?.id}
           serverChoreo={serverChoreo}
         />

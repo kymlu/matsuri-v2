@@ -51,11 +51,8 @@ type HomePageProps = {
   goToRosterPage: () => void,
   goToNewChoreoPage: (eventDetails?: EventDetails) => void,
   goToViewPage: (choreo: Choreo, status: ChoreoStatus, serverChoreo?: BasicChoreoDetails, pastVersion?: number) => void,
-  myDancerName: string | null,
   savedDancerName: string | null,
   setSavedDancerName: (newName: string) => void,
-  accountName: string | null,
-  setAccountName: (newName: string) => void,
   isLoggedIn: boolean,
   setIsLoggedIn: (value: boolean) => void,
   isAdmin: boolean,
@@ -86,12 +83,11 @@ const pdfExportDialog = Dialog.createHandle<{}>();
 const uploadChoreoDialog = Dialog.createHandle<{}>();
 const loginDialog = Dialog.createHandle<{}>();
 const editUserNameDialog = Dialog.createHandle<{}>();
-const editAccountNameDialog = Dialog.createHandle<{}>();
 
 export default function HomePage({
   buildInfo, eventList, setEventList,
   goToAdminPage, goToRosterPage, goToNewChoreoPage, goToViewPage,
-  myDancerName, savedDancerName, setSavedDancerName, accountName, setAccountName,
+  savedDancerName, setSavedDancerName,
   isLoggedIn, setIsLoggedIn, isAdmin, setIsAdmin, isViewer, setIsViewer,
   setCurrentTeamMemberId, team, showNoTeamDialog, setShowNoTeamDialog, setupToken
 }: HomePageProps) {
@@ -363,18 +359,13 @@ export default function HomePage({
     setEditUserNameDialogOpen(isOpen);
   };
 
-  const [editAccountNameDialogOpen, setEditAccountNameDialogOpen] = useState(false);
-  const handleEditAccountNameDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
-    setEditAccountNameDialogOpen(isOpen);
-  };
-  const [showAccountNameFailedDialog, setShowAccountNameFailedDialog] = useState(false);
+  const [showNameChangeFailedDialog, setShowNameChangeFailedDialog] = useState(false);
 
-  // Invited members start without a name, so ask for one. "Me" is never asked for.
   useEffect(() => {
-    if (isLoggedIn && isNullOrUndefinedOrBlank(accountName?.trim())) {
-      setEditAccountNameDialogOpen(true);
+    if (isLoggedIn && isNullOrUndefinedOrBlank(savedDancerName)) {
+      setEditUserNameDialogOpen(true);
     }
-  }, [isLoggedIn, accountName]);
+  }, [isLoggedIn, savedDancerName]);
 
   const triggerUpload = () => {
     const uploadFileElement = document.getElementById("uploadFileInput");
@@ -520,35 +511,25 @@ export default function HomePage({
             <Dialog.Root
               handle={editUserNameDialog}
               open={editUserNameDialogOpen}
-              onOpenChange={handleEditUserNameDialogOpen}>
+              onOpenChange={handleEditUserNameDialogOpen}
+              disablePointerDismissal={isLoggedIn && isNullOrUndefinedOrBlank(savedDancerName)}>
               <Dialog.Trigger>
                 <IconButton src="personEdit" colour="grey" noBorder asDiv/>
               </Dialog.Trigger>
               <UserNameEditDialog
-                title="自分の名前"
-                description="隊列内に同じ名前があれば、自動で選択されます。"
                 name={savedDancerName ?? ""}
-                note={isLoggedIn ? "アカウント名は右上のメニューから変更できます。" : undefined}
-                onSubmit={setSavedDancerName}/>
-            </Dialog.Root>
-            <Dialog.Root
-              handle={editAccountNameDialog}
-              open={editAccountNameDialogOpen}
-              onOpenChange={handleEditAccountNameDialogOpen}
-              disablePointerDismissal={isNullOrUndefinedOrBlank(accountName?.trim())}>
-              {
-                isLoggedIn && team &&
-                <UserNameEditDialog
-                  title="アカウント名"
-                  description="チーム内で表示される名前です。"
-                  name={accountName ?? ""}
-                  required
-                  onSubmit={(name) => {
+                isLoggedIn={isLoggedIn}
+                onSubmit={(name) => {
+                  if (isLoggedIn && team) {
+                    // The device copy follows the server, so a refused rename doesn't show as saved.
                     changeUserName(name, team.id,
-                      () => setAccountName(name),
-                      () => setShowAccountNameFailedDialog(true));
-                  }}/>
-              }
+                      () => setSavedDancerName(name),
+                      () => setShowNameChangeFailedDialog(true));
+                  } else {
+                    setSavedDancerName(name);
+                  }
+                }
+              }/>
             </Dialog.Root>
             {
               !isLoggedIn && team?.id &&
@@ -562,19 +543,11 @@ export default function HomePage({
                 }>
                 <div className="space-y-2">
                   {
-                    !isNullOrUndefinedOrBlank(accountName) && <>
-                      <b className="pl-2">{accountName}</b><small>さん</small>
+                    !isNullOrUndefinedOrBlank(savedDancerName) && <>
+                      <b className="pl-2">{savedDancerName}</b><small>さん</small>
+                      <Divider compact/>
                     </>
                   }
-                  <Menu.Item>
-                    <IconLabelButton
-                      full noBorder
-                      icon="edit"
-                      label="アカウント名を変更"
-                      alignment="left"
-                      onClick={() => setEditAccountNameDialogOpen(true)}/>
-                  </Menu.Item>
-                  <Divider compact/>
                   {
                     isAdmin && <>
                       <Menu.Item>
@@ -834,7 +807,7 @@ export default function HomePage({
             exportingChoreo &&
             <ExportDialog
               choreo={exportingChoreo!}
-              selectedId={findMyDancerId(exportingChoreo.dancers, myDancerName) ?? ""}
+              selectedId={findMyDancerId(exportingChoreo.dancers, savedDancerName) ?? ""}
               onClose={handlePdfExportClose}
             />
           }
@@ -982,7 +955,7 @@ export default function HomePage({
           onOpenChange={handleLoginDialogOpen}>
           <LoginDialog
             onLogin={(name, role, teamMemberId) => {
-              setAccountName(name);
+              setSavedDancerName(name);
               setIsAdmin(role === "admin");
               setIsViewer(role === "viewer");
               setCurrentTeamMemberId(teamMemberId);
@@ -1011,9 +984,9 @@ export default function HomePage({
             </div>
           </CustomDialog>
         </Dialog.Root>
-        <Dialog.Root open={showAccountNameFailedDialog} onOpenChange={() => setShowAccountNameFailedDialog(false)}>
+        <Dialog.Root open={showNameChangeFailedDialog} onOpenChange={() => setShowNameChangeFailedDialog(false)}>
           <BaseErrorDialog title="変更失敗" fullWidth>
-            <p>アカウント名を変更できませんでした。時間をおいて、もう一度お試しください。</p>
+            <p>名前を変更できませんでした。時間をおいて、もう一度お試しください。</p>
           </BaseErrorDialog>
         </Dialog.Root>
         <Dialog.Root open={showVerifyInviteErrorDialog} onOpenChange={() => setShowVerifyInviteErrorDialog(false)}>
@@ -1027,7 +1000,7 @@ export default function HomePage({
             setupToken={setupToken}
             inputEmail={email}
             onLogin={(name, role, teamMemberId) => {
-              setAccountName(name);
+              setSavedDancerName(name);
               setIsAdmin(role === "admin");
               setIsViewer(role === "viewer");
               setCurrentTeamMemberId(teamMemberId);

@@ -39,7 +39,8 @@ export default function ChoreoViewPage(props: {
   goToEditPage: () => void,
   pastVersion?: number,
   myDancerName: string | null,
-  setSavedDancerName: (name: string) => void,
+  // Only given when logged out: logged in, the name is the account name and is changed from home.
+  setSavedDancerName?: (name: string) => void,
   teamId?: string,
   serverChoreo?: BasicChoreoDetails,
 }) {
@@ -234,7 +235,7 @@ export default function ChoreoViewPage(props: {
     setSelectedIds({props: [], dancers: [dancerId], obstacles: []});
     setSelectedTimingId(undefined);
     setFocusDancerRequest(n => n + 1);
-    if (saveAsMe) {
+    if (saveAsMe && setSavedDancerName) {
       setSavedDancerName(props.currentChoreo.dancers[dancerId].name);
     }
   }, [props.currentChoreo.dancers, setSavedDancerName]);
@@ -355,6 +356,7 @@ export default function ChoreoViewPage(props: {
             shownId={selectedIds.dancers.length === 1 && selectedTimingId === undefined ? selectedIds.dancers[0] : undefined}
             myDancerId={myDancerId}
             myDancerName={props.myDancerName}
+            canSaveAsMe={props.setSavedDancerName !== undefined}
             onConfirm={onFindDancer}/>
         }
       </Dialog.Root>
