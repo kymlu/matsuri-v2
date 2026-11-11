@@ -28,6 +28,7 @@ import Icon from "../components/basic/Icon";
 import InstructionMessage from "../components/basic/InstructionMessage";
 import { useHelp } from "../components/help/HelpContext";
 import { findMyDancerId } from "../lib/helpers/myDancerHelper";
+import FindDancerDialog from "../components/dialogs/FindDancerDialog";
 
 const exportDialog = Dialog.createHandle<{}>();
 
@@ -219,6 +220,22 @@ export default function ChoreoViewPage(props: {
   ), [showPaths, selectedIds.dancers, selectedTimingId, nextSection, currentSection]);
 
   const closeHintDialog = useCallback(() => setShowHintDialog(false), []);
+
+  // ---- Find dancer ----
+  const [findDancerOpen, setFindDancerOpen] = useState(false);
+  const openFindDancer = useCallback(() => setFindDancerOpen(true), []);
+  const myDancerId = useMemo(
+    () => findMyDancerId(props.currentChoreo.dancers, props.myDancerName),
+    [props.currentChoreo.dancers, props.myDancerName]
+  );
+  const { setSavedDancerName } = props;
+  const onFindDancer = useCallback((dancerId: string, saveAsMe: boolean) => {
+    setSelectedIds({props: [], dancers: [dancerId], obstacles: []});
+    setSelectedTimingId(undefined);
+    if (saveAsMe) {
+      setSavedDancerName(props.currentChoreo.dancers[dancerId].name);
+    }
+  }, [props.currentChoreo.dancers, setSavedDancerName]);
   const closeExportDialog = useCallback(() => setExportDialogOpen(false), []);
 
   return (
@@ -293,6 +310,7 @@ export default function ChoreoViewPage(props: {
           propAnimationCache={propAnimationCache}
           openChangeLog={changeLog && !isChangeLogBannerShown ? openChangeLog : undefined}
           openHelp={openHelpHere}
+          openFindDancer={entityCount.dancers > 0 ? openFindDancer : undefined}
         />
       </div>
 
@@ -324,6 +342,18 @@ export default function ChoreoViewPage(props: {
             defaultChecked={false}
             onChange={(value) => stopShowingViewPageInfoDialog(value)}/>
         </BaseErrorDialog>
+      </Dialog.Root>
+
+      <Dialog.Root open={findDancerOpen} onOpenChange={setFindDancerOpen}>
+        {
+          findDancerOpen &&
+          <FindDancerDialog
+            dancers={props.currentChoreo.dancers}
+            shownId={selectedIds.dancers.length === 1 && selectedTimingId === undefined ? selectedIds.dancers[0] : undefined}
+            myDancerId={myDancerId}
+            myDancerName={props.myDancerName}
+            onConfirm={onFindDancer}/>
+        }
       </Dialog.Root>
 
       <Dialog.Root onOpenChange={closeChangeLog} open={changeLogSelection !== undefined}>

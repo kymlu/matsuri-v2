@@ -74,6 +74,7 @@ type MainStageProps = {
   openChangeLog?: () => void,
   // Shows the 🔰 help button at the top left.
   openHelp?: () => void,
+  openFindDancer?: () => void,
   showPaths?: boolean,
   isEditingMovement?: boolean,
   dancerMovementCache: MovementCacheBySectionIdByObjectId,
@@ -93,7 +94,7 @@ function MainStage({
   updatePropSizeAndRotate, updateObstacleSizeAndRotate,
   selectedIds, setSelectedIds, selectedObjects,
   addDancer, addProp, addObstacle, appSettings, previousSection, selectedDancerMovement,
-  onDancerSelected, bottomMarginPercent = 0, canResizeProps, editEnabled, toggleEditEnabled, openNoteDialog, openChangeLog, openHelp,
+  onDancerSelected, bottomMarginPercent = 0, canResizeProps, editEnabled, toggleEditEnabled, openNoteDialog, openChangeLog, openHelp, openFindDancer,
   showPaths = false, isEditingMovement = false, dancerMovementCache, propMovementCache, onMidpointEdit, currentMovement,
   dancerAnimationCache, propAnimationCache,
 }: MainStageProps) {
@@ -679,7 +680,7 @@ function MainStage({
       />
     }
     {
-      ((canEdit && openNoteDialog) || openChangeLog || openHelp) &&
+      ((canEdit && openNoteDialog) || openChangeLog || openHelp || openFindDancer) &&
       <div className={`absolute space-y-1 left-2 ${isShowingHorizontalRuler ? "top-7" : "top-1"}`}>
         {
           openHelp &&
@@ -688,6 +689,15 @@ function MainStage({
             imgSrc={theme === "dark" ? "beginnerDark" : "beginner"}
             colour="primary"
             onClick={openHelp}
+          />
+        }
+        {
+          openFindDancer &&
+          <IconButton
+            size="sm"
+            src="search"
+            colour="black"
+            onClick={openFindDancer}
           />
         }
         {
