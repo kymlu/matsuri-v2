@@ -140,7 +140,7 @@ function ViewerSidebar({
                       {action.name}
                     </span>
                     {/* Timings joined into one strip. The 1px gap shows the background as divider lines, so wrapped rows stay tidy. */}
-                    <div className="flex flex-wrap gap-px overflow-hidden border rounded-md w-fit max-w-full bg-line-strong border-line-strong [&>button]:flex-1 [&>button]:rounded-none">
+                    <div className="flex flex-wrap gap-px overflow-hidden border rounded-md w-fit max-w-full bg-line border-line [&>button]:flex-1 [&>button]:rounded-none">
                       {
                         action.timings.map(timing =>
                           <Button

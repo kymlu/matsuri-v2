@@ -33,10 +33,7 @@ export default function IconButton ({
     "border-line": noBorder !== true && (colour === undefined || colour === "black"),
     "border-line-strong": noBorder !== true && colour === "grey",
     "border-white": noBorder !== true && colour === "white",
-    "bg-surface p-1": noBorder !== true,
-    // Primary (red) buttons keep the heavier ring so they still stand out; the rest use a light hairline.
-    "border-2": noBorder !== true && (colour === "primary" || colour === "white"),
-    "border": noBorder !== true && colour !== "primary" && colour !== "white",
+    "border bg-surface p-1": noBorder !== true,
     "opacity-30": disabled,
     "min-w-16 min-h-16 size-16 max-w-16 max-h-16": noBorder !== true && size === "lg",
     "min-w-12 min-h-12 size-12 max-w-12 max-h-12": noBorder !== true && (size === undefined || size === "md"),
