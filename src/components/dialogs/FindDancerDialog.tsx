@@ -1,9 +1,9 @@
 import { Checkbox, Dialog } from "@base-ui/react";
+import SelectBox from "../basic/SelectBox";
 import { useMemo, useState } from "react";
 import classNames from "classnames";
 import CustomDialog from "../basic/CustomDialog";
 import Button from "../basic/Button";
-import Icon from "../basic/Icon";
 import TextInput from "../inputs/TextInput";
 import { Dancer } from "../../models/dancer";
 import { buildFindDancerList } from "../../lib/helpers/myDancerHelper";
@@ -51,7 +51,7 @@ export default function FindDancerDialog({ dancers, shownId, myDancerId, myDance
   return <CustomDialog
     title="ダンサーを探す"
     hasX
-    fullWidth
+    full
     // On a phone, focusing the search box would raise the keyboard over the list.
     focusDialogOnOpen={window.matchMedia?.("(pointer: coarse)").matches}
     header={
@@ -70,13 +70,11 @@ export default function FindDancerDialog({ dancers, shownId, myDancerId, myDance
             ? <p className="text-sm text-muted min-h-9">この端末では自分として登録済み</p>
             : <label className={classNames("flex items-start gap-2 text-sm min-h-9", { "text-muted opacity-60": !picked })}>
                 <Checkbox.Root
-                  checked={saveAsMe}
+                  checked={saveAsMe && !!picked}
                   disabled={!picked}
                   onCheckedChange={setSaveAsMe}
-                  className="flex items-center justify-center mt-0.5 border rounded size-4 shrink-0 border-line data-[checked]:bg-primary-fill data-[checked]:border-primary-fill">
-                  <Checkbox.Indicator>
-                    <Icon src="check" size="xs" colour="white"/>
-                  </Checkbox.Indicator>
+                  className="shrink-0">
+                  <SelectBox state={saveAsMe && picked ? "all" : "none"}/>
                 </Checkbox.Root>
                 <span>{checkboxLabel}</span>
               </label>
@@ -96,8 +94,8 @@ export default function FindDancerDialog({ dancers, shownId, myDancerId, myDance
     }>
     {
       items.length === 0
-        ? <p className="py-8 text-sm text-center text-muted min-h-[40svh]">「{searchTerm.trim()}」は見つかりませんでした</p>
-        : <ul className="space-y-1 min-h-[40svh]" aria-label="ダンサー">
+        ? <p className="py-8 text-sm text-center text-muted">「{searchTerm.trim()}」は見つかりませんでした</p>
+        : <ul className="space-y-1" aria-label="ダンサー">
             {
               items.map(item =>
                 <li key={item.id}>
