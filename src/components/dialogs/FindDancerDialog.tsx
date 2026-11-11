@@ -97,7 +97,7 @@ export default function FindDancerDialog({ dancers, shownId, myDancerId, myDance
     {
       items.length === 0
         ? <p className="py-8 text-sm text-center text-muted">「{searchTerm.trim()}」は見つかりませんでした</p>
-        : <ul className="space-y-1" aria-label="ダンサー">
+        : <ul className="p-px space-y-1" aria-label="ダンサー">
             {
               items.map(item =>
                 <li key={item.id}>
