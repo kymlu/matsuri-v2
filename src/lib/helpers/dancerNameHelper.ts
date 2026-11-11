@@ -9,6 +9,10 @@ export function formatDancerName(name: string): string {
   if (chars.length <= MAX_PER_LINE) return name;
   if (chars.length > MAX_PER_LINE * 2) chars = [...chars.slice(0, MAX_PER_LINE * 2 - 1), "…"];
   let cut = Math.ceil(chars.length / 2);
-  if (NO_LINE_START.includes(chars[cut]) && cut < MAX_PER_LINE) cut++;
+  if (NO_LINE_START.includes(chars[cut])) {
+    // Move the break forward if line 1 has room, else back if line 2 has room.
+    if (cut < MAX_PER_LINE) cut++;
+    else if (chars.length - (cut - 1) <= MAX_PER_LINE) cut--;
+  }
   return chars.slice(0, cut).join("") + "\n" + chars.slice(cut).join("");
 }

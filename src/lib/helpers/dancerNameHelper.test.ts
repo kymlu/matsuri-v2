@@ -14,6 +14,8 @@ describe("formatDancerName", () => {
 
   it("doesn't start the second line with ー or a small kana", () => {
     expect(formatDancerName("リョーコ")).toBe("リョー\nコ");
+    expect(formatDancerName("ミッキーマ")).toBe("ミッ\nキーマ");
+    expect(formatDancerName("ケイティー")).toBe("ケイ\nティー");
   });
 
   it("cuts names over 6 characters with an ellipsis", () => {

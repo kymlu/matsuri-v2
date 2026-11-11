@@ -860,7 +860,7 @@ export default function HomePage({
           onOpenChange={handleDeleteChoreoDialogOpen}>
 
           <BaseEditDialog
-            title={`${editingChoreo?.name}を${deleteChoreoVerb}しますか？`}
+            title={`${editingChoreo?.name ?? ""}を${deleteChoreoVerb}しますか？`}
             actionButtonText="OK"
             onSubmit={() => {
               if (editingChoreo) {
