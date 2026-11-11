@@ -417,7 +417,7 @@ export function NewChoreoPage({
         {
           isConfirmingLeave &&
           <BaseEditDialog title="戻りますか？" actionButtonText="戻る" onSubmit={goToHomePage}>
-            <p className="text-muted">入力した内容はすべて失われます。</p>
+            <p className="text-sm text-muted">入力した内容はすべて失われます。</p>
           </BaseEditDialog>
         }
       </Dialog.Root>
@@ -442,7 +442,7 @@ export function EventListItem ({
     onClick={() => {
       setStartAndEndDate(eventDetails.event ?? "", eventDetails.startDate ?? "", eventDetails.endDate ?? "")
     }}
-    className="cursor-default items-center py-2 pr-8 pl-4 text-base leading-4 outline-none select-none data-[highlighted]:relative data-[highlighted]:z-0 data-[highlighted]:text-gray-50 data-[highlighted]:before:absolute data-[highlighted]:before:inset-x-2 data-[highlighted]:before:inset-y-0 data-[highlighted]:before:z-[-1] data-[highlighted]:before:rounded-md data-[highlighted]:before:bg-primary data-[highlighted]:before:text-white">
+    className="cursor-default items-center py-2 pr-8 pl-4 text-base leading-4 outline-none select-none data-[highlighted]:relative data-[highlighted]:z-0 data-[highlighted]:text-gray-50 data-[highlighted]:before:absolute data-[highlighted]:before:inset-x-2 data-[highlighted]:before:inset-y-0 data-[highlighted]:before:z-[-1] data-[highlighted]:before:rounded-md data-[highlighted]:before:bg-primary-fill data-[highlighted]:before:text-white">
     <span className="font-medium">{eventDetails.event}</span>
     <br/>
     {

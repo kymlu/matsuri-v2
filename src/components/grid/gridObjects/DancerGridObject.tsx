@@ -1,4 +1,5 @@
 import { Circle, Text } from "react-konva";
+import { formatDancerName } from "../../../lib/helpers/dancerNameHelper";
 import { Dancer, DancerPosition } from "../../../models/dancer";
 import { StageGeometry } from "../../../models/choreo";
 import BaseGridObject from "./BaseGridObject";
@@ -97,13 +98,14 @@ const DancerGridObject = memo(function DancerGridObject({
           <Text
             listening={false}
             x={-METER_PX/2}
-            y={-METER_PX/2}
+            y={-METER_PX*0.4}
             width={METER_PX}
-            height={METER_PX}
+            height={METER_PX*0.8}
             verticalAlign="middle"
             align="center"
-            text={dancer.name}
-            fontSize={METER_PX/3}
+            text={formatDancerName(dancer.name)}
+            fontFamily="'Hiragino Sans','Noto Sans JP','Yu Gothic',sans-serif"
+            fontSize={METER_PX/3.5}
             fontStyle="bold"
             fill={colorPalette.getTextColor(position.color) ?? "white"}
           />

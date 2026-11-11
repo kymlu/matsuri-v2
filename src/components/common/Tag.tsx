@@ -17,7 +17,7 @@ export function Tag ({
 }: TagProps) {
   const tagClasses = classNames("w-min font-semibold flex items-center gap-0.5 border rounded-md text-nowrap",
     {
-      "bg-primary text-white border-primary": type === "filled",
+      "bg-primary-fill text-white border-primary-fill": type === "filled",
       "bg-transparent text-primary border-primary": type === "primary",
       "bg-transparent text-muted border-line-strong": type === "grey",
       "px-0.5 py-0 text-xs": compact === true,

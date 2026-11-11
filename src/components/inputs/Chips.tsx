@@ -1,5 +1,7 @@
 import classNames from "classnames";
 import Icon from "../basic/Icon";
+import { useRef } from "react";
+import { useScrollFade } from "../../lib/hooks/useScrollFade";
 
 export type ChipOption = {
   value: string,
@@ -12,11 +14,11 @@ export type ChipOption = {
 const chipClasses = (selected: boolean) => classNames(
   "shrink-0 flex items-center gap-1 min-h-8 px-3 rounded-full border text-sm whitespace-nowrap",
   {
-    "bg-primary border-primary text-white font-semibold": selected,
+    "bg-primary-fill border-primary-fill text-white font-semibold": selected,
     "bg-surface border-line text-body": !selected,
   });
 
-const rowClasses = "flex min-w-0 gap-1.5 overflow-x-auto max-w-full pb-1";
+const rowClasses = "flex min-w-0 gap-1.5 overflow-x-auto max-w-full pb-1 scroll-fade";
 
 type ChipFilterProps = {
   label: string, // for screen readers
@@ -27,7 +29,9 @@ type ChipFilterProps = {
 
 // Pick one, e.g. which category of names to show.
 export function ChipFilter({ label, options, value, onChange }: ChipFilterProps) {
-  return <div role="radiogroup" aria-label={label} className={rowClasses}>
+  const rowRef = useRef<HTMLDivElement | null>(null);
+  useScrollFade(rowRef);
+  return <div ref={rowRef} role="radiogroup" aria-label={label} className={rowClasses}>
     {
       options.map(option =>
         <button
@@ -56,7 +60,9 @@ type ChipTogglesProps = {
 // Pick any number, e.g. the categories a name belongs to. Selected chips show a check
 // so they can't be mistaken for a ChipFilter.
 export function ChipToggles({ label, options, values, onChange, wrap }: ChipTogglesProps) {
-  return <div role="group" aria-label={label} className={wrap ? "flex flex-wrap gap-1.5" : rowClasses}>
+  const rowRef = useRef<HTMLDivElement | null>(null);
+  useScrollFade(rowRef);
+  return <div ref={rowRef} role="group" aria-label={label} className={wrap ? "flex flex-wrap gap-1.5" : rowClasses}>
     {
       options.map(option => {
         const selected = values.includes(option.value);

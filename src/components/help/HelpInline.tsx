@@ -14,9 +14,23 @@ export function InlineIcon({ src }: { src: keyof typeof ICON }) {
 export function InlineButton({ children, primary }: { children: ReactNode, primary?: boolean }) {
   return <span className={classNames(
     "inline-flex items-center gap-0.5 align-middle mx-0.5 px-1.5 text-sm font-semibold leading-6 border rounded-md whitespace-nowrap",
-    primary ? "bg-primary border-primary text-white" : "bg-surface border-line text-body",
+    primary ? "bg-primary-fill border-primary-fill text-white" : "bg-surface border-line text-body",
   )}>
     {children}
+  </span>;
+}
+
+// A small copy of the viewer's joined count strip. `selected` is the index shown in red.
+export function InlineStrip({ items, selected }: { items: string[], selected?: number }) {
+  return <span className="inline-flex align-middle mx-0.5 overflow-hidden border rounded-md border-line bg-line gap-px">
+    {items.map((item, i) =>
+      <span key={i} className={classNames(
+        "px-1.5 text-sm font-semibold leading-6 whitespace-nowrap",
+        i === selected ? "bg-primary-fill text-white" : "bg-surface text-body",
+      )}>
+        {item}
+      </span>
+    )}
   </span>;
 }
 

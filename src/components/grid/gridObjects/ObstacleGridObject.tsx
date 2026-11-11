@@ -174,6 +174,11 @@ const ObstacleGridObject = memo(function ObstacleGridObject({
       fontSize={METER_PX/3}
       fontStyle="bold"
       fill={colorPalette.black}
+      // Outline in the background colour keeps the label readable on any stripe colour, in both themes.
+      stroke={colorPalette.white}
+      strokeWidth={3}
+      fillAfterStrokeEnabled
+      lineJoin="round"
       verticalAlign="middle"
       align="center" />
   </BaseGridObject>

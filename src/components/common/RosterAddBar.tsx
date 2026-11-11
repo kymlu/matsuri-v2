@@ -88,7 +88,7 @@ export default function RosterAddBar({ teamId, kind, isVisible = true, list: ros
     : lastResult;
 
   const buttonClasses = classNames("row-span-2 flex flex-col items-center justify-center w-14 rounded-md font-semibold text-xs gap-0.5", {
-    "bg-primary text-white": state.toSend.length > 0 && !isSaving,
+    "bg-primary-fill text-white": state.toSend.length > 0 && !isSaving,
     "bg-subtle text-faint border border-line": state.toSend.length === 0 || isSaving,
   });
 

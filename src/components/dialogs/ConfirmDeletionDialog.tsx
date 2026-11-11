@@ -15,6 +15,6 @@ export default function ConfirmDeletionDialog({
     onSubmit={onSubmit}
     actionButtonText="削除"
     >
-      {note ? <p className="text-muted">{note}</p> : <></>}
+      {note ? <p className="text-sm text-muted">{note}</p> : <></>}
   </BaseEditDialog>
 }

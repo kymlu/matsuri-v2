@@ -177,7 +177,8 @@ export default function HelpSheet({ open, target, reader, onClose }: HelpSheetPr
                         <div key={g.group} ref={el => { groupRefs.current[g.group] = el; }} className="scroll-mt-1">
                           <ExpandableSection
                             level={1}
-                            title={<GroupTitle title={HELP_GROUPS[g.group].title} count={expanded[g.group] ? undefined : g.articles.length}/>}
+                            title={HELP_GROUPS[g.group].title}
+                            titleExtra={<Tag compact type="grey" text={`${g.articles.length}件`}/>}
                             expanded={!!expanded[g.group]}
                             onExpandedChange={(v) => setExpanded(e => ({ ...e, [g.group]: v }))}>
                             <ArticleRows articles={g.articles} onOpen={openArticle}/>
@@ -189,7 +190,8 @@ export default function HelpSheet({ open, target, reader, onClose }: HelpSheetPr
                       contents.others.length > 0 &&
                       <ExpandableSection
                         level={1}
-                        title={<GroupTitle title="ほかの役割の方向け" count={expanded.others ? undefined : contents.others.length}/>}
+                        title="ほかの役割の方向け"
+                        titleExtra={<Tag compact type="grey" text={`${contents.others.length}件`}/>}
                         expanded={!!expanded.others}
                         onExpandedChange={(v) => setExpanded(e => ({ ...e, others: v }))}>
                         <ArticleRows articles={contents.others} onOpen={openArticle} showRoles/>
@@ -201,13 +203,6 @@ export default function HelpSheet({ open, target, reader, onClose }: HelpSheetPr
       </Dialog.Popup>
     </Dialog.Portal>
   </Dialog.Root>;
-}
-
-function GroupTitle({ title, count }: { title: string, count?: number }) {
-  return <span className="flex items-baseline gap-2">
-    {title}
-    {count !== undefined && <span className="text-xs font-normal text-muted">{count}</span>}
-  </span>;
 }
 
 function ArticleRows({ articles, onOpen, showRoles }: { articles: HelpArticle[], onOpen: (id: string) => void, showRoles?: boolean }) {
@@ -294,7 +289,7 @@ function ArticleView({ article, reader, onOpen }: { article: HelpArticle, reader
         {
           article.steps.map((s, i) =>
             <li key={i} className="flex gap-2.5 leading-relaxed">
-              <span className="flex items-center justify-center flex-none mt-0.5 text-xs font-bold text-white rounded-full size-5 bg-primary">{i + 1}</span>
+              <span className="flex items-center justify-center flex-none mt-0.5 text-xs font-bold text-white rounded-full size-5 bg-primary-fill">{i + 1}</span>
               <span className="flex-1">{s}</span>
             </li>
           )
@@ -314,7 +309,7 @@ function ArticleView({ article, reader, onOpen }: { article: HelpArticle, reader
           article.stages.map((s, i) =>
             <li key={s.article} className="flex gap-2.5">
               <span className="flex flex-col items-center">
-                <span className="flex items-center justify-center flex-none text-xs font-bold text-white rounded-full size-6 bg-primary">{i + 1}</span>
+                <span className="flex items-center justify-center flex-none text-xs font-bold text-white rounded-full size-6 bg-primary-fill">{i + 1}</span>
                 {i < article.stages!.length - 1 && <span className="flex-1 my-0.5 border-l-2 border-dashed border-primary"/>}
               </span>
               <button type="button" onClick={() => onOpen(s.article)} className="flex items-start flex-1 gap-2 pb-3 text-start">

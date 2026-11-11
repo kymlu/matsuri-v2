@@ -1,7 +1,7 @@
 import jsPDF, { GState } from "jspdf";
 import { Choreo } from "../../models/choreo";
 import { Dancer } from "../../models/dancer";
-import { colorPalette } from "../consts/colors";
+import { colorPalette, getPaletteTheme, setPaletteTheme } from "../consts/colors";
 import { getDefaultFileName, getSafeFileName, isNullOrUndefined, isNullOrUndefinedOrBlank, roundToTenth, strCompare, strEquals } from "./globalHelper";
 import { getPathLineOps, stageMetersToPx } from "./editorCalculationHelper";
 import { BaseModel, Coordinates } from "../../models/base";
@@ -10,6 +10,7 @@ import { Obstacle } from "../../models/prop";
 import { PDF_METER_PX, STRIPES_PER_METRE } from "../consts/consts";
 import { sortDancers, sortObstacles, sortProps } from "../editor/commands/objectCommands";
 import { getPersonalSectionNote } from "../dataAccess/LocalStorageController";
+import { formatDancerName } from "./dancerNameHelper";
 
 const README_TEXT =
   "このZIPには本アプリ用のデータが含まれています。\n" +
@@ -87,11 +88,28 @@ export async function exportEvent(
   await downloadZip(zip, isNullOrUndefinedOrBlank(eventName) ? "隊列表" : eventName);
 }
 
+// PDFs are always drawn in light mode, whatever theme the app is showing.
 async function generateChoreoPdfBlob(
   choreo: Choreo,
   followingId: string,
   showFollowingPath: boolean = false,
   includePersonalNotes: boolean = false,
+  updateProgress: (progress: number) => void,
+): Promise<Blob> {
+  const appTheme = getPaletteTheme();
+  setPaletteTheme("light");
+  try {
+    return await drawChoreoPdfBlob(choreo, followingId, showFollowingPath, includePersonalNotes, updateProgress);
+  } finally {
+    setPaletteTheme(appTheme);
+  }
+}
+
+async function drawChoreoPdfBlob(
+  choreo: Choreo,
+  followingId: string,
+  showFollowingPath: boolean,
+  includePersonalNotes: boolean,
   updateProgress: (progress: number) => void,
 ): Promise<Blob> {
   const titleBuffer = PDF_METER_PX * 1.5;
@@ -468,7 +486,7 @@ async function generateChoreoPdfBlob(
         pdf.circle(x, y + titleBuffer, PDF_METER_PX * (hasActions && !isFollowing ? 0.27 : 0.4), "FD");
   
         pdf.setTextColor(colorPalette.getTextColor(p.color));
-        let displayName = dancer.name ?? "";
+        let displayName = formatDancerName(dancer.name ?? "");
         let textHeight = pdf.getTextDimensions(displayName, {maxWidth: PDF_METER_PX}).h;
         pdf.text(displayName, x, y - textHeight/2 + titleBuffer, {align: "center", baseline: "top", maxWidth: PDF_METER_PX});
       }

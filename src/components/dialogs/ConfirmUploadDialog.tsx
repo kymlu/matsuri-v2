@@ -25,24 +25,8 @@ export default function ConfirmUploadDialog({
       fullWidth
       title="ファイルの重複"
       footer={
-      <div className="flex flex-col w-full gap-2 mt-4 md:flex-row">
-        <Dialog.Close
-          onClick={onCancel}
-          className="w-full">
-          <Button asDiv full>
-            キャンセル
-          </Button>
-        </Dialog.Close>
-        <Dialog.Close
-          onClick={onOverwrite}
-          className="w-full">
-          <Button asDiv full primary>
-            <span className="font-semibold">
-              上書き
-            </span>
-          </Button>
-        </Dialog.Close>
-
+      // Safest choice first and solid; overwriting is outlined in red; cancel last.
+      <div className="flex flex-col w-full gap-2 mt-4 md:flex-row-reverse">
         <Dialog.Close
           onClick={onCopy}
           className="w-full">
@@ -52,20 +36,43 @@ export default function ConfirmUploadDialog({
             </span>
           </Button>
         </Dialog.Close>
+        <Dialog.Close
+          onClick={onOverwrite}
+          className="w-full">
+          <Button asDiv full primaryText>
+            <span className="font-semibold">
+              上書き
+            </span>
+          </Button>
+        </Dialog.Close>
+        <Dialog.Close
+          onClick={onCancel}
+          className="w-full">
+          <Button asDiv full>
+            <span className="font-semibold">
+              キャンセル
+            </span>
+          </Button>
+        </Dialog.Close>
       </div>
     }>
-      <p>隊列名とイベントの組み合わせがすでに存在します。どうしますか？</p>
-      <ChoreoInfo
-        name={choreoName ?? ""}
-        event={event}
-        startDate={startDate}
-        endDate={endDate}/>
-      <b>最終編集日時</b>
-      <div className="grid grid-cols-[auto,auto]">
-      <span className="text-left">現在のファイル</span>
-      <span className="text-right">{currentUpdatedDate ? getJpDate(new Date(currentUpdatedDate)) : ""}</span>
-      <span className="text-left">アップロード中のファイル</span>
-      <span className="text-right">{incomingUpdatedDate ? getJpDate(new Date(incomingUpdatedDate)) : ""}</span>
+      <div className="space-y-3">
+        <p>隊列名とイベントの組み合わせがすでに存在します。どうしますか？</p>
+        <ChoreoInfo
+          name={choreoName ?? ""}
+          event={event}
+          startDate={startDate}
+          endDate={endDate}/>
+        <div>
+          <b>最終編集日時</b>
+          {/* Labels may wrap anywhere so the dates always fit on one line. */}
+          <div className="grid grid-cols-[minmax(0,1fr),auto] gap-x-3 gap-y-1 [&>span:nth-child(odd)]:[word-break:normal]">
+            <span>現在のファイル</span>
+            <span className="text-right text-nowrap">{currentUpdatedDate ? getJpDate(new Date(currentUpdatedDate)) : ""}</span>
+            <span>アップロード中のファイル</span>
+            <span className="text-right text-nowrap">{incomingUpdatedDate ? getJpDate(new Date(incomingUpdatedDate)) : ""}</span>
+          </div>
+        </div>
       </div>
     </CustomDialog>
 }

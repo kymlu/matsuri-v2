@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { useDB } from './DBProvider';
-import { Oval } from 'react-loader-spinner';
+import { Grid } from 'react-loader-spinner';
 import { colorPalette } from '../consts/colors';
 
 export const RequireDB = ({ children }: { children: ReactNode }) => {
@@ -9,9 +9,11 @@ export const RequireDB = ({ children }: { children: ReactNode }) => {
   if (dbStatus === "LOADING") return (
     <div className='flex flex-col items-center justify-center h-[100svh] gap-2'>
       <p>データベースを確認中...</p>
-      <Oval 
+      <Grid
+        height={44}
+        width={44}
         color={colorPalette.primary}
-        secondaryColor={colorPalette.rainbow.red[2]}/>
+        ariaLabel="読み込み中"/>
     </div>
   )
   if (dbStatus === "FAILED") return (

@@ -3,6 +3,7 @@ import { DancerAction, DancerActionTiming } from "../../models/dancerAction"
 import Button from "../basic/Button";
 import { strEquals } from "../../lib/helpers/globalHelper";
 import Icon from "../basic/Icon";
+import { useScrollFade } from "../../lib/hooks/useScrollFade";
 
 type ActionSelectionToolbarProps = {
   actions: DancerAction[],
@@ -13,7 +14,9 @@ type ActionSelectionToolbarProps = {
 function ActionSelectionToolbar({
   actions, selectedTimingId, onSelectTiming
 }: ActionSelectionToolbarProps){
-  return <div className="flex w-screen gap-1 p-2 overflow-auto max-w-screen">
+  const rowRef = useRef<HTMLDivElement | null>(null);
+  useScrollFade(rowRef);
+  return <div ref={rowRef} className="flex w-screen gap-1 p-2 overflow-auto max-w-screen scroll-fade">
     {
       actions.map((action, index) => <ActionSection
         key={action.id}

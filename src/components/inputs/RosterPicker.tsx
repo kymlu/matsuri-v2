@@ -62,7 +62,7 @@ export default function RosterPicker({
               aria-pressed={isSelected}
               onClick={() => onPick(n)}
               className={classNames("px-1 py-1.5 text-sm rounded-md border break-all", {
-                "bg-primary border-primary text-white font-semibold": isSelected,
+                "bg-primary-fill border-primary-fill text-white font-semibold": isSelected,
                 "border-dashed border-line text-faint": !isSelected && n.isUsed,
                 "bg-surface border-line text-body": !isSelected && !n.isUsed,
               })}>

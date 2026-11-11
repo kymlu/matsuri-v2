@@ -1,6 +1,6 @@
 import { Dialog, Menu } from "@base-ui/react"
 import CustomDialog from "../components/basic/CustomDialog"
-import { LONG_NAME_LENGTH, SAMPLE_PARADE_ID, SAMPLE_STAGE_ID, SEARCH_NAME_LENGTH } from "../lib/consts/consts"
+import { contactMailto, LONG_NAME_LENGTH, SAMPLE_PARADE_ID, SAMPLE_STAGE_ID, SEARCH_NAME_LENGTH } from "../lib/consts/consts"
 import Button, { IconLabelButton } from "../components/basic/Button"
 import Icon from "../components/basic/Icon"
 import { readUploadedFile } from "../lib/helpers/uploadHelper"
@@ -22,7 +22,7 @@ import React from "react"
 import Divider from "../components/basic/Divider"
 import TextInput from "../components/inputs/TextInput"
 import UserNameEditDialog from "../components/dialogs/UserNameEditDialog"
-import { Oval } from "react-loader-spinner"
+import { Grid } from "react-loader-spinner"
 import { colorPalette } from "../lib/consts/colors"
 import EditChoreoInfoDialog from "../components/dialogs/EditChoreoInfoDialog"
 import SyncChoreoDialog from "../components/dialogs/SyncChoreoDialog"
@@ -30,7 +30,7 @@ import ExpandableSection from "../components/basic/ExpandableSection"
 import { useHelp } from "../components/help/HelpContext"
 import EditEventInfoDialog from "../components/dialogs/EditEventInfoDialog"
 import SiteInfoDialog from "../components/dialogs/SiteInfoDialog"
-import { ChoreoStatusTag } from "../components/common/Tag"
+import { ChoreoStatusTag, Tag } from "../components/common/Tag"
 import { changeUserName, getChoreoFile, getChoreoSummary, logoutUserFromTeam, verifyInvite } from "../lib/helpers/apiHelper"
 import LoginDialog from "../components/dialogs/LoginDialog"
 import { Team } from "../models/team"
@@ -486,7 +486,7 @@ export default function HomePage({
 
   return (
     <div className="bg-app">
-      <div className='grid py-10 px-4 h-[100svh] grid-rows-[auto,auto,auto,auto,1fr] overflow-hide w-full mx-auto'>
+      <div className='grid pt-[max(1rem,env(safe-area-inset-top))] pb-6 px-4 h-[100svh] grid-rows-[auto,auto,auto,auto,1fr] overflow-hide w-full mx-auto'>
         <div className="text-sm text-primary">
           {
             team &&
@@ -498,10 +498,10 @@ export default function HomePage({
         <div className="flex items-center justify-between pb-1">
           <h1 onClick={() => {goToAdminPage()}} className='text-2xl font-bold text-nowrap'>隊列表一覧</h1>
           <div className="flex items-center ">
-            <IconButton onClick={toggleTheme} src={theme === "dark" ? "lightMode" : "darkMode"} colour="primary" noBorder/>
+            <IconButton onClick={toggleTheme} src={theme === "dark" ? "lightMode" : "darkMode"} colour="grey" noBorder/>
             <Dialog.Root>
               <Dialog.Trigger>
-                <IconButton src="info" colour="primary" noBorder asDiv/>
+                <IconButton src="info" colour="grey" noBorder asDiv/>
               </Dialog.Trigger>
               <SiteInfoDialog buildInfo={buildInfo} goToHelpPage={() => openHelp()}/>
             </Dialog.Root>
@@ -511,7 +511,7 @@ export default function HomePage({
               onOpenChange={handleEditUserNameDialogOpen}
               disablePointerDismissal={isLoggedIn && isNullOrUndefinedOrBlank(savedDancerName)}>
               <Dialog.Trigger>
-                <IconButton src="personEdit" colour="primary" noBorder asDiv/>
+                <IconButton src="personEdit" colour="grey" noBorder asDiv/>
               </Dialog.Trigger>
               <UserNameEditDialog
                 name={savedDancerName ?? ""}
@@ -532,7 +532,7 @@ export default function HomePage({
               isLoggedIn && team?.id &&
               <CustomMenu
                 trigger={
-                  <IconButton asDiv src="verifiedUser" colour="primary" noBorder/>
+                  <IconButton asDiv src="verifiedUser" colour="grey" noBorder/>
                 }>
                 <div className="space-y-2">
                   {
@@ -621,10 +621,12 @@ export default function HomePage({
           }
           {
             isLoading &&
-            <Oval
+            <Grid
+              height={44}
+              width={44}
               wrapperClass="mt-4 justify-self-center"
               color={colorPalette.primary}
-              secondaryColor={colorPalette.rainbow.red[2]}/>
+              ariaLabel="読み込み中"/>
           }
           {
             !isLoading &&
@@ -858,7 +860,7 @@ export default function HomePage({
           onOpenChange={handleDeleteChoreoDialogOpen}>
 
           <BaseEditDialog
-            title={`${deleteChoreoVerb}確認`}
+            title={`${editingChoreo?.name ?? ""}を${deleteChoreoVerb}しますか？`}
             actionButtonText="OK"
             onSubmit={() => {
               if (editingChoreo) {
@@ -870,8 +872,7 @@ export default function HomePage({
                 });
               }
             }}>
-            <p className="max-w-full w-max">本当に<b> {editingChoreo?.name} </b>を{deleteChoreoVerb}しますか？</p>
-            <p>この操作は取り消せません。</p>
+            <p className="text-sm text-muted">この操作は取り消せません。</p>
           </BaseEditDialog>
         </Dialog.Root>
         <Dialog.Root
@@ -959,7 +960,16 @@ export default function HomePage({
             teamId={team?.id ?? ""}/>
         </Dialog.Root>
         <Dialog.Root open={showNoTeamDialog} onOpenChange={() => setShowNoTeamDialog(false)}>
-          <CustomDialog title="ようこそ！" hasX fullWidth>
+          <CustomDialog
+            title="ようこそ！"
+            hasX
+            fullWidth
+            focusDialogOnOpen
+            footer={
+              <a href={contactMailto("チームへの参加について")} className="block mt-4">
+                <IconLabelButton asDiv full primaryText icon="mail" label="メールで問い合わせる"/>
+              </a>
+            }>
             <div className="space-y-2">
               <p>チームに参加すると、隊列表の保存・公開ができます。</p>
               <p>参加をご希望の方はチームの管理者にお問い合わせください。</p>
@@ -968,7 +978,7 @@ export default function HomePage({
           </CustomDialog>
         </Dialog.Root>
         <Dialog.Root open={showVerifyInviteErrorDialog} onOpenChange={() => setShowVerifyInviteErrorDialog(false)}>
-          <BaseErrorDialog title="招待失敗" fullWidth>
+          <BaseErrorDialog title="招待失敗" fullWidth focusDialogOnOpen>
             <p>この招待リンクはご利用いただけません。管理者に新しい招待リンクをご依頼ください。</p>
           </BaseErrorDialog>
         </Dialog.Root>
@@ -1055,6 +1065,7 @@ const EventSection = memo(function EventSection({
   return <ExpandableSection
     defaultExpanded={isExpandedByDefault ?? true}
     level={2}
+    titleExtra={<Tag compact type="grey" text={`${choreos.length}件`}/>}
     title={
       <div className="py-1 text-left">
         <div>

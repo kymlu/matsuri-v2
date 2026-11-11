@@ -7,6 +7,7 @@
      so `bg-app` / `text-body` / etc. render identically to the old literals. */
   :root {
     --color-primary: #AB1010;
+    --color-primary-fill: #AB1010; /* solid red under white text */
     --color-app: #f9fafb;     /* gray-50  — page / body background */
     --color-surface: #ffffff; /* white    — cards, dialogs, inputs, menus */
     --color-subtle: #e5e7eb;  /* gray-200 — muted fills, dividers, disabled */
@@ -19,6 +20,7 @@
 
   .dark {
     --color-primary: #D9534F;
+    --color-primary-fill: #C8322E; /* darker than --color-primary so white text passes 4.5:1 */
     --color-app: #030712;     /* gray-950 */
     --color-surface: #1f2937; /* gray-800 */
     --color-subtle: #374151;  /* gray-700 */
@@ -39,5 +41,22 @@
 
   body {
     @apply bg-app text-body;
+  }
+}
+
+/* Fade the edge of a sideways-scrolling row while there is more to scroll to.
+   The data attributes are set by useScrollFade (lib/hooks/useScrollFade.ts). */
+@layer utilities {
+  .scroll-fade[data-fade-right]:not([data-fade-left]) {
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 24px), transparent);
+  }
+  .scroll-fade[data-fade-left]:not([data-fade-right]) {
+    -webkit-mask-image: linear-gradient(to left, #000 calc(100% - 24px), transparent);
+    mask-image: linear-gradient(to left, #000 calc(100% - 24px), transparent);
+  }
+  .scroll-fade[data-fade-left][data-fade-right] {
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 24px, #000 calc(100% - 24px), transparent);
+    mask-image: linear-gradient(to right, transparent, #000 24px, #000 calc(100% - 24px), transparent);
   }
 }

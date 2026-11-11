@@ -86,7 +86,7 @@ function Header({
         {
           (goToEdit || goToView) &&
           <IconButton
-            colour="primary"
+            colour="black"
             src={goToEdit ? "edit" : "visibility"}
             noBorder
             onClick={() => {

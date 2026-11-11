@@ -8,13 +8,14 @@ Behaviour that used to be in the in-app help but doesn't help a reader finish a 
 - **List:** grouped by year, then event. Only the newest year starts open, unless a search is active.
 - **新規作成 from an event's 追加:** the event name and dates are filled in.
 - **新規作成 step 3:** up to 150 dancers, and up to 100 of one prop. When the stage is full, dancers are stacked with a small offset.
-- **Upload, single chart:** if the name, event and dates match an existing chart, the choice is キャンセル, 上書き or コピーを作成.
+- **Upload, single chart:** if the name, event and dates match an existing chart, the choice is コピーを作成 (the main button), 上書き or キャンセル.
 - **Upload, zip:** everything is imported as new charts with no duplicate check, and one failure doesn't stop the rest.
 - **Passwords:** a correct password unlocks a chart on this device until it's next published. Logged-in team members never need it. The password also gates 複製, 隊列情報変更, 共有用エクスポート, PDF and 公開履歴 for users who aren't logged in.
 - **公開履歴:** past versions open read-only; they can't be edited or exported as PDF.
 - **削除:** only for charts that exist only on this device. **変更を破棄:** only when there are unpublished local changes. Neither can be undone.
 - **Event 情報変更:** renames the event and changes its dates for every chart in it.
-- **ⓘ:** shows build info. Double-tapping the editor/viewer title downloads logs for troubleshooting.
+- **ⓘ:** links to the guide, has お問い合わせ (the ケイティー button opens an email to tairetsu.app@gmail.com, subject お問い合わせ) and shows build info. Double-tapping the editor/viewer title downloads logs for troubleshooting.
+- **Welcome (no team link):** explains that joining a team enables saving and publishing, with a メールで問い合わせる button (email to tairetsu.app@gmail.com, subject チームへの参加について).
 
 ## View mode
 
@@ -30,6 +31,7 @@ Behaviour that used to be in the in-app help but doesn't help a reader finish a 
   - lists event, stage, sections, notes, dancers, actions, props and obstacles;
   - per-dancer view lists position, count and path changes by section, and dancers with no changes can't be picked.
 - **PDF:** not available while viewing a past version.
+- **Dancer names on the stage:** up to 3 characters per line and 2 lines, split evenly. Longer names end in … (the first 5 characters). Names with spaces wrap at the space. The full name is unchanged and shows in the rename dialog and dancer list. PDFs use the same split.
 
 ## Edit mode
 
@@ -82,7 +84,8 @@ Behaviour that used to be in the in-app help but doesn't help a reader finish a 
   - 全ダンサー分をまとめて出力 makes one PDF per dancer in a zip, named with the dancer first (off by default);
   - the tracked dancer defaults to the selected one;
   - paths follow the current path toggle;
-  - 自分用メモ is included by default.
+  - 自分用メモ is included by default;
+  - PDFs are always in light mode, even when exported from dark mode.
 
 ## Team and login
 

@@ -1,5 +1,5 @@
 import React from "react";
-import { InlineButton as B, InlineIcon as I } from "../../components/help/HelpInline";
+import { InlineButton as B, InlineIcon as I, InlineStrip as S } from "../../components/help/HelpInline";
 import StageDiagram from "../../components/help/StageDiagram";
 import { Tag } from "../../components/common/Tag";
 
@@ -163,7 +163,7 @@ export const HELP_ARTICLES: HelpArticle[] = [
     summary: "ダンサーを選んでいないとき、下のパネルのカウントをタップすると、そのカウントのダンサーに輪が付きます。",
     steps: [
       "ダンサーを選んでいたら、選択を外します。",
-      <>下のパネルのカウント（<B primary>1</B><B>3</B>など）をタップします。</>,
+      <>下のパネルのカウント（<S items={["1", "1と", "2"]} selected={0}/>など）をタップします。</>,
     ],
     related: ["term-counts"],
     keywords: ["カウント", "振り", "アクション", "誰", "タイミング"],

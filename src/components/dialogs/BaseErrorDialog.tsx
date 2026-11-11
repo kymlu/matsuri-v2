@@ -1,5 +1,5 @@
 import Button from "../basic/Button";
-import CustomDialog from "../basic/CustomDialog";
+import CustomDialog, { CustomDialogProps } from "../basic/CustomDialog";
 import { Dialog } from "@base-ui/react";
 
 type BaseErrorDialogProps = {
@@ -8,18 +8,20 @@ type BaseErrorDialogProps = {
   children: React.ReactNode,
   onClose?: () => void,
   fullWidth?: boolean
+  focusDialogOnOpen?: CustomDialogProps["focusDialogOnOpen"],
 }
 
 export default function BaseErrorDialog({
-  title, actionButtonText, children, onClose, fullWidth
+  title, actionButtonText, children, onClose, fullWidth, focusDialogOnOpen
 }: BaseErrorDialogProps) {
   return <CustomDialog
     hasX
     onClose={onClose}
     fullWidth={fullWidth}
+    focusDialogOnOpen={focusDialogOnOpen}
     title={title}
     footer={
-      <div className="flex w-full gap-2 mt-6">
+      <div className="grid w-full grid-flow-col gap-2 mt-4 auto-cols-fr">
         <Dialog.Close onClick={onClose} className="w-full">
           <Button
             asDiv

@@ -14,7 +14,7 @@ import RosterPage from './pages/RosterPage';
 import { RosterKind } from './models/roster';
 import { HelpProvider } from './components/help/HelpContext';
 import { isNullOrUndefinedOrBlank } from './lib/helpers/globalHelper';
-import { Oval } from 'react-loader-spinner';
+import { Grid } from 'react-loader-spinner';
 import { colorPalette } from './lib/consts/colors';
 import { useSearchParams } from 'react-router-dom';
 
@@ -130,10 +130,12 @@ function App() {
       {
         isProcessing &&
         <div className='w-full h-svh'>
-          <Oval
-            wrapperClass="mt-4 justify-self-center"
-            color={colorPalette.primary}
-            secondaryColor={colorPalette.rainbow.red[2]}/>
+          <Grid
+              height={44}
+              width={44}
+              wrapperClass="mt-4 justify-self-center"
+              color={colorPalette.primary}
+              ariaLabel="読み込み中"/>
         </div>
       }
       {!isProcessing && mode === "home" && (

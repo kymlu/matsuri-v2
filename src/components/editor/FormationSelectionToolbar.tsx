@@ -1,3 +1,4 @@
+import { useScrollFade } from "../../lib/hooks/useScrollFade";
 import { isNullOrUndefinedOrBlank, strEquals } from "../../lib/helpers/globalHelper";
 import { ChoreoSection } from "../../models/choreoSection";
 import Button from "../basic/Button";
@@ -32,6 +33,7 @@ function FormationSelectionToolbar({
   const [isFirstSectionVisible, setIsFirstSectionVisible] = useState<boolean>(true);
 
   const stripRef = useRef<HTMLDivElement | null>(null);
+  useScrollFade(stripRef);
 
   const sectionRefs = useRef<Map<string, HTMLButtonElement | null>>(new Map());
   const dialogSectionRefs = useRef<Map<string, HTMLButtonElement | null>>(new Map());
@@ -150,7 +152,7 @@ function FormationSelectionToolbar({
         </Drawer.Viewport>
       </Drawer.Portal>
     </Drawer.Root>
-    <div ref={stripRef} className="flex gap-1 overflow-auto">
+    <div ref={stripRef} className="flex gap-1 overflow-auto scroll-fade">
       <DndContext
         sensors={sensors}
         modifiers={[restrictToHorizontalAxis, restrictToParentElement]}

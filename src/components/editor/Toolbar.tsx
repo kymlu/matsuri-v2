@@ -1,4 +1,5 @@
-import { memo, useEffect, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
+import { useScrollFade } from "../../lib/hooks/useScrollFade";
 import IconButton from "../basic/IconButton";
 import { VerticalDivider } from "../basic/Divider";
 import { Distribution, HorizontalAlignment, Rearrangement, VerticalAlignment } from "../../models/alignment";
@@ -187,11 +188,14 @@ function Toolbar({
     }
    }, [areSelectionActionsActivated]);
 
-  const className = classNames("z-10 flex items-start w-screen gap-2 px-4 pt-2 pb-10 h-28 overflow-y-hidden bg-surface border-t-2 border-line", {
+  const className = classNames("z-10 flex items-start w-screen gap-3 px-4 pt-2 pb-10 h-28 overflow-y-hidden bg-surface border-t-2 border-line scroll-fade", {
     "pointer-events-none opacity-40": !isEnabled
   });
 
-  return <div className={className}>
+  const rowRef = useRef<HTMLDivElement | null>(null);
+  useScrollFade(rowRef);
+
+  return <div ref={rowRef} className={className}>
     {
       !isSubmenuOpen &&
       <>
