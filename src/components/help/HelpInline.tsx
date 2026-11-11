@@ -20,6 +20,20 @@ export function InlineButton({ children, primary }: { children: ReactNode, prima
   </span>;
 }
 
+// A small copy of the viewer's joined count strip. `selected` is the index shown in red.
+export function InlineStrip({ items, selected }: { items: string[], selected?: number }) {
+  return <span className="inline-flex align-middle mx-0.5 overflow-hidden border rounded-md border-line bg-line gap-px">
+    {items.map((item, i) =>
+      <span key={i} className={classNames(
+        "px-1.5 text-sm font-semibold leading-6 whitespace-nowrap",
+        i === selected ? "bg-primary-fill text-white" : "bg-surface text-body",
+      )}>
+        {item}
+      </span>
+    )}
+  </span>;
+}
+
 // 若葉マーク, the same shape as public/img/beginner.svg, coloured by the theme.
 export function BeginnerMark({ className = "size-5" }: { className?: string }) {
   return <svg viewBox="0 0 512 512" className={classNames("fill-primary flex-none", className)} aria-hidden>

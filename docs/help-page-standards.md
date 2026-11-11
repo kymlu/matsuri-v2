@@ -112,16 +112,16 @@ Help has no 詳しく block. Conditions, limits and edge cases that a reader doe
 
 Help is built from the app's own parts, so it looks like the app and follows its theme.
 
-- **Tokens only:** `primary`, `app`, `surface`, `subtle`, `line`, `muted`, `faint`. No new colours. Red is an accent, never a large fill. Colour beyond that comes only from dancers (the `rainbow` palette). Dark mode works because everything uses tokens.
+- **Tokens only:** `primary`, `primary-fill`, `app`, `surface`, `subtle`, `line`, `muted`, `faint`. No new colours. Use `primary-fill` for red behind white text (it's darker in dark mode so the text stays readable), `primary` for red text, lines and outlines. Red is an accent, never a large fill. Colour beyond that comes only from dancers (the `rainbow` palette). Dark mode works because everything uses tokens.
 - **Icons:** Material Symbols Rounded, through `Icon`.
 - **Shapes:** `rounded-md` everywhere. No pills.
 - **Components:**
-  - contents groups use `ExpandableSection` level 1 (the grey bars, like the years on home);
+  - contents groups use `ExpandableSection` level 1 (the thin grey bars with a small red label, like the years on home), with the article count as a grey `Tag` in `titleExtra`;
   - role tags use `Tag`;
   - links and actions use `IconLabelButton`.
 - **Step numbers** are red filled circles with white numbers, like the position markers on the stage edge.
 - **Answer line:** bold body text with a 3px `primary` bar on the left, like the stage's centre line. No tinted box.
-- **Inline controls:** when a step names a button, render the real control small (`Icon`, `Tag`, a section-bar button) instead of describing it. It stays correct when the UI changes.
+- **Inline controls:** when a step names a button, render the real control small (`Icon`, `Tag`, a section-bar button, the count strip `InlineStrip`) instead of describing it. It stays correct when the UI changes.
 - **Diagrams, not screenshots:** small SVG stages in the app's language:
   - dashed grid, dashed red centre line, red ▼ at the front;
   - coloured dancer circles with names, the reader's own dancer ringed in red;
