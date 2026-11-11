@@ -375,13 +375,24 @@ function MainStage({
   }, [stageGeometry, selectedIds.dancers, selectedObjects.dancers, size.width, size.height, isShowingVerticalRuler, centerXPx, bottomMarginM, pixelsPerMeter, currentSection.formation.dancerPositions, setStagePosition]);
 
   // Declared after the selection-following effect so its pan wins when both run together.
+  // The bottom panel grows once a dancer is selected, so the pan is redone while it settles.
+  const focusUntil = useRef(0);
   useEffect(() => {
-    if (!focusSelectedDancerRequest || !stageGeometry || selectedObjects.dancers.length !== 1) return;
+    if (focusSelectedDancerRequest) focusUntil.current = Date.now() + 1500;
+  }, [focusSelectedDancerRequest]);
+  useEffect(() => {
+    if (Date.now() > focusUntil.current || !stageGeometry || selectedObjects.dancers.length !== 1) return;
     const dancer = selectedObjects.dancers[0];
     const dancerPx = stageMetersToPx({x: dancer.x, y: dancer.y}, stageGeometry, pixelsPerMeter);
+    // Centre in the part of the stage the bottom panel doesn't cover, measured from the page.
+    const drawerTop = document.querySelector("[data-bottom-drawer]")?.getBoundingClientRect().top;
+    const containerTop = containerRef.current?.getBoundingClientRect().top;
+    const visibleHeight = drawerTop !== undefined && containerTop !== undefined
+      ? Math.max(0, Math.min(size.height, drawerTop - containerTop))
+      : size.height - bottomMarginM * pixelsPerMeter;
     const newPosition = {
       x: (size.width - (isShowingVerticalRuler ? 32 : 0)) / 2 - dancerPx.x,
-      y: (size.height - bottomMarginM * pixelsPerMeter) / 2 - dancerPx.y,
+      y: visibleHeight / 2 - dancerPx.y,
     };
     setIsManualMovement(true); // keeps the reset-camera button, so the usual view is one tap away
     setRulerPos(newPosition);
@@ -392,9 +403,9 @@ function MainStage({
       easing: Konva.Easings.EaseInOut,
       onFinish: () => setStagePosition(newPosition),
     });
-  // Only on a new request: the selection and camera values are read as they are at that moment.
+  // Runs on a new request, and again if the visible area changes while it settles.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [focusSelectedDancerRequest]);
+  }, [focusSelectedDancerRequest, bottomMarginM, size.height]);
 
   const handleWheel = useCallback((e: any) => {
     e.evt.preventDefault();

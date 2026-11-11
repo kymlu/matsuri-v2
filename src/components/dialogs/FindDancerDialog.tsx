@@ -6,8 +6,8 @@ import CustomDialog from "../basic/CustomDialog";
 import Button from "../basic/Button";
 import TextInput from "../inputs/TextInput";
 import { Dancer } from "../../models/dancer";
-import { buildFindDancerList } from "../../lib/helpers/myDancerHelper";
-import { isNullOrUndefinedOrBlank, strEquals } from "../../lib/helpers/globalHelper";
+import { buildFindDancerList, isSameDancerName } from "../../lib/helpers/myDancerHelper";
+import { isNullOrUndefinedOrBlank } from "../../lib/helpers/globalHelper";
 
 type FindDancerDialogProps = {
   dancers: Record<string, Dancer>,
@@ -37,7 +37,7 @@ export default function FindDancerDialog({ dancers, shownId, myDancerId, myDance
   );
 
   // Saving stores the name, so a dancer whose name is already "me" has nothing to save.
-  const isAlreadyMe = picked !== undefined && strEquals(picked.name.trim(), myDancerName?.trim());
+  const isAlreadyMe = picked !== undefined && isSameDancerName(picked.name, myDancerName);
   const checkboxLabel = !picked
     ? "自分として登録"
     : isNullOrUndefinedOrBlank(myDancerName?.trim())

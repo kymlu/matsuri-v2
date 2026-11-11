@@ -1,4 +1,4 @@
-import { buildFindDancerList, findMyDancerId, normalizeForSearch } from "./myDancerHelper";
+import { buildFindDancerList, findMyDancerId, isSameDancerName, normalizeForSearch } from "./myDancerHelper";
 
 const dancers = {
   a: { id: "a", name: "さくら" },
@@ -6,7 +6,18 @@ const dancers = {
   c: { id: "c", name: "花子" },
 };
 
+describe("isSameDancerName", () => {
+  it("ignores spaces at either end and Latin case", () => {
+    expect(isSameDancerName(" Aya ", "aya")).toBe(true);
+    expect(isSameDancerName("ＡＹＡ", "ａｙａ")).toBe(true);
+    expect(isSameDancerName("さくら", "サクラ")).toBe(false);
+    expect(isSameDancerName("", "")).toBe(false);
+  });
+});
+
 describe("findMyDancerId", () => {
+  it("matches Latin names in any case", () =>
+    expect(findMyDancerId({ x: { id: "x", name: "Mika" } }, "mika")).toBe("x"));
   it("finds a single match", () => expect(findMyDancerId(dancers, "さくら")).toBe("a"));
   it("ignores surrounding spaces", () => expect(findMyDancerId(dancers, " さくら ")).toBe("a"));
   it("skips duplicate names", () => expect(findMyDancerId(dancers, "花子")).toBeUndefined());

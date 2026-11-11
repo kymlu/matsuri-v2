@@ -1,10 +1,15 @@
 import { Dancer } from "../../models/dancer";
-import { isNullOrUndefinedOrBlank, strEquals } from "./globalHelper";
+import { isNullOrUndefinedOrBlank } from "./globalHelper";
+
+// Whether two dancer names are the same name: spaces at either end ignored, and Latin letters in any case.
+export function isSameDancerName(a: string | null | undefined, b: string | null | undefined): boolean {
+  if (isNullOrUndefinedOrBlank(a?.trim()) || isNullOrUndefinedOrBlank(b?.trim())) return false;
+  return a!.trim().toLowerCase() === b!.trim().toLowerCase();
+}
 
 // The id of the one dancer with exactly this name. Two or more matches are left for the user to pick.
 export function findMyDancerId(dancers: Record<string, Dancer>, name: string | null | undefined): string | undefined {
-  if (isNullOrUndefinedOrBlank(name?.trim())) return undefined;
-  const matches = Object.values(dancers).filter(d => strEquals(d.name.trim(), name!.trim()));
+  const matches = Object.values(dancers).filter(d => isSameDancerName(d.name, name));
   return matches.length === 1 ? matches[0].id : undefined;
 }
 
@@ -26,11 +31,13 @@ export function buildFindDancerList(
 ): FindDancerItem[] {
   const all = Object.values(dancers);
   const counts: Record<string, number> = {};
-  all.forEach(d => { counts[d.name.trim()] = (counts[d.name.trim()] ?? 0) + 1; });
+  // Same key as isSameDancerName, so names it treats as one are numbered too.
+  const key = (d: Dancer) => d.name.trim().toLowerCase();
+  all.forEach(d => { counts[key(d)] = (counts[key(d)] ?? 0) + 1; });
   const seen: Record<string, number> = {};
   const items = all.map(d => {
     const name = d.name.trim();
-    const label = counts[name] > 1 ? `${name}(${seen[name] = (seen[name] ?? 0) + 1})` : name;
+    const label = counts[key(d)] > 1 ? `${name}(${seen[key(d)] = (seen[key(d)] ?? 0) + 1})` : name;
     return { id: d.id, label, isShown: d.id === shownId, isMe: d.id === myDancerId };
   });
   const query = normalizeForSearch(searchTerm);
