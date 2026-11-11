@@ -1,5 +1,5 @@
 import { Dialog } from "@base-ui/react";
-import React from "react";
+import React, { useRef } from "react";
 import Icon from "./Icon";
 
 export type CustomDialogProps = {
@@ -12,15 +12,19 @@ export type CustomDialogProps = {
   fullWidth?: boolean
   onClose?: () => void,
   initialFocus?: Dialog.Popup.Props["initialFocus"], // where focus goes on open; Base UI's default is the first field
+  // For dialogs that open by themselves (e.g. on page load): focus the dialog panel rather than ✕,
+  // so the browser doesn't draw its keyboard-focus box around ✕. Tab still moves into the dialog.
+  focusDialogOnOpen?: boolean,
 }
 
 export default function CustomDialog({
-  children, title, header, footer, hasX, full, fullWidth, onClose, initialFocus
+  children, title, header, footer, hasX, full, fullWidth, onClose, initialFocus, focusDialogOnOpen
 }: CustomDialogProps) {
+  const popupRef = useRef<HTMLDivElement | null>(null);
   return (
     <Dialog.Portal>
       <Dialog.Backdrop className="fixed inset-0 bg-black transition-all duration-150 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 opacity-50 z-30" />
-      <Dialog.Popup initialFocus={initialFocus} className={"fixed max-h-[95svh] overflow-hidden top-1/2 z-30 left-1/2 min-w-64 max-w-[calc(100vw-3rem)] -translate-x-1/2 -translate-y-1/2 rounded-lg bg-surface p-6 text-body [word-break:auto-phrase] outline outline-1 outline-subtle transition-all duration-150 data-[ending-style]:scale-90 data-[ending-style]:opacity-0 data-[starting-style]:scale-90 data-[starting-style]:opacity-0" 
+      <Dialog.Popup ref={popupRef} initialFocus={focusDialogOnOpen ? popupRef : initialFocus} className={"fixed max-h-[95svh] overflow-hidden top-1/2 z-30 left-1/2 min-w-64 max-w-[calc(100vw-3rem)] -translate-x-1/2 -translate-y-1/2 rounded-lg bg-surface p-6 text-body [word-break:auto-phrase] outline outline-1 outline-subtle transition-all duration-150 data-[ending-style]:scale-90 data-[ending-style]:opacity-0 data-[starting-style]:scale-90 data-[starting-style]:opacity-0" 
         + (full ? " w-[95svw] h-[95svh]" : fullWidth ? " w-[95svw] md:w-[50svw]" : "")
       }>
         <div className="flex flex-col h-full min-h-0 max-h-[calc(95svh-3rem)]">

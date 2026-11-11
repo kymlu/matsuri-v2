@@ -964,6 +964,7 @@ export default function HomePage({
             title="ようこそ！"
             hasX
             fullWidth
+            focusDialogOnOpen
             footer={
               <a href={contactMailto("チームへの参加について")} className="block mt-4">
                 <IconLabelButton asDiv full primaryText icon="mail" label="メールで問い合わせる"/>
@@ -977,7 +978,7 @@ export default function HomePage({
           </CustomDialog>
         </Dialog.Root>
         <Dialog.Root open={showVerifyInviteErrorDialog} onOpenChange={() => setShowVerifyInviteErrorDialog(false)}>
-          <BaseErrorDialog title="招待失敗" fullWidth>
+          <BaseErrorDialog title="招待失敗" fullWidth focusDialogOnOpen>
             <p>この招待リンクはご利用いただけません。管理者に新しい招待リンクをご依頼ください。</p>
           </BaseErrorDialog>
         </Dialog.Root>
