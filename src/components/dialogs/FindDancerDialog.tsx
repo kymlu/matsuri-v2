@@ -106,10 +106,11 @@ export default function FindDancerDialog({ dancers, shownId, myDancerId, myDance
                     aria-pressed={item.id === pickedId}
                     onClick={() => pick(item.id)}
                     className={classNames(
-                      "flex items-center w-full gap-2 px-3 text-left rounded-md min-h-11",
-                      item.id === pickedId ? "outline outline-2 -outline-offset-2 outline-primary" : "hover:bg-line/40"
+                      // Same as the current row in まとめ.
+                      "flex items-center w-full gap-2 px-3 text-left rounded-md min-h-11 border",
+                      item.id === pickedId ? "border-primary bg-primary/5" : "border-line hover:bg-line/40"
                     )}>
-                    <span className={classNames("break-all", { "font-bold": item.id === pickedId })}>{item.label}</span>
+                    <span className={classNames("break-all", item.id === pickedId ? "text-primary font-bold" : "font-semibold")}>{item.label}</span>
                     {item.isMe && <span className="px-1 text-xs border rounded text-primary border-primary shrink-0">自分</span>}
                     {item.isShown && <span className="ml-auto text-xs text-muted shrink-0">表示中</span>}
                   </button>
