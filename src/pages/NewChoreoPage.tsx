@@ -417,7 +417,7 @@ export function NewChoreoPage({
         {
           isConfirmingLeave &&
           <BaseEditDialog title="戻りますか？" actionButtonText="戻る" onSubmit={goToHomePage}>
-            <p className="text-muted">入力した内容はすべて失われます。</p>
+            <p className="text-sm text-muted">入力した内容はすべて失われます。</p>
           </BaseEditDialog>
         }
       </Dialog.Root>

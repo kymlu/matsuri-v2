@@ -29,7 +29,7 @@ export default function SiteInfoDialog({
       <p>お困りの際は、内容に応じて以下をご確認・ご連絡ください。</p>
       <div>
         <InfoRow icon="help" label="使い方について">
-          <Button compact primary onClick={() => goToHelpPage()}>ガイドを見る</Button>
+          <Button compact primaryText onClick={() => goToHelpPage()}>ガイドを見る</Button>
         </InfoRow>
         <Divider compact/>
         <InfoRow icon="warning" label="アプリの不具合">

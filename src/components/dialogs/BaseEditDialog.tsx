@@ -34,7 +34,7 @@ export default function BaseEditDialog({
     title={title}
     onClose={onClose}
     footer={
-      <div className="flex w-full gap-1 mt-4">
+      <div className="grid w-full grid-flow-col gap-2 mt-4 auto-cols-fr">
         {
           showCloseButton && backButton &&
           <Button full onClick={backButton.onClick}>

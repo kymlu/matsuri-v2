@@ -19,7 +19,7 @@ export default function BaseErrorDialog({
     fullWidth={fullWidth}
     title={title}
     footer={
-      <div className="flex w-full gap-2 mt-6">
+      <div className="grid w-full grid-flow-col gap-2 mt-4 auto-cols-fr">
         <Dialog.Close onClick={onClose} className="w-full">
           <Button
             asDiv

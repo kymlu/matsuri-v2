@@ -860,7 +860,7 @@ export default function HomePage({
           onOpenChange={handleDeleteChoreoDialogOpen}>
 
           <BaseEditDialog
-            title={`${deleteChoreoVerb}確認`}
+            title={`${editingChoreo?.name}を${deleteChoreoVerb}しますか？`}
             actionButtonText="OK"
             onSubmit={() => {
               if (editingChoreo) {
@@ -872,8 +872,7 @@ export default function HomePage({
                 });
               }
             }}>
-            <p className="max-w-full w-max">本当に<b> {editingChoreo?.name} </b>を{deleteChoreoVerb}しますか？</p>
-            <p>この操作は取り消せません。</p>
+            <p className="text-sm text-muted">この操作は取り消せません。</p>
           </BaseEditDialog>
         </Dialog.Root>
         <Dialog.Root

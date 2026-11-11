@@ -479,7 +479,7 @@ export default function RosterPage({ goToHomePage, team, tab, onTabChange }: Ros
             title={`${selectedIds.size}件の大きさと色を消しますか？`}
             actionButtonText="消す"
             onSubmit={clearLook}>
-            <p className="text-muted">元に戻せません。隊列表の道具は変わりません。</p>
+            <p className="text-sm text-muted">元に戻せません。隊列表の道具は変わりません。</p>
           </BaseEditDialog>
         }
       </Dialog.Root>
