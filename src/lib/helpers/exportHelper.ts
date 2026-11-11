@@ -1,7 +1,7 @@
 import jsPDF, { GState } from "jspdf";
 import { Choreo } from "../../models/choreo";
 import { Dancer } from "../../models/dancer";
-import { colorPalette } from "../consts/colors";
+import { colorPalette, getPaletteTheme, setPaletteTheme } from "../consts/colors";
 import { getDefaultFileName, getSafeFileName, isNullOrUndefined, isNullOrUndefinedOrBlank, roundToTenth, strCompare, strEquals } from "./globalHelper";
 import { getPathLineOps, stageMetersToPx } from "./editorCalculationHelper";
 import { BaseModel, Coordinates } from "../../models/base";
@@ -88,11 +88,28 @@ export async function exportEvent(
   await downloadZip(zip, isNullOrUndefinedOrBlank(eventName) ? "隊列表" : eventName);
 }
 
+// PDFs are always drawn in light mode, whatever theme the app is showing.
 async function generateChoreoPdfBlob(
   choreo: Choreo,
   followingId: string,
   showFollowingPath: boolean = false,
   includePersonalNotes: boolean = false,
+  updateProgress: (progress: number) => void,
+): Promise<Blob> {
+  const appTheme = getPaletteTheme();
+  setPaletteTheme("light");
+  try {
+    return await drawChoreoPdfBlob(choreo, followingId, showFollowingPath, includePersonalNotes, updateProgress);
+  } finally {
+    setPaletteTheme(appTheme);
+  }
+}
+
+async function drawChoreoPdfBlob(
+  choreo: Choreo,
+  followingId: string,
+  showFollowingPath: boolean,
+  includePersonalNotes: boolean,
   updateProgress: (progress: number) => void,
 ): Promise<Blob> {
   const titleBuffer = PDF_METER_PX * 1.5;

@@ -10,6 +10,10 @@ export function setPaletteTheme(theme: PaletteTheme) {
   paletteTheme = theme;
 }
 
+export function getPaletteTheme(): PaletteTheme {
+  return paletteTheme;
+}
+
 const STRUCTURAL = {
   //            light        dark
   white:     ["#FFFFFF",   "#1F2937"], // dance-floor / surface, and haloes drawn in it
