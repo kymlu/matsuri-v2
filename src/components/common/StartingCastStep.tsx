@@ -86,7 +86,7 @@ export default function StartingCastStep({
             aria-selected={tab === kind}
             onClick={() => setTab(kind)}
             className={classNames("flex-1 py-1 text-sm font-semibold", {
-              "bg-primary text-white": tab === kind,
+              "bg-primary-fill text-white": tab === kind,
               "bg-surface text-primary": tab !== kind,
             })}>
             {label}

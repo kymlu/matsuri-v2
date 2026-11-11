@@ -8,6 +8,8 @@ module.exports = {
         // Semantic tokens — resolved from CSS variables so one class name renders
         // correctly in both themes. Values are defined in src/App.css.
         primary: 'var(--color-primary, #AB1010)',
+        // Solid fill behind white text (buttons, selected chips, filled tags). Darker in dark mode for contrast.
+        'primary-fill': 'var(--color-primary-fill, #AB1010)',
         // backgrounds, deepest → most raised
         app: 'var(--color-app, #f9fafb)',        // page / body background
         surface: 'var(--color-surface, #ffffff)', // cards, dialogs, inputs, menus, toolbars

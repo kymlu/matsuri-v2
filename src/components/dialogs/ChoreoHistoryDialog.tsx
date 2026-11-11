@@ -7,7 +7,7 @@ import CustomDialog from "../basic/CustomDialog";
 import { Tag } from "../common/Tag";
 import Divider from "../basic/Divider";
 import Icon from "../basic/Icon";
-import { Oval } from "react-loader-spinner";
+import { ThreeDots } from "react-loader-spinner";
 import { colorPalette } from "../../lib/consts/colors";
 
 type ChoreoHistoryDialogProps = {
@@ -83,7 +83,7 @@ export function ChoreoHistoryDialog({
             {
               i > 0 && (
                 loadingVersion === h.version ?
-                <Oval height={20} width={20} strokeWidth={4} color={colorPalette.primary} secondaryColor={colorPalette.rainbow.red[2]} ariaLabel="読み込み中"/> :
+                <ThreeDots height={20} width={32} color={colorPalette.primary} ariaLabel="読み込み中"/> :
                 <Icon src="visibility" colour="grey" size="sm"/>
               )
             }

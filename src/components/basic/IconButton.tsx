@@ -30,10 +30,13 @@ export default function IconButton ({
   const buttonClasses = classNames("relative flex justify-center items-center rounded-full", {
     "border-0": noBorder,
     "border-primary": noBorder !== true && colour === "primary",
-    "border-black dark:border-gray-300": noBorder !== true && (colour === undefined || colour === "black"),
+    "border-line": noBorder !== true && (colour === undefined || colour === "black"),
     "border-line-strong": noBorder !== true && colour === "grey",
     "border-white": noBorder !== true && colour === "white",
-    "border-2 bg-surface p-1": noBorder !== true,
+    "bg-surface p-1": noBorder !== true,
+    // Primary (red) buttons keep the heavier ring so they still stand out; the rest use a light hairline.
+    "border-2": noBorder !== true && (colour === "primary" || colour === "white"),
+    "border": noBorder !== true && colour !== "primary" && colour !== "white",
     "opacity-30": disabled,
     "min-w-16 min-h-16 size-16 max-w-16 max-h-16": noBorder !== true && size === "lg",
     "min-w-12 min-h-12 size-12 max-w-12 max-h-12": noBorder !== true && (size === undefined || size === "md"),
@@ -61,7 +64,7 @@ export default function IconButton ({
 
   const imgClasses = classNames("self-center justify-self-center flex-1", {
     "min-w-12 min-h-12 size-12 max-w-12 max-h-12": size === "lg",
-    "min-w-9 min-h-9 size-9x max-w-9 max-h-9": (size === undefined || size === "md"),
+    "min-w-9 min-h-9 size-9 max-w-9 max-h-9": (size === undefined || size === "md"),
     "min-w-6 min-h-6 size-6 max-w-6 max-h-6": size === "sm",
   });
 
@@ -75,9 +78,10 @@ export default function IconButton ({
 
   const labelWrapperClasses = classNames("flex flex-col items-center h-8", {
     "opacity-30": disabled,
-    "w-16": size === "lg",
-    "w-12": size === undefined || size === "md",
-    "w-8": size === "sm",
+    // Minimum (not fixed) width so 4-character labels can grow instead of spilling into the next button.
+    "min-w-16": size === "lg",
+    "min-w-12": size === undefined || size === "md",
+    "min-w-8": size === "sm",
   });
 
   const labelLineClasses = classNames("flex justify-center w-full text-sm leading-4 font-semibold text-nowrap");

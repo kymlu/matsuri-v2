@@ -17,7 +17,7 @@ export default function ItemButton ({
   const classes = className("border-primary border rounded-md w-fit", {
     "bg-subtle": isDisabled,
     "w-32 max-w-32 min-w-32": fixed,
-    "bg-primary text-white border-primary": filled,
+    "bg-primary-fill text-white border-primary-fill": filled,
     "lg:hover:bg-subtle": filled !== true,
     "lg:hover:opacity-70": filled,
     "p-1": compact,

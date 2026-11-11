@@ -66,7 +66,7 @@ export default function LongTextInput({
       "pr-2": !clearable,
       "text-center": centered,
       "bg-subtle": disabled,
-      "border-primary bg-primary-lighter placeholder:text-primary-darker": (required && isNullOrUndefinedOrBlank(value)) || hasError,
+      "border-primary bg-primary/20 placeholder:text-primary": (required && isNullOrUndefinedOrBlank(value)) || hasError,
     },);
 
   const wrapperClasses = classNames(

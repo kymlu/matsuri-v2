@@ -51,7 +51,7 @@ export default function DateInput({
       "bg-subtle": disabled,
       "w-full": !compact,
       "min-w-32": compact,
-      "border-primary bg-primary/20 text-primary-darker": (required && isNullOrUndefinedOrBlank(value)) || hasError,
+      "border-primary bg-primary/20 text-primary": (required && isNullOrUndefinedOrBlank(value)) || hasError,
       "bg-surface": !(required && isNullOrUndefinedOrBlank(value)) && !hasError && !disabled,
     },)
 

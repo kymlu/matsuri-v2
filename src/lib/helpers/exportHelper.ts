@@ -10,6 +10,7 @@ import { Obstacle } from "../../models/prop";
 import { PDF_METER_PX, STRIPES_PER_METRE } from "../consts/consts";
 import { sortDancers, sortObstacles, sortProps } from "../editor/commands/objectCommands";
 import { getPersonalSectionNote } from "../dataAccess/LocalStorageController";
+import { formatDancerName } from "./dancerNameHelper";
 
 const README_TEXT =
   "このZIPには本アプリ用のデータが含まれています。\n" +
@@ -468,7 +469,7 @@ async function generateChoreoPdfBlob(
         pdf.circle(x, y + titleBuffer, PDF_METER_PX * (hasActions && !isFollowing ? 0.27 : 0.4), "FD");
   
         pdf.setTextColor(colorPalette.getTextColor(p.color));
-        let displayName = dancer.name ?? "";
+        let displayName = formatDancerName(dancer.name ?? "");
         let textHeight = pdf.getTextDimensions(displayName, {maxWidth: PDF_METER_PX}).h;
         pdf.text(displayName, x, y - textHeight/2 + titleBuffer, {align: "center", baseline: "top", maxWidth: PDF_METER_PX});
       }

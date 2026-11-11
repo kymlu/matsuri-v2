@@ -14,7 +14,7 @@ export function InlineIcon({ src }: { src: keyof typeof ICON }) {
 export function InlineButton({ children, primary }: { children: ReactNode, primary?: boolean }) {
   return <span className={classNames(
     "inline-flex items-center gap-0.5 align-middle mx-0.5 px-1.5 text-sm font-semibold leading-6 border rounded-md whitespace-nowrap",
-    primary ? "bg-primary border-primary text-white" : "bg-surface border-line text-body",
+    primary ? "bg-primary-fill border-primary-fill text-white" : "bg-surface border-line text-body",
   )}>
     {children}
   </span>;

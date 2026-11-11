@@ -139,10 +139,12 @@ function ViewerSidebar({
                     <span className="mt-1">
                       {action.name}
                     </span>
-                    <div className="flex flex-wrap gap-1">
+                    {/* Timings joined into one strip. The 1px gap shows the background as divider lines, so wrapped rows stay tidy. */}
+                    <div className="flex flex-wrap gap-px overflow-hidden border rounded-md w-fit max-w-full bg-line-strong border-line-strong [&>button]:flex-1 [&>button]:rounded-none">
                       {
                         action.timings.map(timing =>
                           <Button
+                            noBorder
                             key={timing.id}
                             disabled={timing.dancerIds.length === 0}
                             primary={strEquals(selectedTiming, timing.id)}

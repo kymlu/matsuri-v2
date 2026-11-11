@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Dialog } from "@base-ui/react";
-import { Oval } from "react-loader-spinner";
+import { Grid } from "react-loader-spinner";
 import classNames from "classnames";
 import { Team } from "../models/team";
 import { Roster, RosterDefaultsItem, RosterDefaultsResult, RosterKind, RosterLinksResult, RosterName, rosterListOf } from "../models/roster";
@@ -239,7 +239,7 @@ export default function RosterPage({ goToHomePage, team, tab, onTabChange }: Ros
                       aria-selected={tab === t.kind}
                       onClick={() => changeTab(t.kind)}
                       className={classNames("px-3 py-0.5 text-sm font-semibold", {
-                        "bg-primary text-white": tab === t.kind,
+                        "bg-primary-fill text-white": tab === t.kind,
                         "bg-surface text-primary": tab !== t.kind,
                       })}>
                       {t.label}
@@ -290,7 +290,7 @@ export default function RosterPage({ goToHomePage, team, tab, onTabChange }: Ros
       <div className="min-h-0 px-4 overflow-y-auto">
         {
           !roster && !loadFailed &&
-          <Oval wrapperClass="mt-4 justify-center" color={colorPalette.primary} secondaryColor={colorPalette.rainbow.red[2]}/>
+          <Grid height={44} width={44} wrapperClass="mt-4 justify-center" color={colorPalette.primary} ariaLabel="読み込み中"/>
         }
         {
           loadFailed &&

@@ -42,6 +42,12 @@ const ObstacleGridObject = memo(function ObstacleGridObject({
     return {x: obstacle.x, y: obstacle.y};
   }, [obstacle.x, obstacle.y]);
 
+  // Width of the name as drawn (capped at the obstacle's width), for the label's backing plate.
+  const labelWidth = useMemo(() => {
+    const measured = new Konva.Text({ text: obstacle.name, fontSize: METER_PX / 3, fontStyle: "bold" }).width();
+    return Math.min(measured, obstacle.width * METER_PX);
+  }, [obstacle.name, obstacle.width]);
+
   const stripeLines = useMemo(() => {
     const width = obstacle.width * METER_PX;
     const height = obstacle.length * METER_PX;
@@ -166,6 +172,18 @@ const ObstacleGridObject = memo(function ObstacleGridObject({
       ))
     }
     
+    {/* Backing plate so the label stays readable on any stripe colour, in both themes. */}
+    <Rect
+      listening={false}
+      x={(obstacle.width * METER_PX - labelWidth) / 2 - 2}
+      y={(obstacle.length / 2) * METER_PX - METER_PX / 6 - 1}
+      width={labelWidth + 4}
+      height={METER_PX / 3 + 2}
+      cornerRadius={2}
+      fill={colorPalette.white}
+      opacity={0.85}
+      />
+
     <Text
       y={(obstacle.length / 2) * METER_PX}
       width={obstacle.width * METER_PX}
