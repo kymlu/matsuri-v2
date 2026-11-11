@@ -10,6 +10,7 @@ import { colorPalette } from "../lib/consts/colors";
 import IconButton from "../components/basic/IconButton";
 import { IconLabelButton } from "../components/basic/Button";
 import Icon from "../components/basic/Icon";
+import SelectBox from "../components/basic/SelectBox";
 import { Tag } from "../components/common/Tag";
 import TextInput from "../components/inputs/TextInput";
 import { ChipFilter } from "../components/inputs/Chips";
@@ -502,14 +503,3 @@ export default function RosterPage({ goToHomePage, team, tab, onTabChange }: Ros
   </div>;
 }
 
-// A checkbox for selection mode: empty, ticked, or a dash when only some are selected.
-function SelectBox({ state }: { state: "none" | "some" | "all" }) {
-  return <span aria-hidden className={classNames("flex items-center justify-center rounded shrink-0 size-5 border-2", {
-    "border-line-strong": state === "none",
-    "border-primary bg-primary": state === "all",
-    "border-primary": state === "some",
-  })}>
-    {state === "all" && <Icon src="check" size="2xs" colour="white"/>}
-    {state === "some" && <span className="w-2.5 h-0.5 bg-primary"/>}
-  </span>;
-}

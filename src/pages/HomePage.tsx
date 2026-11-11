@@ -22,6 +22,7 @@ import React from "react"
 import Divider from "../components/basic/Divider"
 import TextInput from "../components/inputs/TextInput"
 import UserNameEditDialog from "../components/dialogs/UserNameEditDialog"
+import { findMyDancerId } from "../lib/helpers/myDancerHelper"
 import { Grid } from "react-loader-spinner"
 import { colorPalette } from "../lib/consts/colors"
 import EditChoreoInfoDialog from "../components/dialogs/EditChoreoInfoDialog"
@@ -358,6 +359,8 @@ export default function HomePage({
     setEditUserNameDialogOpen(isOpen);
   };
 
+  const [showNameChangeFailedDialog, setShowNameChangeFailedDialog] = useState(false);
+
   useEffect(() => {
     if (isLoggedIn && isNullOrUndefinedOrBlank(savedDancerName)) {
       setEditUserNameDialogOpen(true);
@@ -517,9 +520,13 @@ export default function HomePage({
                 name={savedDancerName ?? ""}
                 isLoggedIn={isLoggedIn}
                 onSubmit={(name) => {
-                  setSavedDancerName(name);
                   if (isLoggedIn && team) {
-                    changeUserName(name, team.id, () => {}, () => {})
+                    // The device copy follows the server, so a refused rename doesn't show as saved.
+                    changeUserName(name, team.id,
+                      () => setSavedDancerName(name),
+                      () => setShowNameChangeFailedDialog(true));
+                  } else {
+                    setSavedDancerName(name);
                   }
                 }
               }/>
@@ -800,7 +807,7 @@ export default function HomePage({
             exportingChoreo &&
             <ExportDialog
               choreo={exportingChoreo!}
-              selectedId={Object.values(exportingChoreo.dancers).find(d => strEquals(d.name, savedDancerName))?.id ?? ""}
+              selectedId={findMyDancerId(exportingChoreo.dancers, savedDancerName) ?? ""}
               onClose={handlePdfExportClose}
             />
           }
@@ -976,6 +983,11 @@ export default function HomePage({
               <p>なお、チームに参加していない場合、データはブラウザ上にのみ保存されます。</p>
             </div>
           </CustomDialog>
+        </Dialog.Root>
+        <Dialog.Root open={showNameChangeFailedDialog} onOpenChange={() => setShowNameChangeFailedDialog(false)}>
+          <BaseErrorDialog title="変更失敗" fullWidth>
+            <p>名前を変更できませんでした。時間をおいて、もう一度お試しください。</p>
+          </BaseErrorDialog>
         </Dialog.Root>
         <Dialog.Root open={showVerifyInviteErrorDialog} onOpenChange={() => setShowVerifyInviteErrorDialog(false)}>
           <BaseErrorDialog title="招待失敗" fullWidth focusDialogOnOpen>

@@ -74,6 +74,9 @@ type MainStageProps = {
   openChangeLog?: () => void,
   // Shows the 🔰 help button at the top left.
   openHelp?: () => void,
+  openFindDancer?: () => void,
+  // Bump to centre the one selected dancer at the current zoom, e.g. after finding them by name.
+  focusSelectedDancerRequest?: number,
   showPaths?: boolean,
   isEditingMovement?: boolean,
   dancerMovementCache: MovementCacheBySectionIdByObjectId,
@@ -93,7 +96,7 @@ function MainStage({
   updatePropSizeAndRotate, updateObstacleSizeAndRotate,
   selectedIds, setSelectedIds, selectedObjects,
   addDancer, addProp, addObstacle, appSettings, previousSection, selectedDancerMovement,
-  onDancerSelected, bottomMarginPercent = 0, canResizeProps, editEnabled, toggleEditEnabled, openNoteDialog, openChangeLog, openHelp,
+  onDancerSelected, bottomMarginPercent = 0, canResizeProps, editEnabled, toggleEditEnabled, openNoteDialog, openChangeLog, openHelp, openFindDancer, focusSelectedDancerRequest,
   showPaths = false, isEditingMovement = false, dancerMovementCache, propMovementCache, onMidpointEdit, currentMovement,
   dancerAnimationCache, propAnimationCache,
 }: MainStageProps) {
@@ -370,6 +373,39 @@ function MainStage({
       });
     }
   }, [stageGeometry, selectedIds.dancers, selectedObjects.dancers, size.width, size.height, isShowingVerticalRuler, centerXPx, bottomMarginM, pixelsPerMeter, currentSection.formation.dancerPositions, setStagePosition]);
+
+  // Declared after the selection-following effect so its pan wins when both run together.
+  // The bottom panel grows once a dancer is selected, so the pan is redone while it settles.
+  const focusUntil = useRef(0);
+  useEffect(() => {
+    if (focusSelectedDancerRequest) focusUntil.current = Date.now() + 1500;
+  }, [focusSelectedDancerRequest]);
+  useEffect(() => {
+    if (Date.now() > focusUntil.current || !stageGeometry || selectedObjects.dancers.length !== 1) return;
+    const dancer = selectedObjects.dancers[0];
+    const dancerPx = stageMetersToPx({x: dancer.x, y: dancer.y}, stageGeometry, pixelsPerMeter);
+    // Centre in the part of the stage the bottom panel doesn't cover, measured from the page.
+    const drawerTop = document.querySelector("[data-bottom-drawer]")?.getBoundingClientRect().top;
+    const containerTop = containerRef.current?.getBoundingClientRect().top;
+    const visibleHeight = drawerTop !== undefined && containerTop !== undefined
+      ? Math.max(0, Math.min(size.height, drawerTop - containerTop))
+      : size.height - bottomMarginM * pixelsPerMeter;
+    const newPosition = {
+      x: (size.width - (isShowingVerticalRuler ? 32 : 0)) / 2 - dancerPx.x,
+      y: visibleHeight / 2 - dancerPx.y,
+    };
+    setIsManualMovement(true); // keeps the reset-camera button, so the usual view is one tap away
+    setRulerPos(newPosition);
+    stageRef?.current?.to({
+      x: newPosition.x,
+      y: newPosition.y,
+      duration: 0.6,
+      easing: Konva.Easings.EaseInOut,
+      onFinish: () => setStagePosition(newPosition),
+    });
+  // Runs on a new request, and again if the visible area changes while it settles.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focusSelectedDancerRequest, bottomMarginM, size.height]);
 
   const handleWheel = useCallback((e: any) => {
     e.evt.preventDefault();
@@ -679,7 +715,7 @@ function MainStage({
       />
     }
     {
-      ((canEdit && openNoteDialog) || openChangeLog || openHelp) &&
+      ((canEdit && openNoteDialog) || openChangeLog || openHelp || openFindDancer) &&
       <div className={`absolute space-y-1 left-2 ${isShowingHorizontalRuler ? "top-7" : "top-1"}`}>
         {
           openHelp &&
@@ -688,6 +724,15 @@ function MainStage({
             imgSrc={theme === "dark" ? "beginnerDark" : "beginner"}
             colour="primary"
             onClick={openHelp}
+          />
+        }
+        {
+          openFindDancer &&
+          <IconButton
+            size="sm"
+            src="search"
+            colour="black"
+            onClick={openFindDancer}
           />
         }
         {
