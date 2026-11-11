@@ -223,6 +223,7 @@ export default function ChoreoViewPage(props: {
 
   // ---- Find dancer ----
   const [findDancerOpen, setFindDancerOpen] = useState(false);
+  const [focusDancerRequest, setFocusDancerRequest] = useState(0);
   const openFindDancer = useCallback(() => setFindDancerOpen(true), []);
   const myDancerId = useMemo(
     () => findMyDancerId(props.currentChoreo.dancers, props.myDancerName),
@@ -232,6 +233,7 @@ export default function ChoreoViewPage(props: {
   const onFindDancer = useCallback((dancerId: string, saveAsMe: boolean) => {
     setSelectedIds({props: [], dancers: [dancerId], obstacles: []});
     setSelectedTimingId(undefined);
+    setFocusDancerRequest(n => n + 1);
     if (saveAsMe) {
       setSavedDancerName(props.currentChoreo.dancers[dancerId].name);
     }
@@ -311,6 +313,7 @@ export default function ChoreoViewPage(props: {
           openChangeLog={changeLog && !isChangeLogBannerShown ? openChangeLog : undefined}
           openHelp={openHelpHere}
           openFindDancer={entityCount.dancers > 0 ? openFindDancer : undefined}
+          focusSelectedDancerRequest={focusDancerRequest}
         />
       </div>
 

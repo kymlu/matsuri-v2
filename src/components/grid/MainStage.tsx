@@ -75,6 +75,8 @@ type MainStageProps = {
   // Shows the 🔰 help button at the top left.
   openHelp?: () => void,
   openFindDancer?: () => void,
+  // Bump to centre the one selected dancer at the current zoom, e.g. after finding them by name.
+  focusSelectedDancerRequest?: number,
   showPaths?: boolean,
   isEditingMovement?: boolean,
   dancerMovementCache: MovementCacheBySectionIdByObjectId,
@@ -94,7 +96,7 @@ function MainStage({
   updatePropSizeAndRotate, updateObstacleSizeAndRotate,
   selectedIds, setSelectedIds, selectedObjects,
   addDancer, addProp, addObstacle, appSettings, previousSection, selectedDancerMovement,
-  onDancerSelected, bottomMarginPercent = 0, canResizeProps, editEnabled, toggleEditEnabled, openNoteDialog, openChangeLog, openHelp, openFindDancer,
+  onDancerSelected, bottomMarginPercent = 0, canResizeProps, editEnabled, toggleEditEnabled, openNoteDialog, openChangeLog, openHelp, openFindDancer, focusSelectedDancerRequest,
   showPaths = false, isEditingMovement = false, dancerMovementCache, propMovementCache, onMidpointEdit, currentMovement,
   dancerAnimationCache, propAnimationCache,
 }: MainStageProps) {
@@ -371,6 +373,28 @@ function MainStage({
       });
     }
   }, [stageGeometry, selectedIds.dancers, selectedObjects.dancers, size.width, size.height, isShowingVerticalRuler, centerXPx, bottomMarginM, pixelsPerMeter, currentSection.formation.dancerPositions, setStagePosition]);
+
+  // Declared after the selection-following effect so its pan wins when both run together.
+  useEffect(() => {
+    if (!focusSelectedDancerRequest || !stageGeometry || selectedObjects.dancers.length !== 1) return;
+    const dancer = selectedObjects.dancers[0];
+    const dancerPx = stageMetersToPx({x: dancer.x, y: dancer.y}, stageGeometry, pixelsPerMeter);
+    const newPosition = {
+      x: (size.width - (isShowingVerticalRuler ? 32 : 0)) / 2 - dancerPx.x,
+      y: (size.height - bottomMarginM * pixelsPerMeter) / 2 - dancerPx.y,
+    };
+    setIsManualMovement(true); // keeps the reset-camera button, so the usual view is one tap away
+    setRulerPos(newPosition);
+    stageRef?.current?.to({
+      x: newPosition.x,
+      y: newPosition.y,
+      duration: 0.6,
+      easing: Konva.Easings.EaseInOut,
+      onFinish: () => setStagePosition(newPosition),
+    });
+  // Only on a new request: the selection and camera values are read as they are at that moment.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focusSelectedDancerRequest]);
 
   const handleWheel = useCallback((e: any) => {
     e.evt.preventDefault();
