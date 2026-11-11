@@ -1,10 +1,19 @@
+// "Me": the dancer name this device is matched to. Saved per team, with the old
+// device-wide key used outside a team and as a fallback for teams not yet saved.
 const USERNAME = "USERNAME";
-export function getUserName(): string | null {
+const getMyDancerNameKey = (teamId?: string) => teamId ? `${USERNAME}_${teamId}` : USERNAME;
+
+export function getMyDancerName(teamId?: string): string | null {
+  if (teamId) {
+    const teamName = localStorage.getItem(getMyDancerNameKey(teamId));
+    if (teamName !== null) return teamName;
+  }
   return localStorage.getItem(USERNAME);
 }
 
-export function setUserName(name: string) {
-  localStorage.setItem(USERNAME, name);
+// A blank name is kept as "" so a team stays cleared instead of falling back to the old key.
+export function setMyDancerName(teamId: string | undefined, name: string) {
+  localStorage.setItem(getMyDancerNameKey(teamId), name.trim());
 }
 
 function getUnlockedChoreoKey(choreoId: string, version?: number): string {

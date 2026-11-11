@@ -67,7 +67,8 @@ function renderPage(overrides: Partial<Parameters<typeof ChoreoViewPage>[0]> = {
       goToEditPage={() => {}}
       currentChoreo={current}
       currentChoreoStatus="upToDate"
-      savedDancerName={null}
+      myDancerName={null}
+      setSavedDancerName={() => {}}
       teamId="team_1"
       {...overrides}
     />
@@ -136,7 +137,7 @@ describe("ChoreoViewPage change log", () => {
   it("opens on the saved name's dancer when they have changes", async () => {
     setSeenVersion("c1", 1);
     mockGetChoreoFile.mockResolvedValue(makeChoreo(1));
-    renderPage({ savedDancerName: "さくら" });
+    renderPage({ myDancerName: "さくら" });
 
     fireEvent.click(await findBanner());
     expect(await screen.findByText("（前回：）")).toBeInTheDocument();
@@ -145,7 +146,7 @@ describe("ChoreoViewPage change log", () => {
   it("opens on 全体 when the saved name's dancer has no changes", async () => {
     setSeenVersion("c1", 1);
     mockGetChoreoFile.mockResolvedValue(makeChoreo(1));
-    renderPage({ savedDancerName: "あおい" });
+    renderPage({ myDancerName: "あおい" });
 
     fireEvent.click(await findBanner());
     expect(await screen.findByText("名前を選ぶと、その人の変更を確認できます。")).toBeInTheDocument();
@@ -154,7 +155,7 @@ describe("ChoreoViewPage change log", () => {
   it("replaces the banner with the stage button after it's tapped", async () => {
     setSeenVersion("c1", 1);
     mockGetChoreoFile.mockResolvedValue(makeChoreo(1));
-    renderPage({ savedDancerName: "さくら" });
+    renderPage({ myDancerName: "さくら" });
 
     fireEvent.click(await findBanner());
     const dialog = await screen.findByRole("dialog", { name: changeLogTitle });
@@ -169,7 +170,7 @@ describe("ChoreoViewPage change log", () => {
   it("replaces the banner with the stage button once the banner is closed", async () => {
     setSeenVersion("c1", 1);
     mockGetChoreoFile.mockResolvedValue(makeChoreo(1));
-    renderPage({ savedDancerName: "さくら" });
+    renderPage({ myDancerName: "さくら" });
 
     await findBanner();
     fireEvent.click(screen.getByRole("button", { name: "clear" }));

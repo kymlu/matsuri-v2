@@ -27,6 +27,7 @@ import ChangeLogDialog from "../components/dialogs/ChangeLogDialog";
 import Icon from "../components/basic/Icon";
 import InstructionMessage from "../components/basic/InstructionMessage";
 import { useHelp } from "../components/help/HelpContext";
+import { findMyDancerId } from "../lib/helpers/myDancerHelper";
 
 const exportDialog = Dialog.createHandle<{}>();
 
@@ -36,7 +37,8 @@ export default function ChoreoViewPage(props: {
   currentChoreoStatus: ChoreoStatus,
   goToEditPage: () => void,
   pastVersion?: number,
-  savedDancerName: string | null,
+  myDancerName: string | null,
+  setSavedDancerName: (name: string) => void,
   teamId?: string,
   serverChoreo?: BasicChoreoDetails,
 }) {
@@ -75,10 +77,10 @@ export default function ChoreoViewPage(props: {
   useEffect(() => {
     // The how-to hint is for a first look at the current version, not for checking an old one.
     const shouldShowHint = props.pastVersion === undefined && !checkShowingViewPageInfoDialog();
-    if (!isNullOrUndefinedOrBlank(props.savedDancerName)) {
-      const dancer = Object.values(props.currentChoreo.dancers).find(x => strEquals(x.name, props.savedDancerName));
-      if (dancer) {
-        setSelectedIds({dancers: [dancer.id], props: [], obstacles: []});
+    if (!isNullOrUndefinedOrBlank(props.myDancerName)) {
+      const myDancerId = findMyDancerId(props.currentChoreo.dancers, props.myDancerName);
+      if (myDancerId) {
+        setSelectedIds({dancers: [myDancerId], props: [], obstacles: []});
         setShowHintDialog(false);
       } else {
         resetSelectedIds();

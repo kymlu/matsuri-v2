@@ -5,7 +5,8 @@ import { NewChoreoPage } from './pages/NewChoreoPage';
 import ChoreoEditPage from './pages/ChoreoEditPage';
 import ChoreoViewPage from './pages/ChoreoViewPage';
 import { BasicChoreoDetails, Choreo, EventDetails } from './models/choreo';
-import { getUserName, setUserName } from './lib/dataAccess/LocalStorageController';
+import { getMyDancerName, setMyDancerName } from './lib/dataAccess/LocalStorageController';
+import { resolveMyDancerName } from './lib/helpers/myDancerHelper';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Team } from './models/team';
 import { checkLogin, verifyTeam } from './lib/helpers/apiHelper';
@@ -30,7 +31,9 @@ function App() {
   const [currentChoreo, setCurrentChoreo] = useState<Choreo | undefined>();
   const [currentChoreoStatus, setCurrentChoreoStatus] = useState<ChoreoStatus>();
   const [pastVersion, setPastVersion] = useState<number | undefined>();
-  const [name, setName] = useState<string | null>(null);
+  // The saved "me" for this team (null if never saved) and the logged-in account name, kept apart.
+  const [savedDancerName, setSavedDancerName] = useState<string | null>(null);
+  const [accountName, setAccountName] = useState<string | null>(null);
   const [buildInfo, setBuildInfo] = useState<string | undefined>();
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
@@ -61,14 +64,16 @@ function App() {
 
   useEffect(() => {
     if (isNullOrUndefinedOrBlank(teamSlug)) {
+      setSavedDancerName(getMyDancerName());
       setShowNoTeamDialog(true);
       setIsProcessing(false);
     } else {
       verifyTeam(teamSlug!!, (t) => {
         setTeam(t);
+        setSavedDancerName(getMyDancerName(t?.id));
         checkLogin(t?.id!,
         (name, role, teamMemberId) => {
-          setNewName(name);
+          setAccountName(name);
           setIsAdmin(role === "admin");
           setIsViewer(role === "viewer");
           setIsLoggedIn(true);
@@ -78,6 +83,7 @@ function App() {
         });
         setIsProcessing(false);
       }, () => {
+        setSavedDancerName(getMyDancerName());
         navigate('/');
         setIsProcessing(false);
       });
@@ -85,7 +91,6 @@ function App() {
   }, []);
 
   useEffect(() => {
-    setName(getUserName());
     console.log("getting build info");
     fetch(`${process.env.PUBLIC_URL}/build-info.json`)
       .then(r => r.json())
@@ -96,10 +101,13 @@ function App() {
       });
   }, []);
 
-  const setNewName = (newName: string) => {
-    setUserName(newName);
-    setName(newName);
+  const saveDancerName = (newName: string) => {
+    setMyDancerName(team?.id, newName);
+    setSavedDancerName(newName.trim());
   }
+
+  // Used to find "me" in a choreo. Logged out, the account name no longer counts as a guess.
+  const myDancerName = resolveMyDancerName(savedDancerName, isLoggedIn ? accountName : null);
 
   useEffect(() => {
     console.log("Changing mode:", mode);
@@ -162,8 +170,11 @@ function App() {
             setPastVersion(pastVersion);
             setMode("view");
           }}
-          savedDancerName={name}
-          setSavedDancerName={(newName) => setNewName(newName)}
+          myDancerName={myDancerName}
+          savedDancerName={savedDancerName}
+          setSavedDancerName={saveDancerName}
+          accountName={accountName}
+          setAccountName={setAccountName}
           isAdmin={isAdmin}
           setIsAdmin={setIsAdmin}
           isViewer={isViewer}
@@ -220,7 +231,8 @@ function App() {
           goToHomePage={() => setMode("home")}
           goToEditPage={() => setMode("edit")}
           pastVersion={pastVersion}
-          savedDancerName={name}
+          myDancerName={myDancerName}
+          setSavedDancerName={saveDancerName}
           teamId={team?.id}
           serverChoreo={serverChoreo}
         />

@@ -35,3 +35,32 @@ describe("seen version", () => {
     expect(getSeenVersion("c1")).toBeUndefined();
   });
 });
+
+describe("my dancer name", () => {
+  const { getMyDancerName, setMyDancerName } = require("./LocalStorageController");
+  afterEach(() => localStorage.clear());
+
+  it("falls back to the old device-wide name for a team not yet saved", () => {
+    localStorage.setItem("USERNAME", "さくら");
+    expect(getMyDancerName("t1")).toBe("さくら");
+  });
+
+  it("keeps names per team", () => {
+    setMyDancerName("t1", "さくら");
+    setMyDancerName("t2", "花子");
+    expect(getMyDancerName("t1")).toBe("さくら");
+    expect(getMyDancerName("t2")).toBe("花子");
+    expect(getMyDancerName()).toBeNull();
+  });
+
+  it("keeps a cleared team name instead of falling back", () => {
+    localStorage.setItem("USERNAME", "さくら");
+    setMyDancerName("t1", " ");
+    expect(getMyDancerName("t1")).toBe("");
+  });
+
+  it("uses the device-wide key outside a team", () => {
+    setMyDancerName(undefined, "ゆい");
+    expect(localStorage.getItem("USERNAME")).toBe("ゆい");
+  });
+});
