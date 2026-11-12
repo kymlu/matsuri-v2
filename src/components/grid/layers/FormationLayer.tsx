@@ -187,6 +187,7 @@ const FormationLayer = memo(function FormationLayer({
   }, [canEdit]);
   const dancerStackDrawing = useMemo(() => stackDrawing(dancerStacks, selectedIds.dancers), [stackDrawing, dancerStacks, selectedIds.dancers]);
   const propStackDrawing = useMemo(() => stackDrawing(propStacks, selectedIds.props), [stackDrawing, propStacks, selectedIds.props]);
+  const coveredDancers = useMemo(() => new Set((dancerStacks ?? []).flatMap(stack => stack.slice(0, -1))), [dancerStacks]);
 
   // Dragging one member of a stack brings the others along on every frame, so nothing jumps or slides into place
   // after the drop. Members the transformer already drags (the whole stack was selected when the drag began) are left to it.
@@ -291,6 +292,7 @@ const FormationLayer = memo(function FormationLayer({
             stackMark={dancerStackDrawing[dancerPosition.dancerId]?.mark}
             hiddenSelected={dancerStackDrawing[dancerPosition.dancerId]?.hiddenSelected}
             stackCount={dancerStackDrawing[dancerPosition.dancerId]?.count}
+            coveredInStack={coveredDancers.has(dancerPosition.dancerId)}
             onDragFollow={canEdit ? followDrag : undefined}
           />
         );

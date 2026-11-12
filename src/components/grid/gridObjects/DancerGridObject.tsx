@@ -32,6 +32,8 @@ type DancerGridObjectProps = {
   // and a dashed ring when a hidden member is selected but this top one isn't.
   stackMark?: "normal" | "red",
   hiddenSelected?: boolean,
+  // Under someone in a stack: no selection ring of its own (it would show through the top one's dashed ring).
+  coveredInStack?: boolean,
   stackCount?: number,
   onDragFollow?: (id: string, phase: "start" | "move" | "end" | "cancel", dx?: number, dy?: number) => void,
 };
@@ -55,6 +57,7 @@ const DancerGridObject = memo(function DancerGridObject({
   animationCache,
   stackMark,
   hiddenSelected,
+  coveredInStack,
   stackCount,
   onDragFollow,
 }: DancerGridObjectProps) {
@@ -85,7 +88,7 @@ const DancerGridObject = memo(function DancerGridObject({
           <Circle radius={ringRadius} fill={colorPalette.white} strokeEnabled strokeWidth={3} stroke={colorPalette.primary} dash={[5, 4]}/>
         }
         {
-          isSelected && 
+          isSelected && !coveredInStack &&
           <Circle
             radius={ringRadius}
             fill={colorPalette.white}
