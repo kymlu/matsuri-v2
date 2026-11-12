@@ -20,6 +20,13 @@ export function historyReducer<T>(
       }
     }
 
+    case "AMEND_STATE":
+      return {
+        ...state,
+        presentState: { state: action.newState, currentSectionId: action.currentSectionId },
+        redoStack: [],
+      }
+
     case "UNDO":
       return undo(state)
 

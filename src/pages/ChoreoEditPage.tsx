@@ -117,7 +117,7 @@ export default function ChoreoEditPage(props: {
     } as EditHistory<Choreo>);
   // Every new state goes through the stack rules, so commands never have to know about stacks.
   const dispatch = useCallback((action: Parameters<typeof rawDispatch>[0]) => {
-    rawDispatch(action.type === "SET_STATE" ? { ...action, newState: normalizeStacks(action.newState as Choreo) } : action);
+    rawDispatch(action.type === "SET_STATE" || action.type === "AMEND_STATE" ? { ...action, newState: normalizeStacks(action.newState as Choreo) } : action);
   }, []);
 
   const currentStateRef = useRef(history.presentState.state);
@@ -336,12 +336,16 @@ export default function ChoreoEditPage(props: {
     return units.sort((a, b) => Math.max(...b.map(z)) - Math.max(...a.map(z))).flat();
   }, [currentSection.formation]);
 
-  const [stackOrder, setStackOrder] = useState<{ kind: StackKind, members: StackMember[], fromDrop?: boolean }>();
+  // fromDrop: the pair key of the drop that led here. Stacking then joins the move's undo step;
+  // backing out (そのまま, or closing) remembers the pair so the prompt doesn't keep coming back.
+  const [stackOrder, setStackOrder] = useState<{ kind: StackKind, members: StackMember[], fromDrop?: string }>();
   const [reorderingStack, setReorderingStack] = useState<{ kind: StackKind, members: StackMember[] }>();
   const [unstacking, setUnstacking] = useState<{ kind: StackKind, members: StackMember[] }>();
-  const [stackPrompt, setStackPrompt] = useState<{ kind: StackKind, members: StackMember[], text: string }>();
+  const [stackPrompt, setStackPrompt] = useState<{ kind: StackKind, members: StackMember[], text: string, pairKey: string }>();
   // Pairs the editor answered そのまま for, so moving them a little doesn't ask again.
   const keptApart = useRef<Set<string>>(new Set());
+  // The 重ねる button also closes its dialog; this tells that close apart from backing out.
+  const stackedDrop = useRef<string | undefined>(undefined);
 
   const onStack = useCallback(() => {
     if (!stackKind) return;
@@ -350,12 +354,19 @@ export default function ChoreoEditPage(props: {
 
   const onConfirmStack = useCallback((topFirst: string[], spot: StackSpot) => {
     if (!stackOrder) return;
-    commitState(stackObjects(history.presentState.state, currentSection.id, stackOrder.kind, topFirst, spot));
+    const stacked = stackObjects(history.presentState.state, currentSection.id, stackOrder.kind, topFirst, spot);
+    stackedDrop.current = stackOrder.fromDrop;
+    if (stackOrder.fromDrop) {
+      // Same undo step as the move that offered it: one undo puts everything back.
+      dispatch({ type: "AMEND_STATE", newState: stacked, currentSectionId: currentSection.id });
+    } else {
+      commitState(stacked);
+    }
     setSelectedIds(stackOrder.kind === "dancers"
       ? { dancers: topFirst, props: [], obstacles: [] }
       : { dancers: [], props: topFirst, obstacles: [] });
     setStackOrder(undefined);
-  }, [stackOrder, commitState, history.presentState.state, currentSection.id]);
+  }, [stackOrder, commitState, dispatch, history.presentState.state, currentSection.id]);
 
   const onReorderStack = useCallback(() => {
     if (!stackKind || !wholeStack) return;
@@ -711,8 +722,8 @@ export default function ChoreoEditPage(props: {
       kind,
       members: stackMembers(kind, topFirst),
       text: `${movedIds.map(name).join("・")}と${target.map(name).join("・")}を重ねます。`,
+      pairKey,
     });
-    keptApart.current.add(pairKey);
   }, [movementUpdateGroup]);
 
   const editMovement = useCallback((points: Coordinates[], tension: MovementType) => {
@@ -1315,14 +1326,19 @@ export default function ChoreoEditPage(props: {
           }}
         />
       }
-      <Dialog.Root open={stackOrder !== undefined} onOpenChange={open => { if (!open) setStackOrder(undefined); }}>
+      <Dialog.Root open={stackOrder !== undefined} onOpenChange={open => {
+        if (open) return;
+        if (stackOrder?.fromDrop && stackedDrop.current !== stackOrder.fromDrop) keptApart.current.add(stackOrder.fromDrop);
+        stackedDrop.current = undefined;
+        setStackOrder(undefined);
+      }}>
         {
           stackOrder &&
           <StackOrderDialog
             initial={stackOrder.members}
             onSubmit={onConfirmStack}
             onBack={stackOrder.fromDrop ? () => {
-              setStackPrompt({ kind: stackOrder.kind, members: stackOrder.members, text: `${stackOrder.members.map(m => m.label).join("・")}を重ねます。` });
+              setStackPrompt({ kind: stackOrder.kind, members: stackOrder.members, text: `${stackOrder.members.map(m => m.label).join("・")}を重ねます。`, pairKey: stackOrder.fromDrop! });
               setStackOrder(undefined);
             } : undefined}/>
         }
@@ -1352,14 +1368,21 @@ export default function ChoreoEditPage(props: {
             }}/>
         }
       </Dialog.Root>
-      <Dialog.Root open={stackPrompt !== undefined} onOpenChange={open => { if (!open) setStackPrompt(undefined); }}>
+      <Dialog.Root open={stackPrompt !== undefined} onOpenChange={open => {
+        if (open) return;
+        if (stackPrompt) keptApart.current.add(stackPrompt.pairKey);
+        setStackPrompt(undefined);
+      }}>
         {
           stackPrompt &&
           <StackPromptDialog
             text={stackPrompt.text}
-            onKeep={() => setStackPrompt(undefined)}
+            onKeep={() => {
+              keptApart.current.add(stackPrompt.pairKey);
+              setStackPrompt(undefined);
+            }}
             onNext={() => {
-              setStackOrder({ kind: stackPrompt.kind, members: stackPrompt.members, fromDrop: true });
+              setStackOrder({ kind: stackPrompt.kind, members: stackPrompt.members, fromDrop: stackPrompt.pairKey });
               setStackPrompt(undefined);
             }}/>
         }
