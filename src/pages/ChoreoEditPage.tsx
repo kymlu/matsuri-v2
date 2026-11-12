@@ -2,7 +2,7 @@ import Toolbar from "../components/editor/Toolbar"
 import Header from "../components/editor/Header"
 import FormationSelectionToolbar from "../components/editor/FormationSelectionToolbar";
 import UndoRedoToolbar from "../components/editor/UndoRedoToolbar";
-import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
+import { SetStateAction, useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import { historyReducer } from "../lib/editor/historyReducer";
 import { BasicChoreoDetails, Choreo, EventDetails, getBasicChoreoDetails } from "../models/choreo";
 import { EditHistory, StageEntities } from "../models/history";
@@ -12,6 +12,8 @@ import { debounce, indexByKey, isNullOrUndefinedOrBlank, strEquals } from "../li
 import MainStage from "../components/grid/MainStage";
 import { Dialog } from "@base-ui/react";
 import FindObjectsDialog from "../components/dialogs/FindObjectsDialog";
+import { ReorderStackDialog, StackMember, StackOrderDialog, StackPromptDialog, UnstackDialog } from "../components/dialogs/StackDialogs";
+import { countUnits, expandSelectionToStacks, findDropTarget, findStack, normalizeStacks, reorderStack, selectedWholeStack, StackKind, stackObjects, StackSpot, unstackObjects } from "../lib/helpers/stackHelper";
 import EditChoreoSizeDialog from "../components/dialogs/EditChoreoSizeDialog";
 import { exportChoreo } from "../lib/helpers/exportHelper";
 import { saveChoreo } from "../lib/dataAccess/DataController";
@@ -107,12 +109,16 @@ export default function ChoreoEditPage(props: {
   const isDirty = useRef(false);
   const hasInitialized = useRef(false);
 
-  const [history, dispatch] = useReducer(historyReducer,
+  const [history, rawDispatch] = useReducer(historyReducer,
     {
       undoStack: [],
-      presentState: {state: setZOnAllPositions(props.currentChoreo), currentSectionId: props.currentChoreo.sections[0].id},
+      presentState: {state: normalizeStacks(setZOnAllPositions(props.currentChoreo)), currentSectionId: props.currentChoreo.sections[0].id},
       redoStack: [],
     } as EditHistory<Choreo>);
+  // Every new state goes through the stack rules, so commands never have to know about stacks.
+  const dispatch = useCallback((action: Parameters<typeof rawDispatch>[0]) => {
+    rawDispatch(action.type === "SET_STATE" ? { ...action, newState: normalizeStacks(action.newState as Choreo) } : action);
+  }, []);
 
   const currentStateRef = useRef(history.presentState.state);
   useEffect(() => {
@@ -127,7 +133,7 @@ export default function ChoreoEditPage(props: {
       currentSectionId: sectionId ?? currentSection.id,
       commit: true,
     });
-  }, [currentSection.id]);
+  }, [currentSection.id, dispatch]);
 
   const debouncedSave = useMemo(
     () =>
@@ -277,6 +283,87 @@ export default function ChoreoEditPage(props: {
   }, []);
   // Not while assigning a count (selecting would assign) or editing a path.
   const canFind = !isAssigningActions && !isEditingMovement && (findDancers.length + findProps.length) > 0;
+
+  // ---- Stacks ----
+  // Stage taps select whole stacks (not while assigning a count or editing a path).
+  const setStageSelectedIds = useCallback((action: SetStateAction<StageEntities<string[]>>) => {
+    setSelectedIds(prev => {
+      const next = typeof action === "function" ? action(prev) : action;
+      return isAssigningActions || isEditingMovement ? next : expandSelectionToStacks(currentSection.formation, prev, next);
+    });
+  }, [currentSection.formation, isAssigningActions, isEditingMovement]);
+
+  const stackKind: StackKind | undefined =
+    selectedIds.obstacles.length > 0 ? undefined
+    : selectedIds.props.length === 0 && selectedIds.dancers.length > 0 ? "dancers"
+    : selectedIds.dancers.length === 0 && selectedIds.props.length > 0 ? "props"
+    : undefined;
+  const stackIds = useMemo(
+    () => stackKind === "dancers" ? selectedIds.dancers : stackKind === "props" ? selectedIds.props : [],
+    [stackKind, selectedIds.dancers, selectedIds.props]);
+  const canStack = stackKind !== undefined && countUnits(currentSection.formation, stackKind, stackIds) >= 2;
+  const wholeStack = stackKind ? selectedWholeStack(currentSection.formation, stackKind, stackIds) : undefined;
+
+  const stackMembers = useCallback((kind: StackKind, ids: string[]): StackMember[] => {
+    const state = history.presentState.state;
+    return ids.map(id => kind === "dancers"
+      ? { id, label: state.dancers[id]?.name ?? "", color: currentSection.formation.dancerPositions[id]?.color }
+      : { id, label: state.props[id]?.name ?? "", color: state.props[id]?.color });
+  }, [history.presentState.state, currentSection.formation]);
+
+  // Top first: front-most unit on top, each existing stack keeping its own order.
+  const defaultStackOrder = useCallback((kind: StackKind, ids: string[]): string[] => {
+    const f = currentSection.formation;
+    const z = (id: string) => (kind === "dancers" ? f.dancerPositions[id]?.z : f.propPositions[id]?.z) ?? 0;
+    const units: string[][] = [];
+    ids.forEach(id => {
+      if (units.some(u => u.includes(id))) return;
+      const s = findStack(f, kind, id);
+      units.push(s ? [...s].reverse() : [id]);
+    });
+    return units.sort((a, b) => Math.max(...b.map(z)) - Math.max(...a.map(z))).flat();
+  }, [currentSection.formation]);
+
+  const [stackOrder, setStackOrder] = useState<{ kind: StackKind, members: StackMember[], fromDrop?: boolean }>();
+  const [reorderingStack, setReorderingStack] = useState<{ kind: StackKind, members: StackMember[] }>();
+  const [unstacking, setUnstacking] = useState<{ kind: StackKind, members: StackMember[] }>();
+  const [stackPrompt, setStackPrompt] = useState<{ kind: StackKind, members: StackMember[], text: string }>();
+  // Pairs the editor answered そのまま for, so moving them a little doesn't ask again.
+  const keptApart = useRef<Set<string>>(new Set());
+
+  const onStack = useCallback(() => {
+    if (!stackKind) return;
+    setStackOrder({ kind: stackKind, members: stackMembers(stackKind, defaultStackOrder(stackKind, stackIds)) });
+  }, [stackKind, stackIds, stackMembers, defaultStackOrder]);
+
+  const onConfirmStack = useCallback((topFirst: string[], spot: StackSpot) => {
+    if (!stackOrder) return;
+    commitState(stackObjects(history.presentState.state, currentSection.id, stackOrder.kind, topFirst, spot));
+    setSelectedIds(stackOrder.kind === "dancers"
+      ? { dancers: topFirst, props: [], obstacles: [] }
+      : { dancers: [], props: topFirst, obstacles: [] });
+    setStackOrder(undefined);
+  }, [stackOrder, commitState, history.presentState.state, currentSection.id]);
+
+  const onReorderStack = useCallback(() => {
+    if (!stackKind || !wholeStack) return;
+    const topFirst = [...wholeStack].reverse();
+    if (wholeStack.length === 2) {
+      // Two people: just swap who is on top.
+      commitState(reorderStack(history.presentState.state, currentSection.id, stackKind, [...topFirst].reverse()));
+    } else {
+      setReorderingStack({ kind: stackKind, members: stackMembers(stackKind, topFirst) });
+    }
+  }, [stackKind, wholeStack, commitState, history.presentState.state, currentSection.id, stackMembers]);
+
+  const onUnstack = useCallback(() => {
+    if (!stackKind || !wholeStack) return;
+    if (wholeStack.length === 2) {
+      commitState(unstackObjects(history.presentState.state, currentSection.id, stackKind, wholeStack));
+    } else {
+      setUnstacking({ kind: stackKind, members: stackMembers(stackKind, [...wholeStack].reverse()) });
+    }
+  }, [stackKind, wholeStack, commitState, history.presentState.state, currentSection.id, stackMembers]);
 
   const firstSelectedDancerProp: SelectedEntity | undefined = useMemo(() => {
     if (selectedIds.obstacles.length > 0 || selectedIds.dancers.length > 1 || selectedIds.props.length > 1) return;
@@ -559,8 +646,30 @@ export default function ChoreoEditPage(props: {
       (selectedIds.obstacles.length > 0 && selectedIds.obstacles.some(id => !movementUpdateGroup.obstacles[id]))
     ) return;
 
-    commitState(moveObjectPositions(history.presentState.state, currentSection.id, movementUpdateGroup));
+    const moved = normalizeStacks(moveObjectPositions(history.presentState.state, currentSection.id, movementUpdateGroup));
+    commitState(moved);
     setMovementUpdateGroup({props: {}, dancers: {}, obstacles: {}});
+
+    // Dropped one thing almost exactly onto another of the same kind: offer to stack them.
+    const movedDancers = Object.keys(movementUpdateGroup.dancers);
+    const movedProps = Object.keys(movementUpdateGroup.props);
+    const kind: StackKind | undefined = Object.keys(movementUpdateGroup.obstacles).length > 0 ? undefined
+      : movedProps.length === 0 ? "dancers" : movedDancers.length === 0 ? "props" : undefined;
+    if (!kind) return;
+    const movedIds = kind === "dancers" ? movedDancers : movedProps;
+    const formation = moved.sections.find(s => s.id === currentSection.id)?.formation;
+    if (!formation) return;
+    const target = findDropTarget(formation, kind, movedIds, moved.props);
+    const pairKey = target && `${currentSection.id}:${[...movedIds, ...target].sort().join(",")}`;
+    if (!target || !pairKey || keptApart.current.has(pairKey)) return;
+    const name = (id: string) => kind === "dancers" ? moved.dancers[id]?.name : moved.props[id]?.name;
+    const topFirst = [...movedIds, ...[...target].reverse()];
+    setStackPrompt({
+      kind,
+      members: stackMembers(kind, topFirst),
+      text: `${movedIds.map(name).join("・")}と${target.map(name).join("・")}を重ねます。`,
+    });
+    keptApart.current.add(pairKey);
   }, [movementUpdateGroup]);
 
   const editMovement = useCallback((points: Coordinates[], tension: MovementType) => {
@@ -963,7 +1072,7 @@ export default function ChoreoEditPage(props: {
           updateObstaclePosition={updateObstaclePosition}
           updateObstacleSizeAndRotate={onUpdateObstacleSizeAndRotate}
           selectedIds={selectedIds}
-          setSelectedIds={setSelectedIds}
+          setSelectedIds={setStageSelectedIds}
           selectedObjects={selectedObjects}
           previousSection={prevSection}
           addDancer={onCreateDancer}
@@ -1058,6 +1167,12 @@ export default function ChoreoEditPage(props: {
         onHorizontalAlign={onHorizontalAlign}
         onVerticalAlign={onVerticalAlign}
         showArrange={selectedIds.dancers.length > 0 || selectedIds.props.length > 0 || selectedIds.obstacles.length > 0}
+        showStack={canStack}
+        onStack={onStack}
+        reorderStackLabel={wholeStack ? (wholeStack.length === 2 ? "上下入れ替え" : "並べ替え") : undefined}
+        onReorderStack={onReorderStack}
+        showUnstack={wholeStack !== undefined}
+        onUnstack={onUnstack}
         showSwapPosition={
           ((selectedIds.dancers.length === 2 && selectedIds.props.length === 0) ||
           (selectedIds.dancers.length === 0 && selectedIds.props.length === 2)) &&
@@ -1141,6 +1256,55 @@ export default function ChoreoEditPage(props: {
           }}
         />
       }
+      <Dialog.Root open={stackOrder !== undefined} onOpenChange={open => { if (!open) setStackOrder(undefined); }}>
+        {
+          stackOrder &&
+          <StackOrderDialog
+            initial={stackOrder.members}
+            onSubmit={onConfirmStack}
+            onBack={stackOrder.fromDrop ? () => {
+              setStackPrompt({ kind: stackOrder.kind, members: stackOrder.members, text: `${stackOrder.members.map(m => m.label).join("・")}を重ねます。` });
+              setStackOrder(undefined);
+            } : undefined}/>
+        }
+      </Dialog.Root>
+      <Dialog.Root open={reorderingStack !== undefined} onOpenChange={open => { if (!open) setReorderingStack(undefined); }}>
+        {
+          reorderingStack &&
+          <ReorderStackDialog
+            initial={reorderingStack.members}
+            onSubmit={topFirst => {
+              commitState(reorderStack(history.presentState.state, currentSection.id, reorderingStack.kind, topFirst));
+              setReorderingStack(undefined);
+            }}/>
+        }
+      </Dialog.Root>
+      <Dialog.Root open={unstacking !== undefined} onOpenChange={open => { if (!open) setUnstacking(undefined); }}>
+        {
+          unstacking &&
+          <UnstackDialog
+            members={unstacking.members}
+            onSubmit={ids => {
+              commitState(unstackObjects(history.presentState.state, currentSection.id, unstacking.kind, ids));
+              setSelectedIds(unstacking.kind === "dancers"
+                ? { dancers: ids, props: [], obstacles: [] }
+                : { dancers: [], props: ids, obstacles: [] });
+              setUnstacking(undefined);
+            }}/>
+        }
+      </Dialog.Root>
+      <Dialog.Root open={stackPrompt !== undefined} onOpenChange={open => { if (!open) setStackPrompt(undefined); }}>
+        {
+          stackPrompt &&
+          <StackPromptDialog
+            text={stackPrompt.text}
+            onKeep={() => setStackPrompt(undefined)}
+            onNext={() => {
+              setStackOrder({ kind: stackPrompt.kind, members: stackPrompt.members, fromDrop: true });
+              setStackPrompt(undefined);
+            }}/>
+        }
+      </Dialog.Root>
       <Dialog.Root open={findOpen} onOpenChange={setFindOpen}>
         {
           findOpen &&

@@ -7,3 +7,11 @@ Running list, added to after each phase's review. 🔴 = must be handled before 
 - 🟡 **Server validation.** If the server validates choreography JSON against its own schema, it has to accept the two new fields. Not checked from here.
 - ⚪ **Rotated props** are centred on the prop below by their unrotated boxes, so a rotated top prop can look slightly off.
 - ⚪ **The bottom member is the anchor.** Whatever a command does, members snap back to the bottom one. Moving a single non-bottom member on purpose (e.g. through find + drag) is silently undone, which is the "locked" rule, but there is no message.
+
+## Phase 2 (editor)
+- 🔴 **Hidden people can't be given a count.** While assigning a count, stage taps hit only the top person, and find is hidden in that mode. Needs either find allowed while assigning, or the stack list when tapping a stack in that mode.
+- 🟡 **Selections that aren't stage taps don't expand.** 同色選択, 同名選択, find and paste select people individually. Moving such a selection moves only the bottom member's stack as a whole; anyone else picked out of a stack snaps back. Consistent with "locked", but can surprise.
+- 🟡 **Distribute (横均・縦均)** counts each member separately, so a stack inside a distribute leaves an uneven gap.
+- 🟡 **Paths.** A stack is a multi-selection, and path editing needs exactly one selected, so a stack's path can't be edited. Members' paths stay independent (the spec wanted one shared path).
+- ⚪ **そのまま is remembered per pair for the session**, not "until moved apart". Reloading clears it.
+- ⚪ **Swap positions** on a stacked person and an outsider: the swap happens, then the stack snaps back to its bottom member, which can look like a partial swap.

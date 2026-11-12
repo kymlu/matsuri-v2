@@ -1,5 +1,5 @@
 import { Choreo } from "../../models/choreo";
-import { countUnits, expandSelectionToStacks, isHiddenInStack, normalizeStacks, reorderStack, selectedWholeStack, stackAbove, stackBelow, stackObjects, unstackObjects } from "./stackHelper";
+import { countUnits, expandSelectionToStacks, findDropTarget, isHiddenInStack, normalizeStacks, reorderStack, selectedWholeStack, stackAbove, stackBelow, stackObjects, unstackObjects } from "./stackHelper";
 import { removeObjects } from "../editor/commands/objectCommands";
 
 const dp = (id: string, x: number, y: number, z: number) => ({ dancerId: id, x, y, z, color: "#000", sectionId: "s1", type: "dancer" as const });
@@ -133,5 +133,27 @@ describe("selection", () => {
     expect(countUnits(f(s()), "dancers", ["a", "c", "b"])).toBe(2);
     expect(selectedWholeStack(f(s()), "dancers", ["c", "a"])).toEqual(["c", "a"]);
     expect(selectedWholeStack(f(s()), "dancers", ["c", "a", "b"])).toBeUndefined();
+  });
+});
+
+describe("findDropTarget", () => {
+  const near = () => {
+    const s = makeChoreo();
+    return { ...s, sections: [{ ...s.sections[0], formation: { ...f(s), dancerPositions: { ...f(s).dancerPositions, a: dp("a", 3.1, 1.1, 0) } } }] };
+  };
+
+  it("finds the thing a single person was dropped onto", () => {
+    expect(findDropTarget(f(near()), "dancers", ["a"], {})).toEqual(["b"]);
+  });
+
+  it("ignores things further than 0.2m and moves of several things", () => {
+    expect(findDropTarget(f(makeChoreo()), "dancers", ["a"], {})).toBeUndefined();
+    expect(findDropTarget(f(near()), "dancers", ["a", "d"], {})).toBeUndefined();
+  });
+
+  it("treats a dragged whole stack as one thing, and a target stack as a whole", () => {
+    let s = stackObjects(makeChoreo(), "s1", "dancers", ["c", "d"]); // at d's spot (7,1)
+    s = { ...s, sections: [{ ...s.sections[0], formation: { ...f(s), dancerPositions: { ...f(s).dancerPositions, a: dp("a", 7.05, 1, 0) } } }] };
+    expect(findDropTarget(f(s), "dancers", ["a"], {})).toEqual(["d", "c"]);
   });
 });

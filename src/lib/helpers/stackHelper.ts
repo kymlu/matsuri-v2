@@ -256,3 +256,45 @@ export function selectedWholeStack(formation: Formation, kind: StackKind, ids: s
   const s = findStack(formation, kind, ids[0]);
   return s && s.length === ids.length && s.every(id => ids.includes(id)) ? s : undefined;
 }
+
+// ---- dropping onto something ----
+
+const DROP_DISTANCE = 0.2; // metres between centres that counts as "dropped onto"
+
+function unitOf(formation: Formation, kind: StackKind, id: string): Stack {
+  return findStack(formation, kind, id) ?? [id];
+}
+
+function centreOf(formation: Formation, kind: StackKind, id: string, props: Record<string, Prop>): { x: number, y: number } | undefined {
+  if (kind === "dancers") {
+    const p = formation.dancerPositions[id];
+    return p && { x: p.x, y: p.y };
+  }
+  const p = formation.propPositions[id];
+  const prop = props[id];
+  return p && prop && { x: p.x + prop.width / 2, y: p.y + prop.length / 2 };
+}
+
+// When one thing (a person, a prop, or one whole stack) was just moved, the nearest other thing of the
+// same kind whose centre is within DROP_DISTANCE, as its whole stack. Undefined otherwise.
+export function findDropTarget(formation: Formation, kind: StackKind, movedIds: string[], props: Record<string, Prop>): Stack | undefined {
+  if (movedIds.length === 0) return undefined;
+  const moved = unitOf(formation, kind, movedIds[0]);
+  if (moved.length !== movedIds.length || !movedIds.every(id => moved.includes(id))) return undefined;
+  const from = centreOf(formation, kind, moved[0], props);
+  if (!from) return undefined;
+
+  const ids = Object.keys(kind === "dancers" ? formation.dancerPositions : formation.propPositions);
+  let best: { unit: Stack, distance: number } | undefined;
+  const checked = new Set<string>(moved);
+  ids.forEach(id => {
+    if (checked.has(id)) return;
+    const unit = unitOf(formation, kind, id);
+    unit.forEach(x => checked.add(x));
+    const c = centreOf(formation, kind, unit[0], props);
+    if (!c) return;
+    const distance = Math.hypot(c.x - from.x, c.y - from.y);
+    if (distance <= DROP_DISTANCE && (!best || distance < best.distance)) best = { unit, distance };
+  });
+  return best?.unit;
+}

@@ -43,6 +43,13 @@ type ToolbarProps = {
   showPastePosition: boolean;
   onPastePosition: () => void;
   showSwapPosition: boolean;
+  showStack: boolean;
+  onStack: () => void;
+  // 上下入れ替え for a stack of two, 並べ替え for more; undefined when a whole stack isn't selected.
+  reorderStackLabel?: string;
+  onReorderStack: () => void;
+  showUnstack: boolean;
+  onUnstack: () => void;
   onSwapPosition: () => void;
 
   // arrange
@@ -128,6 +135,10 @@ function Toolbar({
   showPastePosition, onPastePosition,
   showSwapPosition, onSwapPosition,
 
+  showStack, onStack,
+  reorderStackLabel, onReorderStack,
+  showUnstack, onUnstack,
+
   showArrange, onRearrange,
   onVerticalAlign, onHorizontalAlign,
   showDistribute, onDistribute,
@@ -165,7 +176,7 @@ function Toolbar({
 
   const isSubmenuOpen = isAddManagerVisible || isArrangeVisible || isActionManagerVisible || isEditingMovement;
   const areSelectionActionsActivated = showRenameDancer || showArrange || showDeleteObjects;
-  const areEditingActionsActivated = showRenameDancer || showRenameProp || showRenameObstacle ||
+  const areEditingActionsActivated = showRenameDancer || showRenameProp || showRenameObstacle || showStack || showUnstack ||
     showInUse || showArrange || showChangeColour || showCopyPosition || showPastePosition ||
     showSwapPosition || showDuplicateObstacle || showDuplicateProp || showDeleteObjects;
 
@@ -215,6 +226,9 @@ function Toolbar({
         {showRenameObstacle && <IconButton src="textFieldsAlt" label={"名前変更"} onClick={onRenameObstacle} />}
         {showInUse && <IconButton src="flagCheck" crossedOut={!isInUse} label="使用中" onClick={onToggleInUse} />}
         {showArrange && <IconButton src="straighten" label="整理" onClick={()=>{setIsArrangeVisible(true)}}/>}
+        {showStack && <IconButton src="stacks" label="重ねる" onClick={onStack} />}
+        {reorderStackLabel && <IconButton src="swapVert" label={reorderStackLabel} onClick={onReorderStack} />}
+        {showUnstack && <IconButton src="layersClear" label="解除" onClick={onUnstack} />}
         {showChangeColour && <IconButton src="colors" label="色" onClick={onChangeColor} />}
         {showCopyPosition && <IconButton src="contentCopy" label={"位置\nコピー"} onClick={onCopyPosition} />}
         {showPastePosition && <IconButton src="contentPaste" label={"位置\nペースト"} onClick={onPastePosition} />}
