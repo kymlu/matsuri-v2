@@ -973,8 +973,8 @@ export default function ChoreoEditPage(props: {
           toggleEditEnabled={toggleEditEnabled}
           openNoteDialog={openNoteDialog}
           openHelp={openHelpHere}
-          openFindDancer={canFind ? openFind : undefined}
-          focusSelectedDancerRequest={focusSelectionRequest}
+          openFind={canFind ? openFind : undefined}
+          focusSelectionRequest={focusSelectionRequest}
           showPaths={showPaths}
           isEditingMovement={isEditingMovement}
           dancerMovementCache={dancerMovementCache}

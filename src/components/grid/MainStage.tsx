@@ -74,9 +74,9 @@ type MainStageProps = {
   openChangeLog?: () => void,
   // Shows the 🔰 help button at the top left.
   openHelp?: () => void,
-  openFindDancer?: () => void,
+  openFind?: () => void,
   // Bump to centre the selection at the current zoom, e.g. after finding it by name.
-  focusSelectedDancerRequest?: number,
+  focusSelectionRequest?: number,
   showPaths?: boolean,
   isEditingMovement?: boolean,
   dancerMovementCache: MovementCacheBySectionIdByObjectId,
@@ -96,7 +96,7 @@ function MainStage({
   updatePropSizeAndRotate, updateObstacleSizeAndRotate,
   selectedIds, setSelectedIds, selectedObjects,
   addDancer, addProp, addObstacle, appSettings, previousSection, selectedDancerMovement,
-  onDancerSelected, bottomMarginPercent = 0, canResizeProps, editEnabled, toggleEditEnabled, openNoteDialog, openChangeLog, openHelp, openFindDancer, focusSelectedDancerRequest,
+  onDancerSelected, bottomMarginPercent = 0, canResizeProps, editEnabled, toggleEditEnabled, openNoteDialog, openChangeLog, openHelp, openFind, focusSelectionRequest,
   showPaths = false, isEditingMovement = false, dancerMovementCache, propMovementCache, onMidpointEdit, currentMovement,
   dancerAnimationCache, propAnimationCache,
 }: MainStageProps) {
@@ -378,8 +378,8 @@ function MainStage({
   // The bottom panel grows once a dancer is selected, so the pan is redone while it settles.
   const focusUntil = useRef(0);
   useEffect(() => {
-    if (focusSelectedDancerRequest) focusUntil.current = Date.now() + 1500;
-  }, [focusSelectedDancerRequest]);
+    if (focusSelectionRequest) focusUntil.current = Date.now() + 1500;
+  }, [focusSelectionRequest]);
   useEffect(() => {
     if (Date.now() > focusUntil.current || !stageGeometry) return;
     // The middle of everything selected (dancers by centre, props by their box), kept at the current zoom.
@@ -417,7 +417,7 @@ function MainStage({
     });
   // Runs on a new request, and again if the visible area changes while it settles.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [focusSelectedDancerRequest, bottomMarginM, size.height]);
+  }, [focusSelectionRequest, bottomMarginM, size.height]);
 
   const handleWheel = useCallback((e: any) => {
     e.evt.preventDefault();
@@ -727,7 +727,7 @@ function MainStage({
       />
     }
     {
-      ((canEdit && openNoteDialog) || openChangeLog || openHelp || openFindDancer) &&
+      ((canEdit && openNoteDialog) || openChangeLog || openHelp || openFind) &&
       <div className={`absolute space-y-1 left-2 ${isShowingHorizontalRuler ? "top-7" : "top-1"}`}>
         {
           openHelp &&
@@ -739,12 +739,12 @@ function MainStage({
           />
         }
         {
-          openFindDancer &&
+          openFind &&
           <IconButton
             size="sm"
             src="search"
             colour="black"
-            onClick={openFindDancer}
+            onClick={openFind}
           />
         }
         {
