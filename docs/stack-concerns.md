@@ -1,15 +1,19 @@
 # Stacks: concerns
 
-## Summary (end of branch)
+## Summary (current)
 Still open, most important first:
-1. 🔴 Older app versions erase stacks when they save (schema stripping). Needs a release plan.
-2. 🟡 Server must accept the two new formation fields (not verified).
-3. 🟡 PDF export doesn't show stacks; printed sheets hide the bottom person.
-4. 🟡 A stack's path can't be edited; members' paths stay independent.
-5. 🟡 Accidental overlaps still have no grey ×2.
-6. 🟡 Prop stacks can't be inspected in view mode.
-7. 🟡 Individually selected stack members (同色選択, find) snap back when moved; distribute leaves uneven gaps around stacks.
-Not built from the spec: docked member list (find covers it), floating stack list (dialog instead), dancer on prop.
+1. 🟡 **Old app versions erase stacks** (the schema drops unknown fields). Low risk: the server stores the choreography without reading it, and a web app picks up the new version on reload, so only a tab left open on the old version that then saves can lose stacks.
+2. 🟡 **The rules live only in the client** (same spot, consecutive z, linked paths). Anything that edits choreography JSON outside the editor can break them until the editor next saves.
+3. 🟡 **No page-level tests** for the drop prompt, drag-follow, selection expansion and paste message; covered by helper/dialog tests and manual browser checks only.
+4. 🟡 **Members picked out of a stack** (同色選択, find) still snap back silently when moved alone.
+5. 🟡 **Accidental overlaps** (same spot, not stacked) have no mark.
+6. ⚪ Drop detection is centre-to-centre within 0.2 m; large props rarely trigger it.
+7. ⚪ Only the drawn member's colour is visible; members can differ.
+8. ⚪ Drag-follow moves stage nodes outside React; a re-render mid-drag that reset positions would make members jump apart.
+9. ⚪ The normaliser runs over every section on each change (cheap now; grows with sections × stacks).
+Handled separately: dancer on prop (and vice versa).
+
+Done since the first summary: prop stacks in view mode, 整理 per stack (incl. even spacing), copy/paste keeps stacks, colour note and ×N badge, one undo step for drop-and-stack, the drop prompt returns after unstacking, 位置交換 between stacks and people, linked stack paths, changelog 重なり lines, PDF marks and followed-dancer stack lines, useStackEditing hook.
 
 
 Running list, added to after each phase's review. 🔴 = must be handled before release, 🟡 = should be decided, ⚪ = known limit.
@@ -47,3 +51,13 @@ Running list, added to after each phase's review. 🔴 = must be handled before 
 ## After user testing
 - ✅ **Dragging one member moved only that member.** A drag that starts on one member (before the rest are selected, or when the stage only drags that node) now brings the whole stack by the same amount, and selects the whole stack.
 - ✅ **Reordering uses drag handles** like the app's other sortable lists, instead of arrows.
+
+## Follow-up round
+- ✅ **Drop then stack was two undo steps.** Stacking from the drop prompt now folds into the move's undo step (AMEND_STATE).
+- ✅ **The drop prompt only showed once per pair.** A pair is remembered only after そのまま (or closing), not when the prompt opens.
+- ✅ **useStackEditing** holds the editor's stack state, actions, drop prompt and dialogs.
+- ✅ **位置交換** works for stack↔stack and stack↔person; not for one stack on its own (上下入れ替え covers that).
+- ✅ **Linked paths.** A stack with the same members as in the previous section has one path: tapping it while editing paths selects the whole stack, edits go to the bottom member, and the normaliser copies them to the rest. Stacks that form or break up keep separate paths.
+- ✅ **Changelog** shows 重なり：〇〇の上 / 〇〇を乗せる / なし per section, with the previous value.
+- ✅ **PDF** draws ×N on stacks with a legend; on a followed dancer's sheet they're drawn on top of their stack (red ×N) and their boxes get the stack lines.
+- ⚪ On a followed dancer's sheet, whoever is above them is hidden instead; the red ×N and the 〇〇を乗せている line say so.
