@@ -58,6 +58,7 @@ function makeLog(overall: Partial<ChangeLog["overall"]> = {}): ChangeLog {
             position: { from: position(4, 1), to: position(3.5, 1.25) },
             counts: [{ actionName: "振りA", from: ["1回目"], to: ["1回目", "2回目"] }],
             pathChanged: true,
+            stack: { from: undefined, to: { on: "ゆい" } },
           },
           { sectionId: "s2", oldSectionName: "サビ2", isNew: false, counts: [{ actionName: "振りB", from: [], to: ["1回目"] }], pathChanged: false },
           { sectionId: "s3", isNew: true, position: { to: position(5, 2) }, counts: [{ actionName: "振りC", from: [], to: ["2回目"] }], pathChanged: false },
@@ -99,6 +100,7 @@ describe("ChangeLogDialog", () => {
       expect(positionLines()[0]).toBe("位置：1.3m/←1.5m（前回：1m/←1m）");
       expect(screen.getByText("振りA：1回目 → 1回目、2回目")).toBeInTheDocument();
       expect(screen.getByText("大サビへの移動経路を変更")).toBeInTheDocument();
+      expect(screen.getByText(/重なり：ゆいの上/).textContent).toBe("重なり：ゆいの上（前回：なし）");
     });
 
     it("shows a renamed section's old name and なし for no count", () => {

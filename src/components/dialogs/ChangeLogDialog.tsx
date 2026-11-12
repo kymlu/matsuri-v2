@@ -2,7 +2,7 @@ import { Select } from "@base-ui/react";
 import { Fragment, useMemo, useState } from "react";
 import { Choreo, StageGeometry } from "../../models/choreo";
 import { Dancer } from "../../models/dancer";
-import { ActionLine, ChangeLog, DancerSectionChanges, ListChanges } from "../../lib/helpers/changeLogHelper";
+import { ActionLine, ChangeLog, DancerSectionChanges, ListChanges, StackPlace } from "../../lib/helpers/changeLogHelper";
 import { formatDateRange } from "../../lib/helpers/dateHelper";
 import { strCompare } from "../../lib/helpers/globalHelper";
 import Icon from "../basic/Icon";
@@ -156,7 +156,7 @@ type DancerSectionProps = {
 }
 
 function DancerSection({ section, choreo, oldGeometry, sectionNames }: DancerSectionProps) {
-  const { position, counts, pathChanged } = section;
+  const { position, counts, pathChanged, stack } = section;
   const index = choreo.sections.findIndex(x => x.id === section.sectionId);
   const nextSectionName = choreo.sections[index + 1]?.name;
 
@@ -187,6 +187,13 @@ function DancerSection({ section, choreo, oldGeometry, sectionNames }: DancerSec
           </li>
         }
         {
+          stack &&
+          <li>
+            重なり：{stackPlaceText(stack.to)}
+            {!section.isNew && <span className="text-muted">（前回：{stackPlaceText(stack.from)}）</span>}
+          </li>
+        }
+        {
           counts.map((count, i) =>
             <li key={i}>
               {count.actionName}：{section.isNew ? countNames(count.to) : `${countNames(count.from)} → ${countNames(count.to)}`}
@@ -201,6 +208,9 @@ function DancerSection({ section, choreo, oldGeometry, sectionNames }: DancerSec
     </div>
   );
 }
+
+const stackPlaceText = (place?: StackPlace) =>
+  !place ? "なし" : "on" in place ? `${place.on}の上` : `${place.carrying}を乗せる`;
 
 const countNames = (names: string[]) => names.length > 0 ? names.join("、") : "なし";
 

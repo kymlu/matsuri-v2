@@ -191,6 +191,28 @@ describe("buildChangeLog", () => {
     });
   });
 
+  describe("stacks", () => {
+    const stack = (c: Choreo, i: number, ...ids: string[]) => { c.sections[i].formation.dancerStacks = [ids]; };
+
+    it("reports being put in a stack, from both sides, without a position change", () => {
+      const log = compare(c => stack(c, 0, "d2", "d1")); // さくら on あおい (positions untouched here)
+      const s1 = (id: string) => log.dancers[id].kind === "changed" ? (log.dancers[id] as any).sections[0] : undefined;
+      expect(s1("d1").stack).toEqual({ from: undefined, to: { on: "あおい" } });
+      expect(s1("d2").stack).toEqual({ from: undefined, to: { carrying: "さくら" } });
+    });
+
+    it("reports a change of order and leaving a stack", () => {
+      const order = compare(c => stack(c, 0, "d1", "d2"), c => stack(c, 0, "d2", "d1"));
+      expect(order.dancers.d1.kind === "changed" && order.dancers.d1.sections[0].stack).toEqual({ from: { on: "あおい" }, to: { carrying: "あおい" } });
+      const left = compare(() => {}, c => stack(c, 0, "d2", "d1"));
+      expect(left.dancers.d1.kind === "changed" && left.dancers.d1.sections[0].stack).toEqual({ from: { on: "あおい" }, to: undefined });
+    });
+
+    it("says nothing when the stack is unchanged", () => {
+      expect(compare(c => stack(c, 0, "d2", "d1"), c => stack(c, 0, "d2", "d1")).dancers.d1).toBeUndefined();
+    });
+  });
+
   describe("sections", () => {
     it("reports added, removed and renamed sections", () => {
       const log = compare(c => {
