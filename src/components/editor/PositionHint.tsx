@@ -28,8 +28,10 @@ const PositionHint = memo(function PositionHint({
   const deltaX = nextPosition ? roundToTenth(roundToTenth(nextPosition.x) - roundToTenth(position.x)) : undefined;
   const deltaY = nextPosition ? roundToTenth(roundToTenth(nextPosition.y) - roundToTenth(position.y)) : undefined;
 
-  // With a stack line under one of them, the boxes differ in height: keep both readings level at the top.
-  const hasNote = !!stackNote || !!stackMoveNote;
+  // With a stack line under one of them, the other gets a "-" in its place so both boxes have three lines,
+  // and both stay top-aligned so the readings line up.
+  const showNext = !!nextPosition && deltaX !== undefined && deltaY !== undefined;
+  const hasNote = !!stackNote || (showNext && !!stackMoveNote);
 
   return (
     <div>
@@ -37,7 +39,7 @@ const PositionHint = memo(function PositionHint({
         <div className="flex w-full gap-1">
           <InfoBox title="現在の位置" alignTop={hasNote}>
             <DancerPositionText position={position} geometry={geometry}/>
-            {stackNote && <Note text={stackNote}/>}
+            {hasNote && <Note text={stackNote ?? "-"}/>}
           </InfoBox>
           {
             nextPosition && deltaX !== undefined && deltaY !== undefined &&
@@ -71,7 +73,7 @@ const PositionHint = memo(function PositionHint({
                   </>
                 }
               </div>
-              {stackMoveNote && <Note text={stackMoveNote}/>}
+              {hasNote && <Note text={stackMoveNote ?? "-"}/>}
             </InfoBox>
           }
         </div>
