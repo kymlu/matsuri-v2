@@ -3,6 +3,7 @@ import { ChoreoSection, Formation } from "../../models/choreoSection";
 import { DancerPosition } from "../../models/dancer";
 import { Prop, PropPosition } from "../../models/prop";
 import { StageEntities } from "../../models/history";
+import { cornerToCentreFromProp } from "./editorCalculationHelper";
 
 // A stack is a list of ids, bottom first. Everyone in it is at the bottom member's spot,
 // and their z values are consecutive in that order. Dancers and props stack separately.
@@ -456,5 +457,44 @@ export function restoreCopiedStacks(state: Choreo, sectionId: string, copied: Co
       return [...getStacks(f, kind).map(s => s.filter(id => !taken.has(id))), ...incoming];
     };
     return { ...f, dancerStacks: add("dancers", copied.dancers), propStacks: add("props", copied.props) };
+  });
+}
+
+// ---- 位置交換 (swap) ----
+
+// The two separate things (a person/prop or a whole stack) the selection is made of, bottom members first;
+// undefined unless there are exactly two.
+export function swapUnits(formation: Formation, kind: StackKind, ids: string[]): [Stack, Stack] | undefined {
+  const units: Stack[] = [];
+  ids.forEach(id => {
+    if (units.some(u => u.includes(id))) return;
+    units.push(unitOf(formation, kind, id));
+  });
+  return units.length === 2 ? [units[0], units[1]] : undefined;
+}
+
+// Swaps two units: each moves by the distance between them (bottom member to bottom member, prop centres
+// for props), so stacks stay stacks. Front/back order is kept per unit.
+export function swapUnitPositions(state: Choreo, sectionId: string, kind: StackKind, a: Stack, b: Stack): Choreo {
+  return updateSection(state, sectionId, f => {
+    if (kind === "dancers") {
+      const pa = f.dancerPositions[a[0]], pb = f.dancerPositions[b[0]];
+      if (!pa || !pb) return f;
+      const dx = pb.x - pa.x, dy = pb.y - pa.y;
+      const next = { ...f.dancerPositions };
+      a.forEach(id => { if (next[id]) next[id] = { ...next[id], x: next[id].x + dx, y: next[id].y + dy }; });
+      b.forEach(id => { if (next[id]) next[id] = { ...next[id], x: next[id].x - dx, y: next[id].y - dy }; });
+      return { ...f, dancerPositions: next };
+    }
+    const pa = f.propPositions[a[0]], pb = f.propPositions[b[0]];
+    const propA = state.props[a[0]], propB = state.props[b[0]];
+    if (!pa || !pb || !propA || !propB) return f;
+    const ca = cornerToCentreFromProp(pa, propA, state.stageGeometry.yAxis);
+    const cb = cornerToCentreFromProp(pb, propB, state.stageGeometry.yAxis);
+    const dx = cb.x - ca.x, dy = cb.y - ca.y;
+    const next = { ...f.propPositions };
+    a.forEach(id => { if (next[id]) next[id] = { ...next[id], x: next[id].x + dx, y: next[id].y + dy }; });
+    b.forEach(id => { if (next[id]) next[id] = { ...next[id], x: next[id].x - dx, y: next[id].y - dy }; });
+    return { ...f, propPositions: next };
   });
 }

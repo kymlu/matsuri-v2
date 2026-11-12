@@ -13,7 +13,7 @@ import MainStage from "../components/grid/MainStage";
 import { Dialog } from "@base-ui/react";
 import FindObjectsDialog from "../components/dialogs/FindObjectsDialog";
 import { useStackEditing } from "../lib/hooks/useStackEditing";
-import { arrangeRepresentatives, copyStacks, CopiedStacks, countSelectedUnits, prepareStackPaste, rearrangeWithStacks, restoreCopiedStacks, findStack, moveStacksTogether, normalizeStacks } from "../lib/helpers/stackHelper";
+import { arrangeRepresentatives, copyStacks, CopiedStacks, countSelectedUnits, prepareStackPaste, rearrangeWithStacks, restoreCopiedStacks, moveStacksTogether, normalizeStacks } from "../lib/helpers/stackHelper";
 import EditChoreoSizeDialog from "../components/dialogs/EditChoreoSizeDialog";
 import { exportChoreo } from "../lib/helpers/exportHelper";
 import { saveChoreo } from "../lib/dataAccess/DataController";
@@ -31,7 +31,7 @@ import EditSectionNoteDialog from "../components/dialogs/EditSectionNoteDialog";
 import { clearSeenVersion, getPersonalNotesForChoreo } from "../lib/dataAccess/LocalStorageController";
 import { Coordinates } from "../models/base";
 import { colorPalette } from "../lib/consts/colors";
-import { addDancer, addObstacle, addObstacles, addProp, alignHorizontalPositions, alignVerticalPositions, changeObjectColours, changePropInUse, distributePositions, duplicateProps, editAndDeleteProps, editDancerPath, editPropPath, moveObjectPositions, pastePositions, rearrangePositions, removeObjects, renameAndDeleteDancers, renameDancer, renameObstacle, renameProp, setZOnAllPositions, swapDancerPositions, swapPropPositions, updateObstacleSizeAndRotate, updatePropSizeAndRotate } from "../lib/editor/commands/objectCommands";
+import { addDancer, addObstacle, addObstacles, addProp, alignHorizontalPositions, alignVerticalPositions, changeObjectColours, changePropInUse, distributePositions, duplicateProps, editAndDeleteProps, editDancerPath, editPropPath, moveObjectPositions, pastePositions, rearrangePositions, removeObjects, renameAndDeleteDancers, renameDancer, renameObstacle, renameProp, setZOnAllPositions, updateObstacleSizeAndRotate, updatePropSizeAndRotate } from "../lib/editor/commands/objectCommands";
 import { Obstacle, PropPosition } from "../models/prop";
 import { DancerManagerDialog } from "../components/dialogs/DancerManagerDialog";
 import ExportDialog from "../components/dialogs/ExportDialog";
@@ -290,8 +290,8 @@ export default function ChoreoEditPage(props: {
     dispatch({ type: "AMEND_STATE", newState, currentSectionId: currentSection.id });
   }, [dispatch, currentSection.id]);
   const {
-    setStageSelectedIds, stackKind, stackIds, canStack, wholeStack, hiddenSelectedNames,
-    onStack, onReorderStack, onUnstack, offerStackOnDrop, stackDialogs,
+    setStageSelectedIds, canStack, wholeStack, hiddenSelectedNames,
+    onStack, onReorderStack, onUnstack, canSwap, onSwap, offerStackOnDrop, stackDialogs,
   } = useStackEditing({
     state: history.presentState.state,
     section: currentSection,
@@ -578,14 +578,6 @@ export default function ChoreoEditPage(props: {
   const handleExportDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setExportDialogOpen(isOpen);
   };
-
-  const onSwapPositions = useCallback(() => {
-    if (selectedIds.dancers[0] && selectedIds.dancers[1]) {
-      commitState(swapDancerPositions(history.presentState.state, currentSection.id, selectedIds.dancers[0], selectedIds.dancers[1]));
-    } else if (selectedIds.props[0] && selectedIds.props[1]) {
-      commitState(swapPropPositions(history.presentState.state, currentSection.id, selectedIds.props[0], selectedIds.props[1]));
-    }
-  }, [commitState, selectedIds, history.presentState.state, currentSection.id]);
 
   const [movementUpdateGroup, setMovementUpdateGroup] = useState<StageEntities<Record<string, Coordinates>>>({props: {}, dancers: {}, obstacles: {}});
 
@@ -1133,14 +1125,8 @@ export default function ChoreoEditPage(props: {
         onReorderStack={onReorderStack}
         showUnstack={wholeStack !== undefined}
         onUnstack={onUnstack}
-        showSwapPosition={
-          ((selectedIds.dancers.length === 2 && selectedIds.props.length === 0) ||
-          (selectedIds.dancers.length === 0 && selectedIds.props.length === 2)) &&
-          selectedIds.obstacles.length === 0 &&
-          // Not for stacks: they share one spot, so there's nothing to swap (上下入れ替え does that).
-          !stackIds.some(id => stackKind && findStack(currentSection.formation, stackKind, id))
-        }
-        onSwapPosition={onSwapPositions}
+        showSwapPosition={canSwap}
+        onSwapPosition={onSwap}
         showDeleteObjects={selectedIds.dancers.length > 0 || selectedIds.props.length > 0 || selectedIds.obstacles.length > 0}
         onDeleteObjects={onDeleteObjects}
         onOpenActionManager={openEditDancerActionsDialog}

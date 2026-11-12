@@ -1,5 +1,5 @@
 import { Choreo } from "../../models/choreo";
-import { arrangeRepresentatives, copyStacks, countSelectedUnits, prepareStackPaste, rearrangeWithStacks, restoreCopiedStacks, countUnits, expandSelectionToStacks, findDropTarget, moveStacksTogether, stackNotes, isHiddenInStack, normalizeStacks, reorderStack, selectedWholeStack, stackAbove, stackBelow, stackObjects, unstackObjects } from "./stackHelper";
+import { arrangeRepresentatives, swapUnits, swapUnitPositions, copyStacks, countSelectedUnits, prepareStackPaste, rearrangeWithStacks, restoreCopiedStacks, countUnits, expandSelectionToStacks, findDropTarget, moveStacksTogether, stackNotes, isHiddenInStack, normalizeStacks, reorderStack, selectedWholeStack, stackAbove, stackBelow, stackObjects, unstackObjects } from "./stackHelper";
 import { alignHorizontalPositions, pastePositions, removeObjects } from "../editor/commands/objectCommands";
 import { addSection } from "../editor/commands/sectionCommands";
 
@@ -272,5 +272,31 @@ describe("copy and paste with stacks", () => {
   it("a partly copied stack pastes as separate people", () => {
     const s = withSecond(stackObjects(makeChoreo(), "s1", "dancers", ["a", "b", "c"]));
     expect(copyStacks(f(s), { dancers: ["a", "b"], props: [], obstacles: [] }).dancers).toEqual([]);
+  });
+});
+
+describe("位置交換 with stacks", () => {
+  it("finds two units, not one stack", () => {
+    const s = stackObjects(makeChoreo(), "s1", "dancers", ["a", "b"]);
+    expect(swapUnits(f(s), "dancers", ["a", "b"])).toBeUndefined();
+    expect(swapUnits(f(s), "dancers", ["a", "b", "c"])).toEqual([["b", "a"], ["c"]]);
+  });
+
+  it("swaps a stack with a person, keeping the stack", () => {
+    let s = stackObjects(makeChoreo(), "s1", "dancers", ["a", "b"]); // at b (3,1)
+    s = normalizeStacks(swapUnitPositions(s, "s1", "dancers", ["b", "a"], ["c"])); // c at (5,1)
+    expect(pos(s, "a")).toMatchObject({ x: 5, y: 1 });
+    expect(pos(s, "b")).toMatchObject({ x: 5, y: 1 });
+    expect(pos(s, "c")).toMatchObject({ x: 3, y: 1 });
+    expect(f(s).dancerStacks).toEqual([["b", "a"]]);
+  });
+
+  it("swaps two stacks", () => {
+    let s = stackObjects(makeChoreo(), "s1", "dancers", ["a", "b"]); // at (3,1)
+    s = stackObjects(s, "s1", "dancers", ["c", "d"]); // d bottom
+    const dAt = { x: pos(s, "d").x, y: pos(s, "d").y };
+    s = normalizeStacks(swapUnitPositions(s, "s1", "dancers", ["b", "a"], ["d", "c"]));
+    expect(pos(s, "a")).toMatchObject(dAt);
+    expect(pos(s, "c")).toMatchObject({ x: 3, y: 1 });
   });
 });
