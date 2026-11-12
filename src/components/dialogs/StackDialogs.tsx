@@ -156,7 +156,7 @@ export function StackListDialog({ members, onPick, kind = "dancers" }: { members
     <span className="font-semibold break-all">{m.label}</span>
     <span className="ml-auto text-sm text-muted shrink-0">{tierLabel(i, members.length)}</span>
   </>;
-  return <CustomDialog title={kind === "dancers" ? `ここに${members.length}人` : `ここに${members.length}つ`} hasX fullWidth focusDialogOnOpen>
+  return <CustomDialog title={kind === "dancers" ? "重なっている人" : "重なっている道具"} hasX fullWidth focusDialogOnOpen>
     <ul className="p-px space-y-1">
       {
         members.map((m, i) =>

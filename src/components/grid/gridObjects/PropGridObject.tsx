@@ -159,7 +159,7 @@ const PropGridObject = memo(function PropGridObject({
             stroke={colorPalette.primary} strokeWidth={3} dash={[5, 4]} cornerRadius={4}/>
         }
         {
-          stackMark &&
+          stackMark && stackCount !== undefined &&
           <StackBadge x={prop.width * METER_PX} y={0} radius={METER_PX * 0.22} red={stackMark === "red"} count={stackCount}/>
         }
       </BaseGridObject>
