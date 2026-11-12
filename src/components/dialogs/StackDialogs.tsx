@@ -115,7 +115,15 @@ export function UnstackDialog({ members, onSubmit }: { members: StackMember[], o
   return <BaseEditDialog title="外す人を選ぶ" actionButtonText="外す" noDetachedTrigger fullWidth
     isActionButtonDisabled={picked.size === 0}
     onSubmit={() => onSubmit([...picked])}>
-    <p className="mb-2 text-sm text-muted">上から順。外した人はその場に残ります。</p>
+    <div className="flex items-center justify-between gap-2 mb-2">
+      <p className="text-sm text-muted">上から順。外した人はその場に残ります。</p>
+      <button
+        type="button"
+        className="px-2 text-sm font-semibold rounded-md text-primary min-h-8 shrink-0"
+        onClick={() => setPicked(picked.size === members.length ? new Set() : new Set(members.map(m => m.id)))}>
+        {picked.size === members.length ? "すべて解除" : "すべて選択"}
+      </button>
+    </div>
     <ul className="p-px space-y-1">
       {
         members.map((m, i) => {
