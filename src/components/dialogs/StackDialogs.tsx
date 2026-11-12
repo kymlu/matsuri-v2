@@ -44,7 +44,7 @@ function SortableMember({ member, tier }: { member: StackMember, tier: string })
     style={{ transform: CSS.Transform.toString(transform), transition }}
     className="flex items-center gap-2 px-3 border rounded-md min-h-11 border-line bg-surface">
     {/* touch-none so dragging the handle on a phone doesn't scroll the dialog instead */}
-    <div {...attributes} {...listeners} aria-label={`${member.label}を並べ替え`} className="cursor-grab touch-none">
+    <div {...attributes} {...listeners} aria-label={`${member.label}を並べ替え`} className="flex items-center justify-center self-stretch cursor-grab touch-none">
       <Icon src="dragHandle" size="sm" colour="grey"/>
     </div>
     <Dot color={member.color}/>

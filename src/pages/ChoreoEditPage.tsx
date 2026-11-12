@@ -1190,7 +1190,9 @@ export default function ChoreoEditPage(props: {
         showSwapPosition={
           ((selectedIds.dancers.length === 2 && selectedIds.props.length === 0) ||
           (selectedIds.dancers.length === 0 && selectedIds.props.length === 2)) &&
-          selectedIds.obstacles.length === 0
+          selectedIds.obstacles.length === 0 &&
+          // Not for stacks: they share one spot, so there's nothing to swap (上下入れ替え does that).
+          !stackIds.some(id => stackKind && findStack(currentSection.formation, stackKind, id))
         }
         onSwapPosition={onSwapPositions}
         showDeleteObjects={selectedIds.dancers.length > 0 || selectedIds.props.length > 0 || selectedIds.obstacles.length > 0}
