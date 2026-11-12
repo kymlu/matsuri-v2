@@ -186,6 +186,36 @@ const FormationLayer = memo(function FormationLayer({
   const dancerStackDrawing = useMemo(() => stackDrawing(dancerStacks, selectedIds.dancers), [stackDrawing, dancerStacks, selectedIds.dancers]);
   const propStackDrawing = useMemo(() => stackDrawing(propStacks, selectedIds.props), [stackDrawing, propStacks, selectedIds.props]);
 
+  // Dragging one member of a stack brings the others along on every frame, so nothing jumps or slides into place
+  // after the drop. Members the transformer already drags (the whole stack was selected when the drag began) are left to it.
+  // The editor then saves the others at the same offset (moveStacksTogether), which lands exactly where they already are.
+  const following = useRef<Map<string, { node: Konva.Node, x: number, y: number }[]>>(new Map());
+  const followDrag = useCallback((id: string, phase: "start" | "move" | "end" | "cancel", dx = 0, dy = 0) => {
+    if (phase === "start") {
+      const stack = [...(dancerStacks ?? []), ...(propStacks ?? [])].find(s => s.includes(id));
+      const leaderNode = nodeMap.current.get(id);
+      const attached = transformerRef.current?.nodes() ?? [];
+      const proxied = !!leaderNode && attached.includes(leaderNode);
+      const nodes = (stack ?? [])
+        .filter(member => member !== id)
+        .map(member => nodeMap.current.get(member))
+        .filter((node): node is Konva.Node => !!node && !(proxied && attached.includes(node)))
+        .map(node => ({ node, x: node.x(), y: node.y() }));
+      if (nodes.length > 0) following.current.set(id, nodes);
+      else following.current.delete(id);
+      return;
+    }
+    const nodes = following.current.get(id);
+    if (!nodes) return;
+    nodes.forEach(({ node, x, y }) => {
+      if (phase === "end") node.to({ x: x + dx, y: y + dy }); // same 1s tween as the dragged one's snap
+      else if (phase === "cancel") node.position({ x, y });
+      else node.position({ x: x + dx, y: y + dy });
+    });
+    if (phase === "end" || phase === "cancel") following.current.delete(id);
+    else nodes[0].node.getLayer()?.batchDraw();
+  }, [dancerStacks, propStacks]);
+
   const handleDancerClick = useCallback((id: string, isAdditive?: boolean) => {
     toggleDancerSelect(id, isAdditive);
     onDancerSelected?.();
@@ -233,6 +263,7 @@ const FormationLayer = memo(function FormationLayer({
             isZooming={isZooming}
             stackMark={propStackDrawing[propPosition.propId]?.mark}
             hiddenSelected={propStackDrawing[propPosition.propId]?.hiddenSelected}
+            onDragFollow={canEdit ? followDrag : undefined}
           />
         );
       })}
@@ -256,6 +287,7 @@ const FormationLayer = memo(function FormationLayer({
             animationCache={dancerAnimationCache[dancerPosition.dancerId]}
             stackMark={dancerStackDrawing[dancerPosition.dancerId]?.mark}
             hiddenSelected={dancerStackDrawing[dancerPosition.dancerId]?.hiddenSelected}
+            onDragFollow={canEdit ? followDrag : undefined}
           />
         );
       })}
