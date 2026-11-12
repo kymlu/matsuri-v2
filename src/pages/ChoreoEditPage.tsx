@@ -11,6 +11,7 @@ import { ChoreoSection, Movement, MovementCacheBySectionIdByObjectId, MovementTy
 import { debounce, indexByKey, isNullOrUndefinedOrBlank, strEquals } from "../lib/helpers/globalHelper";
 import MainStage from "../components/grid/MainStage";
 import { Dialog } from "@base-ui/react";
+import FindObjectsDialog from "../components/dialogs/FindObjectsDialog";
 import EditChoreoSizeDialog from "../components/dialogs/EditChoreoSizeDialog";
 import { exportChoreo } from "../lib/helpers/exportHelper";
 import { saveChoreo } from "../lib/dataAccess/DataController";
@@ -255,6 +256,27 @@ export default function ChoreoEditPage(props: {
       obstacles: obstacles,
     } as StageEntities<PropPosition[], DancerPosition[], Obstacle[]>;
   }, [selectedIds, currentSection]);
+
+  // ---- Find (by name) ----
+  const [findOpen, setFindOpen] = useState(false);
+  const [focusSelectionRequest, setFocusSelectionRequest] = useState(0);
+  const openFind = useCallback(() => setFindOpen(true), []);
+  const findDancers = useMemo(() => {
+    const dancers = history.presentState.state.dancers;
+    return Object.values(currentSection.formation.dancerPositions)
+      .filter(pos => dancers[pos.dancerId])
+      .map(pos => ({ id: pos.dancerId, name: dancers[pos.dancerId].name, color: pos.color }));
+  }, [history.presentState.state.dancers, currentSection.formation.dancerPositions]);
+  const findProps = useMemo(() => {
+    const props = history.presentState.state.props;
+    return Object.keys(currentSection.formation.propPositions).filter(id => props[id]).map(id => props[id]);
+  }, [history.presentState.state.props, currentSection.formation.propPositions]);
+  const onFind = useCallback((dancerIds: string[], propIds: string[]) => {
+    setSelectedIds({dancers: dancerIds, props: propIds, obstacles: []});
+    setFocusSelectionRequest(n => n + 1);
+  }, []);
+  // Not while assigning a count (selecting would assign) or editing a path.
+  const canFind = !isAssigningActions && !isEditingMovement && (findDancers.length + findProps.length) > 0;
 
   const firstSelectedDancerProp: SelectedEntity | undefined = useMemo(() => {
     if (selectedIds.obstacles.length > 0 || selectedIds.dancers.length > 1 || selectedIds.props.length > 1) return;
@@ -951,6 +973,8 @@ export default function ChoreoEditPage(props: {
           toggleEditEnabled={toggleEditEnabled}
           openNoteDialog={openNoteDialog}
           openHelp={openHelpHere}
+          openFind={canFind ? openFind : undefined}
+          focusSelectionRequest={focusSelectionRequest}
           showPaths={showPaths}
           isEditingMovement={isEditingMovement}
           dancerMovementCache={dancerMovementCache}
@@ -1117,6 +1141,17 @@ export default function ChoreoEditPage(props: {
           }}
         />
       }
+      <Dialog.Root open={findOpen} onOpenChange={setFindOpen}>
+        {
+          findOpen &&
+          <FindObjectsDialog
+            dancers={findDancers}
+            props={findProps}
+            initialDancerIds={selectedIds.dancers}
+            initialPropIds={selectedIds.props}
+            onConfirm={onFind}/>
+        }
+      </Dialog.Root>
       <Dialog.Root
         handle={resizeDialog}
         open={resizeDialogOpen}

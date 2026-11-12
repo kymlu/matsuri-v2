@@ -225,7 +225,7 @@ export default function ChoreoViewPage(props: {
   // ---- Find dancer ----
   const [findDancerOpen, setFindDancerOpen] = useState(false);
   const [focusDancerRequest, setFocusDancerRequest] = useState(0);
-  const openFindDancer = useCallback(() => setFindDancerOpen(true), []);
+  const openFind = useCallback(() => setFindDancerOpen(true), []);
   const myDancerId = useMemo(
     () => findMyDancerId(props.currentChoreo.dancers, props.myDancerName),
     [props.currentChoreo.dancers, props.myDancerName]
@@ -313,8 +313,8 @@ export default function ChoreoViewPage(props: {
           propAnimationCache={propAnimationCache}
           openChangeLog={changeLog && !isChangeLogBannerShown ? openChangeLog : undefined}
           openHelp={openHelpHere}
-          openFindDancer={entityCount.dancers > 0 ? openFindDancer : undefined}
-          focusSelectedDancerRequest={focusDancerRequest}
+          openFind={entityCount.dancers > 0 ? openFind : undefined}
+          focusSelectionRequest={focusDancerRequest}
         />
       </div>
 
