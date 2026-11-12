@@ -281,8 +281,9 @@ export default function ChoreoEditPage(props: {
     setSelectedIds({dancers: dancerIds, props: propIds, obstacles: []});
     setFocusSelectionRequest(n => n + 1);
   }, []);
-  // Not while assigning a count (selecting would assign) or editing a path.
-  const canFind = !isAssigningActions && !isEditingMovement && (findDancers.length + findProps.length) > 0;
+  // While assigning a count, find picks who does it (dancers only), which also reaches people hidden in a stack.
+  // Not while editing a path.
+  const canFind = !isEditingMovement && (isAssigningActions ? currentTiming !== undefined && findDancers.length > 0 : (findDancers.length + findProps.length) > 0);
 
   // ---- Stacks ----
   // Stage taps select whole stacks (not while assigning a count or editing a path).
@@ -1310,7 +1311,7 @@ export default function ChoreoEditPage(props: {
           findOpen &&
           <FindObjectsDialog
             dancers={findDancers}
-            props={findProps}
+            props={isAssigningActions ? [] : findProps}
             initialDancerIds={selectedIds.dancers}
             initialPropIds={selectedIds.props}
             onConfirm={onFind}/>

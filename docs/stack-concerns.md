@@ -9,7 +9,7 @@ Running list, added to after each phase's review. 🔴 = must be handled before 
 - ⚪ **The bottom member is the anchor.** Whatever a command does, members snap back to the bottom one. Moving a single non-bottom member on purpose (e.g. through find + drag) is silently undone, which is the "locked" rule, but there is no message.
 
 ## Phase 2 (editor)
-- 🔴 **Hidden people can't be given a count.** While assigning a count, stage taps hit only the top person, and find is hidden in that mode. Needs either find allowed while assigning, or the stack list when tapping a stack in that mode.
+- ✅ ~~**Hidden people can't be given a count.**~~ Fixed in phase 2: find now works while assigning a count (dancers only), and ticking someone there assigns them, hidden or not.
 - 🟡 **Selections that aren't stage taps don't expand.** 同色選択, 同名選択, find and paste select people individually. Moving such a selection moves only the bottom member's stack as a whole; anyone else picked out of a stack snaps back. Consistent with "locked", but can surprise.
 - 🟡 **Distribute (横均・縦均)** counts each member separately, so a stack inside a distribute leaves an uneven gap.
 - 🟡 **Paths.** A stack is a multi-selection, and path editing needs exactly one selected, so a stack's path can't be edited. Members' paths stay independent (the spec wanted one shared path).
