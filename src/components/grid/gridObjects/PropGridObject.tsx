@@ -7,6 +7,7 @@ import { METER_PX, PATH_DASH } from "../../../lib/consts/consts";
 import { Prop, PropPosition } from "../../../models/prop";
 import { memo, useCallback, useEffect, useRef } from "react";
 import { PathSvgCacheBySectionId } from "../../../models/choreoSection";
+import StackBadge from "./StackBadge";
 
 type PropGridObjectProps = {
   prop: Prop;
@@ -25,6 +26,10 @@ type PropGridObjectProps = {
   animationCache?: PathSvgCacheBySectionId;
   halfOpacity?: boolean,
   isZooming?: React.RefObject<boolean>;
+  // On the top prop of a stack: the layers mark (red: a hidden prop is selected),
+  // and a dashed outline when a hidden prop is selected but this top one isn't.
+  stackMark?: "normal" | "red",
+  hiddenSelected?: boolean,
 };
 
 const PropGridObject = memo(function PropGridObject({
@@ -44,6 +49,8 @@ const PropGridObject = memo(function PropGridObject({
   animationCache,
   halfOpacity,
   isZooming,
+  stackMark,
+  hiddenSelected,
 }: PropGridObjectProps) {
   const inUseOutline = useRef<Konva.Rect>(null);
   const inUseOutlineAnimation = useRef<Konva.Animation>(null);
@@ -141,6 +148,15 @@ const PropGridObject = memo(function PropGridObject({
           fill={colorPalette.getTextColor(prop.color) ?? "white"}
           verticalAlign="middle"
           align="center" />
+        {
+          hiddenSelected && !isSelected &&
+          <Rect listening={false} x={-3} y={-3} width={prop.width * METER_PX + 6} height={prop.length * METER_PX + 6}
+            stroke={colorPalette.primary} strokeWidth={3} dash={[5, 4]} cornerRadius={4}/>
+        }
+        {
+          stackMark &&
+          <StackBadge x={prop.width * METER_PX} y={0} radius={METER_PX * 0.22} red={stackMark === "red"}/>
+        }
       </BaseGridObject>
     }
   </>

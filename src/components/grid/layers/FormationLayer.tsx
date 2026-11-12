@@ -44,6 +44,8 @@ type FormationLayerProps = {
   dancerAnimationCache: PathSvgCacheByObjectIdBySectionId;
   propAnimationCache: PathSvgCacheByObjectIdBySectionId;
   isEditingMovement?: boolean,
+  dancerStacks?: string[][],
+  propStacks?: string[][],
 };
 
 const FormationLayer = memo(function FormationLayer({
@@ -74,6 +76,7 @@ const FormationLayer = memo(function FormationLayer({
   isZooming,
   sectionId,
   dancerAnimationCache, propAnimationCache, isEditingMovement,
+  dancerStacks, propStacks,
 }: FormationLayerProps) {
 	const transformerRef = useRef<Konva.Transformer>(null);
 
@@ -170,6 +173,19 @@ const FormationLayer = memo(function FormationLayer({
     return (selectedIds.dancers.length + selectedIds.props.length + selectedIds.obstacles.length) > 1
   }, [selectedIds]);
 
+  // For the top member of each stack: whether to draw the mark, red, and the dashed "hidden one selected" ring.
+  // Red is for view mode, where selecting means "acts at this count"; in the editor a whole stack is selected together.
+  const stackDrawing = useCallback((stacks: string[][] | undefined, selected: string[]) => {
+    const result: Record<string, { mark: "normal" | "red", hiddenSelected: boolean }> = {};
+    (stacks ?? []).forEach(stack => {
+      const hiddenSelected = stack.slice(0, -1).some(id => selected.includes(id));
+      result[stack[stack.length - 1]] = { mark: hiddenSelected && !canEdit ? "red" : "normal", hiddenSelected };
+    });
+    return result;
+  }, [canEdit]);
+  const dancerStackDrawing = useMemo(() => stackDrawing(dancerStacks, selectedIds.dancers), [stackDrawing, dancerStacks, selectedIds.dancers]);
+  const propStackDrawing = useMemo(() => stackDrawing(propStacks, selectedIds.props), [stackDrawing, propStacks, selectedIds.props]);
+
   const handleDancerClick = useCallback((id: string, isAdditive?: boolean) => {
     toggleDancerSelect(id, isAdditive);
     onDancerSelected?.();
@@ -215,6 +231,8 @@ const FormationLayer = memo(function FormationLayer({
             animate
             animationCache={propAnimationCache[propPosition.propId]}
             isZooming={isZooming}
+            stackMark={propStackDrawing[propPosition.propId]?.mark}
+            hiddenSelected={propStackDrawing[propPosition.propId]?.hiddenSelected}
           />
         );
       })}
@@ -236,6 +254,8 @@ const FormationLayer = memo(function FormationLayer({
             isZooming={isZooming}
             sectionId={sectionId}
             animationCache={dancerAnimationCache[dancerPosition.dancerId]}
+            stackMark={dancerStackDrawing[dancerPosition.dancerId]?.mark}
+            hiddenSelected={dancerStackDrawing[dancerPosition.dancerId]?.hiddenSelected}
           />
         );
       })}

@@ -15,3 +15,9 @@ Running list, added to after each phase's review. 🔴 = must be handled before 
 - 🟡 **Paths.** A stack is a multi-selection, and path editing needs exactly one selected, so a stack's path can't be edited. Members' paths stay independent (the spec wanted one shared path).
 - ⚪ **そのまま is remembered per pair for the session**, not "until moved apart". Reloading clears it.
 - ⚪ **Swap positions** on a stacked person and an outsider: the swap happens, then the stack snaps back to its bottom member, which can look like a partial swap.
+
+## Phase 3 (stage drawing)
+- 🟡 **PDF export** draws stacked people on top of each other with no mark, so a printed sheet hides the bottom person. Needs the mark (and a legend) in exportHelper.
+- 🟡 **Accidental overlaps** (two people at one spot without 重ねる) still have no grey ×2, so they hide someone silently, as before stacks existed.
+- ⚪ **Mark size.** At the default zoom on a phone the mark is about 10px across: visible, but small. Worth checking on a real device.
+- ⚪ **Red mark in view mode means "a hidden member is selected"**, which is what a count does, but finding a hidden person by name also turns it red. Harmless; the dashed ring makes it clear who it is.

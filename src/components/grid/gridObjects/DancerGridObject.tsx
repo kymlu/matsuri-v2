@@ -8,6 +8,7 @@ import { colorPalette } from "../../../lib/consts/colors";
 import { DancerDisplayType } from "../../../models/appSettings";
 import { METER_PX } from "../../../lib/consts/consts";
 import { memo } from "react";
+import StackBadge from "./StackBadge";
 import { PathSvgCacheBySectionId } from "../../../models/choreoSection";
 
 type DancerGridObjectProps = {
@@ -27,6 +28,10 @@ type DancerGridObjectProps = {
   sectionId?: string,
   halfOpacity?: boolean,
   animationCache?: PathSvgCacheBySectionId;
+  // On the top member of a stack: show the layers mark (red: a hidden member is selected),
+  // and a dashed ring when a hidden member is selected but this top one isn't.
+  stackMark?: "normal" | "red",
+  hiddenSelected?: boolean,
 };
 
 const DancerGridObject = memo(function DancerGridObject({
@@ -46,7 +51,10 @@ const DancerGridObject = memo(function DancerGridObject({
   isZooming,
   halfOpacity,
   animationCache,
+  stackMark,
+  hiddenSelected,
 }: DancerGridObjectProps) {
+  const ringRadius = METER_PX * (dancerDisplayType === "large" ? 0.6 : 0.3);
   return <>
     {
       dancer &&
@@ -68,9 +76,13 @@ const DancerGridObject = memo(function DancerGridObject({
         halfOpacity={halfOpacity}
       >
         {
+          hiddenSelected && !isSelected &&
+          <Circle radius={ringRadius} fill={colorPalette.white} strokeEnabled strokeWidth={3} stroke={colorPalette.primary} dash={[5, 4]}/>
+        }
+        {
           isSelected && 
           <Circle
-            radius={METER_PX * (dancerDisplayType === "large" ?  0.6 : 0.3)}
+            radius={ringRadius}
             fill={colorPalette.white}
             strokeEnabled
             strokeWidth={3}
@@ -109,6 +121,10 @@ const DancerGridObject = memo(function DancerGridObject({
             fontStyle="bold"
             fill={colorPalette.getTextColor(position.color) ?? "white"}
           />
+        }
+        {
+          stackMark &&
+          <StackBadge x={ringRadius * 0.75} y={-ringRadius * 0.75} radius={METER_PX * 0.22} red={stackMark === "red"}/>
         }
       </BaseGridObject>
     }
