@@ -52,3 +52,6 @@ Review:
 
 ### Phase 5: help, review, concerns
 - Help article for stacking; concerns document; final review.
+
+## Status
+All five phases are done on this branch. Deviations from the spec and open problems are in `stack-concerns.md`.

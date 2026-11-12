@@ -202,9 +202,12 @@ const BaseGridObject = memo(function BaseGridObject({
         }
       }}
       onPointerUp={(e) => {
-        if (dragStartRef && !isDraggingRef.current && !isZooming?.current) {
+        // Only a press that started on this object counts as a tap. Without this, dropping something
+        // onto another object "tapped" the one underneath, added it to the selection and lost the move.
+        if (dragStartRef.current && !isDraggingRef.current && !isZooming?.current) {
           onClick?.(id);
         }
+        dragStartRef.current = null;
       }}
       onDragEnd={(e) => {
         if (isDraggingRef.current) {

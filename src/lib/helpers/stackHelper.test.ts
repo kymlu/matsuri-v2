@@ -1,6 +1,7 @@
 import { Choreo } from "../../models/choreo";
 import { countUnits, expandSelectionToStacks, findDropTarget, stackNotes, isHiddenInStack, normalizeStacks, reorderStack, selectedWholeStack, stackAbove, stackBelow, stackObjects, unstackObjects } from "./stackHelper";
 import { removeObjects } from "../editor/commands/objectCommands";
+import { addSection } from "../editor/commands/sectionCommands";
 
 const dp = (id: string, x: number, y: number, z: number) => ({ dancerId: id, x, y, z, color: "#000", sectionId: "s1", type: "dancer" as const });
 
@@ -177,5 +178,12 @@ describe("stackNotes", () => {
 
   it("says nothing when nothing changes", () => {
     expect(stackNotes(f(makeChoreo()), f(makeChoreo()), "a", name)).toEqual({ now: undefined, next: undefined });
+  });
+});
+
+describe("sections", () => {
+  it("a new section keeps the stacks (a duplicate copies the whole formation)", () => {
+    const s = stackObjects(makeChoreo(), "s1", "dancers", ["a", "b"]);
+    expect(addSection(s, "s2").sections[1].formation.dancerStacks).toEqual([["b", "a"]]);
   });
 });

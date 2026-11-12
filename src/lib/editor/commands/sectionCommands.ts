@@ -25,6 +25,9 @@ export function addSection(state: Choreo, id: string): Choreo {
         formation: {
           dancerPositions: copyPositions(previousSection?.formation.dancerPositions, id),
           propPositions: copyPositions(previousSection?.formation.propPositions, id),
+          // Positions are copied, so stacks are too; otherwise the people on top would just overlap.
+          dancerStacks: previousSection?.formation.dancerStacks?.map(s => [...s]),
+          propStacks: previousSection?.formation.propStacks?.map(s => [...s]),
           dancerActions: [],
         },
       } as ChoreoSection
