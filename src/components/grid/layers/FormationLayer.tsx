@@ -176,10 +176,12 @@ const FormationLayer = memo(function FormationLayer({
   // For the top member of each stack: whether to draw the mark, red, and the dashed "hidden one selected" ring.
   // Red is for view mode, where selecting means "acts at this count"; in the editor a whole stack is selected together.
   const stackDrawing = useCallback((stacks: string[][] | undefined, selected: string[]) => {
-    const result: Record<string, { mark: "normal" | "red", hiddenSelected: boolean }> = {};
+    const result: Record<string, { mark: "normal" | "red", hiddenSelected: boolean, count?: number }> = {};
     (stacks ?? []).forEach(stack => {
       const hiddenSelected = stack.slice(0, -1).some(id => selected.includes(id));
-      result[stack[stack.length - 1]] = { mark: hiddenSelected && !canEdit ? "red" : "normal", hiddenSelected };
+      // In the editor, how many of this stack an action will affect.
+      const count = canEdit ? stack.filter(id => selected.includes(id)).length : undefined;
+      result[stack[stack.length - 1]] = { mark: hiddenSelected && !canEdit ? "red" : "normal", hiddenSelected, count };
     });
     return result;
   }, [canEdit]);
@@ -263,6 +265,7 @@ const FormationLayer = memo(function FormationLayer({
             isZooming={isZooming}
             stackMark={propStackDrawing[propPosition.propId]?.mark}
             hiddenSelected={propStackDrawing[propPosition.propId]?.hiddenSelected}
+            stackCount={propStackDrawing[propPosition.propId]?.count}
             onDragFollow={canEdit ? followDrag : undefined}
           />
         );
@@ -287,6 +290,7 @@ const FormationLayer = memo(function FormationLayer({
             animationCache={dancerAnimationCache[dancerPosition.dancerId]}
             stackMark={dancerStackDrawing[dancerPosition.dancerId]?.mark}
             hiddenSelected={dancerStackDrawing[dancerPosition.dancerId]?.hiddenSelected}
+            stackCount={dancerStackDrawing[dancerPosition.dancerId]?.count}
             onDragFollow={canEdit ? followDrag : undefined}
           />
         );

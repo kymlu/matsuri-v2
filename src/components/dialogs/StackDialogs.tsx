@@ -148,19 +148,24 @@ export function StackPromptDialog({ text, onNext, onKeep }: { text: string, onNe
 }
 
 // View mode: tapping a stack lists who is there, top first. Picking one selects them.
-export function StackListDialog({ members, onPick }: { members: StackMember[], onPick: (id: string) => void }) {
-  return <CustomDialog title={`ここに${members.length}人`} hasX fullWidth focusDialogOnOpen>
+export function StackListDialog({ members, onPick, kind = "dancers" }: { members: StackMember[], onPick?: (id: string) => void, kind?: "dancers" | "props" }) {
+  // Dancers can be picked to see their details; a prop stack is only shown, as props can't be selected in view mode.
+  const rowClass = "flex items-center w-full gap-2 px-3 text-left border rounded-md min-h-11 border-line";
+  const row = (m: StackMember, i: number) => <>
+    <Dot color={m.color}/>
+    <span className="font-semibold break-all">{m.label}</span>
+    <span className="ml-auto text-sm text-muted shrink-0">{tierLabel(i, members.length)}</span>
+  </>;
+  return <CustomDialog title={kind === "dancers" ? `ここに${members.length}人` : `ここに${members.length}つ`} hasX fullWidth focusDialogOnOpen>
     <ul className="p-px space-y-1">
       {
         members.map((m, i) =>
           <li key={m.id}>
-            <Dialog.Close
-              onClick={() => onPick(m.id)}
-              className="flex items-center w-full gap-2 px-3 text-left border rounded-md min-h-11 border-line hover:bg-line/40">
-              <Dot color={m.color}/>
-              <span className="font-semibold break-all">{m.label}</span>
-              <span className="ml-auto text-sm text-muted shrink-0">{tierLabel(i, members.length)}</span>
-            </Dialog.Close>
+            {
+              onPick ?
+              <Dialog.Close onClick={() => onPick(m.id)} className={`${rowClass} hover:bg-line/40`}>{row(m, i)}</Dialog.Close> :
+              <div className={rowClass}>{row(m, i)}</div>
+            }
           </li>
         )
       }

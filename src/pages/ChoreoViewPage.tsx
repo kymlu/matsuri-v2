@@ -209,24 +209,36 @@ export default function ChoreoViewPage(props: {
 
   // ---- MainStage handlers ----
   // Tapping a stack lists who is there instead of selecting the top person; the count stays until someone is picked.
-  const [stackList, setStackList] = useState<StackMember[]>();
+  const [stackList, setStackList] = useState<{ kind: "dancers" | "props", members: StackMember[] }>();
   const selectedIdsRef = useRef(selectedIds);
   selectedIdsRef.current = selectedIds;
   const onSetSelectedIds = useCallback((action: SetStateAction<StageEntities<string[]>>) => {
     const next = typeof action === "function" ? action(selectedIdsRef.current) : action;
+    // Props can't be selected here; only a stacked prop responds, by showing what's in the stack.
+    if (next.props.length > 0) {
+      const propStack = next.props.length === 1 ? findStack(currentSection.formation, "props", next.props[0]) : undefined;
+      if (propStack) {
+        setStackList({ kind: "props", members: [...propStack].reverse().map(id => ({
+          id,
+          label: props.currentChoreo.props[id]?.name ?? "",
+          color: props.currentChoreo.props[id]?.color,
+        })) });
+      }
+      return;
+    }
     const tapped = next.dancers.length === 1 ? next.dancers[0] : undefined;
     const stack = tapped ? findStack(currentSection.formation, "dancers", tapped) : undefined;
     if (stack) {
-      setStackList([...stack].reverse().map(id => ({
+      setStackList({ kind: "dancers", members: [...stack].reverse().map(id => ({
         id,
         label: props.currentChoreo.dancers[id]?.name ?? "",
         color: currentSection.formation.dancerPositions[id]?.color,
-      })));
+      })) });
       return;
     }
     setSelectedIds(next);
     setSelectedTimingId(undefined);
-  }, [currentSection.formation, props.currentChoreo.dancers]);
+  }, [currentSection.formation, props.currentChoreo.dancers, props.currentChoreo.props]);
 
   const stackNote = useMemo(() => {
     if (selectedIds.dancers.length !== 1) return {};
@@ -320,7 +332,7 @@ export default function ChoreoViewPage(props: {
         <MainStage
           appSettings={appSettings}
           canEdit={false}
-          canSelectProps={false}
+          canSelectProps={!!currentSection.formation.propStacks?.length}
           canSelectObstacles={false}
           hideTransformerBorder
           canSelectDancers
@@ -377,8 +389,9 @@ export default function ChoreoViewPage(props: {
         {
           stackList &&
           <StackListDialog
-            members={stackList}
-            onPick={id => {
+            members={stackList.members}
+            kind={stackList.kind}
+            onPick={stackList.kind === "props" ? undefined : id => {
               setSelectedIds({ dancers: [id], props: [], obstacles: [] });
               setSelectedTimingId(undefined);
               setStackList(undefined);

@@ -10,10 +10,12 @@ type EditDancerColourDialogProps = {
   selectedObjectColour: string | undefined,
   propOnly: boolean,
   onSubmit: (colour: string, mode: colourMode) => void,
+  // Names of selected objects hidden under the top of a stack, so the change isn't a surprise.
+  hiddenNames?: string[],
 }
 
 export default function EditDancerColourDialog({
-  selectedObjectColour, propOnly, onSubmit
+  selectedObjectColour, propOnly, onSubmit, hiddenNames
 }: EditDancerColourDialogProps) {
   const [selectedColour, setSelectedColour] = useState("");
   const [mode, setMode] = useState<colourMode>("current");
@@ -59,6 +61,10 @@ export default function EditDancerColourDialog({
             </Button>
           </div>
         </div>
+      }
+      {
+        hiddenNames && hiddenNames.length > 0 &&
+        <p className="mb-3 text-sm text-muted">重なっている{hiddenNames.join("・")}の色も変わります。</p>
       }
       <ColorSwatchGrid value={selectedColour} onChange={setSelectedColour}/>
   </BaseEditDialog>

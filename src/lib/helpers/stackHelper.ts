@@ -345,3 +345,113 @@ export function moveStacksTogether(
   const props = add("props", moves.props);
   return dancers === moves.dancers && props === moves.props ? moves : { ...moves, dancers, props };
 }
+
+// ---- 整理 (arrange) ----
+
+// For aligning and spacing out, a stack counts once: only its lowest selected member is moved,
+// and the normaliser brings the rest of the stack along.
+export function arrangeRepresentatives<T extends { dancers: DancerPosition[], props: PropPosition[] }>(formation: Formation, selected: T): T {
+  const keep = <P,>(kind: StackKind, items: P[], idOf: (p: P) => string) => {
+    const ids = items.map(idOf);
+    return items.filter(item => {
+      const id = idOf(item);
+      const stack = findStack(formation, kind, id);
+      if (!stack) return true;
+      return stack.find(member => ids.includes(member)) === id;
+    });
+  };
+  return {
+    ...selected,
+    dancers: keep("dancers", selected.dancers, d => d.dancerId),
+    props: keep("props", selected.props, p => p.propId),
+  };
+}
+
+// How many separate things are selected, a stack counting once.
+export function countSelectedUnits(formation: Formation, selected: StageEntities<string[]>): number {
+  return countUnits(formation, "dancers", selected.dancers) + countUnits(formation, "props", selected.props) + selected.obstacles.length;
+}
+
+// Front/back for dancers and props, moving each stack as one block so nobody ends up between its members.
+// Same rules as the ordinary commands: forward/backward step past the next unselected thing (here, a whole stack).
+export function rearrangeWithStacks(state: Choreo, sectionId: string, selected: StageEntities<string[]>, rearrangement: "toFront" | "forward" | "backward" | "toBack"): Choreo {
+  const reorder = <P extends { z?: number }>(kind: StackKind, f: Formation, positions: Record<string, P>, ids: string[]): Record<string, P> => {
+    if (ids.length === 0) return positions;
+    const order = Object.keys(positions).sort((a, b) => (positions[a].z ?? 0) - (positions[b].z ?? 0));
+    const units: string[][] = [];
+    const seen = new Set<string>();
+    order.forEach(id => {
+      if (seen.has(id)) return;
+      const unit = findStack(f, kind, id) ?? [id];
+      unit.forEach(m => seen.add(m));
+      units.push(unit);
+    });
+    const isSel = (u: string[]) => u.some(id => ids.includes(id));
+    const sel = units.filter(isSel);
+    const rest = units.filter(u => !isSel(u));
+    let result: string[][];
+    if (rearrangement === "toFront") result = [...rest, ...sel];
+    else if (rearrangement === "toBack") result = [...sel, ...rest];
+    else if (rearrangement === "forward") {
+      const last = Math.max(...sel.map(u => units.indexOf(u)));
+      const blocking = rest.findIndex(u => units.indexOf(u) > last);
+      if (blocking === -1) return positions;
+      result = [...rest.slice(0, blocking + 1), ...sel, ...rest.slice(blocking + 1)];
+    } else {
+      const first = Math.min(...sel.map(u => units.indexOf(u)));
+      let blocking = -1;
+      rest.forEach((u, i) => { if (units.indexOf(u) < first) blocking = i; });
+      if (blocking === -1) return positions;
+      result = [...rest.slice(0, blocking), ...sel, ...rest.slice(blocking)];
+    }
+    const next = { ...positions };
+    result.flat().forEach((id, i) => { next[id] = { ...next[id], z: i }; });
+    return next;
+  };
+  return updateSection(state, sectionId, f => ({
+    ...f,
+    dancerPositions: reorder("dancers", f, f.dancerPositions, selected.dancers),
+    propPositions: reorder("props", f, f.propPositions, selected.props),
+  }));
+}
+
+// ---- copy and paste ----
+
+export type CopiedStacks = { dancers: Stack[], props: Stack[] };
+
+// The stacks that were copied whole. A partly copied stack is pasted as separate objects.
+export function copyStacks(formation: Formation, selected: StageEntities<string[]>): CopiedStacks {
+  const whole = (kind: StackKind, ids: string[]) => getStacks(formation, kind).filter(s => s.every(id => ids.includes(id))).map(s => [...s]);
+  return { dancers: whole("dancers", selected.dancers), props: whole("props", selected.props) };
+}
+
+// Before pasting: take the pasted objects out of their stacks in the target section, so the normaliser
+// doesn't pull them back (or drag the rest of a stack to the pasted spot).
+// After pasting: rebuild the copied stacks. Returns who left a stack that wasn't simply recreated.
+export function prepareStackPaste(state: Choreo, sectionId: string, pasted: { dancers: string[], props: string[] }, copied: CopiedStacks): { state: Choreo, leftStack: { dancers: string[], props: string[] } } {
+  const section = state.sections.find(s => s.id === sectionId);
+  if (!section) return { state, leftStack: { dancers: [], props: [] } };
+  const same = (a: Stack, b: Stack) => a.length === b.length && a.every((id, i) => id === b[i]);
+  const left = (kind: StackKind, ids: string[], copiedStacks: Stack[]) =>
+    getStacks(section.formation, kind)
+      .filter(s => s.some(id => ids.includes(id)) && !copiedStacks.some(c => same(c, s)))
+      .flatMap(s => s.filter(id => ids.includes(id)));
+  const leftStack = { dancers: left("dancers", pasted.dancers, copied.dancers), props: left("props", pasted.props, copied.props) };
+  const inAny = (kind: StackKind, ids: string[]) => getStacks(section.formation, kind).some(st => st.some(id => ids.includes(id)));
+  let next = inAny("dancers", pasted.dancers) ? unstackObjects(state, sectionId, "dancers", pasted.dancers) : state;
+  next = inAny("props", pasted.props) ? unstackObjects(next, sectionId, "props", pasted.props) : next;
+  return { state: next, leftStack };
+}
+
+export function restoreCopiedStacks(state: Choreo, sectionId: string, copied: CopiedStacks): Choreo {
+  if (copied.dancers.length === 0 && copied.props.length === 0) return state;
+  return updateSection(state, sectionId, f => {
+    const present = (kind: StackKind, s: Stack) => s.filter(id => kind === "dancers" ? !!f.dancerPositions[id] : !!f.propPositions[id]);
+    const add = (kind: StackKind, copiedStacks: Stack[]) => {
+      const incoming = copiedStacks.map(s => present(kind, s)).filter(s => s.length >= 2);
+      const taken = new Set(incoming.flat());
+      return [...getStacks(f, kind).map(s => s.filter(id => !taken.has(id))), ...incoming];
+    };
+    return { ...f, dancerStacks: add("dancers", copied.dancers), propStacks: add("props", copied.props) };
+  });
+}

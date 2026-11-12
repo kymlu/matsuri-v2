@@ -30,6 +30,7 @@ type PropGridObjectProps = {
   // and a dashed outline when a hidden prop is selected but this top one isn't.
   stackMark?: "normal" | "red",
   hiddenSelected?: boolean,
+  stackCount?: number,
   onDragFollow?: (id: string, phase: "start" | "move" | "end" | "cancel", dx?: number, dy?: number) => void,
 };
 
@@ -52,6 +53,7 @@ const PropGridObject = memo(function PropGridObject({
   isZooming,
   stackMark,
   hiddenSelected,
+  stackCount,
   onDragFollow,
 }: PropGridObjectProps) {
   const inUseOutline = useRef<Konva.Rect>(null);
@@ -158,7 +160,7 @@ const PropGridObject = memo(function PropGridObject({
         }
         {
           stackMark &&
-          <StackBadge x={prop.width * METER_PX} y={0} radius={METER_PX * 0.22} red={stackMark === "red"}/>
+          <StackBadge x={prop.width * METER_PX} y={0} radius={METER_PX * 0.22} red={stackMark === "red"} count={stackCount}/>
         }
       </BaseGridObject>
     }

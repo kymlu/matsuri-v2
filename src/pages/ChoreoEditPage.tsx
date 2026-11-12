@@ -13,7 +13,7 @@ import MainStage from "../components/grid/MainStage";
 import { Dialog } from "@base-ui/react";
 import FindObjectsDialog from "../components/dialogs/FindObjectsDialog";
 import { ReorderStackDialog, StackMember, StackOrderDialog, StackPromptDialog, UnstackDialog } from "../components/dialogs/StackDialogs";
-import { countUnits, expandSelectionToStacks, findDropTarget, findStack, moveStacksTogether, normalizeStacks, reorderStack, selectedWholeStack, StackKind, stackObjects, StackSpot, unstackObjects } from "../lib/helpers/stackHelper";
+import { arrangeRepresentatives, copyStacks, CopiedStacks, countSelectedUnits, countUnits, expandSelectionToStacks, prepareStackPaste, rearrangeWithStacks, restoreCopiedStacks, findDropTarget, findStack, moveStacksTogether, normalizeStacks, reorderStack, selectedWholeStack, StackKind, stackObjects, StackSpot, unstackObjects } from "../lib/helpers/stackHelper";
 import EditChoreoSizeDialog from "../components/dialogs/EditChoreoSizeDialog";
 import { exportChoreo } from "../lib/helpers/exportHelper";
 import { saveChoreo } from "../lib/dataAccess/DataController";
@@ -305,6 +305,17 @@ export default function ChoreoEditPage(props: {
   const canStack = stackKind !== undefined && countUnits(currentSection.formation, stackKind, stackIds) >= 2;
   const wholeStack = stackKind ? selectedWholeStack(currentSection.formation, stackKind, stackIds) : undefined;
 
+  // Selected objects that sit under the top of their stack, so can't be seen on the stage.
+  const hiddenSelectedNames = useMemo(() => {
+    const state = history.presentState.state;
+    const hidden = (stacks: string[][] | undefined, selected: string[]) =>
+      (stacks ?? []).flatMap(stack => stack.slice(0, -1)).filter(id => selected.includes(id));
+    return [
+      ...hidden(currentSection.formation.dancerStacks, selectedIds.dancers).map(id => state.dancers[id]?.name ?? ""),
+      ...hidden(currentSection.formation.propStacks, selectedIds.props).map(id => state.props[id]?.name ?? ""),
+    ];
+  }, [history.presentState.state, currentSection.formation, selectedIds.dancers, selectedIds.props]);
+
   const stackMembers = useCallback((kind: StackKind, ids: string[]): StackMember[] => {
     const state = history.presentState.state;
     return ids.map(id => kind === "dancers"
@@ -396,6 +407,13 @@ export default function ChoreoEditPage(props: {
   }, [selectedObjects]);
 
   const copyBuffer = useRef<StageEntities<Record<string, PropPosition>, Record<string, DancerPosition>>>({props: {}, dancers: {}, obstacles: {}});
+  const copiedStacks = useRef<CopiedStacks>({ dancers: [], props: [] });
+  const [pasteNote, setPasteNote] = useState<string | undefined>(undefined);
+  useEffect(() => {
+    if (!pasteNote) return;
+    const timer = setTimeout(() => setPasteNote(undefined), 5000);
+    return () => clearTimeout(timer);
+  }, [pasteNote]);
 
   useEffect(() => {
     const newSection = history.presentState.state.sections.find(s => strEquals(s.id, history.presentState.currentSectionId));
@@ -470,6 +488,7 @@ export default function ChoreoEditPage(props: {
   const onCopy = useCallback(() => {
     if ((selectedIds.dancers.length + selectedIds.props.length) === 0) {
       copyBuffer.current = ({props: {}, dancers: {}, obstacles: {}});
+      copiedStacks.current = { dancers: [], props: [] };
       return;
     }
 
@@ -490,17 +509,27 @@ export default function ChoreoEditPage(props: {
     });
 
     copyBuffer.current = ({ props: copyRecordProp, dancers: copyRecordDancer, obstacles: {} });
+    copiedStacks.current = copyStacks(currentSection.formation, selectedIdsRef.current);
   }, [
     selectedIds,
-    currentSection.formation.dancerPositions,
+    currentSection.formation,
   ]);
 
   const onPaste = useCallback(() => {
-    commitState(pastePositions(
-      history.presentState.state,
+    const state = history.presentState.state;
+    const pasted = { dancers: Object.keys(copyBuffer.current.dancers), props: Object.keys(copyBuffer.current.props) };
+    // Out of their stacks here first, so pasting can't snap them back or drag a stack along; then rebuild copied stacks.
+    const prepared = prepareStackPaste(state, currentSection.id, pasted, copiedStacks.current);
+    const result = restoreCopiedStacks(
+      pastePositions(prepared.state, currentSection.id, copyBuffer.current),
       currentSection.id,
-      copyBuffer.current
-    ));
+      copiedStacks.current);
+    commitState(result);
+    const names = [
+      ...prepared.leftStack.dancers.map(id => state.dancers[id]?.name ?? ""),
+      ...prepared.leftStack.props.map(id => state.props[id]?.name ?? ""),
+    ];
+    setPasteNote(names.length > 0 ? `${names.join("・")}は重なりから外れました。` : undefined);
   }, [
     commitState,
     history.presentState.state,
@@ -948,19 +977,29 @@ export default function ChoreoEditPage(props: {
   }, [history.presentState.state.props, history.presentState.state.dancers, history.presentState.state.obstacles, areObstaclesLocked]);
 
   const onRearrange = useCallback((rearrangement: Rearrangement) => {
-    commitState(rearrangePositions(history.presentState.state, currentSection.id, selectedIds, rearrangement));
+    const state = history.presentState.state;
+    const hasStacks = !!(currentSection.formation.dancerStacks?.length || currentSection.formation.propStacks?.length);
+    if (!hasStacks) {
+      commitState(rearrangePositions(state, currentSection.id, selectedIds, rearrangement));
+      return;
+    }
+    // Stacks move front/back as one block; obstacles use the ordinary command.
+    const withObstacles = selectedIds.obstacles.length > 0
+      ? rearrangePositions(state, currentSection.id, { dancers: [], props: [], obstacles: selectedIds.obstacles }, rearrangement)
+      : state;
+    commitState(rearrangeWithStacks(withObstacles, currentSection.id, { ...selectedIds, obstacles: [] }, rearrangement));
   }, [commitState, history.presentState.state, currentSection.id, selectedIds]);
 
   const onDistribute = useCallback((distribution: Distribution) => {
-    commitState(distributePositions(history.presentState.state, currentSection.id, selectedObjects, distribution));
+    commitState(distributePositions(history.presentState.state, currentSection.id, arrangeRepresentatives(currentSection.formation, selectedObjects), distribution));
   }, [commitState, history.presentState.state, currentSection.id, selectedObjects]);
 
   const onHorizontalAlign = useCallback((alignment: HorizontalAlignment) => {
-    commitState(alignHorizontalPositions(history.presentState.state, currentSection.id, selectedObjects, alignment));
+    commitState(alignHorizontalPositions(history.presentState.state, currentSection.id, arrangeRepresentatives(currentSection.formation, selectedObjects), alignment));
   }, [commitState, history.presentState.state, currentSection.id, selectedObjects]);
 
   const onVerticalAlign = useCallback((alignment: VerticalAlignment) => {
-    commitState(alignVerticalPositions(history.presentState.state, currentSection.id, selectedObjects, alignment));
+    commitState(alignVerticalPositions(history.presentState.state, currentSection.id, arrangeRepresentatives(currentSection.formation, selectedObjects), alignment));
   }, [commitState, history.presentState.state, currentSection.id, selectedObjects]);
 
   const onDeleteObjects = useCallback(() => {
@@ -1176,7 +1215,7 @@ export default function ChoreoEditPage(props: {
         showSelectAllButton={entityCount.dancers > selectedIds.dancers.length || entityCount.props > selectedIds.props.length || (!areObstaclesLocked && entityCount.obstacles > selectedIds.obstacles.length)}
         onDeselect={resetSelectedIds}
         onRearrange={onRearrange}
-        showDistribute={(selectedIds.dancers.length + selectedIds.props.length + selectedIds.obstacles.length) >= 3}
+        showDistribute={countSelectedUnits(currentSection.formation, selectedIds) >= 3}
         onDistribute={onDistribute}
         onHorizontalAlign={onHorizontalAlign}
         onVerticalAlign={onVerticalAlign}
@@ -1232,6 +1271,10 @@ export default function ChoreoEditPage(props: {
         togglePointCount={togglePointCount}
         onResetPath={resetPath}
       />
+      {
+        pasteNote &&
+        <InstructionMessage instruction={pasteNote} onClose={() => setPasteNote(undefined)}/>
+      }
       {
         isAddingDancers &&
         <InstructionMessage
@@ -1445,6 +1488,7 @@ export default function ChoreoEditPage(props: {
         <EditDancerColourDialog
           selectedObjectColour={selectedColour}
           propOnly={selectedIds.dancers.length === 0 && (selectedIds.props.length + selectedIds.obstacles.length) > 0}
+          hiddenNames={hiddenSelectedNames}
           onSubmit={(color, mode) => {
             if (!isNullOrUndefinedOrBlank(color)) {
               commitState(changeObjectColours(history.presentState.state, history.presentState.state.sections.findIndex(x => strEquals(x.id, currentSection.id)), mode, selectedIds, color));

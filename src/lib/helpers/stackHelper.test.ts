@@ -1,6 +1,6 @@
 import { Choreo } from "../../models/choreo";
-import { countUnits, expandSelectionToStacks, findDropTarget, moveStacksTogether, stackNotes, isHiddenInStack, normalizeStacks, reorderStack, selectedWholeStack, stackAbove, stackBelow, stackObjects, unstackObjects } from "./stackHelper";
-import { removeObjects } from "../editor/commands/objectCommands";
+import { arrangeRepresentatives, copyStacks, countSelectedUnits, prepareStackPaste, rearrangeWithStacks, restoreCopiedStacks, countUnits, expandSelectionToStacks, findDropTarget, moveStacksTogether, stackNotes, isHiddenInStack, normalizeStacks, reorderStack, selectedWholeStack, stackAbove, stackBelow, stackObjects, unstackObjects } from "./stackHelper";
+import { alignHorizontalPositions, pastePositions, removeObjects } from "../editor/commands/objectCommands";
 import { addSection } from "../editor/commands/sectionCommands";
 
 const dp = (id: string, x: number, y: number, z: number) => ({ dancerId: id, x, y, z, color: "#000", sectionId: "s1", type: "dancer" as const });
@@ -198,5 +198,69 @@ describe("moveStacksTogether", () => {
   it("leaves moves alone when nobody is stacked", () => {
     const moves = { dancers: { a: { x: 6, y: 2 } }, props: {}, obstacles: {} };
     expect(moveStacksTogether(f(makeChoreo()), moves)).toBe(moves);
+  });
+});
+
+describe("整理 with stacks", () => {
+  const ab = () => stackObjects(makeChoreo(), "s1", "dancers", ["a", "b"]); // b bottom at (3,1), a on top
+  const all = { dancers: ["a", "b"], props: [], obstacles: [] };
+
+  it("counts a stack once and moves only its lowest selected member", () => {
+    const s = ab();
+    expect(countSelectedUnits(f(s), all)).toBe(1);
+    const reps = arrangeRepresentatives(f(s), { dancers: [pos(s, "a"), pos(s, "b")], props: [], obstacles: [] });
+    expect(reps.dancers.map(d => d.dancerId)).toEqual(["b"]);
+  });
+
+  it("aligns a single stack to the stage, everyone together", () => {
+    const s = ab();
+    const reps = arrangeRepresentatives(f(s), { dancers: [pos(s, "a"), pos(s, "b")], props: [], obstacles: [] });
+    const after = normalizeStacks(alignHorizontalPositions(s, "s1", reps, "left"));
+    expect(pos(after, "a").x).toBe(0);
+    expect(pos(after, "b").x).toBe(0);
+  });
+
+  it("moves a stack back past a whole other stack, keeping both together", () => {
+    let s = stackObjects(makeChoreo(), "s1", "dancers", ["c", "d"]); // d bottom, c top: the front-most pair
+    s = ab(); s = stackObjects(s, "s1", "dancers", ["c", "d"]);
+    const order = () => Object.values(f(s).dancerPositions).sort((x, y) => x.z! - y.z!).map(d => d.dancerId);
+    s = rearrangeWithStacks(s, "s1", { dancers: ["c", "d"], props: [], obstacles: [] }, "backward");
+    expect(order()).toEqual(["d", "c", "b", "a"]);
+    s = rearrangeWithStacks(s, "s1", { dancers: ["d", "c"], props: [], obstacles: [] }, "forward");
+    expect(order()).toEqual(["b", "a", "d", "c"]);
+    s = rearrangeWithStacks(s, "s1", { dancers: ["a", "b"], props: [], obstacles: [] }, "toFront");
+    expect(order()).toEqual(["d", "c", "b", "a"]);
+  });
+});
+
+describe("copy and paste with stacks", () => {
+  const withSecond = (s: Choreo): Choreo => ({ ...s, sections: [...s.sections, { ...s.sections[0], id: "s2", formation: { ...makeChoreo().sections[0].formation } }] });
+  const f2 = (s: Choreo) => s.sections[1].formation;
+  const paste = (s: Choreo, ids: string[]) => {
+    const buffer = { dancers: Object.fromEntries(ids.map(id => [id, f(s).dancerPositions[id]])), props: {}, obstacles: {} };
+    const copied = copyStacks(f(s), { dancers: ids, props: [], obstacles: [] });
+    const prepared = prepareStackPaste(s, "s2", { dancers: ids, props: [] }, copied);
+    return { state: normalizeStacks(restoreCopiedStacks(pastePositions(prepared.state, "s2", buffer), "s2", copied)), left: prepared.leftStack };
+  };
+
+  it("pastes a whole stack as a stack", () => {
+    const { state } = paste(withSecond(stackObjects(makeChoreo(), "s1", "dancers", ["a", "b"])), ["a", "b"]);
+    expect(f2(state).dancerStacks).toEqual([["b", "a"]]);
+    expect(f2(state).dancerPositions.a).toMatchObject({ x: 3, y: 1 });
+  });
+
+  it("takes a pasted person out of a stack in the target instead of snapping back", () => {
+    let s = withSecond(makeChoreo());
+    s = stackObjects(s, "s2", "dancers", ["a", "c"]); // in s2, a sits on c at (5,1)
+    const { state, left } = paste(s, ["a"]);
+    expect(f2(state).dancerPositions.a).toMatchObject({ x: 1, y: 1 });
+    expect(f2(state).dancerPositions.c).toMatchObject({ x: 5, y: 1 });
+    expect(f2(state).dancerStacks).toBeUndefined();
+    expect(left.dancers).toEqual(["a"]);
+  });
+
+  it("a partly copied stack pastes as separate people", () => {
+    const s = withSecond(stackObjects(makeChoreo(), "s1", "dancers", ["a", "b", "c"]));
+    expect(copyStacks(f(s), { dancers: ["a", "b"], props: [], obstacles: [] }).dancers).toEqual([]);
   });
 });

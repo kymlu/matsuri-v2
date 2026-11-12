@@ -32,6 +32,7 @@ type DancerGridObjectProps = {
   // and a dashed ring when a hidden member is selected but this top one isn't.
   stackMark?: "normal" | "red",
   hiddenSelected?: boolean,
+  stackCount?: number,
   onDragFollow?: (id: string, phase: "start" | "move" | "end" | "cancel", dx?: number, dy?: number) => void,
 };
 
@@ -54,6 +55,7 @@ const DancerGridObject = memo(function DancerGridObject({
   animationCache,
   stackMark,
   hiddenSelected,
+  stackCount,
   onDragFollow,
 }: DancerGridObjectProps) {
   const ringRadius = METER_PX * (dancerDisplayType === "large" ? 0.6 : 0.3);
@@ -127,7 +129,7 @@ const DancerGridObject = memo(function DancerGridObject({
         }
         {
           stackMark &&
-          <StackBadge x={ringRadius * 0.75} y={-ringRadius * 0.75} radius={METER_PX * 0.22} red={stackMark === "red"}/>
+          <StackBadge x={ringRadius * 0.75} y={-ringRadius * 0.75} radius={METER_PX * 0.22} red={stackMark === "red"} count={stackCount}/>
         }
       </BaseGridObject>
     }
