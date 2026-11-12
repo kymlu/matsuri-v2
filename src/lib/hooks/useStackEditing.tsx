@@ -5,7 +5,7 @@ import { ChoreoSection } from "../../models/choreoSection";
 import { StageEntities } from "../../models/history";
 import { ReorderStackDialog, StackMember, StackOrderDialog, StackPromptDialog, UnstackDialog } from "../../components/dialogs/StackDialogs";
 import {
-  countUnits, expandSelectionToStacks, findDropTarget, findStack, reorderStack, selectedWholeStack,
+  countUnits, expandSelectionToStacks, findDropTarget, findStack, linkedStack, reorderStack, selectedWholeStack,
   StackKind, stackObjects, StackSpot, swapUnitPositions, swapUnits, unstackObjects,
 } from "../helpers/stackHelper";
 import { swapDancerPositions, swapPropPositions } from "../editor/commands/objectCommands";
@@ -15,6 +15,7 @@ type Selection = StageEntities<string[]>;
 type Options = {
   state: Choreo,
   section: ChoreoSection,
+  prevSection: ChoreoSection | undefined,
   selectedIds: Selection,
   setSelectedIds: Dispatch<SetStateAction<Selection>>,
   commitState: (newState: Choreo) => void,
@@ -26,16 +27,25 @@ type Options = {
 
 // Everything the editor needs for stacks: what the selection means for them, the toolbar actions,
 // the drop prompt, and the dialogs. The rules themselves live in stackHelper.
-export function useStackEditing({ state, section, selectedIds, setSelectedIds, commitState, amendState, isAssigningActions, isEditingMovement }: Options) {
+export function useStackEditing({ state, section, prevSection, selectedIds, setSelectedIds, commitState, amendState, isAssigningActions, isEditingMovement }: Options) {
   const formation = section.formation;
 
-  // Stage taps select whole stacks (not while assigning a count or editing a path).
+  // Stage taps select whole stacks. Not while assigning a count (people are picked one by one), and while
+  // editing a path only a stack that stays together from the previous section, as it has one shared path.
   const setStageSelectedIds = useCallback((action: SetStateAction<Selection>) => {
     setSelectedIds(prev => {
       const next = typeof action === "function" ? action(prev) : action;
-      return isAssigningActions || isEditingMovement ? next : expandSelectionToStacks(formation, prev, next);
+      if (isAssigningActions) return next;
+      if (isEditingMovement) {
+        const kind: StackKind = next.dancers.length > 0 ? "dancers" : "props";
+        const id = next.dancers[0] ?? next.props[0];
+        const linked = id ? linkedStack(prevSection?.formation, formation, kind, id) : undefined;
+        if (!linked) return next;
+        return kind === "dancers" ? { dancers: [...linked], props: [], obstacles: [] } : { dancers: [], props: [...linked], obstacles: [] };
+      }
+      return expandSelectionToStacks(formation, prev, next);
     });
-  }, [formation, isAssigningActions, isEditingMovement, setSelectedIds]);
+  }, [formation, prevSection, isAssigningActions, isEditingMovement, setSelectedIds]);
 
   const stackKind: StackKind | undefined =
     selectedIds.obstacles.length > 0 ? undefined
@@ -124,6 +134,12 @@ export function useStackEditing({ state, section, selectedIds, setSelectedIds, c
       setUnstacking({ kind: stackKind, members: stackMembers(stackKind, [...wholeStack].reverse()) });
     }
   }, [stackKind, wholeStack, commitState, state, section.id, stackMembers]);
+
+  // A whole stack with the same members as in the previous section has one path, edited through its
+  // bottom member (the normaliser copies it to the rest).
+  const linkedPathId = wholeStack && stackKind && linkedStack(prevSection?.formation, formation, stackKind, wholeStack[0])
+    ? { id: wholeStack[0], type: stackKind === "dancers" ? "dancer" as const : "prop" as const }
+    : undefined;
 
   // 位置交換 works on two separate things: people, props or whole stacks (not within one stack:
   // that's 上下入れ替え).
@@ -234,6 +250,7 @@ export function useStackEditing({ state, section, selectedIds, setSelectedIds, c
     stackKind, stackIds, canStack, wholeStack, hiddenSelectedNames,
     onStack, onReorderStack, onUnstack,
     canSwap: swapPair !== undefined, onSwap,
+    linkedPathId,
     offerStackOnDrop,
     stackDialogs,
   };

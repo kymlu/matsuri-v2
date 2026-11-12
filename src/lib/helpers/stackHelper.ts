@@ -132,12 +132,48 @@ export function normalizeSection(section: ChoreoSection, props: Record<string, P
 // Restores the stack rules after any change. Returns the same object when nothing changes.
 export function normalizeStacks(state: Choreo): Choreo {
   let changed = false;
-  const sections = state.sections.map(s => {
-    const n = normalizeSection(s, state.props);
+  const sections: ChoreoSection[] = [];
+  state.sections.forEach((s, i) => {
+    const n = syncLinkedPaths(sections[i - 1]?.formation, normalizeSection(s, state.props));
     if (n !== s) changed = true;
-    return n;
+    sections.push(n);
   });
   return changed ? { ...state, sections } : state;
+}
+
+// ---- linked paths ----
+
+// A stack with the same members in the previous section starts and ends together, so it has one path
+// (a section's movements are the paths into it). Undefined if the stack changed or there's no previous section.
+export function linkedStack(prev: Formation | undefined, formation: Formation, kind: StackKind, id: string): Stack | undefined {
+  if (!prev) return undefined;
+  const stack = findStack(formation, kind, id);
+  if (!stack) return undefined;
+  return getStacks(prev, kind).some(p => p.length === stack.length && p.every(x => stack.includes(x))) ? stack : undefined;
+}
+
+// Every member of a linked stack follows the bottom member's path.
+function syncLinkedPaths(prev: Formation | undefined, section: ChoreoSection): ChoreoSection {
+  if (!prev) return section;
+  const f = section.formation;
+  const sync = <M,>(kind: StackKind, movements: Record<string, M> | undefined): Record<string, M> | undefined => {
+    let next = movements;
+    getStacks(f, kind).forEach(stack => {
+      if (!linkedStack(prev, f, kind, stack[0])) return;
+      const path = movements?.[stack[0]];
+      stack.slice(1).forEach(id => {
+        if (JSON.stringify(next?.[id]) === JSON.stringify(path)) return;
+        next = { ...(next ?? {}) };
+        if (path === undefined) delete next[id];
+        else next[id] = path;
+      });
+    });
+    return next;
+  };
+  const dancerMovements = sync("dancers", f.dancerMovements);
+  const propMovements = sync("props", f.propMovements);
+  if (dancerMovements === f.dancerMovements && propMovements === f.propMovements) return section;
+  return { ...section, formation: { ...f, dancerMovements, propMovements } };
 }
 
 // ---- commands ----

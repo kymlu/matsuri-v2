@@ -1,5 +1,5 @@
 import { Choreo } from "../../models/choreo";
-import { arrangeRepresentatives, swapUnits, swapUnitPositions, copyStacks, countSelectedUnits, prepareStackPaste, rearrangeWithStacks, restoreCopiedStacks, countUnits, expandSelectionToStacks, findDropTarget, moveStacksTogether, stackNotes, isHiddenInStack, normalizeStacks, reorderStack, selectedWholeStack, stackAbove, stackBelow, stackObjects, unstackObjects } from "./stackHelper";
+import { arrangeRepresentatives, linkedStack, swapUnits, swapUnitPositions, copyStacks, countSelectedUnits, prepareStackPaste, rearrangeWithStacks, restoreCopiedStacks, countUnits, expandSelectionToStacks, findDropTarget, moveStacksTogether, stackNotes, isHiddenInStack, normalizeStacks, reorderStack, selectedWholeStack, stackAbove, stackBelow, stackObjects, unstackObjects } from "./stackHelper";
 import { alignHorizontalPositions, pastePositions, removeObjects } from "../editor/commands/objectCommands";
 import { addSection } from "../editor/commands/sectionCommands";
 
@@ -298,5 +298,28 @@ describe("位置交換 with stacks", () => {
     s = normalizeStacks(swapUnitPositions(s, "s1", "dancers", ["b", "a"], ["d", "c"]));
     expect(pos(s, "a")).toMatchObject(dAt);
     expect(pos(s, "c")).toMatchObject({ x: 3, y: 1 });
+  });
+});
+
+describe("linked stack paths", () => {
+  const twoSections = (s: Choreo): Choreo => ({ ...s, sections: [s.sections[0], { ...s.sections[0], id: "s2", formation: { ...s.sections[0].formation } }] });
+  const path = { points: [{ x: 9, y: 9 }], tension: "curved" as const };
+
+  it("a stack that stays together shares the bottom member's path", () => {
+    let s = twoSections(stackObjects(makeChoreo(), "s1", "dancers", ["a", "b"])); // b bottom in both
+    expect(linkedStack(s.sections[0].formation, s.sections[1].formation, "dancers", "a")).toEqual(["b", "a"]);
+    s = { ...s, sections: [s.sections[0], { ...s.sections[1], formation: { ...s.sections[1].formation, dancerMovements: { b: path, a: { points: [], tension: "straight" } } } }] };
+    s = normalizeStacks(s);
+    expect(s.sections[1].formation.dancerMovements?.a).toEqual(path);
+  });
+
+  it("a stack that just formed keeps separate paths", () => {
+    let s = makeChoreo();
+    s = { ...s, sections: [s.sections[0], { ...s.sections[0], id: "s2" }] };
+    s = stackObjects(s, "s2", "dancers", ["a", "b"]);
+    expect(linkedStack(s.sections[0].formation, s.sections[1].formation, "dancers", "a")).toBeUndefined();
+    const other = { points: [{ x: 1, y: 1 }], tension: "curved" as const };
+    s = { ...s, sections: [s.sections[0], { ...s.sections[1], formation: { ...s.sections[1].formation, dancerMovements: { b: path, a: other } } }] };
+    expect(normalizeStacks(s).sections[1].formation.dancerMovements?.a).toEqual(other);
   });
 });

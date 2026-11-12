@@ -291,10 +291,11 @@ export default function ChoreoEditPage(props: {
   }, [dispatch, currentSection.id]);
   const {
     setStageSelectedIds, canStack, wholeStack, hiddenSelectedNames,
-    onStack, onReorderStack, onUnstack, canSwap, onSwap, offerStackOnDrop, stackDialogs,
+    onStack, onReorderStack, onUnstack, canSwap, onSwap, linkedPathId, offerStackOnDrop, stackDialogs,
   } = useStackEditing({
     state: history.presentState.state,
     section: currentSection,
+    prevSection,
     selectedIds,
     setSelectedIds,
     commitState,
@@ -304,6 +305,8 @@ export default function ChoreoEditPage(props: {
   });
 
   const firstSelectedDancerProp: SelectedEntity | undefined = useMemo(() => {
+    // A stack that stays together from the previous section is edited as one path.
+    if (linkedPathId) return linkedPathId as SelectedEntity;
     if (selectedIds.obstacles.length > 0 || selectedIds.dancers.length > 1 || selectedIds.props.length > 1) return;
 
     if (selectedIds.dancers.length === 1 && selectedIds.props.length === 0) {
@@ -311,7 +314,7 @@ export default function ChoreoEditPage(props: {
     } else if (selectedIds.dancers.length === 0 && selectedIds.props.length === 1) {
       return {id: selectedIds.props[0], type: "prop"} as SelectedEntity;
     }
-  }, [selectedIds.dancers, selectedIds.props]);
+  }, [selectedIds.dancers, selectedIds.props, linkedPathId?.id, linkedPathId?.type]);
 
   const firstSelectedDancerPropMovement: Movement | undefined = useMemo(() => {
     if (!firstSelectedDancerProp) return;
@@ -1157,7 +1160,7 @@ export default function ChoreoEditPage(props: {
         onEditMovement={onEditMovement}
         isEditingMovement={isEditingMovement}
         setIsEditingMovement={setIsEditingMovement}
-        canEditMovement={(selectedIds.dancers.length | selectedIds.props.length) === 1 && currentSection.id !== history.presentState.state.sections[0].id}
+        canEditMovement={((selectedIds.dancers.length | selectedIds.props.length) === 1 || linkedPathId !== undefined) && currentSection.id !== history.presentState.state.sections[0].id}
         curved={firstSelectedDancerPropMovement?.tension !== "straight"}
         toggleCurved={toggleCurved}
         pointCount={firstSelectedDancerPropMovement?.points.length ?? 1}
