@@ -298,3 +298,22 @@ export function findDropTarget(formation: Formation, kind: StackKind, movedIds: 
   });
   return best?.unit;
 }
+
+// ---- viewer wording ----
+
+// The grey lines under the position panel: where the dancer is in a stack now, and getting on or off next.
+export function stackNotes(current: Formation, next: Formation | undefined, id: string, name: (id: string) => string): { now?: string, next?: string } {
+  const below = stackBelow(current, "dancers", id);
+  const above = stackAbove(current, "dancers", id);
+  const now = below ? `${name(below)}の上` : above ? `${name(above)}を乗せている` : undefined;
+
+  if (!next) return { now };
+  const nextBelow = stackBelow(next, "dancers", id);
+  const nextAbove = stackAbove(next, "dancers", id);
+  let move: string | undefined;
+  if (below && nextBelow !== below) move = `${name(below)}から降りる`;
+  else if (!below && nextBelow) move = `${name(nextBelow)}に乗る`;
+  else if (above && nextAbove !== above) move = `${name(above)}が降りる`;
+  else if (!above && nextAbove) move = `${name(nextAbove)}が乗る`;
+  return { now, next: move };
+}

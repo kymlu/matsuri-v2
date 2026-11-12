@@ -25,6 +25,8 @@ type ViewerSidebarProps = {
   dancer: Dancer;
   position: DancerPosition;
   nextPosition?: DancerPosition;
+  stackNote?: string;
+  stackMoveNote?: string;
   selectedTiming?: string;
   onSelectTiming: (timing?: DancerActionTiming) => void;
   actions?: DancerAction[];
@@ -45,6 +47,8 @@ function ViewerSidebar({
   dancer,
   position,
   nextPosition,
+  stackNote,
+  stackMoveNote,
   selectedTiming,
   onSelectTiming,
   actions,
@@ -122,6 +126,8 @@ function ViewerSidebar({
               dancer={dancer}
               position={position}
               nextPosition={nextPosition}
+              stackNote={stackNote}
+              stackMoveNote={stackMoveNote}
               actions={actions}
               geometry={geometry}
             />

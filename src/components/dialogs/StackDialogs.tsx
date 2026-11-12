@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { Dialog } from "@base-ui/react";
+import CustomDialog from "../basic/CustomDialog";
 import classNames from "classnames";
 import BaseEditDialog from "./BaseEditDialog";
 import SelectBox from "../basic/SelectBox";
@@ -132,4 +134,25 @@ export function StackPromptDialog({ text, onNext, onKeep }: { text: string, onNe
     <p>{text}</p>
     <p className="mt-2 text-sm text-muted">次に順番を確認します。</p>
   </BaseEditDialog>;
+}
+
+// View mode: tapping a stack lists who is there, top first. Picking one selects them.
+export function StackListDialog({ members, onPick }: { members: StackMember[], onPick: (id: string) => void }) {
+  return <CustomDialog title={`ここに${members.length}人`} hasX fullWidth focusDialogOnOpen>
+    <ul className="p-px space-y-1">
+      {
+        members.map((m, i) =>
+          <li key={m.id}>
+            <Dialog.Close
+              onClick={() => onPick(m.id)}
+              className="flex items-center w-full gap-2 px-3 text-left border rounded-md min-h-11 border-line hover:bg-line/40">
+              <Dot color={m.color}/>
+              <span className="font-semibold break-all">{m.label}</span>
+              <span className="ml-auto text-sm text-muted shrink-0">{tierLabel(i, members.length)}</span>
+            </Dialog.Close>
+          </li>
+        )
+      }
+    </ul>
+  </CustomDialog>;
 }

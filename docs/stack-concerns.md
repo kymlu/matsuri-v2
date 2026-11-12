@@ -21,3 +21,8 @@ Running list, added to after each phase's review. 🔴 = must be handled before 
 - 🟡 **Accidental overlaps** (two people at one spot without 重ねる) still have no grey ×2, so they hide someone silently, as before stacks existed.
 - ⚪ **Mark size.** At the default zoom on a phone the mark is about 10px across: visible, but small. Worth checking on a real device.
 - ⚪ **Red mark in view mode means "a hidden member is selected"**, which is what a count does, but finding a hidden person by name also turns it red. Harmless; the dashed ring makes it clear who it is.
+
+## Phase 4 (view mode)
+- 🟡 **Prop stacks can't be inspected in view mode.** Props can't be tapped there, so the "order only" list from the spec isn't reachable. The mark still shows.
+- ⚪ **The stack list is a small dialog**, not a popover next to the stack as mocked. Same content and rules (opens on tap only, the count stays until someone is picked), simpler and always on screen.
+- ⚪ **Panel lines only look one section ahead** (降りる / 乗る / が降りる / が乗る). Changes of stack order alone (上下入れ替え between sections) aren't described.

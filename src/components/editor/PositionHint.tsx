@@ -10,6 +10,9 @@ type PositionHintProps = {
   nextPosition?: DancerPosition;
   actions?: DancerAction[];
   geometry: StageGeometry;
+  // Grey lines for stacks: where they are now (〇〇の上) and what happens next (〇〇から降りる).
+  stackNote?: string;
+  stackMoveNote?: string;
 };
 
 const PositionHint = memo(function PositionHint({
@@ -18,6 +21,8 @@ const PositionHint = memo(function PositionHint({
   nextPosition,
   actions,
   geometry,
+  stackNote,
+  stackMoveNote,
 }: PositionHintProps) {
 
   const deltaX = nextPosition ? roundToTenth(roundToTenth(nextPosition.x) - roundToTenth(position.x)) : undefined;
@@ -29,6 +34,7 @@ const PositionHint = memo(function PositionHint({
         <div className="flex w-full gap-1">
           <InfoBox title="現在の位置">
             <DancerPositionText position={position} geometry={geometry}/>
+            {stackNote && <Note text={stackNote}/>}
           </InfoBox>
           {
             nextPosition && deltaX !== undefined && deltaY !== undefined &&
@@ -62,6 +68,7 @@ const PositionHint = memo(function PositionHint({
                   </>
                 }
               </div>
+              {stackMoveNote && <Note text={stackMoveNote}/>}
             </InfoBox>
           }
         </div>
@@ -118,8 +125,10 @@ type InfoBoxProps = {
 function InfoBox({title, children, isSmall}: InfoBoxProps) {
   return <div className={"flex flex-col justify-between p-2 border border-line rounded-md" + (isSmall ? "" : " flex-1")}>
     <span className="text-sm font-semibold text-center text-muted">{title}</span>
-    <div className="flex items-center justify-center gap-1">
+    <div className="flex flex-col items-center justify-center">
       {children}
     </div>
   </div>
 }
+
+const Note = ({ text }: { text: string }) => <span className="text-sm text-center text-muted">{text}</span>;

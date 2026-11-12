@@ -1,5 +1,5 @@
 import { Choreo } from "../../models/choreo";
-import { countUnits, expandSelectionToStacks, findDropTarget, isHiddenInStack, normalizeStacks, reorderStack, selectedWholeStack, stackAbove, stackBelow, stackObjects, unstackObjects } from "./stackHelper";
+import { countUnits, expandSelectionToStacks, findDropTarget, stackNotes, isHiddenInStack, normalizeStacks, reorderStack, selectedWholeStack, stackAbove, stackBelow, stackObjects, unstackObjects } from "./stackHelper";
 import { removeObjects } from "../editor/commands/objectCommands";
 
 const dp = (id: string, x: number, y: number, z: number) => ({ dancerId: id, x, y, z, color: "#000", sectionId: "s1", type: "dancer" as const });
@@ -155,5 +155,27 @@ describe("findDropTarget", () => {
     let s = stackObjects(makeChoreo(), "s1", "dancers", ["c", "d"]); // at d's spot (7,1)
     s = { ...s, sections: [{ ...s.sections[0], formation: { ...f(s), dancerPositions: { ...f(s).dancerPositions, a: dp("a", 7.05, 1, 0) } } }] };
     expect(findDropTarget(f(s), "dancers", ["a"], {})).toEqual(["d", "c"]);
+  });
+});
+
+describe("stackNotes", () => {
+  const names: Record<string, string> = { a: "花子", b: "一郎", c: "松子", d: "月子" };
+  const name = (id: string) => names[id];
+
+  it("says who is under or on top now, and getting off next", () => {
+    const now = f(stackObjects(makeChoreo(), "s1", "dancers", ["a", "b"])); // a on b
+    const next = f(makeChoreo());
+    expect(stackNotes(now, next, "a", name)).toEqual({ now: "一郎の上", next: "一郎から降りる" });
+    expect(stackNotes(now, next, "b", name)).toEqual({ now: "花子を乗せている", next: "花子が降りる" });
+  });
+
+  it("says getting on next", () => {
+    const now = f(makeChoreo());
+    const next = f(stackObjects(makeChoreo(), "s1", "dancers", ["a", "b"]));
+    expect(stackNotes(now, next, "a", name)).toEqual({ now: undefined, next: "一郎に乗る" });
+  });
+
+  it("says nothing when nothing changes", () => {
+    expect(stackNotes(f(makeChoreo()), f(makeChoreo()), "a", name)).toEqual({ now: undefined, next: undefined });
   });
 });
