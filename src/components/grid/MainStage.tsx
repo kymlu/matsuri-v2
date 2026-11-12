@@ -75,7 +75,7 @@ type MainStageProps = {
   // Shows the 🔰 help button at the top left.
   openHelp?: () => void,
   openFindDancer?: () => void,
-  // Bump to centre the one selected dancer at the current zoom, e.g. after finding them by name.
+  // Bump to centre the selection at the current zoom, e.g. after finding it by name.
   focusSelectedDancerRequest?: number,
   showPaths?: boolean,
   isEditingMovement?: boolean,
@@ -381,9 +381,21 @@ function MainStage({
     if (focusSelectedDancerRequest) focusUntil.current = Date.now() + 1500;
   }, [focusSelectedDancerRequest]);
   useEffect(() => {
-    if (Date.now() > focusUntil.current || !stageGeometry || selectedObjects.dancers.length !== 1) return;
-    const dancer = selectedObjects.dancers[0];
-    const dancerPx = stageMetersToPx({x: dancer.x, y: dancer.y}, stageGeometry, pixelsPerMeter);
+    if (Date.now() > focusUntil.current || !stageGeometry) return;
+    // The middle of everything selected (dancers by centre, props by their box), kept at the current zoom.
+    const points = [
+      ...selectedObjects.dancers.map(d => [{x: d.x, y: d.y}]),
+      ...selectedObjects.props.map(pos => {
+        const prop = currentChoreo.props[pos.propId];
+        return [{x: pos.x, y: pos.y}, {x: pos.x + (prop?.width ?? 0), y: pos.y + (prop?.length ?? 0)}];
+      }),
+    ].flat();
+    if (points.length === 0) return;
+    const centre = {
+      x: (Math.min(...points.map(p => p.x)) + Math.max(...points.map(p => p.x))) / 2,
+      y: (Math.min(...points.map(p => p.y)) + Math.max(...points.map(p => p.y))) / 2,
+    };
+    const dancerPx = stageMetersToPx(centre, stageGeometry, pixelsPerMeter);
     // Centre in the part of the stage the bottom panel doesn't cover, measured from the page.
     const drawerTop = document.querySelector("[data-bottom-drawer]")?.getBoundingClientRect().top;
     const containerTop = containerRef.current?.getBoundingClientRect().top;

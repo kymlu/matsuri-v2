@@ -1,4 +1,4 @@
-import { buildFindDancerList, findMyDancerId, isSameDancerName, normalizeForSearch } from "./myDancerHelper";
+import { buildFindDancerList, buildFindList, findMyDancerId, isSameDancerName, normalizeForSearch } from "./myDancerHelper";
 
 const dancers = {
   a: { id: "a", name: "さくら" },
@@ -53,5 +53,17 @@ describe("buildFindDancerList", () => {
     expect(list(undefined, undefined, "サク").map(i => i.id)).toEqual(["a"]);
     expect(list(undefined, undefined, "花子").length).toBe(2);
     expect(list(undefined, undefined, "ゆい")).toEqual([]);
+  });
+});
+
+describe("buildFindList", () => {
+  const props = [{ id: "p1", name: "大旗" }, { id: "p2", name: "幕" }, { id: "p3", name: "幕" }];
+  it("numbers duplicates in the given order and sorts by reading", () => {
+    expect(buildFindList(props, "").map(i => i.label)).toEqual(["大旗", "幕(1)", "幕(2)"]);
+    expect(buildFindList(props, "").find(i => i.label === "幕(2)")?.id).toBe("p3");
+  });
+  it("filters by partial match", () => {
+    expect(buildFindList(props, "旗").map(i => i.id)).toEqual(["p1"]);
+    expect(buildFindList(props, "x")).toEqual([]);
   });
 });
