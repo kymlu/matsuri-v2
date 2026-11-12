@@ -27,6 +27,8 @@ type ViewerSidebarProps = {
   nextPosition?: DancerPosition;
   stackNote?: string;
   stackMoveNote?: string;
+  // Where the dancer is in a stack in a given section (〇〇の上 / 〇〇の下), for まとめ.
+  stackLine?: (section: ChoreoSection) => string | undefined;
   selectedTiming?: string;
   onSelectTiming: (timing?: DancerActionTiming) => void;
   actions?: DancerAction[];
@@ -49,6 +51,7 @@ function ViewerSidebar({
   nextPosition,
   stackNote,
   stackMoveNote,
+  stackLine,
   selectedTiming,
   onSelectTiming,
   actions,
@@ -115,6 +118,7 @@ function ViewerSidebar({
           currentSectionId={sectionId}
           geometry={geometry}
           onChangeSection={onChangeSection}
+          stackLine={stackLine}
         />
       }
       {

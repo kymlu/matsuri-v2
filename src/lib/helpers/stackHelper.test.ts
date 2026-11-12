@@ -167,7 +167,7 @@ describe("stackNotes", () => {
     const now = f(stackObjects(makeChoreo(), "s1", "dancers", ["a", "b"])); // a on b
     const next = f(makeChoreo());
     expect(stackNotes(now, next, "a", name)).toEqual({ now: "一郎の上", next: "一郎から降りる" });
-    expect(stackNotes(now, next, "b", name)).toEqual({ now: "花子を乗せている", next: "花子が降りる" });
+    expect(stackNotes(now, next, "b", name)).toEqual({ now: "花子の下", next: "花子が降りる" });
   });
 
   it("says getting on next", () => {

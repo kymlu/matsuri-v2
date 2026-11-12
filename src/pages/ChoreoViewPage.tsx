@@ -315,6 +315,8 @@ export default function ChoreoViewPage(props: {
           nextPosition={nextSection?.formation.dancerPositions[selectedIds.dancers[0]]}
           stackNote={stackNote.now}
           stackMoveNote={stackNote.next}
+          stackLine={section => stackNotes(section.formation, undefined, selectedIds.dancers[0],
+            id => props.currentChoreo.dancers[id]?.name ?? "").now}
           geometry={props.currentChoreo.stageGeometry}
           isPositionHintShown={
             selectedIds.dancers.length === 1 &&

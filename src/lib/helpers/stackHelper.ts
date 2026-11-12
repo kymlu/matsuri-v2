@@ -342,7 +342,7 @@ export function findDropTarget(formation: Formation, kind: StackKind, movedIds: 
 export function stackNotes(current: Formation, next: Formation | undefined, id: string, name: (id: string) => string): { now?: string, next?: string } {
   const below = stackBelow(current, "dancers", id);
   const above = stackAbove(current, "dancers", id);
-  const now = below ? `${name(below)}の上` : above ? `${name(above)}を乗せている` : undefined;
+  const now = below ? `${name(below)}の上` : above ? `${name(above)}の下` : undefined;
 
   if (!next) return { now };
   const nextBelow = stackBelow(next, "dancers", id);

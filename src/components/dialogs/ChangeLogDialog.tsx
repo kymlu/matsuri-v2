@@ -210,7 +210,7 @@ function DancerSection({ section, choreo, oldGeometry, sectionNames }: DancerSec
 }
 
 const stackPlaceText = (place?: StackPlace) =>
-  !place ? "なし" : "on" in place ? `${place.on}の上` : `${place.carrying}を乗せる`;
+  !place ? "なし" : "on" in place ? `${place.on}の上` : `${place.carrying}の下`;
 
 const countNames = (names: string[]) => names.length > 0 ? names.join("、") : "なし";
 

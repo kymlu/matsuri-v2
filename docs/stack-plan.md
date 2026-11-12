@@ -48,7 +48,7 @@ Review:
 
 ### Phase 4: view mode
 - Tapping a stack opens 「ここに◯人」 (members top to bottom); picking one selects them.
-- Position panel: grey line under 現在の位置 (〇〇の上 / 〇〇を乗せている) and under 次への移動 (〇〇から降りる / 〇〇に乗る).
+- Position panel: grey line under 現在の位置 (〇〇の上 / 〇〇の下) and under 次への移動 (〇〇から降りる / 〇〇に乗る).
 
 ### Phase 5: help, review, concerns
 - Help article for stacking; concerns document; final review.
