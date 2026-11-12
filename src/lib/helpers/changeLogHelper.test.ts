@@ -208,6 +208,11 @@ describe("buildChangeLog", () => {
       expect(left.dancers.d1.kind === "changed" && left.dancers.d1.sections[0].stack).toEqual({ from: { on: "あおい" }, to: undefined });
     });
 
+    it("doesn't report a stack change when the partner was only renamed", () => {
+      const log = compare(c => { stack(c, 0, "d2", "d1"); c.dancers.d2.name = "あおい2"; }, c => stack(c, 0, "d2", "d1"));
+      expect(log.dancers.d1).toBeUndefined();
+    });
+
     it("says nothing when the stack is unchanged", () => {
       expect(compare(c => stack(c, 0, "d2", "d1"), c => stack(c, 0, "d2", "d1")).dancers.d1).toBeUndefined();
     });

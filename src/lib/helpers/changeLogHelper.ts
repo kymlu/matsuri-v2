@@ -160,19 +160,25 @@ function compareCounts(oldActions: DancerAction[], newActions: DancerAction[], o
     }));
 }
 
-function stackPlace(choreo: Choreo, section: ChoreoSection | undefined, dancerId: string): StackPlace | undefined {
+// Who the dancer is on (or, at the bottom, under), by ID in that version of the choreo.
+function stackPartner(section: ChoreoSection | undefined, dancerId: string): { on: boolean, id: string } | undefined {
   if (!section) return undefined;
   const below = stackBelow(section.formation, "dancers", dancerId);
-  if (below) return { on: choreo.dancers[below]?.name ?? "" };
+  if (below) return { on: true, id: below };
   const above = stackAbove(section.formation, "dancers", dancerId);
-  if (above) return { carrying: choreo.dancers[above]?.name ?? "" };
+  if (above) return { on: false, id: above };
   return undefined;
 }
 
-const samePlace = (a?: StackPlace, b?: StackPlace) => JSON.stringify(a ?? null) === JSON.stringify(b ?? null);
+const toPlace = (choreo: Choreo, partner?: { on: boolean, id: string }): StackPlace | undefined => {
+  if (!partner) return undefined;
+  const name = choreo.dancers[partner.id]?.name ?? "";
+  return partner.on ? { on: name } : { carrying: name };
+};
 
 function compareDancer(
-  oldChoreo: Choreo, newChoreo: Choreo, samePosition: SamePosition, sectionMatch: Match<ChoreoSection>, oldDancerId: string, newDancerId: string
+  oldChoreo: Choreo, newChoreo: Choreo, samePosition: SamePosition, sectionMatch: Match<ChoreoSection>, dancerMatch: Match<BaseModel>,
+  oldDancerId: string, newDancerId: string
 ): DancerSectionChanges[] {
   const changes: DancerSectionChanges[] = newChoreo.sections.map(section => {
     const oldSection = sectionMatch.oldOf[section.id];
@@ -189,9 +195,12 @@ function compareDancer(
       counts: compareCounts(oldSection?.formation.dancerActions ?? [], section.formation.dancerActions, oldDancerId, newDancerId),
       pathChanged: false,
       stack: (() => {
-        const from = stackPlace(oldChoreo, oldSection, oldDancerId);
-        const to = stackPlace(newChoreo, section, newDancerId);
-        return samePlace(from, to) ? undefined : { from, to };
+        // Compared by matched dancer, so renaming a partner isn't reported as a stack change.
+        const from = stackPartner(oldSection, oldDancerId);
+        const to = stackPartner(section, newDancerId);
+        const same = from === undefined ? to === undefined :
+          to !== undefined && from.on === to.on && dancerMatch.oldOf[to.id]?.id === from.id;
+        return same ? undefined : { from: toPlace(oldChoreo, from), to: toPlace(newChoreo, to) };
       })(),
     };
   });
@@ -290,7 +299,7 @@ export function buildChangeLog(oldChoreo: Choreo, newChoreo: Choreo): ChangeLog 
       dancers[dancer.id] = { kind: "new" };
       return;
     }
-    const sections = compareDancer(oldChoreo, newChoreo, samePosition, sectionMatch, oldDancer.id, dancer.id);
+    const sections = compareDancer(oldChoreo, newChoreo, samePosition, sectionMatch, dancerMatch, oldDancer.id, dancer.id);
     if (sections.length > 0) {
       dancers[dancer.id] = { kind: "changed", sections };
     }
