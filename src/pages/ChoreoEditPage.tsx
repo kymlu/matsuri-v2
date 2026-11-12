@@ -263,7 +263,9 @@ export default function ChoreoEditPage(props: {
   const openFind = useCallback(() => setFindOpen(true), []);
   const findDancers = useMemo(() => {
     const dancers = history.presentState.state.dancers;
-    return Object.keys(currentSection.formation.dancerPositions).filter(id => dancers[id]).map(id => dancers[id]);
+    return Object.values(currentSection.formation.dancerPositions)
+      .filter(pos => dancers[pos.dancerId])
+      .map(pos => ({ id: pos.dancerId, name: dancers[pos.dancerId].name, color: pos.color }));
   }, [history.presentState.state.dancers, currentSection.formation.dancerPositions]);
   const findProps = useMemo(() => {
     const props = history.presentState.state.props;

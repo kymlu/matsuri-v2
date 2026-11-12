@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { Dialog } from "@base-ui/react";
 import FindObjectsDialog from "./FindObjectsDialog";
 
@@ -44,6 +44,18 @@ describe("FindObjectsDialog", () => {
     expect(screen.getByText("2件選択中")).toBeTruthy();
     fireEvent.click(confirmButton());
     expect(onConfirm).toHaveBeenCalledWith(["d2"], ["p1"]);
+  });
+
+  it("ticks and unticks every row shown with すべて", async () => {
+    const onConfirm = jest.fn();
+    render(dialog({ onConfirm }));
+    fireEvent.input(await screen.findByRole("textbox"), { target: { value: "花" } });
+    const dancerGroup = screen.getByRole("region", { name: "ダンサー" });
+    fireEvent.click(within(dancerGroup).getByText("すべて選択"));
+    expect(screen.getByText("2件選択中")).toBeTruthy();
+    expect(within(dancerGroup).getByText("すべて解除")).toBeTruthy();
+    fireEvent.click(confirmButton());
+    expect(onConfirm).toHaveBeenCalledWith(["d1", "d3"], []);
   });
 
   it("says when nothing matches", async () => {
