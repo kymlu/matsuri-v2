@@ -176,6 +176,16 @@ describe("stackNotes", () => {
     expect(stackNotes(now, next, "a", name)).toEqual({ now: undefined, next: "一郎に乗る" });
   });
 
+  it("in a stack of three, the middle one says who they're on", () => {
+    const now = f(stackObjects(makeChoreo(), "s1", "dancers", ["a", "b", "c"])); // a on b on c
+    expect(stackNotes(now, f(makeChoreo()), "b", name).now).toBe("松子の上");
+    // Only the top one gets off next: the middle one still stands on 松子, so nothing about above.
+    const next = f(stackObjects(makeChoreo(), "s1", "dancers", ["b", "c"]));
+    expect(stackNotes(now, next, "b", name).next).toBeUndefined();
+    expect(stackNotes(now, next, "c", name).next).toBeUndefined();
+    expect(stackNotes(now, next, "a", name).next).toBe("一郎から降りる");
+  });
+
   it("says nothing when nothing changes", () => {
     expect(stackNotes(f(makeChoreo()), f(makeChoreo()), "a", name)).toEqual({ now: undefined, next: undefined });
   });

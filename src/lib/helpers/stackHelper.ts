@@ -310,9 +310,12 @@ export function stackNotes(current: Formation, next: Formation | undefined, id: 
   if (!next) return { now };
   const nextBelow = stackBelow(next, "dancers", id);
   const nextAbove = stackAbove(next, "dancers", id);
+  // Someone standing on another person only hears about what's under them; who's above is only
+  // mentioned to the bottom of a stack.
   let move: string | undefined;
   if (below && nextBelow !== below) move = `${name(below)}から降りる`;
   else if (!below && nextBelow) move = `${name(nextBelow)}に乗る`;
+  else if (below) move = undefined;
   else if (above && nextAbove !== above) move = `${name(above)}が降りる`;
   else if (!above && nextAbove) move = `${name(nextAbove)}が乗る`;
   return { now, next: move };
