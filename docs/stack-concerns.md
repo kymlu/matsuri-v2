@@ -9,7 +9,7 @@ Still open, most important first:
 5. 🟡 Accidental overlaps still have no grey ×2.
 6. 🟡 Prop stacks can't be inspected in view mode.
 7. 🟡 Individually selected stack members (同色選択, find) snap back when moved; distribute leaves uneven gaps around stacks.
-Not built from the spec: docked member list (find covers it), drag-to-reorder (arrows instead), floating stack list (dialog instead), dancer on prop.
+Not built from the spec: docked member list (find covers it), floating stack list (dialog instead), dancer on prop.
 
 
 Running list, added to after each phase's review. 🔴 = must be handled before release, 🟡 = should be decided, ⚪ = known limit.
@@ -43,3 +43,7 @@ Running list, added to after each phase's review. 🔴 = must be handled before 
 - ✅ **Fixed a bug on main** found while testing the drop prompt: releasing a drag over another object counted as tapping that object, so it was added to the selection and the move was lost. A tap now has to start on the object.
 - ✅ **New sections keep stacks.** 「＋」 copies positions from the previous section, so it copies stacks too; otherwise stacked people would just overlap. Duplicating a section already copied them.
 - 🟡 **To check with choreographers:** whether stacks should carry into a new section (current: yes), the tier limit (current: none), and whether dancer-on-prop is needed.
+
+## After user testing
+- ✅ **Dragging one member moved only that member.** A drag that starts on one member (before the rest are selected, or when the stage only drags that node) now brings the whole stack by the same amount, and selects the whole stack.
+- ✅ **Reordering uses drag handles** like the app's other sortable lists, instead of arrows.

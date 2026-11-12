@@ -1,5 +1,5 @@
 import { Choreo } from "../../models/choreo";
-import { countUnits, expandSelectionToStacks, findDropTarget, stackNotes, isHiddenInStack, normalizeStacks, reorderStack, selectedWholeStack, stackAbove, stackBelow, stackObjects, unstackObjects } from "./stackHelper";
+import { countUnits, expandSelectionToStacks, findDropTarget, moveStacksTogether, stackNotes, isHiddenInStack, normalizeStacks, reorderStack, selectedWholeStack, stackAbove, stackBelow, stackObjects, unstackObjects } from "./stackHelper";
 import { removeObjects } from "../editor/commands/objectCommands";
 import { addSection } from "../editor/commands/sectionCommands";
 
@@ -185,5 +185,18 @@ describe("sections", () => {
   it("a new section keeps the stacks (a duplicate copies the whole formation)", () => {
     const s = stackObjects(makeChoreo(), "s1", "dancers", ["a", "b"]);
     expect(addSection(s, "s2").sections[1].formation.dancerStacks).toEqual([["b", "a"]]);
+  });
+});
+
+describe("moveStacksTogether", () => {
+  it("brings the rest of a stack by the same amount", () => {
+    const s = f(stackObjects(makeChoreo(), "s1", "dancers", ["a", "c"])); // both at (5,1)
+    const moves = { dancers: { a: { x: 6, y: 2 } }, props: {}, obstacles: {} };
+    expect(moveStacksTogether(s, moves).dancers).toEqual({ a: { x: 6, y: 2 }, c: { x: 6, y: 2 } });
+  });
+
+  it("leaves moves alone when nobody is stacked", () => {
+    const moves = { dancers: { a: { x: 6, y: 2 } }, props: {}, obstacles: {} };
+    expect(moveStacksTogether(f(makeChoreo()), moves)).toBe(moves);
   });
 });

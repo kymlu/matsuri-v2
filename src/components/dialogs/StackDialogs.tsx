@@ -5,6 +5,10 @@ import classNames from "classnames";
 import BaseEditDialog from "./BaseEditDialog";
 import SelectBox from "../basic/SelectBox";
 import Icon from "../basic/Icon";
+import { DndContext } from "@dnd-kit/core";
+import { arrayMove, SortableContext, useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { restrictToParentElement, restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import { StackSpot } from "../../lib/helpers/stackHelper";
 
 export type StackMember = { id: string, label: string, color?: string };
@@ -12,34 +16,41 @@ export type StackMember = { id: string, label: string, color?: string };
 const Dot = ({ color }: { color?: string }) =>
   color ? <span aria-hidden className="border rounded-full size-4 shrink-0 border-line" style={{ backgroundColor: color }}/> : null;
 
-const ArrowButton = ({ src, label, disabled, onClick }: { src: "arrowUpward" | "arrowDownward", label: string, disabled: boolean, onClick: () => void }) =>
-  <button type="button" aria-label={label} disabled={disabled} onClick={onClick}
-    className="flex items-center justify-center rounded-full size-9 shrink-0 disabled:opacity-30">
-    <Icon src={src} size="sm"/>
-  </button>;
-
 const tierLabel = (i: number, count: number) => i === 0 ? "上" : i === count - 1 ? "下" : "中";
 
-// The order of a stack, top first, changed with ↑/↓. Used for 重ねる順 and 並べ替え.
+// The order of a stack, top first, changed by dragging the handle (same as the app's other sortable lists).
 function OrderList({ members, setMembers }: { members: StackMember[], setMembers: (m: StackMember[]) => void }) {
-  const move = (i: number, by: number) => {
-    const next = [...members];
-    [next[i], next[i + by]] = [next[i + by], next[i]];
-    setMembers(next);
-  };
-  return <ol className="p-px space-y-1" aria-label="上から順">
-    {
-      members.map((m, i) =>
-        <li key={m.id} className="flex items-center gap-2 px-3 border rounded-md min-h-11 border-line">
-          <Dot color={m.color}/>
-          <span className="font-semibold break-all">{m.label}</span>
-          <span className="ml-auto text-sm text-muted shrink-0">{tierLabel(i, members.length)}</span>
-          <ArrowButton src="arrowUpward" label={`${m.label}を上へ`} disabled={i === 0} onClick={() => move(i, -1)}/>
-          <ArrowButton src="arrowDownward" label={`${m.label}を下へ`} disabled={i === members.length - 1} onClick={() => move(i, 1)}/>
-        </li>
-      )
-    }
-  </ol>;
+  return <DndContext
+    modifiers={[restrictToVerticalAxis, restrictToParentElement]}
+    onDragEnd={({ active, over }) => {
+      if (over && active.id !== over.id) {
+        const oldIndex = members.findIndex(m => m.id === active.id);
+        const newIndex = members.findIndex(m => m.id === over.id);
+        if (oldIndex !== -1 && newIndex !== -1) setMembers(arrayMove(members, oldIndex, newIndex));
+      }
+    }}>
+    <SortableContext items={members.map(m => m.id)}>
+      <ol className="p-px space-y-1" aria-label="上から順">
+        {members.map((m, i) => <SortableMember key={m.id} member={m} tier={tierLabel(i, members.length)}/>)}
+      </ol>
+    </SortableContext>
+  </DndContext>;
+}
+
+function SortableMember({ member, tier }: { member: StackMember, tier: string }) {
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: member.id });
+  return <li
+    ref={setNodeRef}
+    style={{ transform: CSS.Transform.toString(transform), transition }}
+    className="flex items-center gap-2 px-3 border rounded-md min-h-11 border-line bg-surface">
+    {/* touch-none so dragging the handle on a phone doesn't scroll the dialog instead */}
+    <div {...attributes} {...listeners} aria-label={`${member.label}を並べ替え`} className="cursor-grab touch-none">
+      <Icon src="dragHandle" size="sm" colour="grey"/>
+    </div>
+    <Dot color={member.color}/>
+    <span className="font-semibold break-all">{member.label}</span>
+    <span className="ml-auto text-sm text-muted shrink-0">{tier}</span>
+  </li>;
 }
 
 // 重ねる順: confirm the order (and where) before stacking. Always shown, from the button or after a drop.
@@ -57,7 +68,7 @@ export function StackOrderDialog({ initial, onSubmit, onBack }: {
     fullWidth
     backButton={onBack ? { label: "戻る", onClick: onBack } : undefined}
     onSubmit={() => onSubmit(members.map(m => m.id), spot)}>
-    <p className="mb-2 text-sm text-muted">上から順。矢印で並べ替えます。</p>
+    <p className="mb-2 text-sm text-muted">上から順。ドラッグで並べ替えます。</p>
     <OrderList members={members} setMembers={setMembers}/>
     <p className="mt-3 mb-1 text-sm font-semibold text-muted">位置</p>
     <div className="flex gap-2" role="radiogroup" aria-label="位置">
@@ -83,7 +94,7 @@ export function StackOrderDialog({ initial, onSubmit, onBack }: {
 export function ReorderStackDialog({ initial, onSubmit }: { initial: StackMember[], onSubmit: (topFirst: string[]) => void }) {
   const [members, setMembers] = useState(initial);
   return <BaseEditDialog title="並べ替え" noDetachedTrigger fullWidth onSubmit={() => onSubmit(members.map(m => m.id))}>
-    <p className="mb-2 text-sm text-muted">上から順。矢印で並べ替えます。</p>
+    <p className="mb-2 text-sm text-muted">上から順。ドラッグで並べ替えます。</p>
     <OrderList members={members} setMembers={setMembers}/>
   </BaseEditDialog>;
 }

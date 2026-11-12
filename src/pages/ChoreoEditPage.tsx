@@ -13,7 +13,7 @@ import MainStage from "../components/grid/MainStage";
 import { Dialog } from "@base-ui/react";
 import FindObjectsDialog from "../components/dialogs/FindObjectsDialog";
 import { ReorderStackDialog, StackMember, StackOrderDialog, StackPromptDialog, UnstackDialog } from "../components/dialogs/StackDialogs";
-import { countUnits, expandSelectionToStacks, findDropTarget, findStack, normalizeStacks, reorderStack, selectedWholeStack, StackKind, stackObjects, StackSpot, unstackObjects } from "../lib/helpers/stackHelper";
+import { countUnits, expandSelectionToStacks, findDropTarget, findStack, moveStacksTogether, normalizeStacks, reorderStack, selectedWholeStack, StackKind, stackObjects, StackSpot, unstackObjects } from "../lib/helpers/stackHelper";
 import EditChoreoSizeDialog from "../components/dialogs/EditChoreoSizeDialog";
 import { exportChoreo } from "../lib/helpers/exportHelper";
 import { saveChoreo } from "../lib/dataAccess/DataController";
@@ -640,6 +640,19 @@ export default function ChoreoEditPage(props: {
       Object.keys(movementUpdateGroup.props).length === 0 &&
       Object.keys(movementUpdateGroup.obstacles).length === 0
     ) return;
+
+    // A stack moves as one: whoever was dragged brings the rest of their stack by the same amount,
+    // even if the drag started on one member before the others were selected.
+    const withStacks = moveStacksTogether(currentSection.formation, movementUpdateGroup);
+    if (withStacks !== movementUpdateGroup) {
+      setMovementUpdateGroup(withStacks);
+      setSelectedIds(prev => ({
+        ...prev,
+        dancers: Array.from(new Set([...prev.dancers, ...Object.keys(withStacks.dancers)])),
+        props: Array.from(new Set([...prev.props, ...Object.keys(withStacks.props)])),
+      }));
+      return;
+    }
 
     if (
       (selectedIds.dancers.length > 0 && selectedIds.dancers.some(id => !movementUpdateGroup.dancers[id])) ||

@@ -102,8 +102,6 @@ export const ICON = {
   stacks: "stacks",
   layersClear: "layers_clear",
   swapVert: "swap_vert",
-  arrowUpward: "arrow_upward",
-  arrowDownward: "arrow_downward",
   expandMore: "expand_more",
   familiarFaceAndZone: "familiar_face_and_zone",
   festival: "festival",

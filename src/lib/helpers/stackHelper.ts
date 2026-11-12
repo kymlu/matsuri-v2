@@ -317,3 +317,31 @@ export function stackNotes(current: Formation, next: Formation | undefined, id: 
   else if (!above && nextAbove) move = `${name(nextAbove)}が乗る`;
   return { now, next: move };
 }
+
+// ---- dragging ----
+
+// Adds the rest of each moved member's stack to a set of moves, by the same amount, so a stack always
+// moves as one. Returns the same object when nothing needs adding.
+export function moveStacksTogether(
+  formation: Formation,
+  moves: StageEntities<Record<string, { x: number, y: number }>>,
+): StageEntities<Record<string, { x: number, y: number }>> {
+  const add = (kind: StackKind, moved: Record<string, { x: number, y: number }>) => {
+    const positions: Record<string, { x: number, y: number }> = kind === "dancers" ? formation.dancerPositions : formation.propPositions;
+    let next = moved;
+    Object.keys(moved).forEach(id => {
+      const stack = findStack(formation, kind, id);
+      const from = positions[id];
+      if (!stack || !from) return;
+      const dx = moved[id].x - from.x, dy = moved[id].y - from.y;
+      stack.forEach(mate => {
+        if (next[mate] || !positions[mate]) return;
+        next = { ...next, [mate]: { x: positions[mate].x + dx, y: positions[mate].y + dy } };
+      });
+    });
+    return next;
+  };
+  const dancers = add("dancers", moves.dancers);
+  const props = add("props", moves.props);
+  return dancers === moves.dancers && props === moves.props ? moves : { ...moves, dancers, props };
+}
