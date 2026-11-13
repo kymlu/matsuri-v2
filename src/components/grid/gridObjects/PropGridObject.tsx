@@ -26,8 +26,8 @@ type PropGridObjectProps = {
   animationCache?: PathSvgCacheBySectionId;
   halfOpacity?: boolean,
   isZooming?: React.RefObject<boolean>;
-  // On the top prop of a stack: the layers mark (red: a hidden prop is selected),
-  // and a dashed outline when a hidden prop is selected but this top one isn't.
+  // On the top prop of a stack: the ×N mark (red: the stack is selected in the editor, or a hidden prop
+  // is selected in view mode), and a dashed outline when a hidden prop is selected but this top one isn't.
   stackMark?: "normal" | "red",
   hiddenSelected?: boolean,
   stackCount?: number,

@@ -28,8 +28,8 @@ type DancerGridObjectProps = {
   sectionId?: string,
   halfOpacity?: boolean,
   animationCache?: PathSvgCacheBySectionId;
-  // On the top member of a stack: show the layers mark (red: a hidden member is selected),
-  // and a dashed ring when a hidden member is selected but this top one isn't.
+  // On the top member of a stack: the ×N mark (red: the stack is selected in the editor, or a hidden member
+  // is selected in view mode), and a dashed ring when a hidden member is selected but this top one isn't.
   stackMark?: "normal" | "red",
   hiddenSelected?: boolean,
   // Under someone in a stack: no selection ring of its own (it would show through the top one's dashed ring).
