@@ -92,6 +92,9 @@ export default function ChoreoEditPage(props: {
   const [selectedIds, setSelectedIds] = useState<StageEntities<string[]>>({props: [], dancers: [], obstacles: []});
   const [isAddingDancers, setIsAddingDancers] = useState<boolean>(false);
   const [showPaths, setShowPaths] = useState<boolean>(false);
+  // Focusing on props: dancers are drawn faint and can't be selected, so only props and obstacles are worked on.
+  // Not saved; it goes away when leaving the editor.
+  const [dimDancers, setDimDancers] = useState<boolean>(false);
   const [isEditingMovement, setIsEditingMovement] = useState<boolean>(false);
   const [isAddingProps, setIsAddingProps] = useState<boolean>(false);
   const [isAddingObstacles, setIsAddingObstacles] = useState<boolean>(false);
@@ -268,11 +271,12 @@ export default function ChoreoEditPage(props: {
   const [focusSelectionRequest, setFocusSelectionRequest] = useState(0);
   const openFind = useCallback(() => setFindOpen(true), []);
   const findDancers = useMemo(() => {
+    if (dimDancers) return [];
     const dancers = history.presentState.state.dancers;
     return Object.values(currentSection.formation.dancerPositions)
       .filter(pos => dancers[pos.dancerId])
       .map(pos => ({ id: pos.dancerId, name: dancers[pos.dancerId].name, color: pos.color }));
-  }, [history.presentState.state.dancers, currentSection.formation.dancerPositions]);
+  }, [dimDancers, history.presentState.state.dancers, currentSection.formation.dancerPositions]);
   const findProps = useMemo(() => {
     const props = history.presentState.state.props;
     return Object.keys(currentSection.formation.propPositions).filter(id => props[id]).map(id => props[id]);
@@ -816,8 +820,17 @@ export default function ChoreoEditPage(props: {
   // ---- Toolbar handlers ----
   const onAddDancerToggle = useCallback(() => {
     resetSelectedIds();
+    setDimDancers(false);
     setIsAddingDancers(prev => !prev);
   }, [resetSelectedIds]);
+
+  const toggleDimDancers = useCallback(() => {
+    setDimDancers(prev => {
+      // Dancers can't be acted on while faint, so they leave the selection.
+      if (!prev) setSelectedIds(ids => ids.dancers.length > 0 ? { ...ids, dancers: [] } : ids);
+      return !prev;
+    });
+  }, []);
 
   const onAddPropToggle = useCallback(() => {
     resetSelectedIds();
@@ -873,10 +886,10 @@ export default function ChoreoEditPage(props: {
   const onSelectType = useCallback((selectDancers: boolean, selectProps: boolean, selectObstacles: boolean) => {
     setSelectedIds({
       props: selectProps ? Object.keys(history.presentState.state.props) : [],
-      dancers: selectDancers ? Object.keys(history.presentState.state.dancers) : [],
+      dancers: selectDancers && !dimDancers ? Object.keys(history.presentState.state.dancers) : [],
       obstacles: (selectObstacles && !areObstaclesLocked) ? Object.keys(history.presentState.state.obstacles ?? {}) : []
     });
-  }, [history.presentState.state.props, history.presentState.state.dancers, history.presentState.state.obstacles, areObstaclesLocked]);
+  }, [history.presentState.state.props, history.presentState.state.dancers, history.presentState.state.obstacles, areObstaclesLocked, dimDancers]);
 
   const onRearrange = useCallback((rearrangement: Rearrangement) => {
     const state = history.presentState.state;
@@ -913,6 +926,7 @@ export default function ChoreoEditPage(props: {
 
   const onAssignActions = useCallback(() => {
     resetSelectedIds();
+    setDimDancers(false);
     setCurrentAction(undefined);
     setCurrentTiming(undefined);
     setIsAssigningActions(prev => !prev);
@@ -1010,6 +1024,7 @@ export default function ChoreoEditPage(props: {
         <MainStage
           canEdit={!isAssigningActions}
           canSelectDancers={!isAssigningActions || currentTiming !== undefined}
+          dimDancers={dimDancers}
           canSelectProps={!isAssigningActions}
           canSelectObstacles={!isAssigningActions && !areObstaclesLocked && !isEditingMovement}
           canToggleSelection={!isEditingMovement}
@@ -1111,10 +1126,10 @@ export default function ChoreoEditPage(props: {
         showSelectName={(selectedIds.dancers.length + selectedIds.props.length + selectedIds.obstacles.length) > 0}
         onSelectName={onSelectName}
         onSelectType={onSelectType}
-        showSelectDancersButton={entityCount.dancers > 0 && entityCount.dancers > selectedIds.dancers.length}
+        showSelectDancersButton={!dimDancers && entityCount.dancers > 0 && entityCount.dancers > selectedIds.dancers.length}
         showSelectPropsButton={entityCount.props > 0 && entityCount.props > selectedIds.props.length}
         showSelectObstaclesButton={!areObstaclesLocked && entityCount.obstacles > 0 && entityCount.obstacles > selectedIds.obstacles.length}
-        showSelectAllButton={entityCount.dancers > selectedIds.dancers.length || entityCount.props > selectedIds.props.length || (!areObstaclesLocked && entityCount.obstacles > selectedIds.obstacles.length)}
+        showSelectAllButton={(!dimDancers && entityCount.dancers > selectedIds.dancers.length) || entityCount.props > selectedIds.props.length || (!areObstaclesLocked && entityCount.obstacles > selectedIds.obstacles.length)}
         onDeselect={resetSelectedIds}
         onRearrange={onRearrange}
         showDistribute={countSelectedUnits(currentSection.formation, selectedIds) >= 3}
@@ -1152,6 +1167,9 @@ export default function ChoreoEditPage(props: {
         onToggleResizePropsLock={onToggleResizePropsLock}
         isResizePropsLocked={isPropResizeLocked}
         showLockResizeProps={entityCount.props > 0}
+        showDimDancers={entityCount.dancers > 0 && (entityCount.props + entityCount.obstacles) > 0}
+        areDancersDimmed={dimDancers}
+        onToggleDimDancers={toggleDimDancers}
         onEditPropSize={openPropSizeDialog}
         showEditPropSize={selectedIds.props.length >= 1 && (selectedIds.dancers.length + selectedIds.obstacles.length) === 0}
         showMovementFunctions={(entityCount.dancers + entityCount.props) > 0}
@@ -1167,6 +1185,10 @@ export default function ChoreoEditPage(props: {
         togglePointCount={togglePointCount}
         onResetPath={resetPath}
       />
+      {
+        dimDancers &&
+        <InstructionMessage instruction="ダンサーを薄く表示中" onClose={() => setDimDancers(false)}/>
+      }
       {
         pasteNote &&
         <InstructionMessage instruction={pasteNote} onClose={() => setPasteNote(undefined)}/>

@@ -103,6 +103,9 @@ type ToolbarProps = {
   onToggleResizePropsLock: () => void;
   isResizePropsLocked: boolean;
   showLockResizeProps: boolean;
+  showDimDancers: boolean;
+  areDancersDimmed: boolean;
+  onToggleDimDancers: () => void;
   onEditPropSize: () => void;
   showEditPropSize: boolean;
   showDuplicateProp: boolean;
@@ -166,6 +169,9 @@ function Toolbar({
   onToggleResizePropsLock,
   isResizePropsLocked,
   showLockResizeProps,
+  showDimDancers,
+  areDancersDimmed,
+  onToggleDimDancers,
   onEditPropSize,
   showEditPropSize,
   showDuplicateProp, onDuplicateProp,
@@ -247,6 +253,8 @@ function Toolbar({
           setIsEditingMovement(true);
         }}/>}
         {showEditPropSize && <IconButton src="flag" subIconSrc="edit" subIconPosition="corner" label={"道具管理"} onClick={onEditPropSize} />}
+        {/* Like 動線表示: crossed out while dancers are faint (focusing on props) */}
+        {showDimDancers && <IconButton src="person" crossedOut={areDancersDimmed} label={"ダンサー\n表示"} onClick={onToggleDimDancers} />}
         <VerticalDivider/>
         {showSelectColour && <IconButton src="select" subIconSrc="colors" label={"同色選択"} onClick={onSelectColor} />}
         {showSelectName && <IconButton src="select" subIconSrc="textFieldsAlt" label={"同名選択"} onClick={onSelectName} />}

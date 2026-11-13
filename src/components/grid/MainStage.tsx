@@ -43,6 +43,7 @@ type MainStageProps = {
   canEdit: boolean,
   canToggleSelection: boolean,
   canSelectDancers: boolean,
+  dimDancers?: boolean,
   canSelectProps: boolean,
   canSelectObstacles: boolean,
   isAddingDancer?: boolean,
@@ -89,7 +90,7 @@ type MainStageProps = {
 
 function MainStage({
   canEdit, canToggleSelection,
-  canSelectDancers, canSelectProps, canSelectObstacles,
+  canSelectDancers, canSelectProps, canSelectObstacles, dimDancers,
   isAddingDancer, isAddingProp, isAddingObstacles,
   hideTransformerBorder, currentChoreo, currentSection,
   updateDancerPosition, updatePropPosition, updateObstaclePosition,
@@ -652,7 +653,8 @@ function MainStage({
         <FormationLayer
           canEdit={canEdit && editEnabled === true}
           hideTransformerBorder={hideTransformerBorder}
-          canSelectDancers={canSelectDancers}
+          canSelectDancers={canSelectDancers && !dimDancers}
+          dimDancers={dimDancers}
           canSelectProps={canSelectProps}
           canSelectObstacles={canSelectObstacles}
           canToggleSelection={canToggleSelection}

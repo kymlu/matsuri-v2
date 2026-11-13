@@ -34,6 +34,7 @@ type DancerGridObjectProps = {
   hiddenSelected?: boolean,
   // Under someone in a stack: no selection ring of its own (it would show through the top one's dashed ring).
   coveredInStack?: boolean,
+  dimmed?: boolean,
   stackCount?: number,
   onDragFollow?: (id: string, phase: "start" | "move" | "end" | "cancel", dx?: number, dy?: number) => void,
 };
@@ -58,6 +59,7 @@ const DancerGridObject = memo(function DancerGridObject({
   stackMark,
   hiddenSelected,
   coveredInStack,
+  dimmed,
   stackCount,
   onDragFollow,
 }: DancerGridObjectProps) {
@@ -81,6 +83,7 @@ const DancerGridObject = memo(function DancerGridObject({
         animationCache={animationCache}
         sectionId={sectionId}
         halfOpacity={halfOpacity}
+        dimmed={dimmed}
         onDragFollow={onDragFollow}
       >
         {
