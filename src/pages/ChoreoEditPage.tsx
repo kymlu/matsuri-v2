@@ -825,12 +825,10 @@ export default function ChoreoEditPage(props: {
   }, [resetSelectedIds]);
 
   const toggleDimDancers = useCallback(() => {
-    setDimDancers(prev => {
-      // Dancers can't be acted on while faint, so they leave the selection.
-      if (!prev) setSelectedIds(ids => ids.dancers.length > 0 ? { ...ids, dancers: [] } : ids);
-      return !prev;
-    });
-  }, []);
+    // Dancers can't be acted on while faint, so they leave the selection.
+    if (!dimDancers) setSelectedIds(ids => ids.dancers.length > 0 ? { ...ids, dancers: [] } : ids);
+    setDimDancers(!dimDancers);
+  }, [dimDancers]);
 
   const dimDancersToggle = useMemo(() => ({ dimmed: dimDancers, onToggle: toggleDimDancers }), [dimDancers, toggleDimDancers]);
 

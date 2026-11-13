@@ -64,9 +64,10 @@ const DancerGridObject = memo(function DancerGridObject({
   onDragFollow,
 }: DancerGridObjectProps) {
   const ringRadius = METER_PX * (dancerDisplayType === "large" ? 0.6 : 0.3);
-  // Dimmed but selected (view mode, "me"): the dancer is as faint as everyone else so a prop under them can be
-  // read, but the selection ring stays at full strength, unfilled, so they can still find themselves.
-  const faintSelected = !!dimmed && isSelected;
+  // Dimmed but selected (view mode, "me"), or the top of a stack hiding the selected dancer: the dancer is as faint
+  // as everyone else so a prop under them can be read, but the ring stays at full strength, unfilled, so the
+  // selected dancer can still find themselves.
+  const faintSelected = !!dimmed && (isSelected || !!hiddenSelected);
   return <>
     {
       dancer &&
@@ -92,7 +93,7 @@ const DancerGridObject = memo(function DancerGridObject({
       >
         {
           hiddenSelected && !isSelected &&
-          <Circle radius={ringRadius} fill={colorPalette.white} strokeEnabled strokeWidth={3} stroke={colorPalette.primary} dash={[5, 4]}/>
+          <Circle radius={ringRadius} fill={colorPalette.white} fillEnabled={!faintSelected} strokeEnabled strokeWidth={3} stroke={colorPalette.primary} dash={[5, 4]}/>
         }
         {
           isSelected && !coveredInStack &&
