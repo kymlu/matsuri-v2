@@ -78,7 +78,7 @@ export default function SectionSummaryList({
                         key={action.id}
                         type="grey"
                         compact
-                        text={<span className="flex items-baseline gap-0.5">
+                        text={<span className="flex items-baseline gap-0.5 text-sm">
                           <span className="font-normal">{action.name}</span>
                           <span className="font-black">{count ?? "-"}</span>
                         </span>
