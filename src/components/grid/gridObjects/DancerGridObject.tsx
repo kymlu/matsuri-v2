@@ -144,7 +144,7 @@ const DancerGridObject = memo(function DancerGridObject({
         </Group>
         {
           stackMark && stackCount !== undefined &&
-          <StackBadge x={ringRadius * 0.75} y={-ringRadius * 0.75} radius={METER_PX * 0.25} red={stackMark === "red"} count={stackCount}/>
+          <StackBadge x={ringRadius * 0.75} y={-ringRadius * 0.75} radius={METER_PX * 0.235} red={stackMark === "red"} count={stackCount}/>
         }
       </BaseGridObject>
     }

@@ -9,7 +9,7 @@ const FONT_FAMILY = "'Hiragino Sans','Noto Sans JP','Yu Gothic',sans-serif";
 // (editor), or when someone hidden in it acts at the chosen count (view).
 export default function StackBadge({ x, y, radius, red, count }: { x: number, y: number, radius: number, red?: boolean, count: number }) {
   const text = `×${count}`;
-  const fontSize = radius * 1.55;
+  const fontSize = radius * 1.4;
   const h = radius * 2;
   // Sized to the text as the device's font actually draws it ("×" is much wider in some Japanese fonts),
   // and never wrapped, so the number can't drop onto a hidden second line.
