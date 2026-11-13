@@ -363,10 +363,6 @@ export default function ChoreoViewPage(props: {
       </div>
 
       {
-        dimDancers && !(changeLog && isChangeLogBannerShown) &&
-        <InstructionMessage instruction="ダンサーを薄く表示中" onClose={() => setDimDancers(false)}/>
-      }
-      {
         changeLog && isChangeLogBannerShown &&
         <InstructionMessage
           instruction={

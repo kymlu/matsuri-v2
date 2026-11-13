@@ -1187,10 +1187,6 @@ export default function ChoreoEditPage(props: {
         onResetPath={resetPath}
       />
       {
-        dimDancers &&
-        <InstructionMessage instruction="ダンサーを薄く表示中" onClose={() => setDimDancers(false)}/>
-      }
-      {
         pasteNote &&
         <InstructionMessage instruction={pasteNote} onClose={() => setPasteNote(undefined)}/>
       }
