@@ -66,6 +66,9 @@ const BaseGridObject = memo(function BaseGridObject({
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
   const prevSectionId = useRef<string>("");
   const animation = useRef<Konva.Animation | undefined>(undefined);
+  const tween = useRef<Konva.Tween | undefined>(undefined);
+  // True while moving to a section's position, so a new section picked mid-move can tell it interrupted one.
+  const isMoving = useRef(false);
   const prevRotation = useRef<number | undefined>(undefined);
   
   useEffect(() => {
@@ -74,20 +77,46 @@ const BaseGridObject = memo(function BaseGridObject({
   }, [id, registerNode]);
 
   useEffect(() => {
+    // Interrupted mid-move (sections switched quickly): stop where it is, right now.
+    const interrupted = isMoving.current;
     animation.current?.stop();
+    tween.current?.pause();
+    tween.current?.destroy();
+    tween.current = undefined;
+    isMoving.current = false;
+    if (ref.current && (ref.current.offsetX() !== 0 || ref.current.offsetY() !== 0)) {
+      // Path animations move props by their centre (offset set to half their size). Put the node back to
+      // corner-based coordinates at the same on-screen spot, so nothing below mistakes the centre for the corner.
+      const node = ref.current;
+      const rad = node.rotation() * Math.PI / 180;
+      const ox = node.offsetX(), oy = node.offsetY();
+      node.setAttrs({
+        x: node.x() - (ox * Math.cos(rad) - oy * Math.sin(rad)),
+        y: node.y() - (ox * Math.sin(rad) + oy * Math.cos(rad)),
+        offsetX: 0,
+        offsetY: 0,
+      });
+    }
     const newPosition = stageMetersToPx({x: position.x, y: position.y}, stageGeometry, METER_PX, height);
-    if (newPosition.x === ref.current?.x() && newPosition.y === ref.current?.y()) return;
+    if (newPosition.x === ref.current?.x() && newPosition.y === ref.current?.y()) {
+      if (interrupted) setIsAnimating(false);
+      return;
+    }
     // Already there to within rounding, e.g. a stack member that followed a drag live: no animation.
     if (ref.current && Math.abs(newPosition.x - ref.current.x()) < 0.5 && Math.abs(newPosition.y - ref.current.y()) < 0.5) {
       ref.current.position(newPosition);
+      if (interrupted) setIsAnimating(false);
       return;
     }
     if (animate) setIsAnimating(true);
     if (ref.current) {
       const key = sectionId ? getAnimationKey(prevSectionId.current, sectionId) : undefined;
-      const cachedPath = key ? animationCache?.[key]?.path : undefined;
+      // A drawn path starts at the previous section's spot. After an interruption the object isn't there,
+      // so playing the path would first jump it to that spot; glide straight from where it is instead.
+      const cachedPath = key && !interrupted ? animationCache?.[key]?.path : undefined;
 
       if (cachedPath && animate) {
+        isMoving.current = true;
         let path: Konva.Path = new Konva.Path({x: 0, y: 0, data: cachedPath});
         const pathLen = path.getLength();
         const duration = 1200;
@@ -115,6 +144,7 @@ const BaseGridObject = memo(function BaseGridObject({
 
           if (t >= 1) {
             animation.current?.stop();
+            isMoving.current = false;
             ref?.current?.setAttrs({
               rotation: rotation,
               x: newPosition.x,
@@ -140,7 +170,9 @@ const BaseGridObject = memo(function BaseGridObject({
 
       } else {
         animation?.current?.stop();
-        ref.current.to({
+        isMoving.current = !!animate;
+        tween.current = new Konva.Tween({
+          node: ref.current,
           x: newPosition.x,
           y: newPosition.y,
           rotation: rotation ?? 0,
@@ -148,8 +180,12 @@ const BaseGridObject = memo(function BaseGridObject({
           easing: Konva.Easings.EaseInOut,
           offsetX: 0,
           offsetY: 0,
-          onFinish: () => {setIsAnimating(false)}
+          onFinish: () => {
+            isMoving.current = false;
+            setIsAnimating(false);
+          }
         });
+        tween.current.play();
       }
       if (sectionId) {
         prevSectionId.current = sectionId;
