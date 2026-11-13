@@ -210,6 +210,9 @@ export default function ChoreoViewPage(props: {
   // ---- MainStage handlers ----
   // Tapping a stack lists who is there instead of selecting the top person; the count stays until someone is picked.
   const [stackList, setStackList] = useState<{ kind: "dancers" | "props", members: StackMember[] }>();
+  // Fading the dancers out to see the props (and anyone selected, as a ring). Not saved.
+  const [dimDancers, setDimDancers] = useState(false);
+  const dimDancersToggle = useMemo(() => ({ dimmed: dimDancers, onToggle: () => setDimDancers(d => !d) }), [dimDancers]);
   const selectedIdsRef = useRef(selectedIds);
   selectedIdsRef.current = selectedIds;
   const onSetSelectedIds = useCallback((action: SetStateAction<StageEntities<string[]>>) => {
@@ -353,6 +356,8 @@ export default function ChoreoViewPage(props: {
           openChangeLog={changeLog && !isChangeLogBannerShown ? openChangeLog : undefined}
           openHelp={openHelpHere}
           openFind={entityCount.dancers > 0 ? openFind : undefined}
+          dimDancers={dimDancers}
+          dimDancersToggle={entityCount.dancers > 0 && entityCount.props > 0 ? dimDancersToggle : undefined}
           focusSelectionRequest={focusDancerRequest}
         />
       </div>

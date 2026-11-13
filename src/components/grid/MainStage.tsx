@@ -43,6 +43,7 @@ type MainStageProps = {
   canEdit: boolean,
   canToggleSelection: boolean,
   canSelectDancers: boolean,
+  dimDancers?: boolean,
   canSelectProps: boolean,
   canSelectObstacles: boolean,
   isAddingDancer?: boolean,
@@ -75,6 +76,8 @@ type MainStageProps = {
   // Shows the 🔰 help button at the top left.
   openHelp?: () => void,
   openFind?: () => void,
+  // Toggle for fading the dancers out to see props; under the centre button in both edit and view mode.
+  dimDancersToggle?: { dimmed: boolean, onToggle: () => void },
   // Bump to centre the selection at the current zoom, e.g. after finding it by name.
   focusSelectionRequest?: number,
   showPaths?: boolean,
@@ -89,14 +92,14 @@ type MainStageProps = {
 
 function MainStage({
   canEdit, canToggleSelection,
-  canSelectDancers, canSelectProps, canSelectObstacles,
+  canSelectDancers, canSelectProps, canSelectObstacles, dimDancers,
   isAddingDancer, isAddingProp, isAddingObstacles,
   hideTransformerBorder, currentChoreo, currentSection,
   updateDancerPosition, updatePropPosition, updateObstaclePosition,
   updatePropSizeAndRotate, updateObstacleSizeAndRotate,
   selectedIds, setSelectedIds, selectedObjects,
   addDancer, addProp, addObstacle, appSettings, previousSection, selectedDancerMovement,
-  onDancerSelected, bottomMarginPercent = 0, canResizeProps, editEnabled, toggleEditEnabled, openNoteDialog, openChangeLog, openHelp, openFind, focusSelectionRequest,
+  onDancerSelected, bottomMarginPercent = 0, canResizeProps, editEnabled, toggleEditEnabled, openNoteDialog, openChangeLog, openHelp, openFind, dimDancersToggle, focusSelectionRequest,
   showPaths = false, isEditingMovement = false, dancerMovementCache, propMovementCache, onMidpointEdit, currentMovement,
   dancerAnimationCache, propAnimationCache,
 }: MainStageProps) {
@@ -652,7 +655,8 @@ function MainStage({
         <FormationLayer
           canEdit={canEdit && editEnabled === true}
           hideTransformerBorder={hideTransformerBorder}
-          canSelectDancers={canSelectDancers}
+          canSelectDancers={canSelectDancers && !dimDancers}
+          dimDancers={dimDancers}
           canSelectProps={canSelectProps}
           canSelectObstacles={canSelectObstacles}
           canToggleSelection={canToggleSelection}
@@ -770,7 +774,7 @@ function MainStage({
       </div>
     }
     {
-      (isManualMovement || canEdit) &&
+      (isManualMovement || canEdit || dimDancersToggle) &&
       <div className={`absolute space-y-1 ${isShowingVerticalRuler ? "right-9" : "right-2"} ${isShowingHorizontalRuler ? "top-7" : "top-1"}`}>
         {
           isManualMovement &&
@@ -779,6 +783,16 @@ function MainStage({
             src="centerFocusStrong"
             colour="black"
             onClick={resetCamera}
+          />
+        }
+        {
+          dimDancersToggle &&
+          <IconButton
+            size="sm"
+            src="person"
+            crossedOut={dimDancersToggle.dimmed}
+            colour="black"
+            onClick={dimDancersToggle.onToggle}
           />
         }
         {

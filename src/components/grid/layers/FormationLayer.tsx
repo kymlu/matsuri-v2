@@ -17,6 +17,7 @@ import { PathSvgCacheByObjectIdBySectionId } from "../../../models/choreoSection
 type FormationLayerProps = {
   canEdit: boolean,
   canSelectDancers: boolean,
+  dimDancers?: boolean, // focusing on props: dancers faint and can't be touched
   canSelectProps: boolean,
   canSelectObstacles: boolean,
   canToggleSelection: boolean,
@@ -51,6 +52,7 @@ type FormationLayerProps = {
 const FormationLayer = memo(function FormationLayer({
   canEdit,
   canSelectDancers,
+  dimDancers,
   canSelectProps,
   canSelectObstacles,
   canToggleSelection,
@@ -293,6 +295,7 @@ const FormationLayer = memo(function FormationLayer({
             hiddenSelected={dancerStackDrawing[dancerPosition.dancerId]?.hiddenSelected}
             stackCount={dancerStackDrawing[dancerPosition.dancerId]?.count}
             coveredInStack={coveredDancers.has(dancerPosition.dancerId)}
+            dimmed={dimDancers}
             onDragFollow={canEdit ? followDrag : undefined}
           />
         );

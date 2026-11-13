@@ -1,4 +1,4 @@
-import { Circle, Text } from "react-konva";
+import { Circle, Group, Text } from "react-konva";
 import { formatDancerName } from "../../../lib/helpers/dancerNameHelper";
 import { Dancer, DancerPosition } from "../../../models/dancer";
 import { StageGeometry } from "../../../models/choreo";
@@ -34,6 +34,7 @@ type DancerGridObjectProps = {
   hiddenSelected?: boolean,
   // Under someone in a stack: no selection ring of its own (it would show through the top one's dashed ring).
   coveredInStack?: boolean,
+  dimmed?: boolean,
   stackCount?: number,
   onDragFollow?: (id: string, phase: "start" | "move" | "end" | "cancel", dx?: number, dy?: number) => void,
 };
@@ -58,10 +59,15 @@ const DancerGridObject = memo(function DancerGridObject({
   stackMark,
   hiddenSelected,
   coveredInStack,
+  dimmed,
   stackCount,
   onDragFollow,
 }: DancerGridObjectProps) {
   const ringRadius = METER_PX * (dancerDisplayType === "large" ? 0.6 : 0.3);
+  // Dimmed but selected (view mode, "me"), or the top of a stack hiding the selected dancer: the dancer is as faint
+  // as everyone else so a prop under them can be read, but the ring stays at full strength, unfilled, so the
+  // selected dancer can still find themselves.
+  const faintSelected = !!dimmed && (isSelected || !!hiddenSelected);
   return <>
     {
       dancer &&
@@ -81,22 +87,27 @@ const DancerGridObject = memo(function DancerGridObject({
         animationCache={animationCache}
         sectionId={sectionId}
         halfOpacity={halfOpacity}
+        dimmed={dimmed && !faintSelected}
+        listening={dimmed ? false : undefined}
         onDragFollow={onDragFollow}
       >
         {
           hiddenSelected && !isSelected &&
-          <Circle radius={ringRadius} fill={colorPalette.white} strokeEnabled strokeWidth={3} stroke={colorPalette.primary} dash={[5, 4]}/>
+          <Circle radius={ringRadius} fill={colorPalette.white} fillEnabled={!faintSelected} strokeEnabled strokeWidth={3} stroke={colorPalette.primary} dash={[5, 4]}/>
         }
         {
           isSelected && !coveredInStack &&
           <Circle
             radius={ringRadius}
             fill={colorPalette.white}
+            fillEnabled={!faintSelected}
             strokeEnabled
             strokeWidth={3}
             stroke={colorPalette.primary}
           />
         }
+        {/* Must keep listening: the circle in here is what catches taps on the dancer. */}
+        <Group opacity={faintSelected ? 0.2 : 1}>
         <Circle
           radius={METER_PX * (dancerDisplayType === "large" ? 0.45 : 0.2)}
           fill={position.color}
@@ -130,6 +141,7 @@ const DancerGridObject = memo(function DancerGridObject({
             fill={colorPalette.getTextColor(position.color) ?? "white"}
           />
         }
+        </Group>
         {
           stackMark && stackCount !== undefined &&
           <StackBadge x={ringRadius * 0.75} y={-ringRadius * 0.75} radius={METER_PX * 0.22} red={stackMark === "red"} count={stackCount}/>
