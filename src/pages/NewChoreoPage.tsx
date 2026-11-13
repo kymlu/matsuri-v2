@@ -84,7 +84,7 @@ export function NewChoreoPage({
         }
       })
       .catch(e => {
-        console.error((e as Error)?.message);
+        console.error(e);
         setRosterState("failed");
       });
   };
@@ -184,7 +184,7 @@ export function NewChoreoPage({
           propPositions: propPositions
         }}],
     };
-    console.log("Creating new choreo:", choreo);
+    console.log(`Creating new choreo ${choreo.id}: ${Object.keys(choreo.dancers).length} dancers, ${Object.keys(choreo.props).length} props`);
     saveChoreo(choreo, () => {
       goToEditPage(choreo);
     }, true);

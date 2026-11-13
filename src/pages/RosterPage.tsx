@@ -68,7 +68,7 @@ export default function RosterPage({ goToHomePage, team, tab, onTabChange }: Ros
     getRoster(team.id)
       .then(setRoster)
       .catch((e) => {
-        console.error((e as Error)?.message);
+        console.error(e);
         setLoadFailed(true);
       });
   };

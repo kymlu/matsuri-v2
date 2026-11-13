@@ -17,6 +17,7 @@ import { isNullOrUndefinedOrBlank } from './lib/helpers/globalHelper';
 import { Grid } from 'react-loader-spinner';
 import { colorPalette } from './lib/consts/colors';
 import { useSearchParams } from 'react-router-dom';
+import { setBuildDateForLogs } from './lib/helpers/logHelper';
 
 type Mode = "home" | "form" | "edit" | "view" | "admin" | "roster";
 
@@ -90,14 +91,15 @@ function App() {
   }, []);
 
   useEffect(() => {
-    console.log("getting build info");
     fetch(`${process.env.PUBLIC_URL}/build-info.json`)
       .then(r => r.json())
       .then(info => {
         const buildDate = info.buildDate;
         console.log(`Build: ${buildDate}`);
+        setBuildDateForLogs(buildDate);
         setBuildInfo(`更新 ${buildDate}`);
-      });
+      })
+      .catch(e => console.warn("Could not load build info:", e));
   }, []);
 
   const saveDancerName = (newName: string) => {
