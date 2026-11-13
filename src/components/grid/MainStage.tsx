@@ -693,6 +693,7 @@ function MainStage({
             currentPosition={selectedDancerMovement.current}
             nextPosition={selectedDancerMovement.next}
             dancerMovementCache={dancerMovementCache[currentSection.id]}
+            dimmed={dimDancers}
           />
         }
         {
