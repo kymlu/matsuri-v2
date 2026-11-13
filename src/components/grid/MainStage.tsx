@@ -76,6 +76,8 @@ type MainStageProps = {
   // Shows the 🔰 help button at the top left.
   openHelp?: () => void,
   openFind?: () => void,
+  // View mode: toggle for fading the dancers out to see props (the editor has it in the toolbar).
+  dimDancersToggle?: { dimmed: boolean, onToggle: () => void },
   // Bump to centre the selection at the current zoom, e.g. after finding it by name.
   focusSelectionRequest?: number,
   showPaths?: boolean,
@@ -97,7 +99,7 @@ function MainStage({
   updatePropSizeAndRotate, updateObstacleSizeAndRotate,
   selectedIds, setSelectedIds, selectedObjects,
   addDancer, addProp, addObstacle, appSettings, previousSection, selectedDancerMovement,
-  onDancerSelected, bottomMarginPercent = 0, canResizeProps, editEnabled, toggleEditEnabled, openNoteDialog, openChangeLog, openHelp, openFind, focusSelectionRequest,
+  onDancerSelected, bottomMarginPercent = 0, canResizeProps, editEnabled, toggleEditEnabled, openNoteDialog, openChangeLog, openHelp, openFind, dimDancersToggle, focusSelectionRequest,
   showPaths = false, isEditingMovement = false, dancerMovementCache, propMovementCache, onMidpointEdit, currentMovement,
   dancerAnimationCache, propAnimationCache,
 }: MainStageProps) {
@@ -772,7 +774,7 @@ function MainStage({
       </div>
     }
     {
-      (isManualMovement || canEdit) &&
+      (isManualMovement || canEdit || dimDancersToggle) &&
       <div className={`absolute space-y-1 ${isShowingVerticalRuler ? "right-9" : "right-2"} ${isShowingHorizontalRuler ? "top-7" : "top-1"}`}>
         {
           isManualMovement &&
@@ -781,6 +783,16 @@ function MainStage({
             src="centerFocusStrong"
             colour="black"
             onClick={resetCamera}
+          />
+        }
+        {
+          dimDancersToggle &&
+          <IconButton
+            size="sm"
+            src="person"
+            crossedOut={dimDancersToggle.dimmed}
+            colour="black"
+            onClick={dimDancersToggle.onToggle}
           />
         }
         {
