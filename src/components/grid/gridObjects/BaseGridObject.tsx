@@ -66,9 +66,6 @@ const BaseGridObject = memo(function BaseGridObject({
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
   const prevSectionId = useRef<string>("");
   const animation = useRef<Konva.Animation | undefined>(undefined);
-  const tween = useRef<Konva.Tween | undefined>(undefined);
-  // True while moving to a section's position, so a new section picked mid-move can tell it interrupted one.
-  const isMoving = useRef(false);
   const prevRotation = useRef<number | undefined>(undefined);
   
   useEffect(() => {
@@ -76,122 +73,117 @@ const BaseGridObject = memo(function BaseGridObject({
     return () => registerNode?.(id, null);
   }, [id, registerNode]);
 
-  useEffect(() => {
-    // Interrupted mid-move (sections switched quickly): stop where it is, right now.
-    const interrupted = isMoving.current;
+  // Stop a running path animation where it is. Path animations move props by their centre (offset = half their
+  // size), so put the node back to corner-based coordinates at the same on-screen spot.
+  const stopPathAnimation = (node: Konva.Group) => {
     animation.current?.stop();
-    tween.current?.pause();
-    tween.current?.destroy();
-    tween.current = undefined;
-    isMoving.current = false;
-    if (ref.current && (ref.current.offsetX() !== 0 || ref.current.offsetY() !== 0)) {
-      // Path animations move props by their centre (offset set to half their size). Put the node back to
-      // corner-based coordinates at the same on-screen spot, so nothing below mistakes the centre for the corner.
-      const node = ref.current;
-      const rad = node.rotation() * Math.PI / 180;
-      const ox = node.offsetX(), oy = node.offsetY();
-      node.setAttrs({
-        x: node.x() - (ox * Math.cos(rad) - oy * Math.sin(rad)),
-        y: node.y() - (ox * Math.sin(rad) + oy * Math.cos(rad)),
-        offsetX: 0,
-        offsetY: 0,
-      });
-    }
+    const ox = node.offsetX(), oy = node.offsetY();
+    if (ox === 0 && oy === 0) return;
+    const rad = node.rotation() * Math.PI / 180;
+    node.setAttrs({
+      x: node.x() - (ox * Math.cos(rad) - oy * Math.sin(rad)),
+      y: node.y() - (ox * Math.sin(rad) + oy * Math.cos(rad)),
+      offsetX: 0,
+      offsetY: 0,
+    });
+  };
+
+  // A path animation still running when the object is removed would keep calling back into it.
+  useEffect(() => () => { animation.current?.stop(); }, []);
+
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+    stopPathAnimation(node);
     const newPosition = stageMetersToPx({x: position.x, y: position.y}, stageGeometry, METER_PX, height);
-    if (newPosition.x === ref.current?.x() && newPosition.y === ref.current?.y()) {
-      if (interrupted) setIsAnimating(false);
-      return;
-    }
-    // Already there to within rounding, e.g. a stack member that followed a drag live: no animation.
-    if (ref.current && Math.abs(newPosition.x - ref.current.x()) < 0.5 && Math.abs(newPosition.y - ref.current.y()) < 0.5) {
-      ref.current.position(newPosition);
-      if (interrupted) setIsAnimating(false);
+    // Already there to within rounding (e.g. a stack member that followed a drag live): settle exactly.
+    // A zero-length tween also replaces any glide still heading somewhere else.
+    if (Math.abs(newPosition.x - node.x()) < 0.5 && Math.abs(newPosition.y - node.y()) < 0.5) {
+      node.to({ x: newPosition.x, y: newPosition.y, duration: 0, onFinish: () => setIsAnimating(false) });
       return;
     }
     if (animate) setIsAnimating(true);
-    if (ref.current) {
-      const key = sectionId ? getAnimationKey(prevSectionId.current, sectionId) : undefined;
-      // A drawn path starts at the previous section's spot. After an interruption the object isn't there,
-      // so playing the path would first jump it to that spot; glide straight from where it is instead.
-      const cachedPath = key && !interrupted ? animationCache?.[key]?.path : undefined;
-
-      if (cachedPath && animate) {
-        isMoving.current = true;
-        let path: Konva.Path = new Konva.Path({x: 0, y: 0, data: cachedPath});
-        const pathLen = path.getLength();
-        const duration = 1200;
-        const prevRot = prevRotation.current ?? 0;
-        const targetRot = rotation ?? 0;
-        let offsetX = 0;
-        let offsetY = 0;
-        if (height && height > 0 && width && width > 0) {
-          const centre = cornerToCentre(ref.current.x(), ref.current.y(), ref.current.rotation(), width * METER_PX, height * METER_PX, stageGeometry.yAxis);
-          offsetX = width * METER_PX / 2;
-          offsetY = height * METER_PX / 2;
-          ref.current.setAttrs({
-            offsetX,
-            offsetY,
-            x: centre.x,
-            y: centre.y,
-          });
-        }
-
-        animation.current = new Konva.Animation(function(frame) {
-          if (!frame) return;
-
-          const elapsed = frame.time; // ms since animation start
-          const t = Math.min(elapsed / duration, 1); // 0 to 1
-
-          if (t >= 1) {
-            animation.current?.stop();
-            isMoving.current = false;
-            ref?.current?.setAttrs({
-              rotation: rotation,
-              x: newPosition.x,
-              y: newPosition.y,
-              offsetX: 0,
-              offsetY: 0,
-            });
-            setIsAnimating(false);
-          } else {
-            const easedT = easeInOut(t);
-            const pt = path.getPointAtLength(easedT * pathLen);
-            const rot = prevRot + (targetRot - prevRot) * t;
-            if (ref.current && pt) {
-              ref.current.setAttrs({
-                rotation: rot,
-                x: pt.x,
-                y: pt.y,
-              });
-            }
-          }
-        }, ref.current.getLayer());
-        animation.current?.start();
-
-      } else {
-        animation?.current?.stop();
-        isMoving.current = !!animate;
-        tween.current = new Konva.Tween({
-          node: ref.current,
-          x: newPosition.x,
-          y: newPosition.y,
-          rotation: rotation ?? 0,
-          duration: animate ? 1.2 : 0,
-          easing: Konva.Easings.EaseInOut,
-          offsetX: 0,
-          offsetY: 0,
-          onFinish: () => {
-            isMoving.current = false;
-            setIsAnimating(false);
-          }
-        });
-        tween.current.play();
-      }
-      if (sectionId) {
-        prevSectionId.current = sectionId;
-      }
-      prevRotation.current = rotation ?? 0;
+    const key = sectionId ? getAnimationKey(prevSectionId.current, sectionId) : undefined;
+    const cachedPath = key ? animationCache?.[key]?.path : undefined;
+    let path: Konva.Path | undefined = cachedPath ? new Konva.Path({x: 0, y: 0, data: cachedPath}) : undefined;
+    if (path) {
+      // A drawn path starts at the previous section's spot (props: their centre). If the object isn't there,
+      // e.g. sections were switched mid-move, playing it would first jump there: glide straight instead.
+      const start = path.getPointAtLength(0);
+      const here = height && height > 0 && width && width > 0
+        ? cornerToCentre(node.x(), node.y(), node.rotation(), width * METER_PX, height * METER_PX, stageGeometry.yAxis)
+        : { x: node.x(), y: node.y() };
+      if (!start || Math.hypot(start.x - here.x, start.y - here.y) > 2) path = undefined;
     }
+
+    const drawnPath = path;
+    if (drawnPath && animate) {
+      const pathLen = drawnPath.getLength();
+      const duration = 1200;
+      const prevRot = prevRotation.current ?? 0;
+      const targetRot = rotation ?? 0;
+      let offsetX = 0;
+      let offsetY = 0;
+      if (height && height > 0 && width && width > 0) {
+        const centre = cornerToCentre(node.x(), node.y(), node.rotation(), width * METER_PX, height * METER_PX, stageGeometry.yAxis);
+        offsetX = width * METER_PX / 2;
+        offsetY = height * METER_PX / 2;
+        node.setAttrs({
+          offsetX,
+          offsetY,
+          x: centre.x,
+          y: centre.y,
+        });
+      }
+
+      animation.current = new Konva.Animation(function(frame) {
+        if (!frame) return;
+
+        const elapsed = frame.time; // ms since animation start
+        const t = Math.min(elapsed / duration, 1); // 0 to 1
+
+        if (t >= 1) {
+          animation.current?.stop();
+          ref?.current?.setAttrs({
+            rotation: rotation,
+            x: newPosition.x,
+            y: newPosition.y,
+            offsetX: 0,
+            offsetY: 0,
+          });
+          setIsAnimating(false);
+        } else {
+          const easedT = easeInOut(t);
+          const pt = drawnPath.getPointAtLength(easedT * pathLen);
+          const rot = prevRot + (targetRot - prevRot) * t;
+          if (ref.current && pt) {
+            ref.current.setAttrs({
+              rotation: rot,
+              x: pt.x,
+              y: pt.y,
+            });
+          }
+        }
+      }, node.getLayer());
+      animation.current?.start();
+
+    } else {
+      // Replaces any glide still running (Konva cancels a tween when a new one takes the same attributes).
+      node.to({
+        x: newPosition.x,
+        y: newPosition.y,
+        rotation: rotation ?? 0,
+        duration: animate ? 1.2 : 0,
+        easing: Konva.Easings.EaseInOut,
+        offsetX: 0,
+        offsetY: 0,
+        onFinish: () => {setIsAnimating(false)}
+      });
+    }
+    if (sectionId) {
+      prevSectionId.current = sectionId;
+    }
+    prevRotation.current = rotation ?? 0;
   }, [position, stageGeometry, rotation]);
 
   const snapSize = METER_PX/2;
