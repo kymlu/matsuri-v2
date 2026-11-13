@@ -158,9 +158,11 @@ function ViewerSidebar({
                             key={timing.id}
                             disabled={timing.dancerIds.length === 0}
                             primary={strEquals(selectedTiming, timing.id)}
+                            compact
                             onClick={() => onSelectTiming(strEquals(selectedTiming, timing.id) ? undefined : timing)}
                             >
-                            <div className="min-w-6 w-max">
+                            {/* Centred even when the button stretches to fill a wrapped row */}
+                            <div className="px-1 py-1 mx-auto text-center min-w-6 w-max">
                               {timing.name}
                             </div>
                           </Button>
