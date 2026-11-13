@@ -494,7 +494,7 @@ export default function HomePage({
           {
             team &&
             <>
-              <b>{team.name}</b><span>の</span>
+              <b>{team.name}</b>{" "}<span>の</span>
             </>
           }
         </div>
