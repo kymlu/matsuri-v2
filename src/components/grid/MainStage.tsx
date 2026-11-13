@@ -76,7 +76,7 @@ type MainStageProps = {
   // Shows the 🔰 help button at the top left.
   openHelp?: () => void,
   openFind?: () => void,
-  // View mode: toggle for fading the dancers out to see props (the editor has it in the toolbar).
+  // Toggle for fading the dancers out to see props; under the centre button in both edit and view mode.
   dimDancersToggle?: { dimmed: boolean, onToggle: () => void },
   // Bump to centre the selection at the current zoom, e.g. after finding it by name.
   focusSelectionRequest?: number,

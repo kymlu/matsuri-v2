@@ -832,6 +832,8 @@ export default function ChoreoEditPage(props: {
     });
   }, []);
 
+  const dimDancersToggle = useMemo(() => ({ dimmed: dimDancers, onToggle: toggleDimDancers }), [dimDancers, toggleDimDancers]);
+
   const onAddPropToggle = useCallback(() => {
     resetSelectedIds();
     setIsAddingProps(prev => !prev);
@@ -1053,6 +1055,8 @@ export default function ChoreoEditPage(props: {
           openNoteDialog={openNoteDialog}
           openHelp={openHelpHere}
           openFind={canFind ? openFind : undefined}
+          dimDancersToggle={entityCount.dancers > 0 && (entityCount.props + entityCount.obstacles) > 0 && !isAssigningActions && !isAddingDancers
+            ? dimDancersToggle : undefined}
           focusSelectionRequest={focusSelectionRequest}
           showPaths={showPaths}
           isEditingMovement={isEditingMovement}
@@ -1167,9 +1171,6 @@ export default function ChoreoEditPage(props: {
         onToggleResizePropsLock={onToggleResizePropsLock}
         isResizePropsLocked={isPropResizeLocked}
         showLockResizeProps={entityCount.props > 0}
-        showDimDancers={entityCount.dancers > 0 && (entityCount.props + entityCount.obstacles) > 0}
-        areDancersDimmed={dimDancers}
-        onToggleDimDancers={toggleDimDancers}
         onEditPropSize={openPropSizeDialog}
         showEditPropSize={selectedIds.props.length >= 1 && (selectedIds.dancers.length + selectedIds.obstacles.length) === 0}
         showMovementFunctions={(entityCount.dancers + entityCount.props) > 0}
