@@ -160,7 +160,7 @@ export default function PublishConfirmationDialog({
         {
           isProcessing &&
           <p className="w-full font-semibold text-center text-primary">
-            処理中...
+            処理中…
           </p>
         }
         {

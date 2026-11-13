@@ -146,7 +146,7 @@ function ViewerSidebar({
               {
                 actions.map(action =>
                   <React.Fragment key={action.id}>
-                    <span className="mt-1">
+                    <span className="mt-1.5">
                       {action.name}
                     </span>
                     {/* Timings joined into one strip. The 1px gap shows the background as divider lines, so wrapped rows stay tidy. */}
@@ -161,7 +161,8 @@ function ViewerSidebar({
                             compact
                             onClick={() => onSelectTiming(strEquals(selectedTiming, timing.id) ? undefined : timing)}
                             >
-                            <div className="min-w-6 w-max">
+                            {/* Centred even when the button stretches to fill a wrapped row */}
+                            <div className="px-1 py-1 mx-auto text-center min-w-6 w-max">
                               {timing.name}
                             </div>
                           </Button>
@@ -223,7 +224,7 @@ function ViewerSidebar({
                   name="自分用メモ"
                   defaultValue={personalNote ?? ""}
                   onContentChange={onPersonalNoteChange}
-                  placeholder="自分用メモを追加..."
+                  placeholder="自分用メモを追加…"
                   maxRows={2}
                   compact/>
               </div>

@@ -8,7 +8,7 @@ export const RequireDB = ({ children }: { children: ReactNode }) => {
 
   if (dbStatus === "LOADING") return (
     <div className='flex flex-col items-center justify-center h-[100svh] gap-2'>
-      <p>データベースを確認中...</p>
+      <p>データベースを確認中…</p>
       <Grid
         height={44}
         width={44}

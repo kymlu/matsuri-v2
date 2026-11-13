@@ -13,10 +13,12 @@ type NextDirectionLayerProps = {
   currentPosition?: DancerPosition,
   nextPosition?: DancerPosition,
   dancerMovementCache?: MovementCacheByObjectId,
+  // Dancers are faded (focusing on props): the next-position marker fades with them; the arrow stays.
+  dimmed?: boolean,
 }
 
 const NextDirectionLayer = memo(function NextDirectionLayer({
-  geometry, currentPosition, nextPosition, dancerMovementCache
+  geometry, currentPosition, nextPosition, dancerMovementCache, dimmed
 }: NextDirectionLayerProps) {
   const hideLayer = useMemo(() => {
     return (!currentPosition ||
@@ -60,6 +62,7 @@ const NextDirectionLayer = memo(function NextDirectionLayer({
         />
         <DancerGridObject
           halfOpacity={true} 
+          dimmed={dimmed}
           dancer={{"id": "", "name": ""}}
           stageGeometry={geometry}
           position={nextPosition!!}

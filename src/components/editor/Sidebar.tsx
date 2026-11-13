@@ -77,7 +77,7 @@ export function Sidebar({
           <>
             <IconLabelButton
               onClick={editSize}
-              label="舞台サイズを変更"
+              label="舞台サイズ変更"
               full icon="resize"/>
           </>
         }

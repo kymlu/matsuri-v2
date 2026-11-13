@@ -132,7 +132,7 @@ export default function InviteUserDialog({
     {
       isProcessing &&
       <span className="w-full font-semibold text-center text-primary">
-        処理中...
+        処理中…
       </span>
     }
     {
