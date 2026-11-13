@@ -146,7 +146,7 @@ function ViewerSidebar({
               {
                 actions.map(action =>
                   <React.Fragment key={action.id}>
-                    <span className="mt-1">
+                    <span className="mt-1.5">
                       {action.name}
                     </span>
                     {/* Timings joined into one strip. The 1px gap shows the background as divider lines, so wrapped rows stay tidy. */}
@@ -158,7 +158,6 @@ function ViewerSidebar({
                             key={timing.id}
                             disabled={timing.dancerIds.length === 0}
                             primary={strEquals(selectedTiming, timing.id)}
-                            compact
                             onClick={() => onSelectTiming(strEquals(selectedTiming, timing.id) ? undefined : timing)}
                             >
                             <div className="min-w-6 w-max">
