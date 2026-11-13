@@ -94,6 +94,8 @@ const BaseGridObject = memo(function BaseGridObject({
   useEffect(() => {
     const node = ref.current;
     if (!node) return;
+    // Moving already (sections switched mid-move): carry on from where it is without stopping dead first.
+    const wasMoving = isAnimating;
     stopPathAnimation(node);
     const newPosition = stageMetersToPx({x: position.x, y: position.y}, stageGeometry, METER_PX, height);
     // Already there to within rounding (e.g. a stack member that followed a drag live): settle exactly.
@@ -169,12 +171,14 @@ const BaseGridObject = memo(function BaseGridObject({
 
     } else {
       // Replaces any glide still running (Konva cancels a tween when a new one takes the same attributes).
+      // From rest it eases in and out; if it was already moving it starts at speed and only eases out,
+      // so an interrupted move doesn't freeze and then restart slowly.
       node.to({
         x: newPosition.x,
         y: newPosition.y,
         rotation: rotation ?? 0,
-        duration: animate ? 1.2 : 0,
-        easing: Konva.Easings.EaseInOut,
+        duration: !animate ? 0 : wasMoving ? 0.9 : 1.2,
+        easing: wasMoving ? Konva.Easings.EaseOut : Konva.Easings.EaseInOut,
         offsetX: 0,
         offsetY: 0,
         onFinish: () => {setIsAnimating(false)}
