@@ -4,6 +4,7 @@ import { ChoreoSection, Movement } from "../../models/choreoSection";
 import { DancerPosition } from "../../models/dancer";
 import { DancerAction } from "../../models/dancerAction";
 import { indexByKey, roundToTenth } from "./globalHelper";
+import { stackAbove, stackBelow } from "./stackHelper";
 
 // Compares two versions of a choreo for the dancer change log.
 // Only returns data; all wording is done by the dialog.
@@ -21,7 +22,12 @@ export type DancerSectionChanges = {
   position?: { from?: DancerPosition, to: DancerPosition },
   counts: { actionName: string, from: string[], to: string[] }[],
   pathChanged: boolean, // path from this section to the next
+  stack?: { from?: StackPlace, to?: StackPlace }, // set when where they are in a stack changed
 };
+
+// Where a dancer is in a stack, by name: who they stand on, or (at the bottom) who stands on them.
+// Like the viewer panel, someone standing on another person is only described by who's under them.
+export type StackPlace = { on: string } | { carrying: string };
 
 export type DancerChangeEntry =
   | { kind: "new" }
@@ -154,8 +160,25 @@ function compareCounts(oldActions: DancerAction[], newActions: DancerAction[], o
     }));
 }
 
+// Who the dancer is on (or, at the bottom, under), by ID in that version of the choreo.
+function stackPartner(section: ChoreoSection | undefined, dancerId: string): { on: boolean, id: string } | undefined {
+  if (!section) return undefined;
+  const below = stackBelow(section.formation, "dancers", dancerId);
+  if (below) return { on: true, id: below };
+  const above = stackAbove(section.formation, "dancers", dancerId);
+  if (above) return { on: false, id: above };
+  return undefined;
+}
+
+const toPlace = (choreo: Choreo, partner?: { on: boolean, id: string }): StackPlace | undefined => {
+  if (!partner) return undefined;
+  const name = choreo.dancers[partner.id]?.name ?? "";
+  return partner.on ? { on: name } : { carrying: name };
+};
+
 function compareDancer(
-  newChoreo: Choreo, samePosition: SamePosition, sectionMatch: Match<ChoreoSection>, oldDancerId: string, newDancerId: string
+  oldChoreo: Choreo, newChoreo: Choreo, samePosition: SamePosition, sectionMatch: Match<ChoreoSection>, dancerMatch: Match<BaseModel>,
+  oldDancerId: string, newDancerId: string
 ): DancerSectionChanges[] {
   const changes: DancerSectionChanges[] = newChoreo.sections.map(section => {
     const oldSection = sectionMatch.oldOf[section.id];
@@ -171,6 +194,14 @@ function compareDancer(
         { from: oldPosition, to: newPosition },
       counts: compareCounts(oldSection?.formation.dancerActions ?? [], section.formation.dancerActions, oldDancerId, newDancerId),
       pathChanged: false,
+      stack: (() => {
+        // Compared by matched dancer, so renaming a partner isn't reported as a stack change.
+        const from = stackPartner(oldSection, oldDancerId);
+        const to = stackPartner(section, newDancerId);
+        const same = from === undefined ? to === undefined :
+          to !== undefined && from.on === to.on && dancerMatch.oldOf[to.id]?.id === from.id;
+        return same ? undefined : { from: toPlace(oldChoreo, from), to: toPlace(newChoreo, to) };
+      })(),
     };
   });
 
@@ -182,7 +213,7 @@ function compareDancer(
     }
   });
 
-  return changes.filter(x => x.isNew || x.position || x.counts.length > 0 || x.pathChanged);
+  return changes.filter(x => x.isNew || x.position || x.counts.length > 0 || x.pathChanged || x.stack);
 }
 
 function compareActions(oldSection: ChoreoSection, newSection: ChoreoSection): ActionLine[] {
@@ -268,7 +299,7 @@ export function buildChangeLog(oldChoreo: Choreo, newChoreo: Choreo): ChangeLog 
       dancers[dancer.id] = { kind: "new" };
       return;
     }
-    const sections = compareDancer(newChoreo, samePosition, sectionMatch, oldDancer.id, dancer.id);
+    const sections = compareDancer(oldChoreo, newChoreo, samePosition, sectionMatch, dancerMatch, oldDancer.id, dancer.id);
     if (sections.length > 0) {
       dancers[dancer.id] = { kind: "changed", sections };
     }

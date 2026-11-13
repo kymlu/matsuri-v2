@@ -662,6 +662,8 @@ function MainStage({
           props={currentChoreo.props}
           propPositions={propPositions}
           obstacles={currentChoreo.obstacles}
+          dancerStacks={currentSection.formation.dancerStacks}
+          propStacks={currentSection.formation.propStacks}
           updateDancerPosition={updateDancerPosition}
           updatePropPosition={updatePropPosition}
           updatePropSizeAndRotate={updatePropSizeAndRotate}

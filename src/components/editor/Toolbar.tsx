@@ -43,6 +43,13 @@ type ToolbarProps = {
   showPastePosition: boolean;
   onPastePosition: () => void;
   showSwapPosition: boolean;
+  showStack: boolean;
+  onStack: () => void;
+  // 上下入れ替え for a stack of two, 並べ替え for more; undefined when a whole stack isn't selected.
+  reorderStackLabel?: string;
+  onReorderStack: () => void;
+  showUnstack: boolean;
+  onUnstack: () => void;
   onSwapPosition: () => void;
 
   // arrange
@@ -127,6 +134,10 @@ function Toolbar({
   showCopyPosition, onCopyPosition,
   showPastePosition, onPastePosition,
   showSwapPosition, onSwapPosition,
+
+  showStack, onStack,
+  reorderStackLabel, onReorderStack,
+  showUnstack, onUnstack,
 
   showArrange, onRearrange,
   onVerticalAlign, onHorizontalAlign,
@@ -225,6 +236,11 @@ function Toolbar({
         {
           areEditingActionsActivated && <VerticalDivider/>
         }
+        {/* Stacks get their own group */}
+        {showStack && <IconButton src="stacks" label="重ねる" onClick={onStack} />}
+        {reorderStackLabel && <IconButton src="swapVert" label={reorderStackLabel} onClick={onReorderStack} />}
+        {showUnstack && <IconButton src="layersClear" label="解除" onClick={onUnstack} />}
+        {(showStack || showUnstack) && <VerticalDivider/>}
         {showMovementFunctions && <IconButton src="conversionPath" crossedOut={!showPaths} label={"動線表示"} onClick={toggleShowPaths}/>}
         {showMovementFunctions && <IconButton src="rebaseEdit" label={"動線編集"} onClick={()=>{
           onEditMovement();

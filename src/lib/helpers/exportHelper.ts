@@ -11,6 +11,7 @@ import { PDF_METER_PX, STRIPES_PER_METRE } from "../consts/consts";
 import { sortDancers, sortObstacles, sortProps } from "../editor/commands/objectCommands";
 import { getPersonalSectionNote } from "../dataAccess/LocalStorageController";
 import { formatDancerName } from "./dancerNameHelper";
+import { findStack, getStacks, stackNotes } from "./stackHelper";
 
 const README_TEXT =
   "このZIPには本アプリ用のデータが含まれています。\n" +
@@ -389,6 +390,9 @@ async function drawChoreoPdfBlob(
 
     pdf.setFontSize(8);
 
+    // Stack marks are drawn last, over everything.
+    const stackBadges: { x: number, y: number, count: number, red: boolean }[] = [];
+
     // Draw props
     sortProps(Object.values(section.formation.propPositions)).forEach(p => {
       let prop = choreo.props[p.propId];
@@ -429,6 +433,11 @@ async function drawChoreoPdfBlob(
           propWidth);
 
         context.restore();
+
+        const propStack = findStack(section.formation, "props", p.propId);
+        if (propStack && propStack[propStack.length - 1] === p.propId) {
+          stackBadges.push({ x: propX + Math.cos(angle) * propWidth, y: propY + Math.sin(angle) * propWidth, count: propStack.length, red: false });
+        }
       }
     });
 
@@ -446,8 +455,15 @@ async function drawChoreoPdfBlob(
       })
     });
 
-    // Draw participants
-    sortDancers(Object.values(section.formation.dancerPositions)).forEach(p => {
+    // Draw participants. A followed dancer hidden in a stack is drawn on top of it, so their sheet shows them.
+    const followedStack = followingId ? findStack(section.formation, "dancers", followingId) : undefined;
+    const drawnTop = (stack: string[]) => followedStack === stack ? followingId : stack[stack.length - 1];
+    const dancerOrder = sortDancers(Object.values(section.formation.dancerPositions));
+    if (followedStack) {
+      const followed = dancerOrder.findIndex(p => p.dancerId === followingId);
+      if (followed >= 0) dancerOrder.push(...dancerOrder.splice(followed, 1));
+    }
+    dancerOrder.forEach(p => {
       let dancer = choreo.dancers[p.dancerId];
       if (dancer) {
         const isFollowing = strEquals(followingId, dancer.id);
@@ -489,8 +505,14 @@ async function drawChoreoPdfBlob(
         let displayName = formatDancerName(dancer.name ?? "");
         let textHeight = pdf.getTextDimensions(displayName, {maxWidth: PDF_METER_PX}).h;
         pdf.text(displayName, x, y - textHeight/2 + titleBuffer, {align: "center", baseline: "top", maxWidth: PDF_METER_PX});
+
+        const dancerStack = findStack(section.formation, "dancers", p.dancerId);
+        if (dancerStack && drawnTop(dancerStack) === p.dancerId) {
+          stackBadges.push({ x: x + PDF_METER_PX * 0.35, y: y + titleBuffer - PDF_METER_PX * 0.35, count: dancerStack.length, red: dancerStack === followedStack });
+        }
       }
     });
+    stackBadges.forEach(b => drawStackBadge(pdf, boldFont, b.x, b.y, b.count, b.red));
 
     let memoY = PDF_METER_PX;
 
@@ -564,10 +586,23 @@ async function drawChoreoPdfBlob(
 
       memoY += 5;
 
+      // Stack lines as in the viewer panel; when either box has one, both get a third line ("-" if empty).
+      const notes = stackNotes(section.formation, choreo.sections[i + 1]?.formation, followingDancer.id,
+        id => choreo.dancers[id]?.name ?? "");
+      const hasStackNote = !!notes.now || (!!nextPosition && !!notes.next);
+      const boxHeight = hasStackNote ? 40 : 30;
+      const drawStackNote = (text: string | undefined) => {
+        memoY += 10;
+        pdf.setFontSize(8);
+        pdf.setFont(font);
+        pdf.setTextColor(colorPalette.grey);
+        pdf.text(text ?? "-", memoLeft + memoWidth/2, memoY, {maxWidth: memoWidth, align: "center"});
+      };
+
       // current position
       pdf.setDrawColor(colorPalette.lightGrey);
       pdf.setLineWidth(1);
-      pdf.roundedRect(memoLeft, memoY, memoWidth, 30, 5, 5, "S");
+      pdf.roundedRect(memoLeft, memoY, memoWidth, boxHeight, 5, 5, "S");
       
       memoY += 10;
       
@@ -582,6 +617,7 @@ async function drawChoreoPdfBlob(
       pdf.setTextColor(colorPalette.black);
       const currentPositionText = `${displayY}m/${displayX}m`;
       pdf.text(currentPositionText, memoLeft + memoWidth/2 + 4, memoY, {maxWidth: memoWidth, align: "center"});
+      if (hasStackNote) drawStackNote(notes.now);
       memoY += 10.5;
       
       const delta: Coordinates | null = nextPosition ? {
@@ -592,7 +628,7 @@ async function drawChoreoPdfBlob(
       if (delta) {
         pdf.setDrawColor(colorPalette.lightGrey);
         pdf.setLineWidth(1);
-        pdf.roundedRect(memoLeft, memoY, memoWidth, 30, 5, 5, "S");
+        pdf.roundedRect(memoLeft, memoY, memoWidth, boxHeight, 5, 5, "S");
         
         memoY += 10;
         
@@ -608,6 +644,7 @@ async function drawChoreoPdfBlob(
 
         if (delta.x === 0 && delta.y === 0) {
           pdf.text("なし", memoLeft + memoWidth/2, memoY, {maxWidth: memoWidth, align: "center"});
+          if (hasStackNote) drawStackNote(notes.next);
           memoY += 10.5;
         } else {
           let xMovement: string | null = null;
@@ -627,6 +664,7 @@ async function drawChoreoPdfBlob(
   
           const deltaText = `${[yMovement, xMovement].filter(x => x !== null).join("/")}`;
           pdf.text(deltaText, memoLeft + memoWidth/2 + 2, memoY, {maxWidth: memoWidth, align: "center"});
+          if (hasStackNote) drawStackNote(notes.next);
           memoY += 10.5;
         }
       }
@@ -744,6 +782,19 @@ async function drawChoreoPdfBlob(
         });
         memoY += 13;
       });
+    }
+
+    if (getStacks(section.formation, "dancers").length > 0 || getStacks(section.formation, "props").length > 0) {
+      if (memoY > (PDF_METER_PX)) {
+        drawLine(pdf, colorPalette.lightGrey, 1, [], memoLeft, memoY, memoLeft + memoWidth, memoY);
+        memoY += 14;
+      }
+      drawStackBadge(pdf, boldFont, memoLeft + 8, memoY - 3, 2, false);
+      pdf.setFontSize(8);
+      pdf.setFont(font);
+      pdf.setTextColor(colorPalette.grey);
+      pdf.text("重なっている数", memoLeft + 20, memoY, {maxWidth: memoWidth - 20});
+      memoY += 13;
     }
 
     pdf.setFont(boldFont);
@@ -994,4 +1045,16 @@ function getSectionRadians(sections: number, index: number): [number, number] {
   const start = sectionSize * index - Math.PI * ([2, 4].includes(sections) ? 1 : sections === 3 ? 7/6 : 4.5/5);
   const end = start + sectionSize;
   return [start, end];
+}
+// The "×N" pill on the drawn member of a stack, as in the app: grey, red for the followed dancer's stack.
+function drawStackBadge(pdf: jsPDF, font: string, x: number, y: number, count: number, red: boolean) {
+  const r = PDF_METER_PX * 0.2;
+  const text = `×${count}`;
+  const w = r * (2 + 0.8 * String(count).length), h = r * 2;
+  pdf.setFillColor(red ? colorPalette.primary : colorPalette.grey);
+  pdf.roundedRect(x - w / 2, y - h / 2, w, h, h / 2, h / 2, "F");
+  pdf.setFont(font);
+  pdf.setFontSize(r * 1.3);
+  pdf.setTextColor("#FFFFFF");
+  pdf.text(text, x, y, { align: "center", baseline: "middle" });
 }

@@ -44,6 +44,8 @@ type FormationLayerProps = {
   dancerAnimationCache: PathSvgCacheByObjectIdBySectionId;
   propAnimationCache: PathSvgCacheByObjectIdBySectionId;
   isEditingMovement?: boolean,
+  dancerStacks?: string[][],
+  propStacks?: string[][],
 };
 
 const FormationLayer = memo(function FormationLayer({
@@ -74,6 +76,7 @@ const FormationLayer = memo(function FormationLayer({
   isZooming,
   sectionId,
   dancerAnimationCache, propAnimationCache, isEditingMovement,
+  dancerStacks, propStacks,
 }: FormationLayerProps) {
 	const transformerRef = useRef<Konva.Transformer>(null);
 
@@ -170,6 +173,52 @@ const FormationLayer = memo(function FormationLayer({
     return (selectedIds.dancers.length + selectedIds.props.length + selectedIds.obstacles.length) > 1
   }, [selectedIds]);
 
+  // For the top member of each stack: whether to draw the mark, red, and the dashed "hidden one selected" ring.
+  // Red is for view mode, where selecting means "acts at this count"; in the editor a whole stack is selected together.
+  const stackDrawing = useCallback((stacks: string[][] | undefined, selected: string[]) => {
+    const result: Record<string, { mark: "normal" | "red", hiddenSelected: boolean, count: number }> = {};
+    (stacks ?? []).forEach(stack => {
+      const hiddenSelected = stack.slice(0, -1).some(id => selected.includes(id));
+      // Editor: red while any of the stack is selected. View: red when someone hidden is selected (acts at the count).
+      const red = canEdit ? stack.some(id => selected.includes(id)) : hiddenSelected;
+      result[stack[stack.length - 1]] = { mark: red ? "red" : "normal", hiddenSelected, count: stack.length };
+    });
+    return result;
+  }, [canEdit]);
+  const dancerStackDrawing = useMemo(() => stackDrawing(dancerStacks, selectedIds.dancers), [stackDrawing, dancerStacks, selectedIds.dancers]);
+  const propStackDrawing = useMemo(() => stackDrawing(propStacks, selectedIds.props), [stackDrawing, propStacks, selectedIds.props]);
+  const coveredDancers = useMemo(() => new Set((dancerStacks ?? []).flatMap(stack => stack.slice(0, -1))), [dancerStacks]);
+
+  // Dragging one member of a stack brings the others along on every frame, so nothing jumps or slides into place
+  // after the drop. Members the transformer already drags (the whole stack was selected when the drag began) are left to it.
+  // The editor then saves the others at the same offset (moveStacksTogether), which lands exactly where they already are.
+  const following = useRef<Map<string, { node: Konva.Node, x: number, y: number }[]>>(new Map());
+  const followDrag = useCallback((id: string, phase: "start" | "move" | "end" | "cancel", dx = 0, dy = 0) => {
+    if (phase === "start") {
+      const stack = [...(dancerStacks ?? []), ...(propStacks ?? [])].find(s => s.includes(id));
+      const leaderNode = nodeMap.current.get(id);
+      const attached = transformerRef.current?.nodes() ?? [];
+      const proxied = !!leaderNode && attached.includes(leaderNode);
+      const nodes = (stack ?? [])
+        .filter(member => member !== id)
+        .map(member => nodeMap.current.get(member))
+        .filter((node): node is Konva.Node => !!node && !(proxied && attached.includes(node)))
+        .map(node => ({ node, x: node.x(), y: node.y() }));
+      if (nodes.length > 0) following.current.set(id, nodes);
+      else following.current.delete(id);
+      return;
+    }
+    const nodes = following.current.get(id);
+    if (!nodes) return;
+    nodes.forEach(({ node, x, y }) => {
+      if (phase === "end") node.to({ x: x + dx, y: y + dy }); // same 1s tween as the dragged one's snap
+      else if (phase === "cancel") node.position({ x, y });
+      else node.position({ x: x + dx, y: y + dy });
+    });
+    if (phase === "end" || phase === "cancel") following.current.delete(id);
+    else nodes[0].node.getLayer()?.batchDraw();
+  }, [dancerStacks, propStacks]);
+
   const handleDancerClick = useCallback((id: string, isAdditive?: boolean) => {
     toggleDancerSelect(id, isAdditive);
     onDancerSelected?.();
@@ -215,6 +264,10 @@ const FormationLayer = memo(function FormationLayer({
             animate
             animationCache={propAnimationCache[propPosition.propId]}
             isZooming={isZooming}
+            stackMark={propStackDrawing[propPosition.propId]?.mark}
+            hiddenSelected={propStackDrawing[propPosition.propId]?.hiddenSelected}
+            stackCount={propStackDrawing[propPosition.propId]?.count}
+            onDragFollow={canEdit ? followDrag : undefined}
           />
         );
       })}
@@ -236,6 +289,11 @@ const FormationLayer = memo(function FormationLayer({
             isZooming={isZooming}
             sectionId={sectionId}
             animationCache={dancerAnimationCache[dancerPosition.dancerId]}
+            stackMark={dancerStackDrawing[dancerPosition.dancerId]?.mark}
+            hiddenSelected={dancerStackDrawing[dancerPosition.dancerId]?.hiddenSelected}
+            stackCount={dancerStackDrawing[dancerPosition.dancerId]?.count}
+            coveredInStack={coveredDancers.has(dancerPosition.dancerId)}
+            onDragFollow={canEdit ? followDrag : undefined}
           />
         );
       })}

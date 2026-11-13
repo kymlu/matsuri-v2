@@ -14,6 +14,7 @@ type SectionSummaryListProps = {
   currentSectionId: string;
   geometry: StageGeometry;
   onChangeSection: (section: ChoreoSection) => void;
+  stackLine?: (section: ChoreoSection) => string | undefined;
 };
 
 export default function SectionSummaryList({
@@ -22,6 +23,7 @@ export default function SectionSummaryList({
   currentSectionId,
   geometry,
   onChangeSection,
+  stackLine,
 }: SectionSummaryListProps) {
   const rowRefs = useRef<Map<string, HTMLDivElement | null>>(new Map());
 
@@ -36,6 +38,7 @@ export default function SectionSummaryList({
           const isActive = strEquals(currentSectionId, section.id);
           const position = section.formation.dancerPositions[dancer.id];
           const hasPublicNote = !isNullOrUndefinedOrBlank(section.note);
+          const stack = position ? stackLine?.(section) : undefined;
 
           return (
             <div
@@ -65,6 +68,7 @@ export default function SectionSummaryList({
                   <DancerPositionText position={position} geometry={geometry} bold={isActive}/> :
                   <span className="text-sm text-muted">-</span>
                 }
+                {stack && <span className="text-sm text-muted">{stack}</span>}
                 {
                   section.formation.dancerActions.map(action => {
                     const count = action.timings.find(t => t.dancerIds.includes(dancer.id))?.name;

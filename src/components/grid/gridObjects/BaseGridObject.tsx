@@ -31,6 +31,9 @@ export interface BaseGridObjectProps {
   sectionId?: string,
   halfOpacity?: boolean,
   animationCache?: PathSvgCacheBySectionId;
+  // Tells the layer how far this object has been dragged, so it can bring others along live (a stack's other members).
+  // "end" gives the final offset after snapping and is followed by the same 1s tween; "cancel" means it didn't move.
+  onDragFollow?: (id: string, phase: "start" | "move" | "end" | "cancel", dx?: number, dy?: number) => void;
 }
 
 const BaseGridObject = memo(function BaseGridObject({
@@ -54,6 +57,7 @@ const BaseGridObject = memo(function BaseGridObject({
   halfOpacity,
   animationCache,
   sectionId,
+  onDragFollow,
 }: BaseGridObjectProps) {
   const ref = useRef<Konva.Group>(null);
   const [isAnimating, setIsAnimating] = useState<boolean>(false);
@@ -70,6 +74,11 @@ const BaseGridObject = memo(function BaseGridObject({
     animation.current?.stop();
     const newPosition = stageMetersToPx({x: position.x, y: position.y}, stageGeometry, METER_PX, height);
     if (newPosition.x === ref.current?.x() && newPosition.y === ref.current?.y()) return;
+    // Already there to within rounding, e.g. a stack member that followed a drag live: no animation.
+    if (ref.current && Math.abs(newPosition.x - ref.current.x()) < 0.5 && Math.abs(newPosition.y - ref.current.y()) < 0.5) {
+      ref.current.position(newPosition);
+      return;
+    }
     if (animate) setIsAnimating(true);
     if (ref.current) {
       const key = sectionId ? getAnimationKey(prevSectionId.current, sectionId) : undefined;
@@ -158,6 +167,7 @@ const BaseGridObject = memo(function BaseGridObject({
 
   const dragStartRef = useRef<{ x: number; y: number } | null>(null);
   const isDraggingRef = useRef(false);
+  const dragOriginRef = useRef<Coordinates | null>(null);
   
   return (
     <Group
@@ -177,6 +187,11 @@ const BaseGridObject = memo(function BaseGridObject({
           y: e.target.y(),
         };
         isDraggingRef.current = false;
+      }}
+      onDragStart={() => {
+        if (!ref.current) return;
+        dragOriginRef.current = { x: ref.current.x(), y: ref.current.y() };
+        onDragFollow?.(id, "start");
       }}
       onDragMove={(e) => {
         if (isZooming?.current) return;
@@ -200,14 +215,24 @@ const BaseGridObject = memo(function BaseGridObject({
         if (Math.hypot(dx, dy) > 0.01 && !isDraggingRef.current) {
           isDraggingRef.current = true;
         }
+
+        const origin = dragOriginRef.current;
+        if (origin) onDragFollow?.(id, "move", e.target.x() - origin.x, e.target.y() - origin.y);
       }}
       onPointerUp={(e) => {
-        if (dragStartRef && !isDraggingRef.current && !isZooming?.current) {
+        // Only a press that started on this object counts as a tap. Without this, dropping something
+        // onto another object "tapped" the one underneath, added it to the selection and lost the move.
+        if (dragStartRef.current && !isDraggingRef.current && !isZooming?.current) {
           onClick?.(id);
         }
+        dragStartRef.current = null;
       }}
       onDragEnd={(e) => {
-        if (isDraggingRef.current) {
+        const origin = dragOriginRef.current;
+        dragOriginRef.current = null;
+        if (!isDraggingRef.current) {
+          onDragFollow?.(id, "cancel");
+        } else {
           const node = ref.current!!;
 
           let position: Coordinates = {x: node.x(), y: node.y()};
@@ -215,6 +240,8 @@ const BaseGridObject = memo(function BaseGridObject({
           if (snapToGrid) {
             position = clampToStage(snapCoordsToGrid({x: node.x(), y: node.y()}, snapSize), node.rotation());
           }
+
+          if (origin) onDragFollow?.(id, "end", position.x - origin.x, position.y - origin.y);
 
           node.to({
             x: position.x,

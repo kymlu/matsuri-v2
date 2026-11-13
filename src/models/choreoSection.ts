@@ -32,6 +32,9 @@ export const FormationSchema = z.object({
   dancerActions: z.array(DancerActionSchema),
   propPositions: z.record(z.string(), PropPositionSchema),
   propMovements: z.record(z.string(), MovementSchema).optional(),
+  // Stacks: ids placed exactly on top of each other, bottom first. Same type only.
+  dancerStacks: z.array(z.array(z.string())).optional(),
+  propStacks: z.array(z.array(z.string())).optional(),
 });
 
 export type Formation = z.infer<typeof FormationSchema>;

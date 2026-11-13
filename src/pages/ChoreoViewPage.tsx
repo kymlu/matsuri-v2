@@ -1,6 +1,6 @@
 import Header from "../components/editor/Header"
 import FormationSelectionToolbar from "../components/editor/FormationSelectionToolbar";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BasicChoreoDetails, Choreo } from "../models/choreo";
 import { ChoreoSection, MovementCacheBySectionIdByObjectId, PathSvgCacheByObjectIdBySectionId } from "../models/choreoSection";
 import MainStage from "../components/grid/MainStage";
@@ -29,6 +29,8 @@ import InstructionMessage from "../components/basic/InstructionMessage";
 import { useHelp } from "../components/help/HelpContext";
 import { findMyDancerId } from "../lib/helpers/myDancerHelper";
 import FindDancerDialog from "../components/dialogs/FindDancerDialog";
+import { StackListDialog, StackMember } from "../components/dialogs/StackDialogs";
+import { findStack, stackNotes } from "../lib/helpers/stackHelper";
 
 const exportDialog = Dialog.createHandle<{}>();
 
@@ -206,10 +208,43 @@ export default function ChoreoViewPage(props: {
   ), [currentSection.id, props.currentChoreo.sections, changeSection]);
 
   // ---- MainStage handlers ----
+  // Tapping a stack lists who is there instead of selecting the top person; the count stays until someone is picked.
+  const [stackList, setStackList] = useState<{ kind: "dancers" | "props", members: StackMember[] }>();
+  const selectedIdsRef = useRef(selectedIds);
+  selectedIdsRef.current = selectedIds;
   const onSetSelectedIds = useCallback((action: SetStateAction<StageEntities<string[]>>) => {
-    setSelectedIds(action);
+    const next = typeof action === "function" ? action(selectedIdsRef.current) : action;
+    // Props can't be selected here; only a stacked prop responds, by showing what's in the stack.
+    if (next.props.length > 0) {
+      const propStack = next.props.length === 1 ? findStack(currentSection.formation, "props", next.props[0]) : undefined;
+      if (propStack) {
+        setStackList({ kind: "props", members: [...propStack].reverse().map(id => ({
+          id,
+          label: props.currentChoreo.props[id]?.name ?? "",
+          color: props.currentChoreo.props[id]?.color,
+        })) });
+      }
+      return;
+    }
+    const tapped = next.dancers.length === 1 ? next.dancers[0] : undefined;
+    const stack = tapped ? findStack(currentSection.formation, "dancers", tapped) : undefined;
+    if (stack) {
+      setStackList({ kind: "dancers", members: [...stack].reverse().map(id => ({
+        id,
+        label: props.currentChoreo.dancers[id]?.name ?? "",
+        color: currentSection.formation.dancerPositions[id]?.color,
+      })) });
+      return;
+    }
+    setSelectedIds(next);
     setSelectedTimingId(undefined);
-  }, []);
+  }, [currentSection.formation, props.currentChoreo.dancers, props.currentChoreo.props]);
+
+  const stackNote = useMemo(() => {
+    if (selectedIds.dancers.length !== 1) return {};
+    return stackNotes(currentSection.formation, nextSection?.formation, selectedIds.dancers[0],
+      id => props.currentChoreo.dancers[id]?.name ?? "");
+  }, [selectedIds.dancers, currentSection.formation, nextSection, props.currentChoreo.dancers]);
 
   const selectedDancerMovement = useMemo(() => (
     showPaths && selectedIds.dancers.length === 1 && !selectedTimingId && nextSection ?
@@ -278,6 +313,10 @@ export default function ChoreoViewPage(props: {
           dancer={props.currentChoreo.dancers[selectedIds.dancers[0]]}
           position={currentSection.formation.dancerPositions[selectedIds.dancers[0]]}
           nextPosition={nextSection?.formation.dancerPositions[selectedIds.dancers[0]]}
+          stackNote={stackNote.now}
+          stackMoveNote={stackNote.next}
+          stackLine={section => stackNotes(section.formation, undefined, selectedIds.dancers[0],
+            id => props.currentChoreo.dancers[id]?.name ?? "").now}
           geometry={props.currentChoreo.stageGeometry}
           isPositionHintShown={
             selectedIds.dancers.length === 1 &&
@@ -295,7 +334,7 @@ export default function ChoreoViewPage(props: {
         <MainStage
           appSettings={appSettings}
           canEdit={false}
-          canSelectProps={false}
+          canSelectProps={!!currentSection.formation.propStacks?.length}
           canSelectObstacles={false}
           hideTransformerBorder
           canSelectDancers
@@ -346,6 +385,20 @@ export default function ChoreoViewPage(props: {
             defaultChecked={false}
             onChange={(value) => stopShowingViewPageInfoDialog(value)}/>
         </BaseErrorDialog>
+      </Dialog.Root>
+
+      <Dialog.Root open={stackList !== undefined} onOpenChange={open => { if (!open) setStackList(undefined); }}>
+        {
+          stackList &&
+          <StackListDialog
+            members={stackList.members}
+            kind={stackList.kind}
+            onPick={stackList.kind === "props" ? undefined : id => {
+              setSelectedIds({ dancers: [id], props: [], obstacles: [] });
+              setSelectedTimingId(undefined);
+              setStackList(undefined);
+            }}/>
+        }
       </Dialog.Root>
 
       <Dialog.Root open={findDancerOpen} onOpenChange={setFindDancerOpen}>

@@ -10,6 +10,9 @@ type PositionHintProps = {
   nextPosition?: DancerPosition;
   actions?: DancerAction[];
   geometry: StageGeometry;
+  // Grey lines for stacks: where they are now (〇〇の上) and what happens next (〇〇から降りる).
+  stackNote?: string;
+  stackMoveNote?: string;
 };
 
 const PositionHint = memo(function PositionHint({
@@ -18,21 +21,29 @@ const PositionHint = memo(function PositionHint({
   nextPosition,
   actions,
   geometry,
+  stackNote,
+  stackMoveNote,
 }: PositionHintProps) {
 
   const deltaX = nextPosition ? roundToTenth(roundToTenth(nextPosition.x) - roundToTenth(position.x)) : undefined;
   const deltaY = nextPosition ? roundToTenth(roundToTenth(nextPosition.y) - roundToTenth(position.y)) : undefined;
 
+  // With a stack line under one of them, the other gets a "-" in its place so both boxes have three lines,
+  // and both stay top-aligned so the readings line up.
+  const showNext = !!nextPosition && deltaX !== undefined && deltaY !== undefined;
+  const hasNote = !!stackNote || (showNext && !!stackMoveNote);
+
   return (
     <div>
       <div className="mb-2 space-y-1">
         <div className="flex w-full gap-1">
-          <InfoBox title="現在の位置">
+          <InfoBox title="現在の位置" alignTop={hasNote}>
             <DancerPositionText position={position} geometry={geometry}/>
+            {hasNote && <Note text={stackNote ?? "-"}/>}
           </InfoBox>
           {
             nextPosition && deltaX !== undefined && deltaY !== undefined &&
-            <InfoBox title="次への移動">
+            <InfoBox title="次への移動" alignTop={hasNote}>
               <div className="flex items-center justify-center gap-1">
                 {
                   deltaX === 0 && deltaY === 0 && <span className="font-bold">なし</span>
@@ -62,6 +73,7 @@ const PositionHint = memo(function PositionHint({
                   </>
                 }
               </div>
+              {hasNote && <Note text={stackMoveNote ?? "-"}/>}
             </InfoBox>
           }
         </div>
@@ -113,13 +125,16 @@ type InfoBoxProps = {
   title: string,
   children: ReactNode,
   isSmall?: boolean,
+  alignTop?: boolean,
 }
 
-function InfoBox({title, children, isSmall}: InfoBoxProps) {
-  return <div className={"flex flex-col justify-between p-2 border border-line rounded-md" + (isSmall ? "" : " flex-1")}>
+function InfoBox({title, children, isSmall, alignTop}: InfoBoxProps) {
+  return <div className={"flex flex-col p-2 border border-line rounded-md" + (alignTop ? " justify-start" : " justify-between") + (isSmall ? "" : " flex-1")}>
     <span className="text-sm font-semibold text-center text-muted">{title}</span>
-    <div className="flex items-center justify-center gap-1">
+    <div className="flex flex-col items-center justify-center">
       {children}
     </div>
   </div>
 }
+
+const Note = ({ text }: { text: string }) => <span className="text-sm text-center text-muted">{text}</span>;
