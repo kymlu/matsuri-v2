@@ -222,7 +222,7 @@ export default function RosterPage({ goToHomePage, team, tab, onTabChange }: Ros
           <IconButton src="home" noBorder onClick={goToHomePage}/>
           <div className="flex-1 min-w-0 text-start">
             <div className="text-sm text-primary">
-              <b>{team.name}</b><span>の</span>
+              <b>{team.name}</b>{" "}<span>の</span>
             </div>
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
               <h2 className="text-2xl font-bold text-nowrap">名簿</h2>

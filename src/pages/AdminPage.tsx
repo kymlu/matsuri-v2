@@ -61,7 +61,7 @@ export default function AdminPage({
         }}/>
       <div className="flex-1 text-start">
         <div className="text-sm text-primary">
-          <b>{team.name}</b><span>の</span>
+          <b>{team.name}</b>{" "}<span>の</span>
         </div>
         <h2 className='flex-1 text-2xl font-bold text-nowrap'>ユーザー管理</h2>
       </div>
