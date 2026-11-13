@@ -314,7 +314,7 @@ export default function ChoreoEditPage(props: {
     } else if (selectedIds.dancers.length === 0 && selectedIds.props.length === 1) {
       return {id: selectedIds.props[0], type: "prop"} as SelectedEntity;
     }
-  }, [selectedIds.dancers, selectedIds.props, linkedPathId?.id, linkedPathId?.type]);
+  }, [selectedIds.dancers, selectedIds.props, linkedPathId]);
 
   const firstSelectedDancerPropMovement: Movement | undefined = useMemo(() => {
     if (!firstSelectedDancerProp) return;
@@ -890,19 +890,19 @@ export default function ChoreoEditPage(props: {
       ? rearrangePositions(state, currentSection.id, { dancers: [], props: [], obstacles: selectedIds.obstacles }, rearrangement)
       : state;
     commitState(rearrangeWithStacks(withObstacles, currentSection.id, { ...selectedIds, obstacles: [] }, rearrangement));
-  }, [commitState, history.presentState.state, currentSection.id, selectedIds]);
+  }, [commitState, history.presentState.state, currentSection.id, currentSection.formation, selectedIds]);
 
   const onDistribute = useCallback((distribution: Distribution) => {
     commitState(distributePositions(history.presentState.state, currentSection.id, arrangeRepresentatives(currentSection.formation, selectedObjects), distribution));
-  }, [commitState, history.presentState.state, currentSection.id, selectedObjects]);
+  }, [commitState, history.presentState.state, currentSection.id, currentSection.formation, selectedObjects]);
 
   const onHorizontalAlign = useCallback((alignment: HorizontalAlignment) => {
     commitState(alignHorizontalPositions(history.presentState.state, currentSection.id, arrangeRepresentatives(currentSection.formation, selectedObjects), alignment));
-  }, [commitState, history.presentState.state, currentSection.id, selectedObjects]);
+  }, [commitState, history.presentState.state, currentSection.id, currentSection.formation, selectedObjects]);
 
   const onVerticalAlign = useCallback((alignment: VerticalAlignment) => {
     commitState(alignVerticalPositions(history.presentState.state, currentSection.id, arrangeRepresentatives(currentSection.formation, selectedObjects), alignment));
-  }, [commitState, history.presentState.state, currentSection.id, selectedObjects]);
+  }, [commitState, history.presentState.state, currentSection.id, currentSection.formation, selectedObjects]);
 
   const onDeleteObjects = useCallback(() => {
     commitState(removeObjects(history.presentState.state, selectedIds));

@@ -137,9 +137,11 @@ export function useStackEditing({ state, section, prevSection, selectedIds, setS
 
   // A whole stack with the same members as in the previous section has one path, edited through its
   // bottom member (the normaliser copies it to the rest).
-  const linkedPathId = wholeStack && stackKind && linkedStack(prevSection?.formation, formation, stackKind, wholeStack[0])
-    ? { id: wholeStack[0], type: stackKind === "dancers" ? "dancer" as const : "prop" as const }
-    : undefined;
+  const linkedBottom = wholeStack && stackKind && linkedStack(prevSection?.formation, formation, stackKind, wholeStack[0])
+    ? wholeStack[0] : undefined;
+  const linkedPathId = useMemo(
+    () => linkedBottom && stackKind ? { id: linkedBottom, type: stackKind === "dancers" ? "dancer" as const : "prop" as const } : undefined,
+    [linkedBottom, stackKind]);
 
   // 位置交換 works on two separate things: people, props or whole stacks (not within one stack:
   // that's 上下入れ替え).
