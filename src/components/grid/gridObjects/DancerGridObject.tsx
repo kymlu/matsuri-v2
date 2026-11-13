@@ -105,7 +105,8 @@ const DancerGridObject = memo(function DancerGridObject({
             stroke={colorPalette.primary}
           />
         }
-        <Group opacity={faintSelected ? 0.2 : 1} listening={false}>
+        {/* Must keep listening: the circle in here is what catches taps on the dancer. */}
+        <Group opacity={faintSelected ? 0.2 : 1}>
         <Circle
           radius={METER_PX * (dancerDisplayType === "large" ? 0.45 : 0.2)}
           fill={position.color}
