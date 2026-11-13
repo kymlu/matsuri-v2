@@ -72,7 +72,7 @@ export default function EditRosterNameDialog({ teamId, kind, rosterName, list, o
       title={`「${rosterName.name}」を名簿から削除しますか？`}
       actionButtonText="削除"
       isActionButtonDisabled={isSaving}
-      backButton={{ label: "やめる", onClick: () => setIsConfirmingDelete(false) }}
+      backButton={{ label: "キャンセル", onClick: () => setIsConfirmingDelete(false) }}
       onSubmit={remove}>
       <div className="space-y-3">
         <p className="text-muted">この名前を使っている隊列表は変わりません。</p>

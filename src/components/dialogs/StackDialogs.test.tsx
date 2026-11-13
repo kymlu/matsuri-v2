@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { Dialog } from "@base-ui/react";
-import { UnstackDialog } from "./StackDialogs";
+import { StackOrderDialog, UnstackDialog } from "./StackDialogs";
 
 const members = [{ id: "a", label: "一郎" }, { id: "b", label: "花子" }, { id: "c", label: "月子" }];
 
@@ -20,5 +20,18 @@ describe("UnstackDialog", () => {
     fireEvent.click(await screen.findByText("すべて選択"));
     fireEvent.click(screen.getByText("すべて解除"));
     expect(screen.getAllByRole("checkbox").every(c => c.getAttribute("aria-checked") === "false")).toBe(true);
+  });
+});
+
+describe("prop stacks say 道具, not 人", () => {
+  it("UnstackDialog", async () => {
+    render(<Dialog.Root open><UnstackDialog kind="props" members={members} onSubmit={() => {}}/></Dialog.Root>);
+    expect(await screen.findByText("外す道具を選ぶ")).toBeTruthy();
+    expect(screen.getByText("上から順。外した道具はその場に残ります。")).toBeTruthy();
+  });
+
+  it("StackOrderDialog", async () => {
+    render(<Dialog.Root open><StackOrderDialog kind="props" initial={members} onSubmit={() => {}}/></Dialog.Root>);
+    expect(await screen.findByText("一番下の道具の位置")).toBeTruthy();
   });
 });

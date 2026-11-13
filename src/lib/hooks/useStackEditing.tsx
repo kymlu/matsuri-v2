@@ -194,6 +194,7 @@ export function useStackEditing({ state, section, prevSection, selectedIds, setS
         stackOrder &&
         <StackOrderDialog
           initial={stackOrder.members}
+          kind={stackOrder.kind}
           onSubmit={onConfirmStack}
           onBack={stackOrder.fromDrop ? () => {
             setStackPrompt({ kind: stackOrder.kind, members: stackOrder.members, text: `${stackOrder.members.map(m => m.label).join("・")}を重ねます。`, pairKey: stackOrder.fromDrop! });
@@ -217,6 +218,7 @@ export function useStackEditing({ state, section, prevSection, selectedIds, setS
         unstacking &&
         <UnstackDialog
           members={unstacking.members}
+          kind={unstacking.kind}
           onSubmit={ids => {
             commitState(unstackObjects(state, section.id, unstacking.kind, ids));
             setSelectedIds(unstacking.kind === "dancers"

@@ -223,7 +223,7 @@ function ViewerSidebar({
                   name="自分用メモ"
                   defaultValue={personalNote ?? ""}
                   onContentChange={onPersonalNoteChange}
-                  placeholder="自分用メモを追加..."
+                  placeholder="自分用メモを追加…"
                   maxRows={2}
                   compact/>
               </div>

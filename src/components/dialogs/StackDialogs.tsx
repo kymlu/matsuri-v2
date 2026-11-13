@@ -54,8 +54,9 @@ function SortableMember({ member, tier }: { member: StackMember, tier: string })
 }
 
 // 重ねる順: confirm the order (and where) before stacking. Always shown, from the button or after a drop.
-export function StackOrderDialog({ initial, onSubmit, onBack }: {
+export function StackOrderDialog({ initial, onSubmit, onBack, kind = "dancers" }: {
   initial: StackMember[],
+  kind?: "dancers" | "props",
   onSubmit: (topFirst: string[], spot: StackSpot) => void,
   onBack?: () => void,
 }) {
@@ -73,7 +74,7 @@ export function StackOrderDialog({ initial, onSubmit, onBack }: {
     <p className="mt-3 mb-1 text-sm font-semibold text-muted">位置</p>
     <div className="flex gap-2" role="radiogroup" aria-label="位置">
       {
-        ([["bottom", "一番下の人の位置"], ["middle", "真ん中"]] as [StackSpot, string][]).map(([value, label]) =>
+        ([["bottom", kind === "dancers" ? "一番下の人の位置" : "一番下の道具の位置"], ["middle", "真ん中"]] as [StackSpot, string][]).map(([value, label]) =>
           <button
             key={value}
             type="button"
@@ -99,8 +100,9 @@ export function ReorderStackDialog({ initial, onSubmit }: { initial: StackMember
   </BaseEditDialog>;
 }
 
-// 外す人を選ぶ: for stacks of three or more. Taken-out members stay where they are.
-export function UnstackDialog({ members, onSubmit }: { members: StackMember[], onSubmit: (ids: string[]) => void }) {
+// 外す人（道具）を選ぶ: for stacks of three or more. Taken-out members stay where they are.
+export function UnstackDialog({ members, onSubmit, kind = "dancers" }: { members: StackMember[], onSubmit: (ids: string[]) => void, kind?: "dancers" | "props" }) {
+  const noun = kind === "dancers" ? "人" : "道具";
   const [picked, setPicked] = useState<Set<string>>(new Set());
   const toggle = (id: string) => {
     const next = new Set(picked);
@@ -112,11 +114,11 @@ export function UnstackDialog({ members, onSubmit }: { members: StackMember[], o
   const note = picked.size === 0 ? undefined
     : remaining.length < 2 ? "重なりがなくなります。"
     : `${remaining.map(m => m.label).join("・")}の重なりになります。`;
-  return <BaseEditDialog title="外す人を選ぶ" actionButtonText="外す" noDetachedTrigger fullWidth
+  return <BaseEditDialog title={`外す${noun}を選ぶ`} actionButtonText="外す" noDetachedTrigger fullWidth
     isActionButtonDisabled={picked.size === 0}
     onSubmit={() => onSubmit([...picked])}>
     <div className="flex items-center justify-between gap-2 mb-2">
-      <p className="text-sm text-muted">上から順。外した人はその場に残ります。</p>
+      <p className="text-sm text-muted">上から順。外した{noun}はその場に残ります。</p>
       <button
         type="button"
         className="px-2 text-sm font-semibold rounded-md text-primary min-h-8 shrink-0"
