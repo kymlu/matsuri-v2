@@ -90,14 +90,14 @@ function App() {
   }, []);
 
   useEffect(() => {
-    console.log("getting build info");
     fetch(`${process.env.PUBLIC_URL}/build-info.json`)
       .then(r => r.json())
       .then(info => {
         const buildDate = info.buildDate;
         console.log(`Build: ${buildDate}`);
         setBuildInfo(`更新 ${buildDate}`);
-      });
+      })
+      .catch(e => console.warn("Could not load build info:", e));
   }, []);
 
   const saveDancerName = (newName: string) => {

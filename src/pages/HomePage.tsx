@@ -120,7 +120,7 @@ export default function HomePage({
         return undefined
       }
     } catch (e: any) {
-      console.error("Failed to load choreo with id", id);
+      console.error(`Failed to load choreo ${id} from the server:`, e);
       return undefined;
     }
   }, [team, serverChoreoDetails]);
@@ -131,7 +131,7 @@ export default function HomePage({
     const local = localChoreos[id];
 
     if (local) {
-      console.log(`Getting local choreo with ${id}`);
+      console.debug(`Getting local choreo ${id}`);
       if (local.teamId === undefined && team?.id) {
         local.teamId = team.id;
       }
@@ -139,10 +139,10 @@ export default function HomePage({
     }
 
     if (strEquals(id, SAMPLE_PARADE_ID)) {
-      console.log("using sample parade");
+      console.debug("Using sample parade");
       return SampleParade as Choreo;
     } else if (strEquals(id, SAMPLE_STAGE_ID)) {
-      console.log("using sample stage");
+      console.debug("Using sample stage");
       return SampleStage as Choreo;
     }
 
@@ -150,7 +150,6 @@ export default function HomePage({
   }, [localChoreos, team, getChoreoFromServer]);
 
   useEffect(() => {
-    console.log("build", buildInfo)
     loadChoreos();
   }, []);
 
@@ -416,7 +415,7 @@ export default function HomePage({
       goToViewPage(pastChoreo, "upToDate", serverChoreoDetails[choreo.id], version);
       return true;
     } catch (e: any) {
-      console.error(`Failed to load version ${version} of choreo with id`, choreo.id);
+      console.error(`Failed to load version ${version} of choreo ${choreo.id}:`, e);
       return false;
     }
   }, [team, serverChoreoDetails, goToViewPage]);
@@ -691,9 +690,7 @@ export default function HomePage({
           id="uploadFileInput"
           accept=".mtr, application/zip"
           onChange={(event) => {
-            if (!event.target.files || event.target.files.length === 0) {
-              console.log("No files were selected to upload.");
-            } else {
+            if (event.target.files && event.target.files.length > 0) {
               const file = event.target.files?.[0];
               readUploadedFile(
                 file,
@@ -850,9 +847,10 @@ export default function HomePage({
                 deleteChoreo(editingChoreo.id, async () => {
                   syncChoreoDialog.close();
                   setSyncChoreoDialogOpen(false);
-                  console.log("editing",editingChoreo.id);
                   await getChoreoFromServer(editingChoreo.id).then((choreo) => {
-                    console.log(choreo);
+                    console.log(choreo
+                      ? `Reloaded ${choreo.id} from the server after deleting the local copy: version ${choreo.version ?? 0}, ${choreo.sections.length} sections`
+                      : `No server copy of ${editingChoreo.id} after deleting the local copy`);
                     if (choreo) onSelectChoreo(choreo, "upToDate");
                   });
                   setEditingChoreo(undefined);

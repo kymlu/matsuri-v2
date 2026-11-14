@@ -76,11 +76,7 @@ export default function PublishConfirmationDialog({
         );
       } catch (e: any) {
         setError("error");
-        if (e instanceof Error) {
-          console.error(e.message);
-        } else {
-          console.error("An error has occurred", e);
-        }
+        console.error("Publish failed:", e);
         setIsProcessing(false);
       }
     }
