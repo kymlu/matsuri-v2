@@ -153,12 +153,19 @@ export default {
 		const origin = request.headers.get("Origin");
 		const corsHeaders = getCorsHeaders(origin);
 
+		// The invite setup token is a credential, so keep it out of the logs.
+		const loggedUrl = (() => {
+			const url = new URL(request.url);
+			if (url.searchParams.has("setup")) url.searchParams.set("setup", "[redacted]");
+			return url.toString();
+		})();
+
 		const getSuccessResponse = (
 			body: any = { success: true },
 			status: 200 | 201 | 204 = 200,
 			setCookie?: any,
 		): Response => {
-			console.info(`Successfully resolved ${request.url} - status: ${status}`);
+			console.info(`Successfully resolved ${loggedUrl} - status: ${status}`);
 			const headers = new Headers(corsHeaders);
 			headers.set("Content-Type", "application/json");
 			if (setCookie) {
@@ -175,7 +182,7 @@ export default {
 		}
 
 		const getErrorResponse = (message: string, status: number = 400): Response => {
-			console.error(`Error at ${request.url} - status: ${status} ; message: ${message}`);
+			console.error(`Error at ${loggedUrl} - status: ${status} ; message: ${message}`);
 			
 			return new Response(
 				JSON.stringify({message: message} as ErrorResponse), 
