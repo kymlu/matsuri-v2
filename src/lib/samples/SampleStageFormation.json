@@ -21,7 +21,7 @@
       "id": "dd6d4540-2080-5d45-871a-bb706cdb40cb",
       "name": "OP",
       "order": 1,
-      "note": "入り：下手から\n1-8で2列に並ぶ\n旗は後ろ中央",
+      "note": "入り：下手から\nチーム幕は一番後ろ、旗はその前",
       "formation": {
         "dancerPositions": {
           "676de921-a44b-5eae-8d09-48cc915fc050": {
@@ -46,7 +46,7 @@
           },
           "f9db0031-1bc7-5c9d-99f4-ad3e2ef5bb29": {
             "x": 6.0,
-            "y": 6.8,
+            "y": 6.0,
             "sectionId": "dd6d4540-2080-5d45-871a-bb706cdb40cb",
             "type": "dancer",
             "rotation": 0,
@@ -203,6 +203,26 @@
             "dancerId": "47dde16d-530c-55de-a3a6-cc07563a609d",
             "color": "#888888",
             "z": 17
+          },
+          "8fa214f0-0296-5133-be37-cdadab129c4e": {
+            "x": 5.5,
+            "y": 7.5,
+            "sectionId": "dd6d4540-2080-5d45-871a-bb706cdb40cb",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "8fa214f0-0296-5133-be37-cdadab129c4e",
+            "color": "#888888",
+            "z": 18
+          },
+          "97db115c-f588-5b7e-b482-60358bde7fd3": {
+            "x": 10.5,
+            "y": 7.5,
+            "sectionId": "dd6d4540-2080-5d45-871a-bb706cdb40cb",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "97db115c-f588-5b7e-b482-60358bde7fd3",
+            "color": "#888888",
+            "z": 19
           }
         },
         "dancerActions": [
@@ -244,25 +264,12 @@
                 ]
               }
             ]
-          },
-          {
-            "id": "f28a789f-c21d-5c74-9df3-8a96fd908dca",
-            "name": "旗振り",
-            "timings": [
-              {
-                "id": "364d9976-c261-5ec5-937e-29e88b4e76f6",
-                "name": "1-8",
-                "dancerIds": [
-                  "f9db0031-1bc7-5c9d-99f4-ad3e2ef5bb29"
-                ]
-              }
-            ]
           }
         ],
         "propPositions": {
           "dfdf3b84-38f4-5701-afb3-645f54201bae": {
             "x": 6.0,
-            "y": 6.3,
+            "y": 5.5,
             "sectionId": "dd6d4540-2080-5d45-871a-bb706cdb40cb",
             "type": "prop",
             "rotation": 0,
@@ -289,6 +296,16 @@
             "propId": "b1104fce-7ff3-5340-ab79-461934cceb65",
             "inUse": false,
             "z": 2
+          },
+          "415e3dab-197b-5373-84fd-3bde1055b87d": {
+            "x": 5.5,
+            "y": 7.0,
+            "sectionId": "dd6d4540-2080-5d45-871a-bb706cdb40cb",
+            "type": "prop",
+            "rotation": 0,
+            "propId": "415e3dab-197b-5373-84fd-3bde1055b87d",
+            "inUse": true,
+            "z": 3
           }
         }
       }
@@ -297,7 +314,7 @@
       "id": "7aea8645-c2bf-53d1-9967-49c46915f2e0",
       "name": "Aメロ",
       "order": 2,
-      "note": "旗は上手側に立てて待機\nV字へ移動、先頭はリーダー",
+      "note": "旗は上手の端に立てて待機",
       "formation": {
         "dancerPositions": {
           "676de921-a44b-5eae-8d09-48cc915fc050": {
@@ -479,6 +496,26 @@
             "dancerId": "47dde16d-530c-55de-a3a6-cc07563a609d",
             "color": "#888888",
             "z": 17
+          },
+          "8fa214f0-0296-5133-be37-cdadab129c4e": {
+            "x": 5.5,
+            "y": 7.5,
+            "sectionId": "7aea8645-c2bf-53d1-9967-49c46915f2e0",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "8fa214f0-0296-5133-be37-cdadab129c4e",
+            "color": "#888888",
+            "z": 18
+          },
+          "97db115c-f588-5b7e-b482-60358bde7fd3": {
+            "x": 10.5,
+            "y": 7.5,
+            "sectionId": "7aea8645-c2bf-53d1-9967-49c46915f2e0",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "97db115c-f588-5b7e-b482-60358bde7fd3",
+            "color": "#888888",
+            "z": 19
           }
         },
         "dancerActions": [
@@ -552,6 +589,16 @@
             "propId": "b1104fce-7ff3-5340-ab79-461934cceb65",
             "inUse": false,
             "z": 2
+          },
+          "415e3dab-197b-5373-84fd-3bde1055b87d": {
+            "x": 5.5,
+            "y": 7.0,
+            "sectionId": "7aea8645-c2bf-53d1-9967-49c46915f2e0",
+            "type": "prop",
+            "rotation": 0,
+            "propId": "415e3dab-197b-5373-84fd-3bde1055b87d",
+            "inUse": true,
+            "z": 3
           }
         },
         "dancerMovements": {
@@ -559,7 +606,7 @@
             "points": [
               {
                 "x": 11.6,
-                "y": 6.2
+                "y": 5.6
               }
             ],
             "tension": "curved"
@@ -570,7 +617,7 @@
             "points": [
               {
                 "x": 12.6,
-                "y": 7.2
+                "y": 6.6
               }
             ],
             "tension": "curved"
@@ -582,7 +629,7 @@
       "id": "8631b401-018c-5671-acbe-a763fde40246",
       "name": "Bメロ",
       "order": 3,
-      "note": "1-4で裏方が台を運んで重ねる\n5で肩車",
+      "note": "1-4で裏方が台を運んで重ねる",
       "formation": {
         "dancerPositions": {
           "676de921-a44b-5eae-8d09-48cc915fc050": {
@@ -677,7 +724,7 @@
           },
           "6be2de65-a0aa-5cfb-98d3-a9434c4a7e4b": {
             "x": 2.75,
-            "y": 6.2,
+            "y": 5.8,
             "sectionId": "8631b401-018c-5671-acbe-a763fde40246",
             "type": "dancer",
             "rotation": 0,
@@ -687,7 +734,7 @@
           },
           "a5d3ecc1-e491-5a8c-896d-84d7ea31dd30": {
             "x": 5.75,
-            "y": 6.2,
+            "y": 5.8,
             "sectionId": "8631b401-018c-5671-acbe-a763fde40246",
             "type": "dancer",
             "rotation": 0,
@@ -727,7 +774,7 @@
           },
           "7b8ea6fa-a530-57d3-aa9b-8405a7e940f0": {
             "x": 10.25,
-            "y": 6.2,
+            "y": 5.8,
             "sectionId": "8631b401-018c-5671-acbe-a763fde40246",
             "type": "dancer",
             "rotation": 0,
@@ -737,7 +784,7 @@
           },
           "842c55a4-7214-5cdc-996d-f70f67133aff": {
             "x": 13.25,
-            "y": 6.2,
+            "y": 5.8,
             "sectionId": "8631b401-018c-5671-acbe-a763fde40246",
             "type": "dancer",
             "rotation": 0,
@@ -764,23 +811,29 @@
             "dancerId": "47dde16d-530c-55de-a3a6-cc07563a609d",
             "color": "#888888",
             "z": 17
+          },
+          "8fa214f0-0296-5133-be37-cdadab129c4e": {
+            "x": 5.5,
+            "y": 7.5,
+            "sectionId": "8631b401-018c-5671-acbe-a763fde40246",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "8fa214f0-0296-5133-be37-cdadab129c4e",
+            "color": "#888888",
+            "z": 18
+          },
+          "97db115c-f588-5b7e-b482-60358bde7fd3": {
+            "x": 10.5,
+            "y": 7.5,
+            "sectionId": "8631b401-018c-5671-acbe-a763fde40246",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "97db115c-f588-5b7e-b482-60358bde7fd3",
+            "color": "#888888",
+            "z": 19
           }
         },
         "dancerActions": [
-          {
-            "id": "5cef6e5a-8bac-5fd2-9f3d-0e56b9a95140",
-            "name": "台を運ぶ",
-            "timings": [
-              {
-                "id": "94b3af5d-7376-5900-8f9f-100791dc7f77",
-                "name": "1-4",
-                "dancerIds": [
-                  "5ad486fc-f98a-5403-8c97-4bfdf90a7050",
-                  "47dde16d-530c-55de-a3a6-cc07563a609d"
-                ]
-              }
-            ]
-          },
           {
             "id": "8a83060b-d054-5981-88a6-0af08123d8fe",
             "name": "肩車",
@@ -790,41 +843,15 @@
                 "name": "5",
                 "dancerIds": [
                   "1b5238d0-6d8c-5b5d-ae5d-7551aa48cc69",
-                  "a0825cd6-dc7c-5fec-b7aa-2180b6bf7947",
-                  "17d3c065-908c-5032-b657-cb806e69866a",
-                  "124fbdd6-d557-57ca-9bc6-2d20c01c0244"
-                ]
-              }
-            ]
-          },
-          {
-            "id": "67dad01c-a5cc-5d12-be8f-1490c693f0d4",
-            "name": "手拍子",
-            "timings": [
-              {
-                "id": "ac0f608c-f692-5c4d-8c60-03bf75cc5ef8",
-                "name": "1",
-                "dancerIds": [
-                  "6be2de65-a0aa-5cfb-98d3-a9434c4a7e4b",
-                  "a5d3ecc1-e491-5a8c-896d-84d7ea31dd30",
-                  "5d0d9ad3-8e80-56dd-9908-7126b25e9978",
-                  "4ff81553-549f-5227-a597-6511e3d0a6d8",
-                  "f0594b88-af74-5db6-b75e-a67d2a5d7e8b",
-                  "7b8ea6fa-a530-57d3-aa9b-8405a7e940f0",
-                  "842c55a4-7214-5cdc-996d-f70f67133aff"
+                  "a0825cd6-dc7c-5fec-b7aa-2180b6bf7947"
                 ]
               },
               {
-                "id": "fc699f3f-ad75-5e8e-bf41-0cfcd7af5180",
-                "name": "3",
+                "id": "b83fef3a-7178-5be4-8841-323fdfe4a0ab",
+                "name": "7",
                 "dancerIds": [
-                  "6be2de65-a0aa-5cfb-98d3-a9434c4a7e4b",
-                  "a5d3ecc1-e491-5a8c-896d-84d7ea31dd30",
-                  "5d0d9ad3-8e80-56dd-9908-7126b25e9978",
-                  "4ff81553-549f-5227-a597-6511e3d0a6d8",
-                  "f0594b88-af74-5db6-b75e-a67d2a5d7e8b",
-                  "7b8ea6fa-a530-57d3-aa9b-8405a7e940f0",
-                  "842c55a4-7214-5cdc-996d-f70f67133aff"
+                  "17d3c065-908c-5032-b657-cb806e69866a",
+                  "124fbdd6-d557-57ca-9bc6-2d20c01c0244"
                 ]
               }
             ]
@@ -860,14 +887,24 @@
             "propId": "d1051e62-878a-5b66-9360-dde02ef075f9",
             "inUse": true,
             "z": 2
+          },
+          "415e3dab-197b-5373-84fd-3bde1055b87d": {
+            "x": 5.5,
+            "y": 7.0,
+            "sectionId": "8631b401-018c-5671-acbe-a763fde40246",
+            "type": "prop",
+            "rotation": 0,
+            "propId": "415e3dab-197b-5373-84fd-3bde1055b87d",
+            "inUse": true,
+            "z": 3
           }
         },
         "dancerMovements": {
           "5ad486fc-f98a-5403-8c97-4bfdf90a7050": {
             "points": [
               {
-                "x": 3.2,
-                "y": 7.45
+                "x": 3.4,
+                "y": 6.85
               }
             ],
             "tension": "curved"
@@ -875,8 +912,8 @@
           "47dde16d-530c-55de-a3a6-cc07563a609d": {
             "points": [
               {
-                "x": 3.9,
-                "y": 7.65
+                "x": 4.1,
+                "y": 7.25
               }
             ],
             "tension": "curved"
@@ -886,8 +923,8 @@
           "d1051e62-878a-5b66-9360-dde02ef075f9": {
             "points": [
               {
-                "x": 4.2,
-                "y": 7.3
+                "x": 4.4,
+                "y": 6.7
               }
             ],
             "tension": "curved"
@@ -895,8 +932,8 @@
           "b1104fce-7ff3-5340-ab79-461934cceb65": {
             "points": [
               {
-                "x": 5.0,
-                "y": 7.0
+                "x": 5.2,
+                "y": 6.6
               }
             ],
             "tension": "curved"
@@ -924,7 +961,7 @@
       "id": "12c27824-8db2-5644-b617-d87506b6aa05",
       "name": "サビ",
       "order": 4,
-      "note": "衣装の色替え\n真ん中で3段タワー\n裏方は台を後ろから支える",
+      "note": "衣装の色替え\n裏方は台を後ろから支える",
       "formation": {
         "dancerPositions": {
           "676de921-a44b-5eae-8d09-48cc915fc050": {
@@ -1106,6 +1143,26 @@
             "dancerId": "47dde16d-530c-55de-a3a6-cc07563a609d",
             "color": "#888888",
             "z": 17
+          },
+          "8fa214f0-0296-5133-be37-cdadab129c4e": {
+            "x": 5.5,
+            "y": 7.5,
+            "sectionId": "12c27824-8db2-5644-b617-d87506b6aa05",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "8fa214f0-0296-5133-be37-cdadab129c4e",
+            "color": "#888888",
+            "z": 18
+          },
+          "97db115c-f588-5b7e-b482-60358bde7fd3": {
+            "x": 10.5,
+            "y": 7.5,
+            "sectionId": "12c27824-8db2-5644-b617-d87506b6aa05",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "97db115c-f588-5b7e-b482-60358bde7fd3",
+            "color": "#888888",
+            "z": 19
           }
         },
         "dancerActions": [
@@ -1166,17 +1223,27 @@
             ]
           },
           {
-            "id": "4ca898fd-415e-5ac3-a8b9-184230e7fb41",
-            "name": "決め",
+            "id": "a602c951-9d4f-5386-8c19-fe1b6dca3fb9",
+            "name": "タワー",
             "timings": [
               {
-                "id": "9abdfebc-d8fc-55f5-b33d-253ed97edaf1",
-                "name": "8",
+                "id": "03bf7efb-e669-5ac5-a2a7-3d5c9827e46b",
+                "name": "1",
                 "dancerIds": [
-                  "676de921-a44b-5eae-8d09-48cc915fc050",
-                  "3d911119-c7fa-5e99-bf6f-f7c75fe12ac4",
-                  "5d0d9ad3-8e80-56dd-9908-7126b25e9978",
-                  "4ff81553-549f-5227-a597-6511e3d0a6d8",
+                  "5d0d9ad3-8e80-56dd-9908-7126b25e9978"
+                ]
+              },
+              {
+                "id": "52a83713-6b91-506f-8807-e133fd0a18ba",
+                "name": "3",
+                "dancerIds": [
+                  "4ff81553-549f-5227-a597-6511e3d0a6d8"
+                ]
+              },
+              {
+                "id": "62509e71-6c46-5d4d-8c63-aa24c23676e0",
+                "name": "5",
+                "dancerIds": [
                   "f0594b88-af74-5db6-b75e-a67d2a5d7e8b"
                 ]
               }
@@ -1213,6 +1280,16 @@
             "propId": "d1051e62-878a-5b66-9360-dde02ef075f9",
             "inUse": true,
             "z": 2
+          },
+          "415e3dab-197b-5373-84fd-3bde1055b87d": {
+            "x": 5.5,
+            "y": 7.0,
+            "sectionId": "12c27824-8db2-5644-b617-d87506b6aa05",
+            "type": "prop",
+            "rotation": 0,
+            "propId": "415e3dab-197b-5373-84fd-3bde1055b87d",
+            "inUse": true,
+            "z": 3
           }
         },
         "dancerMovements": {
@@ -1280,12 +1357,12 @@
       "id": "5815b2a8-d6cb-56fc-98e8-03db4e716684",
       "name": "間奏",
       "order": 5,
-      "note": "円になって旗を中央へ\n裏方が台を下げる",
+      "note": "旗を中央へ\n裏方が台を下手の奥へ戻す",
       "formation": {
         "dancerPositions": {
           "676de921-a44b-5eae-8d09-48cc915fc050": {
             "x": 5.885,
-            "y": 1.825,
+            "y": 1.707,
             "sectionId": "5815b2a8-d6cb-56fc-98e8-03db4e716684",
             "type": "dancer",
             "rotation": 0,
@@ -1295,7 +1372,7 @@
           },
           "3d911119-c7fa-5e99-bf6f-f7c75fe12ac4": {
             "x": 10.115,
-            "y": 1.825,
+            "y": 1.707,
             "sectionId": "5815b2a8-d6cb-56fc-98e8-03db4e716684",
             "type": "dancer",
             "rotation": 0,
@@ -1305,7 +1382,7 @@
           },
           "f9db0031-1bc7-5c9d-99f4-ad3e2ef5bb29": {
             "x": 6.0,
-            "y": 4.2,
+            "y": 3.9,
             "sectionId": "5815b2a8-d6cb-56fc-98e8-03db4e716684",
             "type": "dancer",
             "rotation": 0,
@@ -1315,7 +1392,7 @@
           },
           "1b5238d0-6d8c-5b5d-ae5d-7551aa48cc69": {
             "x": 2.828,
-            "y": 4.472,
+            "y": 4.151,
             "sectionId": "5815b2a8-d6cb-56fc-98e8-03db4e716684",
             "type": "dancer",
             "rotation": 0,
@@ -1325,7 +1402,7 @@
           },
           "a0825cd6-dc7c-5fec-b7aa-2180b6bf7947": {
             "x": 4.944,
-            "y": 6.303,
+            "y": 5.842,
             "sectionId": "5815b2a8-d6cb-56fc-98e8-03db4e716684",
             "type": "dancer",
             "rotation": 0,
@@ -1335,7 +1412,7 @@
           },
           "32de0a22-0510-53a6-8d62-6234d5fb0656": {
             "x": 4.136,
-            "y": 2.46,
+            "y": 2.294,
             "sectionId": "5815b2a8-d6cb-56fc-98e8-03db4e716684",
             "type": "dancer",
             "rotation": 0,
@@ -1345,7 +1422,7 @@
           },
           "e0bd6053-a6c6-5b97-bd63-8f937ed9a0e8": {
             "x": 11.864,
-            "y": 2.46,
+            "y": 2.294,
             "sectionId": "5815b2a8-d6cb-56fc-98e8-03db4e716684",
             "type": "dancer",
             "rotation": 0,
@@ -1355,7 +1432,7 @@
           },
           "17d3c065-908c-5032-b657-cb806e69866a": {
             "x": 13.172,
-            "y": 4.472,
+            "y": 4.151,
             "sectionId": "5815b2a8-d6cb-56fc-98e8-03db4e716684",
             "type": "dancer",
             "rotation": 0,
@@ -1365,7 +1442,7 @@
           },
           "124fbdd6-d557-57ca-9bc6-2d20c01c0244": {
             "x": 11.056,
-            "y": 6.303,
+            "y": 5.842,
             "sectionId": "5815b2a8-d6cb-56fc-98e8-03db4e716684",
             "type": "dancer",
             "rotation": 0,
@@ -1375,7 +1452,7 @@
           },
           "6be2de65-a0aa-5cfb-98d3-a9434c4a7e4b": {
             "x": 3.497,
-            "y": 5.5,
+            "y": 5.1,
             "sectionId": "5815b2a8-d6cb-56fc-98e8-03db4e716684",
             "type": "dancer",
             "rotation": 0,
@@ -1385,7 +1462,7 @@
           },
           "a5d3ecc1-e491-5a8c-896d-84d7ea31dd30": {
             "x": 6.919,
-            "y": 6.743,
+            "y": 6.248,
             "sectionId": "5815b2a8-d6cb-56fc-98e8-03db4e716684",
             "type": "dancer",
             "rotation": 0,
@@ -1394,8 +1471,8 @@
             "z": 10
           },
           "5d0d9ad3-8e80-56dd-9908-7126b25e9978": {
-            "x": 8.0,
-            "y": 1.6,
+            "x": 12.945,
+            "y": 3.158,
             "sectionId": "5815b2a8-d6cb-56fc-98e8-03db4e716684",
             "type": "dancer",
             "rotation": 0,
@@ -1405,7 +1482,7 @@
           },
           "4ff81553-549f-5227-a597-6511e3d0a6d8": {
             "x": 3.055,
-            "y": 3.397,
+            "y": 3.158,
             "sectionId": "5815b2a8-d6cb-56fc-98e8-03db4e716684",
             "type": "dancer",
             "rotation": 0,
@@ -1414,8 +1491,8 @@
             "z": 12
           },
           "f0594b88-af74-5db6-b75e-a67d2a5d7e8b": {
-            "x": 12.945,
-            "y": 3.397,
+            "x": 8.0,
+            "y": 1.5,
             "sectionId": "5815b2a8-d6cb-56fc-98e8-03db4e716684",
             "type": "dancer",
             "rotation": 0,
@@ -1425,7 +1502,7 @@
           },
           "7b8ea6fa-a530-57d3-aa9b-8405a7e940f0": {
             "x": 9.081,
-            "y": 6.743,
+            "y": 6.248,
             "sectionId": "5815b2a8-d6cb-56fc-98e8-03db4e716684",
             "type": "dancer",
             "rotation": 0,
@@ -1435,7 +1512,7 @@
           },
           "842c55a4-7214-5cdc-996d-f70f67133aff": {
             "x": 12.503,
-            "y": 5.5,
+            "y": 5.1,
             "sectionId": "5815b2a8-d6cb-56fc-98e8-03db4e716684",
             "type": "dancer",
             "rotation": 0,
@@ -1462,68 +1539,33 @@
             "dancerId": "47dde16d-530c-55de-a3a6-cc07563a609d",
             "color": "#888888",
             "z": 17
+          },
+          "8fa214f0-0296-5133-be37-cdadab129c4e": {
+            "x": 5.5,
+            "y": 7.5,
+            "sectionId": "5815b2a8-d6cb-56fc-98e8-03db4e716684",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "8fa214f0-0296-5133-be37-cdadab129c4e",
+            "color": "#888888",
+            "z": 18
+          },
+          "97db115c-f588-5b7e-b482-60358bde7fd3": {
+            "x": 10.5,
+            "y": 7.5,
+            "sectionId": "5815b2a8-d6cb-56fc-98e8-03db4e716684",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "97db115c-f588-5b7e-b482-60358bde7fd3",
+            "color": "#888888",
+            "z": 19
           }
         },
-        "dancerActions": [
-          {
-            "id": "2f9e8d4e-9100-59ab-a412-625d747dd23a",
-            "name": "歩き",
-            "timings": [
-              {
-                "id": "e466bccf-590d-54bf-82a2-ba1b7b3d3f2b",
-                "name": "1-8",
-                "dancerIds": [
-                  "676de921-a44b-5eae-8d09-48cc915fc050",
-                  "3d911119-c7fa-5e99-bf6f-f7c75fe12ac4",
-                  "1b5238d0-6d8c-5b5d-ae5d-7551aa48cc69",
-                  "a0825cd6-dc7c-5fec-b7aa-2180b6bf7947",
-                  "32de0a22-0510-53a6-8d62-6234d5fb0656",
-                  "e0bd6053-a6c6-5b97-bd63-8f937ed9a0e8",
-                  "17d3c065-908c-5032-b657-cb806e69866a",
-                  "124fbdd6-d557-57ca-9bc6-2d20c01c0244",
-                  "6be2de65-a0aa-5cfb-98d3-a9434c4a7e4b",
-                  "a5d3ecc1-e491-5a8c-896d-84d7ea31dd30",
-                  "5d0d9ad3-8e80-56dd-9908-7126b25e9978",
-                  "4ff81553-549f-5227-a597-6511e3d0a6d8",
-                  "f0594b88-af74-5db6-b75e-a67d2a5d7e8b",
-                  "7b8ea6fa-a530-57d3-aa9b-8405a7e940f0",
-                  "842c55a4-7214-5cdc-996d-f70f67133aff"
-                ]
-              }
-            ]
-          },
-          {
-            "id": "939a84c8-14a6-544d-a48d-3c66aa15594d",
-            "name": "台を下げる",
-            "timings": [
-              {
-                "id": "6fc12fd1-8670-5b7e-8b29-08ffcd0fc560",
-                "name": "1-4",
-                "dancerIds": [
-                  "5ad486fc-f98a-5403-8c97-4bfdf90a7050",
-                  "47dde16d-530c-55de-a3a6-cc07563a609d"
-                ]
-              }
-            ]
-          },
-          {
-            "id": "e5a726ee-ee51-57a0-9133-60b85dbdd71a",
-            "name": "旗振り",
-            "timings": [
-              {
-                "id": "8d8ada5e-f4c6-594b-85ed-0d2a11659d50",
-                "name": "1-8",
-                "dancerIds": [
-                  "f9db0031-1bc7-5c9d-99f4-ad3e2ef5bb29"
-                ]
-              }
-            ]
-          }
-        ],
+        "dancerActions": [],
         "propPositions": {
           "dfdf3b84-38f4-5701-afb3-645f54201bae": {
             "x": 6.0,
-            "y": 3.7,
+            "y": 3.4,
             "sectionId": "5815b2a8-d6cb-56fc-98e8-03db4e716684",
             "type": "prop",
             "rotation": 0,
@@ -1550,14 +1592,24 @@
             "propId": "b1104fce-7ff3-5340-ab79-461934cceb65",
             "inUse": false,
             "z": 2
+          },
+          "415e3dab-197b-5373-84fd-3bde1055b87d": {
+            "x": 5.5,
+            "y": 7.0,
+            "sectionId": "5815b2a8-d6cb-56fc-98e8-03db4e716684",
+            "type": "prop",
+            "rotation": 0,
+            "propId": "415e3dab-197b-5373-84fd-3bde1055b87d",
+            "inUse": true,
+            "z": 3
           }
         },
         "dancerMovements": {
           "5ad486fc-f98a-5403-8c97-4bfdf90a7050": {
             "points": [
               {
-                "x": 3.95,
-                "y": 7.45
+                "x": 4.15,
+                "y": 6.75
               }
             ],
             "tension": "curved"
@@ -1565,8 +1617,8 @@
           "47dde16d-530c-55de-a3a6-cc07563a609d": {
             "points": [
               {
-                "x": 5.25,
-                "y": 7.35
+                "x": 5.45,
+                "y": 6.65
               }
             ],
             "tension": "curved"
@@ -1575,7 +1627,7 @@
             "points": [
               {
                 "x": 11.6,
-                "y": 6.2
+                "y": 5.6
               }
             ],
             "tension": "curved"
@@ -1585,8 +1637,8 @@
           "d1051e62-878a-5b66-9360-dde02ef075f9": {
             "points": [
               {
-                "x": 4.2,
-                "y": 7.4
+                "x": 4.4,
+                "y": 6.7
               }
             ],
             "tension": "curved"
@@ -1594,8 +1646,8 @@
           "b1104fce-7ff3-5340-ab79-461934cceb65": {
             "points": [
               {
-                "x": 5.0,
-                "y": 7.3
+                "x": 5.2,
+                "y": 6.6
               }
             ],
             "tension": "curved"
@@ -1604,7 +1656,7 @@
             "points": [
               {
                 "x": 12.6,
-                "y": 7.2
+                "y": 6.6
               }
             ],
             "tension": "curved"
@@ -1616,12 +1668,12 @@
       "id": "f7e41a22-1761-5c26-af9f-0d34907c3c72",
       "name": "ラスト",
       "order": 6,
-      "note": "旗を後ろ中央へ\n8で決めポーズ\nはけ：上手",
+      "note": "旗を後ろ中央へ\nはけ：上手",
       "formation": {
         "dancerPositions": {
           "676de921-a44b-5eae-8d09-48cc915fc050": {
             "x": 7.25,
-            "y": 2,
+            "y": 1.6,
             "sectionId": "f7e41a22-1761-5c26-af9f-0d34907c3c72",
             "type": "dancer",
             "rotation": 0,
@@ -1631,7 +1683,7 @@
           },
           "3d911119-c7fa-5e99-bf6f-f7c75fe12ac4": {
             "x": 8.75,
-            "y": 2,
+            "y": 1.6,
             "sectionId": "f7e41a22-1761-5c26-af9f-0d34907c3c72",
             "type": "dancer",
             "rotation": 0,
@@ -1641,7 +1693,7 @@
           },
           "f9db0031-1bc7-5c9d-99f4-ad3e2ef5bb29": {
             "x": 6.0,
-            "y": 6.8,
+            "y": 6.0,
             "sectionId": "f7e41a22-1761-5c26-af9f-0d34907c3c72",
             "type": "dancer",
             "rotation": 0,
@@ -1650,8 +1702,8 @@
             "z": 2
           },
           "1b5238d0-6d8c-5b5d-ae5d-7551aa48cc69": {
-            "x": 3.875,
-            "y": 2,
+            "x": 3.125,
+            "y": 3.2,
             "sectionId": "f7e41a22-1761-5c26-af9f-0d34907c3c72",
             "type": "dancer",
             "rotation": 0,
@@ -1660,8 +1712,8 @@
             "z": 3
           },
           "a0825cd6-dc7c-5fec-b7aa-2180b6bf7947": {
-            "x": 3.125,
-            "y": 3.8,
+            "x": 5.375,
+            "y": 1.6,
             "sectionId": "f7e41a22-1761-5c26-af9f-0d34907c3c72",
             "type": "dancer",
             "rotation": 0,
@@ -1670,8 +1722,8 @@
             "z": 4
           },
           "32de0a22-0510-53a6-8d62-6234d5fb0656": {
-            "x": 5.375,
-            "y": 2,
+            "x": 3.875,
+            "y": 1.6,
             "sectionId": "f7e41a22-1761-5c26-af9f-0d34907c3c72",
             "type": "dancer",
             "rotation": 0,
@@ -1680,8 +1732,8 @@
             "z": 5
           },
           "e0bd6053-a6c6-5b97-bd63-8f937ed9a0e8": {
-            "x": 10.625,
-            "y": 2,
+            "x": 12.125,
+            "y": 1.6,
             "sectionId": "f7e41a22-1761-5c26-af9f-0d34907c3c72",
             "type": "dancer",
             "rotation": 0,
@@ -1690,8 +1742,8 @@
             "z": 6
           },
           "17d3c065-908c-5032-b657-cb806e69866a": {
-            "x": 12.125,
-            "y": 2,
+            "x": 12.875,
+            "y": 3.2,
             "sectionId": "f7e41a22-1761-5c26-af9f-0d34907c3c72",
             "type": "dancer",
             "rotation": 0,
@@ -1700,8 +1752,8 @@
             "z": 7
           },
           "124fbdd6-d557-57ca-9bc6-2d20c01c0244": {
-            "x": 12.875,
-            "y": 3.8,
+            "x": 10.625,
+            "y": 1.6,
             "sectionId": "f7e41a22-1761-5c26-af9f-0d34907c3c72",
             "type": "dancer",
             "rotation": 0,
@@ -1711,7 +1763,7 @@
           },
           "6be2de65-a0aa-5cfb-98d3-a9434c4a7e4b": {
             "x": 5.75,
-            "y": 5.4,
+            "y": 4.6,
             "sectionId": "f7e41a22-1761-5c26-af9f-0d34907c3c72",
             "type": "dancer",
             "rotation": 0,
@@ -1721,7 +1773,7 @@
           },
           "a5d3ecc1-e491-5a8c-896d-84d7ea31dd30": {
             "x": 8.0,
-            "y": 5.4,
+            "y": 4.6,
             "sectionId": "f7e41a22-1761-5c26-af9f-0d34907c3c72",
             "type": "dancer",
             "rotation": 0,
@@ -1730,8 +1782,8 @@
             "z": 10
           },
           "5d0d9ad3-8e80-56dd-9908-7126b25e9978": {
-            "x": 7.1,
-            "y": 3.8,
+            "x": 10.625,
+            "y": 3.2,
             "sectionId": "f7e41a22-1761-5c26-af9f-0d34907c3c72",
             "type": "dancer",
             "rotation": 0,
@@ -1741,7 +1793,7 @@
           },
           "4ff81553-549f-5227-a597-6511e3d0a6d8": {
             "x": 5.375,
-            "y": 3.8,
+            "y": 3.2,
             "sectionId": "f7e41a22-1761-5c26-af9f-0d34907c3c72",
             "type": "dancer",
             "rotation": 0,
@@ -1750,8 +1802,8 @@
             "z": 12
           },
           "f0594b88-af74-5db6-b75e-a67d2a5d7e8b": {
-            "x": 10.625,
-            "y": 3.8,
+            "x": 7.1,
+            "y": 3.2,
             "sectionId": "f7e41a22-1761-5c26-af9f-0d34907c3c72",
             "type": "dancer",
             "rotation": 0,
@@ -1761,7 +1813,7 @@
           },
           "7b8ea6fa-a530-57d3-aa9b-8405a7e940f0": {
             "x": 8.9,
-            "y": 3.8,
+            "y": 3.2,
             "sectionId": "f7e41a22-1761-5c26-af9f-0d34907c3c72",
             "type": "dancer",
             "rotation": 0,
@@ -1771,7 +1823,7 @@
           },
           "842c55a4-7214-5cdc-996d-f70f67133aff": {
             "x": 10.25,
-            "y": 5.4,
+            "y": 4.6,
             "sectionId": "f7e41a22-1761-5c26-af9f-0d34907c3c72",
             "type": "dancer",
             "rotation": 0,
@@ -1798,26 +1850,37 @@
             "dancerId": "47dde16d-530c-55de-a3a6-cc07563a609d",
             "color": "#888888",
             "z": 17
+          },
+          "8fa214f0-0296-5133-be37-cdadab129c4e": {
+            "x": 5.5,
+            "y": 7.5,
+            "sectionId": "f7e41a22-1761-5c26-af9f-0d34907c3c72",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "8fa214f0-0296-5133-be37-cdadab129c4e",
+            "color": "#888888",
+            "z": 18
+          },
+          "97db115c-f588-5b7e-b482-60358bde7fd3": {
+            "x": 10.5,
+            "y": 7.5,
+            "sectionId": "f7e41a22-1761-5c26-af9f-0d34907c3c72",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "97db115c-f588-5b7e-b482-60358bde7fd3",
+            "color": "#888888",
+            "z": 19
           }
         },
         "dancerActions": [
           {
-            "id": "6d490639-7591-5835-a654-c3cd0a427fb9",
-            "name": "決めポーズ",
+            "id": "947bab09-156f-5245-a4cc-f2003c824dcd",
+            "name": "ポーズ",
             "timings": [
               {
-                "id": "beca8248-8406-5af1-b4ba-0e81be8e6e20",
-                "name": "8",
+                "id": "a63194da-77f2-54d3-9e0e-175b87e0b8d6",
+                "name": "5",
                 "dancerIds": [
-                  "676de921-a44b-5eae-8d09-48cc915fc050",
-                  "3d911119-c7fa-5e99-bf6f-f7c75fe12ac4",
-                  "f9db0031-1bc7-5c9d-99f4-ad3e2ef5bb29",
-                  "1b5238d0-6d8c-5b5d-ae5d-7551aa48cc69",
-                  "a0825cd6-dc7c-5fec-b7aa-2180b6bf7947",
-                  "32de0a22-0510-53a6-8d62-6234d5fb0656",
-                  "e0bd6053-a6c6-5b97-bd63-8f937ed9a0e8",
-                  "17d3c065-908c-5032-b657-cb806e69866a",
-                  "124fbdd6-d557-57ca-9bc6-2d20c01c0244",
                   "6be2de65-a0aa-5cfb-98d3-a9434c4a7e4b",
                   "a5d3ecc1-e491-5a8c-896d-84d7ea31dd30",
                   "5d0d9ad3-8e80-56dd-9908-7126b25e9978",
@@ -1826,6 +1889,26 @@
                   "7b8ea6fa-a530-57d3-aa9b-8405a7e940f0",
                   "842c55a4-7214-5cdc-996d-f70f67133aff"
                 ]
+              },
+              {
+                "id": "1a9dadcf-86b7-58f5-b102-009d4b4c3d2b",
+                "name": "6",
+                "dancerIds": [
+                  "1b5238d0-6d8c-5b5d-ae5d-7551aa48cc69",
+                  "a0825cd6-dc7c-5fec-b7aa-2180b6bf7947",
+                  "32de0a22-0510-53a6-8d62-6234d5fb0656",
+                  "e0bd6053-a6c6-5b97-bd63-8f937ed9a0e8",
+                  "17d3c065-908c-5032-b657-cb806e69866a",
+                  "124fbdd6-d557-57ca-9bc6-2d20c01c0244"
+                ]
+              },
+              {
+                "id": "2d1e6fb8-4149-5e8c-98d6-8035004e2e36",
+                "name": "7",
+                "dancerIds": [
+                  "676de921-a44b-5eae-8d09-48cc915fc050",
+                  "3d911119-c7fa-5e99-bf6f-f7c75fe12ac4"
+                ]
               }
             ]
           }
@@ -1833,7 +1916,7 @@
         "propPositions": {
           "dfdf3b84-38f4-5701-afb3-645f54201bae": {
             "x": 6.0,
-            "y": 6.3,
+            "y": 5.5,
             "sectionId": "f7e41a22-1761-5c26-af9f-0d34907c3c72",
             "type": "prop",
             "rotation": 0,
@@ -1860,6 +1943,16 @@
             "propId": "b1104fce-7ff3-5340-ab79-461934cceb65",
             "inUse": false,
             "z": 2
+          },
+          "415e3dab-197b-5373-84fd-3bde1055b87d": {
+            "x": 5.5,
+            "y": 7.0,
+            "sectionId": "f7e41a22-1761-5c26-af9f-0d34907c3c72",
+            "type": "prop",
+            "rotation": 0,
+            "propId": "415e3dab-197b-5373-84fd-3bde1055b87d",
+            "inUse": true,
+            "z": 3
           }
         }
       }
@@ -1937,6 +2030,14 @@
     "47dde16d-530c-55de-a3a6-cc07563a609d": {
       "id": "47dde16d-530c-55de-a3a6-cc07563a609d",
       "name": "裏方2"
+    },
+    "8fa214f0-0296-5133-be37-cdadab129c4e": {
+      "id": "8fa214f0-0296-5133-be37-cdadab129c4e",
+      "name": "裏方3"
+    },
+    "97db115c-f588-5b7e-b482-60358bde7fd3": {
+      "id": "97db115c-f588-5b7e-b482-60358bde7fd3",
+      "name": "裏方4"
     }
   },
   "props": {
@@ -1959,6 +2060,13 @@
       "name": "台B",
       "color": "#D2B48C",
       "width": 1,
+      "length": 1
+    },
+    "415e3dab-197b-5373-84fd-3bde1055b87d": {
+      "id": "415e3dab-197b-5373-84fd-3bde1055b87d",
+      "name": "チーム幕",
+      "color": "#A366CC",
+      "width": 5,
       "length": 1
     }
   },
