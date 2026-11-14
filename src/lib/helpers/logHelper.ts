@@ -1,4 +1,4 @@
-type LogLevel = 'LOG' | 'INFO' | 'WARN' | 'ERROR';
+type LogLevel = 'LOG' | 'WARN' | 'ERROR';
 // Kept in memory for the downloadable log file. console.debug is not kept: it is for routine detail
 // that is only useful while watching the browser console.
 const MAX_LOG_ENTRIES = 2000;
@@ -8,7 +8,7 @@ const logs: string[] = [];
 // unhandled rejection; repeats get one line instead of a second copy of the stack.
 const written = new WeakSet<object>();
 
-// JSON.stringify writes an Error (or DOMException) as "{}", so write its name, message and stack instead.
+// JSON.stringify writes an Error (DOMException included) as "{}", so write its name, message and stack instead.
 function formatError(error: Error): string {
   const head = `${error.name}: ${error.message}`;
   if (written.has(error)) return `${head} (stack logged above)`;
@@ -16,21 +16,12 @@ function formatError(error: Error): string {
   const stack = error.stack ?? "";
   // Chrome's stack starts with the same "name: message" line; Firefox and Safari's do not.
   const frames = stack.startsWith(head) ? stack.slice(head.length) : stack ? `\n${stack}` : "";
-  const { cause: reason } = error as { cause?: unknown };
-  const cause = reason !== undefined ? `\nCaused by: ${formatArg(reason)}` : "";
-  return head + frames + cause;
+  return head + frames;
 }
 
 function formatArg(arg: unknown): string {
   if (typeof arg === 'string') return arg;
   if (arg instanceof Error) return formatError(arg);
-  // DOMException is not an Error subclass in every browser.
-  if (typeof DOMException !== 'undefined' && arg instanceof DOMException) {
-    const text = `${arg.name}: ${arg.message}`;
-    if (written.has(arg)) return `${text} (logged above)`;
-    written.add(arg);
-    return text;
-  }
   if (arg === undefined) return 'undefined';
   try {
     return JSON.stringify(arg) ?? String(arg);
@@ -63,7 +54,6 @@ function logInterceptor(
 
 // Override global console methods
 console.log = logInterceptor('LOG', console.log);
-console.info = logInterceptor('INFO', console.info);
 console.warn = logInterceptor('WARN', console.warn);
 console.error = logInterceptor('ERROR', console.error);
 
@@ -88,13 +78,9 @@ export function setScreenForLogs(name: string) {
   screen = name;
 }
 
-export function getLogText() {
-  const header = `Matsuri log, ${new Date().toISOString()}\nBuild: ${buildDate ?? "unknown"}\nScreen: ${screen ?? "unknown"}\nPage: ${window.location.pathname}\nBrowser: ${navigator.userAgent}\n`;
-  return header + "\n" + logs.join("\n");
-}
-
 export function downloadLogs() {
-  downloadFile(getLogText(), "text/plain", `logs_${formatExportDate(new Date())}.txt`);
+  const header = `Matsuri log, ${new Date().toISOString()}\nBuild: ${buildDate ?? "unknown"}\nScreen: ${screen ?? "unknown"}\nPage: ${window.location.pathname}\nBrowser: ${navigator.userAgent}\n`;
+  downloadFile(header + "\n" + logs.join("\n"), "text/plain", `logs_${formatExportDate(new Date())}.txt`);
 }
 
 function formatExportDate(date = new Date()) {
