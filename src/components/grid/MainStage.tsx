@@ -746,6 +746,15 @@ function MainStage({
           />
         }
         {
+          openChangeLog &&
+          <IconButton
+            size="sm"
+            src="releaseAlert"
+            colour="primary"
+            onClick={openChangeLog}
+          />
+        }
+        {
           openFind &&
           <IconButton
             size="sm"
@@ -761,15 +770,6 @@ function MainStage({
             src="speakerNotes"
             colour="black"
             onClick={openNoteDialog}
-          />
-        }
-        {
-          openChangeLog &&
-          <IconButton
-            size="sm"
-            src="releaseAlert"
-            colour="primary"
-            onClick={openChangeLog}
           />
         }
       </div>
