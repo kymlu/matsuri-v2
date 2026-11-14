@@ -14,7 +14,9 @@ test.each([["stage", Stage], ["parade", Parade]])("the %s sample is valid, stack
     const stacked = new Set((f.dancerStacks ?? []).flatMap(x => x.slice(1)));
     const ds = Object.values(f.dancerPositions);
     for (const d of ds) {
-      if (d.x < 0 || d.x > c.stageGeometry.stageWidth || d.y < 0 || d.y > c.stageGeometry.stageLength) problems.push(`${s.name} ${c.dancers[d.dancerId].name} off stage ${d.x},${d.y}`);
+      // People may wait in the margins (staff in the wings); props may not (below).
+      const r = getAnchorRange(c.stageGeometry);
+      if (d.x < r.minX || d.x > r.maxX || d.y < r.minY || d.y > r.maxY) problems.push(`${s.name} ${c.dancers[d.dancerId].name} off the grid ${d.x},${d.y}`);
     }
     const vis = ds.filter(d => !stacked.has(d.dancerId));
     for (let i = 0; i < vis.length; i++) for (let j = i + 1; j < vis.length; j++) {
