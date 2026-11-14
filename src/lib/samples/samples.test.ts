@@ -5,7 +5,7 @@ import Stage from "./SampleStageFormation.json";
 import Parade from "./SampleParadeFormation.json";
 
 // The samples are hand-built data, so check them the way the editor would see them.
-test.each([["stage", Stage], ["parade", Parade]])("the %s sample is valid, stacked in normal form, in bounds and not overlapping", (_, raw) => {
+test.each([["stage", Stage], ["parade", Parade]])("the %s sample is valid, stacked in normal form, on the stage and not overlapping", (_, raw) => {
   const c = ChoreoSchema.parse(raw);
   expect(normalizeStacks(c)).toBe(c);
   const problems: string[] = [];
@@ -23,7 +23,9 @@ test.each([["stage", Stage], ["parade", Parade]])("the %s sample is valid, stack
     }
     for (const p of Object.values(f.propPositions)) {
       const prop = c.props[p.propId];
-      const r = getAnchorRange(c.stageGeometry, p.rotation, prop.width, prop.length);
+      // Props stay on the stage itself, not in the margins.
+      const noMargins = { ...c.stageGeometry, margin: { topMargin: 0, bottomMargin: 0, leftMargin: 0, rightMargin: 0 } };
+      const r = getAnchorRange(noMargins, p.rotation, prop.width, prop.length);
       if (p.x < r.minX - 1e-6 || p.x > r.maxX + 1e-6 || p.y < r.minY - 1e-6 || p.y > r.maxY + 1e-6) problems.push(`${s.name} prop ${prop.name} out ${p.x},${p.y}`);
     }
   }
