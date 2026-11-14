@@ -21,12 +21,11 @@
       "id": "80cb0dd8-e14e-5114-9010-e1d2c105dd4b",
       "name": "OP",
       "order": 1,
-      "note": "踊り子の後ろに台、旗、チーム幕の順",
       "formation": {
         "dancerPositions": {
           "6274b1bc-68e7-5788-afc5-a512d9b677bc": {
-            "x": 2.25,
-            "y": 10.1,
+            "x": 2,
+            "y": 10,
             "sectionId": "80cb0dd8-e14e-5114-9010-e1d2c105dd4b",
             "type": "dancer",
             "rotation": 0,
@@ -35,8 +34,8 @@
             "z": 0
           },
           "50c9c2d5-11a9-5fb2-9e6e-9007af7e1e38": {
-            "x": 3.75,
-            "y": 10.1,
+            "x": 4,
+            "y": 10,
             "sectionId": "80cb0dd8-e14e-5114-9010-e1d2c105dd4b",
             "type": "dancer",
             "rotation": 0,
@@ -55,8 +54,8 @@
             "z": 2
           },
           "ee14877d-16be-56d5-87cf-408261c01f64": {
-            "x": 0.75,
-            "y": 10.1,
+            "x": 0.5,
+            "y": 10,
             "sectionId": "80cb0dd8-e14e-5114-9010-e1d2c105dd4b",
             "type": "dancer",
             "rotation": 0,
@@ -65,8 +64,8 @@
             "z": 3
           },
           "8e836f45-7d53-5629-a4a2-5f202ec445d6": {
-            "x": 5.25,
-            "y": 10.1,
+            "x": 5.5,
+            "y": 10,
             "sectionId": "80cb0dd8-e14e-5114-9010-e1d2c105dd4b",
             "type": "dancer",
             "rotation": 0,
@@ -75,8 +74,8 @@
             "z": 4
           },
           "0b412cef-22ca-5f0a-b232-7a8b4a1fcaf8": {
-            "x": 0.75,
-            "y": 8.6,
+            "x": 0.5,
+            "y": 8.5,
             "sectionId": "80cb0dd8-e14e-5114-9010-e1d2c105dd4b",
             "type": "dancer",
             "rotation": 0,
@@ -85,8 +84,8 @@
             "z": 5
           },
           "a919e9f7-f899-566e-8f20-027ae6c65611": {
-            "x": 2.25,
-            "y": 8.6,
+            "x": 2,
+            "y": 8.5,
             "sectionId": "80cb0dd8-e14e-5114-9010-e1d2c105dd4b",
             "type": "dancer",
             "rotation": 0,
@@ -95,8 +94,8 @@
             "z": 6
           },
           "995a9983-d15c-5a2a-a397-e9d88c7f6c06": {
-            "x": 3.75,
-            "y": 8.6,
+            "x": 4,
+            "y": 8.5,
             "sectionId": "80cb0dd8-e14e-5114-9010-e1d2c105dd4b",
             "type": "dancer",
             "rotation": 0,
@@ -105,8 +104,8 @@
             "z": 7
           },
           "362d835b-735f-5cdb-9726-934ffc83c7c1": {
-            "x": 5.25,
-            "y": 8.6,
+            "x": 5.5,
+            "y": 8.5,
             "sectionId": "80cb0dd8-e14e-5114-9010-e1d2c105dd4b",
             "type": "dancer",
             "rotation": 0,
@@ -115,8 +114,8 @@
             "z": 8
           },
           "a1fd2ca4-3793-522a-8292-469aa1e1b7de": {
-            "x": 0.75,
-            "y": 7.1,
+            "x": 0.5,
+            "y": 7,
             "sectionId": "80cb0dd8-e14e-5114-9010-e1d2c105dd4b",
             "type": "dancer",
             "rotation": 0,
@@ -125,8 +124,8 @@
             "z": 9
           },
           "c6052ba2-df29-5093-93b7-bbcc85ce040f": {
-            "x": 2.25,
-            "y": 7.1,
+            "x": 2,
+            "y": 7,
             "sectionId": "80cb0dd8-e14e-5114-9010-e1d2c105dd4b",
             "type": "dancer",
             "rotation": 0,
@@ -135,8 +134,8 @@
             "z": 10
           },
           "a5abcff1-0dd3-5680-955e-5dd77b9d1799": {
-            "x": 3.75,
-            "y": 7.1,
+            "x": 4,
+            "y": 7,
             "sectionId": "80cb0dd8-e14e-5114-9010-e1d2c105dd4b",
             "type": "dancer",
             "rotation": 0,
@@ -145,8 +144,8 @@
             "z": 11
           },
           "4f2e9f2c-acf3-5ad4-ae84-0f14e60a33a3": {
-            "x": 5.25,
-            "y": 7.1,
+            "x": 5.5,
+            "y": 7,
             "sectionId": "80cb0dd8-e14e-5114-9010-e1d2c105dd4b",
             "type": "dancer",
             "rotation": 0,
@@ -156,7 +155,7 @@
           },
           "f52fc707-09bd-5dc7-a76c-6c8aaf4833e4": {
             "x": 1.5,
-            "y": 5.6,
+            "y": 5.5,
             "sectionId": "80cb0dd8-e14e-5114-9010-e1d2c105dd4b",
             "type": "dancer",
             "rotation": 0,
@@ -166,7 +165,7 @@
           },
           "9059f239-808d-515c-8cac-029606957aeb": {
             "x": 3,
-            "y": 5.6,
+            "y": 5.5,
             "sectionId": "80cb0dd8-e14e-5114-9010-e1d2c105dd4b",
             "type": "dancer",
             "rotation": 0,
@@ -176,7 +175,7 @@
           },
           "a4bf966a-6160-5018-9d34-42d59d25f59c": {
             "x": 4.5,
-            "y": 5.6,
+            "y": 5.5,
             "sectionId": "80cb0dd8-e14e-5114-9010-e1d2c105dd4b",
             "type": "dancer",
             "rotation": 0,
@@ -185,8 +184,8 @@
             "z": 15
           },
           "0f5e3727-e3bb-5f69-a132-0ccd99b13c88": {
-            "x": 1.2,
-            "y": 4.1,
+            "x": 1.5,
+            "y": 4,
             "sectionId": "80cb0dd8-e14e-5114-9010-e1d2c105dd4b",
             "type": "dancer",
             "rotation": 0,
@@ -195,8 +194,8 @@
             "z": 16
           },
           "64f7df7f-cb05-59ce-825d-71e34db31510": {
-            "x": 4.8,
-            "y": 4.1,
+            "x": 4.5,
+            "y": 4,
             "sectionId": "80cb0dd8-e14e-5114-9010-e1d2c105dd4b",
             "type": "dancer",
             "rotation": 0,
@@ -206,7 +205,7 @@
           },
           "8ab67a77-abfc-54e8-9cde-292fffc8c607": {
             "x": 0.5,
-            "y": 0.8999999999999995,
+            "y": 1,
             "sectionId": "80cb0dd8-e14e-5114-9010-e1d2c105dd4b",
             "type": "dancer",
             "rotation": 0,
@@ -216,7 +215,7 @@
           },
           "e2d2954b-6880-5203-8b46-96c658305d1c": {
             "x": 5.5,
-            "y": 0.8999999999999995,
+            "y": 1,
             "sectionId": "80cb0dd8-e14e-5114-9010-e1d2c105dd4b",
             "type": "dancer",
             "rotation": 0,
@@ -278,8 +277,8 @@
             "z": 0
           },
           "7a2e6d9f-2525-518c-ba63-7a7d2f686b0d": {
-            "x": 1.9,
-            "y": 3.6,
+            "x": 2.0,
+            "y": 3.5,
             "sectionId": "80cb0dd8-e14e-5114-9010-e1d2c105dd4b",
             "type": "prop",
             "rotation": 0,
@@ -288,8 +287,8 @@
             "z": 1
           },
           "aa21d600-4cc2-5a43-ae50-f851f3454231": {
-            "x": 3.1,
-            "y": 3.6,
+            "x": 3.0,
+            "y": 3.5,
             "sectionId": "80cb0dd8-e14e-5114-9010-e1d2c105dd4b",
             "type": "prop",
             "rotation": 0,
@@ -299,7 +298,7 @@
           },
           "9586d15a-8759-580c-9a3d-cb3b54b490ff": {
             "x": 0.5,
-            "y": 0.4,
+            "y": 0.5,
             "sectionId": "80cb0dd8-e14e-5114-9010-e1d2c105dd4b",
             "type": "prop",
             "rotation": 0,
@@ -317,8 +316,8 @@
       "formation": {
         "dancerPositions": {
           "6274b1bc-68e7-5788-afc5-a512d9b677bc": {
-            "x": 2.25,
-            "y": 19.28,
+            "x": 2,
+            "y": 19.5,
             "sectionId": "10d8c605-2949-5909-8ada-ffe9ac8816ea",
             "type": "dancer",
             "rotation": 0,
@@ -327,8 +326,8 @@
             "z": 0
           },
           "50c9c2d5-11a9-5fb2-9e6e-9007af7e1e38": {
-            "x": 3.75,
-            "y": 19.28,
+            "x": 4,
+            "y": 19.5,
             "sectionId": "10d8c605-2949-5909-8ada-ffe9ac8816ea",
             "type": "dancer",
             "rotation": 0,
@@ -338,7 +337,7 @@
           },
           "e027f287-d6ad-5373-a9b2-fd4a210c8d5d": {
             "x": 1.0,
-            "y": 11.18,
+            "y": 11.5,
             "sectionId": "10d8c605-2949-5909-8ada-ffe9ac8816ea",
             "type": "dancer",
             "rotation": 0,
@@ -347,8 +346,8 @@
             "z": 2
           },
           "ee14877d-16be-56d5-87cf-408261c01f64": {
-            "x": 1.0,
-            "y": 18.28,
+            "x": 1,
+            "y": 18.5,
             "sectionId": "10d8c605-2949-5909-8ada-ffe9ac8816ea",
             "type": "dancer",
             "rotation": 0,
@@ -357,8 +356,8 @@
             "z": 3
           },
           "8e836f45-7d53-5629-a4a2-5f202ec445d6": {
-            "x": 5.0,
-            "y": 18.28,
+            "x": 5,
+            "y": 18.5,
             "sectionId": "10d8c605-2949-5909-8ada-ffe9ac8816ea",
             "type": "dancer",
             "rotation": 0,
@@ -368,7 +367,7 @@
           },
           "0b412cef-22ca-5f0a-b232-7a8b4a1fcaf8": {
             "x": 0.5,
-            "y": 17.08,
+            "y": 17,
             "sectionId": "10d8c605-2949-5909-8ada-ffe9ac8816ea",
             "type": "dancer",
             "rotation": 0,
@@ -378,7 +377,7 @@
           },
           "a919e9f7-f899-566e-8f20-027ae6c65611": {
             "x": 0.5,
-            "y": 15.78,
+            "y": 15.5,
             "sectionId": "10d8c605-2949-5909-8ada-ffe9ac8816ea",
             "type": "dancer",
             "rotation": 0,
@@ -388,7 +387,7 @@
           },
           "995a9983-d15c-5a2a-a397-e9d88c7f6c06": {
             "x": 5.5,
-            "y": 17.08,
+            "y": 17,
             "sectionId": "10d8c605-2949-5909-8ada-ffe9ac8816ea",
             "type": "dancer",
             "rotation": 0,
@@ -398,7 +397,7 @@
           },
           "362d835b-735f-5cdb-9726-934ffc83c7c1": {
             "x": 5.5,
-            "y": 15.78,
+            "y": 15.5,
             "sectionId": "10d8c605-2949-5909-8ada-ffe9ac8816ea",
             "type": "dancer",
             "rotation": 0,
@@ -407,8 +406,8 @@
             "z": 8
           },
           "a1fd2ca4-3793-522a-8292-469aa1e1b7de": {
-            "x": 1.75,
-            "y": 16.98,
+            "x": 2,
+            "y": 17,
             "sectionId": "10d8c605-2949-5909-8ada-ffe9ac8816ea",
             "type": "dancer",
             "rotation": 0,
@@ -417,8 +416,8 @@
             "z": 9
           },
           "c6052ba2-df29-5093-93b7-bbcc85ce040f": {
-            "x": 2.25,
-            "y": 15.88,
+            "x": 3,
+            "y": 16,
             "sectionId": "10d8c605-2949-5909-8ada-ffe9ac8816ea",
             "type": "dancer",
             "rotation": 0,
@@ -428,7 +427,7 @@
           },
           "a5abcff1-0dd3-5680-955e-5dd77b9d1799": {
             "x": 3,
-            "y": 17.98,
+            "y": 18,
             "sectionId": "10d8c605-2949-5909-8ada-ffe9ac8816ea",
             "type": "dancer",
             "rotation": 0,
@@ -437,8 +436,8 @@
             "z": 11
           },
           "4f2e9f2c-acf3-5ad4-ae84-0f14e60a33a3": {
-            "x": 4.25,
-            "y": 16.98,
+            "x": 4,
+            "y": 17,
             "sectionId": "10d8c605-2949-5909-8ada-ffe9ac8816ea",
             "type": "dancer",
             "rotation": 0,
@@ -448,7 +447,7 @@
           },
           "f52fc707-09bd-5dc7-a76c-6c8aaf4833e4": {
             "x": 1.5,
-            "y": 14.78,
+            "y": 15,
             "sectionId": "10d8c605-2949-5909-8ada-ffe9ac8816ea",
             "type": "dancer",
             "rotation": 0,
@@ -457,8 +456,8 @@
             "z": 13
           },
           "9059f239-808d-515c-8cac-029606957aeb": {
-            "x": 3.75,
-            "y": 15.88,
+            "x": 3,
+            "y": 14,
             "sectionId": "10d8c605-2949-5909-8ada-ffe9ac8816ea",
             "type": "dancer",
             "rotation": 0,
@@ -468,7 +467,7 @@
           },
           "a4bf966a-6160-5018-9d34-42d59d25f59c": {
             "x": 4.5,
-            "y": 14.78,
+            "y": 15,
             "sectionId": "10d8c605-2949-5909-8ada-ffe9ac8816ea",
             "type": "dancer",
             "rotation": 0,
@@ -477,8 +476,8 @@
             "z": 15
           },
           "0f5e3727-e3bb-5f69-a132-0ccd99b13c88": {
-            "x": 1.2,
-            "y": 12.78,
+            "x": 1.5,
+            "y": 13,
             "sectionId": "10d8c605-2949-5909-8ada-ffe9ac8816ea",
             "type": "dancer",
             "rotation": 0,
@@ -487,8 +486,8 @@
             "z": 16
           },
           "64f7df7f-cb05-59ce-825d-71e34db31510": {
-            "x": 4.8,
-            "y": 12.78,
+            "x": 4.5,
+            "y": 13,
             "sectionId": "10d8c605-2949-5909-8ada-ffe9ac8816ea",
             "type": "dancer",
             "rotation": 0,
@@ -498,7 +497,7 @@
           },
           "8ab67a77-abfc-54e8-9cde-292fffc8c607": {
             "x": 0.5,
-            "y": 9.579999999999998,
+            "y": 10,
             "sectionId": "10d8c605-2949-5909-8ada-ffe9ac8816ea",
             "type": "dancer",
             "rotation": 0,
@@ -508,7 +507,7 @@
           },
           "e2d2954b-6880-5203-8b46-96c658305d1c": {
             "x": 5.5,
-            "y": 9.579999999999998,
+            "y": 10,
             "sectionId": "10d8c605-2949-5909-8ada-ffe9ac8816ea",
             "type": "dancer",
             "rotation": 0,
@@ -561,7 +560,7 @@
         "propPositions": {
           "e193ab81-4c97-54fb-b52a-12688eb9b935": {
             "x": 1.0,
-            "y": 10.68,
+            "y": 11.0,
             "sectionId": "10d8c605-2949-5909-8ada-ffe9ac8816ea",
             "type": "prop",
             "rotation": 0,
@@ -570,8 +569,8 @@
             "z": 0
           },
           "7a2e6d9f-2525-518c-ba63-7a7d2f686b0d": {
-            "x": 1.9,
-            "y": 12.28,
+            "x": 2.0,
+            "y": 12.5,
             "sectionId": "10d8c605-2949-5909-8ada-ffe9ac8816ea",
             "type": "prop",
             "rotation": 0,
@@ -580,8 +579,8 @@
             "z": 1
           },
           "aa21d600-4cc2-5a43-ae50-f851f3454231": {
-            "x": 3.1,
-            "y": 12.28,
+            "x": 3.0,
+            "y": 12.5,
             "sectionId": "10d8c605-2949-5909-8ada-ffe9ac8816ea",
             "type": "prop",
             "rotation": 0,
@@ -591,7 +590,7 @@
           },
           "9586d15a-8759-580c-9a3d-cb3b54b490ff": {
             "x": 0.5,
-            "y": 9.08,
+            "y": 9.5,
             "sectionId": "10d8c605-2949-5909-8ada-ffe9ac8816ea",
             "type": "prop",
             "rotation": 0,
@@ -606,12 +605,12 @@
       "id": "3b8f8daf-e8c5-5cdd-8419-1b58960f7997",
       "name": "Bメロ",
       "order": 3,
-      "note": "1-4で裏方が台を運んで重ねる",
+      "note": "裏方：1-4で台を前へ",
       "formation": {
         "dancerPositions": {
           "6274b1bc-68e7-5788-afc5-a512d9b677bc": {
             "x": 2,
-            "y": 26.16,
+            "y": 26.5,
             "sectionId": "3b8f8daf-e8c5-5cdd-8419-1b58960f7997",
             "type": "dancer",
             "rotation": 0,
@@ -621,7 +620,7 @@
           },
           "50c9c2d5-11a9-5fb2-9e6e-9007af7e1e38": {
             "x": 4,
-            "y": 26.16,
+            "y": 26.5,
             "sectionId": "3b8f8daf-e8c5-5cdd-8419-1b58960f7997",
             "type": "dancer",
             "rotation": 0,
@@ -631,7 +630,7 @@
           },
           "e027f287-d6ad-5373-a9b2-fd4a210c8d5d": {
             "x": 1.0,
-            "y": 19.86,
+            "y": 20.5,
             "sectionId": "3b8f8daf-e8c5-5cdd-8419-1b58960f7997",
             "type": "dancer",
             "rotation": 0,
@@ -640,8 +639,8 @@
             "z": 2
           },
           "ee14877d-16be-56d5-87cf-408261c01f64": {
-            "x": 0.9,
-            "y": 24.86,
+            "x": 1,
+            "y": 25.5,
             "sectionId": "3b8f8daf-e8c5-5cdd-8419-1b58960f7997",
             "type": "dancer",
             "rotation": 0,
@@ -650,8 +649,8 @@
             "z": 3
           },
           "0b412cef-22ca-5f0a-b232-7a8b4a1fcaf8": {
-            "x": 0.9,
-            "y": 24.86,
+            "x": 1,
+            "y": 25.5,
             "sectionId": "3b8f8daf-e8c5-5cdd-8419-1b58960f7997",
             "type": "dancer",
             "rotation": 0,
@@ -660,8 +659,8 @@
             "z": 4
           },
           "8e836f45-7d53-5629-a4a2-5f202ec445d6": {
-            "x": 5.1,
-            "y": 24.86,
+            "x": 5,
+            "y": 25.5,
             "sectionId": "3b8f8daf-e8c5-5cdd-8419-1b58960f7997",
             "type": "dancer",
             "rotation": 0,
@@ -670,8 +669,8 @@
             "z": 5
           },
           "995a9983-d15c-5a2a-a397-e9d88c7f6c06": {
-            "x": 5.1,
-            "y": 24.86,
+            "x": 5,
+            "y": 25.5,
             "sectionId": "3b8f8daf-e8c5-5cdd-8419-1b58960f7997",
             "type": "dancer",
             "rotation": 0,
@@ -680,8 +679,8 @@
             "z": 6
           },
           "a919e9f7-f899-566e-8f20-027ae6c65611": {
-            "x": 0.6,
-            "y": 22.56,
+            "x": 0.5,
+            "y": 23,
             "sectionId": "3b8f8daf-e8c5-5cdd-8419-1b58960f7997",
             "type": "dancer",
             "rotation": 0,
@@ -690,8 +689,8 @@
             "z": 7
           },
           "362d835b-735f-5cdb-9726-934ffc83c7c1": {
-            "x": 5.4,
-            "y": 22.56,
+            "x": 5.5,
+            "y": 23,
             "sectionId": "3b8f8daf-e8c5-5cdd-8419-1b58960f7997",
             "type": "dancer",
             "rotation": 0,
@@ -700,8 +699,8 @@
             "z": 8
           },
           "a1fd2ca4-3793-522a-8292-469aa1e1b7de": {
-            "x": 0.6,
-            "y": 27.46,
+            "x": 2,
+            "y": 28,
             "sectionId": "3b8f8daf-e8c5-5cdd-8419-1b58960f7997",
             "type": "dancer",
             "rotation": 0,
@@ -710,8 +709,8 @@
             "z": 9
           },
           "c6052ba2-df29-5093-93b7-bbcc85ce040f": {
-            "x": 1.8,
-            "y": 27.46,
+            "x": 4,
+            "y": 28,
             "sectionId": "3b8f8daf-e8c5-5cdd-8419-1b58960f7997",
             "type": "dancer",
             "rotation": 0,
@@ -721,7 +720,7 @@
           },
           "a5abcff1-0dd3-5680-955e-5dd77b9d1799": {
             "x": 3,
-            "y": 27.46,
+            "y": 28,
             "sectionId": "3b8f8daf-e8c5-5cdd-8419-1b58960f7997",
             "type": "dancer",
             "rotation": 0,
@@ -730,8 +729,8 @@
             "z": 11
           },
           "4f2e9f2c-acf3-5ad4-ae84-0f14e60a33a3": {
-            "x": 5.4,
-            "y": 27.46,
+            "x": 5,
+            "y": 28,
             "sectionId": "3b8f8daf-e8c5-5cdd-8419-1b58960f7997",
             "type": "dancer",
             "rotation": 0,
@@ -740,8 +739,8 @@
             "z": 12
           },
           "f52fc707-09bd-5dc7-a76c-6c8aaf4833e4": {
-            "x": 2.25,
-            "y": 22.56,
+            "x": 1,
+            "y": 28,
             "sectionId": "3b8f8daf-e8c5-5cdd-8419-1b58960f7997",
             "type": "dancer",
             "rotation": 0,
@@ -750,8 +749,8 @@
             "z": 13
           },
           "9059f239-808d-515c-8cac-029606957aeb": {
-            "x": 4.2,
-            "y": 27.46,
+            "x": 2,
+            "y": 23,
             "sectionId": "3b8f8daf-e8c5-5cdd-8419-1b58960f7997",
             "type": "dancer",
             "rotation": 0,
@@ -760,8 +759,8 @@
             "z": 14
           },
           "a4bf966a-6160-5018-9d34-42d59d25f59c": {
-            "x": 3.75,
-            "y": 22.56,
+            "x": 4,
+            "y": 23,
             "sectionId": "3b8f8daf-e8c5-5cdd-8419-1b58960f7997",
             "type": "dancer",
             "rotation": 0,
@@ -770,8 +769,8 @@
             "z": 15
           },
           "0f5e3727-e3bb-5f69-a132-0ccd99b13c88": {
-            "x": 2.4,
-            "y": 23.76,
+            "x": 2.5,
+            "y": 24.5,
             "sectionId": "3b8f8daf-e8c5-5cdd-8419-1b58960f7997",
             "type": "dancer",
             "rotation": 0,
@@ -780,8 +779,8 @@
             "z": 16
           },
           "64f7df7f-cb05-59ce-825d-71e34db31510": {
-            "x": 3.6,
-            "y": 23.76,
+            "x": 3.5,
+            "y": 24.5,
             "sectionId": "3b8f8daf-e8c5-5cdd-8419-1b58960f7997",
             "type": "dancer",
             "rotation": 0,
@@ -791,7 +790,7 @@
           },
           "8ab67a77-abfc-54e8-9cde-292fffc8c607": {
             "x": 0.5,
-            "y": 18.26,
+            "y": 19,
             "sectionId": "3b8f8daf-e8c5-5cdd-8419-1b58960f7997",
             "type": "dancer",
             "rotation": 0,
@@ -801,7 +800,7 @@
           },
           "e2d2954b-6880-5203-8b46-96c658305d1c": {
             "x": 5.5,
-            "y": 18.26,
+            "y": 19,
             "sectionId": "3b8f8daf-e8c5-5cdd-8419-1b58960f7997",
             "type": "dancer",
             "rotation": 0,
@@ -837,7 +836,7 @@
         "propPositions": {
           "e193ab81-4c97-54fb-b52a-12688eb9b935": {
             "x": 1.0,
-            "y": 19.36,
+            "y": 20.0,
             "sectionId": "3b8f8daf-e8c5-5cdd-8419-1b58960f7997",
             "type": "prop",
             "rotation": 0,
@@ -847,7 +846,7 @@
           },
           "aa21d600-4cc2-5a43-ae50-f851f3454231": {
             "x": 2.5,
-            "y": 24.36,
+            "y": 25.0,
             "sectionId": "3b8f8daf-e8c5-5cdd-8419-1b58960f7997",
             "type": "prop",
             "rotation": 0,
@@ -857,7 +856,7 @@
           },
           "7a2e6d9f-2525-518c-ba63-7a7d2f686b0d": {
             "x": 2.5,
-            "y": 24.36,
+            "y": 25.0,
             "sectionId": "3b8f8daf-e8c5-5cdd-8419-1b58960f7997",
             "type": "prop",
             "rotation": 0,
@@ -867,7 +866,7 @@
           },
           "9586d15a-8759-580c-9a3d-cb3b54b490ff": {
             "x": 0.5,
-            "y": 17.76,
+            "y": 18.5,
             "sectionId": "3b8f8daf-e8c5-5cdd-8419-1b58960f7997",
             "type": "prop",
             "rotation": 0,
@@ -898,12 +897,12 @@
       "id": "9d1c0a62-cc2d-5e3a-9a53-0f61e33ed30e",
       "name": "サビ",
       "order": 4,
-      "note": "衣装の色替え\n裏方は台を後ろから支える",
+      "note": "衣装チェンジ",
       "formation": {
         "dancerPositions": {
           "6274b1bc-68e7-5788-afc5-a512d9b677bc": {
-            "x": 1.7,
-            "y": 33.84,
+            "x": 1.5,
+            "y": 34,
             "sectionId": "9d1c0a62-cc2d-5e3a-9a53-0f61e33ed30e",
             "type": "dancer",
             "rotation": 0,
@@ -912,8 +911,8 @@
             "z": 0
           },
           "50c9c2d5-11a9-5fb2-9e6e-9007af7e1e38": {
-            "x": 4.3,
-            "y": 33.84,
+            "x": 4.5,
+            "y": 34,
             "sectionId": "9d1c0a62-cc2d-5e3a-9a53-0f61e33ed30e",
             "type": "dancer",
             "rotation": 0,
@@ -923,7 +922,7 @@
           },
           "e027f287-d6ad-5373-a9b2-fd4a210c8d5d": {
             "x": 1.0,
-            "y": 28.54,
+            "y": 28.5,
             "sectionId": "9d1c0a62-cc2d-5e3a-9a53-0f61e33ed30e",
             "type": "dancer",
             "rotation": 0,
@@ -932,8 +931,8 @@
             "z": 2
           },
           "ee14877d-16be-56d5-87cf-408261c01f64": {
-            "x": 0.6,
-            "y": 32.54,
+            "x": 0.5,
+            "y": 32.5,
             "sectionId": "9d1c0a62-cc2d-5e3a-9a53-0f61e33ed30e",
             "type": "dancer",
             "rotation": 0,
@@ -942,8 +941,8 @@
             "z": 3
           },
           "0b412cef-22ca-5f0a-b232-7a8b4a1fcaf8": {
-            "x": 0.6,
-            "y": 32.54,
+            "x": 0.5,
+            "y": 32.5,
             "sectionId": "9d1c0a62-cc2d-5e3a-9a53-0f61e33ed30e",
             "type": "dancer",
             "rotation": 0,
@@ -952,8 +951,8 @@
             "z": 4
           },
           "8e836f45-7d53-5629-a4a2-5f202ec445d6": {
-            "x": 5.4,
-            "y": 32.54,
+            "x": 5.5,
+            "y": 32.5,
             "sectionId": "9d1c0a62-cc2d-5e3a-9a53-0f61e33ed30e",
             "type": "dancer",
             "rotation": 0,
@@ -962,8 +961,8 @@
             "z": 5
           },
           "995a9983-d15c-5a2a-a397-e9d88c7f6c06": {
-            "x": 5.4,
-            "y": 32.54,
+            "x": 5.5,
+            "y": 32.5,
             "sectionId": "9d1c0a62-cc2d-5e3a-9a53-0f61e33ed30e",
             "type": "dancer",
             "rotation": 0,
@@ -972,8 +971,8 @@
             "z": 6
           },
           "a919e9f7-f899-566e-8f20-027ae6c65611": {
-            "x": 0.75,
-            "y": 31.24,
+            "x": 0.5,
+            "y": 31,
             "sectionId": "9d1c0a62-cc2d-5e3a-9a53-0f61e33ed30e",
             "type": "dancer",
             "rotation": 0,
@@ -982,8 +981,8 @@
             "z": 7
           },
           "362d835b-735f-5cdb-9726-934ffc83c7c1": {
-            "x": 5.25,
-            "y": 31.24,
+            "x": 5.5,
+            "y": 31,
             "sectionId": "9d1c0a62-cc2d-5e3a-9a53-0f61e33ed30e",
             "type": "dancer",
             "rotation": 0,
@@ -992,8 +991,8 @@
             "z": 8
           },
           "a1fd2ca4-3793-522a-8292-469aa1e1b7de": {
-            "x": 0.9,
-            "y": 35.54,
+            "x": 3,
+            "y": 36,
             "sectionId": "9d1c0a62-cc2d-5e3a-9a53-0f61e33ed30e",
             "type": "dancer",
             "rotation": 0,
@@ -1003,7 +1002,7 @@
           },
           "c6052ba2-df29-5093-93b7-bbcc85ce040f": {
             "x": 3,
-            "y": 36.34,
+            "y": 36,
             "sectionId": "9d1c0a62-cc2d-5e3a-9a53-0f61e33ed30e",
             "type": "dancer",
             "rotation": 0,
@@ -1013,7 +1012,7 @@
           },
           "a5abcff1-0dd3-5680-955e-5dd77b9d1799": {
             "x": 3,
-            "y": 36.34,
+            "y": 36,
             "sectionId": "9d1c0a62-cc2d-5e3a-9a53-0f61e33ed30e",
             "type": "dancer",
             "rotation": 0,
@@ -1021,39 +1020,39 @@
             "color": "#5B4B9B",
             "z": 11
           },
-          "9059f239-808d-515c-8cac-029606957aeb": {
-            "x": 3,
-            "y": 36.34,
-            "sectionId": "9d1c0a62-cc2d-5e3a-9a53-0f61e33ed30e",
-            "type": "dancer",
-            "rotation": 0,
-            "dancerId": "9059f239-808d-515c-8cac-029606957aeb",
-            "color": "#5B4B9B",
-            "z": 12
-          },
           "4f2e9f2c-acf3-5ad4-ae84-0f14e60a33a3": {
-            "x": 5.1,
-            "y": 35.54,
+            "x": 5,
+            "y": 35.5,
             "sectionId": "9d1c0a62-cc2d-5e3a-9a53-0f61e33ed30e",
             "type": "dancer",
             "rotation": 0,
             "dancerId": "4f2e9f2c-acf3-5ad4-ae84-0f14e60a33a3",
             "color": "#5B4B9B",
-            "z": 13
+            "z": 12
           },
           "f52fc707-09bd-5dc7-a76c-6c8aaf4833e4": {
-            "x": 2.25,
-            "y": 31.24,
+            "x": 1,
+            "y": 35.5,
             "sectionId": "9d1c0a62-cc2d-5e3a-9a53-0f61e33ed30e",
             "type": "dancer",
             "rotation": 0,
             "dancerId": "f52fc707-09bd-5dc7-a76c-6c8aaf4833e4",
             "color": "#5B4B9B",
+            "z": 13
+          },
+          "9059f239-808d-515c-8cac-029606957aeb": {
+            "x": 2,
+            "y": 31,
+            "sectionId": "9d1c0a62-cc2d-5e3a-9a53-0f61e33ed30e",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "9059f239-808d-515c-8cac-029606957aeb",
+            "color": "#5B4B9B",
             "z": 14
           },
           "a4bf966a-6160-5018-9d34-42d59d25f59c": {
-            "x": 3.75,
-            "y": 31.24,
+            "x": 4,
+            "y": 31,
             "sectionId": "9d1c0a62-cc2d-5e3a-9a53-0f61e33ed30e",
             "type": "dancer",
             "rotation": 0,
@@ -1062,8 +1061,8 @@
             "z": 15
           },
           "0f5e3727-e3bb-5f69-a132-0ccd99b13c88": {
-            "x": 2.4,
-            "y": 32.44,
+            "x": 2.5,
+            "y": 32.5,
             "sectionId": "9d1c0a62-cc2d-5e3a-9a53-0f61e33ed30e",
             "type": "dancer",
             "rotation": 0,
@@ -1072,8 +1071,8 @@
             "z": 16
           },
           "64f7df7f-cb05-59ce-825d-71e34db31510": {
-            "x": 3.6,
-            "y": 32.44,
+            "x": 3.5,
+            "y": 32.5,
             "sectionId": "9d1c0a62-cc2d-5e3a-9a53-0f61e33ed30e",
             "type": "dancer",
             "rotation": 0,
@@ -1083,7 +1082,7 @@
           },
           "8ab67a77-abfc-54e8-9cde-292fffc8c607": {
             "x": 0.5,
-            "y": 26.94,
+            "y": 27,
             "sectionId": "9d1c0a62-cc2d-5e3a-9a53-0f61e33ed30e",
             "type": "dancer",
             "rotation": 0,
@@ -1093,7 +1092,7 @@
           },
           "e2d2954b-6880-5203-8b46-96c658305d1c": {
             "x": 5.5,
-            "y": 26.94,
+            "y": 27,
             "sectionId": "9d1c0a62-cc2d-5e3a-9a53-0f61e33ed30e",
             "type": "dancer",
             "rotation": 0,
@@ -1167,21 +1166,21 @@
                 "id": "b21b8e0c-456c-5d33-83fe-80b4e08441eb",
                 "name": "1",
                 "dancerIds": [
-                  "c6052ba2-df29-5093-93b7-bbcc85ce040f"
+                  "a1fd2ca4-3793-522a-8292-469aa1e1b7de"
                 ]
               },
               {
                 "id": "1a6d3a1c-2c00-5fd6-869a-573c48cb0b6f",
                 "name": "3",
                 "dancerIds": [
-                  "a5abcff1-0dd3-5680-955e-5dd77b9d1799"
+                  "c6052ba2-df29-5093-93b7-bbcc85ce040f"
                 ]
               },
               {
                 "id": "c480735f-493d-5581-a45d-b9972b86e359",
                 "name": "5",
                 "dancerIds": [
-                  "9059f239-808d-515c-8cac-029606957aeb"
+                  "a5abcff1-0dd3-5680-955e-5dd77b9d1799"
                 ]
               }
             ]
@@ -1190,7 +1189,7 @@
         "propPositions": {
           "e193ab81-4c97-54fb-b52a-12688eb9b935": {
             "x": 1.0,
-            "y": 28.04,
+            "y": 28.0,
             "sectionId": "9d1c0a62-cc2d-5e3a-9a53-0f61e33ed30e",
             "type": "prop",
             "rotation": 0,
@@ -1200,7 +1199,7 @@
           },
           "aa21d600-4cc2-5a43-ae50-f851f3454231": {
             "x": 2.5,
-            "y": 33.04,
+            "y": 33.0,
             "sectionId": "9d1c0a62-cc2d-5e3a-9a53-0f61e33ed30e",
             "type": "prop",
             "rotation": 0,
@@ -1210,7 +1209,7 @@
           },
           "7a2e6d9f-2525-518c-ba63-7a7d2f686b0d": {
             "x": 2.5,
-            "y": 33.04,
+            "y": 33.0,
             "sectionId": "9d1c0a62-cc2d-5e3a-9a53-0f61e33ed30e",
             "type": "prop",
             "rotation": 0,
@@ -1220,7 +1219,7 @@
           },
           "9586d15a-8759-580c-9a3d-cb3b54b490ff": {
             "x": 0.5,
-            "y": 26.44,
+            "y": 26.5,
             "sectionId": "9d1c0a62-cc2d-5e3a-9a53-0f61e33ed30e",
             "type": "prop",
             "rotation": 0,
@@ -1233,8 +1232,8 @@
           "ee14877d-16be-56d5-87cf-408261c01f64": {
             "points": [
               {
-                "x": 0.35,
-                "y": 28.7
+                "x": 0.0,
+                "y": 29.0
               }
             ],
             "tension": "curved"
@@ -1242,8 +1241,8 @@
           "0b412cef-22ca-5f0a-b232-7a8b4a1fcaf8": {
             "points": [
               {
-                "x": 0.35,
-                "y": 28.7
+                "x": 0.0,
+                "y": 29.0
               }
             ],
             "tension": "curved"
@@ -1251,8 +1250,8 @@
           "8e836f45-7d53-5629-a4a2-5f202ec445d6": {
             "points": [
               {
-                "x": 5.65,
-                "y": 28.7
+                "x": 6.0,
+                "y": 29.0
               }
             ],
             "tension": "curved"
@@ -1260,8 +1259,8 @@
           "995a9983-d15c-5a2a-a397-e9d88c7f6c06": {
             "points": [
               {
-                "x": 5.65,
-                "y": 28.7
+                "x": 6.0,
+                "y": 29.0
               }
             ],
             "tension": "curved"
@@ -1277,9 +1276,9 @@
             "995a9983-d15c-5a2a-a397-e9d88c7f6c06"
           ],
           [
+            "a1fd2ca4-3793-522a-8292-469aa1e1b7de",
             "c6052ba2-df29-5093-93b7-bbcc85ce040f",
-            "a5abcff1-0dd3-5680-955e-5dd77b9d1799",
-            "9059f239-808d-515c-8cac-029606957aeb"
+            "a5abcff1-0dd3-5680-955e-5dd77b9d1799"
           ]
         ],
         "propStacks": [
@@ -1294,12 +1293,12 @@
       "id": "6041739b-a48a-5d7c-8df6-4a811b7b779b",
       "name": "間奏",
       "order": 5,
-      "note": "裏方が台を後ろへ戻す",
+      "note": "裏方：1-4で台を後ろへ",
       "formation": {
         "dancerPositions": {
           "6274b1bc-68e7-5788-afc5-a512d9b677bc": {
-            "x": 1.983,
-            "y": 45.487,
+            "x": 1.5,
+            "y": 46.5,
             "sectionId": "6041739b-a48a-5d7c-8df6-4a811b7b779b",
             "type": "dancer",
             "rotation": 0,
@@ -1308,8 +1307,8 @@
             "z": 0
           },
           "50c9c2d5-11a9-5fb2-9e6e-9007af7e1e38": {
-            "x": 4.017,
-            "y": 45.487,
+            "x": 4.5,
+            "y": 46.5,
             "sectionId": "6041739b-a48a-5d7c-8df6-4a811b7b779b",
             "type": "dancer",
             "rotation": 0,
@@ -1319,7 +1318,7 @@
           },
           "e027f287-d6ad-5373-a9b2-fd4a210c8d5d": {
             "x": 1.0,
-            "y": 37.22,
+            "y": 37.5,
             "sectionId": "6041739b-a48a-5d7c-8df6-4a811b7b779b",
             "type": "dancer",
             "rotation": 0,
@@ -1328,8 +1327,8 @@
             "z": 2
           },
           "ee14877d-16be-56d5-87cf-408261c01f64": {
-            "x": 1.142,
-            "y": 44.827,
+            "x": 0.5,
+            "y": 45.5,
             "sectionId": "6041739b-a48a-5d7c-8df6-4a811b7b779b",
             "type": "dancer",
             "rotation": 0,
@@ -1338,8 +1337,8 @@
             "z": 3
           },
           "8e836f45-7d53-5629-a4a2-5f202ec445d6": {
-            "x": 4.858,
-            "y": 44.827,
+            "x": 5.5,
+            "y": 45.5,
             "sectionId": "6041739b-a48a-5d7c-8df6-4a811b7b779b",
             "type": "dancer",
             "rotation": 0,
@@ -1348,8 +1347,8 @@
             "z": 4
           },
           "0b412cef-22ca-5f0a-b232-7a8b4a1fcaf8": {
-            "x": 0.514,
-            "y": 42.738,
+            "x": 0.5,
+            "y": 43.5,
             "sectionId": "6041739b-a48a-5d7c-8df6-4a811b7b779b",
             "type": "dancer",
             "rotation": 0,
@@ -1358,8 +1357,8 @@
             "z": 5
           },
           "a919e9f7-f899-566e-8f20-027ae6c65611": {
-            "x": 1.531,
-            "y": 40.836,
+            "x": 1,
+            "y": 41.5,
             "sectionId": "6041739b-a48a-5d7c-8df6-4a811b7b779b",
             "type": "dancer",
             "rotation": 0,
@@ -1368,8 +1367,8 @@
             "z": 6
           },
           "995a9983-d15c-5a2a-a397-e9d88c7f6c06": {
-            "x": 5.486,
-            "y": 42.738,
+            "x": 5.5,
+            "y": 43.5,
             "sectionId": "6041739b-a48a-5d7c-8df6-4a811b7b779b",
             "type": "dancer",
             "rotation": 0,
@@ -1378,8 +1377,8 @@
             "z": 7
           },
           "362d835b-735f-5cdb-9726-934ffc83c7c1": {
-            "x": 4.469,
-            "y": 40.836,
+            "x": 5,
+            "y": 41.5,
             "sectionId": "6041739b-a48a-5d7c-8df6-4a811b7b779b",
             "type": "dancer",
             "rotation": 0,
@@ -1388,8 +1387,8 @@
             "z": 8
           },
           "a1fd2ca4-3793-522a-8292-469aa1e1b7de": {
-            "x": 0.835,
-            "y": 41.67,
+            "x": 3,
+            "y": 47,
             "sectionId": "6041739b-a48a-5d7c-8df6-4a811b7b779b",
             "type": "dancer",
             "rotation": 0,
@@ -1398,8 +1397,8 @@
             "z": 9
           },
           "c6052ba2-df29-5093-93b7-bbcc85ce040f": {
-            "x": 3.0,
-            "y": 45.72,
+            "x": 5.5,
+            "y": 44.5,
             "sectionId": "6041739b-a48a-5d7c-8df6-4a811b7b779b",
             "type": "dancer",
             "rotation": 0,
@@ -1408,8 +1407,8 @@
             "z": 10
           },
           "a5abcff1-0dd3-5680-955e-5dd77b9d1799": {
-            "x": 0.622,
-            "y": 43.854,
+            "x": 0.5,
+            "y": 44.5,
             "sectionId": "6041739b-a48a-5d7c-8df6-4a811b7b779b",
             "type": "dancer",
             "rotation": 0,
@@ -1418,8 +1417,8 @@
             "z": 11
           },
           "4f2e9f2c-acf3-5ad4-ae84-0f14e60a33a3": {
-            "x": 5.165,
-            "y": 41.67,
+            "x": 5.5,
+            "y": 42.5,
             "sectionId": "6041739b-a48a-5d7c-8df6-4a811b7b779b",
             "type": "dancer",
             "rotation": 0,
@@ -1428,8 +1427,8 @@
             "z": 12
           },
           "f52fc707-09bd-5dc7-a76c-6c8aaf4833e4": {
-            "x": 2.48,
-            "y": 40.379,
+            "x": 0.5,
+            "y": 42.5,
             "sectionId": "6041739b-a48a-5d7c-8df6-4a811b7b779b",
             "type": "dancer",
             "rotation": 0,
@@ -1438,8 +1437,8 @@
             "z": 13
           },
           "9059f239-808d-515c-8cac-029606957aeb": {
-            "x": 5.378,
-            "y": 43.854,
+            "x": 2,
+            "y": 40.5,
             "sectionId": "6041739b-a48a-5d7c-8df6-4a811b7b779b",
             "type": "dancer",
             "rotation": 0,
@@ -1448,8 +1447,8 @@
             "z": 14
           },
           "a4bf966a-6160-5018-9d34-42d59d25f59c": {
-            "x": 3.52,
-            "y": 40.379,
+            "x": 4,
+            "y": 40.5,
             "sectionId": "6041739b-a48a-5d7c-8df6-4a811b7b779b",
             "type": "dancer",
             "rotation": 0,
@@ -1458,8 +1457,8 @@
             "z": 15
           },
           "0f5e3727-e3bb-5f69-a132-0ccd99b13c88": {
-            "x": 1.2,
-            "y": 38.82,
+            "x": 1.5,
+            "y": 39,
             "sectionId": "6041739b-a48a-5d7c-8df6-4a811b7b779b",
             "type": "dancer",
             "rotation": 0,
@@ -1468,8 +1467,8 @@
             "z": 16
           },
           "64f7df7f-cb05-59ce-825d-71e34db31510": {
-            "x": 4.8,
-            "y": 38.82,
+            "x": 4.5,
+            "y": 39,
             "sectionId": "6041739b-a48a-5d7c-8df6-4a811b7b779b",
             "type": "dancer",
             "rotation": 0,
@@ -1479,7 +1478,7 @@
           },
           "8ab67a77-abfc-54e8-9cde-292fffc8c607": {
             "x": 0.5,
-            "y": 35.62,
+            "y": 36,
             "sectionId": "6041739b-a48a-5d7c-8df6-4a811b7b779b",
             "type": "dancer",
             "rotation": 0,
@@ -1489,7 +1488,7 @@
           },
           "e2d2954b-6880-5203-8b46-96c658305d1c": {
             "x": 5.5,
-            "y": 35.62,
+            "y": 36,
             "sectionId": "6041739b-a48a-5d7c-8df6-4a811b7b779b",
             "type": "dancer",
             "rotation": 0,
@@ -1502,7 +1501,7 @@
         "propPositions": {
           "e193ab81-4c97-54fb-b52a-12688eb9b935": {
             "x": 1.0,
-            "y": 36.72,
+            "y": 37.0,
             "sectionId": "6041739b-a48a-5d7c-8df6-4a811b7b779b",
             "type": "prop",
             "rotation": 0,
@@ -1511,8 +1510,8 @@
             "z": 0
           },
           "7a2e6d9f-2525-518c-ba63-7a7d2f686b0d": {
-            "x": 1.9,
-            "y": 38.32,
+            "x": 2.0,
+            "y": 38.5,
             "sectionId": "6041739b-a48a-5d7c-8df6-4a811b7b779b",
             "type": "prop",
             "rotation": 0,
@@ -1521,8 +1520,8 @@
             "z": 1
           },
           "aa21d600-4cc2-5a43-ae50-f851f3454231": {
-            "x": 3.1,
-            "y": 38.32,
+            "x": 3.0,
+            "y": 38.5,
             "sectionId": "6041739b-a48a-5d7c-8df6-4a811b7b779b",
             "type": "prop",
             "rotation": 0,
@@ -1532,7 +1531,7 @@
           },
           "9586d15a-8759-580c-9a3d-cb3b54b490ff": {
             "x": 0.5,
-            "y": 35.12,
+            "y": 35.5,
             "sectionId": "6041739b-a48a-5d7c-8df6-4a811b7b779b",
             "type": "prop",
             "rotation": 0,
@@ -1551,8 +1550,8 @@
       "formation": {
         "dancerPositions": {
           "6274b1bc-68e7-5788-afc5-a512d9b677bc": {
-            "x": 2.25,
-            "y": 53.5,
+            "x": 2,
+            "y": 54,
             "sectionId": "60dc510f-3c3b-5fb7-927d-8476d8f1461b",
             "type": "dancer",
             "rotation": 0,
@@ -1561,8 +1560,8 @@
             "z": 0
           },
           "50c9c2d5-11a9-5fb2-9e6e-9007af7e1e38": {
-            "x": 3.75,
-            "y": 53.5,
+            "x": 4,
+            "y": 54,
             "sectionId": "60dc510f-3c3b-5fb7-927d-8476d8f1461b",
             "type": "dancer",
             "rotation": 0,
@@ -1572,7 +1571,7 @@
           },
           "e027f287-d6ad-5373-a9b2-fd4a210c8d5d": {
             "x": 1.0,
-            "y": 45.9,
+            "y": 46.5,
             "sectionId": "60dc510f-3c3b-5fb7-927d-8476d8f1461b",
             "type": "dancer",
             "rotation": 0,
@@ -1581,8 +1580,8 @@
             "z": 2
           },
           "ee14877d-16be-56d5-87cf-408261c01f64": {
-            "x": 0.75,
-            "y": 53.5,
+            "x": 0.5,
+            "y": 54,
             "sectionId": "60dc510f-3c3b-5fb7-927d-8476d8f1461b",
             "type": "dancer",
             "rotation": 0,
@@ -1591,8 +1590,8 @@
             "z": 3
           },
           "8e836f45-7d53-5629-a4a2-5f202ec445d6": {
-            "x": 5.25,
-            "y": 53.5,
+            "x": 5.5,
+            "y": 54,
             "sectionId": "60dc510f-3c3b-5fb7-927d-8476d8f1461b",
             "type": "dancer",
             "rotation": 0,
@@ -1601,8 +1600,8 @@
             "z": 4
           },
           "0b412cef-22ca-5f0a-b232-7a8b4a1fcaf8": {
-            "x": 0.75,
-            "y": 52.0,
+            "x": 0.5,
+            "y": 52.5,
             "sectionId": "60dc510f-3c3b-5fb7-927d-8476d8f1461b",
             "type": "dancer",
             "rotation": 0,
@@ -1611,8 +1610,8 @@
             "z": 5
           },
           "a919e9f7-f899-566e-8f20-027ae6c65611": {
-            "x": 2.25,
-            "y": 52.0,
+            "x": 2,
+            "y": 52.5,
             "sectionId": "60dc510f-3c3b-5fb7-927d-8476d8f1461b",
             "type": "dancer",
             "rotation": 0,
@@ -1621,8 +1620,8 @@
             "z": 6
           },
           "995a9983-d15c-5a2a-a397-e9d88c7f6c06": {
-            "x": 5.25,
-            "y": 52.0,
+            "x": 5.5,
+            "y": 52.5,
             "sectionId": "60dc510f-3c3b-5fb7-927d-8476d8f1461b",
             "type": "dancer",
             "rotation": 0,
@@ -1631,8 +1630,8 @@
             "z": 7
           },
           "362d835b-735f-5cdb-9726-934ffc83c7c1": {
-            "x": 3.75,
-            "y": 52.0,
+            "x": 4,
+            "y": 52.5,
             "sectionId": "60dc510f-3c3b-5fb7-927d-8476d8f1461b",
             "type": "dancer",
             "rotation": 0,
@@ -1641,8 +1640,8 @@
             "z": 8
           },
           "a1fd2ca4-3793-522a-8292-469aa1e1b7de": {
-            "x": 2.25,
-            "y": 50.5,
+            "x": 4,
+            "y": 51,
             "sectionId": "60dc510f-3c3b-5fb7-927d-8476d8f1461b",
             "type": "dancer",
             "rotation": 0,
@@ -1651,8 +1650,8 @@
             "z": 9
           },
           "c6052ba2-df29-5093-93b7-bbcc85ce040f": {
-            "x": 3.75,
-            "y": 50.5,
+            "x": 5.5,
+            "y": 51,
             "sectionId": "60dc510f-3c3b-5fb7-927d-8476d8f1461b",
             "type": "dancer",
             "rotation": 0,
@@ -1661,8 +1660,8 @@
             "z": 10
           },
           "a5abcff1-0dd3-5680-955e-5dd77b9d1799": {
-            "x": 0.75,
-            "y": 50.5,
+            "x": 0.5,
+            "y": 51,
             "sectionId": "60dc510f-3c3b-5fb7-927d-8476d8f1461b",
             "type": "dancer",
             "rotation": 0,
@@ -1672,7 +1671,7 @@
           },
           "4f2e9f2c-acf3-5ad4-ae84-0f14e60a33a3": {
             "x": 4.5,
-            "y": 49.0,
+            "y": 49.5,
             "sectionId": "60dc510f-3c3b-5fb7-927d-8476d8f1461b",
             "type": "dancer",
             "rotation": 0,
@@ -1681,8 +1680,8 @@
             "z": 12
           },
           "f52fc707-09bd-5dc7-a76c-6c8aaf4833e4": {
-            "x": 1.5,
-            "y": 49.0,
+            "x": 2,
+            "y": 51,
             "sectionId": "60dc510f-3c3b-5fb7-927d-8476d8f1461b",
             "type": "dancer",
             "rotation": 0,
@@ -1691,8 +1690,8 @@
             "z": 13
           },
           "9059f239-808d-515c-8cac-029606957aeb": {
-            "x": 5.25,
-            "y": 50.5,
+            "x": 1.5,
+            "y": 49.5,
             "sectionId": "60dc510f-3c3b-5fb7-927d-8476d8f1461b",
             "type": "dancer",
             "rotation": 0,
@@ -1702,7 +1701,7 @@
           },
           "a4bf966a-6160-5018-9d34-42d59d25f59c": {
             "x": 3,
-            "y": 49.0,
+            "y": 49.5,
             "sectionId": "60dc510f-3c3b-5fb7-927d-8476d8f1461b",
             "type": "dancer",
             "rotation": 0,
@@ -1711,8 +1710,8 @@
             "z": 15
           },
           "0f5e3727-e3bb-5f69-a132-0ccd99b13c88": {
-            "x": 1.2,
-            "y": 47.5,
+            "x": 1.5,
+            "y": 48,
             "sectionId": "60dc510f-3c3b-5fb7-927d-8476d8f1461b",
             "type": "dancer",
             "rotation": 0,
@@ -1721,8 +1720,8 @@
             "z": 16
           },
           "64f7df7f-cb05-59ce-825d-71e34db31510": {
-            "x": 4.8,
-            "y": 47.5,
+            "x": 4.5,
+            "y": 48,
             "sectionId": "60dc510f-3c3b-5fb7-927d-8476d8f1461b",
             "type": "dancer",
             "rotation": 0,
@@ -1732,7 +1731,7 @@
           },
           "8ab67a77-abfc-54e8-9cde-292fffc8c607": {
             "x": 0.5,
-            "y": 44.3,
+            "y": 45,
             "sectionId": "60dc510f-3c3b-5fb7-927d-8476d8f1461b",
             "type": "dancer",
             "rotation": 0,
@@ -1742,7 +1741,7 @@
           },
           "e2d2954b-6880-5203-8b46-96c658305d1c": {
             "x": 5.5,
-            "y": 44.3,
+            "y": 45,
             "sectionId": "60dc510f-3c3b-5fb7-927d-8476d8f1461b",
             "type": "dancer",
             "rotation": 0,
@@ -1795,7 +1794,7 @@
         "propPositions": {
           "e193ab81-4c97-54fb-b52a-12688eb9b935": {
             "x": 1.0,
-            "y": 45.4,
+            "y": 46.0,
             "sectionId": "60dc510f-3c3b-5fb7-927d-8476d8f1461b",
             "type": "prop",
             "rotation": 0,
@@ -1804,8 +1803,8 @@
             "z": 0
           },
           "7a2e6d9f-2525-518c-ba63-7a7d2f686b0d": {
-            "x": 1.9,
-            "y": 47.0,
+            "x": 2.0,
+            "y": 47.5,
             "sectionId": "60dc510f-3c3b-5fb7-927d-8476d8f1461b",
             "type": "prop",
             "rotation": 0,
@@ -1814,8 +1813,8 @@
             "z": 1
           },
           "aa21d600-4cc2-5a43-ae50-f851f3454231": {
-            "x": 3.1,
-            "y": 47.0,
+            "x": 3.0,
+            "y": 47.5,
             "sectionId": "60dc510f-3c3b-5fb7-927d-8476d8f1461b",
             "type": "prop",
             "rotation": 0,
@@ -1825,7 +1824,7 @@
           },
           "9586d15a-8759-580c-9a3d-cb3b54b490ff": {
             "x": 0.5,
-            "y": 43.8,
+            "y": 44.5,
             "sectionId": "60dc510f-3c3b-5fb7-927d-8476d8f1461b",
             "type": "prop",
             "rotation": 0,
