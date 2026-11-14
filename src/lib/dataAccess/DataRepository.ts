@@ -64,7 +64,7 @@ export async function deleteAll<T extends TableName>(
   storeName: T
 ): Promise<void> {
   indexedDbManager.deleteAll(storeName).then(() => {
-    console.log(`All data deleted from store ${storeName}`)
+    console.debug(`All data deleted from store ${storeName}`)
   }).catch((error) => {
     console.error(`Error deleting all data from store ${storeName}:`, error)
   });

@@ -26,7 +26,7 @@ export class IndexedDBManager {
 
     return new Promise<void>((resolve, reject) => {
       request.onsuccess = () => {
-        console.log("Successfully initialized db")
+        console.debug("Database opened");
         this.db = request.result;
         resolve();
       };
@@ -42,7 +42,7 @@ export class IndexedDBManager {
     try {
       return this.db.transaction(storeName, mode).objectStore(storeName);
     } catch (error) {
-      console.error(`Error getting object store ${storeName}: ${error}`);
+      console.error(`Could not open object store ${storeName}:`, error);
       throw error;
     }
   }
@@ -52,15 +52,15 @@ export class IndexedDBManager {
       try {
         const request = this._getStore(storeName, "readonly").getAll();
         request.onsuccess = () => {
-          console.log(`successfully completed getAll ${storeName}: ${request.result.length}`);
+          console.debug(`getAll ${storeName} done: ${request.result.length}`);
           resolve(request.result || null);
         };
         request.onerror = () => {
-          console.error(`error on getAll ${storeName}: ${request.error}`);
+          console.error(`getAll on ${storeName} failed:`, request.error);
           reject(request.error);
         };
       } catch (error) {
-        console.error(`exception on getAll ${storeName}: ${error}`);
+        console.error(`getAll on ${storeName} threw:`, error);
         reject(error);
       }
     });
@@ -72,15 +72,15 @@ export class IndexedDBManager {
         const index = this._getStore(storeName, "readonly").index("formationId");
         const request = index.get(id);
         request.onsuccess = () => {
-          console.log(`successfully completed getByFormationId ${storeName}: ${request.result.length}`);
+          console.debug(`getByFormationId ${storeName} done: ${request.result.length}`);
           resolve(request.result || null);
         };
         request.onerror = () => {
-          console.error(`error on getByFormationId ${storeName}: ${request.error}`);
+          console.error(`getByFormationId on ${storeName} failed:`, request.error);
           reject(request.error);
         };
       } catch (error) {
-        console.error(`exception on getByFormationId ${storeName}: ${error}`);
+        console.error(`getByFormationId on ${storeName} threw:`, error);
         reject(error);
       }
     });
@@ -91,15 +91,15 @@ export class IndexedDBManager {
       try {
         const request = this._getStore(storeName).put(item);
         request.onsuccess = () => {
-          console.log(`successfully completed upsertItem ${storeName}: ${request.result as number}`);
+          console.debug(`upsertItem ${storeName} done: ${request.result as number}`);
           resolve(request.result as number);
         };
         request.onerror = () => {
-          console.error(`error on upsertItem ${storeName}: ${request.error}`);
+          console.error(`upsertItem on ${storeName} failed:`, request.error);
           reject(request.error);
         };
       } catch (error) {
-        console.error(`exception on upsertItem ${storeName}: ${error}`);
+        console.error(`upsertItem on ${storeName} threw:`, error);
         reject(error);
       }
     });
@@ -112,15 +112,15 @@ export class IndexedDBManager {
         const store = tx.objectStore(storeName);
         list.forEach(item => store.put(item));
         tx.oncomplete = () => {
-          console.log(`successfully completed upsertList ${storeName}: ${list.length}`);
+          console.debug(`upsertList ${storeName} done: ${list.length}`);
           resolve(list.length);
         };
         tx.onerror = () => {
-          console.error(`error on upsertList ${storeName}: ${tx.error}`);
+          console.error(`upsertList on ${storeName} failed:`, tx.error);
           reject(tx.error);
         };
       } catch (error) {
-        console.error(`exception on upsertList ${storeName}: ${error}`);
+        console.error(`upsertList on ${storeName} threw:`, error);
         reject(error);
       }
     });
@@ -128,20 +128,19 @@ export class IndexedDBManager {
 
   async removeItem(storeName: TableName, itemId: string) {
     if (isNullOrUndefinedOrBlank(itemId)) return Promise.resolve(0);
-    console.log(`removeItem ${storeName} called`);
-    return new Promise<any>((resolve, reject) => {
+        return new Promise<any>((resolve, reject) => {
       try {
         const request = this._getStore(storeName).delete(itemId);
         request.onsuccess = () => {
-          console.log(`successfully completed removeItem ${storeName}: ${itemId}`);
+          console.debug(`removeItem ${storeName} done: ${itemId}`);
           resolve(request.result);
         };
         request.onerror = () => {
-          console.error(`error on removeItem ${storeName}: ${request.error}`);
+          console.error(`removeItem on ${storeName} failed:`, request.error);
           reject(request.error);
         };
       } catch (error) {
-        console.error(`exception on removeItem ${storeName}: ${error}`);
+        console.error(`removeItem on ${storeName} threw:`, error);
         reject(error);
       }
     })
@@ -155,7 +154,7 @@ export class IndexedDBManager {
         await this.removeItem(storeName, id);
         removed.push(id);
       } catch (error) {
-        console.error(`Failed to remove ${id}:`, error);
+        console.error(`Failed to remove ${id} from ${storeName}:`, error);
       }
     }
 
@@ -167,15 +166,15 @@ export class IndexedDBManager {
       try {
         const request = this._getStore(storeName).clear();
         request.onsuccess = () => {
-          console.log(`successfully completed deleteAll ${storeName}`);
+          console.debug(`deleteAll ${storeName} done`);
           resolve(request.result);
         };
         request.onerror = () => {
-          console.error(`error on deleteAll ${storeName}: ${request.error}`);
+          console.error(`deleteAll on ${storeName} failed:`, request.error);
           reject(request.error);
         };
       } catch (error) {
-        console.error(`exception on deleteAll ${storeName}: ${error}`);
+        console.error(`deleteAll on ${storeName} threw:`, error);
         reject(error);
       }
     })

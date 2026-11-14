@@ -41,10 +41,11 @@ async function downloadZip(zip: JSZip, fileName: string) {
       await navigator.share(dataToShare);
       return;
     } catch (e: any) {
-      console.log("Navigator share failed:", e);
+      // AbortError: the user closed the share sheet.
       if (e?.name === "AbortError") {
         return;
       }
+      console.warn("Share failed, downloading instead:", e);
     }
   }
 
@@ -207,7 +208,7 @@ async function drawChoreoPdfBlob(
   pdf.setFont(boldFont);
 
   updateProgress(Math.round((1 / (choreo.sections.length + 1)) * 100));
-  console.log("Exporting to PDF");
+  console.log(`Exporting ${choreo.name} to PDF (${choreo.sections.length} sections)`);
 
   for (let i = 0; i < choreo.sections.length; i++) {
     const section = choreo.sections[i];
@@ -218,7 +219,7 @@ async function drawChoreoPdfBlob(
         });
       });
     });
-    console.log("Exporting", section.name);
+    console.debug("Exporting", section.name);
 
     const startingPoint: number | null = startingPoints[i] ? (startingPoints[i] + (visualDiagramHeightPx/PDF_METER_PX - sectionDeltas[i])) : null;
     const startingPointDelta = startingPoint ? Math.max(stageHeightPx - (startingPoint * PDF_METER_PX), -PDF_METER_PX) + topMarginM * PDF_METER_PX : 0;
@@ -901,11 +902,12 @@ export async function exportToPdf(
       onComplete();
       return;
     } catch (e: any) {
-      console.log("Navigator share failed:", e);
+      // AbortError: the user closed the share sheet.
       if (e?.name === "AbortError") {
         onComplete();
         return;
       }
+      console.warn("Share failed, downloading instead:", e);
     }
   }
 

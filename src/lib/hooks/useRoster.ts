@@ -20,7 +20,7 @@ export function useRoster(teamId: string | undefined, enabled: boolean): Roster 
           setRoster(result);
         }
       })
-      .catch(e => console.error((e as Error)?.message));
+      .catch(e => console.error(e));
     return () => {
       isCancelled = true;
     };

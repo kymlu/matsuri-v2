@@ -13,7 +13,7 @@ function parseChoreo(text: string): Choreo {
     const json = JSON.parse(text);
     return ChoreoSchema.parse(json);
   } catch(e) {
-    console.log(e);
+    console.warn("Uploaded file is not a valid choreo:", e);
     throw new Error("ファイルに問題があります。")
   }
 }
