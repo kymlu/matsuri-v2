@@ -17,6 +17,8 @@ import { isNullOrUndefinedOrBlank } from './lib/helpers/globalHelper';
 import { Grid } from 'react-loader-spinner';
 import { colorPalette } from './lib/consts/colors';
 import { useSearchParams } from 'react-router-dom';
+import { Dialog } from '@base-ui/react';
+import TeamLoadErrorDialog, { TeamLoadError } from './components/dialogs/TeamLoadErrorDialog';
 
 type Mode = "home" | "form" | "edit" | "view" | "admin" | "roster";
 
@@ -58,7 +60,38 @@ function App() {
   }, [teamSlug]);
 
   const [team, setTeam] = useState<Team | undefined>(undefined);
+  const [teamLoadError, setTeamLoadError] = useState<TeamLoadError | undefined>(undefined);
   const navigate = useNavigate();
+
+  const goWithoutTeam = () => {
+    setTeamLoadError(undefined);
+    setSavedDancerName(getMyDancerName());
+    navigate('/');
+    setIsProcessing(false);
+  }
+
+  const loadTeam = () => {
+    verifyTeam(teamSlug!!, (t) => {
+      setTeamLoadError(undefined);
+      setTeam(t);
+      setSavedDancerName(getMyDancerName(t?.id));
+      checkLogin(t?.id!,
+      (name, role, teamMemberId) => {
+        setMyDancerName(t?.id, name);
+        setSavedDancerName(name.trim());
+        setIsAdmin(role === "admin");
+        setIsViewer(role === "viewer");
+        setIsLoggedIn(true);
+        setCurrentTeamMemberId(teamMemberId);
+      }, () => {
+        setIsLoggedIn(false);
+      });
+      setIsProcessing(false);
+    }, (status) => {
+      // Keep the loading screen behind the dialog until the person chooses what to do.
+      setTeamLoadError(status === 404 ? "notFound" : "connection");
+    });
+  }
 
   useEffect(() => {
     if (isNullOrUndefinedOrBlank(teamSlug)) {
@@ -66,26 +99,7 @@ function App() {
       setShowNoTeamDialog(true);
       setIsProcessing(false);
     } else {
-      verifyTeam(teamSlug!!, (t) => {
-        setTeam(t);
-        setSavedDancerName(getMyDancerName(t?.id));
-        checkLogin(t?.id!,
-        (name, role, teamMemberId) => {
-          setMyDancerName(t?.id, name);
-          setSavedDancerName(name.trim());
-          setIsAdmin(role === "admin");
-          setIsViewer(role === "viewer");
-          setIsLoggedIn(true);
-          setCurrentTeamMemberId(teamMemberId);
-        }, () => {
-          setIsLoggedIn(false);
-        });
-        setIsProcessing(false);
-      }, () => {
-        setSavedDancerName(getMyDancerName());
-        navigate('/');
-        setIsProcessing(false);
-      });
+      loadTeam();
     }
   }, []);
 
@@ -131,6 +145,19 @@ function App() {
           />
         )
       }
+      <Dialog.Root open={!!teamLoadError}>
+        {
+          teamLoadError &&
+          <TeamLoadErrorDialog
+            error={teamLoadError}
+            teamSlug={teamSlug ?? ""}
+            onRetry={() => {
+              setTeamLoadError(undefined);
+              loadTeam();
+            }}
+            onUseWithoutTeam={goWithoutTeam}/>
+        }
+      </Dialog.Root>
       {
         isProcessing &&
         <div className='w-full h-svh'>
