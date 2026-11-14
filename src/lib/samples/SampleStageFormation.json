@@ -1,1 +1,2102 @@
-{"id":"0a002caf-611a-40aa-9989-a690e6791e0a","name":"サンプル","event":"例の祭り","stageType":"stage","stageGeometry":{"stageWidth":14,"stageLength":8,"margin":{"topMargin":2,"leftMargin":2,"rightMargin":2,"bottomMargin":2},"yAxis":"top-down"},"sections":[{"id":"e7353d7a-4258-4098-87ff-570973b786fe","name":"OP","order":1,"note":"入り：左\n3-234で全員前向き","formation":{"dancerPositions":{"b90ab6ec-89f3-49df-92de-41d86299bea8":{"x":3,"y":4.5,"sectionId":"d53c65bf-6088-48ab-889f-ba1b48384c45","type":"dancer","rotation":0,"dancerId":"b90ab6ec-89f3-49df-92de-41d86299bea8","color":"#D1B2E0","z":0},"95d6ceab-27ee-42cf-9fd7-9b672d8040ed":{"x":4,"y":3.5,"sectionId":"d53c65bf-6088-48ab-889f-ba1b48384c45","type":"dancer","rotation":0,"dancerId":"95d6ceab-27ee-42cf-9fd7-9b672d8040ed","color":"#D1B2E0","z":1},"5cf28495-b0bd-4798-bb3e-fa45490a30d3":{"x":5,"y":4.5,"sectionId":"d53c65bf-6088-48ab-889f-ba1b48384c45","type":"dancer","rotation":0,"dancerId":"5cf28495-b0bd-4798-bb3e-fa45490a30d3","color":"#D1B2E0","z":2},"2e46d245-6f73-451f-b057-a9f983906462":{"x":6,"y":3.5,"sectionId":"d53c65bf-6088-48ab-889f-ba1b48384c45","type":"dancer","rotation":0,"dancerId":"2e46d245-6f73-451f-b057-a9f983906462","color":"#D1B2E0","z":3},"b83c95dc-a5a8-4ecf-8140-840f11e7b676":{"x":7,"y":4.5,"sectionId":"d53c65bf-6088-48ab-889f-ba1b48384c45","type":"dancer","rotation":0,"dancerId":"b83c95dc-a5a8-4ecf-8140-840f11e7b676","color":"#D1B2E0","z":4},"6f4499ac-def8-47c5-8794-1aecd8a98bd6":{"x":8,"y":3.5,"sectionId":"d53c65bf-6088-48ab-889f-ba1b48384c45","type":"dancer","rotation":0,"dancerId":"6f4499ac-def8-47c5-8794-1aecd8a98bd6","color":"#D1B2E0","z":5},"36f24fae-2839-499c-8023-e6018f5cfc4e":{"x":9,"y":4.5,"sectionId":"d53c65bf-6088-48ab-889f-ba1b48384c45","type":"dancer","rotation":0,"dancerId":"36f24fae-2839-499c-8023-e6018f5cfc4e","color":"#D1B2E0","z":6},"4d44aaa5-fa12-4ffc-9360-fc02b09c46b6":{"x":10,"y":3.5,"sectionId":"d53c65bf-6088-48ab-889f-ba1b48384c45","type":"dancer","rotation":0,"dancerId":"4d44aaa5-fa12-4ffc-9360-fc02b09c46b6","color":"#D1B2E0","z":7},"fdd08aca-33ed-40dc-bf45-1abc4fe880ad":{"x":11,"y":4.5,"sectionId":"d53c65bf-6088-48ab-889f-ba1b48384c45","type":"dancer","rotation":0,"dancerId":"fdd08aca-33ed-40dc-bf45-1abc4fe880ad","color":"#D1B2E0","z":8},"b10f3288-2b17-4e12-aab0-dac6b199b820":{"x":5,"y":1.5,"sectionId":"d53c65bf-6088-48ab-889f-ba1b48384c45","type":"dancer","rotation":0,"dancerId":"b10f3288-2b17-4e12-aab0-dac6b199b820","color":"#F5B04C","z":9},"3c33f593-f3a8-4f90-85c3-85deb187bdc3":{"sectionId":"e7353d7a-4258-4098-87ff-570973b786fe","dancerId":"3c33f593-f3a8-4f90-85c3-85deb187bdc3","type":"dancer","x":2.5,"y":7,"z":10,"color":"#A1D4A1"},"84d52354-6f0b-41fa-9c80-072b6e232224":{"sectionId":"e7353d7a-4258-4098-87ff-570973b786fe","dancerId":"84d52354-6f0b-41fa-9c80-072b6e232224","type":"dancer","x":6.5,"y":7,"z":11,"color":"#A1D4A1"},"ca8e1f8a-bf46-4b74-a36d-228282258bca":{"sectionId":"e7353d7a-4258-4098-87ff-570973b786fe","dancerId":"ca8e1f8a-bf46-4b74-a36d-228282258bca","type":"dancer","x":7.5,"y":7,"z":12,"color":"#99BBDD"},"9152527b-e9ad-4b4c-93f7-695a53413e90":{"sectionId":"e7353d7a-4258-4098-87ff-570973b786fe","dancerId":"9152527b-e9ad-4b4c-93f7-695a53413e90","type":"dancer","x":11.5,"y":7,"z":13,"color":"#99BBDD"}},"dancerActions":[{"id":"ef7e792a-3478-46ef-b1a5-670d681d8b33","name":"手上げ","timings":[{"id":"4ba229de-501d-4aa5-b4d3-545f9b7cfc2d","name":"1","dancerIds":["b83c95dc-a5a8-4ecf-8140-840f11e7b676"]},{"id":"63bc80bc-cc81-4291-bde8-59bc3554576c","name":"1と","dancerIds":["2e46d245-6f73-451f-b057-a9f983906462","6f4499ac-def8-47c5-8794-1aecd8a98bd6"]},{"id":"67c8352a-dec8-470d-9c84-c63a1c14c4d0","name":"2","dancerIds":["5cf28495-b0bd-4798-bb3e-fa45490a30d3","36f24fae-2839-499c-8023-e6018f5cfc4e"]},{"id":"b2f2de9d-4b5c-4c6b-b849-d048baff712f","name":"2と","dancerIds":["95d6ceab-27ee-42cf-9fd7-9b672d8040ed","4d44aaa5-fa12-4ffc-9360-fc02b09c46b6"]},{"id":"9d55efee-d122-4a9f-9936-a6096b2535d0","name":"3","dancerIds":["b90ab6ec-89f3-49df-92de-41d86299bea8","fdd08aca-33ed-40dc-bf45-1abc4fe880ad"]}]}],"propPositions":{"3d99b97c-ad95-48e3-ab4e-e56bf04cb48a":{"x":5,"y":1,"sectionId":"e7353d7a-4258-4098-87ff-570973b786fe","type":"prop","propId":"3d99b97c-ad95-48e3-ab4e-e56bf04cb48a","z":0,"inUse":true},"373ec2ef-7f15-4410-a2a0-5a8b13e7aace":{"sectionId":"e7353d7a-4258-4098-87ff-570973b786fe","propId":"373ec2ef-7f15-4410-a2a0-5a8b13e7aace","type":"prop","x":2,"y":6.5,"z":1,"inUse":false},"92825dce-2858-4202-bcd1-64fc3dcf7dae":{"sectionId":"e7353d7a-4258-4098-87ff-570973b786fe","propId":"92825dce-2858-4202-bcd1-64fc3dcf7dae","type":"prop","x":7,"y":6.5,"z":2,"inUse":false}}}},{"id":"21f9029f-def9-42c2-8833-7881583c3f14","name":"Aメロ","formation":{"dancerPositions":{"b90ab6ec-89f3-49df-92de-41d86299bea8":{"x":3,"y":4,"sectionId":"21f9029f-def9-42c2-8833-7881583c3f14","type":"dancer","rotation":0,"dancerId":"b90ab6ec-89f3-49df-92de-41d86299bea8","color":"#D1B2E0","z":0},"95d6ceab-27ee-42cf-9fd7-9b672d8040ed":{"x":4.5,"y":3,"sectionId":"21f9029f-def9-42c2-8833-7881583c3f14","type":"dancer","rotation":0,"dancerId":"95d6ceab-27ee-42cf-9fd7-9b672d8040ed","color":"#D1B2E0","z":1},"5cf28495-b0bd-4798-bb3e-fa45490a30d3":{"x":6,"y":3.5,"sectionId":"21f9029f-def9-42c2-8833-7881583c3f14","type":"dancer","rotation":0,"dancerId":"5cf28495-b0bd-4798-bb3e-fa45490a30d3","color":"#D1B2E0","z":2},"2e46d245-6f73-451f-b057-a9f983906462":{"x":5.5,"y":2,"sectionId":"21f9029f-def9-42c2-8833-7881583c3f14","type":"dancer","rotation":0,"dancerId":"2e46d245-6f73-451f-b057-a9f983906462","color":"#D1B2E0","z":3},"b83c95dc-a5a8-4ecf-8140-840f11e7b676":{"x":7,"y":1,"sectionId":"21f9029f-def9-42c2-8833-7881583c3f14","type":"dancer","rotation":0,"dancerId":"b83c95dc-a5a8-4ecf-8140-840f11e7b676","color":"#D1B2E0","z":4},"6f4499ac-def8-47c5-8794-1aecd8a98bd6":{"x":8.5,"y":2,"sectionId":"21f9029f-def9-42c2-8833-7881583c3f14","type":"dancer","rotation":0,"dancerId":"6f4499ac-def8-47c5-8794-1aecd8a98bd6","color":"#D1B2E0","z":5},"36f24fae-2839-499c-8023-e6018f5cfc4e":{"x":8,"y":3.5,"sectionId":"21f9029f-def9-42c2-8833-7881583c3f14","type":"dancer","rotation":0,"dancerId":"36f24fae-2839-499c-8023-e6018f5cfc4e","color":"#D1B2E0","z":6},"4d44aaa5-fa12-4ffc-9360-fc02b09c46b6":{"x":9.5,"y":3,"sectionId":"21f9029f-def9-42c2-8833-7881583c3f14","type":"dancer","rotation":0,"dancerId":"4d44aaa5-fa12-4ffc-9360-fc02b09c46b6","color":"#D1B2E0","z":7},"fdd08aca-33ed-40dc-bf45-1abc4fe880ad":{"x":11,"y":4,"sectionId":"21f9029f-def9-42c2-8833-7881583c3f14","type":"dancer","rotation":0,"dancerId":"fdd08aca-33ed-40dc-bf45-1abc4fe880ad","color":"#D1B2E0","z":8},"b10f3288-2b17-4e12-aab0-dac6b199b820":{"x":0.5,"y":5.5,"sectionId":"21f9029f-def9-42c2-8833-7881583c3f14","type":"dancer","rotation":0,"dancerId":"b10f3288-2b17-4e12-aab0-dac6b199b820","color":"#F5B04C","z":9},"3c33f593-f3a8-4f90-85c3-85deb187bdc3":{"sectionId":"21f9029f-def9-42c2-8833-7881583c3f14","dancerId":"3c33f593-f3a8-4f90-85c3-85deb187bdc3","type":"dancer","x":2.5,"y":7,"z":10,"color":"#A1D4A1"},"84d52354-6f0b-41fa-9c80-072b6e232224":{"sectionId":"21f9029f-def9-42c2-8833-7881583c3f14","dancerId":"84d52354-6f0b-41fa-9c80-072b6e232224","type":"dancer","x":6.5,"y":7,"z":11,"color":"#A1D4A1"},"ca8e1f8a-bf46-4b74-a36d-228282258bca":{"sectionId":"21f9029f-def9-42c2-8833-7881583c3f14","dancerId":"ca8e1f8a-bf46-4b74-a36d-228282258bca","type":"dancer","x":7.5,"y":7,"z":12,"color":"#99BBDD"},"9152527b-e9ad-4b4c-93f7-695a53413e90":{"sectionId":"21f9029f-def9-42c2-8833-7881583c3f14","dancerId":"9152527b-e9ad-4b4c-93f7-695a53413e90","type":"dancer","x":11.5,"y":7,"z":13,"color":"#99BBDD"}},"dancerActions":[{"id":"ed10300f-fe38-4832-aa89-a12675314df0","name":"ジャンプ","timings":[{"id":"3dc6a794-a48e-4a9a-ad45-2e9d49465466","name":"2","dancerIds":["b83c95dc-a5a8-4ecf-8140-840f11e7b676"]},{"id":"f4a242cc-7145-4799-8c21-0eed3c6a544e","name":"4","dancerIds":["2e46d245-6f73-451f-b057-a9f983906462","95d6ceab-27ee-42cf-9fd7-9b672d8040ed","6f4499ac-def8-47c5-8794-1aecd8a98bd6","4d44aaa5-fa12-4ffc-9360-fc02b09c46b6"]},{"id":"a20b7a29-5f2e-42d1-ab9c-8f8d3232fc5b","name":"6","dancerIds":["b90ab6ec-89f3-49df-92de-41d86299bea8","5cf28495-b0bd-4798-bb3e-fa45490a30d3","36f24fae-2839-499c-8023-e6018f5cfc4e","fdd08aca-33ed-40dc-bf45-1abc4fe880ad"]}]}],"propPositions":{"3d99b97c-ad95-48e3-ab4e-e56bf04cb48a":{"x":0,"y":5.5,"sectionId":"d53c65bf-6088-48ab-889f-ba1b48384c45","type":"prop","propId":"3d99b97c-ad95-48e3-ab4e-e56bf04cb48a","z":0,"rotation":-89.99999999999996},"373ec2ef-7f15-4410-a2a0-5a8b13e7aace":{"sectionId":"21f9029f-def9-42c2-8833-7881583c3f14","propId":"373ec2ef-7f15-4410-a2a0-5a8b13e7aace","type":"prop","x":2,"y":6.5,"z":1,"inUse":false},"92825dce-2858-4202-bcd1-64fc3dcf7dae":{"sectionId":"21f9029f-def9-42c2-8833-7881583c3f14","propId":"92825dce-2858-4202-bcd1-64fc3dcf7dae","type":"prop","x":7,"y":6.5,"z":2,"inUse":false}},"propMovements":{"3d99b97c-ad95-48e3-ab4e-e56bf04cb48a":{"points":[{"x":1.1500000000000012,"y":2.16}],"tension":"curved"}},"dancerMovements":{"b10f3288-2b17-4e12-aab0-dac6b199b820":{"points":[{"x":0.8300000000000001,"y":3.6100000000000003}],"tension":"curved"}}}},{"id":"e2f8ab45-904f-4539-8b2c-327c3b92649c","name":"サビ","formation":{"dancerPositions":{"b90ab6ec-89f3-49df-92de-41d86299bea8":{"x":4,"y":2,"sectionId":"e2f8ab45-904f-4539-8b2c-327c3b92649c","type":"dancer","rotation":0,"dancerId":"b90ab6ec-89f3-49df-92de-41d86299bea8","color":"#D1B2E0","z":1},"95d6ceab-27ee-42cf-9fd7-9b672d8040ed":{"x":3,"y":1,"sectionId":"e2f8ab45-904f-4539-8b2c-327c3b92649c","type":"dancer","rotation":0,"dancerId":"95d6ceab-27ee-42cf-9fd7-9b672d8040ed","color":"#D1B2E0","z":0},"5cf28495-b0bd-4798-bb3e-fa45490a30d3":{"x":6,"y":2,"sectionId":"e2f8ab45-904f-4539-8b2c-327c3b92649c","type":"dancer","rotation":0,"dancerId":"5cf28495-b0bd-4798-bb3e-fa45490a30d3","color":"#D1B2E0","z":2},"2e46d245-6f73-451f-b057-a9f983906462":{"x":5,"y":1,"sectionId":"e2f8ab45-904f-4539-8b2c-327c3b92649c","type":"dancer","rotation":0,"dancerId":"2e46d245-6f73-451f-b057-a9f983906462","color":"#D1B2E0","z":3},"b83c95dc-a5a8-4ecf-8140-840f11e7b676":{"x":7,"y":1,"sectionId":"e2f8ab45-904f-4539-8b2c-327c3b92649c","type":"dancer","rotation":0,"dancerId":"b83c95dc-a5a8-4ecf-8140-840f11e7b676","color":"#D1B2E0","z":4},"6f4499ac-def8-47c5-8794-1aecd8a98bd6":{"x":9,"y":1,"sectionId":"e2f8ab45-904f-4539-8b2c-327c3b92649c","type":"dancer","rotation":0,"dancerId":"6f4499ac-def8-47c5-8794-1aecd8a98bd6","color":"#D1B2E0","z":5},"36f24fae-2839-499c-8023-e6018f5cfc4e":{"x":8,"y":2,"sectionId":"e2f8ab45-904f-4539-8b2c-327c3b92649c","type":"dancer","rotation":0,"dancerId":"36f24fae-2839-499c-8023-e6018f5cfc4e","color":"#D1B2E0","z":6},"4d44aaa5-fa12-4ffc-9360-fc02b09c46b6":{"x":11,"y":1,"sectionId":"e2f8ab45-904f-4539-8b2c-327c3b92649c","type":"dancer","rotation":0,"dancerId":"4d44aaa5-fa12-4ffc-9360-fc02b09c46b6","color":"#D1B2E0","z":7},"fdd08aca-33ed-40dc-bf45-1abc4fe880ad":{"x":10,"y":2,"sectionId":"e2f8ab45-904f-4539-8b2c-327c3b92649c","type":"dancer","rotation":0,"dancerId":"fdd08aca-33ed-40dc-bf45-1abc4fe880ad","color":"#D1B2E0","z":8},"b10f3288-2b17-4e12-aab0-dac6b199b820":{"x":5,"y":5.5,"sectionId":"e2f8ab45-904f-4539-8b2c-327c3b92649c","type":"dancer","rotation":0,"dancerId":"b10f3288-2b17-4e12-aab0-dac6b199b820","color":"#F5B04C","z":9},"3c33f593-f3a8-4f90-85c3-85deb187bdc3":{"sectionId":"e2f8ab45-904f-4539-8b2c-327c3b92649c","dancerId":"3c33f593-f3a8-4f90-85c3-85deb187bdc3","type":"dancer","x":2.5,"y":7,"z":10,"color":"#A1D4A1"},"84d52354-6f0b-41fa-9c80-072b6e232224":{"sectionId":"e2f8ab45-904f-4539-8b2c-327c3b92649c","dancerId":"84d52354-6f0b-41fa-9c80-072b6e232224","type":"dancer","x":6.5,"y":7,"z":11,"color":"#A1D4A1"},"ca8e1f8a-bf46-4b74-a36d-228282258bca":{"sectionId":"e2f8ab45-904f-4539-8b2c-327c3b92649c","dancerId":"ca8e1f8a-bf46-4b74-a36d-228282258bca","type":"dancer","x":7.5,"y":7,"z":12,"color":"#99BBDD"},"9152527b-e9ad-4b4c-93f7-695a53413e90":{"sectionId":"e2f8ab45-904f-4539-8b2c-327c3b92649c","dancerId":"9152527b-e9ad-4b4c-93f7-695a53413e90","type":"dancer","x":11.5,"y":7,"z":13,"color":"#99BBDD"}},"dancerActions":[],"propPositions":{"3d99b97c-ad95-48e3-ab4e-e56bf04cb48a":{"x":5,"y":5,"sectionId":"d53c65bf-6088-48ab-889f-ba1b48384c45","type":"prop","propId":"3d99b97c-ad95-48e3-ab4e-e56bf04cb48a","z":0,"inUse":false},"373ec2ef-7f15-4410-a2a0-5a8b13e7aace":{"sectionId":"d53c65bf-6088-48ab-889f-ba1b48384c45","propId":"373ec2ef-7f15-4410-a2a0-5a8b13e7aace","type":"prop","x":2,"y":6.5,"z":1,"inUse":true},"92825dce-2858-4202-bcd1-64fc3dcf7dae":{"sectionId":"d53c65bf-6088-48ab-889f-ba1b48384c45","propId":"92825dce-2858-4202-bcd1-64fc3dcf7dae","type":"prop","x":7,"y":6.5,"z":2,"inUse":true}},"propMovements":{"3d99b97c-ad95-48e3-ab4e-e56bf04cb48a":{"points":[],"tension":"curved"}},"dancerMovements":{"b10f3288-2b17-4e12-aab0-dac6b199b820":{"points":[],"tension":"curved"}}}},{"id":"d53c65bf-6088-48ab-889f-ba1b48384c45","name":"間奏","formation":{"dancerPositions":{"b90ab6ec-89f3-49df-92de-41d86299bea8":{"x":4.5,"y":3.5,"sectionId":"d53c65bf-6088-48ab-889f-ba1b48384c45","type":"dancer","rotation":0,"dancerId":"b90ab6ec-89f3-49df-92de-41d86299bea8","color":"#D1B2E0","z":0},"95d6ceab-27ee-42cf-9fd7-9b672d8040ed":{"x":3,"y":2.5,"sectionId":"d53c65bf-6088-48ab-889f-ba1b48384c45","type":"dancer","rotation":0,"dancerId":"95d6ceab-27ee-42cf-9fd7-9b672d8040ed","color":"#D1B2E0","z":1},"5cf28495-b0bd-4798-bb3e-fa45490a30d3":{"x":5.5,"y":2,"sectionId":"d53c65bf-6088-48ab-889f-ba1b48384c45","type":"dancer","rotation":0,"dancerId":"5cf28495-b0bd-4798-bb3e-fa45490a30d3","color":"#D1B2E0","z":3},"2e46d245-6f73-451f-b057-a9f983906462":{"x":4,"y":1,"sectionId":"d53c65bf-6088-48ab-889f-ba1b48384c45","type":"dancer","rotation":0,"dancerId":"2e46d245-6f73-451f-b057-a9f983906462","color":"#D1B2E0","z":2},"b83c95dc-a5a8-4ecf-8140-840f11e7b676":{"x":7,"y":1,"sectionId":"d53c65bf-6088-48ab-889f-ba1b48384c45","type":"dancer","rotation":0,"dancerId":"b83c95dc-a5a8-4ecf-8140-840f11e7b676","color":"#D1B2E0","z":4},"6f4499ac-def8-47c5-8794-1aecd8a98bd6":{"x":10,"y":1,"sectionId":"d53c65bf-6088-48ab-889f-ba1b48384c45","type":"dancer","rotation":0,"dancerId":"6f4499ac-def8-47c5-8794-1aecd8a98bd6","color":"#D1B2E0","z":6},"36f24fae-2839-499c-8023-e6018f5cfc4e":{"x":8.5,"y":2,"sectionId":"d53c65bf-6088-48ab-889f-ba1b48384c45","type":"dancer","rotation":0,"dancerId":"36f24fae-2839-499c-8023-e6018f5cfc4e","color":"#D1B2E0","z":5},"4d44aaa5-fa12-4ffc-9360-fc02b09c46b6":{"x":11,"y":2.5,"sectionId":"d53c65bf-6088-48ab-889f-ba1b48384c45","type":"dancer","rotation":0,"dancerId":"4d44aaa5-fa12-4ffc-9360-fc02b09c46b6","color":"#D1B2E0","z":7},"fdd08aca-33ed-40dc-bf45-1abc4fe880ad":{"x":9.5,"y":3.5,"sectionId":"d53c65bf-6088-48ab-889f-ba1b48384c45","type":"dancer","rotation":0,"dancerId":"fdd08aca-33ed-40dc-bf45-1abc4fe880ad","color":"#D1B2E0","z":8},"b10f3288-2b17-4e12-aab0-dac6b199b820":{"x":5,"y":5.5,"sectionId":"e2f8ab45-904f-4539-8b2c-327c3b92649c","type":"dancer","rotation":0,"dancerId":"b10f3288-2b17-4e12-aab0-dac6b199b820","color":"#F5B04C","z":9},"3c33f593-f3a8-4f90-85c3-85deb187bdc3":{"sectionId":"e2f8ab45-904f-4539-8b2c-327c3b92649c","dancerId":"3c33f593-f3a8-4f90-85c3-85deb187bdc3","type":"dancer","x":2.5,"y":7,"z":10,"color":"#A1D4A1"},"84d52354-6f0b-41fa-9c80-072b6e232224":{"sectionId":"e2f8ab45-904f-4539-8b2c-327c3b92649c","dancerId":"84d52354-6f0b-41fa-9c80-072b6e232224","type":"dancer","x":6.5,"y":7,"z":11,"color":"#A1D4A1"},"ca8e1f8a-bf46-4b74-a36d-228282258bca":{"sectionId":"e2f8ab45-904f-4539-8b2c-327c3b92649c","dancerId":"ca8e1f8a-bf46-4b74-a36d-228282258bca","type":"dancer","x":7.5,"y":7,"z":12,"color":"#99BBDD"},"9152527b-e9ad-4b4c-93f7-695a53413e90":{"sectionId":"e2f8ab45-904f-4539-8b2c-327c3b92649c","dancerId":"9152527b-e9ad-4b4c-93f7-695a53413e90","type":"dancer","x":11.5,"y":7,"z":13,"color":"#99BBDD"}},"dancerActions":[],"propPositions":{"3d99b97c-ad95-48e3-ab4e-e56bf04cb48a":{"x":5,"y":5,"sectionId":"d53c65bf-6088-48ab-889f-ba1b48384c45","type":"prop","propId":"3d99b97c-ad95-48e3-ab4e-e56bf04cb48a","z":0,"inUse":false},"373ec2ef-7f15-4410-a2a0-5a8b13e7aace":{"sectionId":"d53c65bf-6088-48ab-889f-ba1b48384c45","propId":"373ec2ef-7f15-4410-a2a0-5a8b13e7aace","type":"prop","x":2,"y":6.5,"z":1,"inUse":true},"92825dce-2858-4202-bcd1-64fc3dcf7dae":{"sectionId":"d53c65bf-6088-48ab-889f-ba1b48384c45","propId":"92825dce-2858-4202-bcd1-64fc3dcf7dae","type":"prop","x":7,"y":6.5,"z":2,"inUse":true}},"propMovements":{"3d99b97c-ad95-48e3-ab4e-e56bf04cb48a":{"points":[],"tension":"curved"}},"dancerMovements":{"b10f3288-2b17-4e12-aab0-dac6b199b820":{"points":[],"tension":"curved"}}}},{"id":"4020121e-8f1c-40bf-9e41-d165de5dcb84","name":"ラスト","note":"はけ：右","formation":{"dancerPositions":{"b90ab6ec-89f3-49df-92de-41d86299bea8":{"x":5,"y":3,"sectionId":"4020121e-8f1c-40bf-9e41-d165de5dcb84","type":"dancer","rotation":0,"dancerId":"b90ab6ec-89f3-49df-92de-41d86299bea8","color":"#D1B2E0","z":0},"95d6ceab-27ee-42cf-9fd7-9b672d8040ed":{"x":4,"y":2,"sectionId":"4020121e-8f1c-40bf-9e41-d165de5dcb84","type":"dancer","rotation":0,"dancerId":"95d6ceab-27ee-42cf-9fd7-9b672d8040ed","color":"#D1B2E0","z":1},"5cf28495-b0bd-4798-bb3e-fa45490a30d3":{"x":6,"y":2,"sectionId":"4020121e-8f1c-40bf-9e41-d165de5dcb84","type":"dancer","rotation":0,"dancerId":"5cf28495-b0bd-4798-bb3e-fa45490a30d3","color":"#D1B2E0","z":3},"2e46d245-6f73-451f-b057-a9f983906462":{"x":3,"y":1,"sectionId":"4020121e-8f1c-40bf-9e41-d165de5dcb84","type":"dancer","rotation":0,"dancerId":"2e46d245-6f73-451f-b057-a9f983906462","color":"#D1B2E0","z":2},"b83c95dc-a5a8-4ecf-8140-840f11e7b676":{"x":7,"y":1,"sectionId":"4020121e-8f1c-40bf-9e41-d165de5dcb84","type":"dancer","rotation":0,"dancerId":"b83c95dc-a5a8-4ecf-8140-840f11e7b676","color":"#D1B2E0","z":4},"6f4499ac-def8-47c5-8794-1aecd8a98bd6":{"x":11,"y":1,"sectionId":"4020121e-8f1c-40bf-9e41-d165de5dcb84","type":"dancer","rotation":0,"dancerId":"6f4499ac-def8-47c5-8794-1aecd8a98bd6","color":"#D1B2E0","z":6},"36f24fae-2839-499c-8023-e6018f5cfc4e":{"x":8,"y":2,"sectionId":"4020121e-8f1c-40bf-9e41-d165de5dcb84","type":"dancer","rotation":0,"dancerId":"36f24fae-2839-499c-8023-e6018f5cfc4e","color":"#D1B2E0","z":5},"4d44aaa5-fa12-4ffc-9360-fc02b09c46b6":{"x":10,"y":2,"sectionId":"4020121e-8f1c-40bf-9e41-d165de5dcb84","type":"dancer","rotation":0,"dancerId":"4d44aaa5-fa12-4ffc-9360-fc02b09c46b6","color":"#D1B2E0","z":7},"fdd08aca-33ed-40dc-bf45-1abc4fe880ad":{"x":9,"y":3,"sectionId":"4020121e-8f1c-40bf-9e41-d165de5dcb84","type":"dancer","rotation":0,"dancerId":"fdd08aca-33ed-40dc-bf45-1abc4fe880ad","color":"#D1B2E0","z":8},"b10f3288-2b17-4e12-aab0-dac6b199b820":{"x":5,"y":5.5,"sectionId":"4020121e-8f1c-40bf-9e41-d165de5dcb84","type":"dancer","rotation":0,"dancerId":"b10f3288-2b17-4e12-aab0-dac6b199b820","color":"#F5B04C","z":9},"3c33f593-f3a8-4f90-85c3-85deb187bdc3":{"sectionId":"4020121e-8f1c-40bf-9e41-d165de5dcb84","dancerId":"3c33f593-f3a8-4f90-85c3-85deb187bdc3","type":"dancer","x":2.5,"y":7,"z":10,"color":"#A1D4A1"},"84d52354-6f0b-41fa-9c80-072b6e232224":{"sectionId":"4020121e-8f1c-40bf-9e41-d165de5dcb84","dancerId":"84d52354-6f0b-41fa-9c80-072b6e232224","type":"dancer","x":6.5,"y":7,"z":11,"color":"#A1D4A1"},"ca8e1f8a-bf46-4b74-a36d-228282258bca":{"sectionId":"4020121e-8f1c-40bf-9e41-d165de5dcb84","dancerId":"ca8e1f8a-bf46-4b74-a36d-228282258bca","type":"dancer","x":7.5,"y":7,"z":12,"color":"#99BBDD"},"9152527b-e9ad-4b4c-93f7-695a53413e90":{"sectionId":"4020121e-8f1c-40bf-9e41-d165de5dcb84","dancerId":"9152527b-e9ad-4b4c-93f7-695a53413e90","type":"dancer","x":11.5,"y":7,"z":13,"color":"#99BBDD"}},"dancerActions":[],"propPositions":{"3d99b97c-ad95-48e3-ab4e-e56bf04cb48a":{"x":5,"y":5,"sectionId":"4020121e-8f1c-40bf-9e41-d165de5dcb84","type":"prop","propId":"3d99b97c-ad95-48e3-ab4e-e56bf04cb48a","z":0,"inUse":true},"373ec2ef-7f15-4410-a2a0-5a8b13e7aace":{"sectionId":"4020121e-8f1c-40bf-9e41-d165de5dcb84","propId":"373ec2ef-7f15-4410-a2a0-5a8b13e7aace","type":"prop","x":2,"y":6.5,"z":1,"inUse":true},"92825dce-2858-4202-bcd1-64fc3dcf7dae":{"sectionId":"4020121e-8f1c-40bf-9e41-d165de5dcb84","propId":"92825dce-2858-4202-bcd1-64fc3dcf7dae","type":"prop","x":7,"y":6.5,"z":2,"inUse":true}},"dancerMovements":{"b10f3288-2b17-4e12-aab0-dac6b199b820":{"points":[],"tension":"curved"}},"propMovements":{"3d99b97c-ad95-48e3-ab4e-e56bf04cb48a":{"points":[],"tension":"curved"}}}}],"dancers":{"36f24fae-2839-499c-8023-e6018f5cfc4e":{"id":"36f24fae-2839-499c-8023-e6018f5cfc4e","name":"松子"},"b10f3288-2b17-4e12-aab0-dac6b199b820":{"id":"b10f3288-2b17-4e12-aab0-dac6b199b820","name":"梅子"},"5cf28495-b0bd-4798-bb3e-fa45490a30d3":{"id":"5cf28495-b0bd-4798-bb3e-fa45490a30d3","name":"竹子"},"b83c95dc-a5a8-4ecf-8140-840f11e7b676":{"id":"b83c95dc-a5a8-4ecf-8140-840f11e7b676","name":"雪子"},"fdd08aca-33ed-40dc-bf45-1abc4fe880ad":{"id":"fdd08aca-33ed-40dc-bf45-1abc4fe880ad","name":"月子"},"6f4499ac-def8-47c5-8794-1aecd8a98bd6":{"id":"6f4499ac-def8-47c5-8794-1aecd8a98bd6","name":"花子"},"4d44aaa5-fa12-4ffc-9360-fc02b09c46b6":{"id":"4d44aaa5-fa12-4ffc-9360-fc02b09c46b6","name":"一郎"},"95d6ceab-27ee-42cf-9fd7-9b672d8040ed":{"id":"95d6ceab-27ee-42cf-9fd7-9b672d8040ed","name":"二郎"},"2e46d245-6f73-451f-b057-a9f983906462":{"id":"2e46d245-6f73-451f-b057-a9f983906462","name":"三郎"},"b90ab6ec-89f3-49df-92de-41d86299bea8":{"id":"b90ab6ec-89f3-49df-92de-41d86299bea8","name":"四郎"},"3c33f593-f3a8-4f90-85c3-85deb187bdc3":{"id":"3c33f593-f3a8-4f90-85c3-85deb187bdc3","name":"アルファ"},"84d52354-6f0b-41fa-9c80-072b6e232224":{"id":"84d52354-6f0b-41fa-9c80-072b6e232224","name":"ベタ"},"ca8e1f8a-bf46-4b74-a36d-228282258bca":{"id":"ca8e1f8a-bf46-4b74-a36d-228282258bca","name":"デルタ"},"9152527b-e9ad-4b4c-93f7-695a53413e90":{"id":"9152527b-e9ad-4b4c-93f7-695a53413e90","name":"ガンマ"}},"props":{"92825dce-2858-4202-bcd1-64fc3dcf7dae":{"id":"92825dce-2858-4202-bcd1-64fc3dcf7dae","name":"右幕","length":1,"width":5,"color":"#6699CC"},"3d99b97c-ad95-48e3-ab4e-e56bf04cb48a":{"id":"3d99b97c-ad95-48e3-ab4e-e56bf04cb48a","name":"大旗","color":"#F08A00","length":1,"width":4},"373ec2ef-7f15-4410-a2a0-5a8b13e7aace":{"id":"373ec2ef-7f15-4410-a2a0-5a8b13e7aace","name":"左幕","length":1,"width":5,"color":"#7BC77B"}},"obstacles":{"ca5396ae-aac0-4e90-b405-ae16308a65c2":{"id":"ca5396ae-aac0-4e90-b405-ae16308a65c2","name":"スピーカー","x":-4.884981308350689e-15,"y":-0.0036363636363634377,"sectionId":"","type":"obstacle","rotation":0,"color":"#DDDDDD","length":1,"width":2,"z":0},"462b50a6-897f-4b9e-b1b1-888a51bb94a7":{"id":"462b50a6-897f-4b9e-b1b1-888a51bb94a7","name":"スピーカー","x":12,"y":0,"sectionId":"","type":"obstacle","rotation":0,"color":"#DDDDDD","length":1,"width":2,"z":1}},"lastUpdated":"2026-08-18T12:00:00.000Z","version":1,"startDate":"","endDate":""}
+{
+  "id": "0a002caf-611a-40aa-9989-a690e6791e0a",
+  "name": "サンプル",
+  "event": "例の祭り",
+  "startDate": "",
+  "endDate": "",
+  "stageType": "stage",
+  "stageGeometry": {
+    "stageWidth": 16,
+    "stageLength": 8,
+    "margin": {
+      "topMargin": 2,
+      "leftMargin": 2,
+      "rightMargin": 2,
+      "bottomMargin": 2
+    },
+    "yAxis": "top-down"
+  },
+  "sections": [
+    {
+      "id": "dd6d4540-2080-5d45-871a-bb706cdb40cb",
+      "name": "OP",
+      "order": 1,
+      "note": "入り：左から",
+      "formation": {
+        "dancerPositions": {
+          "676de921-a44b-5eae-8d09-48cc915fc050": {
+            "x": 7,
+            "y": 2.5,
+            "sectionId": "dd6d4540-2080-5d45-871a-bb706cdb40cb",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "676de921-a44b-5eae-8d09-48cc915fc050",
+            "color": "#F2D600",
+            "z": 0
+          },
+          "3d911119-c7fa-5e99-bf6f-f7c75fe12ac4": {
+            "x": 9,
+            "y": 2.5,
+            "sectionId": "dd6d4540-2080-5d45-871a-bb706cdb40cb",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "3d911119-c7fa-5e99-bf6f-f7c75fe12ac4",
+            "color": "#F2D600",
+            "z": 1
+          },
+          "f9db0031-1bc7-5c9d-99f4-ad3e2ef5bb29": {
+            "x": 6.0,
+            "y": 6,
+            "sectionId": "dd6d4540-2080-5d45-871a-bb706cdb40cb",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "f9db0031-1bc7-5c9d-99f4-ad3e2ef5bb29",
+            "color": "#5CB85C",
+            "z": 2
+          },
+          "1b5238d0-6d8c-5b5d-ae5d-7551aa48cc69": {
+            "x": 1.5,
+            "y": 2.5,
+            "sectionId": "dd6d4540-2080-5d45-871a-bb706cdb40cb",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "1b5238d0-6d8c-5b5d-ae5d-7551aa48cc69",
+            "color": "#D9534F",
+            "z": 3
+          },
+          "a0825cd6-dc7c-5fec-b7aa-2180b6bf7947": {
+            "x": 3.5,
+            "y": 2.5,
+            "sectionId": "dd6d4540-2080-5d45-871a-bb706cdb40cb",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "a0825cd6-dc7c-5fec-b7aa-2180b6bf7947",
+            "color": "#D9534F",
+            "z": 4
+          },
+          "32de0a22-0510-53a6-8d62-6234d5fb0656": {
+            "x": 5.5,
+            "y": 2.5,
+            "sectionId": "dd6d4540-2080-5d45-871a-bb706cdb40cb",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "32de0a22-0510-53a6-8d62-6234d5fb0656",
+            "color": "#D9534F",
+            "z": 5
+          },
+          "e0bd6053-a6c6-5b97-bd63-8f937ed9a0e8": {
+            "x": 10.5,
+            "y": 2.5,
+            "sectionId": "dd6d4540-2080-5d45-871a-bb706cdb40cb",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "e0bd6053-a6c6-5b97-bd63-8f937ed9a0e8",
+            "color": "#D9534F",
+            "z": 6
+          },
+          "17d3c065-908c-5032-b657-cb806e69866a": {
+            "x": 12.5,
+            "y": 2.5,
+            "sectionId": "dd6d4540-2080-5d45-871a-bb706cdb40cb",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "17d3c065-908c-5032-b657-cb806e69866a",
+            "color": "#D9534F",
+            "z": 7
+          },
+          "124fbdd6-d557-57ca-9bc6-2d20c01c0244": {
+            "x": 14.5,
+            "y": 2.5,
+            "sectionId": "dd6d4540-2080-5d45-871a-bb706cdb40cb",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "124fbdd6-d557-57ca-9bc6-2d20c01c0244",
+            "color": "#D9534F",
+            "z": 8
+          },
+          "6be2de65-a0aa-5cfb-98d3-a9434c4a7e4b": {
+            "x": 2,
+            "y": 4.5,
+            "sectionId": "dd6d4540-2080-5d45-871a-bb706cdb40cb",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "6be2de65-a0aa-5cfb-98d3-a9434c4a7e4b",
+            "color": "#337AB7",
+            "z": 9
+          },
+          "a5d3ecc1-e491-5a8c-896d-84d7ea31dd30": {
+            "x": 4,
+            "y": 4.5,
+            "sectionId": "dd6d4540-2080-5d45-871a-bb706cdb40cb",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "a5d3ecc1-e491-5a8c-896d-84d7ea31dd30",
+            "color": "#337AB7",
+            "z": 10
+          },
+          "5d0d9ad3-8e80-56dd-9908-7126b25e9978": {
+            "x": 6,
+            "y": 4.5,
+            "sectionId": "dd6d4540-2080-5d45-871a-bb706cdb40cb",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "5d0d9ad3-8e80-56dd-9908-7126b25e9978",
+            "color": "#337AB7",
+            "z": 11
+          },
+          "4ff81553-549f-5227-a597-6511e3d0a6d8": {
+            "x": 8,
+            "y": 4.5,
+            "sectionId": "dd6d4540-2080-5d45-871a-bb706cdb40cb",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "4ff81553-549f-5227-a597-6511e3d0a6d8",
+            "color": "#337AB7",
+            "z": 12
+          },
+          "f0594b88-af74-5db6-b75e-a67d2a5d7e8b": {
+            "x": 10,
+            "y": 4.5,
+            "sectionId": "dd6d4540-2080-5d45-871a-bb706cdb40cb",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "f0594b88-af74-5db6-b75e-a67d2a5d7e8b",
+            "color": "#337AB7",
+            "z": 13
+          },
+          "7b8ea6fa-a530-57d3-aa9b-8405a7e940f0": {
+            "x": 12,
+            "y": 4.5,
+            "sectionId": "dd6d4540-2080-5d45-871a-bb706cdb40cb",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "7b8ea6fa-a530-57d3-aa9b-8405a7e940f0",
+            "color": "#337AB7",
+            "z": 14
+          },
+          "842c55a4-7214-5cdc-996d-f70f67133aff": {
+            "x": 14,
+            "y": 4.5,
+            "sectionId": "dd6d4540-2080-5d45-871a-bb706cdb40cb",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "842c55a4-7214-5cdc-996d-f70f67133aff",
+            "color": "#337AB7",
+            "z": 15
+          },
+          "5ad486fc-f98a-5403-8c97-4bfdf90a7050": {
+            "x": 0.5,
+            "y": 6.5,
+            "sectionId": "dd6d4540-2080-5d45-871a-bb706cdb40cb",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "5ad486fc-f98a-5403-8c97-4bfdf90a7050",
+            "color": "#888888",
+            "z": 16
+          },
+          "47dde16d-530c-55de-a3a6-cc07563a609d": {
+            "x": 1.5,
+            "y": 6.5,
+            "sectionId": "dd6d4540-2080-5d45-871a-bb706cdb40cb",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "47dde16d-530c-55de-a3a6-cc07563a609d",
+            "color": "#888888",
+            "z": 17
+          },
+          "8fa214f0-0296-5133-be37-cdadab129c4e": {
+            "x": 5.5,
+            "y": 7.5,
+            "sectionId": "dd6d4540-2080-5d45-871a-bb706cdb40cb",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "8fa214f0-0296-5133-be37-cdadab129c4e",
+            "color": "#888888",
+            "z": 18
+          },
+          "97db115c-f588-5b7e-b482-60358bde7fd3": {
+            "x": 10.5,
+            "y": 7.5,
+            "sectionId": "dd6d4540-2080-5d45-871a-bb706cdb40cb",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "97db115c-f588-5b7e-b482-60358bde7fd3",
+            "color": "#888888",
+            "z": 19
+          }
+        },
+        "dancerActions": [
+          {
+            "id": "3975948b-9879-5a01-9e14-fbbc5790a259",
+            "name": "手上げ",
+            "timings": [
+              {
+                "id": "87744776-9b62-5c89-896a-5f35b69b3b4d",
+                "name": "1",
+                "dancerIds": [
+                  "1b5238d0-6d8c-5b5d-ae5d-7551aa48cc69",
+                  "a0825cd6-dc7c-5fec-b7aa-2180b6bf7947",
+                  "32de0a22-0510-53a6-8d62-6234d5fb0656",
+                  "e0bd6053-a6c6-5b97-bd63-8f937ed9a0e8",
+                  "17d3c065-908c-5032-b657-cb806e69866a",
+                  "124fbdd6-d557-57ca-9bc6-2d20c01c0244"
+                ]
+              },
+              {
+                "id": "fd4fa338-f062-5cff-9102-3b9b2448cc6d",
+                "name": "3",
+                "dancerIds": [
+                  "6be2de65-a0aa-5cfb-98d3-a9434c4a7e4b",
+                  "a5d3ecc1-e491-5a8c-896d-84d7ea31dd30",
+                  "5d0d9ad3-8e80-56dd-9908-7126b25e9978",
+                  "4ff81553-549f-5227-a597-6511e3d0a6d8",
+                  "f0594b88-af74-5db6-b75e-a67d2a5d7e8b",
+                  "7b8ea6fa-a530-57d3-aa9b-8405a7e940f0",
+                  "842c55a4-7214-5cdc-996d-f70f67133aff"
+                ]
+              },
+              {
+                "id": "e66751f1-2b36-5432-a368-40b99e329a90",
+                "name": "5",
+                "dancerIds": [
+                  "676de921-a44b-5eae-8d09-48cc915fc050",
+                  "3d911119-c7fa-5e99-bf6f-f7c75fe12ac4"
+                ]
+              }
+            ]
+          }
+        ],
+        "propPositions": {
+          "dfdf3b84-38f4-5701-afb3-645f54201bae": {
+            "x": 6.0,
+            "y": 5.5,
+            "sectionId": "dd6d4540-2080-5d45-871a-bb706cdb40cb",
+            "type": "prop",
+            "rotation": 0,
+            "propId": "dfdf3b84-38f4-5701-afb3-645f54201bae",
+            "inUse": true,
+            "z": 0
+          },
+          "d1051e62-878a-5b66-9360-dde02ef075f9": {
+            "x": 0.0,
+            "y": 7.0,
+            "sectionId": "dd6d4540-2080-5d45-871a-bb706cdb40cb",
+            "type": "prop",
+            "rotation": 0,
+            "propId": "d1051e62-878a-5b66-9360-dde02ef075f9",
+            "inUse": false,
+            "z": 1
+          },
+          "b1104fce-7ff3-5340-ab79-461934cceb65": {
+            "x": 1.0,
+            "y": 7.0,
+            "sectionId": "dd6d4540-2080-5d45-871a-bb706cdb40cb",
+            "type": "prop",
+            "rotation": 0,
+            "propId": "b1104fce-7ff3-5340-ab79-461934cceb65",
+            "inUse": false,
+            "z": 2
+          },
+          "415e3dab-197b-5373-84fd-3bde1055b87d": {
+            "x": 5.5,
+            "y": 7.0,
+            "sectionId": "dd6d4540-2080-5d45-871a-bb706cdb40cb",
+            "type": "prop",
+            "rotation": 0,
+            "propId": "415e3dab-197b-5373-84fd-3bde1055b87d",
+            "inUse": true,
+            "z": 3
+          }
+        }
+      }
+    },
+    {
+      "id": "7aea8645-c2bf-53d1-9967-49c46915f2e0",
+      "name": "Aメロ",
+      "order": 2,
+      "formation": {
+        "dancerPositions": {
+          "676de921-a44b-5eae-8d09-48cc915fc050": {
+            "x": 7,
+            "y": 1.5,
+            "sectionId": "7aea8645-c2bf-53d1-9967-49c46915f2e0",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "676de921-a44b-5eae-8d09-48cc915fc050",
+            "color": "#F2D600",
+            "z": 0
+          },
+          "3d911119-c7fa-5e99-bf6f-f7c75fe12ac4": {
+            "x": 9,
+            "y": 1.5,
+            "sectionId": "7aea8645-c2bf-53d1-9967-49c46915f2e0",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "3d911119-c7fa-5e99-bf6f-f7c75fe12ac4",
+            "color": "#F2D600",
+            "z": 1
+          },
+          "f9db0031-1bc7-5c9d-99f4-ad3e2ef5bb29": {
+            "x": 15.5,
+            "y": 3.5,
+            "sectionId": "7aea8645-c2bf-53d1-9967-49c46915f2e0",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "f9db0031-1bc7-5c9d-99f4-ad3e2ef5bb29",
+            "color": "#5CB85C",
+            "z": 2
+          },
+          "1b5238d0-6d8c-5b5d-ae5d-7551aa48cc69": {
+            "x": 2.5,
+            "y": 4.5,
+            "sectionId": "7aea8645-c2bf-53d1-9967-49c46915f2e0",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "1b5238d0-6d8c-5b5d-ae5d-7551aa48cc69",
+            "color": "#D9534F",
+            "z": 3
+          },
+          "a0825cd6-dc7c-5fec-b7aa-2180b6bf7947": {
+            "x": 4,
+            "y": 3.5,
+            "sectionId": "7aea8645-c2bf-53d1-9967-49c46915f2e0",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "a0825cd6-dc7c-5fec-b7aa-2180b6bf7947",
+            "color": "#D9534F",
+            "z": 4
+          },
+          "32de0a22-0510-53a6-8d62-6234d5fb0656": {
+            "x": 5.5,
+            "y": 2.5,
+            "sectionId": "7aea8645-c2bf-53d1-9967-49c46915f2e0",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "32de0a22-0510-53a6-8d62-6234d5fb0656",
+            "color": "#D9534F",
+            "z": 5
+          },
+          "e0bd6053-a6c6-5b97-bd63-8f937ed9a0e8": {
+            "x": 10.5,
+            "y": 2.5,
+            "sectionId": "7aea8645-c2bf-53d1-9967-49c46915f2e0",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "e0bd6053-a6c6-5b97-bd63-8f937ed9a0e8",
+            "color": "#D9534F",
+            "z": 6
+          },
+          "17d3c065-908c-5032-b657-cb806e69866a": {
+            "x": 12,
+            "y": 3.5,
+            "sectionId": "7aea8645-c2bf-53d1-9967-49c46915f2e0",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "17d3c065-908c-5032-b657-cb806e69866a",
+            "color": "#D9534F",
+            "z": 7
+          },
+          "124fbdd6-d557-57ca-9bc6-2d20c01c0244": {
+            "x": 13.5,
+            "y": 4.5,
+            "sectionId": "7aea8645-c2bf-53d1-9967-49c46915f2e0",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "124fbdd6-d557-57ca-9bc6-2d20c01c0244",
+            "color": "#D9534F",
+            "z": 8
+          },
+          "6be2de65-a0aa-5cfb-98d3-a9434c4a7e4b": {
+            "x": 3.5,
+            "y": 6,
+            "sectionId": "7aea8645-c2bf-53d1-9967-49c46915f2e0",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "6be2de65-a0aa-5cfb-98d3-a9434c4a7e4b",
+            "color": "#337AB7",
+            "z": 9
+          },
+          "a5d3ecc1-e491-5a8c-896d-84d7ea31dd30": {
+            "x": 5,
+            "y": 5,
+            "sectionId": "7aea8645-c2bf-53d1-9967-49c46915f2e0",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "a5d3ecc1-e491-5a8c-896d-84d7ea31dd30",
+            "color": "#337AB7",
+            "z": 10
+          },
+          "5d0d9ad3-8e80-56dd-9908-7126b25e9978": {
+            "x": 6.5,
+            "y": 4,
+            "sectionId": "7aea8645-c2bf-53d1-9967-49c46915f2e0",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "5d0d9ad3-8e80-56dd-9908-7126b25e9978",
+            "color": "#337AB7",
+            "z": 11
+          },
+          "4ff81553-549f-5227-a597-6511e3d0a6d8": {
+            "x": 8,
+            "y": 3,
+            "sectionId": "7aea8645-c2bf-53d1-9967-49c46915f2e0",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "4ff81553-549f-5227-a597-6511e3d0a6d8",
+            "color": "#337AB7",
+            "z": 12
+          },
+          "f0594b88-af74-5db6-b75e-a67d2a5d7e8b": {
+            "x": 9.5,
+            "y": 4,
+            "sectionId": "7aea8645-c2bf-53d1-9967-49c46915f2e0",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "f0594b88-af74-5db6-b75e-a67d2a5d7e8b",
+            "color": "#337AB7",
+            "z": 13
+          },
+          "7b8ea6fa-a530-57d3-aa9b-8405a7e940f0": {
+            "x": 11,
+            "y": 5,
+            "sectionId": "7aea8645-c2bf-53d1-9967-49c46915f2e0",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "7b8ea6fa-a530-57d3-aa9b-8405a7e940f0",
+            "color": "#337AB7",
+            "z": 14
+          },
+          "842c55a4-7214-5cdc-996d-f70f67133aff": {
+            "x": 12.5,
+            "y": 6,
+            "sectionId": "7aea8645-c2bf-53d1-9967-49c46915f2e0",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "842c55a4-7214-5cdc-996d-f70f67133aff",
+            "color": "#337AB7",
+            "z": 15
+          },
+          "5ad486fc-f98a-5403-8c97-4bfdf90a7050": {
+            "x": 0.5,
+            "y": 6.5,
+            "sectionId": "7aea8645-c2bf-53d1-9967-49c46915f2e0",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "5ad486fc-f98a-5403-8c97-4bfdf90a7050",
+            "color": "#888888",
+            "z": 16
+          },
+          "47dde16d-530c-55de-a3a6-cc07563a609d": {
+            "x": 1.5,
+            "y": 6.5,
+            "sectionId": "7aea8645-c2bf-53d1-9967-49c46915f2e0",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "47dde16d-530c-55de-a3a6-cc07563a609d",
+            "color": "#888888",
+            "z": 17
+          },
+          "8fa214f0-0296-5133-be37-cdadab129c4e": {
+            "x": 5.5,
+            "y": 7.5,
+            "sectionId": "7aea8645-c2bf-53d1-9967-49c46915f2e0",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "8fa214f0-0296-5133-be37-cdadab129c4e",
+            "color": "#888888",
+            "z": 18
+          },
+          "97db115c-f588-5b7e-b482-60358bde7fd3": {
+            "x": 10.5,
+            "y": 7.5,
+            "sectionId": "7aea8645-c2bf-53d1-9967-49c46915f2e0",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "97db115c-f588-5b7e-b482-60358bde7fd3",
+            "color": "#888888",
+            "z": 19
+          }
+        },
+        "dancerActions": [
+          {
+            "id": "41bc97ce-0f45-512d-a152-1e3dababb3a0",
+            "name": "ジャンプ",
+            "timings": [
+              {
+                "id": "d55a534c-98f8-5732-95b5-b60ced6e618f",
+                "name": "2",
+                "dancerIds": [
+                  "676de921-a44b-5eae-8d09-48cc915fc050",
+                  "3d911119-c7fa-5e99-bf6f-f7c75fe12ac4"
+                ]
+              },
+              {
+                "id": "78976393-7a9c-5339-ab8e-6af210e828a3",
+                "name": "4",
+                "dancerIds": [
+                  "1b5238d0-6d8c-5b5d-ae5d-7551aa48cc69",
+                  "a0825cd6-dc7c-5fec-b7aa-2180b6bf7947",
+                  "32de0a22-0510-53a6-8d62-6234d5fb0656",
+                  "e0bd6053-a6c6-5b97-bd63-8f937ed9a0e8",
+                  "17d3c065-908c-5032-b657-cb806e69866a",
+                  "124fbdd6-d557-57ca-9bc6-2d20c01c0244"
+                ]
+              },
+              {
+                "id": "2027c252-b68b-5d64-a3e6-d8878fc1afa1",
+                "name": "6",
+                "dancerIds": [
+                  "6be2de65-a0aa-5cfb-98d3-a9434c4a7e4b",
+                  "a5d3ecc1-e491-5a8c-896d-84d7ea31dd30",
+                  "5d0d9ad3-8e80-56dd-9908-7126b25e9978",
+                  "4ff81553-549f-5227-a597-6511e3d0a6d8",
+                  "f0594b88-af74-5db6-b75e-a67d2a5d7e8b",
+                  "7b8ea6fa-a530-57d3-aa9b-8405a7e940f0",
+                  "842c55a4-7214-5cdc-996d-f70f67133aff"
+                ]
+              }
+            ]
+          }
+        ],
+        "propPositions": {
+          "dfdf3b84-38f4-5701-afb3-645f54201bae": {
+            "x": 16.0,
+            "y": 3.5,
+            "sectionId": "7aea8645-c2bf-53d1-9967-49c46915f2e0",
+            "type": "prop",
+            "rotation": 90,
+            "propId": "dfdf3b84-38f4-5701-afb3-645f54201bae",
+            "inUse": false,
+            "z": 0
+          },
+          "d1051e62-878a-5b66-9360-dde02ef075f9": {
+            "x": 0.0,
+            "y": 7.0,
+            "sectionId": "7aea8645-c2bf-53d1-9967-49c46915f2e0",
+            "type": "prop",
+            "rotation": 0,
+            "propId": "d1051e62-878a-5b66-9360-dde02ef075f9",
+            "inUse": false,
+            "z": 1
+          },
+          "b1104fce-7ff3-5340-ab79-461934cceb65": {
+            "x": 1.0,
+            "y": 7.0,
+            "sectionId": "7aea8645-c2bf-53d1-9967-49c46915f2e0",
+            "type": "prop",
+            "rotation": 0,
+            "propId": "b1104fce-7ff3-5340-ab79-461934cceb65",
+            "inUse": false,
+            "z": 2
+          },
+          "415e3dab-197b-5373-84fd-3bde1055b87d": {
+            "x": 5.5,
+            "y": 7.0,
+            "sectionId": "7aea8645-c2bf-53d1-9967-49c46915f2e0",
+            "type": "prop",
+            "rotation": 0,
+            "propId": "415e3dab-197b-5373-84fd-3bde1055b87d",
+            "inUse": true,
+            "z": 3
+          }
+        },
+        "dancerMovements": {
+          "f9db0031-1bc7-5c9d-99f4-ad3e2ef5bb29": {
+            "points": [
+              {
+                "x": 11.5,
+                "y": 5.5
+              }
+            ],
+            "tension": "curved"
+          }
+        },
+        "propMovements": {
+          "dfdf3b84-38f4-5701-afb3-645f54201bae": {
+            "points": [
+              {
+                "x": 12.5,
+                "y": 6.5
+              }
+            ],
+            "tension": "curved"
+          }
+        }
+      }
+    },
+    {
+      "id": "8631b401-018c-5671-acbe-a763fde40246",
+      "name": "Bメロ",
+      "order": 3,
+      "note": "裏方：1-4で台を出す",
+      "formation": {
+        "dancerPositions": {
+          "676de921-a44b-5eae-8d09-48cc915fc050": {
+            "x": 7,
+            "y": 3,
+            "sectionId": "8631b401-018c-5671-acbe-a763fde40246",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "676de921-a44b-5eae-8d09-48cc915fc050",
+            "color": "#F2D600",
+            "z": 0
+          },
+          "3d911119-c7fa-5e99-bf6f-f7c75fe12ac4": {
+            "x": 9,
+            "y": 3,
+            "sectionId": "8631b401-018c-5671-acbe-a763fde40246",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "3d911119-c7fa-5e99-bf6f-f7c75fe12ac4",
+            "color": "#F2D600",
+            "z": 1
+          },
+          "f9db0031-1bc7-5c9d-99f4-ad3e2ef5bb29": {
+            "x": 15.5,
+            "y": 3.5,
+            "sectionId": "8631b401-018c-5671-acbe-a763fde40246",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "f9db0031-1bc7-5c9d-99f4-ad3e2ef5bb29",
+            "color": "#5CB85C",
+            "z": 2
+          },
+          "1b5238d0-6d8c-5b5d-ae5d-7551aa48cc69": {
+            "x": 4,
+            "y": 4,
+            "sectionId": "8631b401-018c-5671-acbe-a763fde40246",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "1b5238d0-6d8c-5b5d-ae5d-7551aa48cc69",
+            "color": "#D9534F",
+            "z": 3
+          },
+          "a0825cd6-dc7c-5fec-b7aa-2180b6bf7947": {
+            "x": 4,
+            "y": 4,
+            "sectionId": "8631b401-018c-5671-acbe-a763fde40246",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "a0825cd6-dc7c-5fec-b7aa-2180b6bf7947",
+            "color": "#D9534F",
+            "z": 4
+          },
+          "32de0a22-0510-53a6-8d62-6234d5fb0656": {
+            "x": 5.5,
+            "y": 2,
+            "sectionId": "8631b401-018c-5671-acbe-a763fde40246",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "32de0a22-0510-53a6-8d62-6234d5fb0656",
+            "color": "#D9534F",
+            "z": 5
+          },
+          "e0bd6053-a6c6-5b97-bd63-8f937ed9a0e8": {
+            "x": 10.5,
+            "y": 2,
+            "sectionId": "8631b401-018c-5671-acbe-a763fde40246",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "e0bd6053-a6c6-5b97-bd63-8f937ed9a0e8",
+            "color": "#D9534F",
+            "z": 6
+          },
+          "17d3c065-908c-5032-b657-cb806e69866a": {
+            "x": 12,
+            "y": 4,
+            "sectionId": "8631b401-018c-5671-acbe-a763fde40246",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "17d3c065-908c-5032-b657-cb806e69866a",
+            "color": "#D9534F",
+            "z": 7
+          },
+          "124fbdd6-d557-57ca-9bc6-2d20c01c0244": {
+            "x": 12,
+            "y": 4,
+            "sectionId": "8631b401-018c-5671-acbe-a763fde40246",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "124fbdd6-d557-57ca-9bc6-2d20c01c0244",
+            "color": "#D9534F",
+            "z": 8
+          },
+          "6be2de65-a0aa-5cfb-98d3-a9434c4a7e4b": {
+            "x": 2.5,
+            "y": 5.5,
+            "sectionId": "8631b401-018c-5671-acbe-a763fde40246",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "6be2de65-a0aa-5cfb-98d3-a9434c4a7e4b",
+            "color": "#337AB7",
+            "z": 9
+          },
+          "a5d3ecc1-e491-5a8c-896d-84d7ea31dd30": {
+            "x": 3,
+            "y": 2,
+            "sectionId": "8631b401-018c-5671-acbe-a763fde40246",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "a5d3ecc1-e491-5a8c-896d-84d7ea31dd30",
+            "color": "#337AB7",
+            "z": 10
+          },
+          "5d0d9ad3-8e80-56dd-9908-7126b25e9978": {
+            "x": 5.5,
+            "y": 5.5,
+            "sectionId": "8631b401-018c-5671-acbe-a763fde40246",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "5d0d9ad3-8e80-56dd-9908-7126b25e9978",
+            "color": "#337AB7",
+            "z": 11
+          },
+          "4ff81553-549f-5227-a597-6511e3d0a6d8": {
+            "x": 8,
+            "y": 2,
+            "sectionId": "8631b401-018c-5671-acbe-a763fde40246",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "4ff81553-549f-5227-a597-6511e3d0a6d8",
+            "color": "#337AB7",
+            "z": 12
+          },
+          "f0594b88-af74-5db6-b75e-a67d2a5d7e8b": {
+            "x": 10.5,
+            "y": 5.5,
+            "sectionId": "8631b401-018c-5671-acbe-a763fde40246",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "f0594b88-af74-5db6-b75e-a67d2a5d7e8b",
+            "color": "#337AB7",
+            "z": 13
+          },
+          "7b8ea6fa-a530-57d3-aa9b-8405a7e940f0": {
+            "x": 13,
+            "y": 2,
+            "sectionId": "8631b401-018c-5671-acbe-a763fde40246",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "7b8ea6fa-a530-57d3-aa9b-8405a7e940f0",
+            "color": "#337AB7",
+            "z": 14
+          },
+          "842c55a4-7214-5cdc-996d-f70f67133aff": {
+            "x": 13.5,
+            "y": 5.5,
+            "sectionId": "8631b401-018c-5671-acbe-a763fde40246",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "842c55a4-7214-5cdc-996d-f70f67133aff",
+            "color": "#337AB7",
+            "z": 15
+          },
+          "5ad486fc-f98a-5403-8c97-4bfdf90a7050": {
+            "x": 7.5,
+            "y": 5.5,
+            "sectionId": "8631b401-018c-5671-acbe-a763fde40246",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "5ad486fc-f98a-5403-8c97-4bfdf90a7050",
+            "color": "#888888",
+            "z": 16
+          },
+          "47dde16d-530c-55de-a3a6-cc07563a609d": {
+            "x": 8.5,
+            "y": 5.5,
+            "sectionId": "8631b401-018c-5671-acbe-a763fde40246",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "47dde16d-530c-55de-a3a6-cc07563a609d",
+            "color": "#888888",
+            "z": 17
+          },
+          "8fa214f0-0296-5133-be37-cdadab129c4e": {
+            "x": 5.5,
+            "y": 7.5,
+            "sectionId": "8631b401-018c-5671-acbe-a763fde40246",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "8fa214f0-0296-5133-be37-cdadab129c4e",
+            "color": "#888888",
+            "z": 18
+          },
+          "97db115c-f588-5b7e-b482-60358bde7fd3": {
+            "x": 10.5,
+            "y": 7.5,
+            "sectionId": "8631b401-018c-5671-acbe-a763fde40246",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "97db115c-f588-5b7e-b482-60358bde7fd3",
+            "color": "#888888",
+            "z": 19
+          }
+        },
+        "dancerActions": [
+          {
+            "id": "8a83060b-d054-5981-88a6-0af08123d8fe",
+            "name": "肩車",
+            "timings": [
+              {
+                "id": "17ff885a-290f-5350-a5c6-9dd7ec09dace",
+                "name": "5",
+                "dancerIds": [
+                  "1b5238d0-6d8c-5b5d-ae5d-7551aa48cc69",
+                  "a0825cd6-dc7c-5fec-b7aa-2180b6bf7947"
+                ]
+              },
+              {
+                "id": "b83fef3a-7178-5be4-8841-323fdfe4a0ab",
+                "name": "7",
+                "dancerIds": [
+                  "17d3c065-908c-5032-b657-cb806e69866a",
+                  "124fbdd6-d557-57ca-9bc6-2d20c01c0244"
+                ]
+              }
+            ]
+          }
+        ],
+        "propPositions": {
+          "dfdf3b84-38f4-5701-afb3-645f54201bae": {
+            "x": 16.0,
+            "y": 3.5,
+            "sectionId": "8631b401-018c-5671-acbe-a763fde40246",
+            "type": "prop",
+            "rotation": 90,
+            "propId": "dfdf3b84-38f4-5701-afb3-645f54201bae",
+            "inUse": false,
+            "z": 0
+          },
+          "b1104fce-7ff3-5340-ab79-461934cceb65": {
+            "x": 7.5,
+            "y": 4.0,
+            "sectionId": "8631b401-018c-5671-acbe-a763fde40246",
+            "type": "prop",
+            "rotation": 0,
+            "propId": "b1104fce-7ff3-5340-ab79-461934cceb65",
+            "inUse": true,
+            "z": 1
+          },
+          "d1051e62-878a-5b66-9360-dde02ef075f9": {
+            "x": 7.5,
+            "y": 4.0,
+            "sectionId": "8631b401-018c-5671-acbe-a763fde40246",
+            "type": "prop",
+            "rotation": 0,
+            "propId": "d1051e62-878a-5b66-9360-dde02ef075f9",
+            "inUse": true,
+            "z": 2
+          },
+          "415e3dab-197b-5373-84fd-3bde1055b87d": {
+            "x": 5.5,
+            "y": 7.0,
+            "sectionId": "8631b401-018c-5671-acbe-a763fde40246",
+            "type": "prop",
+            "rotation": 0,
+            "propId": "415e3dab-197b-5373-84fd-3bde1055b87d",
+            "inUse": true,
+            "z": 3
+          }
+        },
+        "dancerMovements": {
+          "5ad486fc-f98a-5403-8c97-4bfdf90a7050": {
+            "points": [
+              {
+                "x": 4.0,
+                "y": 6.5
+              }
+            ],
+            "tension": "curved"
+          },
+          "47dde16d-530c-55de-a3a6-cc07563a609d": {
+            "points": [
+              {
+                "x": 5.0,
+                "y": 6.5
+              }
+            ],
+            "tension": "curved"
+          }
+        },
+        "propMovements": {
+          "d1051e62-878a-5b66-9360-dde02ef075f9": {
+            "points": [
+              {
+                "x": 4.5,
+                "y": 6.5
+              }
+            ],
+            "tension": "curved"
+          },
+          "b1104fce-7ff3-5340-ab79-461934cceb65": {
+            "points": [
+              {
+                "x": 5,
+                "y": 6.5
+              }
+            ],
+            "tension": "curved"
+          }
+        },
+        "dancerStacks": [
+          [
+            "1b5238d0-6d8c-5b5d-ae5d-7551aa48cc69",
+            "a0825cd6-dc7c-5fec-b7aa-2180b6bf7947"
+          ],
+          [
+            "17d3c065-908c-5032-b657-cb806e69866a",
+            "124fbdd6-d557-57ca-9bc6-2d20c01c0244"
+          ]
+        ],
+        "propStacks": [
+          [
+            "b1104fce-7ff3-5340-ab79-461934cceb65",
+            "d1051e62-878a-5b66-9360-dde02ef075f9"
+          ]
+        ]
+      }
+    },
+    {
+      "id": "12c27824-8db2-5644-b617-d87506b6aa05",
+      "name": "サビ",
+      "order": 4,
+      "note": "衣装チェンジ",
+      "formation": {
+        "dancerPositions": {
+          "676de921-a44b-5eae-8d09-48cc915fc050": {
+            "x": 6.5,
+            "y": 4.5,
+            "sectionId": "12c27824-8db2-5644-b617-d87506b6aa05",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "676de921-a44b-5eae-8d09-48cc915fc050",
+            "color": "#F2D600",
+            "z": 0
+          },
+          "3d911119-c7fa-5e99-bf6f-f7c75fe12ac4": {
+            "x": 9.5,
+            "y": 4.5,
+            "sectionId": "12c27824-8db2-5644-b617-d87506b6aa05",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "3d911119-c7fa-5e99-bf6f-f7c75fe12ac4",
+            "color": "#F2D600",
+            "z": 1
+          },
+          "f9db0031-1bc7-5c9d-99f4-ad3e2ef5bb29": {
+            "x": 15.5,
+            "y": 3.5,
+            "sectionId": "12c27824-8db2-5644-b617-d87506b6aa05",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "f9db0031-1bc7-5c9d-99f4-ad3e2ef5bb29",
+            "color": "#5CB85C",
+            "z": 2
+          },
+          "1b5238d0-6d8c-5b5d-ae5d-7551aa48cc69": {
+            "x": 2.5,
+            "y": 3.5,
+            "sectionId": "12c27824-8db2-5644-b617-d87506b6aa05",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "1b5238d0-6d8c-5b5d-ae5d-7551aa48cc69",
+            "color": "#E83E8C",
+            "z": 3
+          },
+          "a0825cd6-dc7c-5fec-b7aa-2180b6bf7947": {
+            "x": 2.5,
+            "y": 3.5,
+            "sectionId": "12c27824-8db2-5644-b617-d87506b6aa05",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "a0825cd6-dc7c-5fec-b7aa-2180b6bf7947",
+            "color": "#E83E8C",
+            "z": 4
+          },
+          "32de0a22-0510-53a6-8d62-6234d5fb0656": {
+            "x": 5,
+            "y": 2,
+            "sectionId": "12c27824-8db2-5644-b617-d87506b6aa05",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "32de0a22-0510-53a6-8d62-6234d5fb0656",
+            "color": "#E83E8C",
+            "z": 5
+          },
+          "e0bd6053-a6c6-5b97-bd63-8f937ed9a0e8": {
+            "x": 11,
+            "y": 2,
+            "sectionId": "12c27824-8db2-5644-b617-d87506b6aa05",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "e0bd6053-a6c6-5b97-bd63-8f937ed9a0e8",
+            "color": "#E83E8C",
+            "z": 6
+          },
+          "17d3c065-908c-5032-b657-cb806e69866a": {
+            "x": 13.5,
+            "y": 3.5,
+            "sectionId": "12c27824-8db2-5644-b617-d87506b6aa05",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "17d3c065-908c-5032-b657-cb806e69866a",
+            "color": "#E83E8C",
+            "z": 7
+          },
+          "124fbdd6-d557-57ca-9bc6-2d20c01c0244": {
+            "x": 13.5,
+            "y": 3.5,
+            "sectionId": "12c27824-8db2-5644-b617-d87506b6aa05",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "124fbdd6-d557-57ca-9bc6-2d20c01c0244",
+            "color": "#E83E8C",
+            "z": 8
+          },
+          "6be2de65-a0aa-5cfb-98d3-a9434c4a7e4b": {
+            "x": 2,
+            "y": 5.5,
+            "sectionId": "12c27824-8db2-5644-b617-d87506b6aa05",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "6be2de65-a0aa-5cfb-98d3-a9434c4a7e4b",
+            "color": "#5B4B9B",
+            "z": 9
+          },
+          "a5d3ecc1-e491-5a8c-896d-84d7ea31dd30": {
+            "x": 8,
+            "y": 2,
+            "sectionId": "12c27824-8db2-5644-b617-d87506b6aa05",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "a5d3ecc1-e491-5a8c-896d-84d7ea31dd30",
+            "color": "#5B4B9B",
+            "z": 10
+          },
+          "4ff81553-549f-5227-a597-6511e3d0a6d8": {
+            "x": 8,
+            "y": 2,
+            "sectionId": "12c27824-8db2-5644-b617-d87506b6aa05",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "4ff81553-549f-5227-a597-6511e3d0a6d8",
+            "color": "#5B4B9B",
+            "z": 11
+          },
+          "7b8ea6fa-a530-57d3-aa9b-8405a7e940f0": {
+            "x": 8,
+            "y": 2,
+            "sectionId": "12c27824-8db2-5644-b617-d87506b6aa05",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "7b8ea6fa-a530-57d3-aa9b-8405a7e940f0",
+            "color": "#5B4B9B",
+            "z": 12
+          },
+          "5d0d9ad3-8e80-56dd-9908-7126b25e9978": {
+            "x": 5.5,
+            "y": 6,
+            "sectionId": "12c27824-8db2-5644-b617-d87506b6aa05",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "5d0d9ad3-8e80-56dd-9908-7126b25e9978",
+            "color": "#5B4B9B",
+            "z": 13
+          },
+          "f0594b88-af74-5db6-b75e-a67d2a5d7e8b": {
+            "x": 10.5,
+            "y": 6,
+            "sectionId": "12c27824-8db2-5644-b617-d87506b6aa05",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "f0594b88-af74-5db6-b75e-a67d2a5d7e8b",
+            "color": "#5B4B9B",
+            "z": 14
+          },
+          "842c55a4-7214-5cdc-996d-f70f67133aff": {
+            "x": 14,
+            "y": 5.5,
+            "sectionId": "12c27824-8db2-5644-b617-d87506b6aa05",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "842c55a4-7214-5cdc-996d-f70f67133aff",
+            "color": "#5B4B9B",
+            "z": 15
+          },
+          "5ad486fc-f98a-5403-8c97-4bfdf90a7050": {
+            "x": 7.5,
+            "y": 5.5,
+            "sectionId": "12c27824-8db2-5644-b617-d87506b6aa05",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "5ad486fc-f98a-5403-8c97-4bfdf90a7050",
+            "color": "#888888",
+            "z": 16
+          },
+          "47dde16d-530c-55de-a3a6-cc07563a609d": {
+            "x": 8.5,
+            "y": 5.5,
+            "sectionId": "12c27824-8db2-5644-b617-d87506b6aa05",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "47dde16d-530c-55de-a3a6-cc07563a609d",
+            "color": "#888888",
+            "z": 17
+          },
+          "8fa214f0-0296-5133-be37-cdadab129c4e": {
+            "x": 5.5,
+            "y": 7.5,
+            "sectionId": "12c27824-8db2-5644-b617-d87506b6aa05",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "8fa214f0-0296-5133-be37-cdadab129c4e",
+            "color": "#888888",
+            "z": 18
+          },
+          "97db115c-f588-5b7e-b482-60358bde7fd3": {
+            "x": 10.5,
+            "y": 7.5,
+            "sectionId": "12c27824-8db2-5644-b617-d87506b6aa05",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "97db115c-f588-5b7e-b482-60358bde7fd3",
+            "color": "#888888",
+            "z": 19
+          }
+        },
+        "dancerActions": [
+          {
+            "id": "ba3bc764-6c79-5da3-960e-f25b719fa1f6",
+            "name": "回転",
+            "timings": [
+              {
+                "id": "648198a6-bb67-5982-8a66-fe73275bdd85",
+                "name": "1",
+                "dancerIds": [
+                  "1b5238d0-6d8c-5b5d-ae5d-7551aa48cc69",
+                  "a0825cd6-dc7c-5fec-b7aa-2180b6bf7947",
+                  "32de0a22-0510-53a6-8d62-6234d5fb0656",
+                  "e0bd6053-a6c6-5b97-bd63-8f937ed9a0e8",
+                  "17d3c065-908c-5032-b657-cb806e69866a",
+                  "124fbdd6-d557-57ca-9bc6-2d20c01c0244"
+                ]
+              },
+              {
+                "id": "7275101d-1d0e-5a6c-8479-cd8017e63e3b",
+                "name": "3",
+                "dancerIds": [
+                  "6be2de65-a0aa-5cfb-98d3-a9434c4a7e4b",
+                  "a5d3ecc1-e491-5a8c-896d-84d7ea31dd30",
+                  "5d0d9ad3-8e80-56dd-9908-7126b25e9978",
+                  "4ff81553-549f-5227-a597-6511e3d0a6d8",
+                  "f0594b88-af74-5db6-b75e-a67d2a5d7e8b",
+                  "7b8ea6fa-a530-57d3-aa9b-8405a7e940f0",
+                  "842c55a4-7214-5cdc-996d-f70f67133aff"
+                ]
+              },
+              {
+                "id": "6e62f8a8-ddf3-5221-aa4c-a09e57cf5e66",
+                "name": "5",
+                "dancerIds": [
+                  "1b5238d0-6d8c-5b5d-ae5d-7551aa48cc69",
+                  "a0825cd6-dc7c-5fec-b7aa-2180b6bf7947",
+                  "32de0a22-0510-53a6-8d62-6234d5fb0656",
+                  "e0bd6053-a6c6-5b97-bd63-8f937ed9a0e8",
+                  "17d3c065-908c-5032-b657-cb806e69866a",
+                  "124fbdd6-d557-57ca-9bc6-2d20c01c0244"
+                ]
+              },
+              {
+                "id": "0b92f116-06d8-5fa6-93b1-111dd5b2c1c7",
+                "name": "7",
+                "dancerIds": [
+                  "6be2de65-a0aa-5cfb-98d3-a9434c4a7e4b",
+                  "a5d3ecc1-e491-5a8c-896d-84d7ea31dd30",
+                  "5d0d9ad3-8e80-56dd-9908-7126b25e9978",
+                  "4ff81553-549f-5227-a597-6511e3d0a6d8",
+                  "f0594b88-af74-5db6-b75e-a67d2a5d7e8b",
+                  "7b8ea6fa-a530-57d3-aa9b-8405a7e940f0",
+                  "842c55a4-7214-5cdc-996d-f70f67133aff"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "a602c951-9d4f-5386-8c19-fe1b6dca3fb9",
+            "name": "タワー",
+            "timings": [
+              {
+                "id": "03bf7efb-e669-5ac5-a2a7-3d5c9827e46b",
+                "name": "1",
+                "dancerIds": [
+                  "a5d3ecc1-e491-5a8c-896d-84d7ea31dd30"
+                ]
+              },
+              {
+                "id": "52a83713-6b91-506f-8807-e133fd0a18ba",
+                "name": "3",
+                "dancerIds": [
+                  "4ff81553-549f-5227-a597-6511e3d0a6d8"
+                ]
+              },
+              {
+                "id": "62509e71-6c46-5d4d-8c63-aa24c23676e0",
+                "name": "5",
+                "dancerIds": [
+                  "7b8ea6fa-a530-57d3-aa9b-8405a7e940f0"
+                ]
+              }
+            ]
+          }
+        ],
+        "propPositions": {
+          "dfdf3b84-38f4-5701-afb3-645f54201bae": {
+            "x": 16.0,
+            "y": 3.5,
+            "sectionId": "12c27824-8db2-5644-b617-d87506b6aa05",
+            "type": "prop",
+            "rotation": 90,
+            "propId": "dfdf3b84-38f4-5701-afb3-645f54201bae",
+            "inUse": false,
+            "z": 0
+          },
+          "b1104fce-7ff3-5340-ab79-461934cceb65": {
+            "x": 7.5,
+            "y": 4.0,
+            "sectionId": "12c27824-8db2-5644-b617-d87506b6aa05",
+            "type": "prop",
+            "rotation": 0,
+            "propId": "b1104fce-7ff3-5340-ab79-461934cceb65",
+            "inUse": true,
+            "z": 1
+          },
+          "d1051e62-878a-5b66-9360-dde02ef075f9": {
+            "x": 7.5,
+            "y": 4.0,
+            "sectionId": "12c27824-8db2-5644-b617-d87506b6aa05",
+            "type": "prop",
+            "rotation": 0,
+            "propId": "d1051e62-878a-5b66-9360-dde02ef075f9",
+            "inUse": true,
+            "z": 2
+          },
+          "415e3dab-197b-5373-84fd-3bde1055b87d": {
+            "x": 5.5,
+            "y": 7.0,
+            "sectionId": "12c27824-8db2-5644-b617-d87506b6aa05",
+            "type": "prop",
+            "rotation": 0,
+            "propId": "415e3dab-197b-5373-84fd-3bde1055b87d",
+            "inUse": true,
+            "z": 3
+          }
+        },
+        "dancerMovements": {
+          "1b5238d0-6d8c-5b5d-ae5d-7551aa48cc69": {
+            "points": [
+              {
+                "x": 3.0,
+                "y": 4.0
+              }
+            ],
+            "tension": "curved"
+          },
+          "a0825cd6-dc7c-5fec-b7aa-2180b6bf7947": {
+            "points": [
+              {
+                "x": 3.0,
+                "y": 4.0
+              }
+            ],
+            "tension": "curved"
+          },
+          "17d3c065-908c-5032-b657-cb806e69866a": {
+            "points": [
+              {
+                "x": 13.0,
+                "y": 4.0
+              }
+            ],
+            "tension": "curved"
+          },
+          "124fbdd6-d557-57ca-9bc6-2d20c01c0244": {
+            "points": [
+              {
+                "x": 13.0,
+                "y": 4.0
+              }
+            ],
+            "tension": "curved"
+          }
+        },
+        "dancerStacks": [
+          [
+            "1b5238d0-6d8c-5b5d-ae5d-7551aa48cc69",
+            "a0825cd6-dc7c-5fec-b7aa-2180b6bf7947"
+          ],
+          [
+            "17d3c065-908c-5032-b657-cb806e69866a",
+            "124fbdd6-d557-57ca-9bc6-2d20c01c0244"
+          ],
+          [
+            "a5d3ecc1-e491-5a8c-896d-84d7ea31dd30",
+            "4ff81553-549f-5227-a597-6511e3d0a6d8",
+            "7b8ea6fa-a530-57d3-aa9b-8405a7e940f0"
+          ]
+        ],
+        "propStacks": [
+          [
+            "b1104fce-7ff3-5340-ab79-461934cceb65",
+            "d1051e62-878a-5b66-9360-dde02ef075f9"
+          ]
+        ]
+      }
+    },
+    {
+      "id": "5815b2a8-d6cb-56fc-98e8-03db4e716684",
+      "name": "間奏",
+      "order": 5,
+      "note": "裏方：1-4で台を下げる",
+      "formation": {
+        "dancerPositions": {
+          "676de921-a44b-5eae-8d09-48cc915fc050": {
+            "x": 6.539999999999999,
+            "y": 1.19,
+            "sectionId": "5815b2a8-d6cb-56fc-98e8-03db4e716684",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "676de921-a44b-5eae-8d09-48cc915fc050",
+            "color": "#F2D600",
+            "z": 0
+          },
+          "3d911119-c7fa-5e99-bf6f-f7c75fe12ac4": {
+            "x": 9.46,
+            "y": 1.19,
+            "sectionId": "5815b2a8-d6cb-56fc-98e8-03db4e716684",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "3d911119-c7fa-5e99-bf6f-f7c75fe12ac4",
+            "color": "#F2D600",
+            "z": 1
+          },
+          "f9db0031-1bc7-5c9d-99f4-ad3e2ef5bb29": {
+            "x": 6.0,
+            "y": 3.75,
+            "sectionId": "5815b2a8-d6cb-56fc-98e8-03db4e716684",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "f9db0031-1bc7-5c9d-99f4-ad3e2ef5bb29",
+            "color": "#5CB85C",
+            "z": 2
+          },
+          "1b5238d0-6d8c-5b5d-ae5d-7551aa48cc69": {
+            "x": 4.42,
+            "y": 4.04,
+            "sectionId": "5815b2a8-d6cb-56fc-98e8-03db4e716684",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "1b5238d0-6d8c-5b5d-ae5d-7551aa48cc69",
+            "color": "#D9534F",
+            "z": 3
+          },
+          "a0825cd6-dc7c-5fec-b7aa-2180b6bf7947": {
+            "x": 5.880000000000001,
+            "y": 6.02,
+            "sectionId": "5815b2a8-d6cb-56fc-98e8-03db4e716684",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "a0825cd6-dc7c-5fec-b7aa-2180b6bf7947",
+            "color": "#D9534F",
+            "z": 4
+          },
+          "32de0a22-0510-53a6-8d62-6234d5fb0656": {
+            "x": 5.32,
+            "y": 1.88,
+            "sectionId": "5815b2a8-d6cb-56fc-98e8-03db4e716684",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "32de0a22-0510-53a6-8d62-6234d5fb0656",
+            "color": "#D9534F",
+            "z": 5
+          },
+          "e0bd6053-a6c6-5b97-bd63-8f937ed9a0e8": {
+            "x": 10.68,
+            "y": 1.88,
+            "sectionId": "5815b2a8-d6cb-56fc-98e8-03db4e716684",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "e0bd6053-a6c6-5b97-bd63-8f937ed9a0e8",
+            "color": "#D9534F",
+            "z": 6
+          },
+          "17d3c065-908c-5032-b657-cb806e69866a": {
+            "x": 10.12,
+            "y": 6.02,
+            "sectionId": "5815b2a8-d6cb-56fc-98e8-03db4e716684",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "17d3c065-908c-5032-b657-cb806e69866a",
+            "color": "#D9534F",
+            "z": 7
+          },
+          "124fbdd6-d557-57ca-9bc6-2d20c01c0244": {
+            "x": 11.58,
+            "y": 4.04,
+            "sectionId": "5815b2a8-d6cb-56fc-98e8-03db4e716684",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "124fbdd6-d557-57ca-9bc6-2d20c01c0244",
+            "color": "#D9534F",
+            "z": 8
+          },
+          "6be2de65-a0aa-5cfb-98d3-a9434c4a7e4b": {
+            "x": 4.880000000000001,
+            "y": 5.15,
+            "sectionId": "5815b2a8-d6cb-56fc-98e8-03db4e716684",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "6be2de65-a0aa-5cfb-98d3-a9434c4a7e4b",
+            "color": "#337AB7",
+            "z": 9
+          },
+          "a5d3ecc1-e491-5a8c-896d-84d7ea31dd30": {
+            "x": 4.58,
+            "y": 2.88,
+            "sectionId": "5815b2a8-d6cb-56fc-98e8-03db4e716684",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "a5d3ecc1-e491-5a8c-896d-84d7ea31dd30",
+            "color": "#337AB7",
+            "z": 10
+          },
+          "5d0d9ad3-8e80-56dd-9908-7126b25e9978": {
+            "x": 7.25,
+            "y": 6.49,
+            "sectionId": "5815b2a8-d6cb-56fc-98e8-03db4e716684",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "5d0d9ad3-8e80-56dd-9908-7126b25e9978",
+            "color": "#337AB7",
+            "z": 11
+          },
+          "4ff81553-549f-5227-a597-6511e3d0a6d8": {
+            "x": 11.42,
+            "y": 2.88,
+            "sectionId": "5815b2a8-d6cb-56fc-98e8-03db4e716684",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "4ff81553-549f-5227-a597-6511e3d0a6d8",
+            "color": "#337AB7",
+            "z": 12
+          },
+          "f0594b88-af74-5db6-b75e-a67d2a5d7e8b": {
+            "x": 8.75,
+            "y": 6.49,
+            "sectionId": "5815b2a8-d6cb-56fc-98e8-03db4e716684",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "f0594b88-af74-5db6-b75e-a67d2a5d7e8b",
+            "color": "#337AB7",
+            "z": 13
+          },
+          "7b8ea6fa-a530-57d3-aa9b-8405a7e940f0": {
+            "x": 8.0,
+            "y": 0.95,
+            "sectionId": "5815b2a8-d6cb-56fc-98e8-03db4e716684",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "7b8ea6fa-a530-57d3-aa9b-8405a7e940f0",
+            "color": "#337AB7",
+            "z": 14
+          },
+          "842c55a4-7214-5cdc-996d-f70f67133aff": {
+            "x": 11.12,
+            "y": 5.15,
+            "sectionId": "5815b2a8-d6cb-56fc-98e8-03db4e716684",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "842c55a4-7214-5cdc-996d-f70f67133aff",
+            "color": "#337AB7",
+            "z": 15
+          },
+          "5ad486fc-f98a-5403-8c97-4bfdf90a7050": {
+            "x": 0.5,
+            "y": 6.5,
+            "sectionId": "5815b2a8-d6cb-56fc-98e8-03db4e716684",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "5ad486fc-f98a-5403-8c97-4bfdf90a7050",
+            "color": "#888888",
+            "z": 16
+          },
+          "47dde16d-530c-55de-a3a6-cc07563a609d": {
+            "x": 1.5,
+            "y": 6.5,
+            "sectionId": "5815b2a8-d6cb-56fc-98e8-03db4e716684",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "47dde16d-530c-55de-a3a6-cc07563a609d",
+            "color": "#888888",
+            "z": 17
+          },
+          "8fa214f0-0296-5133-be37-cdadab129c4e": {
+            "x": 5.5,
+            "y": 7.5,
+            "sectionId": "5815b2a8-d6cb-56fc-98e8-03db4e716684",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "8fa214f0-0296-5133-be37-cdadab129c4e",
+            "color": "#888888",
+            "z": 18
+          },
+          "97db115c-f588-5b7e-b482-60358bde7fd3": {
+            "x": 10.5,
+            "y": 7.5,
+            "sectionId": "5815b2a8-d6cb-56fc-98e8-03db4e716684",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "97db115c-f588-5b7e-b482-60358bde7fd3",
+            "color": "#888888",
+            "z": 19
+          }
+        },
+        "dancerActions": [],
+        "propPositions": {
+          "dfdf3b84-38f4-5701-afb3-645f54201bae": {
+            "x": 6.0,
+            "y": 3.25,
+            "sectionId": "5815b2a8-d6cb-56fc-98e8-03db4e716684",
+            "type": "prop",
+            "rotation": 0,
+            "propId": "dfdf3b84-38f4-5701-afb3-645f54201bae",
+            "inUse": true,
+            "z": 0
+          },
+          "d1051e62-878a-5b66-9360-dde02ef075f9": {
+            "x": 0.0,
+            "y": 7.0,
+            "sectionId": "5815b2a8-d6cb-56fc-98e8-03db4e716684",
+            "type": "prop",
+            "rotation": 0,
+            "propId": "d1051e62-878a-5b66-9360-dde02ef075f9",
+            "inUse": false,
+            "z": 1
+          },
+          "b1104fce-7ff3-5340-ab79-461934cceb65": {
+            "x": 1.0,
+            "y": 7.0,
+            "sectionId": "5815b2a8-d6cb-56fc-98e8-03db4e716684",
+            "type": "prop",
+            "rotation": 0,
+            "propId": "b1104fce-7ff3-5340-ab79-461934cceb65",
+            "inUse": false,
+            "z": 2
+          },
+          "415e3dab-197b-5373-84fd-3bde1055b87d": {
+            "x": 5.5,
+            "y": 7.0,
+            "sectionId": "5815b2a8-d6cb-56fc-98e8-03db4e716684",
+            "type": "prop",
+            "rotation": 0,
+            "propId": "415e3dab-197b-5373-84fd-3bde1055b87d",
+            "inUse": true,
+            "z": 3
+          }
+        },
+        "dancerMovements": {
+          "5ad486fc-f98a-5403-8c97-4bfdf90a7050": {
+            "points": [
+              {
+                "x": 4.0,
+                "y": 6.5
+              }
+            ],
+            "tension": "curved"
+          },
+          "47dde16d-530c-55de-a3a6-cc07563a609d": {
+            "points": [
+              {
+                "x": 5.0,
+                "y": 6.5
+              }
+            ],
+            "tension": "curved"
+          },
+          "f9db0031-1bc7-5c9d-99f4-ad3e2ef5bb29": {
+            "points": [
+              {
+                "x": 11.5,
+                "y": 5.5
+              }
+            ],
+            "tension": "curved"
+          }
+        },
+        "propMovements": {
+          "d1051e62-878a-5b66-9360-dde02ef075f9": {
+            "points": [
+              {
+                "x": 4.5,
+                "y": 6.5
+              }
+            ],
+            "tension": "curved"
+          },
+          "b1104fce-7ff3-5340-ab79-461934cceb65": {
+            "points": [
+              {
+                "x": 5,
+                "y": 6.5
+              }
+            ],
+            "tension": "curved"
+          },
+          "dfdf3b84-38f4-5701-afb3-645f54201bae": {
+            "points": [
+              {
+                "x": 12.5,
+                "y": 6.5
+              }
+            ],
+            "tension": "curved"
+          }
+        }
+      }
+    },
+    {
+      "id": "f7e41a22-1761-5c26-af9f-0d34907c3c72",
+      "name": "ラスト",
+      "order": 6,
+      "note": "はけ：右へ",
+      "formation": {
+        "dancerPositions": {
+          "676de921-a44b-5eae-8d09-48cc915fc050": {
+            "x": 7,
+            "y": 1.5,
+            "sectionId": "f7e41a22-1761-5c26-af9f-0d34907c3c72",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "676de921-a44b-5eae-8d09-48cc915fc050",
+            "color": "#F2D600",
+            "z": 0
+          },
+          "3d911119-c7fa-5e99-bf6f-f7c75fe12ac4": {
+            "x": 9,
+            "y": 1.5,
+            "sectionId": "f7e41a22-1761-5c26-af9f-0d34907c3c72",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "3d911119-c7fa-5e99-bf6f-f7c75fe12ac4",
+            "color": "#F2D600",
+            "z": 1
+          },
+          "f9db0031-1bc7-5c9d-99f4-ad3e2ef5bb29": {
+            "x": 6.0,
+            "y": 6,
+            "sectionId": "f7e41a22-1761-5c26-af9f-0d34907c3c72",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "f9db0031-1bc7-5c9d-99f4-ad3e2ef5bb29",
+            "color": "#5CB85C",
+            "z": 2
+          },
+          "1b5238d0-6d8c-5b5d-ae5d-7551aa48cc69": {
+            "x": 3,
+            "y": 1.5,
+            "sectionId": "f7e41a22-1761-5c26-af9f-0d34907c3c72",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "1b5238d0-6d8c-5b5d-ae5d-7551aa48cc69",
+            "color": "#D9534F",
+            "z": 3
+          },
+          "a0825cd6-dc7c-5fec-b7aa-2180b6bf7947": {
+            "x": 2.5,
+            "y": 3,
+            "sectionId": "f7e41a22-1761-5c26-af9f-0d34907c3c72",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "a0825cd6-dc7c-5fec-b7aa-2180b6bf7947",
+            "color": "#D9534F",
+            "z": 4
+          },
+          "32de0a22-0510-53a6-8d62-6234d5fb0656": {
+            "x": 5,
+            "y": 1.5,
+            "sectionId": "f7e41a22-1761-5c26-af9f-0d34907c3c72",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "32de0a22-0510-53a6-8d62-6234d5fb0656",
+            "color": "#D9534F",
+            "z": 5
+          },
+          "e0bd6053-a6c6-5b97-bd63-8f937ed9a0e8": {
+            "x": 11,
+            "y": 1.5,
+            "sectionId": "f7e41a22-1761-5c26-af9f-0d34907c3c72",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "e0bd6053-a6c6-5b97-bd63-8f937ed9a0e8",
+            "color": "#D9534F",
+            "z": 6
+          },
+          "17d3c065-908c-5032-b657-cb806e69866a": {
+            "x": 13.5,
+            "y": 3,
+            "sectionId": "f7e41a22-1761-5c26-af9f-0d34907c3c72",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "17d3c065-908c-5032-b657-cb806e69866a",
+            "color": "#D9534F",
+            "z": 7
+          },
+          "124fbdd6-d557-57ca-9bc6-2d20c01c0244": {
+            "x": 13,
+            "y": 1.5,
+            "sectionId": "f7e41a22-1761-5c26-af9f-0d34907c3c72",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "124fbdd6-d557-57ca-9bc6-2d20c01c0244",
+            "color": "#D9534F",
+            "z": 8
+          },
+          "6be2de65-a0aa-5cfb-98d3-a9434c4a7e4b": {
+            "x": 5,
+            "y": 4.5,
+            "sectionId": "f7e41a22-1761-5c26-af9f-0d34907c3c72",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "6be2de65-a0aa-5cfb-98d3-a9434c4a7e4b",
+            "color": "#337AB7",
+            "z": 9
+          },
+          "a5d3ecc1-e491-5a8c-896d-84d7ea31dd30": {
+            "x": 4,
+            "y": 3,
+            "sectionId": "f7e41a22-1761-5c26-af9f-0d34907c3c72",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "a5d3ecc1-e491-5a8c-896d-84d7ea31dd30",
+            "color": "#337AB7",
+            "z": 10
+          },
+          "5d0d9ad3-8e80-56dd-9908-7126b25e9978": {
+            "x": 8,
+            "y": 4.5,
+            "sectionId": "f7e41a22-1761-5c26-af9f-0d34907c3c72",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "5d0d9ad3-8e80-56dd-9908-7126b25e9978",
+            "color": "#337AB7",
+            "z": 11
+          },
+          "4ff81553-549f-5227-a597-6511e3d0a6d8": {
+            "x": 12,
+            "y": 3,
+            "sectionId": "f7e41a22-1761-5c26-af9f-0d34907c3c72",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "4ff81553-549f-5227-a597-6511e3d0a6d8",
+            "color": "#337AB7",
+            "z": 12
+          },
+          "f0594b88-af74-5db6-b75e-a67d2a5d7e8b": {
+            "x": 9.5,
+            "y": 3,
+            "sectionId": "f7e41a22-1761-5c26-af9f-0d34907c3c72",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "f0594b88-af74-5db6-b75e-a67d2a5d7e8b",
+            "color": "#337AB7",
+            "z": 13
+          },
+          "7b8ea6fa-a530-57d3-aa9b-8405a7e940f0": {
+            "x": 6.5,
+            "y": 3,
+            "sectionId": "f7e41a22-1761-5c26-af9f-0d34907c3c72",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "7b8ea6fa-a530-57d3-aa9b-8405a7e940f0",
+            "color": "#337AB7",
+            "z": 14
+          },
+          "842c55a4-7214-5cdc-996d-f70f67133aff": {
+            "x": 11,
+            "y": 4.5,
+            "sectionId": "f7e41a22-1761-5c26-af9f-0d34907c3c72",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "842c55a4-7214-5cdc-996d-f70f67133aff",
+            "color": "#337AB7",
+            "z": 15
+          },
+          "5ad486fc-f98a-5403-8c97-4bfdf90a7050": {
+            "x": 0.5,
+            "y": 6.5,
+            "sectionId": "f7e41a22-1761-5c26-af9f-0d34907c3c72",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "5ad486fc-f98a-5403-8c97-4bfdf90a7050",
+            "color": "#888888",
+            "z": 16
+          },
+          "47dde16d-530c-55de-a3a6-cc07563a609d": {
+            "x": 1.5,
+            "y": 6.5,
+            "sectionId": "f7e41a22-1761-5c26-af9f-0d34907c3c72",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "47dde16d-530c-55de-a3a6-cc07563a609d",
+            "color": "#888888",
+            "z": 17
+          },
+          "8fa214f0-0296-5133-be37-cdadab129c4e": {
+            "x": 5.5,
+            "y": 7.5,
+            "sectionId": "f7e41a22-1761-5c26-af9f-0d34907c3c72",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "8fa214f0-0296-5133-be37-cdadab129c4e",
+            "color": "#888888",
+            "z": 18
+          },
+          "97db115c-f588-5b7e-b482-60358bde7fd3": {
+            "x": 10.5,
+            "y": 7.5,
+            "sectionId": "f7e41a22-1761-5c26-af9f-0d34907c3c72",
+            "type": "dancer",
+            "rotation": 0,
+            "dancerId": "97db115c-f588-5b7e-b482-60358bde7fd3",
+            "color": "#888888",
+            "z": 19
+          }
+        },
+        "dancerActions": [
+          {
+            "id": "947bab09-156f-5245-a4cc-f2003c824dcd",
+            "name": "ポーズ",
+            "timings": [
+              {
+                "id": "a63194da-77f2-54d3-9e0e-175b87e0b8d6",
+                "name": "5",
+                "dancerIds": [
+                  "6be2de65-a0aa-5cfb-98d3-a9434c4a7e4b",
+                  "a5d3ecc1-e491-5a8c-896d-84d7ea31dd30",
+                  "5d0d9ad3-8e80-56dd-9908-7126b25e9978",
+                  "4ff81553-549f-5227-a597-6511e3d0a6d8",
+                  "f0594b88-af74-5db6-b75e-a67d2a5d7e8b",
+                  "7b8ea6fa-a530-57d3-aa9b-8405a7e940f0",
+                  "842c55a4-7214-5cdc-996d-f70f67133aff"
+                ]
+              },
+              {
+                "id": "1a9dadcf-86b7-58f5-b102-009d4b4c3d2b",
+                "name": "6",
+                "dancerIds": [
+                  "1b5238d0-6d8c-5b5d-ae5d-7551aa48cc69",
+                  "a0825cd6-dc7c-5fec-b7aa-2180b6bf7947",
+                  "32de0a22-0510-53a6-8d62-6234d5fb0656",
+                  "e0bd6053-a6c6-5b97-bd63-8f937ed9a0e8",
+                  "17d3c065-908c-5032-b657-cb806e69866a",
+                  "124fbdd6-d557-57ca-9bc6-2d20c01c0244"
+                ]
+              },
+              {
+                "id": "2d1e6fb8-4149-5e8c-98d6-8035004e2e36",
+                "name": "7",
+                "dancerIds": [
+                  "676de921-a44b-5eae-8d09-48cc915fc050",
+                  "3d911119-c7fa-5e99-bf6f-f7c75fe12ac4"
+                ]
+              }
+            ]
+          }
+        ],
+        "propPositions": {
+          "dfdf3b84-38f4-5701-afb3-645f54201bae": {
+            "x": 6.0,
+            "y": 5.5,
+            "sectionId": "f7e41a22-1761-5c26-af9f-0d34907c3c72",
+            "type": "prop",
+            "rotation": 0,
+            "propId": "dfdf3b84-38f4-5701-afb3-645f54201bae",
+            "inUse": true,
+            "z": 0
+          },
+          "d1051e62-878a-5b66-9360-dde02ef075f9": {
+            "x": 0.0,
+            "y": 7.0,
+            "sectionId": "f7e41a22-1761-5c26-af9f-0d34907c3c72",
+            "type": "prop",
+            "rotation": 0,
+            "propId": "d1051e62-878a-5b66-9360-dde02ef075f9",
+            "inUse": false,
+            "z": 1
+          },
+          "b1104fce-7ff3-5340-ab79-461934cceb65": {
+            "x": 1.0,
+            "y": 7.0,
+            "sectionId": "f7e41a22-1761-5c26-af9f-0d34907c3c72",
+            "type": "prop",
+            "rotation": 0,
+            "propId": "b1104fce-7ff3-5340-ab79-461934cceb65",
+            "inUse": false,
+            "z": 2
+          },
+          "415e3dab-197b-5373-84fd-3bde1055b87d": {
+            "x": 5.5,
+            "y": 7.0,
+            "sectionId": "f7e41a22-1761-5c26-af9f-0d34907c3c72",
+            "type": "prop",
+            "rotation": 0,
+            "propId": "415e3dab-197b-5373-84fd-3bde1055b87d",
+            "inUse": true,
+            "z": 3
+          }
+        }
+      }
+    }
+  ],
+  "dancers": {
+    "676de921-a44b-5eae-8d09-48cc915fc050": {
+      "id": "676de921-a44b-5eae-8d09-48cc915fc050",
+      "name": "太郎"
+    },
+    "3d911119-c7fa-5e99-bf6f-f7c75fe12ac4": {
+      "id": "3d911119-c7fa-5e99-bf6f-f7c75fe12ac4",
+      "name": "花子"
+    },
+    "f9db0031-1bc7-5c9d-99f4-ad3e2ef5bb29": {
+      "id": "f9db0031-1bc7-5c9d-99f4-ad3e2ef5bb29",
+      "name": "蓮"
+    },
+    "1b5238d0-6d8c-5b5d-ae5d-7551aa48cc69": {
+      "id": "1b5238d0-6d8c-5b5d-ae5d-7551aa48cc69",
+      "name": "健太"
+    },
+    "a0825cd6-dc7c-5fec-b7aa-2180b6bf7947": {
+      "id": "a0825cd6-dc7c-5fec-b7aa-2180b6bf7947",
+      "name": "美咲"
+    },
+    "32de0a22-0510-53a6-8d62-6234d5fb0656": {
+      "id": "32de0a22-0510-53a6-8d62-6234d5fb0656",
+      "name": "翔太"
+    },
+    "e0bd6053-a6c6-5b97-bd63-8f937ed9a0e8": {
+      "id": "e0bd6053-a6c6-5b97-bd63-8f937ed9a0e8",
+      "name": "結衣"
+    },
+    "17d3c065-908c-5032-b657-cb806e69866a": {
+      "id": "17d3c065-908c-5032-b657-cb806e69866a",
+      "name": "大輔"
+    },
+    "124fbdd6-d557-57ca-9bc6-2d20c01c0244": {
+      "id": "124fbdd6-d557-57ca-9bc6-2d20c01c0244",
+      "name": "葵"
+    },
+    "6be2de65-a0aa-5cfb-98d3-a9434c4a7e4b": {
+      "id": "6be2de65-a0aa-5cfb-98d3-a9434c4a7e4b",
+      "name": "拓海"
+    },
+    "a5d3ecc1-e491-5a8c-896d-84d7ea31dd30": {
+      "id": "a5d3ecc1-e491-5a8c-896d-84d7ea31dd30",
+      "name": "さくら"
+    },
+    "5d0d9ad3-8e80-56dd-9908-7126b25e9978": {
+      "id": "5d0d9ad3-8e80-56dd-9908-7126b25e9978",
+      "name": "悠真"
+    },
+    "4ff81553-549f-5227-a597-6511e3d0a6d8": {
+      "id": "4ff81553-549f-5227-a597-6511e3d0a6d8",
+      "name": "陽菜"
+    },
+    "f0594b88-af74-5db6-b75e-a67d2a5d7e8b": {
+      "id": "f0594b88-af74-5db6-b75e-a67d2a5d7e8b",
+      "name": "湊"
+    },
+    "7b8ea6fa-a530-57d3-aa9b-8405a7e940f0": {
+      "id": "7b8ea6fa-a530-57d3-aa9b-8405a7e940f0",
+      "name": "凛"
+    },
+    "842c55a4-7214-5cdc-996d-f70f67133aff": {
+      "id": "842c55a4-7214-5cdc-996d-f70f67133aff",
+      "name": "芽衣"
+    },
+    "5ad486fc-f98a-5403-8c97-4bfdf90a7050": {
+      "id": "5ad486fc-f98a-5403-8c97-4bfdf90a7050",
+      "name": "裏方1"
+    },
+    "47dde16d-530c-55de-a3a6-cc07563a609d": {
+      "id": "47dde16d-530c-55de-a3a6-cc07563a609d",
+      "name": "裏方2"
+    },
+    "8fa214f0-0296-5133-be37-cdadab129c4e": {
+      "id": "8fa214f0-0296-5133-be37-cdadab129c4e",
+      "name": "裏方3"
+    },
+    "97db115c-f588-5b7e-b482-60358bde7fd3": {
+      "id": "97db115c-f588-5b7e-b482-60358bde7fd3",
+      "name": "裏方4"
+    }
+  },
+  "props": {
+    "dfdf3b84-38f4-5701-afb3-645f54201bae": {
+      "id": "dfdf3b84-38f4-5701-afb3-645f54201bae",
+      "name": "大旗",
+      "color": "#F08A00",
+      "width": 4,
+      "length": 1
+    },
+    "d1051e62-878a-5b66-9360-dde02ef075f9": {
+      "id": "d1051e62-878a-5b66-9360-dde02ef075f9",
+      "name": "台A",
+      "color": "#8B5E3C",
+      "width": 1,
+      "length": 1
+    },
+    "b1104fce-7ff3-5340-ab79-461934cceb65": {
+      "id": "b1104fce-7ff3-5340-ab79-461934cceb65",
+      "name": "台B",
+      "color": "#D2B48C",
+      "width": 1,
+      "length": 1
+    },
+    "415e3dab-197b-5373-84fd-3bde1055b87d": {
+      "id": "415e3dab-197b-5373-84fd-3bde1055b87d",
+      "name": "チーム幕",
+      "color": "#A366CC",
+      "width": 5,
+      "length": 1
+    }
+  },
+  "obstacles": {
+    "5b62033e-2e09-52b6-bb00-cdfbfdb9f084": {
+      "id": "5b62033e-2e09-52b6-bb00-cdfbfdb9f084",
+      "name": "スピーカー",
+      "x": 0,
+      "y": 0,
+      "sectionId": "",
+      "type": "obstacle",
+      "rotation": 0,
+      "color": "#DDDDDD",
+      "length": 1,
+      "width": 2,
+      "z": 0
+    },
+    "2345c538-2c5c-5055-8bd5-05d128f3ba44": {
+      "id": "2345c538-2c5c-5055-8bd5-05d128f3ba44",
+      "name": "スピーカー",
+      "x": 14,
+      "y": 0,
+      "sectionId": "",
+      "type": "obstacle",
+      "rotation": 0,
+      "color": "#DDDDDD",
+      "length": 1,
+      "width": 2,
+      "z": 1
+    }
+  },
+  "lastUpdated": "2026-11-14T12:00:00.000Z",
+  "version": 1
+}
