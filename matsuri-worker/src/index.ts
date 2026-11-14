@@ -193,6 +193,13 @@ export default {
 			);
 		}
 
+		// An unexpected failure: the details go to the worker log, the client only gets a generic message
+		// (exception text can include database or email-provider internals).
+		const getInternalErrorResponse = (message: string, e: unknown): Response => {
+			console.error(`${message} at ${new URL(request.url).pathname}:`, e);
+			return getErrorResponse(message, 500);
+		}
+
 		const sendEmail = async (emailAddress: string, subject: string, body: string): Promise<boolean> => {
 			const { data, error } = await resend.emails.send({
 				from: '隊列表作成アプリ <accounts@tairetsu.app>',
@@ -206,6 +213,39 @@ export default {
 			}
 
 			return true;
+		}
+
+		// Checks an invite token and returns the invitee's email.
+		const verifyInvite = async (inviteTeamId: string | null, rawToken: string | null | undefined): Promise<Response> => {
+			if (!rawToken) {
+				return getErrorResponse("Invalid invite link", 400);
+			}
+
+			const { results } = await env.DB.prepare(`
+				SELECT it.*, u.email, t.name AS team_name, t.slug AS team_slug
+				FROM invite_tokens it
+				JOIN users u ON it.user_id = u.id
+				JOIN teams t ON it.team_id = t.id
+				WHERE it.used_at IS NULL AND it.team_id = ?
+			`).bind(inviteTeamId).all();
+
+			const match = await Promise.all(
+				results.map(async (row: any) => {
+					const valid = await verifyPassword(rawToken, row.token_hash);
+					return valid ? row : null;
+				})
+			).then(results => results.find(r => r !== null));
+
+			if (!match) {
+				return getErrorResponse("Invalid or already used invite link", 400);
+			}
+
+			return new Response(JSON.stringify({
+				email: match.email
+			}), {
+				status: 200,
+				headers: { ...corsHeaders, "Content-Type": "application/json" },
+			});
 		}
 
 		if (request.method === "OPTIONS") {
@@ -262,38 +302,9 @@ export default {
 				return getSuccessResponse(team);
 			}
 
+			// Kept for app versions loaded before the token moved to a POST body; remove once they've refreshed.
 			if (url.pathname === "/api/auth/verify-invite") {
-				const rawToken = url.searchParams.get("setup");
-
-				if (!rawToken) {
-					return getErrorResponse("Invalid invite link", 400);
-				}
-
-				const { results } = await env.DB.prepare(`
-					SELECT it.*, u.email, t.name AS team_name, t.slug AS team_slug
-					FROM invite_tokens it
-					JOIN users u ON it.user_id = u.id
-					JOIN teams t ON it.team_id = t.id
-					WHERE it.used_at IS NULL AND it.team_id = ?
-				`).bind(teamId).all();
-
-				const match = await Promise.all(
-					results.map(async (row: any) => {
-						const valid = await verifyPassword(rawToken, row.token_hash);
-						return valid ? row : null;
-					})
-				).then(results => results.find(r => r !== null));
-
-				if (!match) {
-					return getErrorResponse("Invalid or already used invite link", 400);
-				}
-
-				return new Response(JSON.stringify({
-					email: match.email
-				}), {
-					status: 200,
-					headers: { ...corsHeaders, "Content-Type": "application/json" },
-				});
+				return verifyInvite(teamId, url.searchParams.get("setup"));
 			}
 
 			if (url.pathname === "/api/choreos/summary") {
@@ -326,7 +337,7 @@ export default {
 	
 					return getSuccessResponse(results);
 				} catch (e: any) {
-					return getErrorResponse(`Internal server error: ${(e as Error)?.message}`, 500);
+					return getInternalErrorResponse("Internal server error", e);
 				}
 			} else if (url.pathname === "/api/choreos/file") {
 				if (!teamId) {
@@ -368,7 +379,7 @@ export default {
 						headers: { ...corsHeaders, "Content-Type": "application/json" }
 					});
 				} catch (e: any) {
-					return getErrorResponse(`Internal server error: ${(e as Error).message}`, 500);
+					return getInternalErrorResponse("Internal server error", e);
 				}
 			} else if (url.pathname === "/api/choreos/file/current-version") {
 				if (!teamId) {
@@ -398,7 +409,7 @@ export default {
 	
 					return getSuccessResponse({ version: row?.version ?? 0 });
 				} catch (e: any) {
-					return getErrorResponse(`Internal server error: ${(e as Error).message}`, 500);
+					return getInternalErrorResponse("Internal server error", e);
 				}
 			} else if (url.pathname === "/api/choreos/file/history/public") {
 				const choreoId = url.searchParams.get("choreo_id");
@@ -476,7 +487,7 @@ export default {
 			    <p>※このメールは自動送信されています。返信には対応しておりませんのでご了承ください。</p>
 				`);
 			} catch (e: any) {
-				return getErrorResponse(`Failed to send email: ${(e as Error)?.message}`, 500);
+				return getInternalErrorResponse("Failed to send email", e);
 			}
 
 			return getSuccessResponse();
@@ -589,6 +600,12 @@ export default {
 				200, 
 				setSessionCookie(token)
 			);
+		}
+
+		// The token is a credential, so it comes in the body rather than the URL.
+		if (url.pathname === "/api/auth/verify-invite" && request.method === "POST") {
+			const body = await request.json() as { team_id?: string, setup?: string };
+			return verifyInvite(body.team_id ?? null, body.setup);
 		}
 
 		if (url.pathname === "/api/auth/accept-invite" && request.method === "POST") {
@@ -1174,7 +1191,7 @@ export default {
 				if (isUniqueConstraintError(e)) {
 					return getErrorResponse("Already in the roster.", 409);
 				}
-				return getErrorResponse(`Internal server error: ${(e as Error).message}`, 500);
+				return getInternalErrorResponse("Internal server error", e);
 			}
 
 			return getErrorResponse(`Endpoint not found`, 404);
@@ -1267,7 +1284,7 @@ export default {
 							<p>※このメールは自動送信されています。返信には対応しておりませんのでご了承ください。</p>
 						`);
 					} catch (e: any) {
-						return getErrorResponse(`Failed to send email: ${(e as Error)?.message}`, 500);
+						return getInternalErrorResponse("Failed to send email", e);
 					}
 				} else {
 					try {
@@ -1277,7 +1294,7 @@ export default {
 							<p>※このメールは自動送信されています。返信には対応しておりませんのでご了承ください。</p>
 						`);
 					} catch (e: any) {
-						return getErrorResponse(`Failed to send email: ${(e as Error)?.message}`, 500);
+						return getInternalErrorResponse("Failed to send email", e);
 					}
 				}
 	
@@ -1336,7 +1353,7 @@ export default {
 				`).bind(data.choreo_id as string, session.team_id).first<{password: string | null}>();
 				return getSuccessResponse(password);
 			} catch (e) {
-				return getErrorResponse(`Internal server error: ${(e as Error).message}`, 500);
+				return getInternalErrorResponse("Internal server error", e);
 			}
 		}
 
@@ -1463,7 +1480,7 @@ export default {
 
 				return getSuccessResponse({ newFile: file }, isNew ? 201 : 200);
 			} catch (e) {
-				return getErrorResponse(`Internal server error: ${(e as Error).message}`, 500);
+				return getInternalErrorResponse("Internal server error", e);
 			}
 		}
 
