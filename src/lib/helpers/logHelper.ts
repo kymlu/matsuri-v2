@@ -1,13 +1,18 @@
-type LogLevel = 'LOG' | 'WARN' | 'ERROR';
+type LogLevel = 'LOG' | 'INFO' | 'WARN' | 'ERROR';
 // Kept in memory for the downloadable log file. console.debug is not kept: it is for routine detail
 // that is only useful while watching the browser console.
 const MAX_LOG_ENTRIES = 2000;
 const MAX_LINE_LENGTH = 2000;
 const logs: string[] = [];
+// Errors already written in full. The same error is often logged again by a caller, or surfaces later as an
+// unhandled rejection; repeats get one line instead of a second copy of the stack.
+const written = new WeakSet<object>();
 
 // JSON.stringify writes an Error (or DOMException) as "{}", so write its name, message and stack instead.
 function formatError(error: Error): string {
   const head = `${error.name}: ${error.message}`;
+  if (written.has(error)) return `${head} (stack logged above)`;
+  written.add(error);
   const stack = error.stack ?? "";
   // Chrome's stack starts with the same "name: message" line; Firefox and Safari's do not.
   const frames = stack.startsWith(head) ? stack.slice(head.length) : stack ? `\n${stack}` : "";
@@ -20,7 +25,12 @@ function formatArg(arg: unknown): string {
   if (typeof arg === 'string') return arg;
   if (arg instanceof Error) return formatError(arg);
   // DOMException is not an Error subclass in every browser.
-  if (typeof DOMException !== 'undefined' && arg instanceof DOMException) return `${arg.name}: ${arg.message}`;
+  if (typeof DOMException !== 'undefined' && arg instanceof DOMException) {
+    const text = `${arg.name}: ${arg.message}`;
+    if (written.has(arg)) return `${text} (logged above)`;
+    written.add(arg);
+    return text;
+  }
   if (arg === undefined) return 'undefined';
   try {
     return JSON.stringify(arg) ?? String(arg);
@@ -53,7 +63,7 @@ function logInterceptor(
 
 // Override global console methods
 console.log = logInterceptor('LOG', console.log);
-console.info = logInterceptor('LOG', console.info);
+console.info = logInterceptor('INFO', console.info);
 console.warn = logInterceptor('WARN', console.warn);
 console.error = logInterceptor('ERROR', console.error);
 
@@ -67,14 +77,19 @@ if (typeof window !== 'undefined') {
   });
 }
 
+// Written at the top of the downloaded file, so they can't be pushed out of the buffer.
 let buildDate: string | undefined;
-// Written at the top of the downloaded file, so it can't be pushed out of the buffer.
+let screen: string | undefined;
 export function setBuildDateForLogs(date: string) {
   buildDate = date;
 }
+// The screen isn't in the URL. (Don't add the query string to the header: it can hold an invite token.)
+export function setScreenForLogs(name: string) {
+  screen = name;
+}
 
 export function getLogText() {
-  const header = `Matsuri log, ${new Date().toISOString()}\nBuild: ${buildDate ?? "unknown"}\nPage: ${window.location.pathname}\nBrowser: ${navigator.userAgent}\n`;
+  const header = `Matsuri log, ${new Date().toISOString()}\nBuild: ${buildDate ?? "unknown"}\nScreen: ${screen ?? "unknown"}\nPage: ${window.location.pathname}\nBrowser: ${navigator.userAgent}\n`;
   return header + "\n" + logs.join("\n");
 }
 

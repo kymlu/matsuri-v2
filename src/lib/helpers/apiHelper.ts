@@ -38,17 +38,18 @@ const getApiUrl = (endpoint:
 }
 
 // What went wrong with a failed response. Never throws: a body that isn't JSON (for example a proxy's
-// HTML error page) goes into the summary as a short excerpt, so the real status isn't lost to a parse error.
-// message is the server's own message, for passing on to the user.
+// HTML error page), or JSON without a message, goes into the summary as a short excerpt, so the details
+// aren't lost. message is the server's own message, for passing on to the user.
 const readFailure = async (response: Response): Promise<{ message?: string, summary: string }> => {
   const text = await response.text().catch(() => "");
+  const excerpt = (label: string) => text ? `${label}${text.replace(/\s+/g, " ").slice(0, 200)}` : undefined;
   let message: string | undefined;
   let detail: string | undefined;
   try {
     message = (JSON.parse(text) as ErrorResponse)?.message;
-    detail = message;
+    detail = message ?? excerpt("");
   } catch {
-    detail = text ? `(not JSON) ${text.replace(/\s+/g, " ").slice(0, 200)}` : undefined;
+    detail = excerpt("(not JSON) ");
   }
   return { message, summary: `${response.status} ${response.statusText}`.trim() + (detail ? `: ${detail}` : "") };
 }

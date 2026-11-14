@@ -128,7 +128,7 @@ export class IndexedDBManager {
 
   async removeItem(storeName: TableName, itemId: string) {
     if (isNullOrUndefinedOrBlank(itemId)) return Promise.resolve(0);
-        return new Promise<any>((resolve, reject) => {
+    return new Promise<any>((resolve, reject) => {
       try {
         const request = this._getStore(storeName).delete(itemId);
         request.onsuccess = () => {

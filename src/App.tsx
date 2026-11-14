@@ -17,7 +17,7 @@ import { isNullOrUndefinedOrBlank } from './lib/helpers/globalHelper';
 import { Grid } from 'react-loader-spinner';
 import { colorPalette } from './lib/consts/colors';
 import { useSearchParams } from 'react-router-dom';
-import { setBuildDateForLogs } from './lib/helpers/logHelper';
+import { setBuildDateForLogs, setScreenForLogs } from './lib/helpers/logHelper';
 
 type Mode = "home" | "form" | "edit" | "view" | "admin" | "roster";
 
@@ -109,6 +109,7 @@ function App() {
 
   useEffect(() => {
     console.log("Changing mode:", mode);
+    setScreenForLogs(mode);
   }, [mode]);
 
   return (
