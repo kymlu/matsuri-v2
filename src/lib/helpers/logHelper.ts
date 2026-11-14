@@ -1,5 +1,6 @@
 type LogLevel = 'LOG' | 'WARN' | 'ERROR';
-const MAX_LOG_ENTRIES = 500;
+const MAX_LOG_ENTRIES = 2000;
+const MAX_LINE_LENGTH = 2000;
 const logs: string[] = [];
 
 function logInterceptor(
@@ -7,7 +8,7 @@ function logInterceptor(
   originalFn: (...args: any[]) => void
 ): (...args: any[]) => void {
   return (...args: any[]) => {
-    const message = args
+    let message = args
       .map(arg => {
         try {
           return typeof arg === 'string' ? arg : JSON.stringify(arg);
@@ -16,6 +17,9 @@ function logInterceptor(
         }
       })
       .join(' ');
+    if (message.length > MAX_LINE_LENGTH) {
+      message = `${message.slice(0, MAX_LINE_LENGTH)}…(trimmed ${message.length - MAX_LINE_LENGTH} characters)`;
+    }
 
     const timestamp = new Date().toISOString();
     logs.push(`[${timestamp}] [${level}] ${message}`);
