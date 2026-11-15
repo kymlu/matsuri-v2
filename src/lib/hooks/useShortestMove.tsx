@@ -126,11 +126,12 @@ export function useShortestMove({ state, section, prevSection, selectedIds, comm
     const shown = choreo.sections.find(s => s.id === session.sectionId);
     if (!shown) return undefined;
     const considered = new Set(plan.considered);
+    const changed = new Set(plan.moves.map(m => m.unit[0]));
     const here = shown.formation.dancerPositions;
     const routes = plan.considered.flatMap(id => {
       const from = prevSection.formation.dancerPositions[id], to = here[id];
       if (!from || !to || Math.hypot(to.x - from.x, to.y - from.y) < MIN_ROUTE) return [];
-      return [{ id, from, to, color: to.color }];
+      return [{ id, from, to, color: to.color, changed: changed.has(id) }];
     });
     return {
       choreo,

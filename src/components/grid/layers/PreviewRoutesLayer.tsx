@@ -6,11 +6,13 @@ import { stageMetersToPx } from "../../../lib/helpers/editorCalculationHelper";
 import { METER_PX } from "../../../lib/consts/consts";
 import { colorPalette } from "../../../lib/consts/colors";
 
-export type PreviewRoute = { id: string, from: Coordinates, to: Coordinates, color: string };
+// changed: this person's spot is different in the proposal.
+export type PreviewRoute = { id: string, from: Coordinates, to: Coordinates, color: string, changed: boolean };
 
 // Straight-line routes from the previous section while previewing a change (最短距離):
 // a faint dashed circle where each person stood before, and an arrow to where they stand now.
-// "after" (the proposal) is green, "now" (what is there today) is red. Nothing here can be touched.
+// People whose spot changes: red in "now" (what is there today), green in "after" (the proposal). Everyone else's
+// route is grey, thinner and lighter: context, not a change. Nothing here can be touched.
 const ROUTE_COLOURS = { now: colorPalette.rainbow.red[0], after: "#2E8B57" };
 
 const PreviewRoutesLayer = memo(function PreviewRoutesLayer({ geometry, routes, kind, largeDancers }: {
@@ -35,8 +37,9 @@ const PreviewRoutesLayer = memo(function PreviewRoutesLayer({ geometry, routes, 
       const cut = Math.min(PERSON_RADIUS, length / 2) / (length || 1);
       const end = { x: to.x - (to.x - from.x) * cut, y: to.y - (to.y - from.y) * cut };
       return <Arrow key={r.id} points={[from.x, from.y, end.x, end.y]}
-        stroke={ROUTE_COLOURS[kind]} fill={ROUTE_COLOURS[kind]} strokeWidth={2}
-        pointerLength={6} pointerWidth={6} opacity={0.85} perfectDrawEnabled={false}/>;
+        stroke={r.changed ? ROUTE_COLOURS[kind] : colorPalette.grey} fill={r.changed ? ROUTE_COLOURS[kind] : colorPalette.grey}
+        strokeWidth={r.changed ? 2 : 1.5} pointerLength={r.changed ? 6 : 5} pointerWidth={r.changed ? 6 : 5}
+        opacity={r.changed ? 0.85 : 0.5} perfectDrawEnabled={false}/>;
     })}
   </Layer>;
 });

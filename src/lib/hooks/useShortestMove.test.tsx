@@ -50,6 +50,7 @@ describe("useShortestMove", () => {
     expect(preview.routes.kind).toBe("after");
     expect(preview.section.formation.dancerPositions.a).toMatchObject({ x: 0, y: 5 });
     expect(preview.fadedDancerIds.size).toBe(0); // everyone is considered when nothing is selected
+    expect(preview.routes.routes.map(r => [r.id, r.changed])).toEqual([["a", true], ["b", true]]);
 
     act(() => result.current.startShortestMove()); // reopening is harmless
     render(result.current.shortestMoveSheet!);
@@ -109,6 +110,8 @@ describe("useShortestMove", () => {
     const { result } = setUp(makeChoreo("blue"));
     act(() => result.current.startShortestMove());
     expect(result.current.shortestMovePreview!.routes.kind).toBe("now");
+    // Nobody would change spot, so every route is drawn as unchanged (grey).
+    expect(result.current.shortestMovePreview!.routes.routes.every(r => !r.changed)).toBe(true);
     render(result.current.shortestMoveSheet!);
     expect(screen.getByText("同じ色どうしでは、これ以上短くなりません")).toBeInTheDocument();
     expect(screen.queryByRole("radiogroup", { name: "表示" })).toBeNull();
