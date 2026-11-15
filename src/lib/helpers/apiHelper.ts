@@ -456,8 +456,8 @@ export const verifyTeam = async(
   
     
     if (!response.ok) {
-      const data = await response.json() as ErrorResponse;
-      console.error(`Status: ${response.status} message: ${data.message}`);
+      const data = await response.json().catch(() => undefined) as ErrorResponse | undefined;
+      console.error(`verifyTeam failed: ${response.status} message: ${data?.message}`);
       onFailure(response.status);
       return;
     } else {
@@ -465,8 +465,9 @@ export const verifyTeam = async(
       onSuccess(data);
     }
   } catch (e: any) {
-    console.error((e as Error)?.message);
-    onFailure(400);
+    // No response at all (offline, or the server couldn't be reached).
+    console.error("verifyTeam failed:", (e as Error)?.message);
+    onFailure(0);
   }
 }
 
