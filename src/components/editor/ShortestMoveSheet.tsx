@@ -15,7 +15,7 @@ type ShortestMoveSheetProps = {
   hasGain: boolean,
   // Only crossing colours would help (and the box is still ticked): nothing to compare, nothing to apply.
   crossColourOnly: boolean,
-  // Colours that would change, as toggles. Empty hides the row (fewer than two to choose from).
+  // Every colour among the people taking part, as toggles: off keeps that colour in place.
   colours: string[],
   excludedColours: ReadonlySet<string>,
   onToggleColour: (colour: string) => void,
@@ -23,6 +23,9 @@ type ShortestMoveSheetProps = {
   onChangeView: (view: ShortestMoveView) => void,
   sameColour: boolean,
   onChangeSameColour: (sameColour: boolean) => void,
+  // People keep their colour when they swap (otherwise the colour stays with the spot). Locked on with sameColour.
+  colourFollowsPerson: boolean,
+  onChangeColourFollowsPerson: (follow: boolean) => void,
   // Only shown when someone who would change spot has counts in this section.
   showCountsOption: boolean,
   countsFollowPerson: boolean,
@@ -43,7 +46,7 @@ const SWIPE_TO_CLOSE_PX = 60;
 // panned and zoomed (no backdrop). The stage itself can't be edited until this closes.
 export default function ShortestMoveSheet({
   previousSectionName, totalBefore, totalAfter, hasGain, crossColourOnly, colours, excludedColours, onToggleColour, view, onChangeView,
-  sameColour, onChangeSameColour, showCountsOption, countsFollowPerson, onChangeCountsFollowPerson,
+  sameColour, onChangeSameColour, colourFollowsPerson, onChangeColourFollowsPerson, showCountsOption, countsFollowPerson, onChangeCountsFollowPerson,
   skippedStacked, onCancel, onApply,
 }: ShortestMoveSheetProps) {
   const dragStart = useRef<number | undefined>(undefined);
@@ -68,7 +71,7 @@ export default function ShortestMoveSheet({
       <div className="flex items-center gap-3">
         <h2 className="text-base font-bold">最短距離</h2>
         {
-          !crossColourOnly &&
+          hasGain &&
           <div className="flex ml-auto" role="radiogroup" aria-label="表示">
             {([["now", "今"], ["after", "入れ替え後"]] as [ShortestMoveView, string][]).map(([value, label], i) =>
               <button
@@ -111,8 +114,8 @@ export default function ShortestMoveSheet({
       </label>
       {
         colours.length > 0 &&
-        // Which colours to swap. Off keeps that colour's people where they are.
-        <div className="flex flex-wrap gap-2 pl-7" role="group" aria-label="入れ替える色">
+        // Which colours take part. Off keeps that colour's people where they are.
+        <div className="flex flex-wrap gap-2 pl-7 pb-1" role="group" aria-label="入れ替える色">
           {colours.map(colour => {
             const on = !excludedColours.has(colour);
             return <button
@@ -129,6 +132,12 @@ export default function ShortestMoveSheet({
           })}
         </div>
       }
+      <label className={classNames("flex items-center gap-2 text-sm min-h-9", { "opacity-50": sameColour })}>
+        <Checkbox.Root checked={colourFollowsPerson} disabled={sameColour} onCheckedChange={onChangeColourFollowsPerson} className="shrink-0">
+          <SelectBox state={colourFollowsPerson ? "all" : "none"}/>
+        </Checkbox.Root>
+        <span>色も人と一緒に入れ替える</span>
+      </label>
       {
         showCountsOption &&
         <label className="flex items-center gap-2 text-sm min-h-9">

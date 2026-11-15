@@ -55,6 +55,7 @@ export function useShortestMove({ state, section, prevSection, selectedIds, comm
   const [countsFollowPerson, setCountsFollowPerson] = useState(false);
   const [view, setView] = useState<ShortestMoveView>("after");
   const [excludedColours, setExcludedColours] = useState<ReadonlySet<string>>(new Set());
+  const [colourFollowsPerson, setColourFollowsPerson] = useState(true);
 
   const startShortestMove = useCallback(() => {
     if (!prevSection) return;
@@ -69,6 +70,7 @@ export function useShortestMove({ state, section, prevSection, selectedIds, comm
     setCountsFollowPerson(false);
     setView("after");
     setExcludedColours(new Set());
+    setColourFollowsPerson(true);
     setSession({ base: state, sectionId: section.id, prev: prevSection, formation: section.formation, selectedIds, sameColour: same, anyColour: any });
   }, [prevSection, section, selectedIds, state]);
 
@@ -79,21 +81,22 @@ export function useShortestMove({ state, section, prevSection, selectedIds, comm
     if (session && (state !== session.base || section.id !== session.sectionId)) setSession(undefined);
   }, [session, state, section.id]);
 
-  // Colours that would change with the colour rule on, in the order people appear. Each colour is planned on its
-  // own then, so leaving one out only keeps its people where they are.
-  const changingColours = useMemo(() => {
+  // Every colour among the people taking part, in the order they appear. Turning one off keeps its people in place.
+  const colours = useMemo(() => {
     if (!session) return [];
-    const movers = new Set(session.sameColour.moves.map(m => m.unit[0]));
     const here = session.formation.dancerPositions;
-    return Array.from(new Set(session.sameColour.considered.filter(id => movers.has(id)).map(id => here[id].color)));
+    return Array.from(new Set(session.sameColour.considered.map(id => here[id].color)));
   }, [session]);
 
-  const plan = useMemo(() => {
+  // Plans for the colours left in, with and without the colour rule.
+  const plans = useMemo(() => {
     if (!session) return undefined;
-    if (!sameColour) return session.anyColour;
-    if (excludedColours.size === 0) return session.sameColour;
-    return planShortestMoves(session.prev.formation, session.formation, session.selectedIds, { sameColour: true, excludeColours: excludedColours });
-  }, [session, sameColour, excludedColours]);
+    if (excludedColours.size === 0) return { same: session.sameColour, any: session.anyColour };
+    const plan = (same: boolean) =>
+      planShortestMoves(session.prev.formation, session.formation, session.selectedIds, { sameColour: same, excludeColours: excludedColours });
+    return { same: plan(true), any: plan(false) };
+  }, [session, excludedColours]);
+  const plan = plans && (sameColour ? plans.same : plans.any);
   const hasGain = (plan?.moves.length ?? 0) > 0;
 
   const toggleColour = useCallback((colour: string) => setExcludedColours(old => {
@@ -104,9 +107,10 @@ export function useShortestMove({ state, section, prevSection, selectedIds, comm
 
   const after = useMemo(
     () => session && plan && plan.moves.length > 0
-      ? moveUnitsTo(session.base, session.sectionId, plan.moves, countsFollowPerson ? "person" : "spot")
+      ? moveUnitsTo(session.base, session.sectionId, plan.moves, countsFollowPerson ? "person" : "spot",
+        sameColour || colourFollowsPerson ? "person" : "spot")
       : undefined,
-    [session, plan, countsFollowPerson]);
+    [session, plan, countsFollowPerson, sameColour, colourFollowsPerson]);
 
   // The preview closes itself once the new state arrives (the effect above), in the same render as the page's
   // section catching up. Closing here would show the old positions for a frame and animate people back.
@@ -142,8 +146,10 @@ export function useShortestMove({ state, section, prevSection, selectedIds, comm
         totalBefore={plan.totalBefore}
         totalAfter={plan.totalAfter}
         hasGain={hasGain}
-        crossColourOnly={sameColour && session.sameColour.moves.length === 0}
-        colours={sameColour && changingColours.length >= 2 ? changingColours : []}
+        crossColourOnly={sameColour && !hasGain && plans!.any.moves.length > 0}
+        colours={colours}
+        colourFollowsPerson={sameColour || colourFollowsPerson}
+        onChangeColourFollowsPerson={setColourFollowsPerson}
         excludedColours={excludedColours}
         onToggleColour={toggleColour}
         view={view}

@@ -59,8 +59,8 @@ describe("planShortestMoves", () => {
     const all = planShortestMoves(start, here, none, { sameColour: true });
     expect(plan.totalBefore).toBeCloseTo(all.totalBefore);
     expect(all.totalBefore - plan.totalAfter).toBeCloseTo(2 * Math.hypot(10, 5) - 10);
-    // Ignored when colours mix anyway.
-    expect(planShortestMoves(start, here, none, { sameColour: false, excludeColours: new Set(["blue"]) }).moves).toHaveLength(4);
+    // Also with colours mixing: blue still stays out.
+    expect(planShortestMoves(start, here, none, { sameColour: false, excludeColours: new Set(["blue"]) }).moves.map(m => m.unit[0]).sort()).toEqual(["a", "b"]);
   });
 
   it("ignores savings under 0.5 m", () => {

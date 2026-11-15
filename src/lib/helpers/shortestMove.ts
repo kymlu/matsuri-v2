@@ -52,8 +52,8 @@ export function planShortestMoves(
 ): ShortestMovePlan {
   const here = formation.dancerPositions;
   const { considered: all, skippedStacked } = candidates(prev, formation, selected);
-  // Colours left out stay where they are. Only meaningful with sameColour, where colours never mix.
-  const considered = sameColour && excludeColours?.size ? all.filter(id => !excludeColours.has(here[id].color)) : all;
+  // Colours left out stay where they are.
+  const considered = excludeColours?.size ? all.filter(id => !excludeColours.has(here[id].color)) : all;
   const distance = (id: string, spotOf: string) => {
     const from = prev!.dancerPositions[id], to = here[spotOf];
     return Math.hypot(to.x - from.x, to.y - from.y);

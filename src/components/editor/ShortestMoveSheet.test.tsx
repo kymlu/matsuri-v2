@@ -5,6 +5,7 @@ const base = {
   previousSectionName: "Aメロ", totalBefore: 62, totalAfter: 17, hasGain: true, crossColourOnly: false,
   colours: [] as string[], excludedColours: new Set<string>(), onToggleColour: jest.fn(),
   view: "after" as const, onChangeView: jest.fn(), sameColour: true, onChangeSameColour: jest.fn(),
+  colourFollowsPerson: true, onChangeColourFollowsPerson: jest.fn(),
   showCountsOption: false, countsFollowPerson: false, onChangeCountsFollowPerson: jest.fn(),
   skippedStacked: false, onCancel: jest.fn(), onApply: jest.fn(),
 };
@@ -49,6 +50,17 @@ describe("ShortestMoveSheet", () => {
     expect(screen.getByRole("button", { name: "#00e" })).toHaveAttribute("aria-pressed", "false");
     screen.getByRole("button", { name: "#00e" }).click();
     expect(onToggleColour).toHaveBeenCalledWith("#00e");
+  });
+
+  it("locks 色も人と一緒に入れ替える on while swaps stay within colours", () => {
+    const { unmount } = render(<ShortestMoveSheet {...base}/>);
+    const box = () => screen.getByText("色も人と一緒に入れ替える").closest("label")!.querySelector("[role=checkbox]")!;
+    const locked = box();
+    expect(locked).toHaveAttribute("aria-checked", "true");
+    expect(locked).toHaveAttribute("aria-disabled", "true");
+    unmount();
+    render(<ShortestMoveSheet {...base} sameColour={false}/>);
+    expect(box()).not.toHaveAttribute("aria-disabled", "true");
   });
 
   it("hides the colour row with nothing to choose", () => {
