@@ -76,7 +76,7 @@ export default function ShortestMoveSheet({
       transition: dragging ? "none" : `transform ${SLIDE_MS}ms ease-out`,
     }}
     className="z-10 flex flex-col w-screen shrink-0 max-h-[45svh] bg-surface border-t-2 border-line rounded-t-2xl shadow-[0_-8px_24px_rgb(0_0_0/0.08)] motion-reduce:!transition-none">
-    {/* Header and buttons stay put; only the options in between scroll on a short screen. */}
+    {/* Header and footer (result and buttons) stay put; only the options in between scroll on a short screen. */}
     <div className="flex flex-col w-full max-w-lg gap-2 px-4 pt-2 mx-auto shrink-0">
       {/* Swipe the handle down to cancel, like the app's other bottom sheets. */}
       <div
@@ -117,18 +117,6 @@ export default function ShortestMoveSheet({
         }
       </div>
 
-      <p className="flex items-baseline gap-2 text-sm">
-        <span className="text-muted">「{shortName(previousSectionName)}」からの移動（合計）</span>
-        {
-          hasGain
-            ? <>
-                <span className="line-through text-muted">{formatMetres(totalBefore)}</span>
-                <span aria-hidden>→</span>
-                <span className="text-xl font-bold">{formatMetres(totalAfter)}</span>
-              </>
-            : <span className="text-lg font-bold">{formatMetres(totalBefore)}</span>
-        }
-      </p>
     </div>
     <div className="flex flex-col w-full max-w-lg min-h-0 gap-2 px-4 py-2 mx-auto overflow-y-auto">
 
@@ -178,8 +166,20 @@ export default function ShortestMoveSheet({
       }
 
     </div>
-    <div className="flex flex-col w-full max-w-lg gap-2 px-4 pt-2 pb-6 mx-auto shrink-0">
-      {/* Notes sit with the buttons they affect; no gain is shown like the app's other errors. */}
+    <div className="flex flex-col w-full max-w-lg gap-2 px-4 pt-3 pb-6 mx-auto border-t shrink-0 border-line">
+      {/* The result sits with the buttons that act on it; no gain is shown like the app's other errors. */}
+      <p className="flex flex-wrap items-baseline justify-center gap-2 text-sm">
+        <span className="text-muted">「{shortName(previousSectionName)}」からの移動（合計）</span>
+        {
+          hasGain
+            ? <>
+                <span className="line-through text-muted">{formatMetres(totalBefore)}</span>
+                <span aria-hidden>→</span>
+                <span className="text-xl font-bold">{formatMetres(totalAfter)}</span>
+              </>
+            : <span className="text-lg font-bold">{formatMetres(totalBefore)}</span>
+        }
+      </p>
       {skippedStacked && <p className="text-sm text-center text-muted">重なっている人は動かしません</p>}
       {noGainMessage && <p className="font-bold text-center text-wrap text-primary">{noGainMessage}</p>}
       <div className="grid w-full grid-flow-col gap-2 auto-cols-fr">
