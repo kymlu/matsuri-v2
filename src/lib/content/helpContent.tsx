@@ -391,6 +391,7 @@ export const HELP_ARTICLES: HelpArticle[] = [
     ],
     points: [
       "前のセクションと同じ顔ぶれで重なっている場合は、重なりをタップすると全員の動線をまとめて編集できます。",
+      "編集中の動線は赤、ほかの人の動線は灰色で表示されます。",
     ],
     related: ["term-movement"],
     keywords: ["動線", "経路", "曲げる", "移動", "カーブ"],
