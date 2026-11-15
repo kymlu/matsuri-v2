@@ -63,10 +63,12 @@ function App() {
   const [teamLoadError, setTeamLoadError] = useState<TeamLoadError | undefined>(undefined);
   const navigate = useNavigate();
 
+  // Same as opening the app without a team, welcome dialog included.
   const goWithoutTeam = () => {
     setTeamLoadError(undefined);
     setSavedDancerName(getMyDancerName());
     navigate('/');
+    setShowNoTeamDialog(true);
     setIsProcessing(false);
   }
 
