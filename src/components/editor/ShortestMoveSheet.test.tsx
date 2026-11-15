@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import ShortestMoveSheet, { formatMetres } from "./ShortestMoveSheet";
 
 const base = {
-  previousSectionName: "Aメロ", totalBefore: 62, totalAfter: 17, hasGain: true, crossColourOnly: false,
+  previousSectionName: "Aメロ", totalBefore: 62, totalAfter: 17, hasGain: true,
   colours: [] as string[], excludedColours: new Set<string>(), onToggleColour: jest.fn(),
   view: "after" as const, onChangeView: jest.fn(), sameColour: true, onChangeSameColour: jest.fn(),
   colourFollowsPerson: true, onChangeColourFollowsPerson: jest.fn(),
@@ -36,7 +36,7 @@ describe("ShortestMoveSheet", () => {
 
   it("explains and blocks applying when only crossing colours helps", () => {
     const onApply = jest.fn();
-    render(<ShortestMoveSheet {...base} hasGain={false} crossColourOnly totalAfter={62} onApply={onApply}/>);
+    render(<ShortestMoveSheet {...base} hasGain={false} noGainMessage="同じ色どうしでは、これ以上短くなりません" totalAfter={62} onApply={onApply}/>);
     expect(screen.getByText("同じ色どうしでは、これ以上短くなりません")).toBeInTheDocument();
     expect(screen.queryByRole("radiogroup")).toBeNull();
     screen.getByText("入れ替える").click();
@@ -65,7 +65,7 @@ describe("ShortestMoveSheet", () => {
 
   it("hides the colour row with nothing to choose", () => {
     render(<ShortestMoveSheet {...base}/>);
-    expect(screen.queryByRole("group", { name: "入れ替える色" })).toBeNull();
+    expect(screen.queryByRole("group", { name: "対象の色" })).toBeNull();
   });
 
   it("shortens long section names and rounds metres", () => {

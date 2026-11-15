@@ -82,6 +82,23 @@ describe("useShortestMove", () => {
     expect(preview.fadedDancerIds.has("d")).toBe(true);
   });
 
+  it("says why nothing would get shorter, whatever the colour choices", () => {
+    const { result } = setUp(makeChoreo());
+    act(() => result.current.startShortestMove());
+    const message = () => {
+      const { unmount } = render(result.current.shortestMoveSheet!);
+      const text = screen.queryByText(/短くなりません|選んでください/)?.textContent;
+      unmount();
+      return text;
+    };
+    expect(message()).toBeUndefined();
+    // Only red is moving; turning it off leaves nothing to gain.
+    let r = render(result.current.shortestMoveSheet!);
+    act(() => screen.getByRole("button", { name: "red" }).click());
+    r.unmount();
+    expect(message()).toBe("色を1つ以上選んでください");
+  });
+
   it("fades people who were left out of the selection", () => {
     const { result } = setUp(makeChoreo(), { ...none, dancers: ["a", "b"] });
     act(() => result.current.startShortestMove());

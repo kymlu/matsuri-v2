@@ -146,7 +146,10 @@ export function useShortestMove({ state, section, prevSection, selectedIds, comm
         totalBefore={plan.totalBefore}
         totalAfter={plan.totalAfter}
         hasGain={hasGain}
-        crossColourOnly={sameColour && !hasGain && plans!.any.moves.length > 0}
+        noGainMessage={hasGain ? undefined
+          : colours.every(c => excludedColours.has(c)) ? "色を1つ以上選んでください"
+          : sameColour ? "同じ色どうしでは、これ以上短くなりません"
+          : "これ以上短くなりません"}
         colours={colours}
         colourFollowsPerson={sameColour || colourFollowsPerson}
         onChangeColourFollowsPerson={setColourFollowsPerson}

@@ -13,8 +13,8 @@ type ShortestMoveSheetProps = {
   totalAfter: number,
   // The current choice shortens the moves (otherwise 入れ替える is disabled).
   hasGain: boolean,
-  // Only crossing colours would help (and the box is still ticked): nothing to compare, nothing to apply.
-  crossColourOnly: boolean,
+  // Why nothing would get shorter, when that is the case.
+  noGainMessage?: string,
   // Every colour among the people taking part, as toggles: off keeps that colour in place.
   colours: string[],
   excludedColours: ReadonlySet<string>,
@@ -45,7 +45,7 @@ const SWIPE_TO_CLOSE_PX = 60;
 // 最短距離: takes the toolbar's place while previewing, so the stage above stays visible and can be
 // panned and zoomed (no backdrop). The stage itself can't be edited until this closes.
 export default function ShortestMoveSheet({
-  previousSectionName, totalBefore, totalAfter, hasGain, crossColourOnly, colours, excludedColours, onToggleColour, view, onChangeView,
+  previousSectionName, totalBefore, totalAfter, hasGain, noGainMessage, colours, excludedColours, onToggleColour, view, onChangeView,
   sameColour, onChangeSameColour, colourFollowsPerson, onChangeColourFollowsPerson, showCountsOption, countsFollowPerson, onChangeCountsFollowPerson,
   skippedStacked, onCancel, onApply,
 }: ShortestMoveSheetProps) {
@@ -54,8 +54,9 @@ export default function ShortestMoveSheet({
   return <div
     role="dialog"
     aria-label="最短距離"
-    className="z-10 w-screen shrink-0 max-h-[45svh] overflow-y-auto bg-surface border-t-2 border-line rounded-t-2xl shadow-[0_-8px_24px_rgb(0_0_0/0.08)]">
-    <div className="flex flex-col w-full max-w-lg gap-2 px-4 pt-2 pb-6 mx-auto">
+    className="z-10 flex flex-col w-screen shrink-0 max-h-[45svh] bg-surface border-t-2 border-line rounded-t-2xl shadow-[0_-8px_24px_rgb(0_0_0/0.08)]">
+    {/* Header and buttons stay put; only the options in between scroll on a short screen. */}
+    <div className="flex flex-col w-full max-w-lg gap-2 px-4 pt-2 mx-auto shrink-0">
       {/* Swipe the handle down to cancel, like the app's other bottom sheets. */}
       <div
         className="self-center w-full py-1 cursor-grab touch-none"
@@ -102,20 +103,17 @@ export default function ShortestMoveSheet({
             : <span className="text-lg font-bold">{formatMetres(totalBefore)}</span>
         }
       </p>
-
-      {crossColourOnly && <p className="px-2 py-1 text-sm rounded-md bg-subtle text-muted">同じ色どうしでは、これ以上短くなりません</p>}
+    </div>
+    <div className="flex flex-col w-full max-w-lg min-h-0 gap-2 px-4 py-2 mx-auto overflow-y-auto">
+      {noGainMessage && <p className="px-2 py-1 text-sm rounded-md bg-subtle text-muted">{noGainMessage}</p>}
       {skippedStacked && <p className="px-2 py-1 text-sm rounded-md bg-subtle text-muted">重なっている人は動かしません</p>}
 
-      <label className="flex items-center gap-2 text-sm min-h-9">
-        <Checkbox.Root checked={sameColour} onCheckedChange={onChangeSameColour} className="shrink-0">
-          <SelectBox state={sameColour ? "all" : "none"}/>
-        </Checkbox.Root>
-        <span>同じ色どうしで入れ替える</span>
-      </label>
       {
         colours.length > 0 &&
         // Which colours take part. Off keeps that colour's people where they are.
-        <div className="flex flex-wrap gap-2 pl-7 pb-1" role="group" aria-label="入れ替える色">
+        <div className="flex items-center gap-3">
+          <span className="text-sm shrink-0">対象の色</span>
+          <div className="flex flex-wrap gap-2 p-1" role="group" aria-label="対象の色">
           {colours.map(colour => {
             const on = !excludedColours.has(colour);
             return <button
@@ -130,8 +128,15 @@ export default function ShortestMoveSheet({
               {on && <span className="text-lg leading-none font-icon" aria-hidden>check</span>}
             </button>;
           })}
+          </div>
         </div>
       }
+      <label className="flex items-center gap-2 text-sm min-h-9">
+        <Checkbox.Root checked={sameColour} onCheckedChange={onChangeSameColour} className="shrink-0">
+          <SelectBox state={sameColour ? "all" : "none"}/>
+        </Checkbox.Root>
+        <span>同じ色どうしで入れ替える</span>
+      </label>
       <label className={classNames("flex items-center gap-2 text-sm min-h-9", { "opacity-50": sameColour })}>
         <Checkbox.Root checked={colourFollowsPerson} disabled={sameColour} onCheckedChange={onChangeColourFollowsPerson} className="shrink-0">
           <SelectBox state={colourFollowsPerson ? "all" : "none"}/>
@@ -148,7 +153,9 @@ export default function ShortestMoveSheet({
         </label>
       }
 
-      <div className="grid w-full grid-flow-col gap-2 mt-1 auto-cols-fr">
+    </div>
+    <div className="w-full max-w-lg px-4 pt-2 pb-6 mx-auto shrink-0">
+      <div className="grid w-full grid-flow-col gap-2 auto-cols-fr">
         <Button full onClick={onCancel}><span className="font-semibold text-nowrap">キャンセル</span></Button>
         <Button full primary disabled={!hasGain} onClick={hasGain ? onApply : undefined}>
           <span className="font-semibold text-nowrap">入れ替える</span>
