@@ -38,6 +38,9 @@ export type ShortestMovePreview = {
   routes: { routes: PreviewRoute[], kind: ShortestMoveView },
 };
 
+// How long the stage keeps jumping after キャンセル, until it has caught up with the real positions.
+const SNAP_BACK_MS = 300;
+
 // Routes shorter than this aren't drawn (the person is practically in the same place).
 const MIN_ROUTE = 0.05;
 
@@ -74,7 +77,18 @@ export function useShortestMove({ state, section, prevSection, selectedIds, comm
     setSession({ base: state, sectionId: section.id, prev: prevSection, formation: section.formation, selectedIds, sameColour: same, anyColour: any });
   }, [prevSection, section, selectedIds, state]);
 
-  const close = useCallback(() => setSession(undefined), []);
+  // Cancelling puts people straight back, without the slide. The stage takes its positions a render or two after the
+  // preview closes, so it keeps jumping instead of animating for a moment longer.
+  const [snapBack, setSnapBack] = useState(false);
+  const close = useCallback(() => {
+    setSnapBack(true);
+    setSession(undefined);
+  }, []);
+  useEffect(() => {
+    if (!snapBack) return;
+    const timer = setTimeout(() => setSnapBack(false), SNAP_BACK_MS);
+    return () => clearTimeout(timer);
+  }, [snapBack]);
 
   // The plan would be stale if the choreo or the section changed underneath it (e.g. a sync).
   useEffect(() => {
@@ -176,5 +190,10 @@ export function useShortestMove({ state, section, prevSection, selectedIds, comm
     </CustomDialog>
   </Dialog.Root>;
 
-  return { canShortestMove, startShortestMove, isPreviewingShortestMove: session !== undefined, shortestMovePreview, shortestMoveSheet, shortestMoveDialog };
+  return {
+    canShortestMove, startShortestMove, isPreviewingShortestMove: session !== undefined,
+    // The stage jumps rather than animates while previewing (flipping 今／最短) and when cancelling.
+    shortestMoveInstantMoves: session !== undefined || snapBack,
+    shortestMovePreview, shortestMoveSheet, shortestMoveDialog,
+  };
 }
