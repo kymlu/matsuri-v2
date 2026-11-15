@@ -48,10 +48,12 @@ export function planShortestMoves(
   prev: Formation | undefined,
   formation: Formation,
   selected: StageEntities<string[]>,
-  { sameColour }: { sameColour: boolean },
+  { sameColour, excludeColours }: { sameColour: boolean, excludeColours?: ReadonlySet<string> },
 ): ShortestMovePlan {
-  const { considered, skippedStacked } = candidates(prev, formation, selected);
   const here = formation.dancerPositions;
+  const { considered: all, skippedStacked } = candidates(prev, formation, selected);
+  // Colours left out stay where they are. Only meaningful with sameColour, where colours never mix.
+  const considered = sameColour && excludeColours?.size ? all.filter(id => !excludeColours.has(here[id].color)) : all;
   const distance = (id: string, spotOf: string) => {
     const from = prev!.dancerPositions[id], to = here[spotOf];
     return Math.hypot(to.x - from.x, to.y - from.y);
@@ -63,7 +65,9 @@ export function planShortestMoves(
     groups.set(key, [...(groups.get(key) ?? []), id]);
   });
 
-  let totalBefore = 0, totalAfter = 0;
+  // Left-out colours still count towards the totals, where they stand.
+  const kept = all.filter(id => !considered.includes(id)).reduce((sum, id) => sum + distance(id, id), 0);
+  let totalBefore = kept, totalAfter = kept;
   const moves: UnitMove[] = [];
   groups.forEach(ids => {
     const cost = ids.map((id, i) => ids.map((spotOf, j) => distance(id, spotOf) - (i === j ? STAY_BONUS : 0)));

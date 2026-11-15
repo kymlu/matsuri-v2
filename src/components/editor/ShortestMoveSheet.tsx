@@ -3,6 +3,7 @@ import { Checkbox } from "@base-ui/react";
 import classNames from "classnames";
 import Button from "../basic/Button";
 import SelectBox from "../basic/SelectBox";
+import { colorPalette } from "../../lib/consts/colors";
 
 export type ShortestMoveView = "now" | "after";
 
@@ -12,6 +13,12 @@ type ShortestMoveSheetProps = {
   totalAfter: number,
   // The current choice shortens the moves (otherwise 入れ替える is disabled).
   hasGain: boolean,
+  // Only crossing colours would help (and the box is still ticked): nothing to compare, nothing to apply.
+  crossColourOnly: boolean,
+  // Colours that would change, as toggles. Empty hides the row (fewer than two to choose from).
+  colours: string[],
+  excludedColours: ReadonlySet<string>,
+  onToggleColour: (colour: string) => void,
   view: ShortestMoveView,
   onChangeView: (view: ShortestMoveView) => void,
   sameColour: boolean,
@@ -35,13 +42,11 @@ const SWIPE_TO_CLOSE_PX = 60;
 // 最短距離: takes the toolbar's place while previewing, so the stage above stays visible and can be
 // panned and zoomed (no backdrop). The stage itself can't be edited until this closes.
 export default function ShortestMoveSheet({
-  previousSectionName, totalBefore, totalAfter, hasGain, view, onChangeView,
+  previousSectionName, totalBefore, totalAfter, hasGain, crossColourOnly, colours, excludedColours, onToggleColour, view, onChangeView,
   sameColour, onChangeSameColour, showCountsOption, countsFollowPerson, onChangeCountsFollowPerson,
   skippedStacked, onCancel, onApply,
 }: ShortestMoveSheetProps) {
   const dragStart = useRef<number | undefined>(undefined);
-  // Nothing to compare: only crossing colours would help, and the box is still ticked.
-  const crossColourOnly = sameColour && !hasGain;
 
   return <div
     role="dialog"
@@ -104,6 +109,26 @@ export default function ShortestMoveSheet({
         </Checkbox.Root>
         <span>同じ色どうしで入れ替える</span>
       </label>
+      {
+        colours.length > 0 &&
+        // Which colours to swap. Off keeps that colour's people where they are.
+        <div className="flex flex-wrap gap-2 pl-7" role="group" aria-label="入れ替える色">
+          {colours.map(colour => {
+            const on = !excludedColours.has(colour);
+            return <button
+              key={colour}
+              type="button"
+              aria-pressed={on}
+              aria-label={colour}
+              onClick={() => onToggleColour(colour)}
+              style={{ backgroundColor: colour, color: colorPalette.textContrast[colour] }}
+              className={classNames("grid font-bold rounded-full place-items-center size-8 min-h-8 min-w-8",
+                on ? "ring-2 ring-primary ring-offset-2 ring-offset-surface" : "opacity-30")}>
+              {on && <span className="text-lg leading-none font-icon" aria-hidden>check</span>}
+            </button>;
+          })}
+        </div>
+      }
       {
         showCountsOption &&
         <label className="flex items-center gap-2 text-sm min-h-9">

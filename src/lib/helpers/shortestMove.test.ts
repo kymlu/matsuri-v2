@@ -48,6 +48,21 @@ describe("planShortestMoves", () => {
     expect(planShortestMoves(prev, mixed, none, { sameColour: false }).moves).toHaveLength(2);
   });
 
+  it("keeps left-out colours where they are", () => {
+    // Two crossing pairs: a/b red, c/d blue.
+    const start = formation([dp("a", 0, 0), dp("b", 10, 0), dp("c", 0, 20, "blue"), dp("d", 10, 20, "blue")]);
+    const here = formation([dp("a", 10, 5), dp("b", 0, 5), dp("c", 10, 25, "blue"), dp("d", 0, 25, "blue")]);
+    const plan = planShortestMoves(start, here, none, { sameColour: true, excludeColours: new Set(["blue"]) });
+    expect(plan.moves.map(m => m.unit[0]).sort()).toEqual(["a", "b"]);
+    expect(plan.considered.sort()).toEqual(["a", "b"]);
+    // Blue still counts, where it stands: only red's saving comes off.
+    const all = planShortestMoves(start, here, none, { sameColour: true });
+    expect(plan.totalBefore).toBeCloseTo(all.totalBefore);
+    expect(all.totalBefore - plan.totalAfter).toBeCloseTo(2 * Math.hypot(10, 5) - 10);
+    // Ignored when colours mix anyway.
+    expect(planShortestMoves(start, here, none, { sameColour: false, excludeColours: new Set(["blue"]) }).moves).toHaveLength(4);
+  });
+
   it("ignores savings under 0.5 m", () => {
     const close = formation([dp("a", 0.2, 0), dp("b", 0, 0)]); // swapping saves 0.4 m
     const start = formation([dp("a", 0, 0), dp("b", 0.2, 0)]);

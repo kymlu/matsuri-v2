@@ -63,6 +63,25 @@ describe("useShortestMove", () => {
     expect(result.current.isPreviewingShortestMove).toBe(false);
   });
 
+  it("offers each changing colour as a toggle, and leaving one out keeps its people in place", () => {
+    const state = makeChoreo();
+    // A second, blue pair that also crosses.
+    state.sections[0].formation.dancerPositions.d = dp("d", 0, 20, "blue", "s1");
+    state.sections[0].formation.dancerPositions.e = dp("e", 10, 20, "blue", "s1");
+    state.sections[1].formation.dancerPositions.d = dp("d", 10, 25, "blue");
+    state.sections[1].formation.dancerPositions.e = dp("e", 0, 25, "blue");
+    const { result } = setUp(state);
+    act(() => result.current.startShortestMove());
+    const { unmount } = render(result.current.shortestMoveSheet!);
+    expect(screen.getAllByRole("button", { pressed: true }).map(b => b.getAttribute("aria-label"))).toEqual(["red", "blue"]);
+    act(() => screen.getByRole("button", { name: "blue" }).click());
+    unmount();
+    const preview = result.current.shortestMovePreview!;
+    expect(preview.section.formation.dancerPositions.d).toMatchObject({ x: 10, y: 25 }); // blue stays
+    expect(preview.section.formation.dancerPositions.a).toMatchObject({ x: 0, y: 5 }); // red still swaps
+    expect(preview.fadedDancerIds.has("d")).toBe(true);
+  });
+
   it("fades people who were left out of the selection", () => {
     const { result } = setUp(makeChoreo(), { ...none, dancers: ["a", "b"] });
     act(() => result.current.startShortestMove());

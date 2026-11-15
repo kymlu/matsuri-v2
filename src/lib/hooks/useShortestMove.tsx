@@ -19,7 +19,16 @@ type Options = {
 };
 
 // Both plans are made once, when the button is pressed, from the choreo as it was then.
-type Session = { base: Choreo, sectionId: string, sameColour: ShortestMovePlan, anyColour: ShortestMovePlan };
+type Session = {
+  base: Choreo,
+  sectionId: string,
+  // What the plans were made from, to re-plan when colours are left out.
+  prev: ChoreoSection,
+  formation: ChoreoSection["formation"],
+  selectedIds: StageEntities<string[]>,
+  sameColour: ShortestMovePlan,
+  anyColour: ShortestMovePlan,
+};
 
 // What the stage shows while previewing.
 export type ShortestMovePreview = {
@@ -45,6 +54,7 @@ export function useShortestMove({ state, section, prevSection, selectedIds, comm
   const [sameColour, setSameColour] = useState(true);
   const [countsFollowPerson, setCountsFollowPerson] = useState(false);
   const [view, setView] = useState<ShortestMoveView>("after");
+  const [excludedColours, setExcludedColours] = useState<ReadonlySet<string>>(new Set());
 
   const startShortestMove = useCallback(() => {
     if (!prevSection) return;
@@ -58,7 +68,8 @@ export function useShortestMove({ state, section, prevSection, selectedIds, comm
     setSameColour(true);
     setCountsFollowPerson(false);
     setView("after");
-    setSession({ base: state, sectionId: section.id, sameColour: same, anyColour: any });
+    setExcludedColours(new Set());
+    setSession({ base: state, sectionId: section.id, prev: prevSection, formation: section.formation, selectedIds, sameColour: same, anyColour: any });
   }, [prevSection, section, selectedIds, state]);
 
   const close = useCallback(() => setSession(undefined), []);
@@ -68,8 +79,28 @@ export function useShortestMove({ state, section, prevSection, selectedIds, comm
     if (session && (state !== session.base || section.id !== session.sectionId)) setSession(undefined);
   }, [session, state, section.id]);
 
-  const plan = session && (sameColour ? session.sameColour : session.anyColour);
+  // Colours that would change with the colour rule on, in the order people appear. Each colour is planned on its
+  // own then, so leaving one out only keeps its people where they are.
+  const changingColours = useMemo(() => {
+    if (!session) return [];
+    const movers = new Set(session.sameColour.moves.map(m => m.unit[0]));
+    const here = session.formation.dancerPositions;
+    return Array.from(new Set(session.sameColour.considered.filter(id => movers.has(id)).map(id => here[id].color)));
+  }, [session]);
+
+  const plan = useMemo(() => {
+    if (!session) return undefined;
+    if (!sameColour) return session.anyColour;
+    if (excludedColours.size === 0) return session.sameColour;
+    return planShortestMoves(session.prev.formation, session.formation, session.selectedIds, { sameColour: true, excludeColours: excludedColours });
+  }, [session, sameColour, excludedColours]);
   const hasGain = (plan?.moves.length ?? 0) > 0;
+
+  const toggleColour = useCallback((colour: string) => setExcludedColours(old => {
+    const next = new Set(old);
+    if (!next.delete(colour)) next.add(colour);
+    return next;
+  }), []);
 
   const after = useMemo(
     () => session && plan && plan.moves.length > 0
@@ -111,6 +142,10 @@ export function useShortestMove({ state, section, prevSection, selectedIds, comm
         totalBefore={plan.totalBefore}
         totalAfter={plan.totalAfter}
         hasGain={hasGain}
+        crossColourOnly={sameColour && session.sameColour.moves.length === 0}
+        colours={sameColour && changingColours.length >= 2 ? changingColours : []}
+        excludedColours={excludedColours}
+        onToggleColour={toggleColour}
         view={view}
         onChangeView={setView}
         sameColour={sameColour}
