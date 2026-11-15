@@ -6,9 +6,9 @@ import { StageEntities } from "../../models/history";
 import { ReorderStackDialog, StackMember, StackOrderDialog, StackPromptDialog, UnstackDialog } from "../../components/dialogs/StackDialogs";
 import {
   countUnits, expandSelectionToStacks, findDropTarget, findStack, linkedStack, reorderStack, selectedWholeStack,
-  StackKind, stackObjects, StackSpot, swapUnitPositions, swapUnits, unstackObjects,
+  moveUnitsTo, StackKind, stackObjects, StackSpot, swapUnitPositions, swapUnits, unstackObjects,
 } from "../helpers/stackHelper";
-import { swapDancerPositions, swapPropPositions } from "../editor/commands/objectCommands";
+import { swapPropPositions } from "../editor/commands/objectCommands";
 
 type Selection = StageEntities<string[]>;
 
@@ -149,11 +149,11 @@ export function useStackEditing({ state, section, prevSection, selectedIds, setS
   const onSwap = useCallback(() => {
     if (!stackKind || !swapPair) return;
     const [a, b] = swapPair;
-    if (a.length === 1 && b.length === 1) {
-      // Two single objects: the original command (which also swaps front/back).
-      commitState(stackKind === "dancers"
-        ? swapDancerPositions(state, section.id, a[0], b[0])
-        : swapPropPositions(state, section.id, a[0], b[0]));
+    if (stackKind === "dancers") {
+      // People (or whole stacks) trade spots; counts stay with the spot and custom paths reset.
+      commitState(moveUnitsTo(state, section.id, [{ unit: a, target: b }, { unit: b, target: a }], "spot"));
+    } else if (a.length === 1 && b.length === 1) {
+      commitState(swapPropPositions(state, section.id, a[0], b[0]));
     } else {
       commitState(swapUnitPositions(state, section.id, stackKind, a, b));
     }

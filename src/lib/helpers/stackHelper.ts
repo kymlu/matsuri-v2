@@ -509,6 +509,66 @@ export function swapUnits(formation: Formation, kind: StackKind, ids: string[]):
   return units.length === 2 ? [units[0], units[1]] : undefined;
 }
 
+// One unit (a person or a whole stack, bottom first) moving onto the spot of the unit standing there now.
+export type UnitMove = { unit: Stack, target: Stack };
+// Who keeps this section's counts when people change spot: whoever ends up on the spot, or the person.
+export type CountsFollow = "spot" | "person";
+
+// Moves people onto other people's spots in one section. The targets must be the moving units themselves
+// (each unit moves onto another's spot and nobody is left behind), e.g. a swap of two. Each unit moves by
+// the distance from its bottom member to the target's bottom member, so stacks stay stacks. A single person
+// moving onto a single person's spot takes their front/back order; stacks keep their own.
+// Counts: with "spot", whoever now stands on a spot gets the counts of whoever stood there (stacks level
+// by level, bottom first); with "person", counts are untouched.
+// Custom paths of everyone who moved are reset, into this section and into the next one, since they were
+// drawn for the old route.
+export function moveUnitsTo(state: Choreo, sectionId: string, moves: UnitMove[], countsFollow: CountsFollow): Choreo {
+  const moving = moves.filter(m => m.unit[0] !== m.target[0]);
+  if (moving.length === 0) return state;
+  const index = state.sections.findIndex(s => s.id === sectionId);
+  if (index < 0) return state;
+  const old = state.sections[index].formation.dancerPositions;
+  if (moving.some(m => [...m.unit, ...m.target].some(id => !old[id]))) return state;
+
+  const moved = new Set(moving.flatMap(m => m.unit));
+  const occupant = new Map<string, string>(); // old occupant of a spot (each level) → the one there now
+  const next = { ...old };
+  moving.forEach(({ unit, target }) => {
+    const from = old[unit[0]], to = old[target[0]];
+    const dx = to.x - from.x, dy = to.y - from.y;
+    const single = unit.length === 1 && target.length === 1;
+    unit.forEach(id => {
+      next[id] = { ...old[id], x: old[id].x + dx, y: old[id].y + dy, ...(single ? { z: to.z } : {}) };
+    });
+    target.forEach((id, level) => { if (level < unit.length) occupant.set(id, unit[level]); });
+  });
+
+  const withoutPaths = (movements: Formation["dancerMovements"]) => {
+    if (!movements || !Object.keys(movements).some(id => moved.has(id))) return movements;
+    return Object.fromEntries(Object.entries(movements).filter(([id]) => !moved.has(id)));
+  };
+  const remapCounts = (actions: Formation["dancerActions"]) => countsFollow === "person" ? actions : actions.map(a => ({
+    ...a,
+    timings: a.timings.map(t => ({ ...t, dancerIds: Array.from(new Set(t.dancerIds.map(id => occupant.get(id) ?? id))) })),
+  }));
+
+  return normalizeStacks({
+    ...state,
+    sections: state.sections.map((s, i) => {
+      if (i === index) {
+        return { ...s, formation: {
+          ...s.formation,
+          dancerPositions: next,
+          dancerMovements: withoutPaths(s.formation.dancerMovements),
+          dancerActions: remapCounts(s.formation.dancerActions),
+        } };
+      }
+      if (i === index + 1) return { ...s, formation: { ...s.formation, dancerMovements: withoutPaths(s.formation.dancerMovements) } };
+      return s;
+    }),
+  });
+}
+
 // Swaps two units: each moves by the distance between them (bottom member to bottom member, prop centres
 // for props), so stacks stay stacks. Front/back order is kept per unit.
 export function swapUnitPositions(state: Choreo, sectionId: string, kind: StackKind, a: Stack, b: Stack): Choreo {

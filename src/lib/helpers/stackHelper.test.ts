@@ -1,5 +1,5 @@
 import { Choreo } from "../../models/choreo";
-import { arrangeRepresentatives, linkedStack, swapUnits, swapUnitPositions, copyStacks, countSelectedUnits, prepareStackPaste, rearrangeWithStacks, restoreCopiedStacks, countUnits, expandSelectionToStacks, findDropTarget, moveStacksTogether, stackNotes, isHiddenInStack, normalizeStacks, reorderStack, selectedWholeStack, stackAbove, stackBelow, stackObjects, unstackObjects } from "./stackHelper";
+import { arrangeRepresentatives, linkedStack, moveUnitsTo, swapUnits, swapUnitPositions, copyStacks, countSelectedUnits, prepareStackPaste, rearrangeWithStacks, restoreCopiedStacks, countUnits, expandSelectionToStacks, findDropTarget, moveStacksTogether, stackNotes, isHiddenInStack, normalizeStacks, reorderStack, selectedWholeStack, stackAbove, stackBelow, stackObjects, unstackObjects } from "./stackHelper";
 import { alignHorizontalPositions, pastePositions, removeObjects } from "../editor/commands/objectCommands";
 import { addSection } from "../editor/commands/sectionCommands";
 
@@ -298,6 +298,69 @@ describe("位置交換 with stacks", () => {
     s = normalizeStacks(swapUnitPositions(s, "s1", "dancers", ["b", "a"], ["d", "c"]));
     expect(pos(s, "a")).toMatchObject(dAt);
     expect(pos(s, "c")).toMatchObject({ x: 3, y: 1 });
+  });
+});
+
+describe("moveUnitsTo", () => {
+  const path = { points: [{ x: 9, y: 9 }], tension: "curved" as const };
+  // s1 then s2, with counts in s1 and custom paths for a and c into both sections.
+  const setUp = (s: Choreo = makeChoreo()): Choreo => {
+    const s1 = { ...s.sections[0], formation: {
+      ...s.sections[0].formation,
+      dancerMovements: { a: path, c: path },
+      dancerActions: [{ id: "act", name: "手上げ", timings: [{ id: "t1", name: "1", dancerIds: ["a"] }, { id: "t3", name: "3", dancerIds: ["b", "c"] }] }],
+    } };
+    const s2 = { ...s1, id: "s2", order: 2, formation: { ...s1.formation, dancerActions: [] } };
+    return { ...s, sections: [s1, s2] } as Choreo;
+  };
+  const timings = (s: Choreo) => f(s).dancerActions[0].timings.map(t => t.dancerIds);
+  const swap = (a: string[], b: string[]) => [{ unit: a, target: b }, { unit: b, target: a }];
+
+  it("swaps two people, including front/back, and moves counts with the spot", () => {
+    const s = moveUnitsTo(setUp(), "s1", swap(["a"], ["b"]), "spot");
+    expect(pos(s, "a")).toMatchObject({ x: 3, y: 1, z: 1 });
+    expect(pos(s, "b")).toMatchObject({ x: 1, y: 1, z: 0 });
+    expect(timings(s)).toEqual([["b"], ["a", "c"]]);
+  });
+
+  it("leaves counts with the person when asked", () => {
+    expect(timings(moveUnitsTo(setUp(), "s1", swap(["a"], ["b"]), "person"))).toEqual([["a"], ["b", "c"]]);
+  });
+
+  it("moves several people round at once", () => {
+    // a → b's spot, b → c's spot, c → a's spot
+    const s = moveUnitsTo(setUp(), "s1", [{ unit: ["a"], target: ["b"] }, { unit: ["b"], target: ["c"] }, { unit: ["c"], target: ["a"] }], "spot");
+    expect([pos(s, "a").x, pos(s, "b").x, pos(s, "c").x]).toEqual([3, 5, 1]);
+    expect(timings(s)).toEqual([["c"], ["a", "b"]]);
+  });
+
+  it("resets the custom paths of people who moved, in this section and the next", () => {
+    const s = moveUnitsTo(setUp(), "s1", swap(["a"], ["b"]), "spot");
+    expect(s.sections[0].formation.dancerMovements).toEqual({ c: path });
+    expect(s.sections[1].formation.dancerMovements).toEqual({ c: path });
+  });
+
+  it("swaps a stack with a person, keeping the stack, and maps counts level by level", () => {
+    const s0 = setUp(stackObjects(makeChoreo(), "s1", "dancers", ["a", "b"])); // b bottom at (3,1)
+    const s = moveUnitsTo(s0, "s1", swap(["b", "a"], ["c"]), "spot");
+    expect(pos(s, "a")).toMatchObject({ x: 5, y: 1 });
+    expect(pos(s, "b")).toMatchObject({ x: 5, y: 1 });
+    expect(pos(s, "c")).toMatchObject({ x: 3, y: 1 });
+    expect(f(s).dancerStacks).toEqual([["b", "a"]]);
+    // c's spot goes to b (bottom); the stack's bottom spot goes to c; a (top) has no one to trade with.
+    expect(timings(s)).toEqual([["a"], ["c", "b"]]);
+  });
+
+  it("does nothing when nobody changes spot", () => {
+    const s0 = setUp();
+    expect(moveUnitsTo(s0, "s1", [{ unit: ["a"], target: ["a"] }], "spot")).toBe(s0);
+  });
+
+  it("leaves the old state untouched, for undo", () => {
+    const s0 = setUp();
+    moveUnitsTo(s0, "s1", swap(["a"], ["b"]), "spot");
+    expect(pos(s0, "a")).toMatchObject({ x: 1, y: 1 });
+    expect(timings(s0)).toEqual([["a"], ["b", "c"]]);
   });
 });
 

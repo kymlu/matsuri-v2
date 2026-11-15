@@ -786,30 +786,6 @@ export function distributePositions (
   return { ...state, obstacles: newObstacles, sections: newSections }
 }
 
-export function swapDancerPositions(
-  state: Choreo,
-  sectionId: string,
-  dancerAId: string,
-  dancerBId: string
-): Choreo {
-  const newSections = state.sections.map(section => {
-    if (section.id !== sectionId) return section
-    const dancerPositions = {...section.formation.dancerPositions};
-    const originalA = section.formation.dancerPositions[dancerAId];
-    const originalB = section.formation.dancerPositions[dancerBId];
-    dancerPositions[dancerAId] = { ...originalA, x: originalB.x, y: originalB.y, z: originalB.z };
-    dancerPositions[dancerBId] = { ...originalB, x: originalA.x, y: originalA.y, z: originalA.z };
-    return {
-      ...section,
-      formation: {
-        ...section.formation,
-        dancerPositions: dancerPositions
-      }
-    }
-  });
-  
-  return { ...state, sections: newSections }
-}
 export function swapPropPositions(
   state: Choreo,
   sectionId: string,
