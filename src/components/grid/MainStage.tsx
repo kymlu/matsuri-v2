@@ -82,6 +82,7 @@ type MainStageProps = {
   focusSelectionRequest?: number,
   showPaths?: boolean,
   isEditingMovement?: boolean,
+  mutedGhostPaths?: boolean, // ghost paths in grey (the editor), so the path being edited is the red one
   dancerMovementCache: MovementCacheBySectionIdByObjectId,
   propMovementCache?: MovementCacheBySectionIdByObjectId,
   onMidpointEdit?: (newMovement: Movement) => void;
@@ -100,7 +101,7 @@ function MainStage({
   selectedIds, setSelectedIds, selectedObjects,
   addDancer, addProp, addObstacle, appSettings, previousSection, selectedDancerMovement,
   onDancerSelected, bottomMarginPercent = 0, canResizeProps, editEnabled, toggleEditEnabled, openNoteDialog, openChangeLog, openHelp, openFind, dimDancersToggle, focusSelectionRequest,
-  showPaths = false, isEditingMovement = false, dancerMovementCache, propMovementCache, onMidpointEdit, currentMovement,
+  showPaths = false, isEditingMovement = false, mutedGhostPaths = false, dancerMovementCache, propMovementCache, onMidpointEdit, currentMovement,
   dancerAnimationCache, propAnimationCache,
 }: MainStageProps) {
   // Konva reads colours from the (non-reactive) colorPalette, so remount the
@@ -648,6 +649,7 @@ function MainStage({
             geometry={stageGeometry}
             selectedId={selectedIds.dancers[0]}
             isEditingPaths={isEditingMovement}
+            mutedPaths={mutedGhostPaths}
             prevSectionId={previousSection?.id}
             sectionId={currentSection.id}
           />
