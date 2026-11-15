@@ -19,6 +19,7 @@ type FormationLayerProps = {
   canSelectDancers: boolean,
   dimDancers?: boolean, // focusing on props: dancers faint and can't be touched
   fadedDancerIds?: ReadonlySet<string>, // these dancers only, faint and untouchable (e.g. left out of a preview)
+  instantMoves?: boolean, // jump to new positions instead of animating (e.g. flipping a preview)
   canSelectProps: boolean,
   canSelectObstacles: boolean,
   canToggleSelection: boolean,
@@ -55,6 +56,7 @@ const FormationLayer = memo(function FormationLayer({
   canSelectDancers,
   dimDancers,
   fadedDancerIds,
+  instantMoves,
   canSelectProps,
   canSelectObstacles,
   canToggleSelection,
@@ -265,7 +267,7 @@ const FormationLayer = memo(function FormationLayer({
             snapToGrid={snapToGrid}
             canSelect={canSelectProps}
             sectionId={sectionId}
-            animate
+            animate={!instantMoves}
             animationCache={propAnimationCache[propPosition.propId]}
             isZooming={isZooming}
             stackMark={propStackDrawing[propPosition.propId]?.mark}
@@ -289,7 +291,7 @@ const FormationLayer = memo(function FormationLayer({
             canEdit={canEdit}
             snapToGrid={snapToGrid}
             dancerDisplayType={dancerDisplayType}
-            animate
+            animate={!instantMoves}
             isZooming={isZooming}
             sectionId={sectionId}
             animationCache={dancerAnimationCache[dancerPosition.dancerId]}

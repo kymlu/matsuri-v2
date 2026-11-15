@@ -329,6 +329,7 @@ export default function ChoreoEditPage(props: {
     toggleEditEnabled: undefined, openNoteDialog: undefined, openFind: undefined, dimDancersToggle: undefined,
     fadedDancerIds: shortestMovePreview.fadedDancerIds,
     previewRoutes: shortestMovePreview.routes,
+    instantMoves: true, // flipping 今／最短 switches at once
   }, [shortestMovePreview]);
   const isPreviewingRef = useRef(false);
   isPreviewingRef.current = isPreviewingShortestMove;

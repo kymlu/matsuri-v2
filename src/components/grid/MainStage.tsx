@@ -93,6 +93,7 @@ type MainStageProps = {
   // A change being previewed (最短距離): people left out are faint, with routes drawn under everyone.
   fadedDancerIds?: ReadonlySet<string>,
   previewRoutes?: { routes: PreviewRoute[], kind: "now" | "after" },
+  instantMoves?: boolean, // jump to new positions instead of animating
 }
 
 function MainStage({
@@ -106,7 +107,7 @@ function MainStage({
   addDancer, addProp, addObstacle, appSettings, previousSection, selectedDancerMovement,
   onDancerSelected, bottomMarginPercent = 0, canResizeProps, editEnabled, toggleEditEnabled, openNoteDialog, openChangeLog, openHelp, openFind, dimDancersToggle, focusSelectionRequest,
   showPaths = false, isEditingMovement = false, mutedGhostPaths = false, dancerMovementCache, propMovementCache, onMidpointEdit, currentMovement,
-  dancerAnimationCache, propAnimationCache, fadedDancerIds, previewRoutes,
+  dancerAnimationCache, propAnimationCache, fadedDancerIds, previewRoutes, instantMoves,
 }: MainStageProps) {
   // Konva reads colours from the (non-reactive) colorPalette, so remount the
   // whole Stage subtree when the theme flips to force every layer to redraw.
@@ -668,6 +669,7 @@ function MainStage({
           canSelectDancers={canSelectDancers && !dimDancers}
           dimDancers={dimDancers}
           fadedDancerIds={fadedDancerIds}
+          instantMoves={instantMoves}
           canSelectProps={canSelectProps}
           canSelectObstacles={canSelectObstacles}
           canToggleSelection={canToggleSelection}
