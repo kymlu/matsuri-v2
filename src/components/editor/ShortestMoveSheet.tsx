@@ -42,7 +42,9 @@ const shortName = (name: string) => name.length > 8 ? name.slice(0, 8) + "…" :
 
 const SWIPE_TO_CLOSE_PX = 60;
 const SWIPE_TO_RESIZE_PX = 40;
-const SLIDE_MS = 200;
+// Same motion as BottomDrawer.
+const SLIDE_MS = 450;
+const SLIDE_EASING = "cubic-bezier(0.32,0.72,0,1)";
 // Normal height, and the most it can grow to (as tall as its content, leaving the top of the stage visible).
 const COLLAPSED_MAX = "45svh";
 const EXPANDED_MAX = "calc(100svh - 8rem)";
@@ -91,14 +93,14 @@ export default function ShortestMoveSheet({
     style={{
       maxHeight,
       transform: `translateY(${offset})`,
-      transition: dragging ? "none" : `transform ${SLIDE_MS}ms ease-out, max-height ${SLIDE_MS}ms ease-out`,
+      transition: dragging ? "none" : `transform ${SLIDE_MS}ms ${SLIDE_EASING}, max-height ${SLIDE_MS}ms ${SLIDE_EASING}`,
     }}
-    className="z-10 flex flex-col w-screen shrink-0 bg-surface border-t-2 border-line rounded-t-2xl shadow-[0_-8px_24px_rgb(0_0_0/0.08)] motion-reduce:!transition-none">
+    className="z-10 flex flex-col w-screen shrink-0 bg-surface rounded-t-2xl shadow-[0_-2px_16px_rgba(0,0,0,0.15)] motion-reduce:!transition-none">
     {/* Header and footer (result and buttons) stay put; only the options in between scroll on a short screen. */}
-    <div className="flex flex-col w-full max-w-lg gap-2 px-4 pt-2 mx-auto shrink-0">
+    <div className="flex flex-col w-full max-w-lg gap-2 px-4 mx-auto shrink-0">
       {/* Drag the handle up to see every option, or down to cancel. */}
       <div
-        className="self-center w-full py-2 -mt-1 cursor-grab touch-none"
+        className="self-center w-full pt-5 pb-3 -mb-2 cursor-grab touch-none"
         onPointerDown={e => {
           if (closing) return;
           dragStart.current = { y: e.clientY, height: sheetRef.current?.getBoundingClientRect().height ?? 0 };
@@ -110,7 +112,7 @@ export default function ShortestMoveSheet({
         }}
         onPointerUp={() => endDrag(false)}
         onPointerCancel={() => endDrag(true)}>
-        <div className="w-24 h-1 mx-auto rounded-full bg-primary"/>
+        <div className="w-[33.333vw] h-1 mx-auto rounded-full bg-primary"/>
       </div>
 
       <div className="flex items-center gap-3">
