@@ -41,7 +41,11 @@ export const formatMetres = (m: number) => `${m >= 10 ? Math.round(m) : Math.rou
 const shortName = (name: string) => name.length > 8 ? name.slice(0, 8) + "…" : name;
 
 const SWIPE_TO_CLOSE_PX = 60;
+const SWIPE_TO_RESIZE_PX = 40;
 const SLIDE_MS = 200;
+// Normal height, and the most it can grow to (as tall as its content, leaving the top of the stage visible).
+const COLLAPSED_MAX = "45svh";
+const EXPANDED_MAX = "calc(100svh - 8rem)";
 
 // 最短距離: takes the toolbar's place while previewing, so the stage above stays visible and can be
 // panned and zoomed (no backdrop). The stage itself can't be edited until this closes.
@@ -50,10 +54,13 @@ export default function ShortestMoveSheet({
   sameColour, onChangeSameColour, colourFollowsPerson, onChangeColourFollowsPerson, showCountsOption, countsFollowPerson, onChangeCountsFollowPerson,
   skippedStacked, onCancel, onApply,
 }: ShortestMoveSheetProps) {
-  // Swipe down: the sheet follows the finger, springs back if let go early, and slides away before closing.
-  const dragStart = useRef<number | undefined>(undefined);
+  // Dragging the handle: up grows the sheet to its content's height; down shrinks it back, and from the normal
+  // height slides it away and closes (キャンセル). It follows the finger and springs back if let go early.
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const dragStart = useRef<{ y: number, height: number } | undefined>(undefined);
   const [dragY, setDragY] = useState(0);
   const [dragging, setDragging] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   const [closing, setClosing] = useState(false);
   useEffect(() => {
     if (!closing) return;
@@ -64,31 +71,42 @@ export default function ShortestMoveSheet({
     if (dragStart.current === undefined) return;
     dragStart.current = undefined;
     setDragging(false);
-    if (!cancelled && dragY > SWIPE_TO_CLOSE_PX) setClosing(true);
-    else setDragY(0);
+    setDragY(0);
+    if (cancelled) return;
+    if (dragY < -SWIPE_TO_RESIZE_PX) setExpanded(true);
+    else if (expanded && dragY > SWIPE_TO_RESIZE_PX) setExpanded(false);
+    else if (!expanded && dragY > SWIPE_TO_CLOSE_PX) setClosing(true);
   };
+  // While dragging, the height follows the finger (except pulling down from the normal height, which moves it).
+  const resizing = dragging && (dragY < 0 || expanded);
+  const maxHeight = resizing
+    ? `min(${Math.max(0, dragStart.current!.height - dragY)}px, ${EXPANDED_MAX})`
+    : expanded ? EXPANDED_MAX : COLLAPSED_MAX;
+  const offset = closing ? "100%" : !resizing && dragY > 0 ? `${dragY}px` : "0px";
 
   return <div
+    ref={sheetRef}
     role="dialog"
     aria-label="最短距離"
     style={{
-      transform: closing ? "translateY(100%)" : `translateY(${dragY}px)`,
-      transition: dragging ? "none" : `transform ${SLIDE_MS}ms ease-out`,
+      maxHeight,
+      transform: `translateY(${offset})`,
+      transition: dragging ? "none" : `transform ${SLIDE_MS}ms ease-out, max-height ${SLIDE_MS}ms ease-out`,
     }}
-    className="z-10 flex flex-col w-screen shrink-0 max-h-[45svh] bg-surface border-t-2 border-line rounded-t-2xl shadow-[0_-8px_24px_rgb(0_0_0/0.08)] motion-reduce:!transition-none">
+    className="z-10 flex flex-col w-screen shrink-0 bg-surface border-t-2 border-line rounded-t-2xl shadow-[0_-8px_24px_rgb(0_0_0/0.08)] motion-reduce:!transition-none">
     {/* Header and footer (result and buttons) stay put; only the options in between scroll on a short screen. */}
     <div className="flex flex-col w-full max-w-lg gap-2 px-4 pt-2 mx-auto shrink-0">
-      {/* Swipe the handle down to cancel, like the app's other bottom sheets. */}
+      {/* Drag the handle up to see every option, or down to cancel. */}
       <div
         className="self-center w-full py-2 -mt-1 cursor-grab touch-none"
         onPointerDown={e => {
           if (closing) return;
-          dragStart.current = e.clientY;
+          dragStart.current = { y: e.clientY, height: sheetRef.current?.getBoundingClientRect().height ?? 0 };
           setDragging(true);
           e.currentTarget.setPointerCapture?.(e.pointerId);
         }}
         onPointerMove={e => {
-          if (dragStart.current !== undefined) setDragY(Math.max(0, e.clientY - dragStart.current));
+          if (dragStart.current !== undefined) setDragY(e.clientY - dragStart.current.y);
         }}
         onPointerUp={() => endDrag(false)}
         onPointerCancel={() => endDrag(true)}>
