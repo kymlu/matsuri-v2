@@ -91,21 +91,25 @@ export default function ShortestMoveSheet({
         }
       </div>
 
-      <p className="flex items-baseline gap-2 text-sm">
-        <span className="text-muted">「{shortName(previousSectionName)}」からの移動（合計）</span>
-        {
-          hasGain
-            ? <>
-                <span className="line-through text-muted">{formatMetres(totalBefore)}</span>
-                <span aria-hidden>→</span>
-                <span className="text-xl font-bold">{formatMetres(totalAfter)}</span>
-              </>
-            : <span className="text-lg font-bold">{formatMetres(totalBefore)}</span>
-        }
-      </p>
+      {
+        // With a saving, the total before → after; without one, why not (in the same place, so it never scrolls away).
+        hasGain || !noGainMessage
+          ? <p className="flex items-baseline gap-2 text-sm">
+              <span className="text-muted">「{shortName(previousSectionName)}」からの移動（合計）</span>
+              {
+                hasGain
+                  ? <>
+                      <span className="line-through text-muted">{formatMetres(totalBefore)}</span>
+                      <span aria-hidden>→</span>
+                      <span className="text-xl font-bold">{formatMetres(totalAfter)}</span>
+                    </>
+                  : <span className="text-lg font-bold">{formatMetres(totalBefore)}</span>
+              }
+            </p>
+          : <p className="flex items-center text-sm min-h-7">{noGainMessage}</p>
+      }
     </div>
     <div className="flex flex-col w-full max-w-lg min-h-0 gap-2 px-4 py-2 mx-auto overflow-y-auto">
-      {noGainMessage && <p className="px-2 py-1 text-sm rounded-md bg-subtle text-muted">{noGainMessage}</p>}
       {skippedStacked && <p className="px-2 py-1 text-sm rounded-md bg-subtle text-muted">重なっている人は動かしません</p>}
 
       {
