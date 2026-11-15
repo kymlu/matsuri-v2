@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Checkbox } from "@base-ui/react";
 import classNames from "classnames";
 import Button from "../basic/Button";
@@ -41,6 +41,7 @@ export const formatMetres = (m: number) => `${m >= 10 ? Math.round(m) : Math.rou
 const shortName = (name: string) => name.length > 8 ? name.slice(0, 8) + "…" : name;
 
 const SWIPE_TO_CLOSE_PX = 60;
+const SLIDE_MS = 200;
 
 // 最短距離: takes the toolbar's place while previewing, so the stage above stays visible and can be
 // panned and zoomed (no backdrop). The stage itself can't be edited until this closes.
@@ -49,23 +50,48 @@ export default function ShortestMoveSheet({
   sameColour, onChangeSameColour, colourFollowsPerson, onChangeColourFollowsPerson, showCountsOption, countsFollowPerson, onChangeCountsFollowPerson,
   skippedStacked, onCancel, onApply,
 }: ShortestMoveSheetProps) {
+  // Swipe down: the sheet follows the finger, springs back if let go early, and slides away before closing.
   const dragStart = useRef<number | undefined>(undefined);
+  const [dragY, setDragY] = useState(0);
+  const [dragging, setDragging] = useState(false);
+  const [closing, setClosing] = useState(false);
+  useEffect(() => {
+    if (!closing) return;
+    const timer = setTimeout(onCancel, SLIDE_MS);
+    return () => clearTimeout(timer);
+  }, [closing, onCancel]);
+  const endDrag = (cancelled: boolean) => {
+    if (dragStart.current === undefined) return;
+    dragStart.current = undefined;
+    setDragging(false);
+    if (!cancelled && dragY > SWIPE_TO_CLOSE_PX) setClosing(true);
+    else setDragY(0);
+  };
 
   return <div
     role="dialog"
     aria-label="最短距離"
-    className="z-10 flex flex-col w-screen shrink-0 max-h-[45svh] bg-surface border-t-2 border-line rounded-t-2xl shadow-[0_-8px_24px_rgb(0_0_0/0.08)]">
+    style={{
+      transform: closing ? "translateY(100%)" : `translateY(${dragY}px)`,
+      transition: dragging ? "none" : `transform ${SLIDE_MS}ms ease-out`,
+    }}
+    className="z-10 flex flex-col w-screen shrink-0 max-h-[45svh] bg-surface border-t-2 border-line rounded-t-2xl shadow-[0_-8px_24px_rgb(0_0_0/0.08)] motion-reduce:!transition-none">
     {/* Header and buttons stay put; only the options in between scroll on a short screen. */}
     <div className="flex flex-col w-full max-w-lg gap-2 px-4 pt-2 mx-auto shrink-0">
       {/* Swipe the handle down to cancel, like the app's other bottom sheets. */}
       <div
-        className="self-center w-full py-1 cursor-grab touch-none"
-        onPointerDown={e => { dragStart.current = e.clientY; e.currentTarget.setPointerCapture?.(e.pointerId); }}
-        onPointerUp={e => {
-          if (dragStart.current !== undefined && e.clientY - dragStart.current > SWIPE_TO_CLOSE_PX) onCancel();
-          dragStart.current = undefined;
+        className="self-center w-full py-2 -mt-1 cursor-grab touch-none"
+        onPointerDown={e => {
+          if (closing) return;
+          dragStart.current = e.clientY;
+          setDragging(true);
+          e.currentTarget.setPointerCapture?.(e.pointerId);
         }}
-        onPointerCancel={() => { dragStart.current = undefined; }}>
+        onPointerMove={e => {
+          if (dragStart.current !== undefined) setDragY(Math.max(0, e.clientY - dragStart.current));
+        }}
+        onPointerUp={() => endDrag(false)}
+        onPointerCancel={() => endDrag(true)}>
         <div className="w-24 h-1 mx-auto rounded-full bg-primary"/>
       </div>
 
@@ -106,7 +132,7 @@ export default function ShortestMoveSheet({
                   : <span className="text-lg font-bold">{formatMetres(totalBefore)}</span>
               }
             </p>
-          : <p className="flex items-center text-sm min-h-7">{noGainMessage}</p>
+          : <p className="flex items-center text-sm text-muted min-h-7">{noGainMessage}</p>
       }
     </div>
     <div className="flex flex-col w-full max-w-lg min-h-0 gap-2 px-4 py-2 mx-auto overflow-y-auto">
