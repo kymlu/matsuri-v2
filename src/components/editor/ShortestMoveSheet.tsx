@@ -73,7 +73,7 @@ export default function ShortestMoveSheet({
         {
           hasGain &&
           <div className="flex ml-auto" role="radiogroup" aria-label="表示">
-            {([["now", "今"], ["after", "入れ替え後"]] as [ShortestMoveView, string][]).map(([value, label], i) =>
+            {([["now", "今"], ["after", "最短"]] as [ShortestMoveView, string][]).map(([value, label], i) =>
               <button
                 key={value}
                 type="button"

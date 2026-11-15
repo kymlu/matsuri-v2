@@ -16,7 +16,7 @@ describe("ShortestMoveSheet", () => {
     expect(screen.getByText("「Aメロ」からの移動（合計）")).toBeInTheDocument();
     expect(screen.getByText("62m")).toBeInTheDocument();
     expect(screen.getByText("17m")).toBeInTheDocument();
-    expect(screen.getByRole("radio", { name: "入れ替え後" })).toHaveAttribute("aria-checked", "true");
+    expect(screen.getByRole("radio", { name: "最短" })).toHaveAttribute("aria-checked", "true");
     expect(screen.queryByText("カウントも人と一緒に入れ替える")).toBeNull();
     expect(screen.queryByText("重なっている人は動かしません")).toBeNull();
   });
