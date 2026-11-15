@@ -168,18 +168,16 @@ export default function ShortestMoveSheet({
     </div>
     <div className="flex flex-col w-full max-w-lg gap-2 px-4 pt-3 pb-6 mx-auto border-t shrink-0 border-line">
       {/* The result sits with the buttons that act on it; no gain is shown like the app's other errors. */}
-      <p className="flex flex-wrap items-baseline justify-center gap-2 text-sm">
-        <span className="text-muted">「{shortName(previousSectionName)}」からの移動（合計）</span>
-        {
-          hasGain
-            ? <>
-                <span className="line-through text-muted">{formatMetres(totalBefore)}</span>
-                <span aria-hidden>→</span>
-                <span className="text-xl font-bold">{formatMetres(totalAfter)}</span>
-              </>
-            : <span className="text-lg font-bold">{formatMetres(totalBefore)}</span>
-        }
-      </p>
+      {
+        // Only worth showing when there is a saving; otherwise the error below says it all.
+        hasGain &&
+        <p className="flex flex-wrap items-baseline justify-center gap-2 text-sm">
+          <span className="text-muted">「{shortName(previousSectionName)}」からの移動（合計）</span>
+          <span className="line-through text-muted">{formatMetres(totalBefore)}</span>
+          <span aria-hidden>→</span>
+          <span className="text-xl font-bold">{formatMetres(totalAfter)}</span>
+        </p>
+      }
       {skippedStacked && <p className="text-sm text-center text-muted">重なっている人は動かしません</p>}
       {noGainMessage && <p className="font-bold text-center text-wrap text-primary">{noGainMessage}</p>}
       <div className="grid w-full grid-flow-col gap-2 auto-cols-fr">
