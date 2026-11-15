@@ -51,6 +51,8 @@ type ToolbarProps = {
   showUnstack: boolean;
   onUnstack: () => void;
   onSwapPosition: () => void;
+  showShortestMove?: boolean;
+  onShortestMove?: () => void;
 
   // arrange
   showArrange: boolean;
@@ -133,7 +135,7 @@ function Toolbar({
 
   showCopyPosition, onCopyPosition,
   showPastePosition, onPastePosition,
-  showSwapPosition, onSwapPosition,
+  showSwapPosition, onSwapPosition, showShortestMove, onShortestMove,
 
   showStack, onStack,
   reorderStackLabel, onReorderStack,
@@ -178,7 +180,7 @@ function Toolbar({
   const areSelectionActionsActivated = showRenameDancer || showArrange || showDeleteObjects;
   const areEditingActionsActivated = showRenameDancer || showRenameProp || showRenameObstacle ||
     showInUse || showArrange || showChangeColour || showCopyPosition || showPastePosition ||
-    showSwapPosition || showDuplicateObstacle || showDuplicateProp || showDeleteObjects;
+    showSwapPosition || showShortestMove || showDuplicateObstacle || showDuplicateProp || showDeleteObjects;
 
   const pointCountIcon = useMemo(() => {
     return pointCount === 3 ? "counter3" : pointCount === 2 ? "counter2" : "counter1"
@@ -230,6 +232,7 @@ function Toolbar({
         {showCopyPosition && <IconButton src="contentCopy" label={"位置\nコピー"} onClick={onCopyPosition} />}
         {showPastePosition && <IconButton src="contentPaste" label={"位置\nペースト"} onClick={onPastePosition} />}
         {showSwapPosition && <IconButton src="swapHoriz" label={"位置交換"} onClick={onSwapPosition} />}
+        {showShortestMove && <IconButton src="route" label={"移動を\n短く"} onClick={onShortestMove} />}
         {showDuplicateObstacle && <IconButton src="controlPointDuplicate" label="複製" onClick={onDuplicateObstacle} />}
         {showDuplicateProp && <IconButton src="controlPointDuplicate" label="複製" onClick={onDuplicateProp} />}
         {showDeleteObjects && <IconButton src="delete" label="削除" onClick={onDeleteObjects}/>}

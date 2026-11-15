@@ -177,6 +177,7 @@ export const ICON = {
   speakerNotesOff: "speaker_notes_off",
   stylusNote: "stylus_note",
   swapHoriz: "swap_horiz",
+  route: "route",
   switchAccessShortcut: "switch_access_shortcut",
   textFieldsAlt: "text_fields_alt",
   turnRight: "turn_right",

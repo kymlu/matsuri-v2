@@ -18,6 +18,7 @@ type FormationLayerProps = {
   canEdit: boolean,
   canSelectDancers: boolean,
   dimDancers?: boolean, // focusing on props: dancers faint and can't be touched
+  fadedDancerIds?: ReadonlySet<string>, // these dancers only, faint and untouchable (e.g. left out of a preview)
   canSelectProps: boolean,
   canSelectObstacles: boolean,
   canToggleSelection: boolean,
@@ -53,6 +54,7 @@ const FormationLayer = memo(function FormationLayer({
   canEdit,
   canSelectDancers,
   dimDancers,
+  fadedDancerIds,
   canSelectProps,
   canSelectObstacles,
   canToggleSelection,
@@ -295,7 +297,7 @@ const FormationLayer = memo(function FormationLayer({
             hiddenSelected={dancerStackDrawing[dancerPosition.dancerId]?.hiddenSelected}
             stackCount={dancerStackDrawing[dancerPosition.dancerId]?.count}
             coveredInStack={coveredDancers.has(dancerPosition.dancerId)}
-            dimmed={dimDancers}
+            dimmed={dimDancers || fadedDancerIds?.has(dancerPosition.dancerId)}
             onDragFollow={canEdit ? followDrag : undefined}
           />
         );

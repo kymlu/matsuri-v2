@@ -26,6 +26,7 @@ import { DancerPosition } from "../models/dancer";
 import { ActionManagerDialog } from "../components/dialogs/ActionManagerDialog";
 import { DancerAction, DancerActionTiming } from "../models/dancerAction";
 import ActionSelectionToolbar from "../components/editor/ActionSelectionToolbar";
+import { useShortestMove } from "../lib/hooks/useShortestMove";
 import ConfirmDeletionDialog from "../components/dialogs/ConfirmDeletionDialog";
 import EditSectionNoteDialog from "../components/dialogs/EditSectionNoteDialog";
 import { clearSeenVersion, getPersonalNotesForChoreo } from "../lib/dataAccess/LocalStorageController";
@@ -60,6 +61,8 @@ const editDancerColourDialog = Dialog.createHandle<string>();
 const editDancerActionsDialog = Dialog.createHandle<string>();
 const dancerManagerDialog = Dialog.createHandle<string>();
 const propManagerDialog = Dialog.createHandle<string>();
+// What the stage gets as its selection while previewing a change.
+const NO_SELECTION = { dancers: [] as string[], props: [] as string[], obstacles: [] as string[] };
 const propSizeDialog = Dialog.createHandle<string>();
 const renameSectionDialog = Dialog.createHandle<ChoreoSection>();
 const addNoteToSectionDialog = Dialog.createHandle<ChoreoSection>();
@@ -307,6 +310,29 @@ export default function ChoreoEditPage(props: {
     isEditingMovement,
   });
 
+  const {
+    canShortestMove, startShortestMove, isPreviewingShortestMove, shortestMovePreview, shortestMoveSheet, shortestMoveDialog,
+  } = useShortestMove({
+    state: history.presentState.state,
+    section: currentSection,
+    prevSection,
+    selectedIds,
+    commitState,
+  });
+  // While previewing, the stage only shows the proposal: nothing on it can be selected or edited.
+  const previewStageProps = useMemo(() => shortestMovePreview && {
+    canEdit: false, canSelectDancers: false, canSelectProps: false, canSelectObstacles: false, canToggleSelection: false,
+    currentChoreo: shortestMovePreview.choreo,
+    currentSection: shortestMovePreview.section,
+    selectedIds: NO_SELECTION, setSelectedIds: () => {},
+    selectedDancerMovement: undefined, onDancerSelected: undefined, showPaths: false,
+    toggleEditEnabled: undefined, openNoteDialog: undefined, openFind: undefined, dimDancersToggle: undefined,
+    fadedDancerIds: shortestMovePreview.fadedDancerIds,
+    previewRoutes: shortestMovePreview.routes,
+  }, [shortestMovePreview]);
+  const isPreviewingRef = useRef(false);
+  isPreviewingRef.current = isPreviewingShortestMove;
+
   const firstSelectedDancerProp: SelectedEntity | undefined = useMemo(() => {
     // A stack that stays together from the previous section is edited as one path.
     if (linkedPathId) return linkedPathId as SelectedEntity;
@@ -368,6 +394,8 @@ export default function ChoreoEditPage(props: {
       const ctrlOrCmd = isMac ? e.metaKey : e.ctrlKey;
 
       if (!ctrlOrCmd) return;
+      // Previewing 移動を短く: the choreo must not change underneath (saving is fine).
+      if (isPreviewingRef.current && e.key !== "s") return;
 
       // Ignore typing in inputs / textareas
       const target = e.target as HTMLElement;
@@ -1023,7 +1051,7 @@ export default function ChoreoEditPage(props: {
         }
         publish={onPublish}
         />
-      <div className="relative flex-1">
+      <div className="relative flex-1 min-h-0">
         <MainStage
           canEdit={!isAssigningActions}
           canSelectDancers={!isAssigningActions || currentTiming !== undefined}
@@ -1068,19 +1096,23 @@ export default function ChoreoEditPage(props: {
           propAnimationCache={propAnimationCache}
           currentMovement={firstSelectedDancerPropMovement}
           onMidpointEdit={onMidpointEdit}
+          {...previewStageProps}
         />
         <div className="absolute bottom-0 flex flex-col">
-          <div className="absolute bottom-10">
-            <UndoRedoToolbar
-              undo={() => {dispatch({type: "UNDO"})}}
-              redo={() => {dispatch({type: "REDO"})}}
-              undoCount={history.undoStack.length}
-              redoCount={history.redoStack.length}
-            />
-          </div>
+          {
+            !isPreviewingShortestMove &&
+            <div className="absolute bottom-10">
+              <UndoRedoToolbar
+                undo={() => {dispatch({type: "UNDO"})}}
+                redo={() => {dispatch({type: "REDO"})}}
+                undoCount={history.undoStack.length}
+                redoCount={history.redoStack.length}
+              />
+            </div>
+          }
           <div className="absolute bottom-0 w-screen">
             {
-              !isAssigningActions &&
+              !isAssigningActions && !isPreviewingShortestMove &&
               <FormationSelectionToolbar
                 currentSectionId={currentSection.id}
                 sections={history.presentState.state.sections}
@@ -1110,7 +1142,7 @@ export default function ChoreoEditPage(props: {
           </div>
         </div>
       </div>
-      <Toolbar
+      {shortestMoveSheet ?? <Toolbar
         isEnabled={editEnabled}
         onAddDancer={onAddDancerToggle}
         isAddingDancer={isAddingDancers}
@@ -1151,6 +1183,8 @@ export default function ChoreoEditPage(props: {
         onUnstack={onUnstack}
         showSwapPosition={canSwap}
         onSwapPosition={onSwap}
+        showShortestMove={canShortestMove && !isAssigningActions && !isEditingMovement}
+        onShortestMove={startShortestMove}
         showDeleteObjects={selectedIds.dancers.length > 0 || selectedIds.props.length > 0 || selectedIds.obstacles.length > 0}
         onDeleteObjects={onDeleteObjects}
         onOpenActionManager={openEditDancerActionsDialog}
@@ -1187,7 +1221,7 @@ export default function ChoreoEditPage(props: {
         pointCount={firstSelectedDancerPropMovement?.points.length ?? 1}
         togglePointCount={togglePointCount}
         onResetPath={resetPath}
-      />
+      />}
       {
         pasteNote &&
         <InstructionMessage instruction={pasteNote} onClose={() => setPasteNote(undefined)}/>
@@ -1233,6 +1267,7 @@ export default function ChoreoEditPage(props: {
         />
       }
       {stackDialogs}
+      {shortestMoveDialog}
       <Dialog.Root open={findOpen} onOpenChange={setFindOpen}>
         {
           findOpen &&

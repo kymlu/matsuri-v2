@@ -20,6 +20,7 @@ import RulerLayer from "./layers/RulerLayer";
 import { sortDancers, sortProps } from "../../lib/editor/commands/objectCommands";
 import IconButton from "../basic/IconButton";
 import MovementEditLayer from "./layers/MovementEditLayer";
+import PreviewRoutesLayer, { PreviewRoute } from "./layers/PreviewRoutesLayer";
 import { useTheme } from "../../lib/helpers/themeHelper";
 
 Konva.hitOnDragEnabled = true;
@@ -89,6 +90,9 @@ type MainStageProps = {
   currentMovement?: Movement,
   dancerAnimationCache: PathSvgCacheByObjectIdBySectionId,
   propAnimationCache: PathSvgCacheByObjectIdBySectionId,
+  // A change being previewed (移動を短く): people left out are faint, with routes drawn under everyone.
+  fadedDancerIds?: ReadonlySet<string>,
+  previewRoutes?: { routes: PreviewRoute[], kind: "now" | "after" },
 }
 
 function MainStage({
@@ -102,7 +106,7 @@ function MainStage({
   addDancer, addProp, addObstacle, appSettings, previousSection, selectedDancerMovement,
   onDancerSelected, bottomMarginPercent = 0, canResizeProps, editEnabled, toggleEditEnabled, openNoteDialog, openChangeLog, openHelp, openFind, dimDancersToggle, focusSelectionRequest,
   showPaths = false, isEditingMovement = false, mutedGhostPaths = false, dancerMovementCache, propMovementCache, onMidpointEdit, currentMovement,
-  dancerAnimationCache, propAnimationCache,
+  dancerAnimationCache, propAnimationCache, fadedDancerIds, previewRoutes,
 }: MainStageProps) {
   // Konva reads colours from the (non-reactive) colorPalette, so remount the
   // whole Stage subtree when the theme flips to force every layer to redraw.
@@ -654,11 +658,16 @@ function MainStage({
             sectionId={currentSection.id}
           />
         }
+        {
+          previewRoutes &&
+          <PreviewRoutesLayer geometry={stageGeometry} routes={previewRoutes.routes} kind={previewRoutes.kind} largeDancers={appSettings.dancerDisplayType === "large"}/>
+        }
         <FormationLayer
           canEdit={canEdit && editEnabled === true}
           hideTransformerBorder={hideTransformerBorder}
           canSelectDancers={canSelectDancers && !dimDancers}
           dimDancers={dimDancers}
+          fadedDancerIds={fadedDancerIds}
           canSelectProps={canSelectProps}
           canSelectObstacles={canSelectObstacles}
           canToggleSelection={canToggleSelection}
