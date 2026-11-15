@@ -68,7 +68,6 @@ const publishConfirmationDialog = Dialog.createHandle<null>();
 const publishSuccessDialog = Dialog.createHandle<null>();
 const exportDialog = Dialog.createHandle<{}>();
 
-const manageSectionsTodo = () => console.log("TODO: implement Manage Sections");
 
 type SelectedEntity = { id: string, type: "dancer" | "prop" };
 
@@ -994,7 +993,6 @@ export default function ChoreoEditPage(props: {
         manageDancers={openDancerManagerDialog}
         showManageProps={entityCount.props > 0}
         manageProps={openPropManagerDialog}
-        manageSections={manageSectionsTodo}
         exportChoreo={onExportChoreo}
         changeShowGrid={toggleShowGrid}
         changeShowPrevious={toggleShowPrevious}
