@@ -32,7 +32,7 @@ const shortName = (name: string) => name.length > 8 ? name.slice(0, 8) + "…" :
 
 const SWIPE_TO_CLOSE_PX = 60;
 
-// 移動を短く: takes the toolbar's place while previewing, so the stage above stays visible and can be
+// 最短距離: takes the toolbar's place while previewing, so the stage above stays visible and can be
 // panned and zoomed (no backdrop). The stage itself can't be edited until this closes.
 export default function ShortestMoveSheet({
   previousSectionName, totalBefore, totalAfter, hasGain, view, onChangeView,
@@ -45,7 +45,7 @@ export default function ShortestMoveSheet({
 
   return <div
     role="dialog"
-    aria-label="移動を短く"
+    aria-label="最短距離"
     className="z-10 w-screen shrink-0 max-h-[45svh] overflow-y-auto bg-surface border-t-2 border-line rounded-t-2xl shadow-[0_-8px_24px_rgb(0_0_0/0.08)]">
     <div className="flex flex-col w-full max-w-lg gap-2 px-4 pt-2 pb-6 mx-auto">
       {/* Swipe the handle down to cancel, like the app's other bottom sheets. */}
@@ -61,7 +61,7 @@ export default function ShortestMoveSheet({
       </div>
 
       <div className="flex items-center gap-3">
-        <h2 className="text-base font-bold">移動を短く</h2>
+        <h2 className="text-base font-bold">最短距離</h2>
         {
           !crossColourOnly &&
           <div className="flex ml-auto" role="radiogroup" aria-label="表示">
@@ -83,7 +83,7 @@ export default function ShortestMoveSheet({
       </div>
 
       <p className="flex items-baseline gap-2 text-sm">
-        <span className="text-muted">{shortName(previousSectionName)}からの移動（合計）</span>
+        <span className="text-muted">「{shortName(previousSectionName)}」からの移動（合計）</span>
         {
           hasGain
             ? <>

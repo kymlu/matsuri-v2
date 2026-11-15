@@ -11,7 +11,7 @@ const base = {
 describe("ShortestMoveSheet", () => {
   it("shows the total from the previous section and the two views", () => {
     render(<ShortestMoveSheet {...base}/>);
-    expect(screen.getByText("Aメロからの移動（合計）")).toBeInTheDocument();
+    expect(screen.getByText("「Aメロ」からの移動（合計）")).toBeInTheDocument();
     expect(screen.getByText("62m")).toBeInTheDocument();
     expect(screen.getByText("17m")).toBeInTheDocument();
     expect(screen.getByRole("radio", { name: "入れ替え後" })).toHaveAttribute("aria-checked", "true");
@@ -43,7 +43,7 @@ describe("ShortestMoveSheet", () => {
 
   it("shortens long section names and rounds metres", () => {
     render(<ShortestMoveSheet {...base} previousSectionName="とても長いセクションの名前"/>);
-    expect(screen.getByText("とても長いセクシ…からの移動（合計）")).toBeInTheDocument();
+    expect(screen.getByText("「とても長いセクシ…」からの移動（合計）")).toBeInTheDocument();
     expect(formatMetres(4.04)).toBe("4m");
     expect(formatMetres(4.25)).toBe("4.3m");
     expect(formatMetres(17.4)).toBe("17m");

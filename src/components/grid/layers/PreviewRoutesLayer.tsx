@@ -8,7 +8,7 @@ import { colorPalette } from "../../../lib/consts/colors";
 
 export type PreviewRoute = { id: string, from: Coordinates, to: Coordinates, color: string };
 
-// Straight-line routes from the previous section while previewing a change (移動を短く):
+// Straight-line routes from the previous section while previewing a change (最短距離):
 // a faint dashed circle where each person stood before, and an arrow to where they stand now.
 // "after" (the proposal) is green, "now" (what is there today) is red. Nothing here can be touched.
 const ROUTE_COLOURS = { now: colorPalette.rainbow.red[0], after: "#2E8B57" };

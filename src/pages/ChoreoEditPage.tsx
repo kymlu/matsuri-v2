@@ -394,7 +394,7 @@ export default function ChoreoEditPage(props: {
       const ctrlOrCmd = isMac ? e.metaKey : e.ctrlKey;
 
       if (!ctrlOrCmd) return;
-      // Previewing 移動を短く: the choreo must not change underneath (saving is fine).
+      // Previewing 最短距離: the choreo must not change underneath (saving is fine).
       if (isPreviewingRef.current && e.key !== "s") return;
 
       // Ignore typing in inputs / textareas

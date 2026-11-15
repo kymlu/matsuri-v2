@@ -232,7 +232,7 @@ function Toolbar({
         {showCopyPosition && <IconButton src="contentCopy" label={"位置\nコピー"} onClick={onCopyPosition} />}
         {showPastePosition && <IconButton src="contentPaste" label={"位置\nペースト"} onClick={onPastePosition} />}
         {showSwapPosition && <IconButton src="swapHoriz" label={"位置交換"} onClick={onSwapPosition} />}
-        {showShortestMove && <IconButton src="route" label={"移動を\n短く"} onClick={onShortestMove} />}
+        {showShortestMove && <IconButton src="route" label={"最短距離"} onClick={onShortestMove} />}
         {showDuplicateObstacle && <IconButton src="controlPointDuplicate" label="複製" onClick={onDuplicateObstacle} />}
         {showDuplicateProp && <IconButton src="controlPointDuplicate" label="複製" onClick={onDuplicateProp} />}
         {showDeleteObjects && <IconButton src="delete" label="削除" onClick={onDeleteObjects}/>}

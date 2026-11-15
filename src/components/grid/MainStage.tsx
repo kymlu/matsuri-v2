@@ -90,7 +90,7 @@ type MainStageProps = {
   currentMovement?: Movement,
   dancerAnimationCache: PathSvgCacheByObjectIdBySectionId,
   propAnimationCache: PathSvgCacheByObjectIdBySectionId,
-  // A change being previewed (移動を短く): people left out are faint, with routes drawn under everyone.
+  // A change being previewed (最短距離): people left out are faint, with routes drawn under everyone.
   fadedDancerIds?: ReadonlySet<string>,
   previewRoutes?: { routes: PreviewRoute[], kind: "now" | "after" },
 }

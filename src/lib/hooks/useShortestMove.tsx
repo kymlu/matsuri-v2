@@ -32,7 +32,7 @@ export type ShortestMovePreview = {
 // Routes shorter than this aren't drawn (the person is practically in the same place).
 const MIN_ROUTE = 0.05;
 
-// 移動を短く: the toolbar check, the preview sheet (in place of the toolbar), what the stage shows while
+// 最短距離: the toolbar check, the preview sheet (in place of the toolbar), what the stage shows while
 // previewing, and the dialog for when nothing would get shorter. Applying commits the previewed choreo
 // itself, so it is one undo step and exactly what was shown.
 export function useShortestMove({ state, section, prevSection, selectedIds, commitState }: Options) {

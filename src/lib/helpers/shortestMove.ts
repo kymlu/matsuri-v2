@@ -3,7 +3,7 @@ import { StageEntities } from "../../models/history";
 import { assign } from "./assignment";
 import { getStacks, UnitMove } from "./stackHelper";
 
-// 移動を短く: among the selected people, swap who stands on which spot so the total straight-line distance
+// 最短距離: among the selected people, swap who stands on which spot so the total straight-line distance
 // from the previous section is as short as possible. Spots never move; stacked people never move.
 
 // Savings smaller than this (metres, in total) are not worth changing anyone's spot for.
