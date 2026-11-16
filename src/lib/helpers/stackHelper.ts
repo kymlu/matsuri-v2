@@ -584,19 +584,10 @@ export function moveChoices(state: Choreo, sectionId: string, moves: UnitMove[])
   return { colour, counts: ids(bySpot) !== ids(byPerson) };
 }
 
-// Swaps two units: each moves by the distance between them (bottom member to bottom member, prop centres
-// for props), so stacks stay stacks. Front/back order is kept per unit.
-export function swapUnitPositions(state: Choreo, sectionId: string, kind: StackKind, a: Stack, b: Stack): Choreo {
+// Swaps two props or prop stacks: each moves by the distance between their bottom members' centres, so
+// stacks stay stacks and keep their angles. (People go through moveUnitsTo.)
+export function swapPropUnitPositions(state: Choreo, sectionId: string, a: Stack, b: Stack): Choreo {
   return updateSection(state, sectionId, f => {
-    if (kind === "dancers") {
-      const pa = f.dancerPositions[a[0]], pb = f.dancerPositions[b[0]];
-      if (!pa || !pb) return f;
-      const dx = pb.x - pa.x, dy = pb.y - pa.y;
-      const next = { ...f.dancerPositions };
-      a.forEach(id => { if (next[id]) next[id] = { ...next[id], x: next[id].x + dx, y: next[id].y + dy }; });
-      b.forEach(id => { if (next[id]) next[id] = { ...next[id], x: next[id].x - dx, y: next[id].y - dy }; });
-      return { ...f, dancerPositions: next };
-    }
     const pa = f.propPositions[a[0]], pb = f.propPositions[b[0]];
     const propA = state.props[a[0]], propB = state.props[b[0]];
     if (!pa || !pb || !propA || !propB) return f;

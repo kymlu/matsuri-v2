@@ -1,5 +1,6 @@
+import { cornerToCentreFromProp } from "./editorCalculationHelper";
 import { Choreo } from "../../models/choreo";
-import { arrangeRepresentatives, linkedStack, moveChoices, moveUnitsTo, swapUnits, swapUnitPositions, copyStacks, countSelectedUnits, prepareStackPaste, rearrangeWithStacks, restoreCopiedStacks, countUnits, expandSelectionToStacks, findDropTarget, moveStacksTogether, stackNotes, isHiddenInStack, normalizeStacks, reorderStack, selectedWholeStack, stackAbove, stackBelow, stackObjects, unstackObjects } from "./stackHelper";
+import { arrangeRepresentatives, linkedStack, moveChoices, moveUnitsTo, swapUnits, swapPropUnitPositions, copyStacks, countSelectedUnits, prepareStackPaste, rearrangeWithStacks, restoreCopiedStacks, countUnits, expandSelectionToStacks, findDropTarget, moveStacksTogether, stackNotes, isHiddenInStack, normalizeStacks, reorderStack, selectedWholeStack, stackAbove, stackBelow, stackObjects, unstackObjects } from "./stackHelper";
 import { alignHorizontalPositions, pastePositions, removeObjects } from "../editor/commands/objectCommands";
 import { addSection } from "../editor/commands/sectionCommands";
 
@@ -284,7 +285,7 @@ describe("位置交換 with stacks", () => {
 
   it("swaps a stack with a person, keeping the stack", () => {
     let s = stackObjects(makeChoreo(), "s1", "dancers", ["a", "b"]); // at b (3,1)
-    s = normalizeStacks(swapUnitPositions(s, "s1", "dancers", ["b", "a"], ["c"])); // c at (5,1)
+    s = moveUnitsTo(s, "s1", [{ unit: ["b", "a"], target: ["c"] }, { unit: ["c"], target: ["b", "a"] }], "person"); // c at (5,1)
     expect(pos(s, "a")).toMatchObject({ x: 5, y: 1 });
     expect(pos(s, "b")).toMatchObject({ x: 5, y: 1 });
     expect(pos(s, "c")).toMatchObject({ x: 3, y: 1 });
@@ -295,9 +296,22 @@ describe("位置交換 with stacks", () => {
     let s = stackObjects(makeChoreo(), "s1", "dancers", ["a", "b"]); // at (3,1)
     s = stackObjects(s, "s1", "dancers", ["c", "d"]); // d bottom
     const dAt = { x: pos(s, "d").x, y: pos(s, "d").y };
-    s = normalizeStacks(swapUnitPositions(s, "s1", "dancers", ["b", "a"], ["d", "c"]));
+    s = moveUnitsTo(s, "s1", [{ unit: ["b", "a"], target: ["d", "c"] }, { unit: ["d", "c"], target: ["b", "a"] }], "person");
     expect(pos(s, "a")).toMatchObject(dAt);
     expect(pos(s, "c")).toMatchObject({ x: 3, y: 1 });
+  });
+});
+
+describe("swapPropUnitPositions", () => {
+  it("swaps two props by their centres, each keeping its own angle", () => {
+    const s0 = makeChoreo();
+    const tilted = { ...s0, sections: s0.sections.map(sec => ({ ...sec, formation: { ...sec.formation,
+      propPositions: { ...sec.formation.propPositions, q: { ...sec.formation.propPositions.q, rotation: 90 } } } })) } as Choreo;
+    const centre = (s: Choreo, id: string) => cornerToCentreFromProp(s.sections[0].formation.propPositions[id], s.props[id], s.stageGeometry.yAxis);
+    const s = swapPropUnitPositions(tilted, "s1", ["p"], ["q"]);
+    expect(centre(s, "p")).toEqual(centre(tilted, "q"));
+    expect(centre(s, "q")).toEqual(centre(tilted, "p"));
+    expect(s.sections[0].formation.propPositions.q.rotation).toBe(90);
   });
 });
 

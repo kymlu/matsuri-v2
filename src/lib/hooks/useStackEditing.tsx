@@ -6,7 +6,7 @@ import { StageEntities } from "../../models/history";
 import { ReorderStackDialog, StackMember, StackOrderDialog, StackPromptDialog, SwapChoice, SwapDialog, SwapPerson, UnstackDialog } from "../../components/dialogs/StackDialogs";
 import {
   countUnits, expandSelectionToStacks, findDropTarget, findStack, linkedStack, reorderStack, selectedWholeStack,
-  moveChoices, moveUnitsTo, UnitMove, StackKind, stackObjects, StackSpot, swapUnitPositions, swapUnits, unstackObjects,
+  moveChoices, moveUnitsTo, UnitMove, StackKind, stackObjects, StackSpot, swapPropUnitPositions, swapUnits, unstackObjects,
 } from "../helpers/stackHelper";
 import { swapPropPositions } from "../editor/commands/objectCommands";
 
@@ -170,7 +170,7 @@ export function useStackEditing({ state, section, prevSection, selectedIds, setS
     } else if (a.length === 1 && b.length === 1) {
       commitState(swapPropPositions(state, section.id, a[0], b[0]));
     } else {
-      commitState(swapUnitPositions(state, section.id, stackKind, a, b));
+      commitState(swapPropUnitPositions(state, section.id, a, b));
     }
   }, [stackKind, swapPair, commitState, state, section.id, swapPeople]);
 
