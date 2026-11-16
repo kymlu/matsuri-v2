@@ -168,6 +168,16 @@ const BaseGridObject = memo(function BaseGridObject({
     return { x: (clamped.x + leftMargin) * METER_PX, y: (clamped.y + topMargin) * METER_PX };
   };
 
+  // Konva draws a translucent shape that has both a fill and a stroke through an off-screen buffer ("perfect
+  // draw"), once per shape on every frame. The Group's perfectDrawEnabled below doesn't reach its shapes, so a
+  // stage with many faint objects (a 最短距離 preview, or dancers dimmed to focus on props) panned slowly. At
+  // 20% opacity the buffer makes no visible difference, so faint objects' shapes skip it. Runs after every
+  // render so shapes added later (e.g. a stack mark) are covered too; it is a few shapes per object.
+  useEffect(() => {
+    if (!dimmed) return;
+    ref.current?.find<Konva.Shape>("Shape").forEach(shape => shape.perfectDrawEnabled(false));
+  });
+
   const dragStartRef = useRef<{ x: number; y: number } | null>(null);
   const isDraggingRef = useRef(false);
   const dragOriginRef = useRef<Coordinates | null>(null);
