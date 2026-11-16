@@ -45,9 +45,9 @@ describe("SwapDialog", () => {
     expect(screen.queryByText("色")).toBeNull();
     expect(screen.getByText("手上げ 1")).toBeTruthy();
     expect(screen.getByText("なし")).toBeTruthy();
-    expect(screen.getByText("位置に残る")).toBeTruthy();
+    expect(screen.getByText("立ち位置のまま")).toBeTruthy();
     fireEvent.click(screen.getByRole("checkbox", { name: "カウント" }));
-    expect(screen.getByText("一緒に移動")).toBeTruthy();
+    expect(screen.getByText("本人のまま")).toBeTruthy();
     fireEvent.click(screen.getByText("入れ替える"));
     expect(onSubmit).toHaveBeenCalledWith({ colour: true, counts: true });
   });

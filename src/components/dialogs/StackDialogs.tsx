@@ -149,8 +149,8 @@ export function UnstackDialog({ members, onSubmit, kind = "dancers" }: { members
 
 export type SwapChoice = { colour: boolean, counts: boolean };
 
-// 位置交換 of two people who differ in colour or counts: which of those go with them. Ticked moves with the
-// person; unticked stays on the spot. Only what differs is listed, with what each has now.
+// 位置交換 of two people who differ in colour or counts: which of those stay theirs. Ticked stays with the
+// person (本人のまま); unticked stays with the spot (立ち位置のまま). Only what differs is listed, with what each has now.
 export type SwapPerson = StackMember & { counts: string[] };
 export function SwapDialog({ a, b, differs, initial, onSubmit }: {
   a: SwapPerson, b: SwapPerson,
@@ -175,7 +175,7 @@ export function SwapDialog({ a, b, differs, initial, onSubmit }: {
         <span className="flex-1 min-w-0">
           <span className="flex items-center justify-between gap-2">
             <span className="font-semibold">{label}</span>
-            <span className={classNames("text-sm text-nowrap", on ? "font-semibold text-primary" : "text-muted")}>{on ? "一緒に移動" : "位置に残る"}</span>
+            <span className={classNames("text-sm text-nowrap", on ? "font-semibold text-primary" : "text-muted")}>{on ? "本人のまま" : "立ち位置のまま"}</span>
           </span>
           {values(show)}
         </span>
@@ -184,7 +184,7 @@ export function SwapDialog({ a, b, differs, initial, onSubmit }: {
   };
   return <BaseEditDialog title="位置交換" actionButtonText="入れ替える" noDetachedTrigger fullWidth onSubmit={() => onSubmit(choice)}>
     <p><span className="font-semibold">{a.label}</span>と<span className="font-semibold">{b.label}</span>の位置を入れ替えます。</p>
-    <p className="mb-2 text-sm text-muted">一緒に移動するものを選んでください。</p>
+    <p className="mb-2 text-sm text-muted">チェックしたものは本人のままになります。</p>
     <ul className="p-px space-y-1">
       {differs.colour && row("colour", "色", p => <Dot color={p.color}/>)}
       {differs.counts && row("counts", "カウント", p => p.counts.length === 0
