@@ -183,8 +183,7 @@ export function SwapDialog({ a, b, differs, initial, onSubmit }: {
     </li>;
   };
   return <BaseEditDialog title="位置交換" actionButtonText="入れ替える" noDetachedTrigger fullWidth onSubmit={() => onSubmit(choice)}>
-    <p><span className="font-semibold">{a.label}</span>と<span className="font-semibold">{b.label}</span>の位置を入れ替えます。</p>
-    <p className="mb-2 text-sm text-muted">チェックしたものは本人のままになります。</p>
+    <p className="mb-2"><span className="font-semibold">{a.label}</span>と<span className="font-semibold">{b.label}</span>の位置を入れ替えます。</p>
     <ul className="p-px space-y-1">
       {differs.colour && row("colour", "色", p => <Dot color={p.color}/>)}
       {differs.counts && row("counts", "カウント", p => p.counts.length === 0
