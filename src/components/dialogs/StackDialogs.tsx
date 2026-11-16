@@ -149,37 +149,48 @@ export function UnstackDialog({ members, onSubmit, kind = "dancers" }: { members
 
 export type SwapChoice = { colour: boolean, counts: boolean };
 
-// 位置交換, when the two differ in colour or counts: what trades places along with the names. Ticked goes with
-// the person; unticked stays on the spot. Only the things that differ are listed.
+// 位置交換 of two people who differ in colour or counts: which of those go with them. Ticked moves with the
+// person; unticked stays on the spot. Only what differs is listed, with what each has now.
+export type SwapPerson = StackMember & { counts: string[] };
 export function SwapDialog({ a, b, differs, initial, onSubmit }: {
-  a: StackMember[], b: StackMember[],
+  a: SwapPerson, b: SwapPerson,
   differs: SwapChoice,
   initial: SwapChoice,
   onSubmit: (choice: SwapChoice) => void,
 }) {
   const [choice, setChoice] = useState(initial);
-  const names = (unit: StackMember[]) => unit.map(m => m.label).join("・");
-  const colours = (unit: StackMember[]) => <span className="flex gap-0.5">{unit.map(m => <Dot key={m.id} color={m.color}/>)}</span>;
-  const row = (label: ReactNode, on: boolean, toggle?: () => void) =>
-    <li>
-      <button type="button" role="checkbox" aria-checked={on} aria-disabled={!toggle} onClick={toggle}
-        className={classNames("flex items-center w-full gap-2 px-3 text-left border rounded-md min-h-11",
-          !toggle ? "border-line opacity-60 cursor-default" : on ? "border-primary bg-primary/5" : "border-line")}>
+  const values = (show: (p: SwapPerson) => ReactNode) => [a, b].map(p =>
+    <span key={p.id} className="flex items-center gap-2 mt-1 text-sm">
+      <span className="w-12 shrink-0 text-muted break-all">{p.label}</span>
+      <span className="flex flex-wrap items-center gap-1">{show(p)}</span>
+    </span>);
+  const row = (key: keyof SwapChoice, label: string, show: (p: SwapPerson) => ReactNode) => {
+    const on = choice[key];
+    return <li>
+      <button type="button" role="checkbox" aria-checked={on} aria-label={label}
+        onClick={() => setChoice({ ...choice, [key]: !on })}
+        className={classNames("flex items-start w-full gap-2 px-3 py-2.5 text-left border rounded-md",
+          on ? "border-primary bg-primary/5" : "border-line")}>
         <SelectBox state={on ? "all" : "none"}/>
-        {label}
+        <span className="flex-1 min-w-0">
+          <span className="flex items-center justify-between gap-2">
+            <span className="font-semibold">{label}</span>
+            <span className={classNames("text-sm text-nowrap", on ? "font-semibold text-primary" : "text-muted")}>{on ? "一緒に移動" : "位置に残る"}</span>
+          </span>
+          {values(show)}
+        </span>
       </button>
     </li>;
-  return <BaseEditDialog title="位置交換" actionButtonText="入れ替える" noDetachedTrigger fullWidth
-    onSubmit={() => onSubmit(choice)}>
-    <p className="mb-2"><span className="font-semibold">{names(a)}</span>と<span className="font-semibold">{names(b)}</span>で入れ替えるもの</p>
+  };
+  return <BaseEditDialog title="位置交換" actionButtonText="入れ替える" noDetachedTrigger fullWidth onSubmit={() => onSubmit(choice)}>
+    <p><span className="font-semibold">{a.label}</span>と<span className="font-semibold">{b.label}</span>の位置を入れ替えます。</p>
+    <p className="mb-2 text-sm text-muted">一緒に移動するものを選んでください。</p>
     <ul className="p-px space-y-1">
-      {row(<span className="font-semibold">名前</span>, true)}
-      {differs.colour && row(<><span className="font-semibold">色</span><span className="flex items-center gap-1 ml-auto">{colours(a)}<Icon src="swapHoriz" size="2xs" colour="grey"/>{colours(b)}</span></>,
-        choice.colour, () => setChoice({ ...choice, colour: !choice.colour }))}
-      {differs.counts && row(<span className="font-semibold">カウント</span>,
-        choice.counts, () => setChoice({ ...choice, counts: !choice.counts }))}
+      {differs.colour && row("colour", "色", p => <Dot color={p.color}/>)}
+      {differs.counts && row("counts", "カウント", p => p.counts.length === 0
+        ? <span className="text-muted">なし</span>
+        : p.counts.map((c, i) => <span key={i} className="px-2 border rounded-full border-line text-nowrap">{c}</span>))}
     </ul>
-    <p className="mt-3 text-sm text-muted">チェックを外したものは、その立ち位置に残ります。</p>
   </BaseEditDialog>;
 }
 

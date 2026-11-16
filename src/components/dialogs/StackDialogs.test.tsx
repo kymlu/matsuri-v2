@@ -37,15 +37,17 @@ describe("prop stacks say 道具, not 人", () => {
 });
 
 describe("SwapDialog", () => {
-  const a = [{ id: "a", label: "一郎", color: "red" }], b = [{ id: "b", label: "花子", color: "blue" }];
-  it("lists only what differs; names always go, and can't be unticked", async () => {
+  const a = { id: "a", label: "一郎", color: "red", counts: ["手上げ 1"] }, b = { id: "b", label: "花子", color: "blue", counts: [] };
+  it("lists only what differs, with what each has now, and says where it goes", async () => {
     const onSubmit = jest.fn();
     render(<Dialog.Root open><SwapDialog a={a} b={b} differs={{ colour: false, counts: true }} initial={{ colour: true, counts: false }} onSubmit={onSubmit}/></Dialog.Root>);
-    expect(await screen.findByText("名前")).toBeTruthy();
+    expect(await screen.findByText("カウント")).toBeTruthy();
     expect(screen.queryByText("色")).toBeNull();
-    fireEvent.click(screen.getByText("名前"));
-    expect(screen.getByRole("checkbox", { name: "名前" }).getAttribute("aria-checked")).toBe("true");
-    fireEvent.click(screen.getByText("カウント"));
+    expect(screen.getByText("手上げ 1")).toBeTruthy();
+    expect(screen.getByText("なし")).toBeTruthy();
+    expect(screen.getByText("位置に残る")).toBeTruthy();
+    fireEvent.click(screen.getByRole("checkbox", { name: "カウント" }));
+    expect(screen.getByText("一緒に移動")).toBeTruthy();
     fireEvent.click(screen.getByText("入れ替える"));
     expect(onSubmit).toHaveBeenCalledWith({ colour: true, counts: true });
   });

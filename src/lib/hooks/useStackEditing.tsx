@@ -3,7 +3,7 @@ import { Dialog } from "@base-ui/react";
 import { Choreo } from "../../models/choreo";
 import { ChoreoSection } from "../../models/choreoSection";
 import { StageEntities } from "../../models/history";
-import { ReorderStackDialog, StackMember, StackOrderDialog, StackPromptDialog, SwapChoice, SwapDialog, UnstackDialog } from "../../components/dialogs/StackDialogs";
+import { ReorderStackDialog, StackMember, StackOrderDialog, StackPromptDialog, SwapChoice, SwapDialog, SwapPerson, UnstackDialog } from "../../components/dialogs/StackDialogs";
 import {
   countUnits, expandSelectionToStacks, findDropTarget, findStack, linkedStack, reorderStack, selectedWholeStack,
   moveChoices, moveUnitsTo, UnitMove, StackKind, stackObjects, StackSpot, swapUnitPositions, swapUnits, unstackObjects,
@@ -146,18 +146,24 @@ export function useStackEditing({ state, section, prevSection, selectedIds, setS
   // 位置交換 works on two separate things: people, props or whole stacks (not within one stack:
   // that's 上下入れ替え).
   const swapPair = stackKind ? swapUnits(formation, stackKind, stackIds) : undefined;
-  // People: when they differ in colour or counts, ask which of those go with them (the last answer is the
-  // next default). Custom paths reset either way.
+  // People: when two people differ in colour or counts, ask which of those go with them (the last answer is
+  // the next default). Stacks keep their own colours and counts, as choosing per level gets messy. Custom
+  // paths reset either way.
   const [swapping, setSwapping] = useState<{ moves: UnitMove[], differs: SwapChoice }>();
   const lastSwapChoice = useRef<SwapChoice>({ colour: true, counts: false });
   const swapPeople = useCallback((moves: UnitMove[], choice: SwapChoice) => {
     commitState(moveUnitsTo(state, section.id, moves, choice.counts ? "person" : "spot", choice.colour ? "person" : "spot"));
   }, [commitState, state, section.id]);
+  const swapPerson = useCallback((id: string): SwapPerson => ({
+    ...stackMembers("dancers", [id])[0],
+    counts: formation.dancerActions.flatMap(a => a.timings.filter(t => t.dancerIds.includes(id)).map(t => `${a.name} ${t.name}`)),
+  }), [stackMembers, formation]);
   const onSwap = useCallback(() => {
     if (!stackKind || !swapPair) return;
     const [a, b] = swapPair;
     if (stackKind === "dancers") {
       const moves = [{ unit: a, target: b }, { unit: b, target: a }];
+      if (a.length > 1 || b.length > 1) return swapPeople(moves, { colour: true, counts: true });
       const differs = moveChoices(state, section.id, moves);
       if (differs.colour || differs.counts) setSwapping({ moves, differs });
       else swapPeople(moves, lastSwapChoice.current);
@@ -197,8 +203,8 @@ export function useStackEditing({ state, section, prevSection, selectedIds, setS
       {
         swapping &&
         <SwapDialog
-          a={stackMembers("dancers", [...swapping.moves[0].unit].reverse())}
-          b={stackMembers("dancers", [...swapping.moves[1].unit].reverse())}
+          a={swapPerson(swapping.moves[0].unit[0])}
+          b={swapPerson(swapping.moves[1].unit[0])}
           differs={swapping.differs}
           initial={lastSwapChoice.current}
           onSubmit={choice => {
