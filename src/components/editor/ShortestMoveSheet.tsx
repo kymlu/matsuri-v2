@@ -1,8 +1,7 @@
-import { useState } from "react";
 import { Checkbox } from "@base-ui/react";
 import classNames from "classnames";
 import Button from "../basic/Button";
-import BottomDrawer from "../basic/BottomDrawer";
+import BottomDrawer, { BottomDrawerClose } from "../basic/BottomDrawer";
 import SelectBox from "../basic/SelectBox";
 import { colorPalette } from "../../lib/consts/colors";
 
@@ -53,13 +52,9 @@ export default function ShortestMoveSheet({
   sameColour, onChangeSameColour, colourFollowsPerson, onChangeColourFollowsPerson, showCountsOption, countsFollowPerson, onChangeCountsFollowPerson,
   skippedStacked, onCancel, onApply, onHeightChange,
 }: ShortestMoveSheetProps) {
-  // キャンセル slides the drawer away first; onCancel runs once it has gone.
-  const [open, setOpen] = useState(true);
-
   return <BottomDrawer
     label="最短距離"
     layerClassName="z-20"
-    open={open}
     onClose={onCancel}
     snapPoints={["75px", 1]}
     defaultSnapPoint={1}
@@ -104,7 +99,9 @@ export default function ShortestMoveSheet({
       {skippedStacked && <p className="text-sm text-center text-muted">重なっている人は動かしません</p>}
       {noGainMessage && <p className="font-bold text-center text-wrap text-primary">{noGainMessage}</p>}
       <div className="grid w-full grid-flow-col gap-2 auto-cols-fr">
-        <Button full onClick={() => setOpen(false)}><span className="font-semibold text-nowrap">キャンセル</span></Button>
+        <BottomDrawerClose className="w-full">
+          <Button asDiv full><span className="font-semibold text-nowrap">キャンセル</span></Button>
+        </BottomDrawerClose>
         <Button full primary disabled={!hasGain} onClick={hasGain ? onApply : undefined}>
           <span className="font-semibold text-nowrap">入れ替える</span>
         </Button>
