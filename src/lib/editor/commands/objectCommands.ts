@@ -801,10 +801,13 @@ export function swapPropPositions(
     const originalB = section.formation.propPositions[propBId];
     const originalACenter = cornerToCentreFromProp(section.formation.propPositions[propAId], state.props[propAId], state.stageGeometry.yAxis);
     const originalBCenter = cornerToCentreFromProp(section.formation.propPositions[propBId], state.props[propBId], state.stageGeometry.yAxis);
-    const newAPosition = centreToCorner(originalBCenter.x, originalBCenter.y, originalA.rotation ?? 0, propA.width, propA.length, state.stageGeometry.yAxis);
-    const newBPosition = centreToCorner(originalACenter.x, originalACenter.y, originalB.rotation ?? 0, propB.width, propB.length, state.stageGeometry.yAxis);
-    propPositions[propAId] = { ...originalA, x: newAPosition.x, y: newAPosition.y };
-    propPositions[propBId] = { ...originalB, x: newBPosition.x, y: newBPosition.y };
+    // Each prop takes the other's spot and angle: the angle is part of the formation's layout there (e.g. a flag
+    // waiting upright at the side), like counts staying with a spot when people swap.
+    const angleA = originalB.rotation ?? 0, angleB = originalA.rotation ?? 0;
+    const newAPosition = centreToCorner(originalBCenter.x, originalBCenter.y, angleA, propA.width, propA.length, state.stageGeometry.yAxis);
+    const newBPosition = centreToCorner(originalACenter.x, originalACenter.y, angleB, propB.width, propB.length, state.stageGeometry.yAxis);
+    propPositions[propAId] = { ...originalA, x: newAPosition.x, y: newAPosition.y, rotation: angleA };
+    propPositions[propBId] = { ...originalB, x: newBPosition.x, y: newBPosition.y, rotation: angleB };
     return {
       ...section,
       formation: {
