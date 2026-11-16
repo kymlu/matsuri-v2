@@ -95,6 +95,9 @@ type MainStageProps = {
   previewRoutes?: { routes: PreviewRoute[], kind: "now" | "after" },
   instantMoves?: boolean, // jump to new positions instead of animating
   dimPropsAndObstacles?: boolean, // props and obstacles faint, so routes drawn underneath show through
+  // Height of something floating over the bottom of the page (e.g. the 最短距離 sheet): the camera zooms and moves
+  // so the preview's routes fit above it, and goes back to where it was when this is unset.
+  bottomOverlayHeight?: number,
 }
 
 function MainStage({
@@ -108,7 +111,7 @@ function MainStage({
   addDancer, addProp, addObstacle, appSettings, previousSection, selectedDancerMovement,
   onDancerSelected, bottomMarginPercent = 0, canResizeProps, editEnabled, toggleEditEnabled, openNoteDialog, openChangeLog, openHelp, openFind, dimDancersToggle, focusSelectionRequest,
   showPaths = false, isEditingMovement = false, mutedGhostPaths = false, dancerMovementCache, propMovementCache, onMidpointEdit, currentMovement,
-  dancerAnimationCache, propAnimationCache, fadedDancerIds, previewRoutes, instantMoves, dimPropsAndObstacles,
+  dancerAnimationCache, propAnimationCache, fadedDancerIds, previewRoutes, instantMoves, dimPropsAndObstacles, bottomOverlayHeight,
 }: MainStageProps) {
   // Konva reads colours from the (non-reactive) colorPalette, so remount the
   // whole Stage subtree when the theme flips to force every layer to redraw.
@@ -382,6 +385,55 @@ function MainStage({
       });
     }
   }, [stageGeometry, selectedIds.dancers, selectedObjects.dancers, size.width, size.height, isShowingVerticalRuler, centerXPx, bottomMarginM, pixelsPerMeter, currentSection.formation.dancerPositions, setStagePosition]);
+
+  // Fitting the preview above a floating sheet: only the camera changes (zoom and position), never the stage's
+  // size. It fits the routes (where everyone starts and ends), zooming out only if they don't already fit, and
+  // puts the earlier camera back when the sheet goes.
+  const cameraBeforeOverlay = useRef<{ scale: Coordinates, position: Coordinates, manual: boolean } | undefined>(undefined);
+  useEffect(() => {
+    if (!stageGeometry || size.width === 0) return;
+    if (bottomOverlayHeight === undefined) {
+      const before = cameraBeforeOverlay.current;
+      if (!before) return;
+      cameraBeforeOverlay.current = undefined;
+      setStageScale(before.scale);
+      setStagePosition(before.position);
+      setRulerPos(before.position);
+      setIsManualMovement(before.manual);
+      return;
+    }
+    if (!cameraBeforeOverlay.current) {
+      cameraBeforeOverlay.current = { scale: stageScale, position: stagePositionRef.current, manual: isManualMovement };
+    }
+    const containerBottom = containerRef.current?.getBoundingClientRect().bottom ?? window.innerHeight;
+    const covered = Math.max(0, containerBottom - (window.innerHeight - bottomOverlayHeight));
+    const visible = { width: size.width - (isShowingVerticalRuler ? 32 : 0), height: Math.max(1, size.height - covered) };
+    // What to fit, in stage metres: the routes' ends, or the whole stage when there are none.
+    const ends = (previewRoutes?.routes ?? []).flatMap(r => [r.from, r.to]);
+    const box = ends.length > 0
+      ? {
+          left: Math.min(...ends.map(p => p.x)) - 1, right: Math.max(...ends.map(p => p.x)) + 1,
+          top: Math.min(...ends.map(p => p.y)) - 1, bottom: Math.max(...ends.map(p => p.y)) + 1,
+        }
+      : { left: 0, right: stageGeometry.stageWidth, top: 0, bottom: stageGeometry.stageLength };
+    const scale = clampScale(Math.min(
+      cameraBeforeOverlay.current.scale.x,
+      visible.width / ((box.right - box.left) * METER_PX),
+      visible.height / ((box.bottom - box.top) * METER_PX)));
+    // Centre the box in the visible area (corners in screen pixels at the new scale; y can run either way).
+    const a = stageMetersToPx({ x: box.left, y: box.top }, stageGeometry, METER_PX * scale);
+    const b = stageMetersToPx({ x: box.right, y: box.bottom }, stageGeometry, METER_PX * scale);
+    const position = {
+      x: visible.width / 2 - (a.x + b.x) / 2,
+      y: visible.height / 2 - (a.y + b.y) / 2,
+    };
+    setIsManualMovement(true);
+    setStageScale({ x: scale, y: scale });
+    setStagePosition(position);
+    setRulerPos(position);
+  // Refits when the sheet opens or settles at a new height; not when the routes change (flipping 今／最短).
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bottomOverlayHeight, size.width, size.height, stageGeometry]);
 
   // Declared after the selection-following effect so its pan wins when both run together.
   // The bottom panel grows once a dancer is selected, so the pan is redone while it settles.

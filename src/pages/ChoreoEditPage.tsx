@@ -311,7 +311,7 @@ export default function ChoreoEditPage(props: {
   });
 
   const {
-    canShortestMove, startShortestMove, isPreviewingShortestMove, shortestMoveInstantMoves, shortestMovePreview, shortestMoveSheet, shortestMoveDialog,
+    canShortestMove, startShortestMove, isPreviewingShortestMove, shortestMoveInstantMoves, shortestMoveSheetHeight, shortestMovePreview, shortestMoveSheet, shortestMoveDialog,
   } = useShortestMove({
     state: history.presentState.state,
     section: currentSection,
@@ -329,8 +329,9 @@ export default function ChoreoEditPage(props: {
     toggleEditEnabled: undefined, openNoteDialog: undefined, openFind: undefined, dimDancersToggle: undefined,
     fadedDancerIds: shortestMovePreview.fadedDancerIds,
     previewRoutes: shortestMovePreview.routes,
+    bottomOverlayHeight: shortestMoveSheetHeight,
     dimPropsAndObstacles: true, // so routes under props (e.g. a curtain) show through
-  }, [shortestMovePreview]);
+  }, [shortestMovePreview, shortestMoveSheetHeight]);
   const isPreviewingRef = useRef(false);
   isPreviewingRef.current = isPreviewingShortestMove;
 
@@ -1052,7 +1053,7 @@ export default function ChoreoEditPage(props: {
         }
         publish={onPublish}
         />
-      <div className="relative flex-1 min-h-0">
+      <div className="relative flex-1">
         <MainStage
           canEdit={!isAssigningActions}
           canSelectDancers={!isAssigningActions || currentTiming !== undefined}
@@ -1144,7 +1145,7 @@ export default function ChoreoEditPage(props: {
           </div>
         </div>
       </div>
-      {shortestMoveSheet ?? <Toolbar
+      <Toolbar
         isEnabled={editEnabled}
         onAddDancer={onAddDancerToggle}
         isAddingDancer={isAddingDancers}
@@ -1223,7 +1224,10 @@ export default function ChoreoEditPage(props: {
         pointCount={firstSelectedDancerPropMovement?.points.length ?? 1}
         togglePointCount={togglePointCount}
         onResetPath={resetPath}
-      />}
+      />
+      {/* Floats over the bottom of the page like view mode's drawer (the toolbar stays underneath), so the stage
+          keeps its size; the stage moves its camera to fit the routes above it instead. */}
+      {shortestMoveSheet}
       {
         pasteNote &&
         <InstructionMessage instruction={pasteNote} onClose={() => setPasteNote(undefined)}/>

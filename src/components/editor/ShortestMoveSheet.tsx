@@ -33,6 +33,8 @@ type ShortestMoveSheetProps = {
   skippedStacked: boolean,
   onCancel: () => void,
   onApply: () => void,
+  // The sheet's height once it has settled (not while dragging), so the stage can fit what's above it.
+  onHeightChange?: (height: number) => void,
 };
 
 // Whole metres from 10 m, one decimal below.
@@ -45,21 +47,22 @@ const SWIPE_TO_RESIZE_PX = 40;
 // Same motion as BottomDrawer.
 const SLIDE_MS = 450;
 const SLIDE_EASING = "cubic-bezier(0.32,0.72,0,1)";
+// How long the height must stay still before it is reported (after a drag, the slide, or a change of content).
+const SETTLE_MS = 150;
 // Normal height, and the most it can grow to (as tall as its content, leaving the top of the stage visible).
 const COLLAPSED_MAX = "45svh";
 const EXPANDED_MAX = "calc(100svh - 8rem)";
 
-// 最短距離: takes the toolbar's place while previewing, so the stage above stays visible and can be
-// panned and zoomed (no backdrop). The stage itself can't be edited until this closes.
+// 最短距離: floats over the bottom of the page while previewing, like view mode's drawer (no backdrop, so the
+// stage stays pannable and zoomable). The stage itself can't be edited until this closes.
 export default function ShortestMoveSheet({
   previousSectionName, totalBefore, totalAfter, hasGain, noGainMessage, colours, excludedColours, onToggleColour, view, onChangeView,
   sameColour, onChangeSameColour, colourFollowsPerson, onChangeColourFollowsPerson, showCountsOption, countsFollowPerson, onChangeCountsFollowPerson,
-  skippedStacked, onCancel, onApply,
+  skippedStacked, onCancel, onApply, onHeightChange,
 }: ShortestMoveSheetProps) {
   // Dragging the handle: up grows the sheet to its content's height; down shrinks it back, and from the normal
   // height slides it away and closes (キャンセル). It follows the finger and springs back if let go early.
-  // While the finger is down the page layout never changes (the sheet grows over the stage, or slides), so the
-  // stage isn't resized and redrawn on every move; the layout changes once, on release.
+  // The sheet floats over the page, so none of this changes the stage's size.
   const sheetRef = useRef<HTMLDivElement>(null);
   const optionsRef = useRef<HTMLDivElement>(null);
   const dragStart = useRef<{ y: number, height: number, fullHeight: number } | undefined>(undefined);
@@ -82,13 +85,27 @@ export default function ShortestMoveSheet({
     else if (expanded && dragY > SWIPE_TO_RESIZE_PX) setExpanded(false);
     else if (!expanded && dragY > SWIPE_TO_CLOSE_PX) setClosing(true);
   };
-  // Growing: as tall as the finger says, up to the content's full height, overlapping the stage (negative margin
-  // keeps the space it takes in the page the same). Everything else while dragging only slides the sheet.
+  // Growing: as tall as the finger says, up to the content's full height. Pulling down only slides the sheet.
   const growing = dragging && dragY < 0 && !expanded;
-  const grownHeight = growing ? Math.min(dragStart.current!.height - dragY, dragStart.current!.fullHeight) : 0;
-  const maxHeight = growing ? `${grownHeight}px` : expanded ? EXPANDED_MAX : COLLAPSED_MAX;
-  const marginTop = growing ? dragStart.current!.height - grownHeight : 0;
+  const maxHeight = growing
+    ? `${Math.min(dragStart.current!.height - dragY, dragStart.current!.fullHeight)}px`
+    : expanded ? EXPANDED_MAX : COLLAPSED_MAX;
   const offset = closing ? "100%" : dragging && dragY > 0 ? `${dragY}px` : "0px";
+
+  // Report the height once it has settled, so the stage refits once rather than on every frame.
+  useEffect(() => {
+    const sheet = sheetRef.current;
+    if (!sheet || !onHeightChange || typeof ResizeObserver === "undefined") return;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const observer = new ResizeObserver(() => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        if (dragStart.current === undefined) onHeightChange(Math.round(sheet.getBoundingClientRect().height));
+      }, SETTLE_MS);
+    });
+    observer.observe(sheet);
+    return () => { observer.disconnect(); clearTimeout(timer); };
+  }, [onHeightChange]);
 
   return <div
     ref={sheetRef}
@@ -96,12 +113,10 @@ export default function ShortestMoveSheet({
     aria-label="最短距離"
     style={{
       maxHeight,
-      marginTop,
       transform: `translateY(${offset})`,
-      // Only the slide animates: animating the height would resize the stage on every frame.
-      transition: dragging ? "none" : `transform ${SLIDE_MS}ms ${SLIDE_EASING}`,
+      transition: dragging ? "none" : `transform ${SLIDE_MS}ms ${SLIDE_EASING}, max-height ${SLIDE_MS}ms ${SLIDE_EASING}`,
     }}
-    className="z-10 flex flex-col w-screen shrink-0 bg-surface rounded-t-2xl shadow-[0_-2px_16px_rgba(0,0,0,0.15)] motion-reduce:!transition-none">
+    className="fixed inset-x-0 bottom-0 z-20 flex flex-col bg-surface rounded-t-2xl shadow-[0_-2px_16px_rgba(0,0,0,0.15)] motion-reduce:!transition-none">
     {/* Header and footer (result and buttons) stay put; only the options in between scroll on a short screen. */}
     <div className="flex flex-col w-full max-w-lg gap-2 px-4 mx-auto shrink-0">
       {/* Drag the handle up to see every option, or down to cancel. */}

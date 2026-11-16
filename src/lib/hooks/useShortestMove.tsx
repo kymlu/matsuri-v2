@@ -56,6 +56,8 @@ export function useShortestMove({ state, section, prevSection, selectedIds, comm
   const [view, setView] = useState<ShortestMoveView>("after");
   const [excludedColours, setExcludedColours] = useState<ReadonlySet<string>>(new Set());
   const [colourFollowsPerson, setColourFollowsPerson] = useState(true);
+  // How tall the sheet is once it has settled, so the stage can fit the routes above it.
+  const [sheetHeight, setSheetHeight] = useState<number | undefined>(undefined);
 
   const startShortestMove = useCallback(() => {
     if (!prevSection) return;
@@ -81,6 +83,9 @@ export function useShortestMove({ state, section, prevSection, selectedIds, comm
     setSnapBack(true);
     setSession(undefined);
   }, []);
+  useEffect(() => {
+    if (!session) setSheetHeight(undefined);
+  }, [session]);
   useEffect(() => {
     if (snapBack) setSnapBack(false);
   }, [snapBack]);
@@ -174,7 +179,8 @@ export function useShortestMove({ state, section, prevSection, selectedIds, comm
         onChangeCountsFollowPerson={setCountsFollowPerson}
         skippedStacked={plan.skippedStacked}
         onCancel={close}
-        onApply={apply}/>
+        onApply={apply}
+        onHeightChange={setSheetHeight}/>
     : undefined;
 
   const shortestMoveDialog = <Dialog.Root open={noGainOpen} onOpenChange={setNoGainOpen}>
@@ -189,6 +195,7 @@ export function useShortestMove({ state, section, prevSection, selectedIds, comm
     canShortestMove, startShortestMove, isPreviewingShortestMove: session !== undefined,
     // The stage jumps rather than animates while previewing (flipping 今／最短) and when cancelling.
     shortestMoveInstantMoves: session !== undefined || snapBack,
+    shortestMoveSheetHeight: session ? sheetHeight : undefined,
     shortestMovePreview, shortestMoveSheet, shortestMoveDialog,
   };
 }
