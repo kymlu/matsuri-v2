@@ -17,7 +17,7 @@ describe("ShortestMoveSheet", () => {
     expect(screen.getByText("62m")).toBeInTheDocument();
     expect(screen.getByText("17m")).toBeInTheDocument();
     expect(screen.getByRole("radio", { name: "最短" })).toHaveAttribute("aria-checked", "true");
-    expect(screen.queryByText("カウントも人と一緒に入れ替える")).toBeNull();
+    expect(screen.queryByText("カウントは本人のまま")).toBeNull();
     expect(screen.queryByText("重なっている人は動かしません")).toBeNull();
   });
 
@@ -30,7 +30,7 @@ describe("ShortestMoveSheet", () => {
 
   it("shows the counts option and the stacks line only when needed", () => {
     render(<ShortestMoveSheet {...base} showCountsOption skippedStacked/>);
-    expect(screen.getByText("カウントも人と一緒に入れ替える")).toBeInTheDocument();
+    expect(screen.getByText("カウントは本人のまま")).toBeInTheDocument();
     expect(screen.getByText("重なっている人は動かしません")).toBeInTheDocument();
   });
 
@@ -52,12 +52,12 @@ describe("ShortestMoveSheet", () => {
     expect(onToggleColour).toHaveBeenCalledWith("#00e");
   });
 
-  it("offers 色も人と一緒に入れ替える only when colours can mix", () => {
+  it("offers 色は本人のまま only when colours can mix", () => {
     const { unmount } = render(<ShortestMoveSheet {...base}/>);
-    expect(screen.queryByText("色も人と一緒に入れ替える")).toBeNull();
+    expect(screen.queryByText("色は本人のまま")).toBeNull();
     unmount();
     render(<ShortestMoveSheet {...base} sameColour={false}/>);
-    expect(screen.getByText("色も人と一緒に入れ替える")).toBeInTheDocument();
+    expect(screen.getByText("色は本人のまま")).toBeInTheDocument();
   });
 
   it("hides the colour row with nothing to choose", () => {

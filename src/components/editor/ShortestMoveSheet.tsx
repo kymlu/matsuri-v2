@@ -145,7 +145,7 @@ export default function ShortestMoveSheet({
           <Checkbox.Root checked={colourFollowsPerson} onCheckedChange={onChangeColourFollowsPerson} className="shrink-0">
             <SelectBox state={colourFollowsPerson ? "all" : "none"}/>
           </Checkbox.Root>
-          <span>色も人と一緒に入れ替える</span>
+          <span>色は本人のまま</span>
         </label>
       }
       {
@@ -154,7 +154,7 @@ export default function ShortestMoveSheet({
           <Checkbox.Root checked={countsFollowPerson} onCheckedChange={onChangeCountsFollowPerson} className="shrink-0">
             <SelectBox state={countsFollowPerson ? "all" : "none"}/>
           </Checkbox.Root>
-          <span>カウントも人と一緒に入れ替える</span>
+          <span>カウントは本人のまま</span>
         </label>
       }
     </div>
