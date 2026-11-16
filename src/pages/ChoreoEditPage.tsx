@@ -1056,6 +1056,7 @@ export default function ChoreoEditPage(props: {
           focusSelectionRequest={focusSelectionRequest}
           showPaths={showPaths}
           isEditingMovement={isEditingMovement}
+          mutedGhostPaths
           dancerMovementCache={dancerMovementCache}
           dancerAnimationCache={dancerAnimationCache}
           propMovementCache={propMovementCache}

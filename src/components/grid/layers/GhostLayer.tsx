@@ -20,6 +20,8 @@ type GhostLayerProps = {
   geometry: StageGeometry,
   selectedId?: string,
   isEditingPaths?: boolean
+  // Grey instead of the primary colour, so a path being edited (drawn in primary) stands out.
+  mutedPaths?: boolean,
   prevSectionId?: string,
   sectionId?: string,
 };
@@ -54,6 +56,7 @@ const GhostLayer = React.memo(function GhostLayer({
   geometry,
   selectedId,
   isEditingPaths,
+  mutedPaths,
   prevSectionId,
   sectionId,
 }: GhostLayerProps) {
@@ -120,7 +123,7 @@ const GhostLayer = React.memo(function GhostLayer({
       listening={false}
       opacity={0.5}
       >
-      <BatchedPath2D allPaths={allPaths}/>
+      <BatchedPath2D allPaths={allPaths} colour={mutedPaths ? colorPalette.grey : colorPalette.primary}/>
       {
         propKeys.map((id) => {
           const prev = syncPrevProps?.[id];
@@ -163,8 +166,10 @@ function getOrCreatePath2D(svgString: string): Path2D {
 
 export const BatchedPath2D = React.memo(function BatchedPath2D({
   allPaths,
+  colour,
 }: {
   allPaths: string[];
+  colour: string;
 }) {
   const combinedPath = useMemo(() => {
     if (!allPaths.length) return null;
@@ -186,7 +191,7 @@ export const BatchedPath2D = React.memo(function BatchedPath2D({
       listening={false}
       perfectDrawEnabled={false}
       sceneFunc={(context) => {
-        context.strokeStyle = colorPalette.primary;
+        context.strokeStyle = colour;
         context.lineWidth = 2;
         context.setLineDash(PATH_DASH);
         context.stroke(combinedPath);
