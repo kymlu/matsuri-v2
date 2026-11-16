@@ -58,8 +58,11 @@ export default function ShortestMoveSheet({
 }: ShortestMoveSheetProps) {
   // Dragging the handle: up grows the sheet to its content's height; down shrinks it back, and from the normal
   // height slides it away and closes (キャンセル). It follows the finger and springs back if let go early.
+  // While the finger is down the page layout never changes (the sheet grows over the stage, or slides), so the
+  // stage isn't resized and redrawn on every move; the layout changes once, on release.
   const sheetRef = useRef<HTMLDivElement>(null);
-  const dragStart = useRef<{ y: number, height: number } | undefined>(undefined);
+  const optionsRef = useRef<HTMLDivElement>(null);
+  const dragStart = useRef<{ y: number, height: number, fullHeight: number } | undefined>(undefined);
   const [dragY, setDragY] = useState(0);
   const [dragging, setDragging] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -79,12 +82,13 @@ export default function ShortestMoveSheet({
     else if (expanded && dragY > SWIPE_TO_RESIZE_PX) setExpanded(false);
     else if (!expanded && dragY > SWIPE_TO_CLOSE_PX) setClosing(true);
   };
-  // While dragging, the height follows the finger (except pulling down from the normal height, which moves it).
-  const resizing = dragging && (dragY < 0 || expanded);
-  const maxHeight = resizing
-    ? `min(${Math.max(0, dragStart.current!.height - dragY)}px, ${EXPANDED_MAX})`
-    : expanded ? EXPANDED_MAX : COLLAPSED_MAX;
-  const offset = closing ? "100%" : !resizing && dragY > 0 ? `${dragY}px` : "0px";
+  // Growing: as tall as the finger says, up to the content's full height, overlapping the stage (negative margin
+  // keeps the space it takes in the page the same). Everything else while dragging only slides the sheet.
+  const growing = dragging && dragY < 0 && !expanded;
+  const grownHeight = growing ? Math.min(dragStart.current!.height - dragY, dragStart.current!.fullHeight) : 0;
+  const maxHeight = growing ? `${grownHeight}px` : expanded ? EXPANDED_MAX : COLLAPSED_MAX;
+  const marginTop = growing ? dragStart.current!.height - grownHeight : 0;
+  const offset = closing ? "100%" : dragging && dragY > 0 ? `${dragY}px` : "0px";
 
   return <div
     ref={sheetRef}
@@ -92,8 +96,10 @@ export default function ShortestMoveSheet({
     aria-label="最短距離"
     style={{
       maxHeight,
+      marginTop,
       transform: `translateY(${offset})`,
-      transition: dragging ? "none" : `transform ${SLIDE_MS}ms ${SLIDE_EASING}, max-height ${SLIDE_MS}ms ${SLIDE_EASING}`,
+      // Only the slide animates: animating the height would resize the stage on every frame.
+      transition: dragging ? "none" : `transform ${SLIDE_MS}ms ${SLIDE_EASING}`,
     }}
     className="z-10 flex flex-col w-screen shrink-0 bg-surface rounded-t-2xl shadow-[0_-2px_16px_rgba(0,0,0,0.15)] motion-reduce:!transition-none">
     {/* Header and footer (result and buttons) stay put; only the options in between scroll on a short screen. */}
@@ -103,7 +109,13 @@ export default function ShortestMoveSheet({
         className="self-center w-full pt-5 pb-3 -mb-2 cursor-grab touch-none"
         onPointerDown={e => {
           if (closing) return;
-          dragStart.current = { y: e.clientY, height: sheetRef.current?.getBoundingClientRect().height ?? 0 };
+          const sheet = sheetRef.current, options = optionsRef.current;
+          const height = sheet?.getBoundingClientRect().height ?? 0;
+          // Everything showing, without scrolling, but leaving the top of the stage visible (as EXPANDED_MAX).
+          const fullHeight = Math.min(
+            height - (options?.clientHeight ?? 0) + (options?.scrollHeight ?? 0),
+            window.innerHeight - 8 * 16);
+          dragStart.current = { y: e.clientY, height, fullHeight: Math.max(height, fullHeight) };
           setDragging(true);
           e.currentTarget.setPointerCapture?.(e.pointerId);
         }}
@@ -138,7 +150,7 @@ export default function ShortestMoveSheet({
       </div>
 
     </div>
-    <div className="flex flex-col w-full max-w-lg min-h-0 gap-2 px-4 py-2 mx-auto overflow-y-auto">
+    <div ref={optionsRef} className="flex flex-col w-full max-w-lg min-h-0 gap-2 px-4 py-2 mx-auto overflow-y-auto">
 
       {
         colours.length > 0 &&
