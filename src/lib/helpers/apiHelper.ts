@@ -123,9 +123,12 @@ export const verifyInvite = async (
   onFailure: (status: number, message: string) => void,
 ): Promise<void> => {
   try {
-    const response = await fetch(`${getApiUrl("auth/verify-invite")}?team_id=${teamId}&setup=${setupToken}`, {
-      method: "GET",
+    // The token goes in the body, not the URL, so it stays out of request logs.
+    const response = await fetch(getApiUrl("auth/verify-invite"), {
+      method: "POST",
       credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ team_id: teamId, setup: setupToken }),
     });
     if (!response.ok) {
       const data = await response.json() as ErrorResponse;

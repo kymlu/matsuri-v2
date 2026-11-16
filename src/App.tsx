@@ -44,8 +44,16 @@ function App() {
 
   const { teamSlug } = useParams();
 
-  const [searchParams] = useSearchParams();
-  const setupToken = searchParams.get('setup');
+  const [searchParams, setSearchParams] = useSearchParams();
+  // Read the invite token once, then take it out of the address bar so it doesn't sit in browser history.
+  const [setupToken] = useState(() => searchParams.get('setup'));
+  useEffect(() => {
+    if (searchParams.has('setup')) {
+      const rest = new URLSearchParams(searchParams);
+      rest.delete('setup');
+      setSearchParams(rest, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   useEffect(() => {
     const href = teamSlug ? `/api/manifest/${teamSlug}` : "/manifest.json";
