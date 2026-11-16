@@ -1,5 +1,5 @@
 import { DrawerPreview as Drawer } from "@base-ui/react"
-import { ReactNode, TransitionEvent, useEffect, useState } from "react"
+import { ReactNode, useEffect, useRef, useState } from "react"
 
 type BottomDrawerProps = {
   children: ReactNode,
@@ -12,7 +12,7 @@ type BottomDrawerProps = {
   snapPoints?: Drawer.Root.SnapPoint[],
   defaultSnapPoint?: Drawer.Root.SnapPoint,
   popupClassName?: string,
-  // Pixels covered from the bottom of the screen, each time the drawer settles.
+  // Pixels covered from the bottom of the screen, each time the drawer settles (opened or snapped).
   onVisibleHeightChange?: (height: number) => void,
   label?: string,
   layerClassName?: string,
@@ -37,16 +37,19 @@ export default function BottomDrawer ({
     }
   }, [open, onClose]);
 
-  const onTransitionEnd = (e: TransitionEvent<HTMLDivElement>) => {
-    if (e.target !== e.currentTarget || e.propertyName !== "transform" || e.currentTarget.hasAttribute("data-swiping")) return;
-    onVisibleHeightChange?.(Math.round(window.innerHeight - e.currentTarget.getBoundingClientRect().top));
+  const popupRef = useRef<HTMLDivElement>(null);
+  const reportVisibleHeight = () => {
+    const popup = popupRef.current;
+    if (popup && !popup.hasAttribute("data-swiping")) {
+      onVisibleHeightChange?.(Math.round(window.innerHeight - popup.getBoundingClientRect().top));
+    }
   };
 
   return (
     <Drawer.Root
       open={open}
       onOpenChange={(open: boolean) => { setOpen(open); }}
-      onOpenChangeComplete={(open: boolean) => { if (!open) onClose?.(); }}
+      onOpenChangeComplete={(open: boolean) => { if (open) reportVisibleHeight(); else onClose?.(); }}
       defaultSnapPoint={defaultSnapPoint}
       snapPoints={snapPoints}
       onSnapPointChange={(snapPoint) => {
@@ -65,7 +68,9 @@ export default function BottomDrawer ({
       >
       <Drawer.Portal>
         <Drawer.Viewport className={`fixed bottom-0 flex flex-col w-full pointer-events-none ${layerClassName}`}>
-          <Drawer.Popup data-bottom-drawer aria-label={label} onTransitionEnd={onTransitionEnd} className={`pointer-events-auto w-full ${popupClassName} bg-surface rounded-t-2xl overscroll-contain transition-transform duration-[450ms] ease-[cubic-bezier(0.32,0.72,0,1)] shadow-[0_-2px_16px_rgba(0,0,0,0.15)] [transform:translateY(calc(var(--drawer-snap-point-offset)+var(--drawer-swipe-movement-y)))]
+          <Drawer.Popup ref={popupRef} data-bottom-drawer aria-label={label}
+            onTransitionEnd={(e) => { if (e.target === e.currentTarget && e.propertyName === "transform") reportVisibleHeight(); }}
+            className={`pointer-events-auto w-full ${popupClassName} bg-surface rounded-t-2xl overscroll-contain transition-transform duration-[450ms] ease-[cubic-bezier(0.32,0.72,0,1)] shadow-[0_-2px_16px_rgba(0,0,0,0.15)] [transform:translateY(calc(var(--drawer-snap-point-offset)+var(--drawer-swipe-movement-y)))]
             will-change-transform outline-none data-[swiping]:select-none data-[starting-style]:translate-y-[calc(100%-var(--bleed))] data-[ending-style]:translate-y-[calc(100%-var(--bleed))] data-[ending-style]:duration-[calc(var(--drawer-swipe-strength)*400ms)]`}>
             <div className="flex-shrink-0 pt-5 pb-3 touch-none">
               <div className="w-1/3 h-1 mx-auto rounded-full bg-primary cursor-grab"/>
