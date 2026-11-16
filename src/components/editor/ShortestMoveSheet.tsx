@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { Checkbox } from "@base-ui/react";
 import classNames from "classnames";
 import Button from "../basic/Button";
+import BottomDrawer from "../basic/BottomDrawer";
 import SelectBox from "../basic/SelectBox";
 import { colorPalette } from "../../lib/consts/colors";
 
@@ -33,7 +34,7 @@ type ShortestMoveSheetProps = {
   skippedStacked: boolean,
   onCancel: () => void,
   onApply: () => void,
-  // The sheet's height once it has settled (not while dragging), so the stage can fit what's above it.
+  // How much of the screen the sheet covers once it has settled, so the stage can fit what's above it.
   onHeightChange?: (height: number) => void,
 };
 
@@ -42,107 +43,30 @@ export const formatMetres = (m: number) => `${m >= 10 ? Math.round(m) : Math.rou
 // Long section names would push the figure off a phone screen.
 const shortName = (name: string) => name.length > 8 ? name.slice(0, 8) + "…" : name;
 
-const SWIPE_TO_CLOSE_PX = 60;
-const SWIPE_TO_RESIZE_PX = 40;
-// Same motion as BottomDrawer.
-const SLIDE_MS = 450;
-const SLIDE_EASING = "cubic-bezier(0.32,0.72,0,1)";
-// How long the height must stay still before it is reported (after a drag, the slide, or a change of content).
-const SETTLE_MS = 150;
-// Normal height, and the most it can grow to (as tall as its content, leaving the top of the stage visible).
-const COLLAPSED_MAX = "45svh";
-const EXPANDED_MAX = "calc(100svh - 8rem)";
-
-// 最短距離: floats over the bottom of the page while previewing, like view mode's drawer (no backdrop, so the
-// stage stays pannable and zoomable). The stage itself can't be edited until this closes.
+// 最短距離's preview, in the app's bottom drawer (the one view mode uses), so it looks and moves the same.
+// Two snap points: everything (as tall as its content, leaving the top of the stage visible), and a peek that
+// shows just the title with the result and buttons below, to see more of the stage. Swiping down from the peek,
+// or キャンセル, slides it away and cancels. No backdrop: the stage stays pannable and zoomable, but can't be
+// edited until this closes.
 export default function ShortestMoveSheet({
   previousSectionName, totalBefore, totalAfter, hasGain, noGainMessage, colours, excludedColours, onToggleColour, view, onChangeView,
   sameColour, onChangeSameColour, colourFollowsPerson, onChangeColourFollowsPerson, showCountsOption, countsFollowPerson, onChangeCountsFollowPerson,
   skippedStacked, onCancel, onApply, onHeightChange,
 }: ShortestMoveSheetProps) {
-  // Dragging the handle: up grows the sheet to its content's height; down shrinks it back, and from the normal
-  // height slides it away and closes (キャンセル). It follows the finger and springs back if let go early.
-  // The sheet floats over the page, so none of this changes the stage's size.
-  const sheetRef = useRef<HTMLDivElement>(null);
-  const optionsRef = useRef<HTMLDivElement>(null);
-  const dragStart = useRef<{ y: number, height: number, fullHeight: number } | undefined>(undefined);
-  const [dragY, setDragY] = useState(0);
-  const [dragging, setDragging] = useState(false);
-  const [expanded, setExpanded] = useState(false);
-  const [closing, setClosing] = useState(false);
-  useEffect(() => {
-    if (!closing) return;
-    const timer = setTimeout(onCancel, SLIDE_MS);
-    return () => clearTimeout(timer);
-  }, [closing, onCancel]);
-  const endDrag = (cancelled: boolean) => {
-    if (dragStart.current === undefined) return;
-    dragStart.current = undefined;
-    setDragging(false);
-    setDragY(0);
-    if (cancelled) return;
-    if (dragY < -SWIPE_TO_RESIZE_PX) setExpanded(true);
-    else if (expanded && dragY > SWIPE_TO_RESIZE_PX) setExpanded(false);
-    else if (!expanded && dragY > SWIPE_TO_CLOSE_PX) setClosing(true);
-  };
-  // Growing: as tall as the finger says, up to the content's full height. Pulling down only slides the sheet.
-  const growing = dragging && dragY < 0 && !expanded;
-  const maxHeight = growing
-    ? `${Math.min(dragStart.current!.height - dragY, dragStart.current!.fullHeight)}px`
-    : expanded ? EXPANDED_MAX : COLLAPSED_MAX;
-  const offset = closing ? "100%" : dragging && dragY > 0 ? `${dragY}px` : "0px";
+  // キャンセル slides the drawer away first; onCancel runs once it has gone.
+  const [open, setOpen] = useState(true);
 
-  // Report the height once it has settled, so the stage refits once rather than on every frame.
-  useEffect(() => {
-    const sheet = sheetRef.current;
-    if (!sheet || !onHeightChange || typeof ResizeObserver === "undefined") return;
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    const observer = new ResizeObserver(() => {
-      clearTimeout(timer);
-      timer = setTimeout(() => {
-        if (dragStart.current === undefined) onHeightChange(Math.round(sheet.getBoundingClientRect().height));
-      }, SETTLE_MS);
-    });
-    observer.observe(sheet);
-    return () => { observer.disconnect(); clearTimeout(timer); };
-  }, [onHeightChange]);
-
-  return <div
-    ref={sheetRef}
-    role="dialog"
-    aria-label="最短距離"
-    style={{
-      maxHeight,
-      transform: `translateY(${offset})`,
-      transition: dragging ? "none" : `transform ${SLIDE_MS}ms ${SLIDE_EASING}, max-height ${SLIDE_MS}ms ${SLIDE_EASING}`,
-    }}
-    className="fixed inset-x-0 bottom-0 z-20 flex flex-col bg-surface rounded-t-2xl shadow-[0_-2px_16px_rgba(0,0,0,0.15)] motion-reduce:!transition-none">
-    {/* Header and footer (result and buttons) stay put; only the options in between scroll on a short screen. */}
-    <div className="flex flex-col w-full max-w-lg gap-2 px-4 mx-auto shrink-0">
-      {/* Drag the handle up to see every option, or down to cancel. */}
-      <div
-        className="self-center w-full pt-5 pb-3 -mb-2 cursor-grab touch-none"
-        onPointerDown={e => {
-          if (closing) return;
-          const sheet = sheetRef.current, options = optionsRef.current;
-          const height = sheet?.getBoundingClientRect().height ?? 0;
-          // Everything showing, without scrolling, but leaving the top of the stage visible (as EXPANDED_MAX).
-          const fullHeight = Math.min(
-            height - (options?.clientHeight ?? 0) + (options?.scrollHeight ?? 0),
-            window.innerHeight - 8 * 16);
-          dragStart.current = { y: e.clientY, height, fullHeight: Math.max(height, fullHeight) };
-          setDragging(true);
-          e.currentTarget.setPointerCapture?.(e.pointerId);
-        }}
-        onPointerMove={e => {
-          if (dragStart.current !== undefined) setDragY(e.clientY - dragStart.current.y);
-        }}
-        onPointerUp={() => endDrag(false)}
-        onPointerCancel={() => endDrag(true)}>
-        <div className="w-[33.333vw] h-1 mx-auto rounded-full bg-primary"/>
-      </div>
-
-      <div className="flex items-center gap-3">
+  return <BottomDrawer
+    label="最短距離"
+    layerClassName="z-20"
+    open={open}
+    onClose={onCancel}
+    snapPoints={["75px", 1]}
+    defaultSnapPoint={1}
+    popupClassName="max-h-[calc(100svh-8rem)]"
+    onVisibleHeightChange={onHeightChange}
+    header={
+      <div className="flex items-center w-full max-w-lg gap-3 mx-auto mb-2">
         <h2 className="text-base font-bold">最短距離</h2>
         {
           hasGain &&
@@ -163,10 +87,31 @@ export default function ShortestMoveSheet({
           </div>
         }
       </div>
-
-    </div>
-    <div ref={optionsRef} className="flex flex-col w-full max-w-lg min-h-0 gap-2 px-4 py-2 mx-auto overflow-y-auto">
-
+    }
+    footer={
+      <div className="flex flex-col w-full max-w-lg gap-2 px-4 pt-3 mx-auto border-t border-line">
+      {/* The result sits with the buttons that act on it; no gain is shown like the app's other errors. */}
+      {
+        // Only worth showing when there is a saving; otherwise the error below says it all.
+        hasGain &&
+        <p className="flex flex-wrap items-baseline justify-center gap-2 text-sm">
+          <span className="text-muted">「{shortName(previousSectionName)}」からの移動（合計）</span>
+          <span className="line-through text-muted">{formatMetres(totalBefore)}</span>
+          <span aria-hidden>→</span>
+          <span className="text-xl font-bold">{formatMetres(totalAfter)}</span>
+        </p>
+      }
+      {skippedStacked && <p className="text-sm text-center text-muted">重なっている人は動かしません</p>}
+      {noGainMessage && <p className="font-bold text-center text-wrap text-primary">{noGainMessage}</p>}
+      <div className="grid w-full grid-flow-col gap-2 auto-cols-fr">
+        <Button full onClick={() => setOpen(false)}><span className="font-semibold text-nowrap">キャンセル</span></Button>
+        <Button full primary disabled={!hasGain} onClick={hasGain ? onApply : undefined}>
+          <span className="font-semibold text-nowrap">入れ替える</span>
+        </Button>
+      </div>
+      </div>
+    }>
+    <div className="flex flex-col w-full max-w-lg gap-2 py-1 mx-auto">
       {
         colours.length > 0 &&
         // Which colours take part. Off keeps that colour's people where they are.
@@ -215,28 +160,6 @@ export default function ShortestMoveSheet({
           <span>カウントも人と一緒に入れ替える</span>
         </label>
       }
-
     </div>
-    <div className="flex flex-col w-full max-w-lg gap-2 px-4 pt-3 pb-6 mx-auto border-t shrink-0 border-line">
-      {/* The result sits with the buttons that act on it; no gain is shown like the app's other errors. */}
-      {
-        // Only worth showing when there is a saving; otherwise the error below says it all.
-        hasGain &&
-        <p className="flex flex-wrap items-baseline justify-center gap-2 text-sm">
-          <span className="text-muted">「{shortName(previousSectionName)}」からの移動（合計）</span>
-          <span className="line-through text-muted">{formatMetres(totalBefore)}</span>
-          <span aria-hidden>→</span>
-          <span className="text-xl font-bold">{formatMetres(totalAfter)}</span>
-        </p>
-      }
-      {skippedStacked && <p className="text-sm text-center text-muted">重なっている人は動かしません</p>}
-      {noGainMessage && <p className="font-bold text-center text-wrap text-primary">{noGainMessage}</p>}
-      <div className="grid w-full grid-flow-col gap-2 auto-cols-fr">
-        <Button full onClick={onCancel}><span className="font-semibold text-nowrap">キャンセル</span></Button>
-        <Button full primary disabled={!hasGain} onClick={hasGain ? onApply : undefined}>
-          <span className="font-semibold text-nowrap">入れ替える</span>
-        </Button>
-      </div>
-    </div>
-  </div>;
+  </BottomDrawer>;
 }
