@@ -329,6 +329,7 @@ export default function ChoreoEditPage(props: {
     toggleEditEnabled: undefined, openNoteDialog: undefined, openFind: undefined, dimDancersToggle: undefined,
     fadedDancerIds: shortestMovePreview.fadedDancerIds,
     previewRoutes: shortestMovePreview.routes,
+    dimPropsAndObstacles: true, // so routes under props (e.g. a curtain) show through
   }, [shortestMovePreview]);
   const isPreviewingRef = useRef(false);
   isPreviewingRef.current = isPreviewingShortestMove;

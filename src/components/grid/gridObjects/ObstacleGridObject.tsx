@@ -19,6 +19,7 @@ type ObstacleGridObjectProps = {
   snapToGrid?: boolean;
   canSelect: boolean;
   animate: boolean,
+  dimmed?: boolean, // faint and untouchable (e.g. so routes show through in a preview)
   isZooming?: React.RefObject<boolean>;
 };
 
@@ -36,6 +37,7 @@ const ObstacleGridObject = memo(function ObstacleGridObject({
   snapToGrid,
   canSelect,
   animate,
+  dimmed,
   isZooming,
 }: ObstacleGridObjectProps) {
   const position = useMemo(() => {
@@ -129,6 +131,7 @@ const ObstacleGridObject = memo(function ObstacleGridObject({
     rotation={obstacle.rotation}
     animate={animate}
     isZooming={isZooming}
+    dimmed={dimmed}
   >
     <Rect
       x={METER_PX*-0.15}

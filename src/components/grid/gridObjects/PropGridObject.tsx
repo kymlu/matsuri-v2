@@ -25,6 +25,7 @@ type PropGridObjectProps = {
   animate: boolean,
   animationCache?: PathSvgCacheBySectionId;
   halfOpacity?: boolean,
+  dimmed?: boolean, // faint and untouchable, like dimmed dancers (e.g. so routes show through in a preview)
   isZooming?: React.RefObject<boolean>;
   // On the top prop of a stack: the ×N mark (red: the stack is selected in the editor, or a hidden prop
   // is selected in view mode), and a dashed outline when a hidden prop is selected but this top one isn't.
@@ -50,6 +51,7 @@ const PropGridObject = memo(function PropGridObject({
   animate,
   animationCache,
   halfOpacity,
+  dimmed,
   isZooming,
   stackMark,
   hiddenSelected,
@@ -98,6 +100,7 @@ const PropGridObject = memo(function PropGridObject({
         animate={animate}
         isZooming={isZooming}
         sectionId={sectionId}
+        dimmed={dimmed}
         halfOpacity={halfOpacity}
         onDragFollow={onDragFollow}
         animationCache={animationCache}
