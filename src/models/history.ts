@@ -1,12 +1,14 @@
 export type HistoryEntry<T> = {
   state: T;
-  currentSectionId?: string;
+  currentSectionId?: string; // where the edit that produced this state was made
 };
 
 export type EditHistory<T> = {
   undoStack: HistoryEntry<T>[];
   presentState: HistoryEntry<T>;
   redoStack: HistoryEntry<T>[];
+  // The section to show: where the latest change (or the one just undone or redone) was made.
+  shownSectionId?: string;
 };
 
 export type EditAction<T> =

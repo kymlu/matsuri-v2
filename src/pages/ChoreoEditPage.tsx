@@ -347,15 +347,20 @@ export default function ChoreoEditPage(props: {
     return () => clearTimeout(timer);
   }, [pasteNote]);
 
+  // Show the section of the latest change (for undo, the change being undone). If that section is gone
+  // (e.g. undoing adding it), show the one that was just before it.
+  const shownSections = useRef(history.presentState.state.sections);
   useEffect(() => {
-    const newSection = history.presentState.state.sections.find(s => strEquals(s.id, history.presentState.currentSectionId));
-
-    if (newSection === undefined) {
-      setCurrentSection(history.presentState.state.sections[0]);
-    } else {
-      setCurrentSection(newSection);
-    }
-  }, [history.presentState]);
+    const sections = history.presentState.state.sections;
+    const id = history.shownSectionId ?? history.presentState.currentSectionId;
+    const before = shownSections.current;
+    shownSections.current = sections;
+    const section = sections.find(s => strEquals(s.id, id));
+    if (section) return setCurrentSection(section);
+    const gone = before.findIndex(s => strEquals(s.id, id));
+    const neighbour = gone > 0 ? sections.find(s => strEquals(s.id, before[gone - 1].id)) : undefined;
+    setCurrentSection(neighbour ?? sections[0]);
+  }, [history.presentState, history.shownSectionId]);
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
