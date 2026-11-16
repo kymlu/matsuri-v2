@@ -1,5 +1,5 @@
 import { Choreo } from "../../models/choreo";
-import { arrangeRepresentatives, linkedStack, moveUnitsTo, swapUnits, swapUnitPositions, copyStacks, countSelectedUnits, prepareStackPaste, rearrangeWithStacks, restoreCopiedStacks, countUnits, expandSelectionToStacks, findDropTarget, moveStacksTogether, stackNotes, isHiddenInStack, normalizeStacks, reorderStack, selectedWholeStack, stackAbove, stackBelow, stackObjects, unstackObjects } from "./stackHelper";
+import { arrangeRepresentatives, linkedStack, moveChoices, moveUnitsTo, swapUnits, swapUnitPositions, copyStacks, countSelectedUnits, prepareStackPaste, rearrangeWithStacks, restoreCopiedStacks, countUnits, expandSelectionToStacks, findDropTarget, moveStacksTogether, stackNotes, isHiddenInStack, normalizeStacks, reorderStack, selectedWholeStack, stackAbove, stackBelow, stackObjects, unstackObjects } from "./stackHelper";
 import { alignHorizontalPositions, pastePositions, removeObjects } from "../editor/commands/objectCommands";
 import { addSection } from "../editor/commands/sectionCommands";
 
@@ -349,6 +349,25 @@ describe("moveUnitsTo", () => {
     expect(f(s).dancerStacks).toEqual([["b", "a"]]);
     // c's spot goes to b (bottom); the stack's bottom spot goes to c; a (top) has no one to trade with.
     expect(timings(s)).toEqual([["a"], ["c", "b"]]);
+  });
+
+  it("keeps colours on their spots when asked", () => {
+    const s0 = setUp();
+    const coloured = { ...s0, sections: s0.sections.map((sec, i) => i > 0 ? sec : { ...sec, formation: { ...sec.formation,
+      dancerPositions: { ...sec.formation.dancerPositions, b: { ...sec.formation.dancerPositions.b, color: "blue" } } } }) } as Choreo;
+    const byPerson = moveUnitsTo(coloured, "s1", swap(["a"], ["b"]), "spot");
+    expect([pos(byPerson, "a").color, pos(byPerson, "b").color]).toEqual([pos(coloured, "a").color, "blue"]);
+    const bySpot = moveUnitsTo(coloured, "s1", swap(["a"], ["b"]), "spot", "spot");
+    expect([pos(bySpot, "a").color, pos(bySpot, "b").color]).toEqual(["blue", pos(coloured, "a").color]);
+  });
+
+  it("tells whether colour or counts would differ", () => {
+    const s0 = setUp();
+    expect(moveChoices(s0, "s1", swap(["a"], ["b"]))).toEqual({ colour: false, counts: true }); // 1 and 3
+    expect(moveChoices(s0, "s1", swap(["b"], ["c"]))).toEqual({ colour: false, counts: false }); // both on 3
+    const coloured = { ...s0, sections: s0.sections.map((sec, i) => i > 0 ? sec : { ...sec, formation: { ...sec.formation,
+      dancerPositions: { ...sec.formation.dancerPositions, b: { ...sec.formation.dancerPositions.b, color: "blue" } } } }) } as Choreo;
+    expect(moveChoices(coloured, "s1", swap(["a"], ["b"])).colour).toBe(true);
   });
 
   it("does nothing when nobody changes spot", () => {

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 import { Dialog } from "@base-ui/react";
 import CustomDialog from "../basic/CustomDialog";
 import classNames from "classnames";
@@ -144,6 +144,42 @@ export function UnstackDialog({ members, onSubmit, kind = "dancers" }: { members
       }
     </ul>
     {note && <p className="px-3 py-2 mt-3 text-sm rounded-md bg-subtle text-muted">{note}</p>}
+  </BaseEditDialog>;
+}
+
+export type SwapChoice = { colour: boolean, counts: boolean };
+
+// 位置交換, when the two differ in colour or counts: what trades places along with the names. Ticked goes with
+// the person; unticked stays on the spot. Only the things that differ are listed.
+export function SwapDialog({ a, b, differs, initial, onSubmit }: {
+  a: StackMember[], b: StackMember[],
+  differs: SwapChoice,
+  initial: SwapChoice,
+  onSubmit: (choice: SwapChoice) => void,
+}) {
+  const [choice, setChoice] = useState(initial);
+  const names = (unit: StackMember[]) => unit.map(m => m.label).join("・");
+  const colours = (unit: StackMember[]) => <span className="flex gap-0.5">{unit.map(m => <Dot key={m.id} color={m.color}/>)}</span>;
+  const row = (label: ReactNode, on: boolean, toggle?: () => void) =>
+    <li>
+      <button type="button" role="checkbox" aria-checked={on} aria-disabled={!toggle} onClick={toggle}
+        className={classNames("flex items-center w-full gap-2 px-3 text-left border rounded-md min-h-11",
+          !toggle ? "border-line opacity-60 cursor-default" : on ? "border-primary bg-primary/5" : "border-line")}>
+        <SelectBox state={on ? "all" : "none"}/>
+        {label}
+      </button>
+    </li>;
+  return <BaseEditDialog title="位置交換" actionButtonText="入れ替える" noDetachedTrigger fullWidth
+    onSubmit={() => onSubmit(choice)}>
+    <p className="mb-2"><span className="font-semibold">{names(a)}</span>と<span className="font-semibold">{names(b)}</span>で入れ替えるもの</p>
+    <ul className="p-px space-y-1">
+      {row(<span className="font-semibold">名前</span>, true)}
+      {differs.colour && row(<><span className="font-semibold">色</span><span className="flex items-center gap-1 ml-auto">{colours(a)}<Icon src="swapHoriz" size="2xs" colour="grey"/>{colours(b)}</span></>,
+        choice.colour, () => setChoice({ ...choice, colour: !choice.colour }))}
+      {differs.counts && row(<span className="font-semibold">カウント</span>,
+        choice.counts, () => setChoice({ ...choice, counts: !choice.counts }))}
+    </ul>
+    <p className="mt-3 text-sm text-muted">チェックを外したものは、その立ち位置に残ります。</p>
   </BaseEditDialog>;
 }
 

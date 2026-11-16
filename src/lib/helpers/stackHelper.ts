@@ -511,8 +511,8 @@ export function swapUnits(formation: Formation, kind: StackKind, ids: string[]):
 
 // One unit (a person or a whole stack, bottom first) moving onto the spot of the unit standing there now.
 export type UnitMove = { unit: Stack, target: Stack };
-// Who keeps this section's counts when people change spot: whoever ends up on the spot, or the person.
-export type CountsFollow = "spot" | "person";
+// What a section's counts or colour stay with when people change spot: the spot (whoever ends up there), or the person.
+export type StaysWith = "spot" | "person";
 
 // Moves people onto other people's spots in one section. The targets must be the moving units themselves
 // (each unit moves onto another's spot and nobody is left behind), e.g. a swap of two. Each unit moves by
@@ -520,9 +520,11 @@ export type CountsFollow = "spot" | "person";
 // moving onto a single person's spot takes their front/back order; stacks keep their own.
 // Counts: with "spot", whoever now stands on a spot gets the counts of whoever stood there (stacks level
 // by level, bottom first); with "person", counts are untouched.
+// Colour: people keep their own by default; with "spot", whoever now stands on a spot takes its colour, so the
+// colours on stage stay where they were.
 // Custom paths of everyone who moved are reset, into this section and into the next one, since they were
 // drawn for the old route.
-export function moveUnitsTo(state: Choreo, sectionId: string, moves: UnitMove[], countsFollow: CountsFollow): Choreo {
+export function moveUnitsTo(state: Choreo, sectionId: string, moves: UnitMove[], countsStayWith: StaysWith, colourStaysWith: StaysWith = "person"): Choreo {
   const moving = moves.filter(m => m.unit[0] !== m.target[0]);
   if (moving.length === 0) return state;
   const index = state.sections.findIndex(s => s.id === sectionId);
@@ -537,8 +539,9 @@ export function moveUnitsTo(state: Choreo, sectionId: string, moves: UnitMove[],
     const from = old[unit[0]], to = old[target[0]];
     const dx = to.x - from.x, dy = to.y - from.y;
     const single = unit.length === 1 && target.length === 1;
-    unit.forEach(id => {
-      next[id] = { ...old[id], x: old[id].x + dx, y: old[id].y + dy, ...(single ? { z: to.z } : {}) };
+    unit.forEach((id, level) => {
+      const spotColour = colourStaysWith === "spot" ? old[target[level]]?.color : undefined;
+      next[id] = { ...old[id], x: old[id].x + dx, y: old[id].y + dy, ...(single ? { z: to.z } : {}), ...(spotColour ? { color: spotColour } : {}) };
     });
     target.forEach((id, level) => { if (level < unit.length) occupant.set(id, unit[level]); });
   });
@@ -547,7 +550,7 @@ export function moveUnitsTo(state: Choreo, sectionId: string, moves: UnitMove[],
     if (!movements || !Object.keys(movements).some(id => moved.has(id))) return movements;
     return Object.fromEntries(Object.entries(movements).filter(([id]) => !moved.has(id)));
   };
-  const remapCounts = (actions: Formation["dancerActions"]) => countsFollow === "person" ? actions : actions.map(a => ({
+  const remapCounts = (actions: Formation["dancerActions"]) => countsStayWith === "person" ? actions : actions.map(a => ({
     ...a,
     timings: a.timings.map(t => ({ ...t, dancerIds: Array.from(new Set(t.dancerIds.map(id => occupant.get(id) ?? id))) })),
   }));
@@ -567,6 +570,18 @@ export function moveUnitsTo(state: Choreo, sectionId: string, moves: UnitMove[],
       return s;
     }),
   });
+}
+
+// Whether a move would come out differently with colour or counts staying on the spot instead of with the
+// person, i.e. whether there's anything to ask.
+export function moveChoices(state: Choreo, sectionId: string, moves: UnitMove[]): { colour: boolean, counts: boolean } {
+  const formation = (s: Choreo) => s.sections.find(x => x.id === sectionId)?.formation;
+  const bySpot = formation(moveUnitsTo(state, sectionId, moves, "spot", "spot"));
+  const byPerson = formation(moveUnitsTo(state, sectionId, moves, "person", "person"));
+  if (!bySpot || !byPerson) return { colour: false, counts: false };
+  const colour = Object.keys(bySpot.dancerPositions).some(id => bySpot.dancerPositions[id].color !== byPerson.dancerPositions[id]?.color);
+  const ids = (f: Formation) => f.dancerActions.map(a => a.timings.map(t => [...t.dancerIds].sort().join(",")).join("|")).join("/");
+  return { colour, counts: ids(bySpot) !== ids(byPerson) };
 }
 
 // Swaps two units: each moves by the distance between them (bottom member to bottom member, prop centres
