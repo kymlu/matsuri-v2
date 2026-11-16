@@ -52,15 +52,12 @@ describe("ShortestMoveSheet", () => {
     expect(onToggleColour).toHaveBeenCalledWith("#00e");
   });
 
-  it("locks 色も人と一緒に入れ替える on while swaps stay within colours", () => {
+  it("offers 色も人と一緒に入れ替える only when colours can mix", () => {
     const { unmount } = render(<ShortestMoveSheet {...base}/>);
-    const box = () => screen.getByText("色も人と一緒に入れ替える").closest("label")!.querySelector("[role=checkbox]")!;
-    const locked = box();
-    expect(locked).toHaveAttribute("aria-checked", "true");
-    expect(locked).toHaveAttribute("aria-disabled", "true");
+    expect(screen.queryByText("色も人と一緒に入れ替える")).toBeNull();
     unmount();
     render(<ShortestMoveSheet {...base} sameColour={false}/>);
-    expect(box()).not.toHaveAttribute("aria-disabled", "true");
+    expect(screen.getByText("色も人と一緒に入れ替える")).toBeInTheDocument();
   });
 
   it("hides the colour row with nothing to choose", () => {

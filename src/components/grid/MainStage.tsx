@@ -112,8 +112,14 @@ function MainStage({
   // Konva reads colours from the (non-reactive) colorPalette, so remount the
   // whole Stage subtree when the theme flips to force every layer to redraw.
   const [theme] = useTheme();
-  const [dancerPositions, setDancerPositions] = useState<DancerPosition[]>([]);
-  const [propPositions, setPropPositions] = useState<PropPosition[]>([]);
+  // Computed in the same render as the section they come from, so the stage never draws one section's
+  // positions with the next one's settings (e.g. animating when it was told to jump).
+  const dancerPositions = useMemo<DancerPosition[]>(
+    () => currentSection.formation.dancerPositions ? sortDancers(Object.values(currentSection.formation.dancerPositions)) : [],
+    [currentSection.formation.dancerPositions]);
+  const propPositions = useMemo<PropPosition[]>(
+    () => currentSection.formation.propPositions ? sortProps(Object.values(currentSection.formation.propPositions)) : [],
+    [currentSection.formation.propPositions]);
   const [stageGeometry, setStageGeometry] = useState<StageGeometry>();
   const [isShowingVerticalRuler, setIsShowingVerticalRuler] = useState<boolean>(false);
   const [isShowingHorizontalRuler, setIsShowingHorizontalRuler] = useState<boolean>(false);
@@ -138,13 +144,6 @@ function MainStage({
     setStageGeometry(newGeometry);
   }, [currentChoreo]);
   
-  useEffect(() => {
-    setDancerPositions(currentSection.formation.dancerPositions ? sortDancers(Object.values(currentSection.formation.dancerPositions)) : []);
-  }, [currentSection.formation.dancerPositions]);
-
-  useEffect(() => {
-    setPropPositions(currentSection.formation.propPositions ? sortProps(Object.values(currentSection.formation.propPositions)) : []);
-  }, [currentSection.formation.propPositions]);
   
   const containerRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });

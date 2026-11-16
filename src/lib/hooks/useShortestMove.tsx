@@ -38,9 +38,6 @@ export type ShortestMovePreview = {
   routes: { routes: PreviewRoute[], kind: ShortestMoveView },
 };
 
-// How long the stage keeps jumping after キャンセル, until it has caught up with the real positions.
-const SNAP_BACK_MS = 300;
-
 // Routes shorter than this aren't drawn (the person is practically in the same place).
 const MIN_ROUTE = 0.05;
 
@@ -77,17 +74,15 @@ export function useShortestMove({ state, section, prevSection, selectedIds, comm
     setSession({ base: state, sectionId: section.id, prev: prevSection, formation: section.formation, selectedIds, sameColour: same, anyColour: any });
   }, [prevSection, section, selectedIds, state]);
 
-  // Cancelling puts people straight back, without the slide. The stage takes its positions a render or two after the
-  // preview closes, so it keeps jumping instead of animating for a moment longer.
+  // Cancelling puts people straight back, without the slide: the render that closes the preview still tells the
+  // stage to jump, and the stage draws the real positions in that same render. Animation is back on after it.
   const [snapBack, setSnapBack] = useState(false);
   const close = useCallback(() => {
     setSnapBack(true);
     setSession(undefined);
   }, []);
   useEffect(() => {
-    if (!snapBack) return;
-    const timer = setTimeout(() => setSnapBack(false), SNAP_BACK_MS);
-    return () => clearTimeout(timer);
+    if (snapBack) setSnapBack(false);
   }, [snapBack]);
 
   // The plan would be stale if the choreo or the section changed underneath it (e.g. a sync).
@@ -166,7 +161,7 @@ export function useShortestMove({ state, section, prevSection, selectedIds, comm
           : sameColour ? "同じ色どうしでは、これ以上短くなりません"
           : "これ以上短くなりません"}
         colours={colours}
-        colourFollowsPerson={sameColour || colourFollowsPerson}
+        colourFollowsPerson={colourFollowsPerson}
         onChangeColourFollowsPerson={setColourFollowsPerson}
         excludedColours={excludedColours}
         onToggleColour={toggleColour}
@@ -183,7 +178,7 @@ export function useShortestMove({ state, section, prevSection, selectedIds, comm
     : undefined;
 
   const shortestMoveDialog = <Dialog.Root open={noGainOpen} onOpenChange={setNoGainOpen}>
-    <CustomDialog title="入れ替えても移動は短くなりません">
+    <CustomDialog title="これ以上短くなりません">
       <Dialog.Close className="w-full mt-2">
         <Button asDiv full><span className="font-semibold">閉じる</span></Button>
       </Dialog.Close>

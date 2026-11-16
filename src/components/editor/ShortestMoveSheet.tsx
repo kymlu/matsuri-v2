@@ -23,7 +23,7 @@ type ShortestMoveSheetProps = {
   onChangeView: (view: ShortestMoveView) => void,
   sameColour: boolean,
   onChangeSameColour: (sameColour: boolean) => void,
-  // People keep their colour when they swap (otherwise the colour stays with the spot). Locked on with sameColour.
+  // People keep their colour when they swap (otherwise the colour stays with the spot). Only shown when colours can mix.
   colourFollowsPerson: boolean,
   onChangeColourFollowsPerson: (follow: boolean) => void,
   // Only shown when someone who would change spot has counts in this section.
@@ -169,12 +169,16 @@ export default function ShortestMoveSheet({
         </Checkbox.Root>
         <span>同じ色どうしで入れ替える</span>
       </label>
-      <label className={classNames("flex items-center gap-2 text-sm min-h-9", { "opacity-50": sameColour })}>
-        <Checkbox.Root checked={colourFollowsPerson} disabled={sameColour} onCheckedChange={onChangeColourFollowsPerson} className="shrink-0">
-          <SelectBox state={colourFollowsPerson ? "all" : "none"}/>
-        </Checkbox.Root>
-        <span>色も人と一緒に入れ替える</span>
-      </label>
+      {
+        // Like the counts option below: only shown when it can make a difference.
+        !sameColour &&
+        <label className="flex items-center gap-2 text-sm min-h-9">
+          <Checkbox.Root checked={colourFollowsPerson} onCheckedChange={onChangeColourFollowsPerson} className="shrink-0">
+            <SelectBox state={colourFollowsPerson ? "all" : "none"}/>
+          </Checkbox.Root>
+          <span>色も人と一緒に入れ替える</span>
+        </label>
+      }
       {
         showCountsOption &&
         <label className="flex items-center gap-2 text-sm min-h-9">

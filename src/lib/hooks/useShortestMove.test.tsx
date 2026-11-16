@@ -125,7 +125,7 @@ describe("useShortestMove", () => {
     act(() => result.current.startShortestMove());
     expect(result.current.isPreviewingShortestMove).toBe(false);
     render(result.current.shortestMoveDialog);
-    expect(screen.getByText("入れ替えても移動は短くなりません")).toBeInTheDocument();
+    expect(screen.getByText("これ以上短くなりません")).toBeInTheDocument();
   });
 
   it("closes if the choreo changes underneath it", () => {
