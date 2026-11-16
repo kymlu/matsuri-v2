@@ -1,15 +1,17 @@
 import { memo } from "react";
-import { Arrow, Circle, Layer } from "react-konva";
+import { Arrow, Circle, Group, Layer, Path } from "react-konva";
 import { StageGeometry } from "../../../models/choreo";
 import { Coordinates } from "../../../models/base";
-import { stageMetersToPx } from "../../../lib/helpers/editorCalculationHelper";
+import { getPathLineSvgCached, movementTension, stageMetersToPx } from "../../../lib/helpers/editorCalculationHelper";
 import { METER_PX } from "../../../lib/consts/consts";
 import { colorPalette } from "../../../lib/consts/colors";
+import { Movement } from "../../../models/choreoSection";
 
-// changed: this person's spot is different in the proposal.
-export type PreviewRoute = { id: string, from: Coordinates, to: Coordinates, color: string, changed: boolean };
+// changed: this person's spot is different in the proposal. path: their custom path, if they have one in the
+// arrangement shown (people who change spot have theirs reset, so walk straight).
+export type PreviewRoute = { id: string, from: Coordinates, to: Coordinates, color: string, changed: boolean, path?: Movement };
 
-// Straight-line routes from the previous section while previewing a change (最短距離):
+// Routes from the previous section while previewing a change (最短距離), drawn as they will be walked:
 // a faint dashed circle where each person stood before, and an arrow to where they stand now.
 // People whose spot changes: red in "now" (what is there today), green in "after" (the proposal). Everyone else's
 // route is grey, thinner and lighter: context, not a change. Nothing here can be touched.
@@ -30,16 +32,28 @@ const PreviewRoutesLayer = memo(function PreviewRoutesLayer({ geometry, routes, 
         stroke={r.color} strokeWidth={1.5} opacity={0.6} dash={[3, 3]} perfectDrawEnabled={false}/>;
     })}
     {routes.map(r => {
-      const from = stageMetersToPx(r.from, geometry, METER_PX);
-      const to = stageMetersToPx(r.to, geometry, METER_PX);
-      // Stop at the edge of the person, so the arrowhead isn't hidden under them.
-      const length = Math.hypot(to.x - from.x, to.y - from.y);
-      const cut = Math.min(PERSON_RADIUS, length / 2) / (length || 1);
-      const end = { x: to.x - (to.x - from.x) * cut, y: to.y - (to.y - from.y) * cut };
-      return <Arrow key={r.id} points={[from.x, from.y, end.x, end.y]}
-        stroke={r.changed ? ROUTE_COLOURS[kind] : colorPalette.grey} fill={r.changed ? ROUTE_COLOURS[kind] : colorPalette.grey}
-        strokeWidth={r.changed ? 2 : 1.5} pointerLength={r.changed ? 6 : 5} pointerWidth={r.changed ? 6 : 5}
-        opacity={r.changed ? 0.85 : 0.5} perfectDrawEnabled={false}/>;
+      const colour = r.changed ? ROUTE_COLOURS[kind] : colorPalette.grey;
+      const style = {
+        stroke: colour, fill: colour, strokeWidth: r.changed ? 2 : 1.5, opacity: r.changed ? 0.85 : 0.5,
+        pointerLength: r.changed ? 6 : 5, pointerWidth: r.changed ? 6 : 5, perfectDrawEnabled: false,
+      };
+      const points = [r.from, ...(r.path?.points ?? []), r.to].map(p => stageMetersToPx(p, geometry, METER_PX));
+      const to = points[points.length - 1], before = points[points.length - 2];
+      // The arrowhead stops at the edge of the person, so it isn't hidden under them. It points the way the
+      // route arrives: from the last bend (or the start) to the person.
+      const length = Math.hypot(to.x - before.x, to.y - before.y) || 1;
+      const cut = Math.min(PERSON_RADIUS, length / 2) / length;
+      const tip = { x: to.x - (to.x - before.x) * cut, y: to.y - (to.y - before.y) * cut };
+      if (points.length === 2) {
+        return <Arrow key={r.id} points={[before.x, before.y, tip.x, tip.y]} {...style}/>;
+      }
+      // A custom path: drawn like the stage's own paths, with the arrowhead on its last stretch.
+      const back = Math.min(1, 6 / length);
+      return <Group key={r.id}>
+        <Path data={getPathLineSvgCached(points.flatMap(p => [p.x, p.y]), movementTension(r.path))}
+          stroke={colour} strokeWidth={style.strokeWidth} opacity={style.opacity} perfectDrawEnabled={false}/>
+        <Arrow points={[tip.x - (to.x - before.x) * back, tip.y - (to.y - before.y) * back, tip.x, tip.y]} {...style}/>
+      </Group>;
     })}
   </Layer>;
 });

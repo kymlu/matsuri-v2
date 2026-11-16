@@ -42,6 +42,18 @@ describe("planShortestMoves", () => {
     expect(planShortestMoves(same, crossed, none, { sameColour: true }).moves).toEqual([]);
   });
 
+  it("measures staying put along the person's own path, curves included", () => {
+    // Already the shortest in straight lines, but a has drawn a long detour to their spot.
+    const straight = formation([dp("a", 0, 5), dp("b", 10, 5)], {
+      dancerMovements: { a: { points: [{ x: 0, y: 30 }], tension: "straight" } },
+    });
+    const plan = planShortestMoves(prev, straight, none, { sameColour: true });
+    expect(plan.totalBefore).toBeCloseTo(30 + 25 + 5); // a: 0,0 → 0,30 → 0,5; b: straight 5
+    // Swapping resets a's path, so both walk straight: 2 × √125 ≈ 22.4 m.
+    expect(plan.moves).toHaveLength(2);
+    expect(plan.totalAfter).toBeCloseTo(2 * Math.hypot(10, 5));
+  });
+
   it("only swaps within a colour unless told otherwise", () => {
     const mixed = formation([dp("a", 10, 5, "red"), dp("b", 0, 5, "blue")]);
     expect(planShortestMoves(prev, mixed, none, { sameColour: true }).moves).toEqual([]);

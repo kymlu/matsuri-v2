@@ -1,10 +1,13 @@
 import { Formation } from "../../models/choreoSection";
 import { StageEntities } from "../../models/history";
 import { assign } from "./assignment";
+import { getPathLength, movementTension } from "./editorCalculationHelper";
 import { getStacks, UnitMove } from "./stackHelper";
 
-// 最短距離: among the selected people, swap who stands on which spot so the total straight-line distance
-// from the previous section is as short as possible. Spots never move; stacked people never move.
+// 最短距離: among the selected people, swap who stands on which spot so the total distance from the previous
+// section is as short as possible. Spots never move; stacked people never move.
+// Distances follow what will actually be walked: someone who stays keeps their path (curves included);
+// someone who changes spot has their path reset, so walks straight.
 
 // Savings smaller than this (metres, in total) are not worth changing anyone's spot for.
 export const MIN_SAVING = 0.5;
@@ -56,7 +59,9 @@ export function planShortestMoves(
   const considered = excludeColours?.size ? all.filter(id => !excludeColours.has(here[id].color)) : all;
   const distance = (id: string, spotOf: string) => {
     const from = prev!.dancerPositions[id], to = here[spotOf];
-    return Math.hypot(to.x - from.x, to.y - from.y);
+    const path = spotOf === id ? formation.dancerMovements?.[id] : undefined;
+    if (!path?.points.length) return Math.hypot(to.x - from.x, to.y - from.y);
+    return getPathLength([from, ...path.points, to].flatMap(p => [p.x, p.y]), movementTension(path));
   };
 
   const groups = new Map<string, string[]>();

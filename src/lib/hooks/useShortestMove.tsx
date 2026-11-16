@@ -140,7 +140,7 @@ export function useShortestMove({ state, section, prevSection, selectedIds, comm
     const routes = plan.considered.flatMap(id => {
       const from = prevSection.formation.dancerPositions[id], to = here[id];
       if (!from || !to || Math.hypot(to.x - from.x, to.y - from.y) < MIN_ROUTE) return [];
-      return [{ id, from, to, color: to.color, changed: changed.has(id) }];
+      return [{ id, from, to, color: to.color, changed: changed.has(id), path: shown.formation.dancerMovements?.[id] }];
     });
     return {
       choreo,

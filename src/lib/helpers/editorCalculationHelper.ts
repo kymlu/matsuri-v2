@@ -104,7 +104,7 @@ const createPropMovementCache = (prop: Prop, stageGeometry: StageGeometry, previ
   } as MovementCache;
 }
 
-function getPathLineSvgCached(points: number[], tension = 0.5, closed = false): string {
+export function getPathLineSvgCached(points: number[], tension = 0.5, closed = false): string {
   const key = `${points.join(",")}|${tension}|${closed}`;
   return getCached(pathLineSvgCache, key, () => getPathLineSvg(points, tension, closed));
 }
@@ -162,6 +162,32 @@ function getPathLineSvg(points: number[], tension = 0.5, closed = false) {
 }
 
 type PdfPathOp = { op: "m" | "l" | "c" | "h", c: number[] };
+
+// The tension a movement is drawn with (as in the stage and the PDF).
+export const movementTension = (movement?: { tension: string }) => movement?.tension === "straight" ? 0 : 0.5;
+
+// Length of a path through these points (flat [x, y, ...], any unit), drawn the same way as on stage:
+// each curve is measured in small straight steps, which is well within a centimetre for stage paths.
+export function getPathLength(points: number[], tension = 0.5): number {
+  const STEPS = 16;
+  let length = 0, x = points[0], y = points[1];
+  getPathLineOps(points, tension).forEach(({ op, c }) => {
+    if (op === "l") {
+      length += Math.hypot(c[0] - x, c[1] - y);
+      [x, y] = c;
+    } else if (op === "c") {
+      const x0 = x, y0 = y; // the curve's start, fixed while stepping along it
+      for (let i = 1; i <= STEPS; i++) {
+        const t = i / STEPS, u = 1 - t;
+        const nx = u * u * u * x0 + 3 * u * u * t * c[0] + 3 * u * t * t * c[2] + t * t * t * c[4];
+        const ny = u * u * u * y0 + 3 * u * u * t * c[1] + 3 * u * t * t * c[3] + t * t * t * c[5];
+        length += Math.hypot(nx - x, ny - y);
+        x = nx; y = ny;
+      }
+    }
+  });
+  return length;
+}
 
 // For jspdf
 export function getPathLineOps(points: number[], tension = 0.5, closed = false): PdfPathOp[] {
