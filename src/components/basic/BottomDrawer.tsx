@@ -5,34 +5,83 @@ type BottomDrawerProps = {
   children: ReactNode,
   header: ReactNode,
   footer: ReactNode,
+  // The active snap point as a fraction (0 at the smallest), as view mode's stage expects.
   onChangeHeight?: (height: number) => void,
+  // Everything below is optional; without it the drawer behaves as view mode's always has.
+  // A drawer that can be closed: swiping down past the smallest snap point (or open turning false) slides it
+  // away, then onClose runs. Without onClose the drawer always stays open.
+  open?: boolean,
+  onClose?: () => void,
+  snapPoints?: Drawer.Root.SnapPoint[],
+  defaultSnapPoint?: Drawer.Root.SnapPoint,
+  // The popup's height (Tailwind classes). Default: three quarters of the screen.
+  popupClassName?: string,
+  // How much of the screen the drawer covers from the bottom, in pixels, once it has settled after opening or
+  // snapping (e.g. so a stage can fit what's above it).
+  onVisibleHeightChange?: (height: number) => void,
+  label?: string,
+  // Stacking (e.g. "z-20") when the drawer floats over things that have their own (the editor's toolbar).
+  layerClassName?: string,
 }
 
+const DEFAULT_SNAP_POINTS: Drawer.Root.SnapPoint[] =
+  ["75px", 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1];
+// Matches the popup's slide (duration-[450ms]) so the visible height is read once it has settled.
+const SETTLE_MS = 500;
+
 export default function BottomDrawer ({
-  children, header, footer, onChangeHeight
+  children, header, footer, onChangeHeight,
+  open: openProp, onClose, snapPoints = DEFAULT_SNAP_POINTS, defaultSnapPoint = 0.2,
+  popupClassName = "h-[75svh]", onVisibleHeightChange, label, layerClassName = "",
 }: BottomDrawerProps) {
+  const closable = onClose !== undefined;
   const [open, setOpen] = useState(true);
-  
+  const viewportRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
-    if (!open) {
+    // View mode's drawer can't be closed: swiping it away just brings it back.
+    if (!open && !closable) {
       setOpen(true);
     }
-  }, [open]);
+  }, [open, closable]);
+
+  useEffect(() => {
+    if (closable && openProp === false) setOpen(false);
+  }, [closable, openProp]);
+
+  // Report how much of the screen the drawer covers once it has settled.
+  const reportTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const reportVisibleHeight = () => {
+    if (!onVisibleHeightChange) return;
+    clearTimeout(reportTimer.current);
+    reportTimer.current = setTimeout(() => {
+      const popup = viewportRef.current?.querySelector("[data-bottom-drawer]");
+      if (popup) onVisibleHeightChange(Math.round(window.innerHeight - popup.getBoundingClientRect().top));
+    }, SETTLE_MS);
+  };
+  useEffect(() => {
+    reportVisibleHeight();
+    return () => clearTimeout(reportTimer.current);
+  // Once, after opening; snapping reports below.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Drawer.Root
       open={open}
       onOpenChange={(open: boolean) => { setOpen(open); }}
-      defaultSnapPoint={0.2}
-      snapPoints={["75px", 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1]}
+      onOpenChangeComplete={(open: boolean) => { if (!open) onClose?.(); }}
+      defaultSnapPoint={defaultSnapPoint}
+      snapPoints={snapPoints}
       onSnapPointChange={(snapPoint) => {
         if (snapPoint) {
-          if (snapPoint === "75px") {
+          if (snapPoint === snapPoints[0]) {
             onChangeHeight?.(0)
           } else {
             onChangeHeight?.(parseFloat(snapPoint?.toString()));
           }
         }
+        reportVisibleHeight();
     }}
       swipeDirection="down"
       modal={false}
@@ -40,9 +89,9 @@ export default function BottomDrawer ({
       snapToSequentialPoints
       >
       <Drawer.Portal>
-        <Drawer.Viewport className="fixed bottom-0 flex flex-col w-full pointer-events-none">
-          <Drawer.Popup data-bottom-drawer className="pointer-events-auto w-full h-[75svh] bg-surface rounded-t-2xl overscroll-contain transition-transform duration-[450ms] ease-[cubic-bezier(0.32,0.72,0,1)] shadow-[0_-2px_16px_rgba(0,0,0,0.15)] [transform:translateY(calc(var(--drawer-snap-point-offset)+var(--drawer-swipe-movement-y)))]
-            will-change-transform outline-none data-[data-swiping]:select-none data-[starting-style]:translate-y-[calc(100%-var(--bleed))] data-[ending-style]:translate-y-[calc(100%-var(--bleed))] data-[ending-style]:duration-[calc(var(--drawer-swipe-strength)*400ms)]">
+        <Drawer.Viewport ref={viewportRef} className={`fixed bottom-0 flex flex-col w-full pointer-events-none ${layerClassName}`}>
+          <Drawer.Popup data-bottom-drawer aria-label={label} className={`pointer-events-auto w-full ${popupClassName} bg-surface rounded-t-2xl overscroll-contain transition-transform duration-[450ms] ease-[cubic-bezier(0.32,0.72,0,1)] shadow-[0_-2px_16px_rgba(0,0,0,0.15)] [transform:translateY(calc(var(--drawer-snap-point-offset)+var(--drawer-swipe-movement-y)))]
+            will-change-transform outline-none data-[swiping]:select-none data-[starting-style]:translate-y-[calc(100%-var(--bleed))] data-[ending-style]:translate-y-[calc(100%-var(--bleed))] data-[ending-style]:duration-[calc(var(--drawer-swipe-strength)*400ms)]`}>
             <div className="flex-shrink-0 pt-5 pb-3 touch-none">
               <div className="w-1/3 h-1 mx-auto rounded-full bg-primary cursor-grab"/>
             </div>
