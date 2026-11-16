@@ -16,7 +16,8 @@ export function historyReducer<T>(
         presentState: {
           state: action.newState,
           currentSectionId: action.currentSectionId
-        }
+        },
+        shownSectionId: action.currentSectionId,
       }
     }
 
@@ -25,6 +26,7 @@ export function historyReducer<T>(
         ...state,
         presentState: { state: action.newState, currentSectionId: action.currentSectionId },
         redoStack: [],
+        shownSectionId: action.currentSectionId,
       }
 
     case "UNDO":
