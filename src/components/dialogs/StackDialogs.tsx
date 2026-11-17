@@ -172,16 +172,14 @@ export function SwapDialog({ a, b, differs, initial, onSubmit }: {
     return <li>
       <button type="button" role="checkbox" aria-checked={on} aria-label={label}
         onClick={() => setChoice({ ...choice, [key]: !on })}
-        className={classNames("flex items-start w-full gap-2 px-3 py-2.5 text-left border rounded-md",
+        className={classNames("block w-full px-3 py-2.5 text-left border rounded-md",
           on ? "border-primary bg-primary/5" : "border-line")}>
-        <SelectBox state={on ? "all" : "none"}/>
-        <span className="flex-1 min-w-0">
-          <span className="flex items-center justify-between gap-2">
-            <span className="font-semibold">{label}</span>
-            <span className={classNames("text-sm text-nowrap", on ? "font-semibold text-primary" : "text-muted")}>{on ? "本人のまま" : "立ち位置のまま"}</span>
-          </span>
-          {values(show)}
+        <span className="flex items-center gap-2">
+          <SelectBox state={on ? "all" : "none"}/>
+          <span className="flex-1 font-semibold">{label}</span>
+          <span className={classNames("text-sm text-nowrap", on ? "font-semibold text-primary" : "text-muted")}>{on ? "本人のまま" : "立ち位置のまま"}</span>
         </span>
+        <span className="block pl-7">{values(show)}</span>
       </button>
     </li>;
   };
