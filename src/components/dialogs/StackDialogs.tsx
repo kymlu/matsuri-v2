@@ -151,7 +151,7 @@ export type SwapChoice = { colour: boolean, counts: boolean };
 
 export type SwapPerson = StackMember & { counts: string[] };
 
-// 位置交換: for what differs, ticked stays with the person, unticked with the spot.
+// 位置交換: for what differs, whether it stays with the person (人) or the spot (立ち位置).
 export function SwapDialog({ a, b, differs, initial, onSubmit }: {
   a: SwapPerson, b: SwapPerson,
   differs: SwapChoice,
@@ -167,25 +167,30 @@ export function SwapDialog({ a, b, differs, initial, onSubmit }: {
         <span key={p.id + "v"} className="flex flex-wrap items-center gap-1">{show(p)}</span>,
       ])}
     </span>;
-  const row = (key: keyof SwapChoice, label: string, show: (p: SwapPerson) => ReactNode) => {
-    const on = choice[key];
-    return <li>
-      <button type="button" role="checkbox" aria-checked={on} aria-label={label}
-        onClick={() => setChoice({ ...choice, [key]: !on })}
-        className={classNames("block w-full px-3 py-2.5 text-left border rounded-md",
-          on ? "border-primary bg-primary/5" : "border-line")}>
-        <span className="flex items-center gap-2">
-          <SelectBox state={on ? "all" : "none"}/>
-          <span className="flex-1 font-semibold">{label}</span>
-          <span className={classNames("text-sm text-nowrap", on ? "font-semibold text-primary" : "text-muted")}>{on ? "本人のまま" : "立ち位置のまま"}</span>
+  const sides: [boolean, string, "person" | "locationOn"][] = [[true, "人", "person"], [false, "立ち位置", "locationOn"]];
+  const row = (key: keyof SwapChoice, label: string, show: (p: SwapPerson) => ReactNode) =>
+    <li className="px-3 py-2.5 border rounded-md border-line">
+      <span className="flex items-center justify-between gap-2">
+        <span className="font-semibold">{label}</span>
+        <span className="flex" role="radiogroup" aria-label={label}>
+          {sides.map(([withPerson, text, icon], i) => {
+            const on = choice[key] === withPerson;
+            return <button key={text} type="button" role="radio" aria-checked={on}
+              onClick={() => setChoice({ ...choice, [key]: withPerson })}
+              className={classNames("flex items-center gap-1 px-3 text-sm border min-h-11",
+                i === 0 ? "rounded-l-md" : "rounded-r-md -ml-px",
+                on ? "relative border-primary bg-primary/5 text-primary font-bold" : "border-line")}>
+              <Icon src={icon} size="2xs" colour={on ? "primary" : "black"}/>{text}
+            </button>;
+          })}
         </span>
-        <span className="block pl-7">{values(show)}</span>
-      </button>
+      </span>
+      {values(show)}
     </li>;
-  };
   return <BaseEditDialog title="位置交換" actionButtonText="入れ替える" noDetachedTrigger fullWidth onSubmit={() => onSubmit(choice)}>
-    <p className="mb-2"><span className="font-semibold">{a.label}</span>と<span className="font-semibold">{b.label}</span>の位置を入れ替えます。</p>
-    <ul className="p-px space-y-1">
+    <p className="mb-1"><span className="font-semibold">{a.label}</span>と<span className="font-semibold">{b.label}</span>の位置を入れ替えます。</p>
+    <p className="mb-2 text-sm text-muted">入れ替えたあと、{[differs.colour && "色", differs.counts && "カウント"].filter(Boolean).join("と")}をどちらに合わせますか？</p>
+    <ul className="p-px space-y-2">
       {differs.colour && row("colour", "色", p => <Dot color={p.color}/>)}
       {differs.counts && row("counts", "カウント", p => p.counts.length === 0
         ? <span className="text-muted">なし</span>

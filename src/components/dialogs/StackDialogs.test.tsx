@@ -38,17 +38,20 @@ describe("prop stacks say 道具, not 人", () => {
 
 describe("SwapDialog", () => {
   const a = { id: "a", label: "一郎", color: "red", counts: ["手上げ 1"] }, b = { id: "b", label: "花子", color: "blue", counts: [] };
-  it("lists only what differs, with what each has now, and says where it goes", async () => {
+  it("lists only what differs, with what each has now, and switches between 人 and 立ち位置", async () => {
     const onSubmit = jest.fn();
-    render(<Dialog.Root open><SwapDialog a={a} b={b} differs={{ colour: false, counts: true }} initial={{ colour: true, counts: false }} onSubmit={onSubmit}/></Dialog.Root>);
-    expect(await screen.findByText("カウント")).toBeTruthy();
-    expect(screen.queryByText("色")).toBeNull();
+    render(<Dialog.Root open><SwapDialog a={a} b={b} differs={{ colour: false, counts: true }} initial={{ colour: true, counts: true }} onSubmit={onSubmit}/></Dialog.Root>);
+    const counts = await screen.findByRole("radiogroup", { name: "カウント" });
+    expect(screen.queryByRole("radiogroup", { name: "色" })).toBeNull();
+    expect(screen.getByText("入れ替えたあと、カウントをどちらに合わせますか？")).toBeTruthy();
     expect(screen.getByText("手上げ 1")).toBeTruthy();
     expect(screen.getByText("なし")).toBeTruthy();
-    expect(screen.getByText("立ち位置のまま")).toBeTruthy();
-    fireEvent.click(screen.getByRole("checkbox", { name: "カウント" }));
-    expect(screen.getByText("本人のまま")).toBeTruthy();
+    const [person, spot] = Array.from(counts.querySelectorAll("[role=radio]"));
+    expect(person.getAttribute("aria-checked")).toBe("true");
+    fireEvent.click(spot);
+    expect(spot.getAttribute("aria-checked")).toBe("true");
+    expect(person.getAttribute("aria-checked")).toBe("false");
     fireEvent.click(screen.getByText("入れ替える"));
-    expect(onSubmit).toHaveBeenCalledWith({ colour: true, counts: true });
+    expect(onSubmit).toHaveBeenCalledWith({ colour: true, counts: false });
   });
 });

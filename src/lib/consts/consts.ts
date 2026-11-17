@@ -148,6 +148,7 @@ export const ICON = {
   password: "password",
   patientList: "patient_list",
   person: "person",
+  locationOn: "location_on",
   personAdd: "person_add",
   personCancel: "person_cancel",
   personEdit: "person_edit",
