@@ -5,6 +5,7 @@ import classNames from "classnames";
 import BaseEditDialog from "./BaseEditDialog";
 import SelectBox from "../basic/SelectBox";
 import Icon from "../basic/Icon";
+import PersonOrSpotSwitch from "../inputs/PersonOrSpotSwitch";
 import { DndContext } from "@dnd-kit/core";
 import { arrayMove, SortableContext, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -167,23 +168,11 @@ export function SwapDialog({ a, b, differs, initial, onSubmit }: {
         <span key={p.id + "v"} className="flex flex-wrap items-center gap-1">{show(p)}</span>,
       ])}
     </span>;
-  const sides: [boolean, string, "person" | "locationOn"][] = [[true, "人", "person"], [false, "立ち位置", "locationOn"]];
   const row = (key: keyof SwapChoice, label: string, show: (p: SwapPerson) => ReactNode) =>
     <li className="px-3 py-2.5 border rounded-md border-line">
       <span className="flex items-center justify-between gap-2">
         <span className="font-semibold">{label}</span>
-        <span className="flex" role="radiogroup" aria-label={label}>
-          {sides.map(([withPerson, text, icon], i) => {
-            const on = choice[key] === withPerson;
-            return <button key={text} type="button" role="radio" aria-checked={on}
-              onClick={() => setChoice({ ...choice, [key]: withPerson })}
-              className={classNames("flex items-center gap-1 px-3 text-sm border min-h-11",
-                i === 0 ? "rounded-l-md" : "rounded-r-md -ml-px",
-                on ? "relative border-primary bg-primary/5 text-primary font-bold" : "border-line")}>
-              <Icon src={icon} size="2xs" colour={on ? "primary" : "black"}/>{text}
-            </button>;
-          })}
-        </span>
+        <PersonOrSpotSwitch label={label} withPerson={choice[key]} onChange={v => setChoice({ ...choice, [key]: v })}/>
       </span>
       {values(show)}
     </li>;
