@@ -159,11 +159,14 @@ export function SwapDialog({ a, b, differs, initial, onSubmit }: {
   onSubmit: (choice: SwapChoice) => void,
 }) {
   const [choice, setChoice] = useState(initial);
-  const values = (show: (p: SwapPerson) => ReactNode) => [a, b].map(p =>
-    <span key={p.id} className="flex items-center gap-2 mt-1 text-sm">
-      <span className="w-12 shrink-0 text-muted break-all">{p.label}</span>
-      <span className="flex flex-wrap items-center gap-1">{show(p)}</span>
-    </span>);
+  // Names in a column as wide as the longer one.
+  const values = (show: (p: SwapPerson) => ReactNode) =>
+    <span className="grid grid-cols-[auto_1fr] items-center gap-x-2 gap-y-1 mt-1 text-sm">
+      {[a, b].map(p => [
+        <span key={p.id + "n"} className="truncate text-nowrap text-muted max-w-32">{p.label}</span>,
+        <span key={p.id + "v"} className="flex flex-wrap items-center gap-1">{show(p)}</span>,
+      ])}
+    </span>;
   const row = (key: keyof SwapChoice, label: string, show: (p: SwapPerson) => ReactNode) => {
     const on = choice[key];
     return <li>
