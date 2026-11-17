@@ -509,21 +509,12 @@ export function swapUnits(formation: Formation, kind: StackKind, ids: string[]):
   return units.length === 2 ? [units[0], units[1]] : undefined;
 }
 
-// One unit (a person or a whole stack, bottom first) moving onto the spot of the unit standing there now.
+// A person or stack (bottom first) moving onto another's spot.
 export type UnitMove = { unit: Stack, target: Stack };
-// What a section's counts or colour stay with when people change spot: the spot (whoever ends up there), or the person.
 export type StaysWith = "spot" | "person";
 
-// Moves people onto other people's spots in one section. The targets must be the moving units themselves
-// (each unit moves onto another's spot and nobody is left behind), e.g. a swap of two. Each unit moves by
-// the distance from its bottom member to the target's bottom member, so stacks stay stacks. A single person
-// moving onto a single person's spot takes their front/back order; stacks keep their own.
-// Counts: with "spot", whoever now stands on a spot gets the counts of whoever stood there (stacks level
-// by level, bottom first); with "person", counts are untouched.
-// Colour: people keep their own by default; with "spot", whoever now stands on a spot takes its colour, so the
-// colours on stage stay where they were.
-// Custom paths of everyone who moved are reset, into this section and into the next one, since they were
-// drawn for the old route.
+// Moves people onto each other's spots (targets are the movers themselves, e.g. a swap). Stacks move as one.
+// Counts and colour stay with the person or the spot (stacks level by level). Movers' custom paths reset.
 export function moveUnitsTo(state: Choreo, sectionId: string, moves: UnitMove[], countsStayWith: StaysWith, colourStaysWith: StaysWith = "person"): Choreo {
   const moving = moves.filter(m => m.unit[0] !== m.target[0]);
   if (moving.length === 0) return state;
@@ -572,8 +563,7 @@ export function moveUnitsTo(state: Choreo, sectionId: string, moves: UnitMove[],
   });
 }
 
-// Whether a move would come out differently with colour or counts staying on the spot instead of with the
-// person, i.e. whether there's anything to ask.
+// Whether colour or counts would differ between staying with the person and with the spot.
 export function moveChoices(state: Choreo, sectionId: string, moves: UnitMove[]): { colour: boolean, counts: boolean } {
   const formation = (s: Choreo) => s.sections.find(x => x.id === sectionId)?.formation;
   const bySpot = formation(moveUnitsTo(state, sectionId, moves, "spot", "spot"));
@@ -584,8 +574,7 @@ export function moveChoices(state: Choreo, sectionId: string, moves: UnitMove[])
   return { colour, counts: ids(bySpot) !== ids(byPerson) };
 }
 
-// Swaps two props or prop stacks: each moves by the distance between their bottom members' centres, so
-// stacks stay stacks and keep their angles. (People go through moveUnitsTo.)
+// Swaps two props or prop stacks by their bottom members' centres; angles stay.
 export function swapPropUnitPositions(state: Choreo, sectionId: string, a: Stack, b: Stack): Choreo {
   return updateSection(state, sectionId, f => {
     const pa = f.propPositions[a[0]], pb = f.propPositions[b[0]];

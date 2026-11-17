@@ -801,8 +801,7 @@ export function swapPropPositions(
     const originalB = section.formation.propPositions[propBId];
     const originalACenter = cornerToCentreFromProp(section.formation.propPositions[propAId], state.props[propAId], state.stageGeometry.yAxis);
     const originalBCenter = cornerToCentreFromProp(section.formation.propPositions[propBId], state.props[propBId], state.stageGeometry.yAxis);
-    // Each prop takes the other's spot and angle: the angle is part of the formation's layout there (e.g. a flag
-    // waiting upright at the side).
+    // The angle belongs to the spot, so it's swapped too.
     const angleA = originalB.rotation ?? 0, angleB = originalA.rotation ?? 0;
     const newAPosition = centreToCorner(originalBCenter.x, originalBCenter.y, angleA, propA.width, propA.length, state.stageGeometry.yAxis);
     const newBPosition = centreToCorner(originalACenter.x, originalACenter.y, angleB, propB.width, propB.length, state.stageGeometry.yAxis);

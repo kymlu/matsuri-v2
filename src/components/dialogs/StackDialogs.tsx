@@ -151,8 +151,7 @@ export type SwapChoice = { colour: boolean, counts: boolean };
 
 export type SwapPerson = StackMember & { counts: string[] };
 
-// 位置交換 of two people who differ in colour or counts: which of those stay theirs. Ticked stays with the
-// person (本人のまま); unticked stays with the spot (立ち位置のまま). Only what differs is listed, with what each has now.
+// 位置交換: for what differs, ticked stays with the person, unticked with the spot.
 export function SwapDialog({ a, b, differs, initial, onSubmit }: {
   a: SwapPerson, b: SwapPerson,
   differs: SwapChoice,

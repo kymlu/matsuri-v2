@@ -146,9 +146,7 @@ export function useStackEditing({ state, section, prevSection, selectedIds, setS
   // 位置交換 works on two separate things: people, props or whole stacks (not within one stack:
   // that's 上下入れ替え).
   const swapPair = stackKind ? swapUnits(formation, stackKind, stackIds) : undefined;
-  // People: when two people differ in colour or counts, ask which stay theirs. Everything starts ticked
-  // (本人のまま), like stacks, which aren't asked as choosing per level gets messy. Each applied answer is the
-  // next default; cancelling keeps the old one. Custom paths reset either way.
+  // Two people who differ in colour or counts: ask (last applied answer is the default). Stacks keep theirs.
   const [swapping, setSwapping] = useState<{ moves: UnitMove[], differs: SwapChoice }>();
   const lastSwapChoice = useRef<SwapChoice>({ colour: true, counts: true });
   const swapPeople = useCallback((moves: UnitMove[], choice: SwapChoice) => {

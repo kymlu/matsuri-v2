@@ -361,7 +361,7 @@ describe("moveUnitsTo", () => {
     expect(pos(s, "b")).toMatchObject({ x: 5, y: 1 });
     expect(pos(s, "c")).toMatchObject({ x: 3, y: 1 });
     expect(f(s).dancerStacks).toEqual([["b", "a"]]);
-    // c's spot goes to b (bottom); the stack's bottom spot goes to c; a (top) has no one to trade with.
+    // b takes c's counts, c takes b's; a has no counterpart.
     expect(timings(s)).toEqual([["a"], ["c", "b"]]);
   });
 
