@@ -11,11 +11,9 @@ type ShortestMoveSheetProps = {
   previousSectionName: string,
   totalBefore: number,
   totalAfter: number,
-  // The current choice shortens the moves (otherwise 入れ替える is disabled).
   hasGain: boolean,
-  // Why nothing would get shorter, when that is the case.
   noGainMessage?: string,
-  // Every colour among the people taking part, as toggles: off keeps that colour in place.
+  // Colours taking part; off keeps that colour in place.
   colours: string[],
   excludedColours: ReadonlySet<string>,
   onToggleColour: (colour: string) => void,
@@ -23,30 +21,24 @@ type ShortestMoveSheetProps = {
   onChangeView: (view: ShortestMoveView) => void,
   sameColour: boolean,
   onChangeSameColour: (sameColour: boolean) => void,
-  // People keep their colour when they swap (otherwise the colour stays with the spot). Only shown when colours can mix.
+  // Shown only when colours can mix.
   colourFollowsPerson: boolean,
   onChangeColourFollowsPerson: (follow: boolean) => void,
-  // Only shown when someone who would change spot has counts in this section.
+  // Shown only when a mover has counts here.
   showCountsOption: boolean,
   countsFollowPerson: boolean,
   onChangeCountsFollowPerson: (follow: boolean) => void,
   skippedStacked: boolean,
   onCancel: () => void,
   onApply: () => void,
-  // How much of the screen the sheet covers once it has settled, so the stage can fit what's above it.
   onHeightChange?: (height: number) => void,
 };
 
 // Whole metres from 10 m, one decimal below.
 export const formatMetres = (m: number) => `${m >= 10 ? Math.round(m) : Math.round(m * 10) / 10}m`;
-// Long section names would push the figure off a phone screen.
 const shortName = (name: string) => name.length > 8 ? name.slice(0, 8) + "…" : name;
 
-// 最短距離's preview, in the app's bottom drawer (the one view mode uses), so it looks and moves the same.
-// Two snap points: everything (as tall as its content, leaving the top of the stage visible), and a peek that
-// shows just the title with the result and buttons below, to see more of the stage. Swiping down from the peek,
-// or キャンセル, slides it away and cancels. No backdrop: the stage stays pannable and zoomable, but can't be
-// edited until this closes.
+// 最短距離 preview in the shared bottom drawer: full or peek. Closing cancels; the stage can be panned but not edited.
 export default function ShortestMoveSheet({
   previousSectionName, totalBefore, totalAfter, hasGain, noGainMessage, colours, excludedColours, onToggleColour, view, onChangeView,
   sameColour, onChangeSameColour, colourFollowsPerson, onChangeColourFollowsPerson, showCountsOption, countsFollowPerson, onChangeCountsFollowPerson,
@@ -85,9 +77,7 @@ export default function ShortestMoveSheet({
     }
     footer={
       <div className="flex flex-col w-full max-w-lg gap-2 px-4 pt-3 mx-auto border-t border-line">
-      {/* The result sits with the buttons that act on it; no gain is shown like the app's other errors. */}
       {
-        // Only worth showing when there is a saving; otherwise the error below says it all.
         hasGain &&
         <p className="flex flex-wrap items-baseline justify-center gap-2 text-sm">
           <span className="text-muted">「{shortName(previousSectionName)}」からの移動（合計）</span>
@@ -111,7 +101,6 @@ export default function ShortestMoveSheet({
     <div className="flex flex-col w-full max-w-lg gap-2 py-1 mx-auto">
       {
         colours.length > 0 &&
-        // Which colours take part. Off keeps that colour's people where they are.
         <div className="flex items-center gap-3">
           <span className="text-sm shrink-0">対象の色</span>
           <div className="flex flex-wrap gap-2 p-1" role="group" aria-label="対象の色">
@@ -139,7 +128,6 @@ export default function ShortestMoveSheet({
         <span>同じ色どうしで入れ替える</span>
       </label>
       {
-        // Like the counts option below: only shown when it can make a difference.
         !sameColour &&
         <label className="flex items-center gap-2 text-sm min-h-9">
           <Checkbox.Root checked={colourFollowsPerson} onCheckedChange={onChangeColourFollowsPerson} className="shrink-0">

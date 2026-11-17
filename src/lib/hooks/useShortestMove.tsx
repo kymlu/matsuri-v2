@@ -18,11 +18,9 @@ type Options = {
   commitState: (newState: Choreo) => void,
 };
 
-// Both plans are made once, when the button is pressed, from the choreo as it was then.
 type Session = {
   base: Choreo,
   sectionId: string,
-  // What the plans were made from, to re-plan when colours are left out.
   prev: ChoreoSection,
   formation: ChoreoSection["formation"],
   selectedIds: StageEntities<string[]>,
@@ -30,7 +28,6 @@ type Session = {
   anyColour: ShortestMovePlan,
 };
 
-// What the stage shows while previewing.
 export type ShortestMovePreview = {
   choreo: Choreo,
   section: ChoreoSection,
@@ -38,12 +35,10 @@ export type ShortestMovePreview = {
   routes: { routes: PreviewRoute[], kind: ShortestMoveView },
 };
 
-// Routes shorter than this aren't drawn (the person is practically in the same place).
+// Shorter routes aren't drawn.
 const MIN_ROUTE = 0.05;
 
-// 最短距離: the toolbar check, the preview sheet (in place of the toolbar), what the stage shows while
-// previewing, and the dialog for when nothing would get shorter. Applying commits the previewed choreo
-// itself, so it is one undo step and exactly what was shown.
+// 最短距離: toolbar check, preview sheet and stage props. Applying commits the previewed state (one undo step).
 export function useShortestMove({ state, section, prevSection, selectedIds, commitState }: Options) {
   const canShortestMove = useMemo(
     () => canPlanShortestMoves(prevSection?.formation, section.formation, selectedIds),
@@ -56,7 +51,6 @@ export function useShortestMove({ state, section, prevSection, selectedIds, comm
   const [view, setView] = useState<ShortestMoveView>("after");
   const [excludedColours, setExcludedColours] = useState<ReadonlySet<string>>(new Set());
   const [colourFollowsPerson, setColourFollowsPerson] = useState(true);
-  // How tall the sheet is once it has settled, so the stage can fit the routes above it.
   const [sheetHeight, setSheetHeight] = useState<number | undefined>(undefined);
 
   const startShortestMove = useCallback(() => {
@@ -67,7 +61,6 @@ export function useShortestMove({ state, section, prevSection, selectedIds, comm
       setNoGainOpen(true);
       return;
     }
-    // Every opening starts from the safe defaults.
     setSameColour(true);
     setCountsFollowPerson(false);
     setView("after");
@@ -76,8 +69,7 @@ export function useShortestMove({ state, section, prevSection, selectedIds, comm
     setSession({ base: state, sectionId: section.id, prev: prevSection, formation: section.formation, selectedIds, sameColour: same, anyColour: any });
   }, [prevSection, section, selectedIds, state]);
 
-  // Cancelling puts people straight back, without the slide: the render that closes the preview still tells the
-  // stage to jump, and the stage draws the real positions in that same render. Animation is back on after it.
+  // Cancel jumps back without animating; animation resumes next render.
   const [snapBack, setSnapBack] = useState(false);
   const close = useCallback(() => {
     setSnapBack(true);
@@ -90,19 +82,17 @@ export function useShortestMove({ state, section, prevSection, selectedIds, comm
     if (snapBack) setSnapBack(false);
   }, [snapBack]);
 
-  // The plan would be stale if the choreo or the section changed underneath it (e.g. a sync).
+  // Stale if the choreo or section changed underneath.
   useEffect(() => {
     if (session && (state !== session.base || section.id !== session.sectionId)) setSession(undefined);
   }, [session, state, section.id]);
 
-  // Every colour among the people taking part, in the order they appear. Turning one off keeps its people in place.
   const colours = useMemo(() => {
     if (!session) return [];
     const here = session.formation.dancerPositions;
     return Array.from(new Set(session.sameColour.considered.map(id => here[id].color)));
   }, [session]);
 
-  // Plans for the colours left in, with and without the colour rule.
   const plans = useMemo(() => {
     if (!session) return undefined;
     if (excludedColours.size === 0) return { same: session.sameColour, any: session.anyColour };
@@ -126,8 +116,7 @@ export function useShortestMove({ state, section, prevSection, selectedIds, comm
       : undefined,
     [session, plan, countsFollowPerson, sameColour, colourFollowsPerson]);
 
-  // The preview closes itself once the new state arrives (the effect above), in the same render as the page's
-  // section catching up. Closing here would show the old positions for a frame and animate people back.
+  // Closes when the new state arrives (effect above); closing here would flash the old positions.
   const apply = useCallback(() => {
     if (after) commitState(after);
     else setSession(undefined);
@@ -193,7 +182,6 @@ export function useShortestMove({ state, section, prevSection, selectedIds, comm
 
   return {
     canShortestMove, startShortestMove, isPreviewingShortestMove: session !== undefined,
-    // The stage jumps rather than animates while previewing (flipping 今／最短) and when cancelling.
     shortestMoveInstantMoves: session !== undefined || snapBack,
     shortestMoveSheetHeight: session ? sheetHeight : undefined,
     shortestMovePreview, shortestMoveSheet, shortestMoveDialog,

@@ -61,7 +61,6 @@ const editDancerColourDialog = Dialog.createHandle<string>();
 const editDancerActionsDialog = Dialog.createHandle<string>();
 const dancerManagerDialog = Dialog.createHandle<string>();
 const propManagerDialog = Dialog.createHandle<string>();
-// What the stage gets as its selection while previewing a change.
 const NO_SELECTION = { dancers: [] as string[], props: [] as string[], obstacles: [] as string[] };
 const propSizeDialog = Dialog.createHandle<string>();
 const renameSectionDialog = Dialog.createHandle<ChoreoSection>();
@@ -319,7 +318,7 @@ export default function ChoreoEditPage(props: {
     selectedIds,
     commitState,
   });
-  // While previewing, the stage only shows the proposal: nothing on it can be selected or edited.
+  // Previewing: nothing on the stage can be selected or edited.
   const previewStageProps = useMemo(() => shortestMovePreview && {
     canEdit: false, canSelectDancers: false, canSelectProps: false, canSelectObstacles: false, canToggleSelection: false,
     currentChoreo: shortestMovePreview.choreo,
@@ -396,7 +395,7 @@ export default function ChoreoEditPage(props: {
       const ctrlOrCmd = isMac ? e.metaKey : e.ctrlKey;
 
       if (!ctrlOrCmd) return;
-      // Previewing 最短距離: the choreo must not change underneath (saving is fine).
+      // No edits while previewing (saving is fine).
       if (isPreviewingRef.current && e.key !== "s") return;
 
       // Ignore typing in inputs / textareas
@@ -1225,8 +1224,7 @@ export default function ChoreoEditPage(props: {
         togglePointCount={togglePointCount}
         onResetPath={resetPath}
       />
-      {/* Floats over the bottom of the page like view mode's drawer (the toolbar stays underneath), so the stage
-          keeps its size; the stage moves its camera to fit the routes above it instead. */}
+      {/* Floats over the page like view mode's drawer; the stage moves its camera instead of resizing. */}
       {shortestMoveSheet}
       {
         pasteNote &&

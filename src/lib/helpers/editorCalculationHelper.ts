@@ -166,8 +166,7 @@ type PdfPathOp = { op: "m" | "l" | "c" | "h", c: number[] };
 // The tension a movement is drawn with (as in the stage and the PDF).
 export const movementTension = (movement?: { tension: string }) => movement?.tension === "straight" ? 0 : 0.5;
 
-// Length of a path through these points (flat [x, y, ...], any unit), drawn the same way as on stage:
-// each curve is measured in small straight steps, which is well within a centimetre for stage paths.
+// Path length as drawn on stage (curves measured in small steps).
 export function getPathLength(points: number[], tension = 0.5): number {
   const STEPS = 16;
   let length = 0, x = points[0], y = points[1];

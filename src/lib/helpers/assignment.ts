@@ -1,6 +1,4 @@
-// Minimum-cost assignment (the Hungarian algorithm, O(n³)).
-// cost[i][j] is the cost of giving row i column j; the matrix must be square.
-// Returns, for each row, the column it gets, so that the total cost is as small as possible.
+// Hungarian algorithm (O(n³)): for a square cost matrix, each row's column with the lowest total.
 export function assign(cost: number[][]): number[] {
   const n = cost.length;
   if (n === 0) return [];

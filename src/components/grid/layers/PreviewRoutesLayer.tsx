@@ -7,14 +7,10 @@ import { METER_PX } from "../../../lib/consts/consts";
 import { colorPalette } from "../../../lib/consts/colors";
 import { Movement } from "../../../models/choreoSection";
 
-// changed: this person's spot is different in the proposal. path: their custom path, if they have one in the
-// arrangement shown (people who change spot have theirs reset, so walk straight).
+// path: their custom path in the arrangement shown, if any.
 export type PreviewRoute = { id: string, from: Coordinates, to: Coordinates, color: string, changed: boolean, path?: Movement };
 
-// Routes from the previous section while previewing a change (最短距離), drawn as they will be walked:
-// a faint dashed circle where each person stood before, and an arrow to where they stand now.
-// People whose spot changes: red in "now" (what is there today), green in "after" (the proposal). Everyone else's
-// route is grey, thinner and lighter: context, not a change. Nothing here can be touched.
+// 最短距離 routes from the previous section: changed ones red (今) or green (最短), the rest grey.
 const ROUTE_COLOURS = { now: colorPalette.rainbow.red[0], after: "#2E8B57" };
 
 const PreviewRoutesLayer = memo(function PreviewRoutesLayer({ geometry, routes, kind, largeDancers }: {
@@ -23,7 +19,6 @@ const PreviewRoutesLayer = memo(function PreviewRoutesLayer({ geometry, routes, 
   kind: "now" | "after",
   largeDancers?: boolean,
 }) {
-  // Just outside the person's circle (as drawn by DancerGridObject).
   const PERSON_RADIUS = METER_PX * (largeDancers ? 0.62 : 0.32);
   return <Layer listening={false}>
     {routes.map(r => {
@@ -39,15 +34,13 @@ const PreviewRoutesLayer = memo(function PreviewRoutesLayer({ geometry, routes, 
       };
       const points = [r.from, ...(r.path?.points ?? []), r.to].map(p => stageMetersToPx(p, geometry, METER_PX));
       const to = points[points.length - 1], before = points[points.length - 2];
-      // The arrowhead stops at the edge of the person, so it isn't hidden under them. It points the way the
-      // route arrives: from the last bend (or the start) to the person.
+      // Arrow ends at the person's edge, pointing from the last bend.
       const length = Math.hypot(to.x - before.x, to.y - before.y) || 1;
       const cut = Math.min(PERSON_RADIUS, length / 2) / length;
       const tip = { x: to.x - (to.x - before.x) * cut, y: to.y - (to.y - before.y) * cut };
       if (points.length === 2) {
         return <Arrow key={r.id} points={[before.x, before.y, tip.x, tip.y]} {...style}/>;
       }
-      // A custom path: drawn like the stage's own paths, with the arrowhead on its last stretch.
       const back = Math.min(1, 6 / length);
       return <Group key={r.id}>
         <Path data={getPathLineSvgCached(points.flatMap(p => [p.x, p.y]), movementTension(r.path))}

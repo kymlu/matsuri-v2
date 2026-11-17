@@ -90,13 +90,12 @@ type MainStageProps = {
   currentMovement?: Movement,
   dancerAnimationCache: PathSvgCacheByObjectIdBySectionId,
   propAnimationCache: PathSvgCacheByObjectIdBySectionId,
-  // A change being previewed (最短距離): people left out are faint, with routes drawn under everyone.
+  // 最短距離 preview: left-out people faint, routes underneath.
   fadedDancerIds?: ReadonlySet<string>,
   previewRoutes?: { routes: PreviewRoute[], kind: "now" | "after" },
   instantMoves?: boolean, // jump to new positions instead of animating
   dimPropsAndObstacles?: boolean, // props and obstacles faint, so routes drawn underneath show through
-  // Height of something floating over the bottom of the page (e.g. the 最短距離 sheet): the camera zooms and moves
-  // so the preview's routes fit above it, and goes back to where it was when this is unset.
+  // Height of a sheet over the bottom; the camera fits the routes above it.
   bottomOverlayHeight?: number,
 }
 
@@ -116,8 +115,7 @@ function MainStage({
   // Konva reads colours from the (non-reactive) colorPalette, so remount the
   // whole Stage subtree when the theme flips to force every layer to redraw.
   const [theme] = useTheme();
-  // Computed in the same render as the section they come from, so the stage never draws one section's
-  // positions with the next one's settings (e.g. animating when it was told to jump).
+  // Derived in the same render as the section, so settings never lag a frame.
   const dancerPositions = useMemo<DancerPosition[]>(
     () => currentSection.formation.dancerPositions ? sortDancers(Object.values(currentSection.formation.dancerPositions)) : [],
     [currentSection.formation.dancerPositions]);
@@ -386,9 +384,7 @@ function MainStage({
     }
   }, [stageGeometry, selectedIds.dancers, selectedObjects.dancers, size.width, size.height, isShowingVerticalRuler, centerXPx, bottomMarginM, pixelsPerMeter, currentSection.formation.dancerPositions, setStagePosition]);
 
-  // Fitting the preview above a floating sheet: only the camera changes (zoom and position), never the stage's
-  // size. It fits the routes (where everyone starts and ends), zooming out only if they don't already fit, and
-  // puts the earlier camera back when the sheet goes.
+  // Fit the routes above the sheet by moving the camera only (zooming out if needed); restore it after.
   const cameraBeforeOverlay = useRef<{ scale: Coordinates, position: Coordinates, manual: boolean } | undefined>(undefined);
   useEffect(() => {
     if (!stageGeometry || size.width === 0) return;
@@ -408,7 +404,6 @@ function MainStage({
     const containerBottom = containerRef.current?.getBoundingClientRect().bottom ?? window.innerHeight;
     const covered = Math.max(0, containerBottom - (window.innerHeight - bottomOverlayHeight));
     const visible = { width: size.width - (isShowingVerticalRuler ? 32 : 0), height: Math.max(1, size.height - covered) };
-    // What to fit, in stage metres: the routes' ends, or the whole stage when there are none.
     const ends = (previewRoutes?.routes ?? []).flatMap(r => [r.from, r.to]);
     const box = ends.length > 0
       ? {
@@ -420,7 +415,6 @@ function MainStage({
       cameraBeforeOverlay.current.scale.x,
       visible.width / ((box.right - box.left) * METER_PX),
       visible.height / ((box.bottom - box.top) * METER_PX)));
-    // Centre the box in the visible area (corners in screen pixels at the new scale; y can run either way).
     const a = stageMetersToPx({ x: box.left, y: box.top }, stageGeometry, METER_PX * scale);
     const b = stageMetersToPx({ x: box.right, y: box.bottom }, stageGeometry, METER_PX * scale);
     const position = {
@@ -431,7 +425,7 @@ function MainStage({
     setStageScale({ x: scale, y: scale });
     setStagePosition(position);
     setRulerPos(position);
-  // Refits when the sheet opens or settles at a new height; not when the routes change (flipping 今／最短).
+  // Refit on sheet height only, not when flipping 今／最短.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bottomOverlayHeight, size.width, size.height, stageGeometry]);
 

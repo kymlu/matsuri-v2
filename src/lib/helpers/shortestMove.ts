@@ -4,30 +4,24 @@ import { assign } from "./assignment";
 import { getPathLength, movementTension } from "./editorCalculationHelper";
 import { getStacks, UnitMove } from "./stackHelper";
 
-// 最短距離: among the selected people, swap who stands on which spot so the total distance from the previous
-// section is as short as possible. Spots never move; stacked people never move.
-// Distances follow what will actually be walked: someone who stays keeps their path (curves included);
-// someone who changes spot has their path reset, so walks straight.
+// 最短距離: reassign selected people to the same spots to minimise total distance from the previous section.
+// Stayers keep their path (curves count); movers walk straight. Stacked people stay.
 
-// Savings smaller than this (metres, in total) are not worth changing anyone's spot for.
+// Minimum total saving (m) worth changing anything for.
 export const MIN_SAVING = 0.5;
-// Makes staying put win any tie, so an already-shortest arrangement is left as it is.
+// Staying put wins ties.
 const STAY_BONUS = 1e-6;
 
 export type ShortestMovePlan = {
-  // Single people only, each onto the spot of the person standing there now.
   moves: UnitMove[],
-  // The people who were considered (selected, outside stacks, in the previous section).
   considered: string[],
   totalBefore: number,
   totalAfter: number,
-  // Someone who would change spot has counts in this section.
   countsAffected: boolean,
-  // The selection included stacked people, who were left where they are.
   skippedStacked: boolean,
 };
 
-// Nothing selected at all means everyone.
+// No selection means everyone.
 function selectedDancers(formation: Formation, selected: StageEntities<string[]>): string[] {
   const nothing = selected.dancers.length + selected.props.length + selected.obstacles.length === 0;
   return nothing ? Object.keys(formation.dancerPositions) : selected.dancers.filter(id => formation.dancerPositions[id]);
@@ -42,7 +36,6 @@ function candidates(prev: Formation | undefined, formation: Formation, selected:
   };
 }
 
-// The cheap check behind the toolbar button.
 export function canPlanShortestMoves(prev: Formation | undefined, formation: Formation, selected: StageEntities<string[]>): boolean {
   return prev !== undefined && candidates(prev, formation, selected).considered.length >= 2;
 }
@@ -55,7 +48,6 @@ export function planShortestMoves(
 ): ShortestMovePlan {
   const here = formation.dancerPositions;
   const { considered: all, skippedStacked } = candidates(prev, formation, selected);
-  // Colours left out stay where they are.
   const considered = excludeColours?.size ? all.filter(id => !excludeColours.has(here[id].color)) : all;
   const distance = (id: string, spotOf: string) => {
     const from = prev!.dancerPositions[id], to = here[spotOf];
@@ -70,7 +62,7 @@ export function planShortestMoves(
     groups.set(key, [...(groups.get(key) ?? []), id]);
   });
 
-  // Left-out colours still count towards the totals, where they stand.
+  // Left-out colours still count in the totals.
   const kept = all.filter(id => !considered.includes(id)).reduce((sum, id) => sum + distance(id, id), 0);
   let totalBefore = kept, totalAfter = kept;
   const moves: UnitMove[] = [];
