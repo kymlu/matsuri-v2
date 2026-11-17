@@ -3,6 +3,7 @@ import classNames from "classnames";
 import Button from "../basic/Button";
 import BottomDrawer, { BottomDrawerClose } from "../basic/BottomDrawer";
 import SelectBox from "../basic/SelectBox";
+import PersonOrSpotSwitch from "../inputs/PersonOrSpotSwitch";
 import { colorPalette } from "../../lib/consts/colors";
 
 export type ShortestMoveView = "now" | "after";
@@ -128,22 +129,24 @@ export default function ShortestMoveSheet({
         <span>同じ色どうしで入れ替える</span>
       </label>
       {
-        !sameColour &&
-        <label className="flex items-center gap-2 text-sm min-h-9">
-          <Checkbox.Root checked={colourFollowsPerson} onCheckedChange={onChangeColourFollowsPerson} className="shrink-0">
-            <SelectBox state={colourFollowsPerson ? "all" : "none"}/>
-          </Checkbox.Root>
-          <span>色は本人のまま</span>
-        </label>
-      }
-      {
-        showCountsOption &&
-        <label className="flex items-center gap-2 text-sm min-h-9">
-          <Checkbox.Root checked={countsFollowPerson} onCheckedChange={onChangeCountsFollowPerson} className="shrink-0">
-            <SelectBox state={countsFollowPerson ? "all" : "none"}/>
-          </Checkbox.Root>
-          <span>カウントは本人のまま</span>
-        </label>
+        (!sameColour || showCountsOption) &&
+        <>
+          <span className="text-sm text-muted">入れ替えたあと、どちらに合わせますか？</span>
+          {
+            !sameColour &&
+            <div className="flex items-center justify-between gap-2 text-sm min-h-9">
+              <span>色</span>
+              <PersonOrSpotSwitch label="色" withPerson={colourFollowsPerson} onChange={onChangeColourFollowsPerson} compact/>
+            </div>
+          }
+          {
+            showCountsOption &&
+            <div className="flex items-center justify-between gap-2 text-sm min-h-9">
+              <span>カウント</span>
+              <PersonOrSpotSwitch label="カウント" withPerson={countsFollowPerson} onChange={onChangeCountsFollowPerson} compact/>
+            </div>
+          }
+        </>
       }
     </div>
   </BottomDrawer>;

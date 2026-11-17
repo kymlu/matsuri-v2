@@ -17,7 +17,7 @@ describe("ShortestMoveSheet", () => {
     expect(screen.getByText("62m")).toBeInTheDocument();
     expect(screen.getByText("17m")).toBeInTheDocument();
     expect(screen.getByRole("radio", { name: "最短" })).toHaveAttribute("aria-checked", "true");
-    expect(screen.queryByText("カウントは本人のまま")).toBeNull();
+    expect(screen.queryByRole("radiogroup", { name: "カウント" })).toBeNull();
     expect(screen.queryByText("重なっている人は動かしません")).toBeNull();
   });
 
@@ -29,8 +29,13 @@ describe("ShortestMoveSheet", () => {
   });
 
   it("shows the counts option and the stacks line only when needed", () => {
-    render(<ShortestMoveSheet {...base} showCountsOption skippedStacked/>);
-    expect(screen.getByText("カウントは本人のまま")).toBeInTheDocument();
+    const onChangeCountsFollowPerson = jest.fn();
+    render(<ShortestMoveSheet {...base} showCountsOption skippedStacked onChangeCountsFollowPerson={onChangeCountsFollowPerson}/>);
+    const counts = screen.getByRole("radiogroup", { name: "カウント" });
+    expect(screen.getByText("入れ替えたあと、どちらに合わせますか？")).toBeInTheDocument();
+    expect(counts.querySelector("[aria-checked=true]")).toHaveTextContent("立ち位置");
+    (counts.querySelector("[aria-checked=false]") as HTMLElement).click();
+    expect(onChangeCountsFollowPerson).toHaveBeenCalledWith(true);
     expect(screen.getByText("重なっている人は動かしません")).toBeInTheDocument();
   });
 
@@ -52,12 +57,13 @@ describe("ShortestMoveSheet", () => {
     expect(onToggleColour).toHaveBeenCalledWith("#00e");
   });
 
-  it("offers 色は本人のまま only when colours can mix", () => {
+  it("offers the colour switch only when colours can mix", () => {
     const { unmount } = render(<ShortestMoveSheet {...base}/>);
-    expect(screen.queryByText("色は本人のまま")).toBeNull();
+    expect(screen.queryByRole("radiogroup", { name: "色" })).toBeNull();
+    expect(screen.queryByText("入れ替えたあと、どちらに合わせますか？")).toBeNull();
     unmount();
     render(<ShortestMoveSheet {...base} sameColour={false}/>);
-    expect(screen.getByText("色は本人のまま")).toBeInTheDocument();
+    expect(screen.getByRole("radiogroup", { name: "色" }).querySelector("[aria-checked=true]")).toHaveTextContent("人");
   });
 
   it("hides the colour row with nothing to choose", () => {
