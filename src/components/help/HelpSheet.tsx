@@ -178,7 +178,7 @@ export default function HelpSheet({ open, target, reader, onClose }: HelpSheetPr
                           <ExpandableSection
                             level={1}
                             title={HELP_GROUPS[g.group].title}
-                            titleExtra={<Tag compact type="grey" text={`${g.articles.length}件`}/>}
+                            titleExtra={<span className="text-sm text-muted">{g.articles.length}件</span>}
                             expanded={!!expanded[g.group]}
                             onExpandedChange={(v) => setExpanded(e => ({ ...e, [g.group]: v }))}>
                             <ArticleRows articles={g.articles} onOpen={openArticle}/>
@@ -191,7 +191,7 @@ export default function HelpSheet({ open, target, reader, onClose }: HelpSheetPr
                       <ExpandableSection
                         level={1}
                         title="ほかの役割の方向け"
-                        titleExtra={<Tag compact type="grey" text={`${contents.others.length}件`}/>}
+                        titleExtra={<span className="text-sm text-muted">{contents.others.length}件</span>}
                         expanded={!!expanded.others}
                         onExpandedChange={(v) => setExpanded(e => ({ ...e, others: v }))}>
                         <ArticleRows articles={contents.others} onOpen={openArticle} showRoles/>
