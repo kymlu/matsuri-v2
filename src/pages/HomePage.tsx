@@ -96,6 +96,8 @@ export default function HomePage({
   const [savedChoreos, setSavedChoreos] = useState<ChoreoWithStatus[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  // What couldn't be loaded: the team's charts (local ones still show) or anything at all.
+  const [loadError, setLoadError] = useState<"team" | "all">();
   // const [choreosFromServer, setChoreosFromServer] = useState<Record<string, Choreo>>({});
   const [serverChoreoDetails, setServerChoreoDetails] = useState<Record<string, BasicChoreoDetails>>({});
   const [localChoreos, setLocalChoreos] = useState<Record<string, Choreo>>({});
@@ -156,10 +158,13 @@ export default function HomePage({
 
   const loadChoreos = () => {
     setIsLoading(true);
+    setLoadError(undefined);
     Promise.all([
       getAllChoreos(team?.id),
       getChoreoSummary(team?.id)
-    ]).then(([local, server]) => {
+    ]).then(([local, fetched]) => {
+      if (fetched === undefined) setLoadError("team");
+      const server = fetched ?? [];
       server.push(getBasicChoreoDetails(z.parse(ChoreoSchema, SampleParade)));
       server.push(getBasicChoreoDetails(z.parse(ChoreoSchema, SampleStage)));
       const choreos: ChoreoWithStatus[] = [];
@@ -174,7 +179,10 @@ export default function HomePage({
           choreos.push({...serverChoreo, status: "upToDate"});
         } else {
           const localChoreoDetails = getBasicChoreoDetails(localChoreo);
-          if (!serverChoreo) {
+          if (!serverChoreo && fetched === undefined) {
+            // The team's list didn't load, so a published chart can't be told from an unpublished one by the server.
+            choreos.push({...localChoreoDetails, status: localChoreo.version ? "edited" : "localOnly"});
+          } else if (!serverChoreo) {
             choreos.push({...localChoreoDetails, status: "localOnly"});
           } else if (serverChoreo.version !== localChoreo.version) {
             if (localChoreo.isDirty === true || localChoreo.isDirty === undefined) {
@@ -209,7 +217,7 @@ export default function HomePage({
       setIsLoading(false);
     }, () => {
       setIsLoading(false);
-      // TODO: Implement error dialog
+      setLoadError("all");
     });
   }
 
@@ -623,7 +631,19 @@ export default function HomePage({
         </div>
         <div className="h-full space-y-2 overflow-auto">
           {
-            !isLoading && filteredChoreos.size === 0 &&
+            loadError &&
+            <div role="alert" className="flex items-center gap-2 p-2 pl-3 text-sm border rounded-md border-primary">
+              <p className="flex-1">
+                {loadError === "team"
+                  ? "チームの隊列表を読み込めませんでした。この端末にある隊列表だけを表示しています。"
+                  : "隊列表を読み込めませんでした。"}
+                通信状況を確認してください。
+              </p>
+              <Button onClick={loadChoreos}><span className="font-semibold text-nowrap">再読み込み</span></Button>
+            </div>
+          }
+          {
+            !isLoading && !loadError && filteredChoreos.size === 0 &&
             <div className="mt-4 text-center">隊列表はありません</div>
           }
           {

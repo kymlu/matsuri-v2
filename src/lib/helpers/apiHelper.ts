@@ -321,7 +321,8 @@ export const changeUserName = async (
   }
 }
 
-export const getChoreoSummary = async (teamId?: string): Promise<BasicChoreoDetails[]> => {
+// undefined when the team's charts couldn't be fetched (offline, server error); [] without a team.
+export const getChoreoSummary = async (teamId?: string): Promise<BasicChoreoDetails[] | undefined> => {
   try {
     if (!teamId) return [];
 
@@ -339,7 +340,7 @@ export const getChoreoSummary = async (teamId?: string): Promise<BasicChoreoDeta
     }
   } catch (e: any) {
     console.error("getchoreoSummary failed:", (e as Error)?.message);
-    return [] as BasicChoreoDetails[]; // todo: show error dialog
+    return undefined;
   }
 }
 
