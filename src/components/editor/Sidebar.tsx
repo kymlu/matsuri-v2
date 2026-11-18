@@ -10,7 +10,7 @@ type SidebarProps = {
   choreoName: string;
   choreoEvent?: string;
   choreoDates?: string;
-  details?: React.ReactNode; // stage size and counts, under the event
+  details?: React.ReactNode;
 
   editName?: () => void;
   editSize?: () => void;
