@@ -11,10 +11,8 @@ type BottomDrawerProps = {
   onClose?: () => void,
   swipeToClose?: boolean, // false: only BottomDrawerClose closes it; swiping stops at the smallest snap point
   snapPoints?: Drawer.Root.SnapPoint[],
-  lowestSnapPoint?: string, // the smallest stop, in px; replaces the first of the default stops
-  // Without a fixed height (popupClassName), the drawer is as tall as its content and slides rather than shrinking
-  // its content to the visible part, so its stops (fractions of its height) stay put.
-  sizeToContent?: boolean,
+  lowestSnapPoint?: string,
+  sizeToContent?: boolean, // slide instead of shrinking the content, for drawers without a fixed height
   defaultSnapPoint?: Drawer.Root.SnapPoint,
   popupClassName?: string,
   // Pixels covered from the bottom of the screen, each time the drawer settles (opened or snapped).
@@ -80,7 +78,6 @@ export default function BottomDrawer ({
       <Drawer.Portal>
         <Drawer.Viewport className={`fixed bottom-0 flex flex-col w-full pointer-events-none ${layerClassName}`}>
           <Drawer.Popup ref={popupRef} data-bottom-drawer aria-label={label}
-            // Can't be swiped closed: stop at the smallest stop instead of following the finger behind the footer.
             style={swipeToClose ? undefined : { transform: `translateY(min(calc(var(--drawer-snap-point-offset) + var(--drawer-swipe-movement-y)), calc(100% - ${lowestSnapPoint})))` }}
             onTransitionEnd={(e) => { if (e.target === e.currentTarget && e.propertyName === "transform") reportVisibleHeight(); }}
             className={`pointer-events-auto w-full ${popupClassName} bg-surface rounded-t-2xl overscroll-contain transition-transform duration-[450ms] ease-[cubic-bezier(0.32,0.72,0,1)] shadow-[0_-2px_16px_rgba(0,0,0,0.15)] [transform:translateY(calc(var(--drawer-snap-point-offset)+var(--drawer-swipe-movement-y)))]
