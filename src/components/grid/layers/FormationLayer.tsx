@@ -18,6 +18,9 @@ type FormationLayerProps = {
   canEdit: boolean,
   canSelectDancers: boolean,
   dimDancers?: boolean, // focusing on props: dancers faint and can't be touched
+  fadedDancerIds?: ReadonlySet<string>, // these dancers only, faint and untouchable (e.g. left out of a preview)
+  instantMoves?: boolean, // jump to new positions instead of animating (e.g. flipping a preview)
+  dimPropsAndObstacles?: boolean, // props and obstacles faint and untouchable (e.g. so a preview's routes show through)
   canSelectProps: boolean,
   canSelectObstacles: boolean,
   canToggleSelection: boolean,
@@ -53,6 +56,9 @@ const FormationLayer = memo(function FormationLayer({
   canEdit,
   canSelectDancers,
   dimDancers,
+  fadedDancerIds,
+  instantMoves,
+  dimPropsAndObstacles,
   canSelectProps,
   canSelectObstacles,
   canToggleSelection,
@@ -243,6 +249,7 @@ const FormationLayer = memo(function FormationLayer({
             snapToGrid={snapToGrid}
             canSelect={canSelectObstacles}
             animate={false}
+            dimmed={dimPropsAndObstacles}
             isZooming={isZooming}
           />
         );
@@ -263,8 +270,9 @@ const FormationLayer = memo(function FormationLayer({
             snapToGrid={snapToGrid}
             canSelect={canSelectProps}
             sectionId={sectionId}
-            animate
+            animate={!instantMoves}
             animationCache={propAnimationCache[propPosition.propId]}
+            dimmed={dimPropsAndObstacles}
             isZooming={isZooming}
             stackMark={propStackDrawing[propPosition.propId]?.mark}
             hiddenSelected={propStackDrawing[propPosition.propId]?.hiddenSelected}
@@ -287,7 +295,7 @@ const FormationLayer = memo(function FormationLayer({
             canEdit={canEdit}
             snapToGrid={snapToGrid}
             dancerDisplayType={dancerDisplayType}
-            animate
+            animate={!instantMoves}
             isZooming={isZooming}
             sectionId={sectionId}
             animationCache={dancerAnimationCache[dancerPosition.dancerId]}
@@ -295,7 +303,7 @@ const FormationLayer = memo(function FormationLayer({
             hiddenSelected={dancerStackDrawing[dancerPosition.dancerId]?.hiddenSelected}
             stackCount={dancerStackDrawing[dancerPosition.dancerId]?.count}
             coveredInStack={coveredDancers.has(dancerPosition.dancerId)}
-            dimmed={dimDancers}
+            dimmed={dimDancers || fadedDancerIds?.has(dancerPosition.dancerId)}
             onDragFollow={canEdit ? followDrag : undefined}
           />
         );

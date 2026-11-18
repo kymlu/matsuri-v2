@@ -168,6 +168,12 @@ const BaseGridObject = memo(function BaseGridObject({
     return { x: (clamped.x + leftMargin) * METER_PX, y: (clamped.y + topMargin) * METER_PX };
   };
 
+  // Faint shapes skip Konva's per-frame off-screen buffer (invisible at this opacity; the Group setting doesn't reach them).
+  useEffect(() => {
+    if (!dimmed) return;
+    ref.current?.find<Konva.Shape>("Shape").forEach(shape => shape.perfectDrawEnabled(false));
+  });
+
   const dragStartRef = useRef<{ x: number; y: number } | null>(null);
   const isDraggingRef = useRef(false);
   const dragOriginRef = useRef<Coordinates | null>(null);

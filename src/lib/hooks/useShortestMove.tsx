@@ -1,0 +1,189 @@
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Dialog } from "@base-ui/react";
+import { Choreo } from "../../models/choreo";
+import { ChoreoSection } from "../../models/choreoSection";
+import { StageEntities } from "../../models/history";
+import { canPlanShortestMoves, planShortestMoves, ShortestMovePlan } from "../helpers/shortestMove";
+import { moveUnitsTo } from "../helpers/stackHelper";
+import ShortestMoveSheet, { ShortestMoveView } from "../../components/editor/ShortestMoveSheet";
+import { PreviewRoute } from "../../components/grid/layers/PreviewRoutesLayer";
+import CustomDialog from "../../components/basic/CustomDialog";
+import Button from "../../components/basic/Button";
+
+type Options = {
+  state: Choreo,
+  section: ChoreoSection,
+  prevSection?: ChoreoSection,
+  selectedIds: StageEntities<string[]>,
+  commitState: (newState: Choreo) => void,
+};
+
+type Session = {
+  base: Choreo,
+  sectionId: string,
+  prev: ChoreoSection,
+  formation: ChoreoSection["formation"],
+  selectedIds: StageEntities<string[]>,
+  sameColour: ShortestMovePlan,
+  anyColour: ShortestMovePlan,
+};
+
+export type ShortestMovePreview = {
+  choreo: Choreo,
+  section: ChoreoSection,
+  fadedDancerIds: ReadonlySet<string>,
+  routes: { routes: PreviewRoute[], kind: ShortestMoveView },
+};
+
+// Shorter routes aren't drawn.
+const MIN_ROUTE = 0.05;
+
+// 最短距離: toolbar check, preview sheet and stage props. Applying commits the previewed state (one undo step).
+export function useShortestMove({ state, section, prevSection, selectedIds, commitState }: Options) {
+  const canShortestMove = useMemo(
+    () => canPlanShortestMoves(prevSection?.formation, section.formation, selectedIds),
+    [prevSection, section.formation, selectedIds]);
+
+  const [session, setSession] = useState<Session | undefined>(undefined);
+  const [noGainOpen, setNoGainOpen] = useState(false);
+  const [sameColour, setSameColour] = useState(true);
+  const [countsFollowPerson, setCountsFollowPerson] = useState(false);
+  const [view, setView] = useState<ShortestMoveView>("after");
+  const [excludedColours, setExcludedColours] = useState<ReadonlySet<string>>(new Set());
+  const [colourFollowsPerson, setColourFollowsPerson] = useState(true);
+  const [sheetHeight, setSheetHeight] = useState<number | undefined>(undefined); // as first opened; snapping or growing doesn't move the stage
+
+  const startShortestMove = useCallback(() => {
+    if (!prevSection) return;
+    const plan = (same: boolean) => planShortestMoves(prevSection.formation, section.formation, selectedIds, { sameColour: same });
+    const same = plan(true), any = plan(false);
+    if (same.moves.length === 0 && any.moves.length === 0) {
+      setNoGainOpen(true);
+      return;
+    }
+    setSameColour(true);
+    setCountsFollowPerson(false);
+    setView("after");
+    setExcludedColours(new Set());
+    setColourFollowsPerson(true);
+    setSession({ base: state, sectionId: section.id, prev: prevSection, formation: section.formation, selectedIds, sameColour: same, anyColour: any });
+  }, [prevSection, section, selectedIds, state]);
+
+  // Cancel jumps back without animating; animation resumes next render.
+  const [snapBack, setSnapBack] = useState(false);
+  const close = useCallback(() => {
+    setSnapBack(true);
+    setSession(undefined);
+  }, []);
+  useEffect(() => {
+    if (!session) setSheetHeight(undefined);
+  }, [session]);
+  useEffect(() => {
+    if (snapBack) setSnapBack(false);
+  }, [snapBack]);
+
+  // Stale if the choreo or section changed underneath.
+  useEffect(() => {
+    if (session && (state !== session.base || section.id !== session.sectionId)) setSession(undefined);
+  }, [session, state, section.id]);
+
+  const colours = useMemo(() => {
+    if (!session) return [];
+    const here = session.formation.dancerPositions;
+    return Array.from(new Set(session.sameColour.considered.map(id => here[id].color)));
+  }, [session]);
+
+  const plans = useMemo(() => {
+    if (!session) return undefined;
+    if (excludedColours.size === 0) return { same: session.sameColour, any: session.anyColour };
+    const plan = (same: boolean) =>
+      planShortestMoves(session.prev.formation, session.formation, session.selectedIds, { sameColour: same, excludeColours: excludedColours });
+    return { same: plan(true), any: plan(false) };
+  }, [session, excludedColours]);
+  const plan = plans && (sameColour ? plans.same : plans.any);
+  const hasGain = (plan?.moves.length ?? 0) > 0;
+
+  const toggleColour = useCallback((colour: string) => setExcludedColours(old => {
+    const next = new Set(old);
+    if (!next.delete(colour)) next.add(colour);
+    return next;
+  }), []);
+
+  const after = useMemo(
+    () => session && plan && plan.moves.length > 0
+      ? moveUnitsTo(session.base, session.sectionId, plan.moves, countsFollowPerson ? "person" : "spot",
+        sameColour || colourFollowsPerson ? "person" : "spot")
+      : undefined,
+    [session, plan, countsFollowPerson, sameColour, colourFollowsPerson]);
+
+  // Closes when the new state arrives (effect above); closing here would flash the old positions.
+  const apply = useCallback(() => {
+    if (after) commitState(after);
+    else setSession(undefined);
+  }, [after, commitState]);
+
+  const shortestMovePreview = useMemo((): ShortestMovePreview | undefined => {
+    if (!session || !plan || !prevSection) return undefined;
+    const kind: ShortestMoveView = hasGain ? view : "now";
+    const choreo = kind === "after" && after ? after : session.base;
+    const shown = choreo.sections.find(s => s.id === session.sectionId);
+    if (!shown) return undefined;
+    const considered = new Set(plan.considered);
+    const changed = new Set(plan.moves.map(m => m.unit[0]));
+    const here = shown.formation.dancerPositions;
+    const routes = plan.considered.flatMap(id => {
+      const from = prevSection.formation.dancerPositions[id], to = here[id];
+      if (!from || !to || Math.hypot(to.x - from.x, to.y - from.y) < MIN_ROUTE) return [];
+      return [{ id, from, to, color: to.color, changed: changed.has(id), path: shown.formation.dancerMovements?.[id] }];
+    });
+    return {
+      choreo,
+      section: shown,
+      fadedDancerIds: new Set(Object.keys(here).filter(id => !considered.has(id))),
+      routes: { routes, kind },
+    };
+  }, [session, plan, prevSection, hasGain, view, after]);
+
+  const shortestMoveSheet = session && plan && prevSection
+    ? <ShortestMoveSheet
+        previousSectionName={prevSection.name}
+        totalBefore={plan.totalBefore}
+        totalAfter={plan.totalAfter}
+        hasGain={hasGain}
+        noGainMessage={hasGain ? undefined
+          : colours.every(c => excludedColours.has(c)) ? "色を1つ以上選んでください"
+          : sameColour ? "同じ色どうしでは、これ以上短くなりません"
+          : "これ以上短くなりません"}
+        colours={colours}
+        colourFollowsPerson={colourFollowsPerson}
+        onChangeColourFollowsPerson={setColourFollowsPerson}
+        excludedColours={excludedColours}
+        onToggleColour={toggleColour}
+        view={view}
+        onChangeView={setView}
+        sameColour={sameColour}
+        onChangeSameColour={setSameColour}
+        showCountsOption={plan.countsAffected}
+        countsFollowPerson={countsFollowPerson}
+        onChangeCountsFollowPerson={setCountsFollowPerson}
+        skippedStacked={plan.skippedStacked}
+        onCancel={close}
+        onApply={apply}
+        onHeightChange={h => setSheetHeight(prev => prev ?? h)}/>
+    : undefined;
+
+  const shortestMoveDialog = <Dialog.Root open={noGainOpen} onOpenChange={setNoGainOpen}>
+    <CustomDialog title="これ以上短くなりません">
+      <Dialog.Close className="w-full mt-2">
+        <Button asDiv full><span className="font-semibold">閉じる</span></Button>
+      </Dialog.Close>
+    </CustomDialog>
+  </Dialog.Root>;
+
+  return {
+    canShortestMove, startShortestMove, isPreviewingShortestMove: session !== undefined,
+    shortestMoveInstantMoves: session !== undefined || snapBack,
+    shortestMoveSheetHeight: session ? sheetHeight : undefined,
+    shortestMovePreview, shortestMoveSheet, shortestMoveDialog,
+  };
+}
