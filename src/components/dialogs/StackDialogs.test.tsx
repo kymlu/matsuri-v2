@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { Dialog } from "@base-ui/react";
 import { StackOrderDialog, SwapDialog, UnstackDialog } from "./StackDialogs";
 
@@ -46,7 +46,7 @@ describe("SwapDialog", () => {
     expect(screen.getByText("入れ替えたあと、どちらに合わせますか？")).toBeTruthy();
     expect(screen.getByText("手上げ 1")).toBeTruthy();
     expect(screen.getByText("なし")).toBeTruthy();
-    const [person, spot] = Array.from(counts.querySelectorAll("[role=radio]"));
+    const [person, spot] = within(counts).getAllByRole("radio");
     expect(person.getAttribute("aria-checked")).toBe("true");
     fireEvent.click(spot);
     expect(spot.getAttribute("aria-checked")).toBe("true");
