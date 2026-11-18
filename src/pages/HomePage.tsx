@@ -32,7 +32,7 @@ import ExpandableSection from "../components/basic/ExpandableSection"
 import { useHelp } from "../components/help/HelpContext"
 import EditEventInfoDialog from "../components/dialogs/EditEventInfoDialog"
 import SiteInfoDialog from "../components/dialogs/SiteInfoDialog"
-import { ChoreoStatusTag, Tag } from "../components/common/Tag"
+import { ChoreoStatusTag } from "../components/common/Tag"
 import { changeUserName, getChoreoFile, getChoreoSummary, logoutUserFromTeam, verifyInvite } from "../lib/helpers/apiHelper"
 import LoginDialog from "../components/dialogs/LoginDialog"
 import { Team } from "../models/team"
@@ -1096,7 +1096,7 @@ const EventSection = memo(function EventSection({
   return <ExpandableSection
     defaultExpanded={isExpandedByDefault ?? true}
     level={2}
-    titleExtra={<Tag compact type="grey" text={`${choreos.length}件`}/>}
+    titleExtra={<span className="text-sm text-muted">{choreos.length}件</span>}
     title={
       <div className="py-1 text-left">
         <div>

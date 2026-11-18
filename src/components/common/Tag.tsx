@@ -15,18 +15,18 @@ type TagProps = {
 export function Tag ({
   icon, text, type, compact, dottedLine
 }: TagProps) {
-  const tagClasses = classNames("w-min font-semibold flex items-center gap-0.5 border rounded-md text-nowrap",
+  const tagClasses = classNames("w-min font-semibold inline-flex items-center align-middle gap-0.5 border rounded-md text-nowrap",
     {
       "bg-primary-fill text-white border-primary-fill": type === "filled",
       "bg-transparent text-primary border-primary": type === "primary",
       "bg-transparent text-muted border-line-strong": type === "grey",
-      "px-0.5 py-0 text-xs": compact === true,
+      "px-1 py-0 text-xs": compact === true,
       "px-1 py-0.5 text-sm ": compact !== true,
       "border-dashed": dottedLine && type !== "filled"
     }
   )
   
-  return <div className={tagClasses}>
+  return <span className={tagClasses}>
     <span>{ text }</span>
     {
       icon &&
@@ -35,7 +35,7 @@ export function Tag ({
         colour={type === "filled" ? "white" : type === "grey" ? "grey" : "primary"}
         size="xs"/>
     }
-  </div>
+  </span>
 }
 
 type ChoreoStatusTagProps = {
