@@ -2,7 +2,7 @@ import { render, screen, within } from "@testing-library/react";
 import ShortestMoveSheet, { formatMetres } from "./ShortestMoveSheet";
 
 const base = {
-  previousSectionName: "Aメロ", totalBefore: 62, totalAfter: 17, hasGain: true,
+  previousSectionName: "Aメロ", totalBefore: 62, totalAfter: 17, movedCount: 4, hasGain: true,
   colours: [] as string[], excludedColours: new Set<string>(), onToggleColour: jest.fn(),
   view: "after" as const, onChangeView: jest.fn(), sameColour: true, onChangeSameColour: jest.fn(),
   colourFollowsPerson: true, onChangeColourFollowsPerson: jest.fn(),
@@ -16,6 +16,7 @@ describe("ShortestMoveSheet", () => {
     expect(screen.getByText("「Aメロ」からの移動（合計）")).toBeInTheDocument();
     expect(screen.getByText("62m")).toBeInTheDocument();
     expect(screen.getByText("17m")).toBeInTheDocument();
+    expect(screen.getByText("4人が入れ替わります")).toBeInTheDocument();
     expect(screen.getByRole("radio", { name: "最短" })).toHaveAttribute("aria-checked", "true");
     expect(screen.queryByRole("radiogroup", { name: "カウント" })).toBeNull();
     expect(screen.queryByText("重なっている人は動かしません")).toBeNull();
@@ -43,6 +44,7 @@ describe("ShortestMoveSheet", () => {
     const onApply = jest.fn();
     render(<ShortestMoveSheet {...base} hasGain={false} noGainMessage="同じ色どうしでは、これ以上短くなりません" totalAfter={62} onApply={onApply}/>);
     expect(screen.getByText("同じ色どうしでは、これ以上短くなりません")).toBeInTheDocument();
+    expect(screen.queryByText("4人が入れ替わります")).toBeNull();
     expect(screen.queryByRole("radiogroup")).toBeNull();
     screen.getByText("入れ替える").click();
     expect(onApply).not.toHaveBeenCalled();

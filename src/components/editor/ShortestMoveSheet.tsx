@@ -12,6 +12,7 @@ type ShortestMoveSheetProps = {
   previousSectionName: string,
   totalBefore: number,
   totalAfter: number,
+  movedCount: number, // people who change spot
   hasGain: boolean,
   noGainMessage?: string,
   // Colours taking part; off keeps that colour in place.
@@ -41,7 +42,7 @@ const shortName = (name: string) => name.length > 8 ? name.slice(0, 8) + "…" :
 
 // 最短距離 preview in the shared bottom drawer: full or peek. Closing cancels; the stage can be panned but not edited.
 export default function ShortestMoveSheet({
-  previousSectionName, totalBefore, totalAfter, hasGain, noGainMessage, colours, excludedColours, onToggleColour, view, onChangeView,
+  previousSectionName, totalBefore, totalAfter, movedCount, hasGain, noGainMessage, colours, excludedColours, onToggleColour, view, onChangeView,
   sameColour, onChangeSameColour, colourFollowsPerson, onChangeColourFollowsPerson, showCountsOption, countsFollowPerson, onChangeCountsFollowPerson,
   skippedStacked, onCancel, onApply, onHeightChange,
 }: ShortestMoveSheetProps) {
@@ -87,6 +88,7 @@ export default function ShortestMoveSheet({
           <span className="text-xl font-bold">{formatMetres(totalAfter)}</span>
         </p>
       }
+      {hasGain && <p className="-mt-1 text-sm text-center text-muted">{movedCount}人が入れ替わります</p>}
       {skippedStacked && <p className="text-sm text-center text-muted">重なっている人は動かしません</p>}
       {noGainMessage && <p className="font-bold text-center text-wrap text-primary">{noGainMessage}</p>}
       <div className="grid w-full grid-flow-col gap-2 auto-cols-fr">
