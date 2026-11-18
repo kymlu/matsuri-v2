@@ -148,6 +148,7 @@ export function useShortestMove({ state, section, prevSection, selectedIds, comm
     ? <ShortestMoveSheet
         previousSectionName={prevSection.name}
         totalBefore={plan.totalBefore}
+        movedCount={plan.moves.length}
         totalAfter={plan.totalAfter}
         hasGain={hasGain}
         noGainMessage={hasGain ? undefined
