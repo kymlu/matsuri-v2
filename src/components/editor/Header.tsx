@@ -12,7 +12,6 @@ import { formatDateRange } from "../../lib/helpers/dateHelper";
 import { ChoreoStatus } from "../../pages/HomePage";
 import { ChoreoStatusTag } from "../common/Tag";
 import { isNullOrUndefinedOrBlank } from "../../lib/helpers/globalHelper";
-import { DancerCount, PropCount, StageSize } from "../common/IconInfo";
 
 type HeaderProps = {
   returnHome: () => void;
@@ -160,11 +159,9 @@ function Header({
               changeShowPrevious={changeShowPrevious}
               showPublish={showPublish}
               publish={publish}
-              details={<>
-                <StageSize stageLength={stageLength} stageWidth={stageWidth}/>
-                {dancerCount > 0 && <DancerCount dancerCount={dancerCount}/>}
-                {propCount > 0 && <PropCount propCount={propCount}/>}
-              </>}
+              stageSize={<><span className="text-nowrap">縦{stageLength}m ×</span> <span className="text-nowrap">幅{stageWidth}m</span></>}
+              dancerCount={dancerCount}
+              propCount={propCount}
             />
           </Dialog.Root>
         }
