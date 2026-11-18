@@ -11,6 +11,8 @@ type BottomDrawerProps = {
   onClose?: () => void,
   swipeToClose?: boolean, // false: only BottomDrawerClose closes it; swiping stops at the smallest snap point
   snapPoints?: Drawer.Root.SnapPoint[],
+  lowestSnapPoint?: string,
+  sizeToContent?: boolean, // slide instead of shrinking the content, for drawers without a fixed height
   defaultSnapPoint?: Drawer.Root.SnapPoint,
   popupClassName?: string,
   // Pixels covered from the bottom of the screen, each time the drawer settles (opened or snapped).
@@ -19,15 +21,17 @@ type BottomDrawerProps = {
   layerClassName?: string,
 }
 
+const DEFAULT_LOWEST_SNAP_POINT = "75px";
 const DEFAULT_SNAP_POINTS: Drawer.Root.SnapPoint[] =
-  ["75px", 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1];
+  [DEFAULT_LOWEST_SNAP_POINT, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1];
 
 // Closes the drawer it is inside (with the slide), like Dialog.Close.
 export const BottomDrawerClose = Drawer.Close;
 
 export default function BottomDrawer ({
   children, header, footer, onChangeHeight,
-  onClose, snapPoints = DEFAULT_SNAP_POINTS, defaultSnapPoint = 0.2,
+  onClose, lowestSnapPoint = DEFAULT_LOWEST_SNAP_POINT, snapPoints = [lowestSnapPoint, ...DEFAULT_SNAP_POINTS.slice(1)],
+  defaultSnapPoint = 0.2, sizeToContent = false,
   popupClassName = "h-[75svh]", onVisibleHeightChange, label, layerClassName = "", swipeToClose = true,
 }: BottomDrawerProps) {
   const [open, setOpen] = useState(true);
@@ -74,6 +78,7 @@ export default function BottomDrawer ({
       <Drawer.Portal>
         <Drawer.Viewport className={`fixed bottom-0 flex flex-col w-full pointer-events-none ${layerClassName}`}>
           <Drawer.Popup ref={popupRef} data-bottom-drawer aria-label={label}
+            style={swipeToClose ? undefined : { transform: `translateY(min(calc(var(--drawer-snap-point-offset) + var(--drawer-swipe-movement-y)), calc(100% - ${lowestSnapPoint})))` }}
             onTransitionEnd={(e) => { if (e.target === e.currentTarget && e.propertyName === "transform") reportVisibleHeight(); }}
             className={`pointer-events-auto w-full ${popupClassName} bg-surface rounded-t-2xl overscroll-contain transition-transform duration-[450ms] ease-[cubic-bezier(0.32,0.72,0,1)] shadow-[0_-2px_16px_rgba(0,0,0,0.15)] [transform:translateY(calc(var(--drawer-snap-point-offset)+var(--drawer-swipe-movement-y)))]
             will-change-transform outline-none data-[swiping]:select-none data-[starting-style]:translate-y-[calc(100%-var(--bleed))] data-[ending-style]:translate-y-[calc(100%-var(--bleed))] data-[ending-style]:duration-[calc(var(--drawer-swipe-strength)*400ms)]`}>
@@ -82,7 +87,7 @@ export default function BottomDrawer ({
             </div>
             <Drawer.Content className="h-full px-4 pb-6">
               {header}
-              <div className="max-h-[calc(var(--drawer-frontmost-height)_-_var(--drawer-snap-point-offset)_-_75px)] overflow-auto">
+              <div className={sizeToContent ? undefined : "max-h-[calc(var(--drawer-frontmost-height)_-_var(--drawer-snap-point-offset)_-_75px)] overflow-auto"}>
                 {children}
               </div>
             </Drawer.Content>
