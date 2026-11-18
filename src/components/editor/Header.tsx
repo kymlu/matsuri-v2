@@ -65,7 +65,7 @@ function Header({
   dancerCount, propCount, stageLength, stageWidth, version, choreoStatus,
   showPublish, publish,
 }: HeaderProps) {
-  return <header className="flex items-center gap-1 py-1 pl-1 pr-2 border-b-2 select-none border-subtle bg-surface">
+  return <header className="flex items-center gap-3 px-3 py-2 border-b-2 select-none border-subtle bg-surface">
       <IconButton
         src="home"
         noBorder
@@ -83,7 +83,7 @@ function Header({
           <ChoreoStatusTag compact choreoStatus={choreoStatus} version={version}/>
         </div>
       </div>
-      <div className="flex justify-end gap-2">
+      <div className="flex justify-end gap-3">
         {
           (goToEdit || goToView) &&
           <IconButton
