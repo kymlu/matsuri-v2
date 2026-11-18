@@ -50,6 +50,7 @@ export default function ShortestMoveSheet({
     label="最短距離"
     layerClassName="z-20"
     onClose={onCancel}
+    swipeToClose={false}
     defaultSnapPoint={1}
     popupClassName="max-h-[calc(100svh-8rem)]"
     onVisibleHeightChange={onHeightChange}

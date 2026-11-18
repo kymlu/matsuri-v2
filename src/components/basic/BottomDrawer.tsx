@@ -9,6 +9,7 @@ type BottomDrawerProps = {
   onChangeHeight?: (height: number) => void,
   // Makes the drawer closable: swiping past the smallest snap point or a BottomDrawerClose slides it away, then this runs.
   onClose?: () => void,
+  swipeToClose?: boolean, // false: only BottomDrawerClose closes it; swiping stops at the smallest snap point
   snapPoints?: Drawer.Root.SnapPoint[],
   defaultSnapPoint?: Drawer.Root.SnapPoint,
   popupClassName?: string,
@@ -27,7 +28,7 @@ export const BottomDrawerClose = Drawer.Close;
 export default function BottomDrawer ({
   children, header, footer, onChangeHeight,
   onClose, snapPoints = DEFAULT_SNAP_POINTS, defaultSnapPoint = 0.2,
-  popupClassName = "h-[75svh]", onVisibleHeightChange, label, layerClassName = "",
+  popupClassName = "h-[75svh]", onVisibleHeightChange, label, layerClassName = "", swipeToClose = true,
 }: BottomDrawerProps) {
   const [open, setOpen] = useState(true);
 
@@ -48,11 +49,15 @@ export default function BottomDrawer ({
   return (
     <Drawer.Root
       open={open}
-      onOpenChange={(open: boolean) => { setOpen(open); }}
+      onOpenChange={(open, details) => {
+        if (!open && !swipeToClose && details.reason === "swipe") return details.cancel();
+        setOpen(open);
+      }}
       onOpenChangeComplete={(open: boolean) => { if (open) reportVisibleHeight(); else onClose?.(); }}
       defaultSnapPoint={defaultSnapPoint}
       snapPoints={snapPoints}
-      onSnapPointChange={(snapPoint) => {
+      onSnapPointChange={(snapPoint, details) => {
+        if (snapPoint === null && !swipeToClose && details.reason === "swipe") return details.cancel();
         if (snapPoint) {
           if (snapPoint === snapPoints[0]) {
             onChangeHeight?.(0)
