@@ -3,7 +3,6 @@ import { StageGeometry } from "../../models/choreo";
 import { Dancer, DancerPosition } from "../../models/dancer";
 import { DancerAction } from "../../models/dancerAction";
 import { roundToTenth } from "../../lib/helpers/globalHelper";
-import { Tag } from "../common/Tag";
 
 type PositionHintProps = {
   dancer: Dancer;
@@ -119,21 +118,8 @@ export function DancerPositionText({ position, geometry, bold = true }: DancerPo
   );
 }
 
-const dancerCount = (action: DancerAction, dancerId: string) =>
+export const dancerCount = (action: DancerAction, dancerId: string) =>
   action.timings.find(t => t.dancerIds.includes(dancerId))?.name;
-
-export function ActionCountTag({ action, dancerId }: { action: DancerAction, dancerId: string }) {
-  const count = dancerCount(action, dancerId);
-
-  return <Tag
-    type="grey"
-    compact
-    text={<span className="flex items-baseline gap-0.5">
-      <span className="font-normal">{action.name}</span>
-      <span className="font-black">{count ?? "-"}</span>
-    </span>}
-  />;
-}
 
 type InfoBoxProps = {
   title: string,
@@ -142,7 +128,7 @@ type InfoBoxProps = {
 }
 
 function InfoBox({title, children, alignTop}: InfoBoxProps) {
-  return <div className={"flex flex-col p-2 border border-line rounded-md" + (alignTop ? " justify-start" : " justify-between") + " flex-1"}>
+  return <div className={"flex flex-col flex-1 p-2 border border-line rounded-md" + (alignTop ? " justify-start" : " justify-between")}>
     <span className="text-sm font-semibold text-center text-muted">{title}</span>
     <div className="flex flex-col items-center justify-center">
       {children}
