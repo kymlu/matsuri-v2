@@ -327,6 +327,7 @@ export default function ChoreoEditPage(props: {
     selectedDancerMovement: undefined, onDancerSelected: undefined, showPaths: false,
     toggleEditEnabled: undefined, openNoteDialog: undefined, openFind: undefined, dimDancersToggle: undefined,
     fadedDancerIds: shortestMovePreview.fadedDancerIds,
+    halfFadedDancerIds: shortestMovePreview.unchangedDancerIds,
     previewRoutes: shortestMovePreview.routes,
     bottomOverlayHeight: shortestMoveSheetHeight,
     dimPropsAndObstacles: true, // so routes under props (e.g. a curtain) show through

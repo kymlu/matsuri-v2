@@ -106,6 +106,16 @@ describe("useShortestMove", () => {
     expect([...result.current.shortestMovePreview!.fadedDancerIds]).toEqual(["c"]);
   });
 
+  it("half-fades people taking part who keep their spot", () => {
+    const { result } = setUp(makeChoreo());
+    act(() => result.current.startShortestMove());
+    const preview = result.current.shortestMovePreview!;
+    const changed = preview.routes.routes.filter(r => r.changed).map(r => r.id);
+    expect(changed.length).toBeGreaterThan(0);
+    changed.forEach(id => expect(preview.unchangedDancerIds.has(id)).toBe(false));
+    expect([...preview.unchangedDancerIds].every(id => !preview.fadedDancerIds.has(id))).toBe(true);
+  });
+
   it("opens with nothing to apply when only crossing colours helps", () => {
     const { result } = setUp(makeChoreo("blue"));
     act(() => result.current.startShortestMove());

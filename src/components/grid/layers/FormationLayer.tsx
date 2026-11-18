@@ -19,6 +19,7 @@ type FormationLayerProps = {
   canSelectDancers: boolean,
   dimDancers?: boolean, // focusing on props: dancers faint and can't be touched
   fadedDancerIds?: ReadonlySet<string>, // these dancers only, faint and untouchable (e.g. left out of a preview)
+  halfFadedDancerIds?: ReadonlySet<string>, // less faint (e.g. taking part but not moving)
   instantMoves?: boolean, // jump to new positions instead of animating (e.g. flipping a preview)
   dimPropsAndObstacles?: boolean, // props and obstacles faint and untouchable (e.g. so a preview's routes show through)
   canSelectProps: boolean,
@@ -57,6 +58,7 @@ const FormationLayer = memo(function FormationLayer({
   canSelectDancers,
   dimDancers,
   fadedDancerIds,
+  halfFadedDancerIds,
   instantMoves,
   dimPropsAndObstacles,
   canSelectProps,
@@ -303,7 +305,7 @@ const FormationLayer = memo(function FormationLayer({
             hiddenSelected={dancerStackDrawing[dancerPosition.dancerId]?.hiddenSelected}
             stackCount={dancerStackDrawing[dancerPosition.dancerId]?.count}
             coveredInStack={coveredDancers.has(dancerPosition.dancerId)}
-            dimmed={dimDancers || fadedDancerIds?.has(dancerPosition.dancerId)}
+            dimmed={dimDancers || fadedDancerIds?.has(dancerPosition.dancerId) || (halfFadedDancerIds?.has(dancerPosition.dancerId) && "half")}
             onDragFollow={canEdit ? followDrag : undefined}
           />
         );

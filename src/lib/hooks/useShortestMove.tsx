@@ -32,6 +32,7 @@ export type ShortestMovePreview = {
   choreo: Choreo,
   section: ChoreoSection,
   fadedDancerIds: ReadonlySet<string>,
+  unchangedDancerIds: ReadonlySet<string>, // taking part but keeping their spot
   routes: { routes: PreviewRoute[], kind: ShortestMoveView },
 };
 
@@ -140,6 +141,7 @@ export function useShortestMove({ state, section, prevSection, selectedIds, comm
       choreo,
       section: shown,
       fadedDancerIds: new Set(Object.keys(here).filter(id => !considered.has(id))),
+      unchangedDancerIds: new Set(hasGain ? plan.considered.filter(id => !changed.has(id)) : []),
       routes: { routes, kind },
     };
   }, [session, plan, prevSection, hasGain, view, after]);
@@ -148,6 +150,7 @@ export function useShortestMove({ state, section, prevSection, selectedIds, comm
     ? <ShortestMoveSheet
         previousSectionName={prevSection.name}
         totalBefore={plan.totalBefore}
+        movedCount={plan.moves.length}
         totalAfter={plan.totalAfter}
         hasGain={hasGain}
         noGainMessage={hasGain ? undefined
