@@ -65,22 +65,23 @@ function Header({
   dancerCount, propCount, stageLength, stageWidth, version, choreoStatus,
   showPublish, publish,
 }: HeaderProps) {
-  return <header className="py-2 space-y-1.5 border-b-2 border-subtle select-none bg-surface from-white to-transparent">
-    <div className="flex items-center justify-between w-screen gap-2 px-2">
-      <div className="flex">
-        <IconButton
-          src="home"
-          noBorder
-          onClick={() => {
-            onSave?.();
-            returnHome();
-          }}/>
-      </div>
-      <div
-        className="w-full text-center truncate"
-        onDoubleClick={downloadLogs}>
-        <p className="text-sm text-faint">{isNullOrUndefinedOrBlank(currentChoreo.event) ? "イベント不明" : currentChoreo.event}</p>
-        <p className="font-bold">{currentChoreo.name}</p>
+  return <header className="flex items-center gap-1 py-1 pl-1 pr-2 border-b-2 select-none border-subtle bg-surface">
+      <IconButton
+        src="home"
+        noBorder
+        onClick={() => {
+          onSave?.();
+          returnHome();
+        }}/>
+      <div className="flex-1 min-w-0" onDoubleClick={downloadLogs}>
+        {
+          !isNullOrUndefinedOrBlank(currentChoreo.event) &&
+          <p className="text-xs leading-tight truncate text-faint">{currentChoreo.event}</p>
+        }
+        <div className="flex items-center min-w-0 gap-1.5">
+          <p className="font-bold leading-tight truncate">{currentChoreo.name}</p>
+          <ChoreoStatusTag compact choreoStatus={choreoStatus} version={version}/>
+        </div>
       </div>
       <div className="flex justify-end gap-2">
         {
@@ -159,26 +160,15 @@ function Header({
               changeShowPrevious={changeShowPrevious}
               showPublish={showPublish}
               publish={publish}
+              details={<>
+                <StageSize stageLength={stageLength} stageWidth={stageWidth}/>
+                {dancerCount > 0 && <DancerCount dancerCount={dancerCount}/>}
+                {propCount > 0 && <PropCount propCount={propCount}/>}
+              </>}
             />
           </Dialog.Root>
         }
       </div>
-    </div>
-    <div className="flex items-center justify-between px-3 text-sm text-muted">
-      <div className="flex gap-1">
-        <StageSize stageLength={stageLength} stageWidth={stageWidth}/>
-
-        {
-          dancerCount > 0 &&
-          <DancerCount dancerCount={dancerCount}/>
-        }
-        {
-          propCount > 0 &&
-          <PropCount propCount={propCount}/>
-        }
-      </div>
-      <ChoreoStatusTag compact choreoStatus={choreoStatus} version={version}/>
-    </div>
   </header>
 }
 

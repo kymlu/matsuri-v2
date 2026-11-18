@@ -10,6 +10,7 @@ type SidebarProps = {
   choreoName: string;
   choreoEvent?: string;
   choreoDates?: string;
+  details?: React.ReactNode;
 
   editName?: () => void;
   editSize?: () => void;
@@ -31,7 +32,7 @@ type SidebarProps = {
 };
 
 export function Sidebar({
-  choreoName, choreoEvent, choreoDates,
+  choreoName, choreoEvent, choreoDates, details,
   editName, editSize,
   showManageDancers, manageDancers,
   showManageProps, manageProps,
@@ -61,6 +62,7 @@ export function Sidebar({
                 </span>
               }
             </span>
+            {details && <div className="flex flex-wrap gap-2 mt-1 text-sm text-muted">{details}</div>}
           </div>
           <div>
             <IconButton
