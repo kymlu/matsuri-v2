@@ -90,7 +90,7 @@ export function Sidebar({
         }
         {
           changeShowPrevious &&
-          <CustomSwitch label="前のセクションを見る" hint="前の位置を薄く表示" defaultChecked={appSettings.showPreviousSection} onChange={changeShowPrevious}/>
+          <CustomSwitch label="前のセクションを見る" defaultChecked={appSettings.showPreviousSection} onChange={changeShowPrevious}/>
         }
         {
           changeDancerSize &&
