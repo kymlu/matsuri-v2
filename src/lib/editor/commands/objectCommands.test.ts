@@ -1,5 +1,6 @@
 import { Choreo } from "../../../models/choreo";
-import { editAndDeleteProps, updateObstacleSizeAndRotate, updatePropSizeAndRotate } from "./objectCommands";
+import { editAndDeleteProps, swapPropPositions, updateObstacleSizeAndRotate, updatePropSizeAndRotate } from "./objectCommands";
+import { cornerToCentreFromProp } from "../../helpers/editorCalculationHelper";
 
 // Undo works by going back to an earlier state object, so a command must never change the state it's given.
 function makeChoreo(): Choreo {
@@ -53,5 +54,30 @@ describe("prop and obstacle resizing", () => {
     expect(after.props.p1).toMatchObject({ name: "中旗", width: 2, color: "#5CB85C" });
     expect(before.props.p1).toMatchObject({ name: "大旗", width: 4, color: "#F08A00" });
     expect(before.sections[0].formation.propPositions.p1).toMatchObject({ x: 2, y: 2 });
+  });
+});
+
+describe("swapping two props (位置交換)", () => {
+  // A flag lying across the middle, and a second one standing upright at the side.
+  function twoFlags(): Choreo {
+    const c = makeChoreo();
+    c.props.p2 = { id: "p2", name: "小旗", width: 2, length: 1, color: "#3366CC" } as Choreo["props"][string];
+    c.sections[0].formation.propPositions.p2 = { propId: "p2", x: 9, y: 3, rotation: 90, sectionId: "s1", type: "prop" };
+    return c;
+  }
+  const centre = (c: Choreo, id: string) =>
+    cornerToCentreFromProp(c.sections[0].formation.propPositions[id], c.props[id], c.stageGeometry.yAxis);
+
+  it("trades places and angles, so each spot keeps its layout", () => {
+    const before = twoFlags();
+    const after = swapPropPositions(before, "s1", "p1", "p2");
+    const at = (c: Choreo, id: string) => c.sections[0].formation.propPositions[id];
+    expect(at(after, "p1").rotation).toBe(90);
+    expect(at(after, "p2").rotation).toBe(0);
+    expect(centre(after, "p1").x).toBeCloseTo(centre(before, "p2").x);
+    expect(centre(after, "p1").y).toBeCloseTo(centre(before, "p2").y);
+    expect(centre(after, "p2").x).toBeCloseTo(centre(before, "p1").x);
+    expect(centre(after, "p2").y).toBeCloseTo(centre(before, "p1").y);
+    expect(at(before, "p1").rotation).toBeUndefined(); // the earlier state is untouched, for undo
   });
 });

@@ -509,19 +509,74 @@ export function swapUnits(formation: Formation, kind: StackKind, ids: string[]):
   return units.length === 2 ? [units[0], units[1]] : undefined;
 }
 
-// Swaps two units: each moves by the distance between them (bottom member to bottom member, prop centres
-// for props), so stacks stay stacks. Front/back order is kept per unit.
-export function swapUnitPositions(state: Choreo, sectionId: string, kind: StackKind, a: Stack, b: Stack): Choreo {
+// A person or stack (bottom first) moving onto another's spot.
+export type UnitMove = { unit: Stack, target: Stack };
+export type StaysWith = "spot" | "person";
+
+// Moves people onto each other's spots (targets are the movers themselves, e.g. a swap). Stacks move as one.
+// Counts and colour stay with the person or the spot (stacks level by level). Movers' custom paths reset.
+export function moveUnitsTo(state: Choreo, sectionId: string, moves: UnitMove[], countsStayWith: StaysWith, colourStaysWith: StaysWith = "person"): Choreo {
+  const moving = moves.filter(m => m.unit[0] !== m.target[0]);
+  if (moving.length === 0) return state;
+  const index = state.sections.findIndex(s => s.id === sectionId);
+  if (index < 0) return state;
+  const old = state.sections[index].formation.dancerPositions;
+  if (moving.some(m => [...m.unit, ...m.target].some(id => !old[id]))) return state;
+
+  const moved = new Set(moving.flatMap(m => m.unit));
+  const occupant = new Map<string, string>(); // old occupant of a spot (each level) → the one there now
+  const next = { ...old };
+  moving.forEach(({ unit, target }) => {
+    const from = old[unit[0]], to = old[target[0]];
+    const dx = to.x - from.x, dy = to.y - from.y;
+    const single = unit.length === 1 && target.length === 1;
+    unit.forEach((id, level) => {
+      const spotColour = colourStaysWith === "spot" ? old[target[level]]?.color : undefined;
+      next[id] = { ...old[id], x: old[id].x + dx, y: old[id].y + dy, ...(single ? { z: to.z } : {}), ...(spotColour ? { color: spotColour } : {}) };
+    });
+    target.forEach((id, level) => { if (level < unit.length) occupant.set(id, unit[level]); });
+  });
+
+  const withoutPaths = (movements: Formation["dancerMovements"]) => {
+    if (!movements || !Object.keys(movements).some(id => moved.has(id))) return movements;
+    return Object.fromEntries(Object.entries(movements).filter(([id]) => !moved.has(id)));
+  };
+  const remapCounts = (actions: Formation["dancerActions"]) => countsStayWith === "person" ? actions : actions.map(a => ({
+    ...a,
+    timings: a.timings.map(t => ({ ...t, dancerIds: Array.from(new Set(t.dancerIds.map(id => occupant.get(id) ?? id))) })),
+  }));
+
+  return normalizeStacks({
+    ...state,
+    sections: state.sections.map((s, i) => {
+      if (i === index) {
+        return { ...s, formation: {
+          ...s.formation,
+          dancerPositions: next,
+          dancerMovements: withoutPaths(s.formation.dancerMovements),
+          dancerActions: remapCounts(s.formation.dancerActions),
+        } };
+      }
+      if (i === index + 1) return { ...s, formation: { ...s.formation, dancerMovements: withoutPaths(s.formation.dancerMovements) } };
+      return s;
+    }),
+  });
+}
+
+// Whether colour or counts would differ between staying with the person and with the spot.
+export function moveChoices(state: Choreo, sectionId: string, moves: UnitMove[]): { colour: boolean, counts: boolean } {
+  const formation = (s: Choreo) => s.sections.find(x => x.id === sectionId)?.formation;
+  const bySpot = formation(moveUnitsTo(state, sectionId, moves, "spot", "spot"));
+  const byPerson = formation(moveUnitsTo(state, sectionId, moves, "person", "person"));
+  if (!bySpot || !byPerson) return { colour: false, counts: false };
+  const colour = Object.keys(bySpot.dancerPositions).some(id => bySpot.dancerPositions[id].color !== byPerson.dancerPositions[id]?.color);
+  const ids = (f: Formation) => f.dancerActions.map(a => a.timings.map(t => [...t.dancerIds].sort().join(",")).join("|")).join("/");
+  return { colour, counts: ids(bySpot) !== ids(byPerson) };
+}
+
+// Swaps two props or prop stacks by their bottom members' centres; angles stay.
+export function swapPropUnitPositions(state: Choreo, sectionId: string, a: Stack, b: Stack): Choreo {
   return updateSection(state, sectionId, f => {
-    if (kind === "dancers") {
-      const pa = f.dancerPositions[a[0]], pb = f.dancerPositions[b[0]];
-      if (!pa || !pb) return f;
-      const dx = pb.x - pa.x, dy = pb.y - pa.y;
-      const next = { ...f.dancerPositions };
-      a.forEach(id => { if (next[id]) next[id] = { ...next[id], x: next[id].x + dx, y: next[id].y + dy }; });
-      b.forEach(id => { if (next[id]) next[id] = { ...next[id], x: next[id].x - dx, y: next[id].y - dy }; });
-      return { ...f, dancerPositions: next };
-    }
     const pa = f.propPositions[a[0]], pb = f.propPositions[b[0]];
     const propA = state.props[a[0]], propB = state.props[b[0]];
     if (!pa || !pb || !propA || !propB) return f;

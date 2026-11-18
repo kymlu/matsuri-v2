@@ -3,12 +3,12 @@ import { Dialog } from "@base-ui/react";
 import { Choreo } from "../../models/choreo";
 import { ChoreoSection } from "../../models/choreoSection";
 import { StageEntities } from "../../models/history";
-import { ReorderStackDialog, StackMember, StackOrderDialog, StackPromptDialog, UnstackDialog } from "../../components/dialogs/StackDialogs";
+import { ReorderStackDialog, StackMember, StackOrderDialog, StackPromptDialog, SwapChoice, SwapDialog, SwapPerson, UnstackDialog } from "../../components/dialogs/StackDialogs";
 import {
   countUnits, expandSelectionToStacks, findDropTarget, findStack, linkedStack, reorderStack, selectedWholeStack,
-  StackKind, stackObjects, StackSpot, swapUnitPositions, swapUnits, unstackObjects,
+  moveChoices, moveUnitsTo, UnitMove, StackKind, stackObjects, StackSpot, swapPropUnitPositions, swapUnits, unstackObjects,
 } from "../helpers/stackHelper";
-import { swapDancerPositions, swapPropPositions } from "../editor/commands/objectCommands";
+import { swapPropPositions } from "../editor/commands/objectCommands";
 
 type Selection = StageEntities<string[]>;
 
@@ -146,18 +146,31 @@ export function useStackEditing({ state, section, prevSection, selectedIds, setS
   // 位置交換 works on two separate things: people, props or whole stacks (not within one stack:
   // that's 上下入れ替え).
   const swapPair = stackKind ? swapUnits(formation, stackKind, stackIds) : undefined;
+  // Two people who differ in colour or counts: ask (last applied answer is the default). Stacks keep theirs.
+  const [swapping, setSwapping] = useState<{ moves: UnitMove[], differs: SwapChoice }>();
+  const lastSwapChoice = useRef<SwapChoice>({ colour: true, counts: true });
+  const swapPeople = useCallback((moves: UnitMove[], choice: SwapChoice) => {
+    commitState(moveUnitsTo(state, section.id, moves, choice.counts ? "person" : "spot", choice.colour ? "person" : "spot"));
+  }, [commitState, state, section.id]);
+  const swapPerson = useCallback((id: string): SwapPerson => ({
+    ...stackMembers("dancers", [id])[0],
+    counts: formation.dancerActions.flatMap(a => a.timings.filter(t => t.dancerIds.includes(id)).map(t => `${a.name} ${t.name}`)),
+  }), [stackMembers, formation]);
   const onSwap = useCallback(() => {
     if (!stackKind || !swapPair) return;
     const [a, b] = swapPair;
-    if (a.length === 1 && b.length === 1) {
-      // Two single objects: the original command (which also swaps front/back).
-      commitState(stackKind === "dancers"
-        ? swapDancerPositions(state, section.id, a[0], b[0])
-        : swapPropPositions(state, section.id, a[0], b[0]));
+    if (stackKind === "dancers") {
+      const moves = [{ unit: a, target: b }, { unit: b, target: a }];
+      if (a.length > 1 || b.length > 1) return swapPeople(moves, { colour: true, counts: true });
+      const differs = moveChoices(state, section.id, moves);
+      if (differs.colour || differs.counts) setSwapping({ moves, differs });
+      else swapPeople(moves, lastSwapChoice.current);
+    } else if (a.length === 1 && b.length === 1) {
+      commitState(swapPropPositions(state, section.id, a[0], b[0]));
     } else {
-      commitState(swapUnitPositions(state, section.id, stackKind, a, b));
+      commitState(swapPropUnitPositions(state, section.id, a, b));
     }
-  }, [stackKind, swapPair, commitState, state, section.id]);
+  }, [stackKind, swapPair, commitState, state, section.id, swapPeople]);
 
   // After a move is saved: if one thing (or one stack) was dropped almost exactly onto another of the
   // same kind, offer to stack them.
@@ -184,6 +197,21 @@ export function useStackEditing({ state, section, prevSection, selectedIds, setS
   }, [section.id, stackMembers]);
 
   const stackDialogs = <>
+    <Dialog.Root open={swapping !== undefined} onOpenChange={open => { if (!open) setSwapping(undefined); }}>
+      {
+        swapping &&
+        <SwapDialog
+          a={swapPerson(swapping.moves[0].unit[0])}
+          b={swapPerson(swapping.moves[1].unit[0])}
+          differs={swapping.differs}
+          initial={lastSwapChoice.current}
+          onSubmit={choice => {
+            lastSwapChoice.current = choice; // what wasn't asked comes back unchanged
+            swapPeople(swapping.moves, choice);
+            setSwapping(undefined);
+          }}/>
+      }
+    </Dialog.Root>
     <Dialog.Root open={stackOrder !== undefined} onOpenChange={open => {
       if (open) return;
       if (stackOrder?.fromDrop && stackedDrop.current !== stackOrder.fromDrop) keptApart.current.add(stackOrder.fromDrop);

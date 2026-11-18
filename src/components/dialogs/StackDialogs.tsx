@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { ReactNode, useState } from "react";
 import { Dialog } from "@base-ui/react";
 import CustomDialog from "../basic/CustomDialog";
 import classNames from "classnames";
 import BaseEditDialog from "./BaseEditDialog";
 import SelectBox from "../basic/SelectBox";
 import Icon from "../basic/Icon";
+import PersonOrSpotSwitch from "../inputs/PersonOrSpotSwitch";
 import { DndContext } from "@dnd-kit/core";
 import { arrayMove, SortableContext, useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
@@ -144,6 +145,46 @@ export function UnstackDialog({ members, onSubmit, kind = "dancers" }: { members
       }
     </ul>
     {note && <p className="px-3 py-2 mt-3 text-sm rounded-md bg-subtle text-muted">{note}</p>}
+  </BaseEditDialog>;
+}
+
+export type SwapChoice = { colour: boolean, counts: boolean };
+
+export type SwapPerson = StackMember & { counts: string[] };
+
+// 位置交換: for what differs, whether it stays with the person (人) or the spot (立ち位置).
+export function SwapDialog({ a, b, differs, initial, onSubmit }: {
+  a: SwapPerson, b: SwapPerson,
+  differs: SwapChoice,
+  initial: SwapChoice,
+  onSubmit: (choice: SwapChoice) => void,
+}) {
+  const [choice, setChoice] = useState(initial);
+  // Both people on one line (wrapping if long).
+  const values = (show: (p: SwapPerson) => ReactNode) =>
+    <span className="flex flex-wrap items-center mt-1 text-sm gap-x-4 gap-y-1">
+      {[a, b].map(p => <span key={p.id} className="flex flex-wrap items-center gap-1 min-w-0">
+        <span className="truncate text-nowrap text-muted max-w-32">{p.label}</span>
+        {show(p)}
+      </span>)}
+    </span>;
+  const row = (key: keyof SwapChoice, label: string, show: (p: SwapPerson) => ReactNode) =>
+    <li className="py-2">
+      <span className="flex items-center justify-between gap-2">
+        <span className="font-semibold">{label}</span>
+        <PersonOrSpotSwitch label={label} withPerson={choice[key]} onChange={v => setChoice({ ...choice, [key]: v })} compact/>
+      </span>
+      {values(show)}
+    </li>;
+  return <BaseEditDialog title="位置交換" actionButtonText="入れ替える" noDetachedTrigger fullWidth onSubmit={() => onSubmit(choice)}>
+    <p><span className="font-semibold">{a.label}</span>と<span className="font-semibold">{b.label}</span>の位置を入れ替えます。</p>
+    <p className="text-sm text-muted">入れ替えたあと、どちらに合わせますか？</p>
+    <ul className="divide-y divide-line">
+      {differs.colour && row("colour", "色", p => <Dot color={p.color}/>)}
+      {differs.counts && row("counts", "カウント", p => p.counts.length === 0
+        ? <span className="text-muted">なし</span>
+        : p.counts.map((c, i) => <span key={i} className="px-1.5 border rounded-full border-line text-nowrap">{c}</span>))}
+    </ul>
   </BaseEditDialog>;
 }
 

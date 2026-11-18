@@ -1,5 +1,6 @@
+import { cornerToCentreFromProp } from "./editorCalculationHelper";
 import { Choreo } from "../../models/choreo";
-import { arrangeRepresentatives, linkedStack, swapUnits, swapUnitPositions, copyStacks, countSelectedUnits, prepareStackPaste, rearrangeWithStacks, restoreCopiedStacks, countUnits, expandSelectionToStacks, findDropTarget, moveStacksTogether, stackNotes, isHiddenInStack, normalizeStacks, reorderStack, selectedWholeStack, stackAbove, stackBelow, stackObjects, unstackObjects } from "./stackHelper";
+import { arrangeRepresentatives, linkedStack, moveChoices, moveUnitsTo, swapUnits, swapPropUnitPositions, copyStacks, countSelectedUnits, prepareStackPaste, rearrangeWithStacks, restoreCopiedStacks, countUnits, expandSelectionToStacks, findDropTarget, moveStacksTogether, stackNotes, isHiddenInStack, normalizeStacks, reorderStack, selectedWholeStack, stackAbove, stackBelow, stackObjects, unstackObjects } from "./stackHelper";
 import { alignHorizontalPositions, pastePositions, removeObjects } from "../editor/commands/objectCommands";
 import { addSection } from "../editor/commands/sectionCommands";
 
@@ -284,7 +285,7 @@ describe("位置交換 with stacks", () => {
 
   it("swaps a stack with a person, keeping the stack", () => {
     let s = stackObjects(makeChoreo(), "s1", "dancers", ["a", "b"]); // at b (3,1)
-    s = normalizeStacks(swapUnitPositions(s, "s1", "dancers", ["b", "a"], ["c"])); // c at (5,1)
+    s = moveUnitsTo(s, "s1", [{ unit: ["b", "a"], target: ["c"] }, { unit: ["c"], target: ["b", "a"] }], "person"); // c at (5,1)
     expect(pos(s, "a")).toMatchObject({ x: 5, y: 1 });
     expect(pos(s, "b")).toMatchObject({ x: 5, y: 1 });
     expect(pos(s, "c")).toMatchObject({ x: 3, y: 1 });
@@ -295,9 +296,104 @@ describe("位置交換 with stacks", () => {
     let s = stackObjects(makeChoreo(), "s1", "dancers", ["a", "b"]); // at (3,1)
     s = stackObjects(s, "s1", "dancers", ["c", "d"]); // d bottom
     const dAt = { x: pos(s, "d").x, y: pos(s, "d").y };
-    s = normalizeStacks(swapUnitPositions(s, "s1", "dancers", ["b", "a"], ["d", "c"]));
+    s = moveUnitsTo(s, "s1", [{ unit: ["b", "a"], target: ["d", "c"] }, { unit: ["d", "c"], target: ["b", "a"] }], "person");
     expect(pos(s, "a")).toMatchObject(dAt);
     expect(pos(s, "c")).toMatchObject({ x: 3, y: 1 });
+  });
+});
+
+describe("swapPropUnitPositions", () => {
+  it("swaps two props by their centres, each keeping its own angle", () => {
+    const s0 = makeChoreo();
+    const tilted = { ...s0, sections: s0.sections.map(sec => ({ ...sec, formation: { ...sec.formation,
+      propPositions: { ...sec.formation.propPositions, q: { ...sec.formation.propPositions.q, rotation: 90 } } } })) } as Choreo;
+    const centre = (s: Choreo, id: string) => cornerToCentreFromProp(s.sections[0].formation.propPositions[id], s.props[id], s.stageGeometry.yAxis);
+    const s = swapPropUnitPositions(tilted, "s1", ["p"], ["q"]);
+    expect(centre(s, "p")).toEqual(centre(tilted, "q"));
+    expect(centre(s, "q")).toEqual(centre(tilted, "p"));
+    expect(s.sections[0].formation.propPositions.q.rotation).toBe(90);
+  });
+});
+
+describe("moveUnitsTo", () => {
+  const path = { points: [{ x: 9, y: 9 }], tension: "curved" as const };
+  // s1 then s2, with counts in s1 and custom paths for a and c into both sections.
+  const setUp = (s: Choreo = makeChoreo()): Choreo => {
+    const s1 = { ...s.sections[0], formation: {
+      ...s.sections[0].formation,
+      dancerMovements: { a: path, c: path },
+      dancerActions: [{ id: "act", name: "手上げ", timings: [{ id: "t1", name: "1", dancerIds: ["a"] }, { id: "t3", name: "3", dancerIds: ["b", "c"] }] }],
+    } };
+    const s2 = { ...s1, id: "s2", order: 2, formation: { ...s1.formation, dancerActions: [] } };
+    return { ...s, sections: [s1, s2] } as Choreo;
+  };
+  const timings = (s: Choreo) => f(s).dancerActions[0].timings.map(t => t.dancerIds);
+  const swap = (a: string[], b: string[]) => [{ unit: a, target: b }, { unit: b, target: a }];
+
+  it("swaps two people, including front/back, and moves counts with the spot", () => {
+    const s = moveUnitsTo(setUp(), "s1", swap(["a"], ["b"]), "spot");
+    expect(pos(s, "a")).toMatchObject({ x: 3, y: 1, z: 1 });
+    expect(pos(s, "b")).toMatchObject({ x: 1, y: 1, z: 0 });
+    expect(timings(s)).toEqual([["b"], ["a", "c"]]);
+  });
+
+  it("leaves counts with the person when asked", () => {
+    expect(timings(moveUnitsTo(setUp(), "s1", swap(["a"], ["b"]), "person"))).toEqual([["a"], ["b", "c"]]);
+  });
+
+  it("moves several people round at once", () => {
+    // a → b's spot, b → c's spot, c → a's spot
+    const s = moveUnitsTo(setUp(), "s1", [{ unit: ["a"], target: ["b"] }, { unit: ["b"], target: ["c"] }, { unit: ["c"], target: ["a"] }], "spot");
+    expect([pos(s, "a").x, pos(s, "b").x, pos(s, "c").x]).toEqual([3, 5, 1]);
+    expect(timings(s)).toEqual([["c"], ["a", "b"]]);
+  });
+
+  it("resets the custom paths of people who moved, in this section and the next", () => {
+    const s = moveUnitsTo(setUp(), "s1", swap(["a"], ["b"]), "spot");
+    expect(s.sections[0].formation.dancerMovements).toEqual({ c: path });
+    expect(s.sections[1].formation.dancerMovements).toEqual({ c: path });
+  });
+
+  it("swaps a stack with a person, keeping the stack, and maps counts level by level", () => {
+    const s0 = setUp(stackObjects(makeChoreo(), "s1", "dancers", ["a", "b"])); // b bottom at (3,1)
+    const s = moveUnitsTo(s0, "s1", swap(["b", "a"], ["c"]), "spot");
+    expect(pos(s, "a")).toMatchObject({ x: 5, y: 1 });
+    expect(pos(s, "b")).toMatchObject({ x: 5, y: 1 });
+    expect(pos(s, "c")).toMatchObject({ x: 3, y: 1 });
+    expect(f(s).dancerStacks).toEqual([["b", "a"]]);
+    // b takes c's counts, c takes b's; a has no counterpart.
+    expect(timings(s)).toEqual([["a"], ["c", "b"]]);
+  });
+
+  it("keeps colours on their spots when asked", () => {
+    const s0 = setUp();
+    const coloured = { ...s0, sections: s0.sections.map((sec, i) => i > 0 ? sec : { ...sec, formation: { ...sec.formation,
+      dancerPositions: { ...sec.formation.dancerPositions, b: { ...sec.formation.dancerPositions.b, color: "blue" } } } }) } as Choreo;
+    const byPerson = moveUnitsTo(coloured, "s1", swap(["a"], ["b"]), "spot");
+    expect([pos(byPerson, "a").color, pos(byPerson, "b").color]).toEqual([pos(coloured, "a").color, "blue"]);
+    const bySpot = moveUnitsTo(coloured, "s1", swap(["a"], ["b"]), "spot", "spot");
+    expect([pos(bySpot, "a").color, pos(bySpot, "b").color]).toEqual(["blue", pos(coloured, "a").color]);
+  });
+
+  it("tells whether colour or counts would differ", () => {
+    const s0 = setUp();
+    expect(moveChoices(s0, "s1", swap(["a"], ["b"]))).toEqual({ colour: false, counts: true }); // 1 and 3
+    expect(moveChoices(s0, "s1", swap(["b"], ["c"]))).toEqual({ colour: false, counts: false }); // both on 3
+    const coloured = { ...s0, sections: s0.sections.map((sec, i) => i > 0 ? sec : { ...sec, formation: { ...sec.formation,
+      dancerPositions: { ...sec.formation.dancerPositions, b: { ...sec.formation.dancerPositions.b, color: "blue" } } } }) } as Choreo;
+    expect(moveChoices(coloured, "s1", swap(["a"], ["b"])).colour).toBe(true);
+  });
+
+  it("does nothing when nobody changes spot", () => {
+    const s0 = setUp();
+    expect(moveUnitsTo(s0, "s1", [{ unit: ["a"], target: ["a"] }], "spot")).toBe(s0);
+  });
+
+  it("leaves the old state untouched, for undo", () => {
+    const s0 = setUp();
+    moveUnitsTo(s0, "s1", swap(["a"], ["b"]), "spot");
+    expect(pos(s0, "a")).toMatchObject({ x: 1, y: 1 });
+    expect(timings(s0)).toEqual([["a"], ["b", "c"]]);
   });
 });
 

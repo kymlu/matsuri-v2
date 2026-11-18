@@ -786,30 +786,6 @@ export function distributePositions (
   return { ...state, obstacles: newObstacles, sections: newSections }
 }
 
-export function swapDancerPositions(
-  state: Choreo,
-  sectionId: string,
-  dancerAId: string,
-  dancerBId: string
-): Choreo {
-  const newSections = state.sections.map(section => {
-    if (section.id !== sectionId) return section
-    const dancerPositions = {...section.formation.dancerPositions};
-    const originalA = section.formation.dancerPositions[dancerAId];
-    const originalB = section.formation.dancerPositions[dancerBId];
-    dancerPositions[dancerAId] = { ...originalA, x: originalB.x, y: originalB.y, z: originalB.z };
-    dancerPositions[dancerBId] = { ...originalB, x: originalA.x, y: originalA.y, z: originalA.z };
-    return {
-      ...section,
-      formation: {
-        ...section.formation,
-        dancerPositions: dancerPositions
-      }
-    }
-  });
-  
-  return { ...state, sections: newSections }
-}
 export function swapPropPositions(
   state: Choreo,
   sectionId: string,
@@ -825,10 +801,12 @@ export function swapPropPositions(
     const originalB = section.formation.propPositions[propBId];
     const originalACenter = cornerToCentreFromProp(section.formation.propPositions[propAId], state.props[propAId], state.stageGeometry.yAxis);
     const originalBCenter = cornerToCentreFromProp(section.formation.propPositions[propBId], state.props[propBId], state.stageGeometry.yAxis);
-    const newAPosition = centreToCorner(originalBCenter.x, originalBCenter.y, originalA.rotation ?? 0, propA.width, propA.length, state.stageGeometry.yAxis);
-    const newBPosition = centreToCorner(originalACenter.x, originalACenter.y, originalB.rotation ?? 0, propB.width, propB.length, state.stageGeometry.yAxis);
-    propPositions[propAId] = { ...originalA, x: newAPosition.x, y: newAPosition.y };
-    propPositions[propBId] = { ...originalB, x: newBPosition.x, y: newBPosition.y };
+    // The angle belongs to the spot, so it's swapped too.
+    const angleA = originalB.rotation ?? 0, angleB = originalA.rotation ?? 0;
+    const newAPosition = centreToCorner(originalBCenter.x, originalBCenter.y, angleA, propA.width, propA.length, state.stageGeometry.yAxis);
+    const newBPosition = centreToCorner(originalACenter.x, originalACenter.y, angleB, propB.width, propB.length, state.stageGeometry.yAxis);
+    propPositions[propAId] = { ...originalA, x: newAPosition.x, y: newAPosition.y, rotation: angleA };
+    propPositions[propBId] = { ...originalB, x: newBPosition.x, y: newBPosition.y, rotation: angleB };
     return {
       ...section,
       formation: {
