@@ -26,20 +26,20 @@ const none = { dancers: [] as string[], props: [] as string[], obstacles: [] as 
 
 function setUp(state: Choreo, selectedIds = none) {
   const commitState = jest.fn();
-  const hook = renderHook(
+  const view = renderHook(
     ({ state, sectionIndex }) => useShortestMove({
       state, section: state.sections[sectionIndex], prevSection: state.sections[sectionIndex - 1], selectedIds, commitState,
     }),
     { initialProps: { state, sectionIndex: 1 } });
-  return { ...hook, commitState };
+  return { ...view, commitState };
 }
 
 describe("useShortestMove", () => {
   it("offers the button from the second section, with two people outside stacks", () => {
     expect(setUp(makeChoreo()).result.current.canShortestMove).toBe(true);
     const state = makeChoreo();
-    const first = renderHook(() => useShortestMove({ state, section: state.sections[0], selectedIds: none, commitState: jest.fn() }));
-    expect(first.result.current.canShortestMove).toBe(false);
+    const { result } = renderHook(() => useShortestMove({ state, section: state.sections[0], selectedIds: none, commitState: jest.fn() }));
+    expect(result.current.canShortestMove).toBe(false);
   });
 
   it("opens the preview with the proposal on stage, and applies it as one commit", () => {
@@ -94,9 +94,9 @@ describe("useShortestMove", () => {
     };
     expect(message()).toBeUndefined();
     // Only red is moving; turning it off leaves nothing to gain.
-    let r = render(result.current.shortestMoveSheet!);
+    const view = render(result.current.shortestMoveSheet!);
     act(() => screen.getByRole("button", { name: "red" }).click());
-    r.unmount();
+    view.unmount();
     expect(message()).toBe("色を1つ以上選んでください");
   });
 

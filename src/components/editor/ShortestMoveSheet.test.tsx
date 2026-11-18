@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import ShortestMoveSheet, { formatMetres } from "./ShortestMoveSheet";
 
 const base = {
@@ -33,8 +33,8 @@ describe("ShortestMoveSheet", () => {
     render(<ShortestMoveSheet {...base} showCountsOption skippedStacked onChangeCountsFollowPerson={onChangeCountsFollowPerson}/>);
     const counts = screen.getByRole("radiogroup", { name: "カウント" });
     expect(screen.getByText("入れ替えたあと、どちらに合わせますか？")).toBeInTheDocument();
-    expect(counts.querySelector("[aria-checked=true]")).toHaveTextContent("立ち位置");
-    (counts.querySelector("[aria-checked=false]") as HTMLElement).click();
+    expect(within(counts).getByRole("radio", { checked: true })).toHaveTextContent("立ち位置");
+    within(counts).getByRole("radio", { checked: false }).click();
     expect(onChangeCountsFollowPerson).toHaveBeenCalledWith(true);
     expect(screen.getByText("重なっている人は動かしません")).toBeInTheDocument();
   });
@@ -63,7 +63,7 @@ describe("ShortestMoveSheet", () => {
     expect(screen.queryByText("入れ替えたあと、どちらに合わせますか？")).toBeNull();
     unmount();
     render(<ShortestMoveSheet {...base} sameColour={false}/>);
-    expect(screen.getByRole("radiogroup", { name: "色" }).querySelector("[aria-checked=true]")).toHaveTextContent("人");
+    expect(within(screen.getByRole("radiogroup", { name: "色" })).getByRole("radio", { checked: true })).toHaveTextContent("人");
   });
 
   it("hides the colour row with nothing to choose", () => {
