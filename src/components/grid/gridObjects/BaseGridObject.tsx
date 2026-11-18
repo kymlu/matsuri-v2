@@ -30,8 +30,8 @@ export interface BaseGridObjectProps {
   isZooming?: React.RefObject<boolean>;
   sectionId?: string,
   halfOpacity?: boolean,
-  // Faint and can't be touched (dancers while focusing on props).
-  dimmed?: boolean,
+  // Faint and can't be touched (dancers while focusing on props); "half" is less faint.
+  dimmed?: boolean | "half",
   animationCache?: PathSvgCacheBySectionId;
   // Tells the layer how far this object has been dragged, so it can bring others along live (a stack's other members).
   // "end" gives the final offset after snapping and is followed by the same 1s tween; "cancel" means it didn't move.
@@ -182,7 +182,7 @@ const BaseGridObject = memo(function BaseGridObject({
     <Group
       id={id} 
       ref={ref}
-      opacity={dimmed ? 0.2 : halfOpacity ? 0.8 : 1}
+      opacity={dimmed === "half" ? 0.5 : dimmed ? 0.2 : halfOpacity ? 0.8 : 1}
       perfectDrawEnabled={false}
       draggable={draggable && !isAnimating}
       listening={dimmed ? false : listening}
