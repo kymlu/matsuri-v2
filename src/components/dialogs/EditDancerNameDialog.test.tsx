@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { Dialog } from "@base-ui/react";
 import { RosterList } from "../../models/roster";
 import EditDancerNameDialog from "./EditDancerNameDialog";
@@ -21,8 +21,9 @@ const dialog = (isOpen: boolean, props: Props) =>
   </Dialog.Root>;
 
 // The picker's name buttons, in the order shown.
-const pickerNames = () => Array.from(document.body.querySelectorAll("button[aria-pressed]"))
-  .map(b => b.firstChild?.textContent);
+const pickerNames = () => screen.queryAllByRole("button")
+  .filter(b => b.getAttribute("aria-pressed") !== null)
+  .map(b => within(b).getAllByText(/./)[0].textContent);
 
 const input = () => screen.getByRole("textbox") as HTMLInputElement;
 
@@ -74,8 +75,8 @@ describe("EditDancerNameDialog", () => {
     const onSubmit = jest.fn();
     const { rerender } = render(dialog(true, { roster, onSubmit }));
     fireEvent.click(await screen.findByRole("button", { name: "はると" }));
-    await act(async () => { rerender(dialog(false, { roster, onSubmit })); });
-    await act(async () => { rerender(dialog(true, { roster, onSubmit })); });
+    rerender(dialog(false, { roster, onSubmit }));
+    rerender(dialog(true, { roster, onSubmit }));
 
     expect((await screen.findByRole("textbox") as HTMLInputElement).value).toBe("三郎");
     fireEvent.click(screen.getByRole("button", { name: "保存" }));

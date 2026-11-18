@@ -10,7 +10,7 @@ const dialog = (overrides: Partial<React.ComponentProps<typeof FindObjectsDialog
     <FindObjectsDialog dancers={dancers} props={props} initialDancerIds={[]} initialPropIds={[]} onConfirm={() => {}} {...overrides}/>
   </Dialog.Root>;
 
-const confirmButton = () => screen.getByText("選択する").closest("button") as HTMLButtonElement;
+const confirmButton = () => screen.getByRole("button", { name: "選択する" }) as HTMLButtonElement;
 
 describe("FindObjectsDialog", () => {
   it("lists dancers and props in their own sections, numbering duplicate names", async () => {

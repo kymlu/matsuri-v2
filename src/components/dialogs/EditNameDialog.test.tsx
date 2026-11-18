@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { Dialog } from "@base-ui/react";
 import { RosterList } from "../../models/roster";
 import EditNameDialog from "./EditNameDialog";
@@ -94,8 +94,8 @@ describe("EditNameDialog for props", () => {
     const onSubmit = jest.fn();
     const { rerender } = render(dialog(true, { onSubmit }));
     fireEvent.click(await screen.findByRole("button", { name: /大旗/ }));
-    await act(async () => { rerender(dialog(false, { onSubmit })); });
-    await act(async () => { rerender(dialog(true, { onSubmit })); });
+    rerender(dialog(false, { onSubmit }));
+    rerender(dialog(true, { onSubmit }));
 
     expect((await screen.findByRole("textbox") as HTMLInputElement).value).toBe("3");
     expect(checkbox()).toBeNull();
