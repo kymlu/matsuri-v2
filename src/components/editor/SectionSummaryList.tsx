@@ -6,7 +6,7 @@ import { Dancer } from "../../models/dancer";
 import { isNullOrUndefinedOrBlank, strEquals } from "../../lib/helpers/globalHelper";
 import { Tag } from "../common/Tag";
 import Icon from "../basic/Icon";
-import { DancerPositionText } from "./PositionHint";
+import { ActionCountTag, DancerPositionText } from "./PositionHint";
 
 type SectionSummaryListProps = {
   dancer: Dancer;
@@ -70,22 +70,7 @@ export default function SectionSummaryList({
                 }
                 {stack && <span className="text-sm text-muted">{stack}</span>}
                 {
-                  section.formation.dancerActions.map(action => {
-                    const count = action.timings.find(t => t.dancerIds.includes(dancer.id))?.name;
-
-                    return (
-                      <Tag
-                        key={action.id}
-                        type="grey"
-                        compact
-                        text={<span className="flex items-baseline gap-0.5">
-                          <span className="font-normal">{action.name}</span>
-                          <span className="font-black">{count ?? "-"}</span>
-                        </span>
-                      }
-                      />
-                    );
-                  })
+                  section.formation.dancerActions.map(action => <ActionCountTag key={action.id} action={action} dancerId={dancer.id}/>)
                 }
               </div>
             </div>

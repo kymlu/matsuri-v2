@@ -3,6 +3,7 @@ import { StageGeometry } from "../../models/choreo";
 import { Dancer, DancerPosition } from "../../models/dancer";
 import { DancerAction } from "../../models/dancerAction";
 import { roundToTenth } from "../../lib/helpers/globalHelper";
+import { Tag } from "../common/Tag";
 
 type PositionHintProps = {
   dancer: Dancer;
@@ -80,19 +81,16 @@ const PositionHint = memo(function PositionHint({
       </div>
       {
         actions && actions.length > 0 &&
-        <>
-          <div className="flex flex-wrap w-full gap-1">
-            {
-              actions.map(action => {
-                const assignedTiming = action.timings.find(t => t.dancerIds.includes(dancer.id));
-                
-                return <InfoBox key={action.id} title={action.name} isSmall>
-                  <span className="font-medium">{assignedTiming?.name ?? "---"}</span>
-                </InfoBox>
-              })
-            }
-          </div>
-        </>
+        <div className="flex flex-wrap gap-1">
+          {
+            actions.map(action =>
+              <span key={action.id} className="flex items-baseline gap-1 px-3 py-1 border rounded-md border-line bg-surface">
+                <span>{action.name}</span>
+                <span className="text-lg font-bold">{dancerCount(action, dancer.id) ?? "-"}</span>
+              </span>
+            )
+          }
+        </div>
       }
     </div>
   );
@@ -121,15 +119,30 @@ export function DancerPositionText({ position, geometry, bold = true }: DancerPo
   );
 }
 
+const dancerCount = (action: DancerAction, dancerId: string) =>
+  action.timings.find(t => t.dancerIds.includes(dancerId))?.name;
+
+export function ActionCountTag({ action, dancerId }: { action: DancerAction, dancerId: string }) {
+  const count = dancerCount(action, dancerId);
+
+  return <Tag
+    type="grey"
+    compact
+    text={<span className="flex items-baseline gap-0.5">
+      <span className="font-normal">{action.name}</span>
+      <span className="font-black">{count ?? "-"}</span>
+    </span>}
+  />;
+}
+
 type InfoBoxProps = {
   title: string,
   children: ReactNode,
-  isSmall?: boolean,
   alignTop?: boolean,
 }
 
-function InfoBox({title, children, isSmall, alignTop}: InfoBoxProps) {
-  return <div className={"flex flex-col p-2 border border-line rounded-md" + (alignTop ? " justify-start" : " justify-between") + (isSmall ? "" : " flex-1")}>
+function InfoBox({title, children, alignTop}: InfoBoxProps) {
+  return <div className={"flex flex-col p-2 border border-line rounded-md" + (alignTop ? " justify-start" : " justify-between") + " flex-1"}>
     <span className="text-sm font-semibold text-center text-muted">{title}</span>
     <div className="flex flex-col items-center justify-center">
       {children}

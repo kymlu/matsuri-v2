@@ -23,6 +23,7 @@ export type TextInputProps = {
   showLength?: boolean,
   label?: string,
   maxRows?: number,
+  autoFocus?: boolean,
 }
 
 export default function LongTextInput({
@@ -44,6 +45,7 @@ export default function LongTextInput({
   showLength,
   label,
   maxRows,
+  autoFocus,
 }: TextInputProps) {
   const [value, setValue] = React.useState<string>(defaultValue ?? "");
 
@@ -83,6 +85,7 @@ export default function LongTextInput({
           name={name}
           maxLength={maxLength}
           rows={maxRows}
+          autoFocus={autoFocus}
           placeholder={placeholder ?? ""}
           value={value ?? ""}
           onInput={(event) => handleChange(event.currentTarget.value)}
