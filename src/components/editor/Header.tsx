@@ -65,11 +65,11 @@ function Header({
   dancerCount, propCount, stageLength, stageWidth, version, choreoStatus,
   showPublish, publish,
 }: HeaderProps) {
-  // One row, app-bar style: back, the chart (event above, name and publish state), then actions. Stage size and
+  // One row, app-bar style: home, the chart (event above, name and publish state), then actions. Stage size and
   // counts are set-up details, so they live in settings (editors) and on the home page cards.
   return <header className="flex items-center gap-1 py-1 pl-1 pr-2 border-b-2 select-none border-subtle bg-surface">
       <IconButton
-        src="chevronBackward"
+        src="home"
         noBorder
         onClick={() => {
           onSave?.();
