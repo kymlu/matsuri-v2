@@ -83,12 +83,8 @@ export default function SectionSummaryList({
 }
 
 function ActionCountTag({ action, dancerId }: { action: DancerAction, dancerId: string }) {
-  return <Tag
-    type="grey"
-    compact
-    text={<span className="flex items-baseline gap-0.5">
-      <span className="font-normal">{action.name}</span>
-      <span className="font-black">{dancerCount(action, dancerId) ?? "-"}</span>
-    </span>}
-  />;
+  return <span className="flex items-baseline gap-0.5 px-1.5 text-sm border rounded-md border-line bg-surface text-nowrap">
+    <span className="text-muted">{action.name}</span>
+    <span className="font-bold">{dancerCount(action, dancerId) ?? "-"}</span>
+  </span>;
 }
