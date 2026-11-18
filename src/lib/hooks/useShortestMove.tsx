@@ -51,7 +51,7 @@ export function useShortestMove({ state, section, prevSection, selectedIds, comm
   const [view, setView] = useState<ShortestMoveView>("after");
   const [excludedColours, setExcludedColours] = useState<ReadonlySet<string>>(new Set());
   const [colourFollowsPerson, setColourFollowsPerson] = useState(true);
-  const [sheetHeight, setSheetHeight] = useState<number | undefined>(undefined);
+  const [sheetHeight, setSheetHeight] = useState<number | undefined>(undefined); // as first opened; snapping or growing doesn't move the stage
 
   const startShortestMove = useCallback(() => {
     if (!prevSection) return;
@@ -169,7 +169,7 @@ export function useShortestMove({ state, section, prevSection, selectedIds, comm
         skippedStacked={plan.skippedStacked}
         onCancel={close}
         onApply={apply}
-        onHeightChange={setSheetHeight}/>
+        onHeightChange={h => setSheetHeight(prev => prev ?? h)}/>
     : undefined;
 
   const shortestMoveDialog = <Dialog.Root open={noGainOpen} onOpenChange={setNoGainOpen}>

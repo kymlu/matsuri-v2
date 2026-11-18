@@ -425,7 +425,7 @@ function MainStage({
     setStageScale({ x: scale, y: scale });
     setStagePosition(position);
     setRulerPos(position);
-  // Refit on sheet height only, not when flipping 今／最短.
+  // Fit when the sheet height is given (once per opening), not when flipping 今／最短.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bottomOverlayHeight, size.width, size.height, stageGeometry]);
 
