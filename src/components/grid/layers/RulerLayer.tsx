@@ -9,6 +9,7 @@ interface RulerLayerProps {
   position: Coordinates,
   verticalGridIncrement: number,
   scale: Coordinates,
+  viewWidth: number, // width of the stage area, which the stage has to run past for the side ruler to show
   isSelectingNewSection: boolean,
   setIsShowingVerticalRuler: (value: boolean) => void,
   setIsShowingHorizontalRuler: (value: boolean) => void,
@@ -20,6 +21,7 @@ const RulerLayer = memo(function RulerLayer({
   position,
   verticalGridIncrement,
   scale,
+  viewWidth,
   isSelectingNewSection,
   setIsShowingVerticalRuler,
   setIsShowingHorizontalRuler
@@ -56,8 +58,8 @@ const RulerLayer = memo(function RulerLayer({
   }, [stageGeometry, gridSize]);
   
   const showVerticalMarks = useMemo(() => {
-    return position.x + (totalMeters * gridSizePx) * scale.x > window.innerWidth;
-  }, [position.x, scale.x]);
+    return position.x + (totalMeters * gridSizePx) * scale.x > viewWidth;
+  }, [position.x, scale.x, viewWidth, totalMeters, gridSizePx]);
 
   const verticalMarks = useMemo(() => {
     const elements: ReactNode[] = [];

@@ -157,15 +157,13 @@ function MainStage({
     const totalWidthPx = (stageGeometry.stageWidth + stageGeometry.margin.leftMargin + stageGeometry.margin.rightMargin) * pixelsPerMeter;
     return size.width - (totalWidthPx > size.width ? 32 : 0);
   }, [size.width, stageGeometry, pixelsPerMeter]);
-  const centerXPx = useMemo(() => stageGeometry ?
-    (centringWidth/pixelsPerMeter/2
-    -(stageGeometry.stageWidth + stageGeometry.margin.leftMargin + stageGeometry.margin.rightMargin)/2) * pixelsPerMeter :
-    0
-  , [centringWidth, stageGeometry, pixelsPerMeter]);
   // Camera x that puts this stage x (metres) in the middle of the screen; the whole stage's middle when omitted.
-  const centredX = useCallback((xMetres?: number) => !stageGeometry || xMetres === undefined ? centerXPx
-    : centringWidth/2 - stageMetersToPx({x: xMetres, y: 0}, stageGeometry, pixelsPerMeter).x,
-  [stageGeometry, centerXPx, centringWidth, pixelsPerMeter]);
+  const centredX = useCallback((xMetres?: number) => {
+    if (!stageGeometry) return 0;
+    if (xMetres !== undefined) return centringWidth/2 - stageMetersToPx({x: xMetres, y: 0}, stageGeometry, pixelsPerMeter).x;
+    const totalWidthPx = (stageGeometry.stageWidth + stageGeometry.margin.leftMargin + stageGeometry.margin.rightMargin) * pixelsPerMeter;
+    return (centringWidth - totalWidthPx)/2;
+  }, [stageGeometry, centringWidth, pixelsPerMeter]);
 
   const allDancerIds = useMemo(() => {
     return Object.keys(currentChoreo.dancers);
@@ -365,12 +363,13 @@ function MainStage({
   useEffect(() => {
     if (!stageGeometry || stagePosSectionId === "" || isManualMovement || bottomOverlayHeight !== undefined) return;
     if (selectedIds.dancers.length + selectedIds.props.length + selectedIds.obstacles.length > 0) return;
-    if (centerXPx === stagePositionRef.current.x) return;
-    const position = { x: centerXPx, y: stagePositionRef.current.y };
+    const x = centredX();
+    if (x === stagePositionRef.current.x) return;
+    const position = { x, y: stagePositionRef.current.y };
     setStagePosition(position);
     setRulerPos(position);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [centerXPx]);
+  }, [centredX]);
 
   const resetCamera = useCallback(() => {
     setIsManualMovement(false);
@@ -817,6 +816,7 @@ function MainStage({
         position={rulerPos}
         verticalGridIncrement={verticalGridIncrement}
         scale={stageScale}
+        viewWidth={size.width}
         isSelectingNewSection={isSelectingNewSection}
         setIsShowingHorizontalRuler={setIsShowingHorizontalRuler}
         setIsShowingVerticalRuler={setIsShowingVerticalRuler}

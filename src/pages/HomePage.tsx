@@ -17,6 +17,7 @@ import { exportEvent, exportChoreo } from "../lib/helpers/exportHelper"
 import BaseEditDialog from "../components/dialogs/BaseEditDialog"
 import ConfirmUploadDialog from "../components/dialogs/ConfirmUploadDialog"
 import BaseErrorDialog from "../components/dialogs/BaseErrorDialog"
+import { statusWithoutTeamList } from "../lib/helpers/choreoStatusHelper";
 import ExportDialog from "../components/dialogs/ExportDialog"
 import React from "react"
 import Divider from "../components/basic/Divider"
@@ -180,8 +181,7 @@ export default function HomePage({
         } else {
           const localChoreoDetails = getBasicChoreoDetails(localChoreo);
           if (!serverChoreo && fetched === undefined) {
-            // The team's list didn't load, so a published chart can't be told from an unpublished one by the server.
-            choreos.push({...localChoreoDetails, status: localChoreo.version ? "edited" : "localOnly"});
+            choreos.push({...localChoreoDetails, status: statusWithoutTeamList(localChoreo)});
           } else if (!serverChoreo) {
             choreos.push({...localChoreoDetails, status: "localOnly"});
           } else if (serverChoreo.version !== localChoreo.version) {
@@ -635,9 +635,8 @@ export default function HomePage({
             <div role="alert" className="flex items-center gap-2 p-2 pl-3 text-sm border rounded-md border-primary">
               <p className="flex-1">
                 {loadError === "team"
-                  ? "チームの隊列表を読み込めませんでした。この端末にある隊列表だけを表示しています。"
+                  ? "チームの隊列表を読み込めませんでした。この端末の隊列表だけ表示中です。"
                   : "隊列表を読み込めませんでした。"}
-                通信状況を確認してください。
               </p>
               <Button onClick={loadChoreos}><span className="font-semibold text-nowrap">再読み込み</span></Button>
             </div>
