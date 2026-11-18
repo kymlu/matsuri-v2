@@ -6,7 +6,8 @@ import { Dancer } from "../../models/dancer";
 import { isNullOrUndefinedOrBlank, strEquals } from "../../lib/helpers/globalHelper";
 import { Tag } from "../common/Tag";
 import Icon from "../basic/Icon";
-import { ActionCountTag, DancerPositionText } from "./PositionHint";
+import { dancerCount, DancerPositionText } from "./PositionHint";
+import { DancerAction } from "../../models/dancerAction";
 
 type SectionSummaryListProps = {
   dancer: Dancer;
@@ -79,4 +80,15 @@ export default function SectionSummaryList({
       }
     </div>
   );
+}
+
+function ActionCountTag({ action, dancerId }: { action: DancerAction, dancerId: string }) {
+  return <Tag
+    type="grey"
+    compact
+    text={<span className="flex items-baseline gap-0.5">
+      <span className="font-normal">{action.name}</span>
+      <span className="font-black">{dancerCount(action, dancerId) ?? "-"}</span>
+    </span>}
+  />;
 }
