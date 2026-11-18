@@ -43,7 +43,7 @@ describe("SwapDialog", () => {
     render(<Dialog.Root open><SwapDialog a={a} b={b} differs={{ colour: false, counts: true }} initial={{ colour: true, counts: true }} onSubmit={onSubmit}/></Dialog.Root>);
     const counts = await screen.findByRole("radiogroup", { name: "カウント" });
     expect(screen.queryByRole("radiogroup", { name: "色" })).toBeNull();
-    expect(screen.getByText("入れ替えたあと、カウントをどちらに合わせますか？")).toBeTruthy();
+    expect(screen.getByText("入れ替えたあと、どちらに合わせますか？")).toBeTruthy();
     expect(screen.getByText("手上げ 1")).toBeTruthy();
     expect(screen.getByText("なし")).toBeTruthy();
     const [person, spot] = Array.from(counts.querySelectorAll("[role=radio]"));

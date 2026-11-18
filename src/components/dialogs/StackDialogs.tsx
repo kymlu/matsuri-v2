@@ -160,30 +160,30 @@ export function SwapDialog({ a, b, differs, initial, onSubmit }: {
   onSubmit: (choice: SwapChoice) => void,
 }) {
   const [choice, setChoice] = useState(initial);
-  // Names in a column as wide as the longer one.
+  // Both people on one line (wrapping if long).
   const values = (show: (p: SwapPerson) => ReactNode) =>
-    <span className="grid grid-cols-[auto_1fr] items-center gap-x-2 gap-y-1 mt-1 text-sm">
-      {[a, b].map(p => [
-        <span key={p.id + "n"} className="truncate text-nowrap text-muted max-w-32">{p.label}</span>,
-        <span key={p.id + "v"} className="flex flex-wrap items-center gap-1">{show(p)}</span>,
-      ])}
+    <span className="flex flex-wrap items-center mt-1 text-sm gap-x-4 gap-y-1">
+      {[a, b].map(p => <span key={p.id} className="flex flex-wrap items-center gap-1 min-w-0">
+        <span className="truncate text-nowrap text-muted max-w-32">{p.label}</span>
+        {show(p)}
+      </span>)}
     </span>;
   const row = (key: keyof SwapChoice, label: string, show: (p: SwapPerson) => ReactNode) =>
-    <li className="px-3 py-2.5 border rounded-md border-line">
+    <li className="py-2">
       <span className="flex items-center justify-between gap-2">
         <span className="font-semibold">{label}</span>
-        <PersonOrSpotSwitch label={label} withPerson={choice[key]} onChange={v => setChoice({ ...choice, [key]: v })}/>
+        <PersonOrSpotSwitch label={label} withPerson={choice[key]} onChange={v => setChoice({ ...choice, [key]: v })} compact/>
       </span>
       {values(show)}
     </li>;
   return <BaseEditDialog title="位置交換" actionButtonText="入れ替える" noDetachedTrigger fullWidth onSubmit={() => onSubmit(choice)}>
-    <p className="mb-1"><span className="font-semibold">{a.label}</span>と<span className="font-semibold">{b.label}</span>の位置を入れ替えます。</p>
-    <p className="mb-2 text-sm text-muted">入れ替えたあと、{[differs.colour && "色", differs.counts && "カウント"].filter(Boolean).join("と")}をどちらに合わせますか？</p>
-    <ul className="p-px space-y-2">
+    <p><span className="font-semibold">{a.label}</span>と<span className="font-semibold">{b.label}</span>の位置を入れ替えます。</p>
+    <p className="text-sm text-muted">入れ替えたあと、どちらに合わせますか？</p>
+    <ul className="divide-y divide-line">
       {differs.colour && row("colour", "色", p => <Dot color={p.color}/>)}
       {differs.counts && row("counts", "カウント", p => p.counts.length === 0
         ? <span className="text-muted">なし</span>
-        : p.counts.map((c, i) => <span key={i} className="px-2 border rounded-full border-line text-nowrap">{c}</span>))}
+        : p.counts.map((c, i) => <span key={i} className="px-1.5 border rounded-full border-line text-nowrap">{c}</span>))}
     </ul>
   </BaseEditDialog>;
 }
