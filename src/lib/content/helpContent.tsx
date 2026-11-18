@@ -835,6 +835,17 @@ export const HELP_ARTICLES: HelpArticle[] = [
     keywords: ["名簿", "ない", "出ない", "候補"],
   },
   {
+    id: "t-load-failed",
+    type: "trouble",
+    group: "trouble",
+    title: "チームの隊列表が出てこない",
+    summary: "通信できないと、チームの隊列表を読み込めません。このときは一覧の上にお知らせが出て、この端末にある隊列表だけが表示されます。",
+    points: [
+      <>通信状況を確認して、お知らせの <B>再読み込み</B> を押します。</>,
+    ],
+    keywords: ["隊列表", "ない", "出ない", "消えた", "読み込めない", "通信", "オフライン"],
+  },
+  {
     id: "t-disabled",
     type: "trouble",
     group: "trouble",

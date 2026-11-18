@@ -150,11 +150,20 @@ function MainStage({
   
   const containerRef = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState({ width: 0, height: 0 });
-  const centerXPx = useMemo(() => stageGeometry ? 
-    ((size.width - (isShowingVerticalRuler ? 32 : 0))/pixelsPerMeter/2
-    -(stageGeometry.stageWidth + stageGeometry.margin.leftMargin + stageGeometry.margin.rightMargin)/2) * pixelsPerMeter :
-    0
-  , [size, stageGeometry, isShowingVerticalRuler, pixelsPerMeter]);
+  // Width left for the stage once centred: the vertical ruler shows whenever the stage runs past the right edge,
+  // which a centred stage does exactly when it's wider than the screen.
+  const centringWidth = useMemo(() => {
+    if (!stageGeometry) return size.width;
+    const totalWidthPx = (stageGeometry.stageWidth + stageGeometry.margin.leftMargin + stageGeometry.margin.rightMargin) * pixelsPerMeter;
+    return size.width - (totalWidthPx > size.width ? 32 : 0);
+  }, [size.width, stageGeometry, pixelsPerMeter]);
+  // Camera x that puts this stage x (metres) in the middle of the screen; the whole stage's middle when omitted.
+  const centredX = useCallback((xMetres?: number) => {
+    if (!stageGeometry) return 0;
+    if (xMetres !== undefined) return centringWidth/2 - stageMetersToPx({x: xMetres, y: 0}, stageGeometry, pixelsPerMeter).x;
+    const totalWidthPx = (stageGeometry.stageWidth + stageGeometry.margin.leftMargin + stageGeometry.margin.rightMargin) * pixelsPerMeter;
+    return (centringWidth - totalWidthPx)/2;
+  }, [stageGeometry, centringWidth, pixelsPerMeter]);
 
   const allDancerIds = useMemo(() => {
     return Object.keys(currentChoreo.dancers);
@@ -199,6 +208,7 @@ function MainStage({
   useEffect(() => {
     if (!stageGeometry || strEquals(stagePosSectionId, currentSection.id)) return;
     if (size.width === 0) return;
+    const firstView = stagePosSectionId === "";
     setIsSelectingNewSection(true);
     setStagePosSectionId(currentSection.id);
     // only consider the frontmost dancer within the app since dancers are the main
@@ -325,7 +335,16 @@ function MainStage({
       }
     }
     
-    if (newPosition.x !== stagePositionRef.current.x || newPosition.y !== stagePositionRef.current.y) {
+    // On opening, centre on the selected person, or on the stage; later, keep the stage centred until it's moved by hand.
+    const nothingSelected = selectedIds.dancers.length + selectedIds.props.length + selectedIds.obstacles.length === 0;
+    if (firstView || (nothingSelected && !isManualMovement)) {
+      newPosition.x = centredX(selectedIds.dancers.length === 1 ? selectedObjects.dancers[0].x : undefined);
+    }
+    if (firstView) {
+      setRulerPos(newPosition);
+      setStagePosition(newPosition);
+      setIsSelectingNewSection(false);
+    } else if (newPosition.x !== stagePositionRef.current.x || newPosition.y !== stagePositionRef.current.y) {
       setRulerPos(newPosition);
       stageRef?.current?.to({
         x: newPosition.x,
@@ -340,18 +359,25 @@ function MainStage({
     }
   }, [stageRef, currentSection, selectedIds, selectedObjects, stagePositionRef.current, stageGeometry, bottomMarginPercent, size.width]);
 
+  // Keep an untouched stage centred when the screen changes size (rotation, rulers appearing).
+  useEffect(() => {
+    if (!stageGeometry || stagePosSectionId === "" || isManualMovement || bottomOverlayHeight !== undefined) return;
+    if (selectedIds.dancers.length + selectedIds.props.length + selectedIds.obstacles.length > 0) return;
+    const x = centredX();
+    if (x === stagePositionRef.current.x) return;
+    const position = { x, y: stagePositionRef.current.y };
+    setStagePosition(position);
+    setRulerPos(position);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [centredX]);
+
   const resetCamera = useCallback(() => {
     setIsManualMovement(false);
     if (!stageGeometry) return;
     
     let newPosition = {x: stagePositionRef.current.x, y: stagePositionRef.current.y};
 
-    if (selectedIds.dancers.length === 1) {
-      let x = selectedObjects.dancers[0].x;
-      newPosition.x = (size.width - (isShowingVerticalRuler ? 32 : 0))/2 - stageMetersToPx({x: x, y: 0}, stageGeometry, pixelsPerMeter).x;
-    } else {
-      newPosition.x = centerXPx;
-    }
+    newPosition.x = centredX(selectedIds.dancers.length === 1 ? selectedObjects.dancers[0].x : undefined);
 
     if (stageGeometry.yAxis === "bottom-up") {
       if (selectedIds.dancers.length === 1) {
@@ -370,7 +396,7 @@ function MainStage({
       newPosition.y = 0;
     }
     
-    if (newPosition.y !== stagePositionRef.current.y) {
+    if (newPosition.x !== stagePositionRef.current.x || newPosition.y !== stagePositionRef.current.y) {
       setRulerPos(newPosition);
       stageRef?.current?.to({
         x: newPosition.x,
@@ -383,7 +409,7 @@ function MainStage({
         }
       });
     }
-  }, [stageGeometry, selectedIds.dancers, selectedObjects.dancers, size.width, size.height, isShowingVerticalRuler, centerXPx, bottomMarginM, pixelsPerMeter, currentSection.formation.dancerPositions, setStagePosition]);
+  }, [stageGeometry, selectedIds.dancers, selectedObjects.dancers, size.height, centredX, bottomMarginM, pixelsPerMeter, currentSection.formation.dancerPositions, setStagePosition]);
 
   // Fit the routes above the sheet by moving the camera only (zooming out if needed); restore it after.
   const cameraBeforeOverlay = useRef<{ scale: Coordinates, position: Coordinates, manual: boolean } | undefined>(undefined);
@@ -790,6 +816,7 @@ function MainStage({
         position={rulerPos}
         verticalGridIncrement={verticalGridIncrement}
         scale={stageScale}
+        viewWidth={size.width}
         isSelectingNewSection={isSelectingNewSection}
         setIsShowingHorizontalRuler={setIsShowingHorizontalRuler}
         setIsShowingVerticalRuler={setIsShowingVerticalRuler}
