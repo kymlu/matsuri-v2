@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import classNames from "classnames";
 import { RosterList } from "../../models/roster";
-import { sortRosterNames, toNameKey, formatPropSize } from "../../lib/helpers/rosterHelper";
+import { sortRosterNames, formatPropSize } from "../../lib/helpers/rosterHelper";
+import { matchesSearch } from "../../lib/helpers/myDancerHelper";
 import { SEARCH_NAME_LENGTH } from "../../lib/consts/consts";
 import NumberInput from "../inputs/NumberInput";
 import TextInput from "../inputs/TextInput";
@@ -113,11 +114,10 @@ export default function StartingCastStep({
 // "picked" shows only what's been picked.
 function useFilteredNames(list: RosterList, filter: string, search: string, picked: Set<string>) {
   return useMemo(() => {
-    const searchKey = toNameKey(search);
     return sortRosterNames(list.names.filter(n =>
       (filter === "all" ||
         (filter === "picked" ? picked.has(n.id) : filter === "none" ? n.categoryIds.length === 0 : n.categoryIds.includes(filter))) &&
-      (searchKey === "" || n.name.includes(search.trim()) || toNameKey(n.name).includes(searchKey))
+      matchesSearch([n.name], search)
     ));
   }, [list, filter, search, picked]);
 }

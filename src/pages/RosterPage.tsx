@@ -5,7 +5,8 @@ import classNames from "classnames";
 import { Team } from "../models/team";
 import { Roster, RosterDefaultsItem, RosterDefaultsResult, RosterKind, RosterLinksResult, RosterName, rosterListOf } from "../models/roster";
 import { getRoster, removeRosterNames, restoreRosterNames, updateRosterDefaults } from "../lib/helpers/apiHelper";
-import { BulkLookField, countHidden, formatPropSize, getDefaultsSummary, getLinksSummary, getRemovedSummary, getSelectAllState, hasAnyDefaults, rosterCounter, sortRosterNames, toNameKey } from "../lib/helpers/rosterHelper";
+import { BulkLookField, countHidden, formatPropSize, getDefaultsSummary, getLinksSummary, getRemovedSummary, getSelectAllState, hasAnyDefaults, rosterCounter, sortRosterNames } from "../lib/helpers/rosterHelper";
+import { matchesSearch } from "../lib/helpers/myDancerHelper";
 import { colorPalette } from "../lib/consts/colors";
 import IconButton from "../components/basic/IconButton";
 import { IconLabelButton } from "../components/basic/Button";
@@ -206,10 +207,9 @@ export default function RosterPage({ goToHomePage, team, tab, onTabChange }: Ros
     if (!list) {
       return [];
     }
-    const searchKey = toNameKey(search);
     return sortRosterNames(list.names.filter(n =>
       (filter === "all" || (filter === "none" ? n.categoryIds.length === 0 : n.categoryIds.includes(filter))) &&
-      (searchKey === "" || n.name.includes(search.trim()) || toNameKey(n.name).includes(searchKey))
+      matchesSearch([n.name], search)
     ));
   }, [list, filter, search]);
 
