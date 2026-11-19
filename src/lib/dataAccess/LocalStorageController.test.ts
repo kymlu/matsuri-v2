@@ -1,4 +1,4 @@
-import { clearSeenVersion, getSeenVersion, setSeenVersion } from "./LocalStorageController";
+import { clearSeenVersion, getLastSeenChoreo, getSeenVersion, setLastSeenChoreo, setSeenVersion } from "./LocalStorageController";
 
 describe("seen version", () => {
   afterEach(() => {
@@ -62,5 +62,19 @@ describe("my dancer name", () => {
   it("uses the device-wide key outside a team", () => {
     setMyDancerName(undefined, "ゆい");
     expect(localStorage.getItem("USERNAME")).toBe("ゆい");
+  });
+});
+
+describe("last seen choreo", () => {
+  afterEach(() => localStorage.clear());
+
+  it("is saved per team and cleared", () => {
+    setLastSeenChoreo("team1", "a");
+    setLastSeenChoreo(undefined, "b");
+    expect(getLastSeenChoreo("team1")).toBe("a");
+    expect(getLastSeenChoreo("team2")).toBeNull();
+    expect(getLastSeenChoreo()).toBe("b");
+    setLastSeenChoreo("team1", undefined);
+    expect(getLastSeenChoreo("team1")).toBeNull();
   });
 });

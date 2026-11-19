@@ -111,8 +111,11 @@ export const HELP_ARTICLES: HelpArticle[] = [
       "隊列表をタップします。",
       "パスワードを聞かれたら、振り付け師から聞いたパスワードを入力します。",
     ],
+    points: [
+      "最後に開いた隊列表には「前回見た」が付きます。一覧の一番上にないときは、検索欄の下からすぐ開けます。",
+    ],
     related: ["t-not-found", "t-password"],
-    keywords: ["開く", "一覧", "探す", "見る"],
+    keywords: ["開く", "一覧", "探す", "見る", "前回", "最近", "続き"],
   },
   {
     id: "switch-sections",

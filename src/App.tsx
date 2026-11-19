@@ -5,7 +5,7 @@ import { NewChoreoPage } from './pages/NewChoreoPage';
 import ChoreoEditPage from './pages/ChoreoEditPage';
 import ChoreoViewPage from './pages/ChoreoViewPage';
 import { BasicChoreoDetails, Choreo, EventDetails } from './models/choreo';
-import { getMyDancerName, setMyDancerName } from './lib/dataAccess/LocalStorageController';
+import { getMyDancerName, setLastSeenChoreo, setMyDancerName } from './lib/dataAccess/LocalStorageController';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Team } from './models/team';
 import { checkLogin, verifyTeam } from './lib/helpers/apiHelper';
@@ -70,6 +70,12 @@ function App() {
   const [team, setTeam] = useState<Team | undefined>(undefined);
   const [teamLoadError, setTeamLoadError] = useState<TeamLoadError | undefined>(undefined);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if ((mode === "view" || mode === "edit") && currentChoreo && pastVersion === undefined) {
+      setLastSeenChoreo(team?.id, currentChoreo.id);
+    }
+  }, [mode, currentChoreo, pastVersion, team]);
 
   // Same as opening the app without a team, welcome dialog included.
   const goWithoutTeam = () => {
