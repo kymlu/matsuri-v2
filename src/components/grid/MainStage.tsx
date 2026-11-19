@@ -414,9 +414,11 @@ function MainStage({
 
   // Fit the routes above the sheet by moving the camera only (zooming out if needed); restore it after.
   const cameraBeforeOverlay = useRef<{ scale: Coordinates, position: Coordinates, manual: boolean } | undefined>(undefined);
+  const overlayFit = useRef<{ height: number, geometry: StageGeometry } | undefined>(undefined);
   useEffect(() => {
     if (!stageGeometry || size.width === 0) return;
     if (bottomOverlayHeight === undefined) {
+      overlayFit.current = undefined;
       const before = cameraBeforeOverlay.current;
       if (!before) return;
       cameraBeforeOverlay.current = undefined;
@@ -426,6 +428,19 @@ function MainStage({
       setIsManualMovement(before.manual);
       return;
     }
+    // Resizing under the sheet: keep the zoom and the front centre where they are instead of refitting.
+    const fitted = overlayFit.current;
+    if (fitted && fitted.height === bottomOverlayHeight) {
+      if (fitted.geometry === stageGeometry) return;
+      const anchor = (g: StageGeometry) => ({ x: (g.margin.leftMargin + g.stageWidth / 2) * pixelsPerMeter, y: g.margin.topMargin * pixelsPerMeter });
+      const from = anchor(fitted.geometry), to = anchor(stageGeometry);
+      const position = { x: stagePositionRef.current.x + from.x - to.x, y: stagePositionRef.current.y + from.y - to.y };
+      overlayFit.current = { height: bottomOverlayHeight, geometry: stageGeometry };
+      setStagePosition(position);
+      setRulerPos(position);
+      return;
+    }
+    overlayFit.current = { height: bottomOverlayHeight, geometry: stageGeometry };
     if (!cameraBeforeOverlay.current) {
       cameraBeforeOverlay.current = { scale: stageScale, position: stagePositionRef.current, manual: isManualMovement };
     }
