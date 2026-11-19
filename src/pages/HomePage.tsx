@@ -1453,7 +1453,7 @@ function LastSeenShortcut({ choreo, onClick }: { choreo: ChoreoWithStatus, onCli
   return <button
     type="button"
     onClick={onClick}
-    className="flex items-center w-full gap-2 p-2 border rounded-md bg-surface border-line-strong text-start">
+    className="flex items-center w-full gap-2 p-2 border rounded-md bg-surface border-line text-start">
     <span className="flex-1 min-w-0">
       <span className="flex items-center min-w-0 gap-1 text-xs">
         <LastSeenLabel/>
