@@ -1,4 +1,4 @@
-import { Dialog } from "@base-ui/react";
+import { DrawerPreview as Drawer } from "@base-ui/react";
 import classNames from "classnames";
 import { ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import Icon from "../basic/Icon";
@@ -106,103 +106,105 @@ export default function HelpSheet({ open, target, reader, onClose }: HelpSheetPr
     ? HELP_ARTICLES_BY_ID[stack[stack.length - 2]].title
     : "使い方";
 
-  return <Dialog.Root open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
-    <Dialog.Portal>
-      <Dialog.Backdrop className="fixed inset-0 z-40 bg-black opacity-50 transition-opacity duration-200 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0"/>
-      <Dialog.Popup
-        initialFocus={false}
-        className="fixed inset-x-0 bottom-0 top-11 z-40 mx-auto flex w-full max-w-xl flex-col rounded-t-2xl bg-surface text-body shadow-[0_-2px_16px_rgba(0,0,0,0.15)] outline-none transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] data-[ending-style]:translate-y-full data-[starting-style]:translate-y-full">
-        <div className="flex-shrink-0 pt-3.5 pb-2">
-          <div className="w-1/3 h-1 mx-auto rounded-full bg-primary"/>
-        </div>
-        <header className="flex items-center flex-shrink-0 gap-1 px-4 pb-2">
-          {
-            current
-              ? <button type="button" onClick={goBack} className="flex items-center flex-1 min-w-0 gap-0.5 text-sm font-bold text-primary text-start">
-                  <Icon src="chevronBackward" size="xs" colour="primary"/>
-                  <span className="truncate">{backLabel}</span>
-                </button>
-              : <Dialog.Title className="flex-1 text-lg font-bold">使い方</Dialog.Title>
-          }
-          {
-            !current &&
-            <button
-              type="button"
-              aria-label={isSearching ? "検索を閉じる" : "検索"}
-              aria-pressed={isSearching}
-              onClick={() => { setIsSearching(s => !s); setQuery(""); }}
-              className="flex items-center justify-center size-8">
-              <Icon src="search" size="sm" colour={isSearching ? "primary" : "grey"}/>
-            </button>
-          }
-          <Dialog.Close aria-label="閉じる" className="flex items-center justify-center size-8">
-            <Icon src="clear" size="sm" colour="grey"/>
-          </Dialog.Close>
-        </header>
-        {
-          isSearching && !current &&
-          <div className="flex-shrink-0 px-4 pb-2">
-            <TextInput
-              defaultValue={query}
-              placeholder="やりたいことを探す"
-              onContentChange={setQuery}
-              search
-              clearable
-              maxLength={30}/>
+  return <Drawer.Root open={open} onOpenChange={(o) => { if (!o) onClose(); }} swipeDirection="down">
+    <Drawer.Portal>
+      <Drawer.Backdrop className="fixed inset-0 z-40 bg-black opacity-50 transition-opacity duration-200 data-[ending-style]:opacity-0 data-[starting-style]:opacity-0"/>
+      <Drawer.Viewport className="fixed inset-0 z-40">
+        <Drawer.Popup
+          initialFocus={false}
+          className="fixed inset-x-0 bottom-0 top-11 z-40 mx-auto flex w-full max-w-xl flex-col rounded-t-2xl bg-surface text-body shadow-[0_-2px_16px_rgba(0,0,0,0.15)] outline-none transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] [transform:translateY(var(--drawer-swipe-movement-y))] data-[swiping]:select-none data-[ending-style]:[transform:translateY(100%)] data-[starting-style]:[transform:translateY(100%)] data-[ending-style]:duration-[calc(var(--drawer-swipe-strength)*300ms)]">
+          <div className="flex-shrink-0 pt-3.5 pb-2 touch-none">
+            <div className="w-1/3 h-1 mx-auto rounded-full bg-primary cursor-grab"/>
           </div>
-        }
-        <div ref={scrollRef} className="flex-1 min-h-0 px-4 overflow-y-auto pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+          <header className="flex items-center flex-shrink-0 gap-1 px-4 pb-2">
+            {
+              current
+                ? <button type="button" onClick={goBack} className="flex items-center flex-1 min-w-0 gap-0.5 text-sm font-bold text-primary text-start">
+                    <Icon src="chevronBackward" size="xs" colour="primary"/>
+                    <span className="truncate">{backLabel}</span>
+                  </button>
+                : <Drawer.Title className="flex-1 text-lg font-bold">使い方</Drawer.Title>
+            }
+            {
+              !current &&
+              <button
+                type="button"
+                aria-label={isSearching ? "検索を閉じる" : "検索"}
+                aria-pressed={isSearching}
+                onClick={() => { setIsSearching(s => !s); setQuery(""); }}
+                className="flex items-center justify-center size-8">
+                <Icon src="search" size="sm" colour={isSearching ? "primary" : "grey"}/>
+              </button>
+            }
+            <Drawer.Close aria-label="閉じる" className="flex items-center justify-center size-8">
+              <Icon src="clear" size="sm" colour="grey"/>
+            </Drawer.Close>
+          </header>
           {
-            current
-              ? <ArticleView article={current} reader={reader} onOpen={openArticle}/>
-              : isSearching
-                ? <SearchView query={query} onOpen={openArticle} trouble={contents.groups.find(g => g.group === "trouble")?.articles ?? []}/>
-                : <div className="space-y-2.5">
-                    {
-                      !hasSeen &&
-                      <button
-                        type="button"
-                        onClick={() => openArticle(contents.walkthrough.id)}
-                        className="flex items-center w-full gap-2.5 p-2.5 border rounded-lg border-primary text-start">
-                        <BeginnerMark className="size-6"/>
-                        <span className="flex-1">
-                          <span className="block font-bold">はじめての方へ</span>
-                          <span className="block text-sm text-muted">{contents.walkthrough.title}</span>
-                        </span>
-                        <Icon src="chevronForward" size="xs" colour="grey"/>
-                      </button>
-                    }
-                    {
-                      contents.groups.map(g =>
-                        <div key={g.group} ref={el => { groupRefs.current[g.group] = el; }} className="scroll-mt-1">
-                          <ExpandableSection
-                            level={1}
-                            title={HELP_GROUPS[g.group].title}
-                            titleExtra={<span className="text-sm text-muted">{g.articles.length}件</span>}
-                            expanded={!!expanded[g.group]}
-                            onExpandedChange={(v) => setExpanded(e => ({ ...e, [g.group]: v }))}>
-                            <ArticleRows articles={g.articles} onOpen={openArticle}/>
-                          </ExpandableSection>
-                        </div>
-                      )
-                    }
-                    {
-                      contents.others.length > 0 &&
-                      <ExpandableSection
-                        level={1}
-                        title="ほかの役割の方向け"
-                        titleExtra={<span className="text-sm text-muted">{contents.others.length}件</span>}
-                        expanded={!!expanded.others}
-                        onExpandedChange={(v) => setExpanded(e => ({ ...e, others: v }))}>
-                        <ArticleRows articles={contents.others} onOpen={openArticle} showRoles/>
-                      </ExpandableSection>
-                    }
-                  </div>
+            isSearching && !current &&
+            <div className="flex-shrink-0 px-4 pb-2">
+              <TextInput
+                defaultValue={query}
+                placeholder="やりたいことを探す"
+                onContentChange={setQuery}
+                search
+                clearable
+                maxLength={30}/>
+            </div>
           }
-        </div>
-      </Dialog.Popup>
-    </Dialog.Portal>
-  </Dialog.Root>;
+          <div ref={scrollRef} className="flex-1 min-h-0 px-4 overflow-y-auto pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+            {
+              current
+                ? <ArticleView article={current} reader={reader} onOpen={openArticle}/>
+                : isSearching
+                  ? <SearchView query={query} onOpen={openArticle} trouble={contents.groups.find(g => g.group === "trouble")?.articles ?? []}/>
+                  : <div className="space-y-2.5">
+                      {
+                        !hasSeen &&
+                        <button
+                          type="button"
+                          onClick={() => openArticle(contents.walkthrough.id)}
+                          className="flex items-center w-full gap-2.5 p-2.5 border rounded-lg border-primary text-start">
+                          <BeginnerMark className="size-6"/>
+                          <span className="flex-1">
+                            <span className="block font-bold">はじめての方へ</span>
+                            <span className="block text-sm text-muted">{contents.walkthrough.title}</span>
+                          </span>
+                          <Icon src="chevronForward" size="xs" colour="grey"/>
+                        </button>
+                      }
+                      {
+                        contents.groups.map(g =>
+                          <div key={g.group} ref={el => { groupRefs.current[g.group] = el; }} className="scroll-mt-1">
+                            <ExpandableSection
+                              level={1}
+                              title={HELP_GROUPS[g.group].title}
+                              titleExtra={<span className="text-sm text-muted">{g.articles.length}件</span>}
+                              expanded={!!expanded[g.group]}
+                              onExpandedChange={(v) => setExpanded(e => ({ ...e, [g.group]: v }))}>
+                              <ArticleRows articles={g.articles} onOpen={openArticle}/>
+                            </ExpandableSection>
+                          </div>
+                        )
+                      }
+                      {
+                        contents.others.length > 0 &&
+                        <ExpandableSection
+                          level={1}
+                          title="ほかの役割の方向け"
+                          titleExtra={<span className="text-sm text-muted">{contents.others.length}件</span>}
+                          expanded={!!expanded.others}
+                          onExpandedChange={(v) => setExpanded(e => ({ ...e, others: v }))}>
+                          <ArticleRows articles={contents.others} onOpen={openArticle} showRoles/>
+                        </ExpandableSection>
+                      }
+                    </div>
+            }
+          </div>
+        </Drawer.Popup>
+      </Drawer.Viewport>
+    </Drawer.Portal>
+  </Drawer.Root>;
 }
 
 function ArticleRows({ articles, onOpen, showRoles }: { articles: HelpArticle[], onOpen: (id: string) => void, showRoles?: boolean }) {
