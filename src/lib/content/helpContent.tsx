@@ -195,7 +195,7 @@ export const HELP_ARTICLES: HelpArticle[] = [
       <>強調するダンサーや、動線・メモを含めるかを選んで、<B primary>エクスポート</B> をタップします。</>,
     ],
     related: ["export-share"],
-    keywords: ["PDF", "印刷", "保存", "ダウンロード", "紙"],
+    keywords: ["PDF", "印刷", "保存", "ダウンロード", "紙", "強調", "全員"],
   },
   {
     id: "show-path",
