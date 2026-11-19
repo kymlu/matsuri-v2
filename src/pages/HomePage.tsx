@@ -41,7 +41,7 @@ import ChoreoPasswordEntryDialog from "../components/dialogs/ChoreoPasswordEntry
 import { ChoreoHistoryDialog } from "../components/dialogs/ChoreoHistoryDialog"
 import { useTheme } from "../lib/helpers/themeHelper"
 import { DancerCount, PropCount, StageSize } from "../components/common/IconInfo"
-import { checkUnlockedChoreo, setUnlockedChoreo } from "../lib/dataAccess/LocalStorageController"
+import { checkUnlockedChoreo, getLastSeenChoreo, setLastSeenChoreo, setUnlockedChoreo } from "../lib/dataAccess/LocalStorageController"
 import AcceptInviteDialog from "../components/dialogs/AcceptInviteDialog"
 
 type HomePageProps = {
@@ -308,6 +308,21 @@ export default function HomePage({
   const filteredChoreos = useMemo(() =>
     groupChoreos(savedChoreos.filter(c => c.name.toLowerCase().includes(searchTerm) || c.event?.toLowerCase().includes(searchTerm)))
   , [savedChoreos, searchTerm]);
+
+  const lastSeenId = useMemo(() => getLastSeenChoreo(team?.id), [team?.id]);
+  const lastSeen = isLoading ? undefined : savedChoreos.find(c => c.id === lastSeenId);
+  useEffect(() => {
+    if (lastSeenId && !isLoading && !loadError && !savedChoreos.some(c => c.id === lastSeenId)) {
+      setLastSeenChoreo(team?.id, undefined);
+    }
+  }, [lastSeenId, isLoading, loadError, savedChoreos, team?.id]);
+  // Only when it isn't already the first card, and opens without a password or sync step.
+  const lastSeenShortcut = useMemo(() => {
+    if (!lastSeen || !isNullOrUndefinedOrBlank(searchTerm) || lastSeen.status === "syncRequired") return undefined;
+    if (lastSeen.hasPassword && !isLoggedIn && !checkUnlockedChoreo(lastSeen.id, lastSeen.version)) return undefined;
+    const firstEvent = filteredChoreos.values().next().value?.values().next().value;
+    return firstEvent?.[0]?.id === lastSeen.id ? undefined : lastSeen;
+  }, [lastSeen, searchTerm, isLoggedIn, filteredChoreos]);
 
   const [editingChoreo, setEditingChoreo] = useState<ChoreoWithStatus | undefined>();
   const [editChoreoInfoDialogOpen, setEditChoreoInfoDialogOpen] = useState(false);
@@ -631,6 +646,10 @@ export default function HomePage({
         </div>
         <div className="h-full space-y-2 overflow-auto">
           {
+            lastSeenShortcut &&
+            <LastSeenShortcut choreo={lastSeenShortcut} onClick={() => handleSelectChoreo(lastSeenShortcut.id, lastSeenShortcut.status)}/>
+          }
+          {
             loadError &&
             <div role="alert" className="flex items-center gap-2 p-2 pl-3 text-sm border rounded-md border-primary">
               <p className="flex-1">
@@ -682,6 +701,7 @@ export default function HomePage({
                         isExpandedByDefault={!isNullOrUndefinedOrBlank(searchTerm) || (yearIndex === 0 && choreoIndex === 0)}
                         isLoggedIn={isLoggedIn}
                         teamId={team?.id}
+                        lastSeenId={lastSeen?.id}
                       />
                       {
                         choreoIndex < events.size - 1 &&
@@ -1055,12 +1075,13 @@ type EventSectionProps = {
   isExpandedByDefault?: boolean,
   isLoggedIn: boolean,
   teamId?: string,
+  lastSeenId?: string,
 }
 
 const EventSection = memo(function EventSection({
   eventInfo, choreos, searchTerm, onSelectChoreo, addEvent, editEventName,
   duplicateChoreo, viewPastVersion, editChoreoName, deleteChoreo, revertChoreo, syncChoreo,
-  onPdfExport, onExport, onExportEvent, isExpandedByDefault, isLoggedIn, teamId
+  onPdfExport, onExport, onExportEvent, isExpandedByDefault, isLoggedIn, teamId, lastSeenId
 }: EventSectionProps) {
   const [optionsDialogOpen, setOptionsDialogOpen] = React.useState(false);
   const [selectedChoreo, setSelectedChoreo] = useState<ChoreoWithStatus | undefined>();
@@ -1132,6 +1153,7 @@ const EventSection = memo(function EventSection({
             key={choreo.id}
             choreo={choreo}
             isLoggedIn={isLoggedIn}
+            isLastSeen={choreo.id === lastSeenId}
             searchTerm={searchTerm}
             openOptionsDialog={handleOpenOptionsDialog}
             onSelectChoreo={handleChoreoSelect}
@@ -1344,13 +1366,14 @@ const EventSection = memo(function EventSection({
 type ChoreoListItemProps = {
   choreo: ChoreoWithStatus;
   isLoggedIn: boolean;
+  isLastSeen?: boolean;
   searchTerm: string;
   onSelectChoreo: (choreo: ChoreoWithStatus, isUnlocked: boolean) => void,
   openOptionsDialog: (choreo: ChoreoWithStatus) => void,
 }
 
 const ChoreoListItem = memo(function ChoreoListItem ({
-  choreo, isLoggedIn, searchTerm, onSelectChoreo, openOptionsDialog
+  choreo, isLoggedIn, isLastSeen, searchTerm, onSelectChoreo, openOptionsDialog
 }: ChoreoListItemProps) {
   const isUnlocked = useMemo(() => isLoggedIn || checkUnlockedChoreo(choreo.id, choreo.version), [isLoggedIn, choreo]);
 
@@ -1364,6 +1387,7 @@ const ChoreoListItem = memo(function ChoreoListItem ({
           onSelectChoreo(choreo, isUnlocked);
         }}
         className="flex flex-col justify-between h-full p-2 gap-0.5 mx-[11px] transition-colors bg-surface border border-line rounded-md cursor-pointer">
+        {isLastSeen && <LastSeenLabel/>}
         {/* Title */}
         <div className="relative flex flex-row items-start justify-between gap-2">
           <span className="flex items-center gap-0.5 font-semibold text-left break-words text-wrap">
@@ -1416,4 +1440,27 @@ function CompactActionButton({icon, label, onClick}: {icon: React.ComponentProps
       {label}
     </div>
   </Button>;
+}
+
+function LastSeenLabel() {
+  return <span className="flex items-center flex-none gap-0.5 text-xs font-bold text-primary">
+    <Icon src="history" size="2xs" colour="primary"/>
+    前回見た
+  </span>;
+}
+
+function LastSeenShortcut({ choreo, onClick }: { choreo: ChoreoWithStatus, onClick: () => void }) {
+  return <button
+    type="button"
+    onClick={onClick}
+    className="flex items-center w-full gap-2 p-2 border rounded-md bg-surface border-line-strong text-start">
+    <span className="flex-1 min-w-0">
+      <span className="flex items-center min-w-0 gap-1 text-xs">
+        <LastSeenLabel/>
+        {choreo.event && <span className="truncate text-muted">{choreo.event}</span>}
+      </span>
+      <span className="block font-semibold break-words">{choreo.name}</span>
+    </span>
+    <Icon src="chevronForward" size="sm" colour="grey"/>
+  </button>;
 }

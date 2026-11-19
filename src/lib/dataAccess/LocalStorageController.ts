@@ -109,3 +109,24 @@ export function clearSeenVersion(choreoId: string) {
     localStorage.removeItem(getSeenVersionKey(choreoId));
   } catch {}
 }
+
+// The choreo last opened on this device, per team, for the home page shortcut.
+const LAST_SEEN = "LAST_SEEN_CHOREO";
+const getLastSeenKey = (teamId?: string) => teamId ? `${LAST_SEEN}_${teamId}` : LAST_SEEN;
+
+export function getLastSeenChoreo(teamId?: string): string | null {
+  try {
+    return localStorage.getItem(getLastSeenKey(teamId));
+  } catch {
+    return null;
+  }
+}
+
+export function setLastSeenChoreo(teamId: string | undefined, choreoId: string | undefined) {
+  try {
+    if (choreoId) localStorage.setItem(getLastSeenKey(teamId), choreoId);
+    else localStorage.removeItem(getLastSeenKey(teamId));
+  } catch {
+    // Blocked storage: no shortcut.
+  }
+}
