@@ -214,7 +214,6 @@ export function NewChoreoPage({
             <TextInput
               defaultValue={form.name}
               onContentChange={newValue => handleChange("name", newValue)}
-              placeholder="名前を入力してください"
               label="隊列名"
               restrictFn={(s) => !testInvalidCharacters(s)}
               showLength
@@ -224,7 +223,6 @@ export function NewChoreoPage({
               defaultValue={form.eventName}
               options={eventNames}
               onContentChange={newValue => handleChange("eventName", newValue)}
-              placeholder="イベント名を入力してください"
               label="イベント"
               clearable
               // restrictFn={(s) => !testInvalidCharacters(s)} // todo: after pushing the official goen change to restrict
