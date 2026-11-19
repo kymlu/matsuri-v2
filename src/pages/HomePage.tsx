@@ -23,7 +23,7 @@ import React from "react"
 import Divider from "../components/basic/Divider"
 import TextInput from "../components/inputs/TextInput"
 import UserNameEditDialog from "../components/dialogs/UserNameEditDialog"
-import { findMyDancerId } from "../lib/helpers/myDancerHelper"
+import { findMyDancerId, matchesSearch } from "../lib/helpers/myDancerHelper"
 import { Grid } from "react-loader-spinner"
 import { colorPalette } from "../lib/consts/colors"
 import EditChoreoInfoDialog from "../components/dialogs/EditChoreoInfoDialog"
@@ -306,7 +306,7 @@ export default function HomePage({
   }
 
   const filteredChoreos = useMemo(() =>
-    groupChoreos(savedChoreos.filter(c => c.name.toLowerCase().includes(searchTerm) || c.event?.toLowerCase().includes(searchTerm)))
+    groupChoreos(savedChoreos.filter(c => matchesSearch([c.name, c.event], searchTerm)))
   , [savedChoreos, searchTerm]);
 
   const lastSeenId = useMemo(() => getLastSeenChoreo(team?.id), [team?.id]);
@@ -1379,9 +1379,7 @@ const ChoreoListItem = memo(function ChoreoListItem ({
 
   return <React.Fragment key={choreo.id}>
     {
-      (isNullOrUndefinedOrBlank(searchTerm) ||
-      choreo.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      choreo.event?.toLowerCase().includes(searchTerm.toLowerCase())) &&
+      matchesSearch([choreo.name, choreo.event], searchTerm) &&
       <div
         onClick={() => {
           onSelectChoreo(choreo, isUnlocked);

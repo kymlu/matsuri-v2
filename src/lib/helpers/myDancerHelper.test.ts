@@ -1,4 +1,4 @@
-import { buildFindDancerList, buildFindList, findMyDancerId, isSameDancerName, normalizeForSearch } from "./myDancerHelper";
+import { buildFindDancerList, buildFindList, findMyDancerId, isSameDancerName, matchesSearch, normalizeForSearch } from "./myDancerHelper";
 
 const dancers = {
   a: { id: "a", name: "さくら" },
@@ -65,5 +65,18 @@ describe("buildFindList", () => {
   it("filters by partial match", () => {
     expect(buildFindList(props, "旗").map(i => i.id)).toEqual(["p1"]);
     expect(buildFindList(props, "x")).toEqual([]);
+  });
+});
+
+describe("matchesSearch", () => {
+  it("treats hiragana and katakana, and full and half width, as the same", () => {
+    expect(matchesSearch(["サンプルパレード", "例の祭り"], "ぱれーど")).toBe(true);
+    expect(matchesSearch(["よさこい", undefined], "ﾖｻｺｲ")).toBe(true);
+    expect(matchesSearch(["Summer", "夏祭り"], "ＳＵＭ")).toBe(true);
+    expect(matchesSearch(["サンプル", "例の祭り"], "まつり")).toBe(false);
+  });
+
+  it("matches everything when the search is blank", () => {
+    expect(matchesSearch(["サンプル"], "  ")).toBe(true);
   });
 });
