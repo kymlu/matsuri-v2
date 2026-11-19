@@ -1,12 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import NumberInput from "../components/inputs/NumberInput";
 import TextInput from "../components/inputs/TextInput";
 import { isNullOrUndefinedOrBlank, testInvalidCharacters } from "../lib/helpers/globalHelper";
 import { Choreo, EventDetails, StageType } from "../models/choreo";
 import { colorPalette } from "../lib/consts/colors";
-import { DEFAULT_PROP_LENGTH, DEFAULT_PROP_WIDTH, LONG_NAME_LENGTH, MAX_STAGE_DIMENSION, MAX_STAGE_MARGIN, MIN_STAGE_DIMENSION, MIN_STAGE_MARGIN } from "../lib/consts/consts";
+import { DEFAULT_PROP_LENGTH, DEFAULT_PROP_WIDTH, LONG_NAME_LENGTH } from "../lib/consts/consts";
 import { saveChoreo } from "../lib/dataAccess/DataController";
-import GridPreview from "../components/grid/GridPreview";
+import StageSizeFields from "../components/common/StageSizeFields";
 import Button from "../components/basic/Button";
 import CustomAutocomplete from "../components/inputs/CustomAutocomplete";
 import DateInput from "../components/inputs/DateInput";
@@ -273,73 +272,25 @@ export function NewChoreoPage({
         )}
 
         {step === 2 && (
-          <div className="flex flex-col h-full gap-2 md:flex-row">
-            <GridPreview
-              stageWidth={form.stageWidth}
-              stageLength={form.stageLength}
-              stageType={form.stageType}
-              xMargin={form.xMargin}
-              yMargin={form.yMargin}
-            />
-            <div className="md:w-1/3">
-              <div className="grid grid-cols-2 gap-2 md:flex md:flex-col">
-                <Button
-                  full
-                  selected={form.stageType === 'parade'}
-                  onClick={() => handleChange("stageType", "parade")}
-                >
+          <StageSizeFields
+            stageType={form.stageType}
+            stageWidth={form.stageWidth}
+            stageLength={form.stageLength}
+            xMargin={form.xMargin}
+            yMargin={form.yMargin}
+            onChange={handleChange}
+            showSummary={false}
+            stageTypeField={
+              <div className="grid grid-cols-2 gap-2">
+                <Button full selected={form.stageType === "parade"} onClick={() => handleChange("stageType", "parade")}>
                   パレード
                 </Button>
-                <Button
-                  full
-                  selected={form.stageType === 'stage'}
-                  onClick={() => handleChange("stageType", "stage")}
-                >
+                <Button full selected={form.stageType === "stage"} onClick={() => handleChange("stageType", "stage")}>
                   ステージ
                 </Button>
-                <NumberInput
-                  name="縦"
-                  defaultValue={form.stageLength}
-                  min={MIN_STAGE_DIMENSION}
-                  max={MAX_STAGE_DIMENSION}
-                  baseStep={1}
-                  buttonStep={1}
-                  onChange={(newValue) => {handleChange("stageLength", Number(newValue))}}
-                  label="縦 (m)"
-                />
-                <NumberInput
-                  name="幅"
-                  defaultValue={form.stageWidth}
-                  min={MIN_STAGE_DIMENSION}
-                  max={MAX_STAGE_DIMENSION}
-                  baseStep={1}
-                  buttonStep={1}
-                  onChange={(newValue) => {handleChange("stageWidth", Number(newValue))}}
-                  label="幅 (m)"
-                />
-                <NumberInput
-                  name="xMargin"
-                  defaultValue={form.xMargin}
-                  min={MIN_STAGE_MARGIN}
-                  max={MAX_STAGE_MARGIN}
-                  baseStep={1}
-                  buttonStep={1}
-                  onChange={(newValue) => {handleChange("xMargin", Number(newValue))}}
-                  label="左右余白 (m)"
-                />
-                <NumberInput
-                  name="yMargin"
-                  defaultValue={form.yMargin}
-                  min={MIN_STAGE_MARGIN}
-                  max={MAX_STAGE_MARGIN}
-                  baseStep={1}
-                  buttonStep={1}
-                  onChange={(newValue) => {handleChange("yMargin", Number(newValue))}}
-                  label="上下余白 (m)"
-                />
               </div>
-            </div>
-          </div>
+            }
+          />
         )}
 
         {

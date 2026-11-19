@@ -1399,7 +1399,7 @@ const ChoreoListItem = memo(function ChoreoListItem ({
           )}
 
           <div className="flex items-center gap-2">
-            <StageSize stageLength={choreo.stageLength} stageWidth={choreo.stageWidth}/>
+            <StageSize stageLength={choreo.stageLength} stageWidth={choreo.stageWidth} stageType={choreo.stageType}/>
             <DancerCount dancerCount={choreo.dancerCount}/>
             <PropCount propCount={choreo.propCount}/>
           </div>

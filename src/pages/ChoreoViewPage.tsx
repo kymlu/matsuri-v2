@@ -292,6 +292,7 @@ export default function ChoreoViewPage(props: {
         isShowPathBtnDisabled={selectedIds.dancers.length !== 1 || selectedTimingId !== undefined}
         stageLength={props.currentChoreo.stageGeometry.stageLength}
         stageWidth={props.currentChoreo.stageGeometry.stageWidth}
+        stageType={props.currentChoreo.stageType}
         dancerCount={entityCount.dancers}
         propCount={entityCount.props}
         version={props.currentChoreo.version}

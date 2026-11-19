@@ -150,7 +150,7 @@ describe("ChangeLogDialog", () => {
       }));
 
       expect(rowsOf("イベント")).toEqual(["イベント名 祭り → 秋祭り", "日程 日程未定 → 2026年11月2日"]);
-      expect(rowsOf("ステージ")).toEqual(["サイズ 縦8m × 幅10m → 縦8m × 幅12m"]);
+      expect(rowsOf("ステージ")).toEqual(["サイズ 幅10m × 奥行8m → 幅12m × 奥行8m"]);
       // One rename per row, labelled only on the first.
       expect(rowsOf("セクション")).toEqual(["追加 「間奏」「ソロ」", "削除 「Aメロ」", "名前変更 「サビ2」→「大サビ」", " 「間奏1」→「ブリッジ」", "並び順 変更あり"]);
       expect(rowsOf("メモ")).toEqual(["変更 サビ1、間奏"]);

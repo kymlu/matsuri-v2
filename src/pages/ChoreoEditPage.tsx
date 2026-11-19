@@ -1034,6 +1034,7 @@ export default function ChoreoEditPage(props: {
         propCount={entityCount.props}
         stageWidth={history.presentState.state.stageGeometry.stageWidth}
         stageLength={history.presentState.state.stageGeometry.stageLength}
+        stageType={history.presentState.state.stageType}
         version={props.currentChoreo.version}
         choreoStatus={props.currentChoreoStatus}
         showPublish={
