@@ -98,6 +98,7 @@ type MainStageProps = {
   dimPropsAndObstacles?: boolean, // props and obstacles faint, so routes drawn underneath show through
   // Height of a sheet over the bottom; the camera fits the routes above it.
   bottomOverlayHeight?: number,
+  hideCameraReset?: boolean,
 }
 
 function MainStage({
@@ -111,7 +112,7 @@ function MainStage({
   addDancer, addProp, addObstacle, appSettings, previousSection, selectedDancerMovement,
   onDancerSelected, bottomMarginPercent = 0, canResizeProps, editEnabled, toggleEditEnabled, openNoteDialog, openChangeLog, openHelp, openFind, dimDancersToggle, focusSelectionRequest,
   showPaths = false, isEditingMovement = false, mutedGhostPaths = false, dancerMovementCache, propMovementCache, onMidpointEdit, currentMovement,
-  dancerAnimationCache, propAnimationCache, fadedDancerIds, halfFadedDancerIds, previewRoutes, instantMoves, dimPropsAndObstacles, bottomOverlayHeight,
+  dancerAnimationCache, propAnimationCache, fadedDancerIds, halfFadedDancerIds, previewRoutes, instantMoves, dimPropsAndObstacles, bottomOverlayHeight, hideCameraReset,
 }: MainStageProps) {
   // Konva reads colours from the (non-reactive) colorPalette, so remount the
   // whole Stage subtree when the theme flips to force every layer to redraw.
@@ -867,7 +868,7 @@ function MainStage({
       (isManualMovement || canEdit || dimDancersToggle) &&
       <div className={`absolute space-y-1 ${isShowingVerticalRuler ? "right-9" : "right-2"} ${isShowingHorizontalRuler ? "top-7" : "top-1"}`}>
         {
-          isManualMovement &&
+          isManualMovement && !hideCameraReset &&
           <IconButton
             size="sm"
             src="centerFocusStrong"

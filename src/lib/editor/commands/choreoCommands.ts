@@ -64,7 +64,7 @@ export function fitPropsInside(state: Choreo, propIds: Set<string>): Choreo {
   };
 }
 
-export type StageOverflow = { dancerIds: string[], propIds: string[], obstacleIds: string[], sectionIds: string[] };
+export type StageOverflow = { dancerIds: string[], propIds: string[], obstacleIds: string[], sectionIds: string[], dancerIdsBySection: Record<string, string[]> };
 
 // What a resize would move to the edge, so the user can be told before saving.
 export function getObjectsOutsideStage(state: Choreo, newGeometry: StageGeometry): StageOverflow {
@@ -78,8 +78,10 @@ export function getObjectsOutsideStage(state: Choreo, newGeometry: StageGeometry
   const dancerIds = new Set<string>();
   const propIds = new Set<string>();
   const sectionIds: string[] = [];
+  const dancerIdsBySection: Record<string, string[]> = {};
   state.sections.forEach(section => {
     const dancers = Object.values(section.formation.dancerPositions).filter(x => isOutside(x));
+    dancerIdsBySection[section.id] = dancers.map(x => x.dancerId);
     const props = Object.values(section.formation.propPositions).filter(x => isOutside(x, propSize(state, x)));
     dancers.forEach(x => dancerIds.add(x.dancerId));
     props.forEach(x => propIds.add(x.propId));
@@ -93,6 +95,7 @@ export function getObjectsOutsideStage(state: Choreo, newGeometry: StageGeometry
     propIds: Array.from(propIds),
     obstacleIds: Object.values(state.obstacles ?? {}).filter(x => isOutside(x, x)).map(x => x.id),
     sectionIds,
+    dancerIdsBySection,
   };
 }
 

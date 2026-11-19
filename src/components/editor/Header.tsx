@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, useState } from "react";
 import { Dialog, Menu } from "@base-ui/react";
 import IconButton from "../basic/IconButton";
 import { Choreo, StageType } from "../../models/choreo";
@@ -17,6 +17,7 @@ import { isNullOrUndefinedOrBlank } from "../../lib/helpers/globalHelper";
 type HeaderProps = {
   returnHome: () => void;
   hasSidebar?: boolean;
+  hideActions?: boolean; // keeps the header's height while the stage is being previewed
   currentChoreo: Choreo;
   onSave?: () => void;
   onDownload?: () => void;
@@ -63,16 +64,20 @@ function Header({
   goToEdit, goToView,
   toggleShowPath, showPath, isShowPathBtnDisabled,
   dancerCount, propCount, stageLength, stageWidth, stageType, version, choreoStatus,
-  showPublish, publish,
+  showPublish, publish, hideActions,
 }: HeaderProps) {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   return <header className="flex items-center gap-3 px-3 py-2 border-b-2 select-none border-subtle bg-surface">
-      <IconButton
-        src="home"
-        noBorder
-        onClick={() => {
-          onSave?.();
-          returnHome();
-        }}/>
+      <div className={hideActions ? "invisible" : undefined}>
+        <IconButton
+          src="home"
+          noBorder
+          onClick={() => {
+            onSave?.();
+            returnHome();
+          }}/>
+      </div>
       <div className="flex-1 min-w-0" onDoubleClick={downloadLogs}>
         {
           !isNullOrUndefinedOrBlank(currentChoreo.event) &&
@@ -83,7 +88,7 @@ function Header({
           <ChoreoStatusTag compact choreoStatus={choreoStatus} version={version}/>
         </div>
       </div>
-      <div className="flex justify-end gap-3">
+      <div className={"flex justify-end gap-3" + (hideActions ? " invisible" : "")}>
         {
           (goToEdit || goToView) &&
           <IconButton
@@ -135,7 +140,7 @@ function Header({
         }
         {
           hasSidebar &&
-          <Dialog.Root>
+          <Dialog.Root open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
             <Dialog.Trigger>
               <IconButton
                 src="settings"
@@ -147,7 +152,11 @@ function Header({
               choreoEvent={currentChoreo.event}
               choreoDates={formatDateRange(currentChoreo.startDate, currentChoreo.endDate)}
               editName={editName}
-              editSize={editSize}
+              editSize={editSize && (() => {
+                // The size sheet shows the stage, so the menu has to get out of the way.
+                setIsSidebarOpen(false);
+                editSize();
+              })}
               showManageDancers={showManageDancers}
               manageDancers={manageDancers}
               showManageProps={showManageProps}

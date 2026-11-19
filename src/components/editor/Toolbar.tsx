@@ -7,6 +7,7 @@ import classNames from "classnames";
 
 type ToolbarProps = {
   isEnabled: boolean;
+  isHidden?: boolean; // keeps its height so the stage doesn't move
   
   // add
   onAddDancer: () => void;
@@ -113,6 +114,7 @@ type ToolbarProps = {
 
 function Toolbar({
   isEnabled,
+  isHidden,
   
   onAddDancer, isAddingDancer,
   onAddProp, isAddingProp,
@@ -202,7 +204,8 @@ function Toolbar({
    }, [areSelectionActionsActivated]);
 
   const className = classNames("z-10 flex items-start w-screen gap-3 px-4 pt-2 pb-10 h-28 overflow-y-hidden bg-surface border-t-2 border-line scroll-fade", {
-    "pointer-events-none opacity-40": !isEnabled
+    "pointer-events-none opacity-40": !isEnabled,
+    "invisible": isHidden,
   });
 
   const rowRef = useRef<HTMLDivElement | null>(null);

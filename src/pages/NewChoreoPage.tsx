@@ -5,7 +5,8 @@ import { Choreo, EventDetails, StageType } from "../models/choreo";
 import { colorPalette } from "../lib/consts/colors";
 import { DEFAULT_PROP_LENGTH, DEFAULT_PROP_WIDTH, LONG_NAME_LENGTH } from "../lib/consts/consts";
 import { saveChoreo } from "../lib/dataAccess/DataController";
-import StageSizeFields from "../components/common/StageSizeFields";
+import StageSizeInputs from "../components/common/StageSizeInputs";
+import GridPreview from "../components/grid/GridPreview";
 import Button from "../components/basic/Button";
 import CustomAutocomplete from "../components/inputs/CustomAutocomplete";
 import DateInput from "../components/inputs/DateInput";
@@ -206,7 +207,7 @@ export function NewChoreoPage({
           {stepTitles[step] || ""}
         </h2>
       </header>
-      <div className={step === 3 ? "flex-1 min-h-0 px-4" : "flex-1 px-4 overflow-auto"}>
+      <div className={step === 1 ? "flex-1 px-4 overflow-auto" : "flex-1 min-h-0 px-4"}>
         {step === 1 && (
           // Top-aligned with even gaps, so the fields stay together and above the keyboard.
           <div className="flex flex-col pt-2 space-y-4">
@@ -272,15 +273,17 @@ export function NewChoreoPage({
         )}
 
         {step === 2 && (
-          <StageSizeFields
-            stageType={form.stageType}
-            stageWidth={form.stageWidth}
-            stageLength={form.stageLength}
-            xMargin={form.xMargin}
-            yMargin={form.yMargin}
-            onChange={handleChange}
-            showSummary={false}
-            stageTypeField={
+          <div className="flex flex-col h-full gap-3 pb-3">
+            <div className="flex-1 min-h-40">
+              <GridPreview
+                stageWidth={form.stageWidth}
+                stageLength={form.stageLength}
+                stageType={form.stageType}
+                xMargin={form.xMargin}
+                yMargin={form.yMargin}
+              />
+            </div>
+            <div className="flex flex-col gap-3 pt-3 border-t border-line">
               <div className="grid grid-cols-2 gap-2">
                 <Button full selected={form.stageType === "parade"} onClick={() => handleChange("stageType", "parade")}>
                   パレード
@@ -289,8 +292,9 @@ export function NewChoreoPage({
                   ステージ
                 </Button>
               </div>
-            }
-          />
+              <StageSizeInputs stageType={form.stageType} size={form} onChange={handleChange}/>
+            </div>
+          </div>
         )}
 
         {

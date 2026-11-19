@@ -14,12 +14,11 @@ import { Dialog } from "@base-ui/react";
 import FindObjectsDialog from "../components/dialogs/FindObjectsDialog";
 import { useStackEditing } from "../lib/hooks/useStackEditing";
 import { arrangeRepresentatives, copyStacks, CopiedStacks, countSelectedUnits, prepareStackPaste, rearrangeWithStacks, restoreCopiedStacks, moveStacksTogether, normalizeStacks } from "../lib/helpers/stackHelper";
-import EditChoreoSizeDialog from "../components/dialogs/EditChoreoSizeDialog";
 import { exportChoreo } from "../lib/helpers/exportHelper";
 import { saveChoreo } from "../lib/dataAccess/DataController";
 import { DEFAULT_PROP_LENGTH, DEFAULT_PROP_WIDTH, SAMPLE_PARADE_ID, SAMPLE_STAGE_ID } from "../lib/consts/consts";
 import { AppSetting } from "../models/appSettings";
-import { changeStageGeometryAndType, renameChoreo } from "../lib/editor/commands/choreoCommands";
+import { renameChoreo } from "../lib/editor/commands/choreoCommands";
 import EditChoreoInfoDialog from "../components/dialogs/EditChoreoInfoDialog";
 import EditDancerColourDialog from "../components/dialogs/EditDancerColourDialog";
 import { DancerPosition } from "../models/dancer";
@@ -27,6 +26,7 @@ import { ActionManagerDialog } from "../components/dialogs/ActionManagerDialog";
 import { DancerAction, DancerActionTiming } from "../models/dancerAction";
 import ActionSelectionToolbar from "../components/editor/ActionSelectionToolbar";
 import { useShortestMove } from "../lib/hooks/useShortestMove";
+import { useStageResize } from "../lib/hooks/useStageResize";
 import ConfirmDeletionDialog from "../components/dialogs/ConfirmDeletionDialog";
 import EditSectionNoteDialog from "../components/dialogs/EditSectionNoteDialog";
 import { clearSeenVersion, getPersonalNotesForChoreo } from "../lib/dataAccess/LocalStorageController";
@@ -51,7 +51,6 @@ import { calculateMovementCache, cornerToCentreFromProp } from "../lib/helpers/e
 import { Distribution, HorizontalAlignment, Rearrangement, VerticalAlignment } from "../models/alignment";
 import { useHelp } from "../components/help/HelpContext";
 
-const resizeDialog = Dialog.createHandle<Choreo>();
 const editChoreoInfoDialog = Dialog.createHandle<string>();
 const sectionManagerDialog = Dialog.createHandle<string>();
 const renameDancerDialog = Dialog.createHandle<string>();
@@ -317,8 +316,25 @@ export default function ChoreoEditPage(props: {
     selectedIds,
     commitState,
   });
+  const {
+    isResizingStage, startStageResize, stageResizePreview, stageResizeSheetHeight, stageSizeSheet,
+  } = useStageResize({
+    state: history.presentState.state,
+    section: currentSection,
+    commitState,
+  });
   // Previewing: nothing on the stage can be selected or edited.
-  const previewStageProps = useMemo(() => shortestMovePreview && {
+  const previewStageProps = useMemo(() => stageResizePreview ? {
+    canEdit: false, canSelectDancers: false, canSelectProps: false, canSelectObstacles: false, canToggleSelection: false,
+    currentChoreo: stageResizePreview.choreo,
+    currentSection: stageResizePreview.section,
+    selectedIds: NO_SELECTION, setSelectedIds: () => {},
+    selectedDancerMovement: undefined, onDancerSelected: undefined, showPaths: false,
+    toggleEditEnabled: undefined, openNoteDialog: undefined, openFind: undefined, openHelp: undefined, dimDancersToggle: undefined,
+    halfFadedDancerIds: stageResizePreview.halfFadedDancerIds,
+    bottomOverlayHeight: stageResizeSheetHeight,
+    hideCameraReset: true,
+  } : shortestMovePreview && {
     canEdit: false, canSelectDancers: false, canSelectProps: false, canSelectObstacles: false, canToggleSelection: false,
     currentChoreo: shortestMovePreview.choreo,
     currentSection: shortestMovePreview.section,
@@ -330,9 +346,10 @@ export default function ChoreoEditPage(props: {
     previewRoutes: shortestMovePreview.routes,
     bottomOverlayHeight: shortestMoveSheetHeight,
     dimPropsAndObstacles: true, // so routes under props (e.g. a curtain) show through
-  }, [shortestMovePreview, shortestMoveSheetHeight]);
+  }, [shortestMovePreview, shortestMoveSheetHeight, stageResizePreview, stageResizeSheetHeight]);
+  const isPreviewing = isPreviewingShortestMove || isResizingStage;
   const isPreviewingRef = useRef(false);
-  isPreviewingRef.current = isPreviewingShortestMove;
+  isPreviewingRef.current = isPreviewing;
 
   const firstSelectedDancerProp: SelectedEntity | undefined = useMemo(() => {
     // A stack that stays together from the previous section is edited as one path.
@@ -526,7 +543,6 @@ export default function ChoreoEditPage(props: {
   }, [selectedIds]);
 
   // dialogs
-  const [resizeDialogOpen, setResizeDialogOpen] = useState(false);
   const [editChoreoInfoDialogOpen, setEditChoreoInfoDialogOpen] = useState(false);
   const [sectionManagerDialogOpen, setSectionManagerDialogOpen] = useState(false);
   const [renameDancerDialogOpen, setRenameDancerDialogOpen] = useState(false);
@@ -562,9 +578,6 @@ export default function ChoreoEditPage(props: {
     setDeleteSectionDialogOpen(isOpen);
   };
 
-  const handleResizeDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
-    setResizeDialogOpen(isOpen);
-  };
 
   const handleEditChoreoInfoDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setEditChoreoInfoDialogOpen(isOpen);
@@ -730,7 +743,6 @@ export default function ChoreoEditPage(props: {
 
   // ---- Header handlers ----
   const openEditChoreoInfoDialog = useCallback(() => setEditChoreoInfoDialogOpen(true), []);
-  const openResizeDialog = useCallback(() => setResizeDialogOpen(true), []);
   const openExportDialog = useCallback(() => setExportDialogOpen(true), []);
   const closeExportDialog = useCallback(() => setExportDialogOpen(false), []);
   const openDancerManagerDialog = useCallback(() => setDancerManagerDialogOpen(true), []);
@@ -1018,7 +1030,8 @@ export default function ChoreoEditPage(props: {
         currentChoreo={history.presentState.state}
         onSave={onSave}
         editName={openEditChoreoInfoDialog}
-        editSize={openResizeDialog}
+        editSize={startStageResize}
+        hideActions={isResizingStage}
         onDownload={openExportDialog}
         showManageDancers={entityCount.dancers > 0}
         manageDancers={openDancerManagerDialog}
@@ -1099,7 +1112,7 @@ export default function ChoreoEditPage(props: {
         />
         <div className="absolute bottom-0 flex flex-col">
           {
-            !isPreviewingShortestMove &&
+            !isPreviewing &&
             <div className="absolute bottom-10">
               <UndoRedoToolbar
                 undo={() => {dispatch({type: "UNDO"})}}
@@ -1111,7 +1124,7 @@ export default function ChoreoEditPage(props: {
           }
           <div className="absolute bottom-0 w-screen">
             {
-              !isAssigningActions && !isPreviewingShortestMove &&
+              !isAssigningActions && !isPreviewing &&
               <FormationSelectionToolbar
                 currentSectionId={currentSection.id}
                 sections={history.presentState.state.sections}
@@ -1143,6 +1156,7 @@ export default function ChoreoEditPage(props: {
       </div>
       <Toolbar
         isEnabled={editEnabled}
+        isHidden={isResizingStage}
         onAddDancer={onAddDancerToggle}
         isAddingDancer={isAddingDancers}
         onAddProp={onAddPropToggle}
@@ -1223,6 +1237,7 @@ export default function ChoreoEditPage(props: {
       />
       {/* Floats over the page like view mode's drawer; the stage moves its camera instead of resizing. */}
       {shortestMoveSheet}
+      {stageSizeSheet}
       {
         pasteNote &&
         <InstructionMessage instruction={pasteNote} onClose={() => setPasteNote(undefined)}/>
@@ -1279,18 +1294,6 @@ export default function ChoreoEditPage(props: {
             initialPropIds={selectedIds.props}
             onConfirm={onFind}/>
         }
-      </Dialog.Root>
-      <Dialog.Root
-        handle={resizeDialog}
-        open={resizeDialogOpen}
-        onOpenChange={handleResizeDialogOpen}>
-        <EditChoreoSizeDialog
-          currentChoreo={history.presentState.state}
-          onSave={(geometry, stageType) => {
-            commitState(changeStageGeometryAndType(history.presentState.state, geometry, stageType));
-            resizeDialog.close();
-            setResizeDialogOpen(false);
-          }}/>
       </Dialog.Root>
       <Dialog.Root
         handle={editChoreoInfoDialog}
