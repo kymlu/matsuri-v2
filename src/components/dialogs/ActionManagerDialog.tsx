@@ -127,7 +127,7 @@ export function ActionManagerDialog({
   }, [liveActions]);
 
   return <BaseEditDialog
-    title={`アクション管理 - ${section.name}`}
+    title={`カウント管理 - ${section.name}`}
     full
     isActionButtonDisabled={!canSubmit}
     actionButtonText="保存"
