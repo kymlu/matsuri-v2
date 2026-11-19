@@ -37,7 +37,7 @@ export default function EditDancerColourDialog({
           <div className="flex flex-row gap-2">
             <Button
               full
-              primary={mode === "current"}
+              selected={mode === "current"}
               onClick={() => setMode("current")}>
               <span className="font-semibold">
                 現在
@@ -45,7 +45,7 @@ export default function EditDancerColourDialog({
             </Button>
             <Button
               full
-              primary={mode === "currentAndAfter"}
+              selected={mode === "currentAndAfter"}
               onClick={() => setMode("currentAndAfter")}>
               <span className="font-semibold">
                 以後
@@ -53,7 +53,7 @@ export default function EditDancerColourDialog({
             </Button>
             <Button
               full
-              primary={mode === "all"}
+              selected={mode === "all"}
               onClick={() => setMode("all")}>
               <span className="font-semibold">
                 すべて

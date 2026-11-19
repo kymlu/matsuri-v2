@@ -285,14 +285,14 @@ export function NewChoreoPage({
               <div className="grid grid-cols-2 gap-2 md:flex md:flex-col">
                 <Button
                   full
-                  primary={form.stageType === 'parade'}
+                  selected={form.stageType === 'parade'}
                   onClick={() => handleChange("stageType", "parade")}
                 >
                   パレード
                 </Button>
                 <Button
                   full
-                  primary={form.stageType === 'stage'}
+                  selected={form.stageType === 'stage'}
                   onClick={() => handleChange("stageType", "stage")}
                 >
                   ステージ
