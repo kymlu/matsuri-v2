@@ -107,7 +107,6 @@ export default function ChoreoEditPage(props: {
   const [appSettings, setAppSettings] = useState<AppSetting>({
     snapToGrid: true,
     showGrid: true,
-    showPreviousSection: false,
     dancerDisplayType: "large",
   });
   const isDirty = useRef(false);
@@ -740,9 +739,6 @@ export default function ChoreoEditPage(props: {
   const toggleShowGrid = useCallback(() => {
     setAppSettings(prev => ({...prev, showGrid: !prev.showGrid}));
   }, []);
-  const toggleShowPrevious = useCallback(() => {
-    setAppSettings(prev => ({...prev, showPreviousSection: !prev.showPreviousSection}));
-  }, []);
   const toggleSnap = useCallback(() => {
     setAppSettings(prev => ({...prev, snapToGrid: !prev.snapToGrid}));
   }, []);
@@ -1030,7 +1026,6 @@ export default function ChoreoEditPage(props: {
         manageProps={openPropManagerDialog}
         exportChoreo={onExportChoreo}
         changeShowGrid={toggleShowGrid}
-        changeShowPrevious={toggleShowPrevious}
         changeSnap={toggleSnap}
         changeDancerSize={changeDancerSize}
         appSettings={appSettings}

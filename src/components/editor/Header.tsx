@@ -29,7 +29,6 @@ type HeaderProps = {
   exportChoreo?: () => void;
   changeSnap?: () => void;
   changeShowGrid?: () => void;
-  changeShowPrevious?: () => void;
   changeDancerSize?: (showLarge: boolean) => void;
   appSettings: AppSetting;
   goToEdit?: () => void;
@@ -57,7 +56,7 @@ function Header({
   showManageProps, manageProps, 
   manageSections,
   exportChoreo,
-  changeSnap, changeShowGrid, changeShowPrevious, changeDancerSize,
+  changeSnap, changeShowGrid, changeDancerSize,
   appSettings,
   goToEdit, goToView,
   toggleShowPath, showPath, isShowPathBtnDisabled,
@@ -156,7 +155,6 @@ function Header({
               changeShowGrid={changeShowGrid}
               changeDancerSize={changeDancerSize}
               appSettings={appSettings}
-              changeShowPrevious={changeShowPrevious}
               showPublish={showPublish}
               publish={publish}
               stageSize={<><span className="text-nowrap">縦{stageLength}m ×</span> <span className="text-nowrap">幅{stageWidth}m</span></>}

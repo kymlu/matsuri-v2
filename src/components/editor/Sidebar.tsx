@@ -24,7 +24,6 @@ type SidebarProps = {
   
   changeSnap?: () => void;
   changeShowGrid?: () => void;
-  changeShowPrevious?: () => void;
   changeDancerSize?: (showLarge: boolean) => void;
   
   appSettings: AppSetting;
@@ -43,7 +42,6 @@ export function Sidebar({
   changeSnap,
   changeShowGrid,
   changeDancerSize,
-  changeShowPrevious,
   appSettings,
   showPublish,  publish,
 }: SidebarProps) {
@@ -87,10 +85,6 @@ export function Sidebar({
         {
           changeSnap &&
           <CustomSwitch label="グリッドにスナップ" hint="動かすとマス目に合わせる" defaultChecked={appSettings.snapToGrid} onChange={changeSnap}/>
-        }
-        {
-          changeShowPrevious &&
-          <CustomSwitch label="前のセクションを見る" defaultChecked={appSettings.showPreviousSection} onChange={changeShowPrevious}/>
         }
         {
           changeDancerSize &&
