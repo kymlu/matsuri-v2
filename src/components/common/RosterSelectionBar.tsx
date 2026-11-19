@@ -33,7 +33,7 @@ export default function RosterSelectionBar({
   const counter = rosterCounter(kind);
   const hasSelection = selectedCount > 0 && !isBusy;
 
-  return <div className="px-4 pt-3 pb-5 border-t bg-surface border-line">
+  return <div className="px-4 pt-3 pb-6 border-t bg-surface border-line">
     <p className="font-bold">
       {
         selectedCount === 0

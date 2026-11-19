@@ -203,7 +203,7 @@ function Toolbar({
     }
    }, [areSelectionActionsActivated]);
 
-  const className = classNames("z-10 flex items-start w-screen gap-3 px-4 pt-2 pb-10 h-28 overflow-y-hidden bg-surface border-t-2 border-line scroll-fade", {
+  const className = classNames("z-10 flex items-start w-screen gap-3 px-4 pt-2 pb-6 h-28 overflow-y-hidden bg-surface border-t-2 border-line scroll-fade", {
     "pointer-events-none opacity-40": !isEnabled,
     "invisible": isHidden,
   });
