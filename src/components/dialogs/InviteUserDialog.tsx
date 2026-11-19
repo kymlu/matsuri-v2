@@ -37,7 +37,9 @@ export default function InviteUserDialog({
   }, [email]);
 
   const errorMessage = useMemo(() => {
-    if (!testEmail(email)) {
+    if (isNullOrUndefinedOrBlank(email)) {
+      return undefined;
+    } else if (!testEmail(email)) {
       return "有効なメールアドレスを入力してください"
     } else if (existingUsers.has(email)) {
       return "このユーザーはすでに追加されています"
@@ -82,7 +84,6 @@ export default function InviteUserDialog({
     actionButtonText={mode === "enter" ? "招待" : "OK"}
     onClose={resetData}
     isActionButtonDisabled={!isEmailValid}
-    fullWidth
     >
     {
       mode === "enter" &&

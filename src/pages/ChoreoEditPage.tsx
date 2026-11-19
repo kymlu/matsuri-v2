@@ -1421,6 +1421,7 @@ export default function ChoreoEditPage(props: {
         <DancerManagerDialog
           dancers={history.presentState.state.dancers}
           roster={roster?.dancers}
+          colours={Object.fromEntries(Object.values(currentSection.formation.dancerPositions).map(p => [p.dancerId, p.color]))}
           onSubmit={(dancers, deletedDancerIds) => {
             commitState(renameAndDeleteDancers(history.presentState.state, indexByKey(dancers, "id"), new Set(deletedDancerIds)));
             dancerManagerDialog.close();

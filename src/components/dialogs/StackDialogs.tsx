@@ -67,7 +67,6 @@ export function StackOrderDialog({ initial, onSubmit, onBack, kind = "dancers" }
     title="重ねる順"
     actionButtonText="重ねる"
     noDetachedTrigger
-    fullWidth
     backButton={onBack ? { label: "戻る", onClick: onBack } : undefined}
     onSubmit={() => onSubmit(members.map(m => m.id), spot)}>
     <p className="mb-2 text-sm text-muted">上から順。ドラッグで並べ替えます。</p>
@@ -95,7 +94,7 @@ export function StackOrderDialog({ initial, onSubmit, onBack, kind = "dancers" }
 // 並べ替え: new order for an existing stack. Nobody moves.
 export function ReorderStackDialog({ initial, onSubmit }: { initial: StackMember[], onSubmit: (topFirst: string[]) => void }) {
   const [members, setMembers] = useState(initial);
-  return <BaseEditDialog title="並べ替え" noDetachedTrigger fullWidth onSubmit={() => onSubmit(members.map(m => m.id))}>
+  return <BaseEditDialog title="並べ替え" noDetachedTrigger onSubmit={() => onSubmit(members.map(m => m.id))}>
     <p className="mb-2 text-sm text-muted">上から順。ドラッグで並べ替えます。</p>
     <OrderList members={members} setMembers={setMembers}/>
   </BaseEditDialog>;
@@ -115,7 +114,7 @@ export function UnstackDialog({ members, onSubmit, kind = "dancers" }: { members
   const note = picked.size === 0 ? undefined
     : remaining.length < 2 ? "重なりがなくなります。"
     : `${remaining.map(m => m.label).join("・")}の重なりになります。`;
-  return <BaseEditDialog title={`外す${noun}を選ぶ`} actionButtonText="外す" noDetachedTrigger fullWidth
+  return <BaseEditDialog title={`外す${noun}を選ぶ`} actionButtonText="外す" noDetachedTrigger
     isActionButtonDisabled={picked.size === 0}
     onSubmit={() => onSubmit([...picked])}>
     <div className="flex items-center justify-between gap-2 mb-2">
@@ -176,7 +175,7 @@ export function SwapDialog({ a, b, differs, initial, onSubmit }: {
       </span>
       {values(show)}
     </li>;
-  return <BaseEditDialog title="位置交換" actionButtonText="入れ替える" noDetachedTrigger fullWidth onSubmit={() => onSubmit(choice)}>
+  return <BaseEditDialog title="位置交換" actionButtonText="入れ替える" noDetachedTrigger onSubmit={() => onSubmit(choice)}>
     <p><span className="font-semibold">{a.label}</span>と<span className="font-semibold">{b.label}</span>の位置を入れ替えます。</p>
     <p className="text-sm text-muted">入れ替えたあと、どちらに合わせますか？</p>
     <ul className="divide-y divide-line">
@@ -190,7 +189,7 @@ export function SwapDialog({ a, b, differs, initial, onSubmit }: {
 
 // 重ねますか？: after dropping one thing almost exactly onto another. 次へ always goes on to 重ねる順.
 export function StackPromptDialog({ text, onNext, onKeep }: { text: string, onNext: () => void, onKeep: () => void }) {
-  return <BaseEditDialog title="重ねますか？" actionButtonText="次へ" fullWidth
+  return <BaseEditDialog title="重ねますか？" actionButtonText="次へ"
     backButton={{ label: "そのまま", onClick: onKeep }}
     onSubmit={onNext}>
     <p>{text}</p>
@@ -207,7 +206,7 @@ export function StackListDialog({ members, onPick, kind = "dancers" }: { members
     <span className="font-semibold break-all">{m.label}</span>
     <span className="ml-auto text-sm text-muted shrink-0">{tierLabel(i, members.length)}</span>
   </>;
-  return <CustomDialog title={kind === "dancers" ? "重なっている人" : "重なっている道具"} hasX fullWidth focusDialogOnOpen>
+  return <CustomDialog title={kind === "dancers" ? "重なっている人" : "重なっている道具"} hasX focusDialogOnOpen>
     <ul className="p-px space-y-1">
       {
         members.map((m, i) =>

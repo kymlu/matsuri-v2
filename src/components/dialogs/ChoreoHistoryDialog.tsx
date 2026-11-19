@@ -52,7 +52,7 @@ export function ChoreoHistoryDialog({
     fetchHistory();
   }, [teamId, choreoId, isLoggedIn]);
 
-  return <CustomDialog title="公開履歴" onClose={onClose} hasX fullWidth>
+  return <CustomDialog title="公開履歴" onClose={onClose} hasX>
     <div className="flex flex-col w-full gap-1">
       {
         history.map((h, i) => (<Fragment key={h.version} >

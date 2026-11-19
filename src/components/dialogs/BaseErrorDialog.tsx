@@ -7,17 +7,15 @@ type BaseErrorDialogProps = {
   actionButtonText?: string,
   children: React.ReactNode,
   onClose?: () => void,
-  fullWidth?: boolean
   focusDialogOnOpen?: CustomDialogProps["focusDialogOnOpen"],
 }
 
 export default function BaseErrorDialog({
-  title, actionButtonText, children, onClose, fullWidth, focusDialogOnOpen
+  title, actionButtonText, children, onClose, focusDialogOnOpen
 }: BaseErrorDialogProps) {
   return <CustomDialog
     hasX
     onClose={onClose}
-    fullWidth={fullWidth}
     focusDialogOnOpen={focusDialogOnOpen}
     title={title}
     footer={

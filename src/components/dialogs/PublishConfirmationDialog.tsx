@@ -96,7 +96,6 @@ export default function PublishConfirmationDialog({
       actionButtonText="公開する"
       isActionButtonDisabled={!isActionButtonEnabled}
       onSubmit={upload}
-      fullWidth
       onClose={() => {
         onClose();
         setIsProcessing(false);

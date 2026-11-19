@@ -49,16 +49,25 @@ export default function GridPreview ({
     return () => observer.disconnect();
   }, []);
 
+  const totalWidth = (stageWidth + xMargin * 2) * METER_PX;
+  const totalLength = (stageLength + yMargin * 2) * METER_PX;
   const scale = useMemo<number>(() => {
     if (containerSize.width === 0 || containerSize.height === 0) return 1;
-    return Math.min(
-      containerSize.width / ((stageWidth + xMargin * 2) * METER_PX),
-      containerSize.height / ((stageLength + yMargin * 2) * METER_PX),
-    );
-  }, [containerSize, stageWidth, stageLength, xMargin, yMargin]);
+    return Math.min(containerSize.width / totalWidth, containerSize.height / totalLength);
+  }, [containerSize, totalWidth, totalLength]);
 
-  return <div ref={containerRef} className="flex-1 min-h-[300px] overflow-hidden">
-    <Stage key={theme} width={containerSize.width} height={containerSize.height} scaleX={scale} scaleY={scale}>
+  return <div
+    ref={containerRef}
+    className="w-full max-h-[50svh] overflow-hidden"
+    style={{ aspectRatio: `${totalWidth} / ${totalLength}` }}>
+    <Stage
+      key={theme}
+      width={containerSize.width}
+      height={containerSize.height}
+      scaleX={scale}
+      scaleY={scale}
+      x={(containerSize.width - totalWidth * scale) / 2}
+      y={(containerSize.height - totalLength * scale) / 2}>
       {
         stageGeometry &&
         <GridLayer

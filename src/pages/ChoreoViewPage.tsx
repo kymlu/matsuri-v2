@@ -381,7 +381,7 @@ export default function ChoreoViewPage(props: {
       }
 
       <Dialog.Root onOpenChange={closeHintDialog} open={showHintDialog}>
-        <BaseErrorDialog title="利用方法" fullWidth onClose={closeHintDialog}>
+        <BaseErrorDialog title="利用方法" onClose={closeHintDialog}>
           <div>名前をタップすると、位置情報が表示されます。</div>
           <Divider/>
           <CustomSwitch

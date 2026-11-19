@@ -56,7 +56,6 @@ export default function EditNameDialog({
 
   return <BaseEditDialog
     title={`${type}名`}
-    fullWidth={showPicker}
     // On a phone, focusing the input would open the keyboard over the names you came to pick.
     initialFocus={showPicker && isPickerOpen ? (openType) => openType !== "touch" : undefined}
     onSubmit={() => { onSubmit(newName.trim(), lookChange && isApplyingLook ? lookChange : undefined) }}

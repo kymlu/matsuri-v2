@@ -71,7 +71,6 @@ export default function AcceptInviteDialog({
     showCloseButton={false}
     onClose={close}
     onSubmit={onAcceptInvite}
-    fullWidth
     hasX={false}
   >
     <TextInput

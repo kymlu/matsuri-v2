@@ -22,7 +22,6 @@ export default function ConfirmUploadDialog({
   onCancel, onCopy, onOverwrite
 }: ConfirmUploadDialogProps) {
   return <CustomDialog
-      fullWidth
       title="ファイルの重複"
       footer={
       // Safest choice first and solid; overwriting is outlined in red; cancel last.

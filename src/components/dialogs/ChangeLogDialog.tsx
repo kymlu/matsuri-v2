@@ -35,7 +35,6 @@ export default function ChangeLogDialog({
   return (
     <CustomDialog
       title="前回からの変更"
-      fullWidth
       onClose={onClose}
       hasX
       header={
@@ -237,7 +236,7 @@ function OverallChanges({ log, sectionNames }: OverallChangesProps) {
     ])],
     ["メモ", rows(memos.length > 0 ? [{ label: "変更", text: sectionList(memos) }] : [])],
     ["ダンサー", rows(listChangeRows(dancers))],
-    ["振り", actions.length > 0 && <ActionChanges lines={actions} sectionNames={sectionNames}/>],
+    ["アクション", actions.length > 0 && <ActionChanges lines={actions} sectionNames={sectionNames}/>],
     ["道具", rows([
       ...listChangeRows(props),
       ...props.lines.map(x => ({ text: `「${x.name}」：${[

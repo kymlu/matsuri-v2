@@ -79,7 +79,6 @@ export default function RosterCategoriesDialog({ teamId, kind, list: roster, onS
   return <BaseEditDialog
     // Names the list, so nobody deletes a category from the wrong tab.
     title={kind === "dancer" ? "区分（ダンサー）" : "区分（道具）"}
-    fullWidth
     onSubmit={save}
     isActionButtonDisabled={isSaving || rows.some(r => !r.isDeleted && isInvalid(r.name))}>
     <div className="space-y-1">
