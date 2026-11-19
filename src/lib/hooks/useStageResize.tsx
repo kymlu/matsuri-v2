@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Choreo, StageGeometry } from "../../models/choreo";
 import { ChoreoSection } from "../../models/choreoSection";
 import { changeStageGeometryAndType, getObjectsOutsideStage } from "../editor/commands/choreoCommands";
@@ -46,10 +46,12 @@ export function useStageResize({ state, section, commitState }: Options) {
   const [base, setBase] = useState<Choreo | undefined>(undefined);
   const [sheetHeight, setSheetHeight] = useState<number | undefined>(undefined);
 
+  const stateRef = useRef(state);
+  stateRef.current = state;
   const startStageResize = useCallback(() => {
-    setBase(state);
-    setDraft(sizeOf(state));
-  }, [state]);
+    setBase(stateRef.current);
+    setDraft(sizeOf(stateRef.current));
+  }, []);
 
   const close = useCallback(() => {
     setDraft(undefined);
@@ -82,20 +84,16 @@ export function useStageResize({ state, section, commitState }: Options) {
   }, [base, geometry, overflow, section.id]);
 
   const save = useCallback(() => {
-    if (!base || !geometry) return;
-    const next = changeStageGeometryAndType(base, geometry, base.stageType);
-    if (next.stageGeometry.stageWidth === base.stageGeometry.stageWidth &&
-      next.stageGeometry.stageLength === base.stageGeometry.stageLength &&
-      next.stageGeometry.margin.leftMargin === base.stageGeometry.margin.leftMargin &&
-      next.stageGeometry.margin.topMargin === base.stageGeometry.margin.topMargin) {
+    if (!base || !draft || !geometry) return;
+    const original = sizeOf(base);
+    if ((Object.keys(draft) as StageSizeField[]).every(k => draft[k] === original[k])) {
       close();
       return;
     }
-    commitState(next);
-  }, [base, geometry, commitState, close]);
+    commitState(changeStageGeometryAndType(base, geometry, base.stageType));
+  }, [base, draft, geometry, commitState, close]);
 
   const onChange = useCallback((field: StageSizeField, value: number) => {
-    if (!Number.isFinite(value)) return;
     setDraft(prev => prev && { ...prev, [field]: value });
   }, []);
 

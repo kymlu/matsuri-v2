@@ -33,7 +33,7 @@ export default function StageSizeInputs({ stageType, size, onChange }: StageSize
           max={isMargin ? MAX_STAGE_MARGIN : MAX_STAGE_DIMENSION}
           baseStep={1}
           buttonStep={1}
-          onChange={(newValue) => onChange(name, Number(newValue))}
+          onCommit={(newValue) => onChange(name, newValue)}
         />)
     }
   </div>;

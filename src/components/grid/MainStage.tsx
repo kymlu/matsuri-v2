@@ -98,7 +98,6 @@ type MainStageProps = {
   dimPropsAndObstacles?: boolean, // props and obstacles faint, so routes drawn underneath show through
   // Height of a sheet over the bottom; the camera fits the routes above it.
   bottomOverlayHeight?: number,
-  hideCameraReset?: boolean,
 }
 
 function MainStage({
@@ -112,7 +111,7 @@ function MainStage({
   addDancer, addProp, addObstacle, appSettings, previousSection, selectedDancerMovement,
   onDancerSelected, bottomMarginPercent = 0, canResizeProps, editEnabled, toggleEditEnabled, openNoteDialog, openChangeLog, openHelp, openFind, dimDancersToggle, focusSelectionRequest,
   showPaths = false, isEditingMovement = false, mutedGhostPaths = false, dancerMovementCache, propMovementCache, onMidpointEdit, currentMovement,
-  dancerAnimationCache, propAnimationCache, fadedDancerIds, halfFadedDancerIds, previewRoutes, instantMoves, dimPropsAndObstacles, bottomOverlayHeight, hideCameraReset,
+  dancerAnimationCache, propAnimationCache, fadedDancerIds, halfFadedDancerIds, previewRoutes, instantMoves, dimPropsAndObstacles, bottomOverlayHeight,
 }: MainStageProps) {
   // Konva reads colours from the (non-reactive) colorPalette, so remount the
   // whole Stage subtree when the theme flips to force every layer to redraw.
@@ -372,7 +371,12 @@ function MainStage({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [centredX]);
 
+  const [overlayRefit, setOverlayRefit] = useState(0);
   const resetCamera = useCallback(() => {
+    if (bottomOverlayHeight !== undefined) {
+      setOverlayRefit(n => n + 1);
+      return;
+    }
     setIsManualMovement(false);
     if (!stageGeometry) return;
     
@@ -410,11 +414,11 @@ function MainStage({
         }
       });
     }
-  }, [stageGeometry, selectedIds.dancers, selectedObjects.dancers, size.height, centredX, bottomMarginM, pixelsPerMeter, currentSection.formation.dancerPositions, setStagePosition]);
+  }, [stageGeometry, selectedIds.dancers, selectedObjects.dancers, size.height, centredX, bottomMarginM, pixelsPerMeter, currentSection.formation.dancerPositions, setStagePosition, bottomOverlayHeight]);
 
   // Fit the routes above the sheet by moving the camera only (zooming out if needed); restore it after.
   const cameraBeforeOverlay = useRef<{ scale: Coordinates, position: Coordinates, manual: boolean } | undefined>(undefined);
-  const overlayFit = useRef<{ height: number, geometry: StageGeometry } | undefined>(undefined);
+  const overlayFit = useRef<{ height: number, refit: number, geometry: StageGeometry } | undefined>(undefined);
   useEffect(() => {
     if (!stageGeometry || size.width === 0) return;
     if (bottomOverlayHeight === undefined) {
@@ -430,17 +434,17 @@ function MainStage({
     }
     // Resizing under the sheet: keep the zoom and the front centre where they are instead of refitting.
     const fitted = overlayFit.current;
-    if (fitted && fitted.height === bottomOverlayHeight) {
+    if (fitted && fitted.height === bottomOverlayHeight && fitted.refit === overlayRefit) {
       if (fitted.geometry === stageGeometry) return;
       const anchor = (g: StageGeometry) => ({ x: (g.margin.leftMargin + g.stageWidth / 2) * pixelsPerMeter, y: g.margin.topMargin * pixelsPerMeter });
       const from = anchor(fitted.geometry), to = anchor(stageGeometry);
       const position = { x: stagePositionRef.current.x + from.x - to.x, y: stagePositionRef.current.y + from.y - to.y };
-      overlayFit.current = { height: bottomOverlayHeight, geometry: stageGeometry };
+      overlayFit.current = { height: bottomOverlayHeight, refit: overlayRefit, geometry: stageGeometry };
       setStagePosition(position);
       setRulerPos(position);
       return;
     }
-    overlayFit.current = { height: bottomOverlayHeight, geometry: stageGeometry };
+    overlayFit.current = { height: bottomOverlayHeight, refit: overlayRefit, geometry: stageGeometry };
     if (!cameraBeforeOverlay.current) {
       cameraBeforeOverlay.current = { scale: stageScale, position: stagePositionRef.current, manual: isManualMovement };
     }
@@ -470,7 +474,7 @@ function MainStage({
     setRulerPos(position);
   // Fit when the sheet height is given (once per opening), not when flipping 今／最短.
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bottomOverlayHeight, size.width, size.height, stageGeometry]);
+  }, [bottomOverlayHeight, size.width, size.height, stageGeometry, overlayRefit]);
 
   // Declared after the selection-following effect so its pan wins when both run together.
   // The bottom panel grows once a dancer is selected, so the pan is redone while it settles.
@@ -883,7 +887,7 @@ function MainStage({
       (isManualMovement || canEdit || dimDancersToggle) &&
       <div className={`absolute space-y-1 ${isShowingVerticalRuler ? "right-9" : "right-2"} ${isShowingHorizontalRuler ? "top-7" : "top-1"}`}>
         {
-          isManualMovement && !hideCameraReset &&
+          isManualMovement &&
           <IconButton
             size="sm"
             src="centerFocusStrong"

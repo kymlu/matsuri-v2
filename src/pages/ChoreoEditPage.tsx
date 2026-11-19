@@ -333,7 +333,6 @@ export default function ChoreoEditPage(props: {
     toggleEditEnabled: undefined, openNoteDialog: undefined, openFind: undefined, openHelp: undefined, dimDancersToggle: undefined,
     halfFadedDancerIds: stageResizePreview.halfFadedDancerIds,
     bottomOverlayHeight: stageResizeSheetHeight,
-    hideCameraReset: true,
   } : shortestMovePreview && {
     canEdit: false, canSelectDancers: false, canSelectProps: false, canSelectObstacles: false, canToggleSelection: false,
     currentChoreo: shortestMovePreview.choreo,
