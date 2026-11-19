@@ -279,6 +279,7 @@ export function NewChoreoPage({
             xMargin={form.xMargin}
             yMargin={form.yMargin}
             onChange={handleChange}
+            showSummary={false}
             stageTypeField={
               <div className="grid grid-cols-2 gap-2">
                 <Button full selected={form.stageType === "parade"} onClick={() => handleChange("stageType", "parade")}>

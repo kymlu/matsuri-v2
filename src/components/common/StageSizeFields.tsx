@@ -15,10 +15,11 @@ type StageSizeFieldsProps = {
   yMargin: number,
   onChange: (field: StageSizeField, value: number) => void,
   stageTypeField: React.ReactNode,
+  showSummary?: boolean,
 }
 
 export default function StageSizeFields({
-  stageType, stageWidth, stageLength, xMargin, yMargin, onChange, stageTypeField
+  stageType, stageWidth, stageLength, xMargin, yMargin, onChange, stageTypeField, showSummary = true
 }: StageSizeFieldsProps) {
   const isTall = stageLength + yMargin * 2 > stageWidth + xMargin * 2;
 
@@ -35,7 +36,7 @@ export default function StageSizeFields({
     />;
 
   return <div className="flex flex-col gap-3">
-    <div className={isTall ? "flex items-center gap-3" : "flex flex-col gap-1"}>
+    <div className={isTall ? "flex items-center justify-center gap-3" : "flex flex-col gap-1"}>
       <GridPreview
         stageWidth={stageWidth}
         stageLength={stageLength}
@@ -43,10 +44,13 @@ export default function StageSizeFields({
         xMargin={xMargin}
         yMargin={yMargin}
       />
-      <div className="flex flex-col">
-        <span className="font-bold text-primary">{formatStageSize(stageWidth, stageLength, stageType)}</span>
-        <span className="text-xs text-muted">左右の余白 {xMargin}m・前後の余白 {yMargin}m</span>
-      </div>
+      {
+        showSummary &&
+        <div className="flex flex-col">
+          <span className="font-bold text-primary">{formatStageSize(stageWidth, stageLength, stageType)}</span>
+          <span className="text-xs text-muted">左右の余白 {xMargin}m・前後の余白 {yMargin}m</span>
+        </div>
+      }
     </div>
     {stageTypeField}
     <div>
