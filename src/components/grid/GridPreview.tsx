@@ -11,11 +11,10 @@ type GridPreviewProps = {
   xMargin: number,
   yMargin: number,
   stageType: StageType,
-  maxHeight?: number,
 }
 
 export default function GridPreview ({
-  stageLength, stageWidth, xMargin, yMargin, stageType, maxHeight = 240
+  stageLength, stageWidth, xMargin, yMargin, stageType
 }: GridPreviewProps) {
   const stageGeometry = useMemo<StageGeometry>(() => {
     return {
@@ -57,15 +56,7 @@ export default function GridPreview ({
     return Math.min(containerSize.width / totalWidth, containerSize.height / totalLength);
   }, [containerSize, totalWidth, totalLength]);
 
-  const aspectRatio = `${totalWidth} / ${totalLength}`;
-
-  // Tall stages (parades) are sized by height so they stay narrow.
-  return <div
-    ref={containerRef}
-    className="overflow-hidden shrink-0"
-    style={totalLength > totalWidth
-      ? { height: maxHeight, aspectRatio }
-      : { width: "100%", maxHeight, aspectRatio }}>
+  return <div ref={containerRef} className="w-full h-full min-h-0 overflow-hidden">
     <Stage
       key={theme}
       width={containerSize.width}

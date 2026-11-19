@@ -154,13 +154,13 @@ describe("changeStageGeometryAndType with props and obstacles", () => {
 describe("getObjectsOutsideStage", () => {
   it("finds nothing when the stage gets bigger", () => {
     expect(getObjectsOutsideStage(makeChoreo(), geometry({ width: 12, length: 10 })))
-      .toEqual({ dancerIds: [], propIds: [], obstacleIds: [], sectionIds: [] });
+      .toEqual({ dancerIds: [], propIds: [], obstacleIds: [], sectionIds: [], dancerIdsBySection: { s1: [], s2: [] } });
   });
 
   it("lists each object and section once", () => {
     // Shifted 3m left: さくら (s1), あおい (s1 and s2) and the obstacle end up outside; the prop at 2 stays.
     expect(getObjectsOutsideStage(makeChoreo(), geometry({ width: 4 })))
-      .toEqual({ dancerIds: ["d1", "d2"], propIds: [], obstacleIds: ["o1"], sectionIds: ["s1", "s2"] });
+      .toEqual({ dancerIds: ["d1", "d2"], propIds: [], obstacleIds: ["o1"], sectionIds: ["s1", "s2"], dancerIdsBySection: { s1: ["d1", "d2"], s2: ["d2"] } });
   });
 
   it("measures y margins from the front for each direction", () => {

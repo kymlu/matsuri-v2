@@ -12,6 +12,7 @@ export interface NumberInputProps {
   baseStep?: number,
   buttonStep?: number,
   onChange?: (newValue: number | null) => void,
+  onCommit?: (newValue: number) => void, // on blur or button release, not every keystroke
   disabled?: boolean,
   compact?: boolean,
   short?: boolean,
@@ -20,10 +21,17 @@ export interface NumberInputProps {
 }
 
 export default function NumberInput ({
-  name, defaultValue, min, max, baseStep, buttonStep, onChange, disabled, compact, short, ref, label
+  name, defaultValue, min, max, baseStep, buttonStep, onChange, onCommit, disabled, compact, short, ref, label
 }: NumberInputProps) {
   const [value, setValue] = React.useState<number | null>(defaultValue ?? 0);
   const id = React.useId();
+
+  const round = (newValue: number | null) => {
+    const step = baseStep ?? 1;
+    const roundedRaw = newValue ? Math.round(newValue/step) * step : min ?? 0;
+    const precision = (step.toString().split('.')[1]?.length) || 0;
+    return parseFloat(roundedRaw.toFixed(precision));
+  };
 
   useImperativeHandle(ref, () => ({
     changeValue: (newValue: number) => {
@@ -43,13 +51,11 @@ export default function NumberInput ({
         name={name}
         value={value}
         onValueChange={(newValue) => {
-          const step = baseStep ?? 1;
-          const roundedRaw = newValue ? Math.round(newValue/step) * step : min ?? 0;
-          const precision = (step.toString().split('.')[1]?.length) || 0;
-          const rounded = parseFloat(roundedRaw.toFixed(precision));
+          const rounded = round(newValue);
           setValue(rounded);
           onChange?.(rounded);
         }}
+        onValueCommitted={onCommit && ((newValue) => onCommit(round(newValue)))}
         defaultValue={defaultValue}
         className="flex flex-col items-start gap-1"
         min={min ?? 0}
