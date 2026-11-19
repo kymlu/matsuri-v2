@@ -19,15 +19,16 @@ type ExportDialogProps = {
   canIncludePersonalNotes?: boolean,
 }
 
+const ALL = "all";
+
 function ExportDialog({
   choreo, selectedId, onClose, showPaths, canIncludePersonalNotes = true
 }: ExportDialogProps) {
   const [step, setStep] = useState<"prep" | "export">("prep");
   const [exportName, setExportName] = useState<string>("");
-  const [followingId, setFollowingId] = useState<string>(selectedId);
+  const [highlight, setHighlight] = useState<string>(selectedId); // "", ALL or a dancer id
   const [showFollowingPath, setShowFollowingPath] = useState<boolean>(showPaths ?? false);
   const [includePersonalNotes, setIncludePersonalNotes] = useState<boolean>(canIncludePersonalNotes);
-  const [exportAllDancers, setExportAllDancers] = useState<boolean>(false);
   const [progress, setProgress] = useState<number>(0);
   const [currentDancer, setCurrentDancer] = useState<{ name: string; index: number; total: number } | undefined>(undefined);
 
@@ -35,9 +36,12 @@ function ExportDialog({
     return !isNullOrUndefinedOrBlank(exportName.trim()) && RegExp(/[<>:"/\\|?*]|[. ]$/g).test(exportName.trim());
   }, [exportName]);
 
+  const dancerCount = Object.keys(choreo.dancers).length;
+  const exportAllDancers = highlight === ALL;
   const dancerList = useMemo(() => {
     const record: Record<string, string> = {};
-    record[""] = "未設定"
+    record[""] = "なし";
+    record[ALL] = "全員（1人ずつ）";
     Object.values(choreo.dancers)
       .sort((a, b) => strCompare<Dancer>(a, b, "name"))
       .forEach((dancer) => {
@@ -67,23 +71,13 @@ function ExportDialog({
     } else {
       await exportToPdf(choreo,
         exportName,
-        followingId,
-        showFollowingPath,
+        highlight,
+        highlight !== "" && showFollowingPath,
         includePersonalNotes,
         setProgress,
         onClose);
     }
-  }, [exportAllDancers, choreo, exportName, showFollowingPath, includePersonalNotes, followingId, onClose]);
-
-  const handleClose = useCallback(() => {
-    onClose();
-    setFollowingId("");
-    setStep("prep");
-    setShowFollowingPath(false);
-    setIncludePersonalNotes(canIncludePersonalNotes);
-    setExportAllDancers(false);
-    setCurrentDancer(undefined);
-  }, [onClose, canIncludePersonalNotes]);
+  }, [exportAllDancers, choreo, exportName, showFollowingPath, includePersonalNotes, highlight, onClose]);
 
   return <>
     {
@@ -92,7 +86,7 @@ function ExportDialog({
         title="PDFエクスポート"
         actionButtonText="エクスポート"
         onSubmit={handleSubmit}
-        onClose={handleClose}
+        onClose={onClose}
         isActionButtonDisabled={isExportNameValid}
       >
         <div className="max-w-full w-[100svw] md:w-max">
@@ -113,31 +107,28 @@ function ExportDialog({
           <Divider/>
 
           {
-            Object.values(choreo.dancers).length > 0 &&
+            dancerCount > 0 &&
             <>
-              <CustomSwitch
-                label="全ダンサー分をまとめて出力"
-                defaultChecked={false}
-                onChange={setExportAllDancers}
-              />
               <CustomSelect
-                label="追跡ダンサー"
+                label="強調するダンサー"
                 items={dancerList}
-                defaultValue={choreo.dancers[selectedId]?.name ?? "未設定"}
-                disabled={exportAllDancers}
-                setSelectValue={setFollowingId}
+                defaultValue={dancerList[selectedId] ?? dancerList[""]}
+                setSelectValue={setHighlight}
                 />
+              {
+                exportAllDancers &&
+                <p className="mt-1 text-xs text-muted">ダンサーごとのページを1つのPDFにまとめます（{dancerCount}人分）</p>
+              }
+              {
+                highlight !== "" &&
+                <CustomSwitch
+                  label="動線を表示"
+                  defaultChecked={showFollowingPath}
+                  onChange={setShowFollowingPath}
+                />
+              }
             </>
           }
-          {
-            <CustomSwitch
-              label="動線表示"
-              disabled={isNullOrUndefinedOrBlank(followingId) && !exportAllDancers}
-              defaultChecked={showPaths === undefined ? false : showPaths}
-              onChange={setShowFollowingPath}
-            />
-          }
-          
           {
             canIncludePersonalNotes &&
             <>
