@@ -52,7 +52,6 @@ export default function ChoreoPasswordEntryDialog({
     showCloseButton={false}
     onClose={close}
     onSubmit={login}
-    fullWidth
   >
     <div className="space-y-2">
       <p><b>{choreoName}</b>を見るにはパスワードが必要です。</p>

@@ -84,7 +84,6 @@ export default function EditRosterNameDialog({ teamId, kind, rosterName, list, o
   return <BaseEditDialog
     title={kind === "dancer" ? "名前を編集" : "道具名を編集"}
     // Room for the size fields and colour grid, like the prop rename dialog.
-    fullWidth
     onSubmit={save}
     isActionButtonDisabled={toNameKey(name) === "" || isTaken || isSaving}>
     <div className="space-y-3">

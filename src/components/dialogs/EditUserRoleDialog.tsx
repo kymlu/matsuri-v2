@@ -48,7 +48,6 @@ export default function EditUserRoleDialog({
     onSubmit={() => onSubmit()}
     actionButtonText="保存"
     noDetachedTrigger
-    fullWidth
     >
     <div className="flex flex-col gap-5">
       <div className="grid grid-cols-[auto,1fr] gap-x-4 gap-y-1 text-sm">

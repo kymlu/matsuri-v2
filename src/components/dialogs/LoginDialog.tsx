@@ -150,7 +150,6 @@ export default function LoginDialog({
     showCloseButton={false}
     onClose={close}
     onSubmit={submit}
-    fullWidth
   >
     {
       mode === "login" && 

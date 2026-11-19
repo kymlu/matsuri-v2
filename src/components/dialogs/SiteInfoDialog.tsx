@@ -25,7 +25,7 @@ function InfoRow({
 export default function SiteInfoDialog({
   buildInfo, goToHelpPage
 }: SiteInfoDialogProps) {
-  return <CustomDialog fullWidth title="サイト情報" hasX>
+  return <CustomDialog title="サイト情報" hasX>
     <div className="flex flex-col gap-2 mb-2">
       <p>お困りの際は、内容に応じて以下をご確認・ご連絡ください。</p>
       <div>

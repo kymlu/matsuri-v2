@@ -36,6 +36,8 @@ export default function TextInput({
   showLength, label, rightLabel, restrictFn, type = "text"
 }: TextInputProps) {
   const [value, setValue] = React.useState<string>(defaultValue ?? "");
+  const [isTouched, setIsTouched] = React.useState(false);
+  const isMissing = required && isTouched && isNullOrUndefinedOrBlank(value?.trim());
 
   useImperativeHandle(ref, () => ({
     changeValue: (newValue: string) => {
@@ -46,6 +48,7 @@ export default function TextInput({
   const handleChange = (newValue: string) => {
     if (!restrictFn || restrictFn(newValue)) {
       setValue(newValue);
+      setIsTouched(true);
       onContentChange(newValue);
     }
   }
@@ -66,10 +69,10 @@ export default function TextInput({
       "h-10": !short,
       "text-center": centered,
       "bg-subtle": disabled,
-      "bg-surface": !disabled && !((required && isNullOrUndefinedOrBlank(value?.trim())) || hasError),
+      "bg-surface": !disabled && !(isMissing || hasError),
       "w-full": !compact,
       "min-w-32": compact,
-      "border-primary bg-primary/20 placeholder:text-primary": (required && isNullOrUndefinedOrBlank(value?.trim())) || hasError,
+      "border-primary bg-primary/20 placeholder:text-primary": isMissing || hasError,
     },);
 
   const wrapperClasses = classNames(
@@ -91,6 +94,7 @@ export default function TextInput({
               placeholder={placeholder ?? ""}
               value={value ?? ""}
               onInput={(event) => handleChange(event.currentTarget.value)}
+              onBlur={() => setIsTouched(true)}
               className={inputClasses}/>
             {
               search &&

@@ -62,7 +62,6 @@ export default function EditDancerNameDialog({
 
   return <BaseEditDialog
     title={`ダンサー名`}
-    fullWidth={showPicker}
     // On a phone, focusing the input would open the keyboard over the names you came to pick.
     initialFocus={showPicker && isPickerOpen ? (openType) => openType !== "touch" : undefined}
     onSubmit={() => { onSubmit(newName.trim()) }}

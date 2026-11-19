@@ -26,10 +26,10 @@ export default function EditSectionNoteDialog({
   }
 
   return <BaseEditDialog
-    title="ノート変更"
+    title="メモ"
     onSubmit={onSubmitBtnClicked}
     >
-    <div className="w-[70svw] md:w-[50svw] h-[70svh] flex flex-col">
+    <div className="w-full h-[70svh] flex flex-col">
       <div className="flex-1 min-h-0 flex flex-col">
         <div className="flex items-center gap-1 mb-1">
           <Icon src="globe" size="xs" colour="grey"/>

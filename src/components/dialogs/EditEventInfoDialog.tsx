@@ -53,7 +53,7 @@ export default function EditEventInfoDialog({
     }}
     isActionButtonDisabled={hasEventName && hasDateError}
     >
-    <div className="w-[100svw] max-w-full md:w-full">
+    <div className="w-full">
       <CustomAutocomplete
         defaultValue={eventInfo?.event ?? ""}
         options={eventNames}

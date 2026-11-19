@@ -13,10 +13,11 @@ type DancerManagerDialogProps = {
   dancers: Record<string, Dancer>,
   onSubmit: (dancers: Dancer[], deletedDancerIds: string[]) => void,
   roster?: RosterList, // 名簿 dancer names to suggest on each row, when there are any
+  colours?: Record<string, string>, // each dancer's colour in the current section
 }
 
 export function DancerManagerDialog({
-  dancers, onSubmit, roster
+  dancers, onSubmit, roster, colours
 }: DancerManagerDialogProps) {
 
   const [dancerList, setDancerList] = useState<Dancer[]>([]);
@@ -81,12 +82,14 @@ export function DancerManagerDialog({
               ? <DeletedRow
                   key={dancer.id}
                   name={dancer.name}
+                  colour={colours?.[dancer.id]}
                   onUndo={() => setDeletedDancerIds(prev => prev.filter(id => id !== dancer.id))}/>
-              : <div className="flex flex-row items-center gap-1" key={dancer.id}>
+              : <div className="flex flex-row items-center gap-2" key={dancer.id}>
+                <ColourDot colour={colours?.[dancer.id]}/>
                 {
                   rosterOptions
                     ? <CustomAutocomplete
-                        label="ダンサー名"
+                        name="ダンサー名"
                         required
                         defaultValue={dancer.name}
                         hasError={dancerNames[dancer.name.trim()] > 1}
@@ -98,7 +101,7 @@ export function DancerManagerDialog({
                         maxLength={SHORT_NAME_LENGTH}
                       />
                     : <TextInput
-                        label="ダンサー名"
+                        name="ダンサー名"
                         required
                         defaultValue={dancer.name}
                         hasError={dancerNames[dancer.name.trim()] > 1}
@@ -108,7 +111,7 @@ export function DancerManagerDialog({
                         maxLength={SHORT_NAME_LENGTH}
                       />
                 }
-                <div className="px-2 pt-4">
+                <div className="px-1">
                   <IconButton
                     noBorder
                     size="sm"
@@ -131,14 +134,19 @@ export function DancerManagerDialog({
 }
 
 // A row marked for deletion: the name greyed and struck through, with undo in place of the trash icon.
-export function DeletedRow({ name, onUndo }: { name: string, onUndo: () => void }) {
-  return <div className="flex flex-row items-center gap-1">
+function DeletedRow({ name, colour, onUndo }: { name: string, colour?: string, onUndo: () => void }) {
+  return <div className="flex flex-row items-center gap-2">
+    <ColourDot colour={colour}/>
     {/* As wide as a name field, so marking a row doesn't reflow the wrapped grid on wide screens. */}
-    <div className="flex-1 min-w-0 pt-4 md:flex-none md:w-[12.2rem]">
+    <div className="flex-1 min-w-0 md:flex-none md:w-[12.2rem]">
       <div className="px-3 py-2 line-through break-all border border-dashed rounded-md text-muted border-line">{name.trim() || "（名前なし）"}</div>
     </div>
-    <div className="px-2 pt-4">
+    <div className="px-1">
       <IconButton noBorder size="sm" colour="grey" src="undo" onClick={onUndo}/>
     </div>
   </div>;
+}
+
+function ColourDot({ colour }: { colour?: string }) {
+  return <span aria-hidden className="border rounded-full size-5 shrink-0 border-line" style={{ backgroundColor: colour }}/>;
 }

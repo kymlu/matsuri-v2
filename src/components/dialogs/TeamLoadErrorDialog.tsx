@@ -17,7 +17,6 @@ export default function TeamLoadErrorDialog({
   const notFound = error === "notFound";
   return <CustomDialog
     title={notFound ? "チームが見つかりません" : "接続できませんでした"}
-    fullWidth
     focusDialogOnOpen
     footer={
       <div className="grid w-full grid-flow-col gap-2 mt-4 auto-cols-fr">

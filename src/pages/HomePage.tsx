@@ -989,7 +989,6 @@ export default function HomePage({
           <CustomDialog
             title="ようこそ！"
             hasX
-            fullWidth
             focusDialogOnOpen
             footer={
               <a href={contactMailto("チームへの参加について")} className="block mt-4">
@@ -1004,12 +1003,12 @@ export default function HomePage({
           </CustomDialog>
         </Dialog.Root>
         <Dialog.Root open={showNameChangeFailedDialog} onOpenChange={() => setShowNameChangeFailedDialog(false)}>
-          <BaseErrorDialog title="変更失敗" fullWidth>
+          <BaseErrorDialog title="変更失敗">
             <p>名前を変更できませんでした。時間をおいて、もう一度お試しください。</p>
           </BaseErrorDialog>
         </Dialog.Root>
         <Dialog.Root open={showVerifyInviteErrorDialog} onOpenChange={() => setShowVerifyInviteErrorDialog(false)}>
-          <BaseErrorDialog title="招待失敗" fullWidth focusDialogOnOpen>
+          <BaseErrorDialog title="招待失敗" focusDialogOnOpen>
             <p>この招待リンクはご利用いただけません。管理者に新しい招待リンクをご依頼ください。</p>
           </BaseErrorDialog>
         </Dialog.Root>

@@ -57,7 +57,7 @@ export default function EditChoreoInfoDialog({
     }}
     isActionButtonDisabled={isNullOrUndefinedOrBlank(name.trim()) || (hasEventName && hasDateError)}
     >
-    <div className="w-[100svw] space-y-2 max-w-full md:w-full">
+    <div className="w-full space-y-2">
       <TextInput
         label="名前"
         required

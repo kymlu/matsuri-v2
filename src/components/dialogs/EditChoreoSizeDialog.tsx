@@ -73,7 +73,6 @@ export default function EditChoreoSizeDialog({
   }, [currentChoreo, stageGeometry]);
 
   return <BaseEditDialog
-    full
     title="舞台サイズ変更"
     actionButtonText={overflowMessage ? "移動して保存" : undefined}
     onClose={() => {

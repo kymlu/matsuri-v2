@@ -95,7 +95,7 @@ function ExportDialog({
         onClose={handleClose}
         isActionButtonDisabled={isExportNameValid}
       >
-        <div className="max-w-full w-[100svw] md:w-max">
+        <div className="w-full">
           <div className="flex items-center gap-2">
             <TextInput
               label="ファイル名"

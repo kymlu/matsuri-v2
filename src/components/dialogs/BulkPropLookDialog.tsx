@@ -47,7 +47,6 @@ export default function BulkPropLookDialog({ teamId, list, selectedIds, field, o
   return <BaseEditDialog
     title={field === "size" ? "大きさを設定" : "色を設定"}
     actionButtonText={`${count}に設定`}
-    fullWidth={true}
     isActionButtonDisabled={isSaving || (field === "color" && color === undefined)}
     onSubmit={apply}>
     <div className="space-y-3">
