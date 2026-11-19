@@ -58,7 +58,6 @@ export default function EditEventInfoDialog({
         defaultValue={eventInfo?.event ?? ""}
         options={eventNames}
         onContentChange={newValue => setEvent(newValue)} // TODO: sort by desc event date
-        placeholder="イベント名を入力してください"
         label="イベント"
         clearable
         showLength
