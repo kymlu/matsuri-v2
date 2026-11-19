@@ -89,10 +89,11 @@ export default function EditChoreoSizeDialog({
           yMargin={form.yMargin}
         />
         <div className="grid grid-cols-2 gap-2 md:flex md:flex-col">
-          <p className="col-span-2 text-sm text-muted">
-            <span className="font-semibold text-body">{form.stageType === "parade" ? "パレード" : "ステージ"}</span>
-            （作成後は変更できません）
-          </p>
+          <div className="col-span-2">
+            <span className="block text-sm font-medium">舞台の種類</span>
+            <span>{form.stageType === "parade" ? "パレード" : "ステージ"}</span>
+            <span className="block text-xs text-muted">隊列表を作ったあとは変えられません</span>
+          </div>
           <NumberInput
             name="縦"
             defaultValue={form.stageLength}
