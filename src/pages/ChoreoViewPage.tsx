@@ -55,7 +55,6 @@ export default function ChoreoViewPage(props: {
   const [appSettings, setAppSettings] = useState<AppSetting>({
     snapToGrid: true,
     showGrid: true,
-    showPreviousSection: false,
     dancerDisplayType: "large",
   });
 

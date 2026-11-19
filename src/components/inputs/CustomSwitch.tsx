@@ -3,6 +3,7 @@ import React, { useImperativeHandle } from "react";
 
 export interface CustomSwitchProps {
   label?: string
+  hint?: string,
   defaultChecked?: boolean,
   onChange?: (checked: boolean) => void,
   ref?: React.Ref<any>,
@@ -10,7 +11,7 @@ export interface CustomSwitchProps {
 }
 
 export default function CustomSwitch({
-  label, defaultChecked, onChange, ref, disabled
+  label, hint, defaultChecked, onChange, ref, disabled
 }: CustomSwitchProps){
   const [checked, setChecked] = React.useState<boolean>(defaultChecked ?? false);
 
@@ -27,7 +28,13 @@ export default function CustomSwitch({
 
   return (
     <div className={"grid gap-2 items-center my-2 mr-2 " + (disabled ? "opacity-50 " : "") + (label ? "grid-cols-[auto,1fr]" : "")}>
-      {label && <label className="font-medium">{label}</label>}
+      {
+        label &&
+        <div className="flex flex-col">
+          <label className="font-medium">{label}</label>
+          {hint && <span className="text-xs text-muted">{hint}</span>}
+        </div>
+      }
       <Switch.Root
         disabled={disabled}
         checked={checked}
