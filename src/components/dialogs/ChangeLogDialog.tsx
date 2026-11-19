@@ -1,6 +1,6 @@
 import { Select } from "@base-ui/react";
 import { Fragment, useMemo, useState } from "react";
-import { Choreo, StageGeometry } from "../../models/choreo";
+import { Choreo, StageGeometry, StageType } from "../../models/choreo";
 import { Dancer } from "../../models/dancer";
 import { ActionLine, ChangeLog, DancerSectionChanges, ListChanges, StackPlace } from "../../lib/helpers/changeLogHelper";
 import { formatDateRange } from "../../lib/helpers/dateHelper";
@@ -9,6 +9,7 @@ import Icon from "../basic/Icon";
 import Divider from "../basic/Divider";
 import { Tag } from "../common/Tag";
 import { DancerPositionText } from "../editor/PositionHint";
+import { formatStageSize } from "../../lib/helpers/stageGridHelper";
 import CustomDialog from "../basic/CustomDialog";
 
 const OVERALL = "";
@@ -60,7 +61,7 @@ export default function ChangeLogDialog({
       <div className="py-2 space-y-2">
         {
           selection === OVERALL &&
-          <OverallChanges log={log} sectionNames={sectionNames}/>
+          <OverallChanges log={log} sectionNames={sectionNames} stageType={choreo.stageType}/>
         }
         {
           entry?.kind === "new" &&
@@ -216,9 +217,10 @@ const countNames = (names: string[]) => names.length > 0 ? names.join("、") : "
 type OverallChangesProps = {
   log: ChangeLog,
   sectionNames: Record<string, string>,
+  stageType: StageType,
 }
 
-function OverallChanges({ log, sectionNames }: OverallChangesProps) {
+function OverallChanges({ log, sectionNames, stageType }: OverallChangesProps) {
   const { event, stage, sections, memos, dancers, actions, props, obstacles } = log.overall;
   const sectionList = (ids: string[]) => ids.map(id => sectionNames[id]).join("、");
 
@@ -229,7 +231,7 @@ function OverallChanges({ log, sectionNames }: OverallChangesProps) {
       ...(event.name ? [{ label: "イベント名", text: `${event.name[0]} → ${event.name[1]}` }] : []),
       ...(event.dates ? [{ label: "日程", text: event.dates.map(x => formatDateRange(x.startDate, x.endDate)).join(" → ") }] : []),
     ])],
-    ["ステージ", rows(stage ? [{ label: "サイズ", text: stage.map(x => `縦${x.stageLength}m × 幅${x.stageWidth}m`).join(" → ") }] : [])],
+    ["ステージ", rows(stage ? [{ label: "サイズ", text: stage.map(x => formatStageSize(x.stageWidth, x.stageLength, stageType)).join(" → ") }] : [])],
     ["セクション", rows([
       ...listChangeRows(sections),
       ...(sections.reordered ? [{ label: "並び順", text: "変更あり" }] : []),

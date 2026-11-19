@@ -1,5 +1,7 @@
 import { ICON } from "../../lib/consts/consts"
 import Icon from "../basic/Icon"
+import { formatStageSize } from "../../lib/helpers/stageGridHelper"
+import { StageType } from "../../models/choreo"
 
 function IconInfo(props: {icon: keyof typeof ICON, text: string}) {
   return <div className="flex items-center gap-0.5">
@@ -12,8 +14,8 @@ function IconInfo(props: {icon: keyof typeof ICON, text: string}) {
   </div>
 }
 
-export function StageSize(props: {stageLength: number, stageWidth: number}) {
-  return <IconInfo icon="resize" text={`縦${props.stageLength}m × 幅${props.stageWidth}m`}/>
+export function StageSize(props: {stageLength: number, stageWidth: number, stageType?: StageType}) {
+  return <IconInfo icon="resize" text={formatStageSize(props.stageWidth, props.stageLength, props.stageType)}/>
 }
 
 export function DancerCount(props: {dancerCount: number}) {

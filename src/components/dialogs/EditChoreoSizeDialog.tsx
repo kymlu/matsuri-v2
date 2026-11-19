@@ -1,9 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { MIN_STAGE_DIMENSION, MAX_STAGE_DIMENSION, MIN_STAGE_MARGIN, MAX_STAGE_MARGIN } from "../../lib/consts/consts";
 import { Choreo, StageGeometry, StageType } from "../../models/choreo";
-import NumberInput from "../inputs/NumberInput";
 import BaseEditDialog from "./BaseEditDialog";
-import GridPreview from "../grid/GridPreview";
+import StageSizeFields from "../common/StageSizeFields";
 import Icon from "../basic/Icon";
 import { getObjectsOutsideStage } from "../../lib/editor/commands/choreoCommands";
 
@@ -79,68 +77,27 @@ export default function EditChoreoSizeDialog({
     }}
     onSubmit={() => {onSave(stageGeometry, form.stageType)}}
     >
-      <div className="flex flex-col h-full gap-2 md:flex-row">
-        <GridPreview
-          stageLength={form.stageLength}
-          stageWidth={form.stageWidth}
-          stageType={form.stageType}
-          xMargin={form.xMargin}
-          yMargin={form.yMargin}
-        />
-        <div className="grid grid-cols-2 gap-2 md:flex md:flex-col">
-          <p className="col-span-2">
+      <StageSizeFields
+        stageType={form.stageType}
+        stageWidth={form.stageWidth}
+        stageLength={form.stageLength}
+        xMargin={form.xMargin}
+        yMargin={form.yMargin}
+        onChange={handleChange}
+        stageTypeField={
+          <p>
             <span className="mr-2 text-sm font-medium">舞台の種類</span>
             {form.stageType === "parade" ? "パレード" : "ステージ"}
             <span className="text-sm text-muted">（変更不可）</span>
           </p>
-          <NumberInput
-            name="縦"
-            defaultValue={form.stageLength}
-            min={MIN_STAGE_DIMENSION}
-            max={MAX_STAGE_DIMENSION}
-            baseStep={1}
-            buttonStep={1}
-            onChange={(newValue) => {handleChange("stageLength", Number(newValue))}}
-            label="縦 (m)"
-          />
-          <NumberInput
-            name="幅"
-            defaultValue={form.stageWidth}
-            min={MIN_STAGE_DIMENSION}
-            max={MAX_STAGE_DIMENSION}
-            baseStep={1}
-            buttonStep={1}
-            onChange={(newValue) => {handleChange("stageWidth", Number(newValue))}}
-            label="幅 (m)"
-          />
-          <NumberInput
-            name="xMargin"
-            defaultValue={form.xMargin}
-            min={MIN_STAGE_MARGIN}
-            max={MAX_STAGE_MARGIN}
-            baseStep={1}
-            buttonStep={1}
-            onChange={(newValue) => {handleChange("xMargin", Number(newValue))}}
-            label="左右余白 (m)"
-          />
-          <NumberInput
-            name="yMargin"
-            defaultValue={form.yMargin}
-            min={MIN_STAGE_MARGIN}
-            max={MAX_STAGE_MARGIN}
-            baseStep={1}
-            buttonStep={1}
-            onChange={(newValue) => {handleChange("yMargin", Number(newValue))}}
-            label="上下余白 (m)"
-          />
-          {
-            overflowMessage &&
-            <p className="flex items-start col-span-2 gap-1 text-sm text-primary">
-              <Icon src="warning" colour="primary" size="xs"/>
-              {overflowMessage}
-            </p>
-          }
-        </div>
-      </div>
+        }
+      />
+      {
+        overflowMessage &&
+        <p className="flex items-start gap-1 mt-2 text-sm text-primary">
+          <Icon src="warning" colour="primary" size="xs"/>
+          {overflowMessage}
+        </p>
+      }
   </BaseEditDialog>
 }

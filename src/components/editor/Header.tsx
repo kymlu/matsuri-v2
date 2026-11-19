@@ -1,7 +1,7 @@
 import { memo } from "react";
 import { Dialog, Menu } from "@base-ui/react";
 import IconButton from "../basic/IconButton";
-import { Choreo } from "../../models/choreo";
+import { Choreo, StageType } from "../../models/choreo";
 import { Sidebar } from "./Sidebar";
 import { AppSetting } from "../../models/appSettings";
 import { downloadLogs } from "../../lib/helpers/logHelper";
@@ -11,6 +11,7 @@ import Divider from "../basic/Divider";
 import { formatDateRange } from "../../lib/helpers/dateHelper";
 import { ChoreoStatus } from "../../pages/HomePage";
 import { ChoreoStatusTag } from "../common/Tag";
+import { stageDepthLabel } from "../../lib/helpers/stageGridHelper";
 import { isNullOrUndefinedOrBlank } from "../../lib/helpers/globalHelper";
 
 type HeaderProps = {
@@ -40,6 +41,7 @@ type HeaderProps = {
   propCount: number,
   stageWidth: number,
   stageLength: number,
+  stageType: StageType,
   version?: number,
   choreoStatus: ChoreoStatus,
   showPublish?: boolean;
@@ -60,7 +62,7 @@ function Header({
   appSettings,
   goToEdit, goToView,
   toggleShowPath, showPath, isShowPathBtnDisabled,
-  dancerCount, propCount, stageLength, stageWidth, version, choreoStatus,
+  dancerCount, propCount, stageLength, stageWidth, stageType, version, choreoStatus,
   showPublish, publish,
 }: HeaderProps) {
   return <header className="flex items-center gap-3 px-3 py-2 border-b-2 select-none border-subtle bg-surface">
@@ -157,7 +159,7 @@ function Header({
               appSettings={appSettings}
               showPublish={showPublish}
               publish={publish}
-              stageSize={<><span className="text-nowrap">縦{stageLength}m ×</span> <span className="text-nowrap">幅{stageWidth}m</span></>}
+              stageSize={<><span className="text-nowrap">幅{stageWidth}m ×</span> <span className="text-nowrap">{stageDepthLabel(stageType)}{stageLength}m</span></>}
               dancerCount={dancerCount}
               propCount={propCount}
             />

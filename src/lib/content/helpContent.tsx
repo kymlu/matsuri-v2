@@ -498,13 +498,13 @@ export const HELP_ARTICLES: HelpArticle[] = [
     group: "edit",
     context: "edit",
     title: "舞台の大きさを変える",
-    summary: "設定の「舞台サイズ」で、縦・幅・余白と、ステージかパレードかを変えます。",
+    summary: "設定の「舞台サイズ」で、幅・奥行（パレードは長さ）と、まわりの余白を変えます。",
     steps: [
       <>右上の <I src="settings"/> をタップします。</>,
       <><B>舞台サイズ</B> を開いて変えます。</>,
     ],
     related: ["term-stage-type"],
-    keywords: ["舞台", "大きさ", "サイズ", "広さ", "余白"],
+    keywords: ["舞台", "大きさ", "サイズ", "広さ", "余白", "奥行", "長さ"],
   },
   {
     id: "undo-save",
@@ -888,7 +888,7 @@ export const HELP_ARTICLES: HelpArticle[] = [
     type: "concept",
     group: "terms",
     title: "ステージとパレード",
-    summary: "舞台の種類です。位置の基準（0の位置）が、ステージでは上端、パレードでは下端になります。",
+    summary: "舞台の種類です。位置の基準（0の位置）が、ステージでは上端、パレードでは下端になります。隊列表を作ったあとは変えられません。",
     keywords: ["ステージ", "パレード", "舞台", "種類"],
   },
   {

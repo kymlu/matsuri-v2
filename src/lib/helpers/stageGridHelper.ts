@@ -1,4 +1,9 @@
-import { StageGeometry, StageMargins, YAxisDirection } from "../../models/choreo";
+import { StageGeometry, StageMargins, StageType, YAxisDirection } from "../../models/choreo";
+
+export const stageDepthLabel = (stageType?: StageType) => stageType === "parade" ? "長さ" : "奥行";
+
+export const formatStageSize = (width: number, length: number, stageType?: StageType) =>
+  `幅${width}m × ${stageDepthLabel(stageType)}${length}m`;
 
 /**
  * Shared pixel-space geometry for rendering the stage grid background
