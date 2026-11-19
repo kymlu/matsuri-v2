@@ -19,6 +19,11 @@ export function normalizeForSearch(text: string): string {
     .replace(/[ァ-ヶ]/g, c => String.fromCharCode(c.charCodeAt(0) - 0x60));
 }
 
+export function matchesSearch(texts: (string | undefined)[], searchTerm: string): boolean {
+  const query = normalizeForSearch(searchTerm);
+  return query === "" || texts.some(t => t !== undefined && normalizeForSearch(t).includes(query));
+}
+
 export type FindDancerItem = { id: string, label: string, isShown: boolean, isMe: boolean };
 
 // Display labels with duplicate names numbered (1), (2)… in the given order, so the numbers

@@ -6,6 +6,7 @@ import { FieldWithLabel } from "./Label";
 import IconButton from "../basic/IconButton";
 import Icon from "../basic/Icon";
 import { Autocomplete } from "@base-ui/react";
+import { matchesSearch } from "../../lib/helpers/myDancerHelper";
 
 export type CustomAutocompleteProps = {
   name?: string,
@@ -93,7 +94,7 @@ export default function CustomAutocomplete({
                 onItemSelect?.(newValue);
               }
             }}
-            filter={(item: string, query: string) => {return item.toLowerCase().includes(query.toLowerCase())}}
+            filter={(item: string, query: string) => matchesSearch([itemToStringValueFunc ? itemToStringValueFunc(item) : item], query)}
             highlightItemOnHover
             itemToStringValue={itemToStringValueFunc}
           >

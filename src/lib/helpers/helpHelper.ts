@@ -1,4 +1,5 @@
 import { HELP_ARTICLES, HelpArticle, HelpGroupId, HelpRole } from "../content/helpContent";
+import { normalizeForSearch } from "./myDancerHelper";
 
 // Who is reading help. Comes from App's login state.
 export type HelpReader = {
@@ -73,15 +74,8 @@ export function getHelpContents(reader: HelpReader, articles: HelpArticle[] = HE
   };
 }
 
-// Katakana → hiragana, full-width → half-width, lower case, no spaces, so
-// 「ぱすわーど」 finds パスワード and 「pdf」 finds PDF.
-export function normalizeHelpText(text: string): string {
-  return text
-    .normalize("NFKC")
-    .toLowerCase()
-    .replace(/[ァ-ヶ]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0x60))
-    .replace(/\s+/g, "");
-}
+// Same as every other search: 「ぱすわーど」 finds パスワード and 「pdf」 finds PDF.
+export const normalizeHelpText = normalizeForSearch;
 
 function searchableText(article: HelpArticle): string {
   return normalizeHelpText([article.title, article.summary, ...article.keywords].join(" "));
