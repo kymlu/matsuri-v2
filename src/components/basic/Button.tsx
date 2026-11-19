@@ -6,6 +6,7 @@ import { ICON } from '../../lib/consts/consts';
 type ButtonProps = {
   children: React.ReactNode
   primary?: boolean,
+  selected?: boolean, // the chosen option in a group of choices
   primaryText?: boolean,
   grey?: boolean,
   greyText?: boolean,
@@ -26,6 +27,7 @@ type ButtonProps = {
 export default function Button({
   children,
   primary, primaryText,
+  selected,
   grey, greyText,
   noBorder,
   disabled,
@@ -48,8 +50,9 @@ export default function Button({
     "px-3 py-1.5": compact !== true,
     "lg:hover:bg-subtle": !disabled && primary !== true && grey !== true,
     "lg:hover:opacity-70": !disabled && (primary || grey),
-    "bg-surface": primary !== true && grey !== true,
-    "border-line ": primary !== true && grey !== true && !primaryText,
+    "bg-surface": primary !== true && grey !== true && !selected,
+    "border-line ": primary !== true && grey !== true && !primaryText && !selected,
+    "border-primary bg-primary/5 text-primary font-bold": selected,
     "bg-primary-fill text-white border-primary-fill": primary,
     "bg-gray-600 text-white border-gray-600": grey,
     "cursor-default opacity-50": disabled,

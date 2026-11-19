@@ -103,13 +103,13 @@ export default function InviteUserDialog({
         <div className="flex flex-col gap-2">
           <span className="text-sm font-medium">役割</span>
           <div className="grid grid-cols-3 gap-2">
-            <Button full primary={role === "viewer"} onClick={() => setRole("viewer")}>
+            <Button full selected={role === "viewer"} onClick={() => setRole("viewer")}>
               閲覧者
             </Button>
-            <Button full primary={role === "editor"} onClick={() => setRole("editor")}>
+            <Button full selected={role === "editor"} onClick={() => setRole("editor")}>
               編集者
             </Button>
-            <Button full primary={role === "admin"} onClick={() => setRole("admin")}>
+            <Button full selected={role === "admin"} onClick={() => setRole("admin")}>
               管理者
             </Button>
           </div>

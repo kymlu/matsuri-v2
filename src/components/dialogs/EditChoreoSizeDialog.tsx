@@ -4,7 +4,6 @@ import { Choreo, StageGeometry, StageType } from "../../models/choreo";
 import NumberInput from "../inputs/NumberInput";
 import BaseEditDialog from "./BaseEditDialog";
 import GridPreview from "../grid/GridPreview";
-import Button from "../basic/Button";
 import Icon from "../basic/Icon";
 import { getObjectsOutsideStage } from "../../lib/editor/commands/choreoCommands";
 
@@ -90,22 +89,10 @@ export default function EditChoreoSizeDialog({
           yMargin={form.yMargin}
         />
         <div className="grid grid-cols-2 gap-2 md:flex md:flex-col">
-          <Button
-            full
-            disabled
-            primary={form.stageType === 'parade'}
-            onClick={() => handleChange("stageType", "parade")}
-          >
-            パレード
-          </Button>
-          <Button
-            full
-            disabled
-            primary={form.stageType === 'stage'}
-            onClick={() => handleChange("stageType", "stage")}
-          >
-            ステージ
-          </Button>
+          <p className="col-span-2 text-sm text-muted">
+            <span className="font-semibold text-body">{form.stageType === "parade" ? "パレード" : "ステージ"}</span>
+            （作成後は変更できません）
+          </p>
           <NumberInput
             name="縦"
             defaultValue={form.stageLength}
