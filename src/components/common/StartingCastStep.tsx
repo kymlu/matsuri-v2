@@ -40,7 +40,7 @@ export default function StartingCastStep({
   const isFull = dancerCount >= MAX_STARTING_DANCERS;
 
   const unnamedField = <div className="flex items-center justify-between gap-2">
-    <span className="font-semibold">{hasRoster ? "名前なしのダンサー" : "ダンサー数"}</span>
+    <span className="font-semibold">{hasRoster ? "名前なし" : "ダンサー数"}</span>
     <div className="w-36">
       <NumberInput
         compact
@@ -177,7 +177,7 @@ function DancerList({ list, pickedIds, isFull, room, unnamedField, onChange }: {
                     onChange([...pickedIds, ...unpickedShown.slice(0, room).map(n => n.id)]);
                   }
                 }}
-                className="flex items-center w-full gap-2 px-1 py-2 text-sm text-left border-b border-line text-muted disabled:opacity-50">
+                className="flex items-center w-full gap-2 px-1 py-1.5 text-sm text-left border-b border-line text-muted disabled:opacity-50">
                 <SelectBox state={state}/>
                 すべて選択（表示中の{names.length}名）
               </button>;
@@ -195,7 +195,7 @@ function DancerList({ list, pickedIds, isFull, room, unnamedField, onChange }: {
                     aria-checked={isPicked}
                     disabled={isDisabled}
                     onClick={() => onChange(isPicked ? pickedIds.filter(id => id !== n.id) : [...pickedIds, n.id])}
-                    className={classNames("flex items-center w-full gap-2 px-1 py-2.5 text-left border-b border-subtle", {
+                    className={classNames("flex items-center w-full gap-2 px-1 py-1.5 text-left border-b border-subtle", {
                       "bg-subtle": isPicked,
                       "opacity-50": isDisabled,
                     })}>
@@ -248,7 +248,7 @@ function PropList({ list, counts, onChange }: { list: RosterList, counts: [strin
             {
               count === undefined
                 // Before it's picked, the whole row adds one.
-                ? <button type="button" onClick={() => setCount(n.id, 1)} className="flex items-center w-full gap-2 px-1 py-2.5 text-left">
+                ? <button type="button" onClick={() => setCount(n.id, 1)} className="flex items-center w-full gap-2 px-1 py-1.5 text-left">
                   {details}
                   <span className="flex items-center ml-auto text-sm font-semibold text-primary whitespace-nowrap"><Icon src="add" size="xs" colour="primary"/>追加</span>
                 </button>
