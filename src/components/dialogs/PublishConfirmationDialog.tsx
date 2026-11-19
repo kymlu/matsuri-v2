@@ -1,15 +1,13 @@
 import { PASSWORD_LENGTH } from "../../lib/consts/consts";
-import { getJpDate } from "../../lib/helpers/dateHelper";
+import { formatDateRange, getDate } from "../../lib/helpers/dateHelper";
 import { findCurrentVersion, publishChoreo } from "../../lib/helpers/apiHelper";
 import { isNullOrUndefinedOrBlank, strEquals, testAlphanumericSymbols } from "../../lib/helpers/globalHelper";
 import { BasicChoreoDetails, Choreo } from "../../models/choreo";
-import Divider from "../basic/Divider";
 import BaseEditDialog from "./BaseEditDialog";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import CustomSwitch from "../inputs/CustomSwitch";
 import TextInput from "../inputs/TextInput";
-import { DancerCount, PropCount, StageSize } from "../common/IconInfo";
-import ChoreoInfo from "../common/ChoreoInfo";
+import { Tag } from "../common/Tag";
 
 type PublishConfirmationDialogProps = {
   onClose: () => void,
@@ -87,11 +85,10 @@ export default function PublishConfirmationDialog({
   }, [publishChoreo, teamId, hasPassword, password, onSave, onClose, isUpdate, oldVersion?.version]);
 
 
-  const isActionButtonEnabled = useMemo(()=> {
-    return currentVersion.isDirty ||
-      !strEquals(svrPassword, password) ||
-      hasPassword !== !isNullOrUndefinedOrBlank(svrPassword);
-  }, [currentVersion.isDirty]);
+  const isActionButtonEnabled = useMemo(() => {
+    const newPassword = hasPassword && !isNullOrUndefinedOrBlank(password) ? password : "";
+    return !isUpdate || !!currentVersion.isDirty || !strEquals(newPassword, svrPassword ?? "");
+  }, [isUpdate, currentVersion.isDirty, hasPassword, password, svrPassword]);
 
   return (
     <BaseEditDialog
@@ -99,7 +96,7 @@ export default function PublishConfirmationDialog({
       actionButtonText="公開する"
       isActionButtonDisabled={!isActionButtonEnabled}
       onSubmit={upload}
-      full
+      fullWidth
       onClose={() => {
         onClose();
         setIsProcessing(false);
@@ -113,49 +110,39 @@ export default function PublishConfirmationDialog({
         }
       }}
     >
-      <div className="space-y-2">
-        <div className="space-y-2 overflow-y-auto">
-          <ChoreoInfo
-            name={currentVersion.name}
-            event={currentVersion.event}
-            startDate={currentVersion.startDate}
-            endDate={currentVersion.endDate}/>
-          <div className="flex gap-4">
-            <StageSize stageLength={currentVersion.stageLength} stageWidth={currentVersion.stageWidth}/>
-            <DancerCount dancerCount={currentVersion.dancerCount}/>
-            <PropCount propCount={currentVersion.propCount}/>
-          </div>
-          <Divider />
-          <div className="grid items-center gap-y-1 grid-cols-[auto,1fr] px-2 text-sm text-muted">
-            <b>最終編集日時</b>
-            <span className="text-right">{currentVersion.lastUpdated ? getJpDate(new Date(currentVersion.lastUpdated)) : ""}</span>
-            {
-              isActionButtonEnabled &&
-              <>
-                <b>新しい公開バージョン</b>
-                <span className="text-right">{(oldVersion?.version ?? 0) + 1}</span>
-              </>
-            }
-            {
-              !isActionButtonEnabled &&
-              <span className="col-span-2 font-semibold text-center text-primary">編集はありません。</span>
-            }
-          </div>
-          <Divider />
+      <div className="space-y-3">
+        <div className="flex flex-col">
+          <span className="font-bold break-all">{currentVersion.name}</span>
+          <span className="text-sm text-muted">
+            {isNullOrUndefinedOrBlank(currentVersion.event) ? "イベント不明" : currentVersion.event}
+            （{formatDateRange(currentVersion.startDate, currentVersion.endDate)}）
+          </span>
+        </div>
+        {
+          isActionButtonEnabled ?
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            {isUpdate && <><Tag compact type="primary" text={`v${oldVersion.version ?? 0}`}/><span className="text-muted">→</span></>}
+            <Tag compact type="filled" text={`v${(oldVersion?.version ?? 0) + 1}`}/>
+            {currentVersion.lastUpdated && <span className="text-sm text-muted">最終編集 {getDate(new Date(currentVersion.lastUpdated))}</span>}
+          </div> :
+          <p className="font-semibold text-primary">編集はありません。</p>
+        }
+        <div className="border-t border-line"/>
+        <div>
           <CustomSwitch
             label="パスワード"
+            hint="ログインしていない人が見るときに必要"
             defaultChecked={hasPassword}
             onChange={(checked) => setHasPassword(checked)}/>
-          <TextInput
-            showLength
-            defaultValue={password}
-            disabled={!hasPassword}
-            maxLength={PASSWORD_LENGTH}
-            restrictFn={(s) => testAlphanumericSymbols(s)}
-            onContentChange={(newContent) => setPassword(newContent)}/>
-          <span className="text-sm text-muted">
-            ログインしていないユーザーがこの隊列表を閲覧する際にパスワードの入力が必要になります。
-          </span>
+          {
+            hasPassword &&
+            <TextInput
+              showLength
+              defaultValue={password}
+              maxLength={PASSWORD_LENGTH}
+              restrictFn={(s) => testAlphanumericSymbols(s)}
+              onContentChange={(newContent) => setPassword(newContent)}/>
+          }
         </div>
         {
           isProcessing &&
