@@ -92,7 +92,7 @@ export default function RosterAddBar({ teamId, kind, isVisible = true, list: ros
     "bg-subtle text-faint border border-line": state.toSend.length === 0 || isSaving,
   });
 
-  return <div className="px-4 pt-3 pb-5 border-t bg-surface border-line">
+  return <div className="px-4 pt-3 pb-6 border-t bg-surface border-line">
     <div className="grid grid-cols-[minmax(0,1fr),auto] gap-x-1.5 gap-y-1.5">
       <div className="relative">
         {/* Enter adds a new line rather than submitting: the IME also uses Enter to confirm. */}

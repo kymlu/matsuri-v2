@@ -317,7 +317,7 @@ export function NewChoreoPage({
         )}
       </div>
 
-      <div className="px-4 pt-3 pb-8 mt-2 space-y-2 border-t bg-surface border-line">
+      <div className="px-4 pt-3 pb-6 mt-2 space-y-2 border-t bg-surface border-line">
         {
           // Only with a 名簿: without one there's just the dancer count, so a total would repeat it.
           step === 3 && rosterState === "loaded" &&

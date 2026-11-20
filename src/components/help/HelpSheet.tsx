@@ -152,7 +152,7 @@ export default function HelpSheet({ open, target, reader, onClose }: HelpSheetPr
                 maxLength={30}/>
             </div>
           }
-          <div ref={scrollRef} className="flex-1 min-h-0 px-4 overflow-y-auto pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+          <div ref={scrollRef} className="flex-1 min-h-0 px-4 overflow-y-auto pb-6">
             {
               current
                 ? <ArticleView article={current} reader={reader} onOpen={openArticle}/>
