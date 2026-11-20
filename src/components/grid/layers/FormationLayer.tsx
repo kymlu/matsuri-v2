@@ -1,3 +1,4 @@
+import { CountBadge } from "../../../lib/helpers/countBadgeHelper";
 import { Layer, Transformer } from "react-konva";
 import { StageGeometry } from "../../../models/choreo";
 import { Dancer, DancerPosition } from "../../../models/dancer";
@@ -51,6 +52,7 @@ type FormationLayerProps = {
   isEditingMovement?: boolean,
   dancerStacks?: string[][],
   propStacks?: string[][],
+  dancerCountBadges?: Record<string, CountBadge>,
 };
 
 const FormationLayer = memo(function FormationLayer({
@@ -86,7 +88,7 @@ const FormationLayer = memo(function FormationLayer({
   isZooming,
   sectionId,
   dancerAnimationCache, propAnimationCache, isEditingMovement,
-  dancerStacks, propStacks,
+  dancerStacks, propStacks, dancerCountBadges,
 }: FormationLayerProps) {
 	const transformerRef = useRef<Konva.Transformer>(null);
 
@@ -305,6 +307,7 @@ const FormationLayer = memo(function FormationLayer({
             hiddenSelected={dancerStackDrawing[dancerPosition.dancerId]?.hiddenSelected}
             stackCount={dancerStackDrawing[dancerPosition.dancerId]?.count}
             coveredInStack={coveredDancers.has(dancerPosition.dancerId)}
+            countBadge={coveredDancers.has(dancerPosition.dancerId) ? undefined : dancerCountBadges?.[dancerPosition.dancerId]}
             dimmed={dimDancers || fadedDancerIds?.has(dancerPosition.dancerId) || (halfFadedDancerIds?.has(dancerPosition.dancerId) && "half")}
             onDragFollow={canEdit ? followDrag : undefined}
           />

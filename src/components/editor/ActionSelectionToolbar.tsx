@@ -51,8 +51,9 @@ const ActionSection = memo(function ActionSection ({
     } else {
       ref.current?.scrollIntoView({"behavior": "smooth", "inline": "center"});
       setIsExpanded(true);
+      if (action.timings.length > 0) onSelectTiming(action, action.timings[0]);
     }
-  }, [isExpanded, onSelectTiming]);
+  }, [isExpanded, onSelectTiming, action]);
 
   return <div className="flex gap-1">
     <Button

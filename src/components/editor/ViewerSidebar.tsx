@@ -31,6 +31,9 @@ type ViewerSidebarProps = {
   stackLine?: (section: ChoreoSection) => string | undefined;
   selectedTiming?: string;
   onSelectTiming: (timing?: DancerActionTiming) => void;
+  // すべて: every count of one action on the stage at once.
+  shownActionId?: string;
+  onShowAction: (action?: DancerAction) => void;
   actions?: DancerAction[];
   geometry: StageGeometry;
   isPositionHintShown: boolean;
@@ -54,6 +57,8 @@ function ViewerSidebar({
   stackLine,
   selectedTiming,
   onSelectTiming,
+  shownActionId,
+  onShowAction,
   actions,
   geometry,
   isPositionHintShown,
@@ -82,7 +87,7 @@ function ViewerSidebar({
           {isPositionHintShown ? dancer.name : "詳細"}
         </span>
         {
-          (isPositionHintShown || selectedTiming) && <IconButton
+          (isPositionHintShown || selectedTiming || shownActionId) && <IconButton
             size="sm"
             src={isPositionHintShown ? "personCancel" : "clear"}
             noBorder
@@ -92,6 +97,8 @@ function ViewerSidebar({
                 setMode("detail");
               } else if (selectedTiming) {
                 onSelectTiming();
+              } else if (shownActionId) {
+                onShowAction();
               }
             }}
           />
@@ -157,6 +164,17 @@ function ViewerSidebar({
                     </span>
                     {/* Timings joined into one strip. The 1px gap shows the background as divider lines, so wrapped rows stay tidy. */}
                     <div className="flex flex-wrap gap-px overflow-hidden border rounded-md w-fit max-w-full bg-line border-line [&>button]:flex-1 [&>button]:rounded-none">
+                      <Button
+                        noBorder
+                        disabled={action.timings.every(t => t.dancerIds.length === 0)}
+                        primary={strEquals(shownActionId, action.id)}
+                        compact
+                        onClick={() => onShowAction(strEquals(shownActionId, action.id) ? undefined : action)}
+                        >
+                        <div className="px-1 py-1 mx-auto text-center min-w-6 w-max">
+                          すべて
+                        </div>
+                      </Button>
                       {
                         action.timings.map(timing =>
                           <Button

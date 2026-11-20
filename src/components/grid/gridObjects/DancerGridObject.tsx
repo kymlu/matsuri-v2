@@ -8,7 +8,8 @@ import { colorPalette } from "../../../lib/consts/colors";
 import { DancerDisplayType } from "../../../models/appSettings";
 import { METER_PX } from "../../../lib/consts/consts";
 import { memo } from "react";
-import StackBadge from "./StackBadge";
+import Badge from "./Badge";
+import { CountBadge } from "../../../lib/helpers/countBadgeHelper";
 import { PathSvgCacheBySectionId } from "../../../models/choreoSection";
 
 type DancerGridObjectProps = {
@@ -36,6 +37,7 @@ type DancerGridObjectProps = {
   coveredInStack?: boolean,
   dimmed?: boolean | "half",
   stackCount?: number,
+  countBadge?: CountBadge,
   onDragFollow?: (id: string, phase: "start" | "move" | "end" | "cancel", dx?: number, dy?: number) => void,
 };
 
@@ -61,6 +63,7 @@ const DancerGridObject = memo(function DancerGridObject({
   coveredInStack,
   dimmed,
   stackCount,
+  countBadge,
   onDragFollow,
 }: DancerGridObjectProps) {
   const ringRadius = METER_PX * (dancerDisplayType === "large" ? 0.6 : 0.3);
@@ -144,7 +147,11 @@ const DancerGridObject = memo(function DancerGridObject({
         </Group>
         {
           stackMark && stackCount !== undefined &&
-          <StackBadge x={ringRadius * 0.75} y={-ringRadius * 0.75} radius={METER_PX * 0.235} red={stackMark === "red"} count={stackCount}/>
+          <Badge x={ringRadius * 0.75} y={-ringRadius * 0.75} radius={METER_PX * 0.235} red={stackMark === "red"} text={`×${stackCount}`}/>
+        }
+        {
+          countBadge &&
+          <Badge x={-ringRadius * 0.75} y={-ringRadius * 0.75} radius={METER_PX * 0.235} red={countBadge.red} text={countBadge.text} growLeft/>
         }
       </BaseGridObject>
     }

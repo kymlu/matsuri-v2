@@ -5,10 +5,8 @@ import { colorPalette } from "../../../lib/consts/colors";
 
 const FONT_FAMILY = "'Hiragino Sans','Noto Sans JP','Yu Gothic',sans-serif";
 
-// "×3" on the top member of a stack: how many are here. Grey normally; red when the stack is selected
-// (editor), or when someone hidden in it acts at the chosen count (view).
-export default function StackBadge({ x, y, radius, red, count }: { x: number, y: number, radius: number, red?: boolean, count: number }) {
-  const text = `×${count}`;
+// A pill on a stage object: a stack's "×3", or a count name. growLeft keeps long text clear of the right side.
+export default function Badge({ x, y, radius, red, text, growLeft }: { x: number, y: number, radius: number, red?: boolean, text: string, growLeft?: boolean }) {
   const fontSize = radius * 1.4;
   const h = radius * 2;
   // Sized to the text as the device's font actually draws it ("×" is much wider in some Japanese fonts),
@@ -17,7 +15,7 @@ export default function StackBadge({ x, y, radius, red, count }: { x: number, y:
     const measured = new Konva.Text({ text, fontSize, fontStyle: "bold", fontFamily: FONT_FAMILY }).width();
     return Math.max(h, measured + h * 0.6);
   }, [text, fontSize, h]);
-  return <Group x={x} y={y} listening={false}>
+  return <Group x={growLeft ? x + h / 2 - w / 2 : x} y={y} listening={false}>
     <Rect x={-w / 2} y={-h / 2} width={w} height={h} cornerRadius={h / 2} fill={red ? colorPalette.primary : colorPalette.grey}/>
     <Text x={-w / 2} y={-h / 2} width={w} height={h} align="center" verticalAlign="middle" wrap="none"
       text={text} fontSize={fontSize} fontStyle="bold" fill={red ? "#FFFFFF" : colorPalette.white}
