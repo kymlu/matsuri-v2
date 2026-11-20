@@ -40,7 +40,7 @@ Behaviour that used to be in the in-app help but doesn't help a reader finish a 
 - **Actions and counts:**
   - up to 5 actions per section and 16 counts per action;
   - action and count names must be unique within a section;
-  - a new action starts by choosing a count pattern (奇数, 偶数, 1〜4, 5〜8, 1〜8, 1〜8と) or 自分で入力. パターンを選び直す is there until 保存, and asks first if the counts were changed. Saved actions never offer patterns;
+  - a new action starts by choosing a count pattern (奇数, 偶数, 1〜4, 5〜8, 1〜8, 1〜8と) or 自分で入力. Once chosen, the counts are edited as usual; there's no going back to the patterns. Saved actions never offer patterns;
   - 自分用メモ from view mode is shown read-only at the bottom of メモ編集.
 - **Z-order:** 最前面へ / 前面へ / 背面へ / 最背面へ.
 - **Selection helpers:**

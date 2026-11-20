@@ -11,9 +11,9 @@ import { ACTION_NAME_LENGTH, COUNT_NAME_LENGTH } from "../../lib/consts/consts";
 import IconButton from "../basic/IconButton";
 import BaseEditDialog from "./BaseEditDialog";
 import { ChoreoSection } from "../../models/choreoSection";
-import Button, { IconLabelButton } from "../basic/Button";
+import { IconLabelButton } from "../basic/Button";
 import classNames from "classnames";
-import { COUNT_PATTERNS, CountPattern, isPatternOrBlank, patternPreview } from "../../lib/consts/countPatterns";
+import { COUNT_PATTERNS, CountPattern, patternPreview } from "../../lib/consts/countPatterns";
 
 type ActionManagerDialogProps = {
   section: ChoreoSection,
@@ -154,7 +154,7 @@ type SortableActionSectionProps = {
   deletedIds: Set<string>, // actions and counts marked for deletion
   canRestoreAction: boolean, // false at the 5-action limit
   isOpen: boolean,
-  isNew: boolean, // added in this dialog: can (re)start from a pattern
+  isNew: boolean, // added in this dialog: starts from a pattern
   onOpen: () => void,
   onClose: () => void,
   onToggleDeleted: (id: string) => void,
@@ -164,7 +164,6 @@ type SortableActionSectionProps = {
 function SortableActionSection ({
   action, errors, deletedIds, canRestoreAction, isOpen, isNew, onOpen, onClose, onToggleDeleted, onUpdate,
 }: SortableActionSectionProps) {
-  const [isConfirmingRepick, setIsConfirmingRepick] = useState(false);
   const {
     attributes,
     listeners,
@@ -182,17 +181,8 @@ function SortableActionSection ({
   const timingNames = countNames(liveTimings.map(t => t.name));
   const isChoosing = isNew && action.timings.length === 0;
 
-  const setTimings = (names: string[]) => {
-    setIsConfirmingRepick(false);
+  const setTimings = (names: string[]) =>
     onUpdate(a => ({ ...a, timings: names.map(name => ({ ...newTiming(), name })) }));
-  };
-  const repick = () => {
-    if (isPatternOrBlank(liveTimings.map(t => t.name))) {
-      setTimings([]);
-    } else {
-      setIsConfirmingRepick(true);
-    }
-  };
   const errorText = errors.name ?? errors.counts;
 
   const dragHandle = <div {...attributes} {...listeners} className="shrink-0">
@@ -252,23 +242,7 @@ function SortableActionSection ({
           <PatternChooser onPick={(pattern) => setTimings(pattern.counts)} onOwn={() => setTimings(["", ""])}/>
         </>
         : <>
-          <div className="flex flex-wrap items-baseline justify-between gap-x-2 mt-1.5">
-            <p className="text-sm font-semibold whitespace-nowrap">カウント <span className="font-normal text-muted">{liveTimings.length}/16</span></p>
-            {
-              isNew &&
-              <button type="button" onClick={repick} className="ml-auto text-sm font-semibold whitespace-nowrap text-primary">パターンを選び直す</button>
-            }
-          </div>
-          {
-            isConfirmingRepick &&
-            <div className="p-2 mt-1.5 text-sm border rounded-md border-primary">
-              今のカウントは消えます。パターンを選び直しますか？
-              <div className="grid grid-cols-2 gap-1.5 mt-1.5">
-                <Button full fontSize="text-sm" onClick={() => setIsConfirmingRepick(false)}>やめる</Button>
-                <Button full primary fontSize="text-sm" onClick={() => setTimings([])}>選び直す</Button>
-              </div>
-            </div>
-          }
+          <p className="mt-1.5 text-sm font-semibold">カウント <span className="font-normal text-muted">{liveTimings.length}/16</span></p>
           <div className="grid grid-cols-[repeat(auto-fill,minmax(8rem,1fr))] gap-x-2 gap-y-2 pt-1.5">
             {
               action.timings.map(timing =>

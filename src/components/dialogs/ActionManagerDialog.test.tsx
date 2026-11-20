@@ -99,13 +99,18 @@ describe("ActionManagerDialog count patterns", () => {
     expect(screen.getByRole("button", { name: "保存" })).toBeDisabled();
   });
 
-  it("fills the counts from a pattern; 1〜8と uses all 16", async () => {
+  it("fills the counts from a pattern, and the patterns go away", async () => {
     renderDialog(makeSection(), jest.fn());
     await addAction();
     fireEvent.click(screen.getByRole("button", { name: /^奇数:/ }));
     expect(countValues()).toEqual(["1", "3", "5", "7"]);
     expect(screen.getByRole("button", { name: /^add\s*カウント$/ })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "パターンを選び直す" }));
+    expect(screen.queryByRole("button", { name: /^偶数:/ })).not.toBeInTheDocument();
+  });
+
+  it("1〜8と uses all 16 counts", async () => {
+    renderDialog(makeSection(), jest.fn());
+    await addAction();
     fireEvent.click(screen.getByRole("button", { name: /^1〜8と:/ }));
     expect(countValues()).toHaveLength(16);
     expect(screen.queryByRole("button", { name: /^add\s*カウント$/ })).not.toBeInTheDocument();
@@ -118,27 +123,7 @@ describe("ActionManagerDialog count patterns", () => {
     expect(countValues()).toEqual(["", ""]);
   });
 
-  it("asks before パターンを選び直す throws edited counts away; やめる keeps them", async () => {
-    renderDialog(makeSection(), jest.fn());
-    await addAction();
-    fireEvent.click(screen.getByRole("button", { name: /^奇数:/ }));
-    fireEvent.input(screen.getByDisplayValue("7"), { target: { value: "8" } });
-    fireEvent.click(screen.getByRole("button", { name: "パターンを選び直す" }));
-    expect(screen.getByText("今のカウントは消えます。パターンを選び直しますか？")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "やめる" }));
-    expect(countValues()).toEqual(["1", "3", "5", "8"]);
-    fireEvent.click(screen.getByRole("button", { name: "パターンを選び直す" }));
-    fireEvent.click(screen.getByRole("button", { name: "選び直す" }));
-    expect(screen.getByRole("button", { name: /^偶数:/ })).toBeInTheDocument();
-  });
 
-  it("goes straight back to the patterns when nothing would be lost", async () => {
-    renderDialog(makeSection(), jest.fn());
-    await addAction();
-    fireEvent.click(screen.getByRole("button", { name: /自分で入力/ }));
-    fireEvent.click(screen.getByRole("button", { name: "パターンを選び直す" }));
-    expect(screen.getByRole("button", { name: /^奇数:/ })).toBeInTheDocument();
-  });
 
   it("keeps choosing after the card is closed, and the closed card says why 保存 is off", async () => {
     renderDialog(makeSection(), jest.fn());
@@ -167,7 +152,6 @@ describe("ActionManagerDialog count patterns", () => {
   it("never offers patterns on a saved action", async () => {
     renderDialog(makeSection(), jest.fn());
     await screen.findByDisplayValue("ウェーブ");
-    expect(screen.queryByRole("button", { name: "パターンを選び直す" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /^奇数:/ })).not.toBeInTheDocument();
   });
 });

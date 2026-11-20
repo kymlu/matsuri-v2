@@ -14,10 +14,3 @@ export const COUNT_PATTERNS: CountPattern[] = [
 export const patternPreview = (pattern: CountPattern) => pattern.counts.length > 5
   ? [pattern.counts[0], pattern.counts[1], "…", pattern.counts[pattern.counts.length - 1]].join(" ")
   : pattern.counts.join(" ");
-
-// Re-picking loses nothing: the counts are exactly a pattern, or all blank.
-export const isPatternOrBlank = (names: string[]) => {
-  const trimmed = names.map(n => n.trim());
-  return trimmed.every(n => !n)
-    || COUNT_PATTERNS.some(p => p.counts.length === trimmed.length && p.counts.every((c, i) => c === trimmed[i]));
-};
