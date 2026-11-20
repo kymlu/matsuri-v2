@@ -8,6 +8,7 @@ import NumberInput from "../inputs/NumberInput";
 import TextInput from "../inputs/TextInput";
 import { ChipFilter } from "../inputs/Chips";
 import Icon from "../basic/Icon";
+import SelectBox from "../basic/SelectBox";
 import { IconLabelButton } from "../basic/Button";
 import { useHelp } from "../help/HelpContext";
 
@@ -275,17 +276,6 @@ function PropList({ list, counts, onChange }: { list: RosterList, counts: [strin
   </div>;
 }
 
-// The same checkbox as selection mode on the 名簿 page: empty, ticked, or a dash when only some are selected.
-function SelectBox({ state }: { state: "none" | "some" | "all" }) {
-  return <span aria-hidden className={classNames("flex items-center justify-center rounded shrink-0 size-5 border-2", {
-    "border-line-strong": state === "none",
-    "border-primary bg-primary": state === "all",
-    "border-primary": state === "some",
-  })}>
-    {state === "all" && <Icon src="check" size="2xs" colour="white"/>}
-    {state === "some" && <span className="w-2.5 h-0.5 bg-primary"/>}
-  </span>;
-}
 
 // Opens help over the form, so nothing typed so far is lost.
 function RosterHelpLink() {

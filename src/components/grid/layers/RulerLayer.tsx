@@ -67,7 +67,7 @@ const RulerLayer = memo(function RulerLayer({
     const pushElement = (meterFromTop: number) => {
       elements.push(
         <div key={`v${meterFromTop}`} className="h-0">
-          <div className={`rounded-full h-[2px] -translate-y-1/2 bg-lightGrey dark:bg-gray-600 ${meterFromTop % verticalGridIncrement === 0 ? "w-1" : "w-1.5"}`
+          <div className={`rounded-full h-[2px] -translate-y-1/2 bg-lightGrey dark:bg-line ${meterFromTop % verticalGridIncrement === 0 ? "w-1" : "w-1.5"}`
           }/>
           {
             meterFromTop % verticalGridIncrement === 0 &&
@@ -113,7 +113,7 @@ const RulerLayer = memo(function RulerLayer({
       elements.push(
         <div key={`h${m}`} className="relative w-0">
           <div className={
-            "absolute rounded-full w-[2px] -translate-x-1/2 bg-lightGrey dark:bg-gray-600 "
+            "absolute rounded-full w-[2px] -translate-x-1/2 bg-lightGrey dark:bg-line "
             + (meterFromCenter % 2 === 0 ? "translate-y-[20px] h-1" : "translate-y-4 h-1.5")}/>
           {
             meterFromCenter % 2 === 0 &&

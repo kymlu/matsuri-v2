@@ -15,7 +15,7 @@ type BulkPropLookDialogProps = {
   onApplied: (result: RosterDefaultsResult) => void,
 }
 
-const SAVE_FAILED = "保存できませんでした。もう一度お試しください";
+const SAVE_FAILED = "保存できませんでした。もう一度お試しください。";
 
 // 大きさを設定 / 色を設定 for every selected prop name at once. Changes only that one field.
 // Starts from the value they share; when they differ, size starts from a new prop's size and colour from nothing.

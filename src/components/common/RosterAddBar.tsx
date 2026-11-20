@@ -78,7 +78,7 @@ export default function RosterAddBar({ teamId, kind, isVisible = true, list: ros
         setIsSaving(false);
       },
       () => {
-        setLastResult({ message: "保存できませんでした。もう一度お試しください", isError: true });
+        setLastResult({ message: "保存できませんでした。もう一度お試しください。", isError: true });
         setIsSaving(false);
       });
   };

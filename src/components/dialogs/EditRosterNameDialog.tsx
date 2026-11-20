@@ -20,7 +20,7 @@ type EditRosterNameDialogProps = {
 }
 
 const NAME_TAKEN = "この名前はすでに名簿にあります";
-const SAVE_FAILED = "保存できませんでした。もう一度お試しください";
+const SAVE_FAILED = "保存できませんでした。もう一度お試しください。";
 
 export default function EditRosterNameDialog({ teamId, kind, rosterName, list, onSaved }: EditRosterNameDialogProps) {
   const [name, setName] = useState(rosterName.name);

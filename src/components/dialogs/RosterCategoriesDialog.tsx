@@ -71,7 +71,7 @@ export default function RosterCategoriesDialog({ teamId, kind, list: roster, onS
     saveRosterCategories(teamId, kind, live.map(r => ({ id: r.id, name: r.name.trim() })), deletedIds,
       onSaved,
       (status) => {
-        setError(status === 409 ? "同じ名前の区分がすでにあります" : "保存できませんでした。もう一度お試しください");
+        setError(status === 409 ? "同じ名前の区分がすでにあります" : "保存できませんでした。もう一度お試しください。");
         setIsSaving(false);
       });
   };

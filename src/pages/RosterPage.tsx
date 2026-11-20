@@ -110,7 +110,7 @@ export default function RosterPage({ goToHomePage, team, tab, onTabChange }: Ros
   };
 
   const failed = () => {
-    setLastAction({ message: "保存できませんでした。もう一度お試しください", isError: true });
+    setLastAction({ message: "保存できませんでした。もう一度お試しください。", isError: true });
     setIsBusy(false);
   };
 
