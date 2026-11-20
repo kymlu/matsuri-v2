@@ -50,6 +50,14 @@ describe("addSection", () => {
   });
 });
 
+describe("named sections", () => {
+  it("uses the name given when adding and duplicating", () => {
+    const before = makeChoreo();
+    expect(addSection(before, "s2", "間奏").sections[1]).toMatchObject({ id: "s2", name: "間奏" });
+    expect(duplicateSection(before, before.sections[0], 0, "サビ前", "s3").sections[0]).toMatchObject({ id: "s3", name: "サビ前" });
+  });
+});
+
 describe("duplicateSection", () => {
   it("makes a full copy that shares nothing with the original", () => {
     const before = makeChoreo();

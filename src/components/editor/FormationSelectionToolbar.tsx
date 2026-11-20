@@ -43,6 +43,16 @@ function FormationSelectionToolbar({
     dialogSectionRefs.current.get(currentSectionId)?.scrollIntoView({behavior: "instant", block: "center"});
   }, []);
 
+  // A section added or duplicated becomes current: bring its tab into view.
+  useEffect(() => {
+    const tab = dialogSectionRefs.current.get(currentSectionId); // the strip registers here, despite the name
+    const strip = stripRef.current;
+    if (!tab || !strip) return;
+    const tabBox = tab.getBoundingClientRect();
+    const left = strip.scrollLeft + tabBox.left - strip.getBoundingClientRect().left - (strip.clientWidth - tabBox.width) / 2;
+    strip.scrollTo({ left, behavior: "smooth" });
+  }, [currentSectionId]);
+
   const firstSectionId = sections[0]?.id;
 
   useEffect(() => {

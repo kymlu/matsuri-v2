@@ -11,8 +11,14 @@ const copyPositions = <T extends { sectionId: string }>(positions: Record<string
 const copyMovements = (movements: ChoreoSection["formation"]["dancerMovements"]) =>
   movements && Object.fromEntries(Object.entries(movements).map(([id, movement]) => [id, { ...movement, points: movement.points.map(p => ({ ...p })) }]));
 
+// What a new section is called unless it's named when added.
+export const newSectionName = (state: Choreo) => {
+  const previousSection = state.sections[state.sections.length - 1];
+  return previousSection ? incrementBracketSuffix(previousSection.name) : "セクション1";
+}
+
 // Starts from where everyone ended in the last section, with no actions or paths.
-export function addSection(state: Choreo, id: string): Choreo {
+export function addSection(state: Choreo, id: string, name?: string): Choreo {
   const previousSection = state.sections[state.sections.length - 1];
 
   return {
@@ -21,7 +27,7 @@ export function addSection(state: Choreo, id: string): Choreo {
       ...state.sections,
       {
         id: id,
-        name: previousSection ? incrementBracketSuffix(previousSection.name) : "セクション1",
+        name: name ?? newSectionName(state),
         formation: {
           dancerPositions: copyPositions(previousSection?.formation.dancerPositions, id),
           propPositions: copyPositions(previousSection?.formation.propPositions, id),
@@ -36,11 +42,11 @@ export function addSection(state: Choreo, id: string): Choreo {
 }
 
 // A full copy, inserted before the original. Actions and counts get new ids so the two sections never share them.
-export function duplicateSection(state: Choreo, section: ChoreoSection, index: number): Choreo {
-  const newId = crypto.randomUUID();
+export function duplicateSection(state: Choreo, section: ChoreoSection, index: number, name = section.name, newId: string = crypto.randomUUID()): Choreo {
   const duplicatedSection: ChoreoSection = {
     ...section,
     id: newId,
+    name,
     formation: {
       ...section.formation,
       dancerPositions: copyPositions(section.formation.dancerPositions, newId),
