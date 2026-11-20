@@ -8,7 +8,7 @@ import { BasicChoreoDetails, Choreo, EventDetails, getBasicChoreoDetails } from 
 import { EditHistory, StageEntities } from "../models/history";
 import { addSection, assignDancersToTiming, duplicateSection, newSectionName, editDancerActions, editSectionNote, removeSection, renameSection, reorderSections } from "../lib/editor/commands/sectionCommands";
 import { ChoreoSection, Movement, MovementCacheBySectionIdByObjectId, MovementType, PathSvgCacheByObjectIdBySectionId } from "../models/choreoSection";
-import { debounce, incrementBracketSuffix, indexByKey, isNullOrUndefinedOrBlank, strEquals } from "../lib/helpers/globalHelper";
+import { debounce, indexByKey, isNullOrUndefinedOrBlank, strEquals } from "../lib/helpers/globalHelper";
 import MainStage from "../components/grid/MainStage";
 import { Dialog } from "@base-ui/react";
 import BaseErrorDialog from "../components/dialogs/BaseErrorDialog";
@@ -562,8 +562,8 @@ export default function ChoreoEditPage(props: {
   const [propManagerDialogOpen, setPropManagerDialogOpen] = useState(false);
   const [propSizeDialogOpen, setPropSizeDialogOpen] = useState(false);
   const [renameSectionDialogOpen, setRenameSectionDialogOpen] = useState(false);
-  // A section being added or duplicated: it's only created once it's named, so キャンセル leaves nothing behind.
-  const [newSection, setNewSection] = useState<{ kind: "add" | "duplicate", id: string }>();
+  // The id of a section being added: it's only created once it's named, so キャンセル leaves nothing behind.
+  const [newSectionId, setNewSectionId] = useState<string>();
   const [addNoteToSectionDialogOpen, setAddNoteToSectionDialogOpen] = useState(false);
   const [deleteSectionDialogOpen, setDeleteSectionDialogOpen] = useState(false);
   const [publishConfirmationDialogOpen, setPublishConfirmationDialogOpen] = useState(false);
@@ -1135,7 +1135,7 @@ export default function ChoreoEditPage(props: {
                 showAddButton
                 onClickAddButton={(id: string) => {
                   resetSelectedIds();
-                  setNewSection({ kind: "add", id });
+                  setNewSectionId(id);
                 }}
                 onChangeSection={(section) => {
                   setCurrentSection(section);
@@ -1348,11 +1348,11 @@ export default function ChoreoEditPage(props: {
             <Dialog.Close>
               <IconLabelButton
                 icon="fileCopy"
-                label="複製して前に追加"
+                label="複製"
                 asDiv
                 onClick={() => {
                   resetSelectedIds();
-                  setNewSection({ kind: "duplicate", id: crypto.randomUUID() });
+                  commitState(duplicateSection(history.presentState.state, currentSection, history.presentState.state.sections.findIndex(x => strEquals(x.id, currentSection.id))));
                 }}
                 full />
             </Dialog.Close>
@@ -1534,21 +1534,18 @@ export default function ChoreoEditPage(props: {
       </Dialog.Root>
       <Dialog.Root
         handle={newSectionDialog}
-        open={!!newSection}
-        onOpenChange={(isOpen) => { if (!isOpen) setNewSection(undefined); }}>
+        open={!!newSectionId}
+        onOpenChange={(isOpen) => { if (!isOpen) setNewSectionId(undefined); }}>
         <EditNameDialog
-          isOpen={!!newSection}
-          name={newSection?.kind === "duplicate" ? incrementBracketSuffix(currentSection.name) : newSectionName(history.presentState.state)}
+          isOpen={!!newSectionId}
+          name={newSectionName(history.presentState.state)}
           type="セクション"
-          title={newSection?.kind === "duplicate" ? "セクション複製" : "セクション追加"}
+          title="セクション追加"
           actionButtonText="追加"
           onSubmit={(name) => {
-            if (!newSection) return;
-            const state = history.presentState.state;
-            commitState(newSection.kind === "duplicate"
-              ? duplicateSection(state, currentSection, state.sections.findIndex(x => strEquals(x.id, currentSection.id)), name, newSection.id)
-              : addSection(state, newSection.id, name), newSection.id);
-            setNewSection(undefined);
+            if (!newSectionId) return;
+            commitState(addSection(history.presentState.state, newSectionId, name), newSectionId);
+            setNewSectionId(undefined);
           }}/>
       </Dialog.Root>
       <Dialog.Root

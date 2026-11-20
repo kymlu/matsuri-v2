@@ -42,11 +42,11 @@ export function addSection(state: Choreo, id: string, name?: string): Choreo {
 }
 
 // A full copy, inserted before the original. Actions and counts get new ids so the two sections never share them.
-export function duplicateSection(state: Choreo, section: ChoreoSection, index: number, name = section.name, newId: string = crypto.randomUUID()): Choreo {
+export function duplicateSection(state: Choreo, section: ChoreoSection, index: number): Choreo {
+  const newId = crypto.randomUUID();
   const duplicatedSection: ChoreoSection = {
     ...section,
     id: newId,
-    name,
     formation: {
       ...section.formation,
       dancerPositions: copyPositions(section.formation.dancerPositions, newId),

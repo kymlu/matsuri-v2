@@ -48,13 +48,9 @@ describe("addSection", () => {
     expect(before.sections[0].formation.dancerPositions.d1.sectionId).toBe("s1");
     expect(added.formation.dancerPositions.d1).not.toBe(before.sections[0].formation.dancerPositions.d1);
   });
-});
 
-describe("named sections", () => {
-  it("uses the name given when adding and duplicating", () => {
-    const before = makeChoreo();
-    expect(addSection(before, "s2", "間奏").sections[1]).toMatchObject({ id: "s2", name: "間奏" });
-    expect(duplicateSection(before, before.sections[0], 0, "サビ前", "s3").sections[0]).toMatchObject({ id: "s3", name: "サビ前" });
+  it("uses the name given", () => {
+    expect(addSection(makeChoreo(), "s2", "間奏").sections[1]).toMatchObject({ id: "s2", name: "間奏" });
   });
 });
 
