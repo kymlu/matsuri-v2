@@ -64,11 +64,11 @@ export default function NumberInput ({
         disabled={disabled}
         >
         <div className={wrapperClasses}>
-          <NumberField.Group className="grid grid-cols-[auto,1fr,auto] w-full bg-surface data-[disabled]:bg-subtle border rounded-md border-line focus-within:border-primary">
+          <NumberField.Group className={classNames("grid grid-cols-[auto,1fr,auto] w-full bg-surface data-[disabled]:bg-subtle border rounded-md border-line focus-within:border-primary", { "h-6": short, "h-10": !short })}>
             <NumberField.Decrement className={"flex items-center mx-1 justify-center select-none rounded-l-md min-w-4 bg-clip-padding" + ((value ?? 1) > (min ?? 0) ? " opacity-100" : " opacity-30")}>
               <Icon src="remove" colour="black" size="sm"/>
             </NumberField.Decrement>
-            <NumberField.Input className={classNames("w-full min-w-0 px-1 py-3 text-center bg-surface text-body tabular-nums focus:z-1 focus:outline-none focus:-outline-offset-1", { "h-6": short, "h-10": !short })} />
+            <NumberField.Input className={classNames("w-full h-full min-w-0 px-1 text-center bg-surface text-body tabular-nums focus:z-1 focus:outline-none focus:-outline-offset-1")} />
             <NumberField.Increment className={"flex items-center mx-1 justify-center select-none rounded-r-md min-w-4 bg-clip-padding" + ((value ?? 1) < (max ?? 100000000) ? " opacity-100" : " opacity-30")}>
               <Icon src="add" colour="black" size="sm"/>
             </NumberField.Increment>

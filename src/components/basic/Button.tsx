@@ -47,7 +47,7 @@ export default function Button({
     "w-32 max-w-32 min-w-32": fixed,
     "py-0.5 px-1": compact,
     "border": noBorder !== true,
-    "px-3 py-1.5": compact !== true,
+    "px-3 py-1.5 min-h-10": compact !== true,
     "lg:hover:bg-subtle": !disabled && primary !== true && grey !== true,
     "lg:hover:opacity-70": !disabled && (primary || grey),
     "bg-surface": primary !== true && grey !== true && !selected,
