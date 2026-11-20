@@ -662,7 +662,7 @@ export default function HomePage({
           }
           {
             !isLoading && !loadError && filteredChoreos.size === 0 &&
-            <div className="mt-4 text-center">隊列表はありません</div>
+            <div className="py-6 text-center text-muted">隊列表はありません</div>
           }
           {
             isLoading &&
