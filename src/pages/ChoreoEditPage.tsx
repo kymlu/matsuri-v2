@@ -267,6 +267,18 @@ export default function ChoreoEditPage(props: {
     } as StageEntities<PropPosition[], DancerPosition[], Obstacle[]>;
   }, [selectedIds, currentSection]);
 
+  // While assigning counts: each dancer's count in the open action, from the saved section (so undo shows too).
+  // Red for the count being filled; no badge means not in any count yet.
+  const dancerCountBadges = useMemo(() => {
+    if (!isAssigningActions || !currentAction) return undefined;
+    const action = currentSection.formation.dancerActions.find(a => strEquals(a.id, currentAction.id));
+    const badges: Record<string, { text: string, red: boolean }> = {};
+    action?.timings.forEach(timing => timing.dancerIds.forEach(id => {
+      badges[id] = { text: timing.name, red: strEquals(timing.id, currentTiming?.id) };
+    }));
+    return badges;
+  }, [isAssigningActions, currentAction, currentTiming?.id, currentSection.formation.dancerActions]);
+
   // ---- Find (by name) ----
   const [findOpen, setFindOpen] = useState(false);
   const [focusSelectionRequest, setFocusSelectionRequest] = useState(0);
@@ -971,12 +983,15 @@ export default function ChoreoEditPage(props: {
   const openEditDancerActionsDialog = useCallback(() => setEditDancerActionsDialogOpen(true), []);
 
   const onAssignActions = useCallback(() => {
-    resetSelectedIds();
     setDimDancers(false);
-    setCurrentAction(undefined);
-    setCurrentTiming(undefined);
-    setIsAssigningActions(prev => !prev);
-  }, [resetSelectedIds]);
+    // Opening starts on the first action's first count (the toolbar opens that action), so badges show at once.
+    const firstAction = isAssigningActions ? undefined : currentSection.formation.dancerActions[0];
+    const firstTiming = firstAction?.timings[0];
+    setCurrentAction(firstTiming ? firstAction : undefined);
+    setCurrentTiming(firstTiming);
+    setSelectedIds({props: [], dancers: firstTiming ? [...firstTiming.dancerIds] : [], obstacles: []});
+    setIsAssigningActions(!isAssigningActions);
+  }, [isAssigningActions, currentSection.formation.dancerActions]);
 
   const onSelectActionTiming = useCallback((action?: DancerAction, timing?: DancerActionTiming) => {
     setCurrentAction(action);
@@ -1080,6 +1095,7 @@ export default function ChoreoEditPage(props: {
           isAddingObstacles={isAddingObstacles}
           canResizeProps={!isPropResizeLocked}
           hideTransformerBorder={isAssigningActions}
+          dancerCountBadges={dancerCountBadges}
           currentChoreo={history.presentState.state}
           currentSection={currentSection}
           updateDancerPosition={updateDancerPosition}

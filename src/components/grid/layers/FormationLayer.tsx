@@ -51,6 +51,7 @@ type FormationLayerProps = {
   isEditingMovement?: boolean,
   dancerStacks?: string[][],
   propStacks?: string[][],
+  dancerCountBadges?: Record<string, { text: string, red: boolean }>,
 };
 
 const FormationLayer = memo(function FormationLayer({
@@ -86,7 +87,7 @@ const FormationLayer = memo(function FormationLayer({
   isZooming,
   sectionId,
   dancerAnimationCache, propAnimationCache, isEditingMovement,
-  dancerStacks, propStacks,
+  dancerStacks, propStacks, dancerCountBadges,
 }: FormationLayerProps) {
 	const transformerRef = useRef<Konva.Transformer>(null);
 
@@ -305,6 +306,8 @@ const FormationLayer = memo(function FormationLayer({
             hiddenSelected={dancerStackDrawing[dancerPosition.dancerId]?.hiddenSelected}
             stackCount={dancerStackDrawing[dancerPosition.dancerId]?.count}
             coveredInStack={coveredDancers.has(dancerPosition.dancerId)}
+            // Not under the top of a stack: its badge would peek out beside the top one's.
+            countBadge={coveredDancers.has(dancerPosition.dancerId) ? undefined : dancerCountBadges?.[dancerPosition.dancerId]}
             dimmed={dimDancers || fadedDancerIds?.has(dancerPosition.dancerId) || (halfFadedDancerIds?.has(dancerPosition.dancerId) && "half")}
             onDragFollow={canEdit ? followDrag : undefined}
           />

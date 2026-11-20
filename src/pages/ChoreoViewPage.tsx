@@ -18,7 +18,7 @@ import CustomSwitch from "../components/inputs/CustomSwitch";
 import { checkShowingViewPageInfoDialog, stopShowingViewPageInfoDialog, getPersonalSectionNote, setPersonalSectionNote, getSeenVersion, setSeenVersion } from "../lib/dataAccess/LocalStorageController";
 import Divider from "../components/basic/Divider";
 import { calculateMovementCache } from "../lib/helpers/editorCalculationHelper";
-import { DancerActionTiming } from "../models/dancerAction";
+import { DancerAction, DancerActionTiming } from "../models/dancerAction";
 import { SetStateAction } from "react";
 import { SAMPLE_PARADE_ID, SAMPLE_STAGE_ID } from "../lib/consts/consts";
 import { getChoreoFile } from "../lib/helpers/apiHelper";
@@ -51,6 +51,8 @@ export default function ChoreoViewPage(props: {
   const [currentSection, setCurrentSection] = useState<ChoreoSection>(props.currentChoreo.sections[0]);
   const [selectedIds, setSelectedIds] = useState<StageEntities<string[]>>({props: [], dancers: [], obstacles: []});
   const [selectedTimingId, setSelectedTimingId] = useState<string | undefined>();
+  // An action whose counts are all shown on the stage at once (a pill on each dancer). Cleared by any other selection.
+  const [shownActionId, setShownActionId] = useState<string | undefined>();
   const [showPaths, setShowPaths] = useState<boolean>(true);
   const [appSettings, setAppSettings] = useState<AppSetting>({
     snapToGrid: true,
@@ -152,6 +154,7 @@ export default function ChoreoViewPage(props: {
   }, [props.currentChoreo.sections, currentSection.id]);
 
   const changeSection = useCallback((section: ChoreoSection) => {
+    setShownActionId(undefined);
     if (selectedTimingId) {
       setSelectedTimingId(undefined);
       resetSelectedIds();
@@ -189,11 +192,27 @@ export default function ChoreoViewPage(props: {
     if (timing) {
       setSelectedIds({props: [], dancers: timing.dancerIds, obstacles: []});
       setSelectedTimingId(timing.id);
+      setShownActionId(undefined);
     } else {
       resetSelectedIds();
       setSelectedTimingId(undefined);
+      setShownActionId(undefined);
     }
   }, [resetSelectedIds]);
+
+  const onShowAction = useCallback((action?: DancerAction) => {
+    resetSelectedIds();
+    setSelectedTimingId(undefined);
+    setShownActionId(action?.id);
+  }, [resetSelectedIds]);
+
+  const dancerCountBadges = useMemo(() => {
+    const action = shownActionId ? currentSection.formation.dancerActions.find(a => strEquals(a.id, shownActionId)) : undefined;
+    if (!action) return undefined;
+    const badges: Record<string, { text: string, red: boolean }> = {};
+    action.timings.forEach(timing => timing.dancerIds.forEach(id => { badges[id] = { text: timing.name, red: false }; }));
+    return badges;
+  }, [shownActionId, currentSection.formation.dancerActions]);
 
   const onChangeHeight = useCallback((height: number) => setSidebarHeight(height), []);
 
@@ -240,6 +259,7 @@ export default function ChoreoViewPage(props: {
     }
     setSelectedIds(next);
     setSelectedTimingId(undefined);
+    setShownActionId(undefined);
   }, [currentSection.formation, props.currentChoreo.dancers, props.currentChoreo.props]);
 
   const stackNote = useMemo(() => {
@@ -271,6 +291,7 @@ export default function ChoreoViewPage(props: {
   const onFindDancer = useCallback((dancerId: string, saveAsMe: boolean) => {
     setSelectedIds({props: [], dancers: [dancerId], obstacles: []});
     setSelectedTimingId(undefined);
+    setShownActionId(undefined);
     setFocusDancerRequest(n => n + 1);
     if (saveAsMe && setSavedDancerName) {
       setSavedDancerName(props.currentChoreo.dancers[dancerId].name);
@@ -331,6 +352,8 @@ export default function ChoreoViewPage(props: {
           deselectPosition={resetSelectedIds}
           onSelectTiming={onSelectTiming}
           selectedTiming={selectedTimingId}
+          shownActionId={shownActionId}
+          onShowAction={onShowAction}
           formationSelectionToolbar={formationSelectionToolbar}
           onChangeHeight={onChangeHeight}
         />
@@ -359,6 +382,7 @@ export default function ChoreoViewPage(props: {
           dimDancers={dimDancers}
           dimDancersToggle={entityCount.dancers > 0 && entityCount.props > 0 ? dimDancersToggle : undefined}
           focusSelectionRequest={focusDancerRequest}
+          dancerCountBadges={dancerCountBadges}
         />
       </div>
 
@@ -401,6 +425,7 @@ export default function ChoreoViewPage(props: {
             onPick={stackList.kind === "props" ? undefined : id => {
               setSelectedIds({ dancers: [id], props: [], obstacles: [] });
               setSelectedTimingId(undefined);
+              setShownActionId(undefined);
               setStackList(undefined);
             }}/>
         }

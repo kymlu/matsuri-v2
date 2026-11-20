@@ -36,6 +36,8 @@ type DancerGridObjectProps = {
   coveredInStack?: boolean,
   dimmed?: boolean | "half",
   stackCount?: number,
+  // While assigning counts: the name of this dancer's count in the open action (red: the count being filled).
+  countBadge?: { text: string, red: boolean },
   onDragFollow?: (id: string, phase: "start" | "move" | "end" | "cancel", dx?: number, dy?: number) => void,
 };
 
@@ -61,6 +63,7 @@ const DancerGridObject = memo(function DancerGridObject({
   coveredInStack,
   dimmed,
   stackCount,
+  countBadge,
   onDragFollow,
 }: DancerGridObjectProps) {
   const ringRadius = METER_PX * (dancerDisplayType === "large" ? 0.6 : 0.3);
@@ -144,7 +147,11 @@ const DancerGridObject = memo(function DancerGridObject({
         </Group>
         {
           stackMark && stackCount !== undefined &&
-          <StackBadge x={ringRadius * 0.75} y={-ringRadius * 0.75} radius={METER_PX * 0.235} red={stackMark === "red"} count={stackCount}/>
+          <StackBadge x={ringRadius * 0.75} y={-ringRadius * 0.75} radius={METER_PX * 0.235} red={stackMark === "red"} text={`×${stackCount}`}/>
+        }
+        {
+          countBadge &&
+          <StackBadge x={-ringRadius * 0.75} y={-ringRadius * 0.75} radius={METER_PX * 0.235} red={countBadge.red} text={countBadge.text} growLeft/>
         }
       </BaseGridObject>
     }
