@@ -826,7 +826,7 @@ export const HELP_ARTICLES: HelpArticle[] = [
     type: "trouble",
     group: "trouble",
     title: "「公開する」がない",
-    summary: "公開できるのは、編集者か管理者としてログインしている人だけです。サンプルの隊列表も公開できません。",
+    summary: "公開できるのは、編集者か管理者としてログインしている人だけです。",
     related: ["login", "publish"],
     keywords: ["公開", "ない", "できない", "ボタン"],
   },

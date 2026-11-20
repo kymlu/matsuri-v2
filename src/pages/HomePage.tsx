@@ -166,8 +166,11 @@ export default function HomePage({
     ]).then(([local, fetched]) => {
       if (fetched === undefined) setLoadError("team");
       const server = fetched ?? [];
-      server.push(getBasicChoreoDetails(z.parse(ChoreoSchema, SampleParade)));
-      server.push(getBasicChoreoDetails(z.parse(ChoreoSchema, SampleStage)));
+      // Samples are for trying the app without a team; a team's list is its own work.
+      if (!team) {
+        server.push(getBasicChoreoDetails(z.parse(ChoreoSchema, SampleParade)));
+        server.push(getBasicChoreoDetails(z.parse(ChoreoSchema, SampleStage)));
+      }
       const choreos: ChoreoWithStatus[] = [];
       let indexedLocal = indexByKey(local, "id");
       const indexedServer = indexByKey(server, "id");
