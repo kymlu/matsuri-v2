@@ -152,10 +152,9 @@ export function PropManagerDialog({
                           />
                     }
                   </div>
-                  <div className="flex gap-1 mt-1 md:mt-0">
+                  <div className="flex gap-1 mt-2 md:mt-0">
                     <NumberInput
                       label="幅"
-                      compact
                       ref={(r) => {widthInputRefs.current.set(prop.id, r);}}
                       defaultValue={prop.width}
                       min={MIN_PROP_DIMENSION}
@@ -168,7 +167,6 @@ export function PropManagerDialog({
                     />
                     <NumberInput
                       label="奥行"
-                      compact
                       ref={(r) => {lengthInputRefs.current.set(prop.id, r);}}
                       defaultValue={prop.length}
                       min={MIN_PROP_DIMENSION}

@@ -55,11 +55,7 @@ export default function DateInput({
       "bg-surface": !(required && isNullOrUndefinedOrBlank(value)) && !hasError && !disabled,
     },)
 
-  const wrapperClasses = classNames(
-    "grid relative items-center w-full grid-cols-1",
-    {
-      "mb-2": !compact,
-    });
+  const wrapperClasses = "grid relative items-center w-full grid-cols-1";
 
   return (
     <FieldWithLabel label={label} full={!compact}>

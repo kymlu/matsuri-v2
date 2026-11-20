@@ -153,7 +153,7 @@ export default function LoginDialog({
   >
     {
       mode === "login" && 
-      <>
+      <div className="space-y-2">
         <TextInput
           label="メールアドレス"
           name="メールアドレス"
@@ -187,24 +187,23 @@ export default function LoginDialog({
             パスワードをお忘れの方はこちら
           </p>
         </button>
-      </>
+      </div>
     }
     {
       mode === "forgot" &&
-      <>
+      <div className="space-y-2">
         <div>入力されたメールアドレスがチームに登録されている場合、認証コードを送信します。</div>
-        
         <TextInput
           name="メールアドレス"
           defaultValue=""
           maxLength={EMAIL_LENGTH}
           onContentChange={(value) => setEmail(value)}/>
-      </>
+      </div>
     }
     {
       mode === "resetPassword" &&
-      <>
-        <div className="mb-2 space-y-1">
+      <div className="space-y-2">
+        <div className="space-y-1">
           <p>メールアドレスが登録されている場合、認証コードを送信します。コードの有効期限は10分です。</p>
           <p>メールが届かない場合は、迷惑メールフォルダもご確認ください。</p>
         </div>
@@ -228,7 +227,7 @@ export default function LoginDialog({
             パスワードを再設定できませんでした。
           </span>
         }
-      </>
+      </div>
     }
     {
       error === "error" &&

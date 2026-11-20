@@ -21,7 +21,7 @@ export default function StageSizeInputs({ stageType, size, onChange }: StageSize
     ["yMargin", "前後の余白", true],
   ];
 
-  return <div className="grid grid-cols-2 gap-x-2 gap-y-1">
+  return <div className="grid grid-cols-2 gap-x-2 gap-y-2">
     {
       fields.map(([name, label, isMargin]) =>
         <NumberInput

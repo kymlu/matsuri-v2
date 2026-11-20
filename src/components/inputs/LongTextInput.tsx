@@ -10,7 +10,6 @@ export type TextInputProps = {
   onContentChange: (newContent: string) => void,
   placeholder?: string,
   clearable?: boolean,
-  compact?: boolean,
   tall?: boolean,
   short?: boolean,
   centered?: boolean,
@@ -32,7 +31,6 @@ export default function LongTextInput({
   onContentChange,
   placeholder,
   clearable,
-  compact,
   tall,
   short,
   centered,
@@ -71,11 +69,7 @@ export default function LongTextInput({
       "border-primary bg-primary/20 placeholder:text-primary": (required && isNullOrUndefinedOrBlank(value)) || hasError,
     },);
 
-  const wrapperClasses = classNames(
-    "grid items-center w-full h-full grid-cols-1",
-    {
-      "mb-2": !compact,
-    },);
+  const wrapperClasses = "grid items-center w-full h-full grid-cols-1";
 
   return (
     <FieldWithLabel full label={label} fullHeight>
