@@ -28,6 +28,14 @@
 			"bucket_name": "matsuri"
 		}
 	],
+	// Choreo password tries: 20 per choreo and IP a minute.
+	"ratelimits": [
+		{
+			"name": "UNLOCK_LIMITER",
+			"namespace_id": "1001",
+			"simple": { "limit": 20, "period": 60 }
+		}
+	],
 	"secrets": {
 		"required": ["RESEND_API_KEY"]
 	}

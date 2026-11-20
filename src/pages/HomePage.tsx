@@ -4,7 +4,7 @@ import { contactMailto, LONG_NAME_LENGTH, SAMPLE_PARADE_ID, SAMPLE_STAGE_ID, SEA
 import Button, { IconLabelButton } from "../components/basic/Button"
 import Icon from "../components/basic/Icon"
 import { readUploadedFile } from "../lib/helpers/uploadHelper"
-import { memo, useCallback, useEffect, useMemo, useState } from "react"
+import { memo, useCallback, useEffect, useMemo, useReducer, useState } from "react"
 import { deleteChoreo, getAllChoreos, saveChoreo, saveChoreos } from "../lib/dataAccess/DataController"
 import { BasicChoreoDetails, Choreo, ChoreoSchema, EventDetails, getBasicChoreoDetails } from "../models/choreo"
 import { isNullOrUndefinedOrBlank, indexByKey, strCompare, strEquals, stringifyEvent, removeKey } from "../lib/helpers/globalHelper"
@@ -33,7 +33,7 @@ import { useHelp } from "../components/help/HelpContext"
 import EditEventInfoDialog from "../components/dialogs/EditEventInfoDialog"
 import SiteInfoDialog from "../components/dialogs/SiteInfoDialog"
 import { ChoreoStatusTag } from "../components/common/Tag"
-import { changeUserName, getChoreoFile, getChoreoSummary, logoutUserFromTeam, verifyInvite } from "../lib/helpers/apiHelper"
+import { changeUserName, ChoreoLockedError, getChoreoFile, getChoreoSummary, logoutUserFromTeam, verifyInvite } from "../lib/helpers/apiHelper"
 import LoginDialog from "../components/dialogs/LoginDialog"
 import { Team } from "../models/team"
 import CustomMenu from "../components/inputs/CustomMenu"
@@ -108,7 +108,8 @@ export default function HomePage({
   const [email, setEmail] = useState<string>("");
 
   const getChoreoFromServer = useCallback(async (
-    id: string
+    id: string,
+    onLocked?: () => void,
   ): Promise<Choreo | undefined> => {
     try {
       if (strEquals(id, SAMPLE_PARADE_ID)) {
@@ -124,12 +125,14 @@ export default function HomePage({
       }
     } catch (e: any) {
       console.error("Failed to load choreo with id", id);
+      if (e instanceof ChoreoLockedError) onLocked?.();
       return undefined;
     }
   }, [team, serverChoreoDetails]);
 
   const getChoreo = useCallback(async (
-    id: string
+    id: string,
+    onLocked?: () => void,
   ): Promise<Choreo | undefined> => {
     const local = localChoreos[id];
 
@@ -149,7 +152,7 @@ export default function HomePage({
       return SampleStage as Choreo;
     }
 
-    return await getChoreoFromServer(id);
+    return await getChoreoFromServer(id, onLocked);
   }, [localChoreos, team, getChoreoFromServer]);
 
   useEffect(() => {
@@ -312,8 +315,10 @@ export default function HomePage({
     groupChoreos(savedChoreos.filter(c => matchesSearch([c.name, c.event], searchTerm)))
   , [savedChoreos, searchTerm]);
 
+  const [, recheckUnlocks] = useReducer((n: number) => n + 1, 0); // after a token was dropped
   const lastSeenId = useMemo(() => getLastSeenChoreo(team?.id), [team?.id]);
   const lastSeen = isLoading ? undefined : savedChoreos.find(c => c.id === lastSeenId);
+  const isLastSeenUnlocked = lastSeen ? checkUnlockedChoreo(lastSeen.id) : false;
   useEffect(() => {
     if (lastSeenId && !isLoading && !loadError && !savedChoreos.some(c => c.id === lastSeenId)) {
       setLastSeenChoreo(team?.id, undefined);
@@ -322,10 +327,10 @@ export default function HomePage({
   // Only when it isn't already the first card, and opens without a password or sync step.
   const lastSeenShortcut = useMemo(() => {
     if (!lastSeen || !isNullOrUndefinedOrBlank(searchTerm) || lastSeen.status === "syncRequired") return undefined;
-    if (lastSeen.hasPassword && !isLoggedIn && !checkUnlockedChoreo(lastSeen.id, lastSeen.version)) return undefined;
+    if (lastSeen.hasPassword && !isLoggedIn && !isLastSeenUnlocked) return undefined;
     const firstEvent = filteredChoreos.values().next().value?.values().next().value;
     return firstEvent?.[0]?.id === lastSeen.id ? undefined : lastSeen;
-  }, [lastSeen, searchTerm, isLoggedIn, filteredChoreos]);
+  }, [lastSeen, searchTerm, isLoggedIn, filteredChoreos, isLastSeenUnlocked]);
 
   const [editingChoreo, setEditingChoreo] = useState<ChoreoWithStatus | undefined>();
   const [editChoreoInfoDialogOpen, setEditChoreoInfoDialogOpen] = useState(false);
@@ -416,8 +421,9 @@ export default function HomePage({
   }, [team]);
 
   // ---- stable, id-parameterized handlers shared across every EventSection / ChoreoListItem ----
-  const handleSelectChoreo = useCallback((id: string, status: ChoreoStatus) => {
-    getChoreo(id).then(c => {
+  // onLocked: the server wants the password again (it changed since this device entered it).
+  const handleSelectChoreo = useCallback((id: string, status: ChoreoStatus, onLocked?: () => void) => {
+    getChoreo(id, onLocked).then(c => {
       if (c) {
         onSelectChoreo(c, status);
       }
@@ -650,7 +656,7 @@ export default function HomePage({
         <div className="h-full space-y-2 overflow-auto">
           {
             lastSeenShortcut &&
-            <LastSeenShortcut choreo={lastSeenShortcut} onClick={() => handleSelectChoreo(lastSeenShortcut.id, lastSeenShortcut.status)}/>
+            <LastSeenShortcut choreo={lastSeenShortcut} onClick={() => handleSelectChoreo(lastSeenShortcut.id, lastSeenShortcut.status, recheckUnlocks)}/>
           }
           {
             loadError &&
@@ -1065,7 +1071,7 @@ type EventSectionProps = {
   searchTerm: string,
   addEvent: (eventInfo: string) => void,
   editEventName: (eventInfo: string, choreos: ChoreoWithStatus[]) => void,
-  onSelectChoreo: (id: string, status: ChoreoStatus) => void,
+  onSelectChoreo: (id: string, status: ChoreoStatus, onLocked?: () => void) => void,
   duplicateChoreo: (choreo: ChoreoWithStatus) => void,
   viewPastVersion: (choreo: ChoreoWithStatus, version: number) => Promise<boolean>,
   editChoreoName: (choreo: ChoreoWithStatus) => void,
@@ -1111,7 +1117,11 @@ const EventSection = memo(function EventSection({
         setPostPasswordAction("open");
         setChoreoPasswordEntryDialogOpen(true);
       } else {
-        onSelectChoreo(choreo.id, choreo.status);
+        onSelectChoreo(choreo.id, choreo.status, () => {
+          setSelectedChoreo(choreo);
+          setPostPasswordAction("open");
+          setChoreoPasswordEntryDialogOpen(true);
+        });
       }
     }
   }, [isLoggedIn, syncChoreo, onSelectChoreo]);
@@ -1328,11 +1338,11 @@ const EventSection = memo(function EventSection({
           choreoId={selectedChoreo?.id}
           choreoName={selectedChoreo?.name}
           teamId={teamId!}
-          onSuccess={() => {
+          onSuccess={(token) => {
             if (selectedChoreo) {
+              setUnlockedChoreo(selectedChoreo.id, token);
               switch (postPasswordAction) {
                 case "open":
-                  setUnlockedChoreo(selectedChoreo.id, selectedChoreo.version);
                   onSelectChoreo(selectedChoreo.id, selectedChoreo.status);
                   break;
                 case "duplicate":
@@ -1378,7 +1388,8 @@ type ChoreoListItemProps = {
 const ChoreoListItem = memo(function ChoreoListItem ({
   choreo, isLoggedIn, isLastSeen, searchTerm, onSelectChoreo, openOptionsDialog
 }: ChoreoListItemProps) {
-  const isUnlocked = useMemo(() => isLoggedIn || checkUnlockedChoreo(choreo.id, choreo.version), [isLoggedIn, choreo]);
+  // Not memoised: a token can be dropped after the password changes.
+  const isUnlocked = isLoggedIn || checkUnlockedChoreo(choreo.id);
 
   return <React.Fragment key={choreo.id}>
     {

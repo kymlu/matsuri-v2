@@ -4,6 +4,7 @@ import { Team } from "../../models/team";
 import { RoleType, User } from "../../models/user";
 import { AddRosterNamesResult, AddRosterNamesResultSchema, PropDefaults, Roster, RosterKind, RosterDefaultsItem, RosterDefaultsResult, RosterDefaultsResultSchema, RosterLink, RosterLinksResult, RosterLinksResultSchema, RosterRemoveResult, RosterRemoveResultSchema, RosterRestoreResult, RosterRestoreResultSchema, RosterSchema } from "../../models/roster";
 import * as z from "zod";
+import { getChoreoUnlockToken, setUnlockedChoreo } from "../dataAccess/LocalStorageController";
 
 const getApiUrl = (endpoint: 
   "auth/login" | 
@@ -348,7 +349,7 @@ export const verifyChoreoPassword = async (
   teamId: string,
   choreoId: string,
   password: string,
-  onSuccess: () => void,
+  onSuccess: (token?: string) => void,
   onFailure: (status: number) => void
 ): Promise<void> => {
   try {
@@ -364,7 +365,8 @@ export const verifyChoreoPassword = async (
       console.error(`Choreo password validation failed: ${response.status} message: ${data.message}`);
       onFailure(response.status);
     } else {
-      onSuccess();
+      const data = await response.json() as { token?: string };
+      onSuccess(data.token);
     }
   } catch (e: any) {
     console.error("login failed:", (e as Error)?.message);
@@ -400,14 +402,25 @@ export const getChoreoPassword = async (
   }
 }
 
+// Thrown when the server wants the choreo's password: the saved token is gone or no longer valid.
+export class ChoreoLockedError extends Error {}
+
 export const getChoreoFile = async (teamId: string, choreoId: string, version: number): Promise<Choreo> => {
   try {
-    const response = await fetch(`${getApiUrl("choreos/file")}?team_id=${teamId}&choreo_id=${choreoId}&version=${version}`);
+    const token = getChoreoUnlockToken(choreoId);
+    const response = await fetch(`${getApiUrl("choreos/file")}?team_id=${teamId}&choreo_id=${choreoId}&version=${version}`, {
+      credentials: "include",
+      headers: token ? { "X-Choreo-Unlock": token } : undefined,
+    });
     if (response.ok) {
       return await response.json() as Choreo;
     } else {
-      const data = await response.json() as ErrorResponse;
+      const data = await response.json() as ErrorResponse & { code?: string };
       console.error(`getChoreoFile failed: ${response.status} message: ${data.message}`);
+      if (data.code === "locked") {
+        setUnlockedChoreo(choreoId, undefined);
+        throw new ChoreoLockedError();
+      }
       throw Error;
     }
   } catch (e: any) {

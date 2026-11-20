@@ -16,26 +16,29 @@ export function setMyDancerName(teamId: string | undefined, name: string) {
   localStorage.setItem(getMyDancerNameKey(teamId), name.trim());
 }
 
-function getUnlockedChoreoKey(choreoId: string, version?: number): string {
-  return `unlocked_${choreoId}_v${version}`;
+// The token the server gave for a choreo's password. It's sent with every download of that choreo,
+// and stays valid until the password changes.
+const getUnlockTokenKey = (choreoId: string) => `unlock_${choreoId}`;
+
+export function setUnlockedChoreo(choreoId: string, token: string | undefined) {
+  if (token) localStorage.setItem(getUnlockTokenKey(choreoId), token);
+  else localStorage.removeItem(getUnlockTokenKey(choreoId));
+  // Flags from before the server checked passwords.
+  Object.keys(localStorage)
+    .filter(key => key.startsWith(`unlocked_${choreoId}_v`))
+    .forEach(key => localStorage.removeItem(key));
+}
+
+export function getChoreoUnlockToken(choreoId: string): string | null {
+  return localStorage.getItem(getUnlockTokenKey(choreoId));
+}
+
+export function checkUnlockedChoreo(choreoId: string): boolean {
+  return getChoreoUnlockToken(choreoId) !== null;
 }
 
 const TRUE = "true";
 const FALSE = "false";
-
-export function setUnlockedChoreo(choreoId: string, version?: number) {
-  localStorage.setItem(getUnlockedChoreoKey(choreoId, version), TRUE);
-
-  if (version) {
-    for (let i = 0; i < version; i++) {
-      localStorage.removeItem(getUnlockedChoreoKey(choreoId, i));
-    }
-  }
-}
-
-export function checkUnlockedChoreo(choreoId: string, version?: number): boolean {
-  return localStorage.getItem(getUnlockedChoreoKey(choreoId, version)) === TRUE;
-}
 
 const THEME = "THEME";
 export function getTheme(): "light" | "dark" {

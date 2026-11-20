@@ -1,4 +1,4 @@
-import { clearSeenVersion, getLastSeenChoreo, getSeenVersion, setLastSeenChoreo, setSeenVersion } from "./LocalStorageController";
+import { checkUnlockedChoreo, clearSeenVersion, getChoreoUnlockToken, getLastSeenChoreo, getSeenVersion, setLastSeenChoreo, setSeenVersion, setUnlockedChoreo } from "./LocalStorageController";
 
 describe("seen version", () => {
   afterEach(() => {
@@ -76,5 +76,28 @@ describe("last seen choreo", () => {
     expect(getLastSeenChoreo()).toBe("b");
     setLastSeenChoreo("team1", undefined);
     expect(getLastSeenChoreo("team1")).toBeNull();
+  });
+});
+
+describe("choreo unlock tokens", () => {
+  afterEach(() => localStorage.clear());
+
+  it("saves and drops a choreo's token", () => {
+    setUnlockedChoreo("c1", "tok");
+    expect(getChoreoUnlockToken("c1")).toBe("tok");
+    expect(checkUnlockedChoreo("c1")).toBe(true);
+    expect(checkUnlockedChoreo("c2")).toBe(false);
+    setUnlockedChoreo("c1", undefined);
+    expect(checkUnlockedChoreo("c1")).toBe(false);
+  });
+
+  it("clears that choreo's old per-version flags", () => {
+    localStorage.setItem("unlocked_c1_v1", "true");
+    localStorage.setItem("unlocked_c1_v2", "true");
+    localStorage.setItem("unlocked_c2_v1", "true");
+    setUnlockedChoreo("c1", "tok");
+    expect(localStorage.getItem("unlocked_c1_v1")).toBeNull();
+    expect(localStorage.getItem("unlocked_c1_v2")).toBeNull();
+    expect(localStorage.getItem("unlocked_c2_v1")).toBe("true");
   });
 });

@@ -1,5 +1,6 @@
 export type ErrorResponse = {
   message: string,
+  code?: string,
 }
 
 export type RosterKind = "dancer" | "prop";
