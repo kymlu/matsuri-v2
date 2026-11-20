@@ -35,8 +35,8 @@ function getActionErrors(liveActions: DancerAction[]): Record<string, ActionErro
     const name = a.name.trim();
     const counts = countNames(a.timings.map(t => t.name));
     return [a.id, {
-      name: !name ? "アクション名が空です" : actionNames[name] > 1 ? "同じアクション名があります" : undefined,
-      counts: counts[""] ? "カウント名が空です" : Object.values(counts).some(n => n > 1) ? "同じカウント名があります" : undefined,
+      name: !name ? "アクション名が空" : actionNames[name] > 1 ? "アクション名が重複" : undefined,
+      counts: counts[""] ? "カウント名が空" : Object.values(counts).some(n => n > 1) ? "カウント名が重複" : undefined,
     }];
   }));
 }
@@ -199,11 +199,10 @@ function SortableActionSection ({
           <span className="block font-semibold truncate">{name || "（名前なし）"}</span>
           {
             errorText
-              ? <span className="block text-sm font-semibold text-primary">{errorText}</span>
-              : <span className="block text-sm truncate text-muted">{liveTimings.map(t => t.name.trim()).join("・")}</span>
+              ? <span className="block text-sm font-semibold truncate text-primary">{errorText}</span>
+              : <span className="block text-sm truncate text-muted">{liveTimings.length}個 · {liveTimings.map(t => t.name.trim()).join("・")}</span>
           }
         </span>
-        <span className="text-sm text-muted whitespace-nowrap">{liveTimings.length}個</span>
         <Icon src="expandMore" size="sm" colour="grey"/>
       </button>
     </div>;
