@@ -103,11 +103,11 @@ export function getPropDefaultsChange(prop: PropLook, rosterName: RosterName): P
   return Object.keys(change).length > 0 ? change : undefined;
 }
 
-// A name's default size as text, e.g. 縦1m × 幅4m, or just the one that's set.
+// A name's default size as text, width first like the stage, e.g. 幅4m × 奥行1m, or just the one that's set.
 export function formatPropSize(size: { length?: number, width?: number }): string {
   return [
-    size.length !== undefined ? `縦${size.length}m` : "",
     size.width !== undefined ? `幅${size.width}m` : "",
+    size.length !== undefined ? `奥行${size.length}m` : "",
   ].filter(x => x !== "").join(" × ");
 }
 

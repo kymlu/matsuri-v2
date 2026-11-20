@@ -122,15 +122,6 @@ export default function EditRosterNameDialog({ teamId, kind, rosterName, list, o
               hasSize &&
               <div className="flex gap-1">
                 <NumberInput
-                  label="縦"
-                  compact
-                  defaultValue={length}
-                  min={MIN_PROP_DIMENSION}
-                  max={MAX_PROP_DIMENSION}
-                  baseStep={0.1}
-                  buttonStep={0.5}
-                  onChange={(value) => setLength(value ?? MIN_PROP_DIMENSION)}/>
-                <NumberInput
                   label="幅"
                   compact
                   defaultValue={width}
@@ -139,6 +130,15 @@ export default function EditRosterNameDialog({ teamId, kind, rosterName, list, o
                   baseStep={0.1}
                   buttonStep={0.5}
                   onChange={(value) => setWidth(value ?? MIN_PROP_DIMENSION)}/>
+                <NumberInput
+                  label="奥行"
+                  compact
+                  defaultValue={length}
+                  min={MIN_PROP_DIMENSION}
+                  max={MAX_PROP_DIMENSION}
+                  baseStep={0.1}
+                  buttonStep={0.5}
+                  onChange={(value) => setLength(value ?? MIN_PROP_DIMENSION)}/>
               </div>
             }
           </div>
