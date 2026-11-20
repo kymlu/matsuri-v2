@@ -1030,7 +1030,7 @@ export default function ChoreoEditPage(props: {
         onSave={onSave}
         editName={openEditChoreoInfoDialog}
         editSize={startStageResize}
-        hideActions={isResizingStage}
+        disableActions={isResizingStage}
         onDownload={openExportDialog}
         showManageDancers={entityCount.dancers > 0}
         manageDancers={openDancerManagerDialog}
