@@ -24,14 +24,12 @@ describe("ActionManagerDialog deleting", () => {
   it("keeps a deleted action until 保存, and undo brings it back", async () => {
     const onSubmit = jest.fn();
     renderDialog(makeSection(), onSubmit);
-    await screen.findByDisplayValue("ジャンプ");
-    // The last trash icon on the page is the second action's.
-    const deletes = screen.getAllByRole("button", { name: "delete" });
-    fireEvent.click(deletes[deletes.length - 1]);
+    fireEvent.click(await screen.findByRole("button", { name: /ジャンプ/ }));
+    fireEvent.click(screen.getByRole("button", { name: "delete" }));
     expect(screen.getByText("ジャンプ")).toHaveClass("line-through");
     fireEvent.click(screen.getByRole("button", { name: "undo" }));
     expect(screen.getByDisplayValue("ジャンプ")).toBeInTheDocument();
-    fireEvent.click(screen.getAllByRole("button", { name: "delete" }).pop()!);
+    fireEvent.click(screen.getByRole("button", { name: "delete" }));
     fireEvent.click(screen.getByRole("button", { name: "保存" }));
     expect(onSubmit).toHaveBeenCalledWith([expect.objectContaining({ id: "a1" })]);
     expect(onSubmit.mock.calls[0][0]).toHaveLength(1);
@@ -41,11 +39,19 @@ describe("ActionManagerDialog deleting", () => {
     const onSubmit = jest.fn();
     renderDialog(makeSection(), onSubmit);
     await screen.findByDisplayValue("ウェーブ");
-    // ウェーブ's counts: 1 and 2, each with a trash icon, then the action's own.
-    fireEvent.click(screen.getAllByRole("button", { name: "delete" })[1]);
+    fireEvent.click(screen.getAllByRole("button", { name: "カウントを削除" })[1]);
     expect(screen.getByText("2")).toHaveClass("line-through");
     fireEvent.click(screen.getByRole("button", { name: "保存" }));
     expect(onSubmit.mock.calls[0][0][0].timings.map((t: { id: string }) => t.id)).toEqual(["t1"]);
+  });
+
+  it("opens one action at a time, starting with the first", async () => {
+    renderDialog(makeSection(), jest.fn());
+    await screen.findByDisplayValue("ウェーブ");
+    expect(screen.queryByDisplayValue("ジャンプ")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /ジャンプ/ }));
+    expect(screen.getByDisplayValue("ジャンプ")).toBeInTheDocument();
+    expect(screen.queryByDisplayValue("ウェーブ")).not.toBeInTheDocument();
   });
 
   it("doesn't change the section it was given when renaming", async () => {
@@ -56,5 +62,12 @@ describe("ActionManagerDialog deleting", () => {
     expect(section.formation.dancerActions[0].name).toBe("ウェーブ");
     fireEvent.click(screen.getByRole("button", { name: "保存" }));
     expect(onSubmit.mock.calls[0][0][0].name).toBe("ウェーブ2");
+  });
+
+  it("shows a duplicate name under its card, on closed cards too", async () => {
+    renderDialog(makeSection(), jest.fn());
+    fireEvent.input(await screen.findByDisplayValue("ウェーブ"), { target: { value: "ジャンプ" } });
+    expect(screen.getAllByText("アクション名が重複")).toHaveLength(2);
+    expect(screen.getByRole("button", { name: "保存" })).toBeDisabled();
   });
 });
