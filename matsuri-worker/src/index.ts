@@ -1343,6 +1343,10 @@ export default {
 		}
 
 		if (url.pathname === "/api/choreos/get-password" && request.method === "POST") {
+			// Only publishing needs the current password, and viewers can't publish.
+			if (session.role === "viewer") {
+				return getErrorResponse("Not permitted to see choreo passwords.", 403);
+			}
 			try {
 				const data = await request.json() as any;
 				// The session's team, not the body's: the session is only checked against the query's team_id.
