@@ -242,7 +242,7 @@ function SortableActionSection ({
     </div>;
   }
 
-  return <div className="relative flex flex-row items-start gap-2 p-4 bg-surface border border-line rounded-md" style={style} ref={setNodeRef}>
+  return <div className="relative flex flex-row items-start gap-1 p-3 bg-surface border border-line rounded-md" style={style} ref={setNodeRef}>
     <div {...attributes} {...listeners}>
       <Icon src="dragHandle"/>
     </div>
@@ -304,14 +304,17 @@ function TimingItem ({
       <IconButton colour="grey" size="sm" noBorder src="undo" disabled={!canRestore} onClick={onToggleDeleted}/>
     </div>;
   }
+  // A fixed width: on its own the input takes the browser's default 20 characters and runs out of the card.
   return <div className="flex items-center gap-0.5">
-    <TextInput 
-      required
-      hasError={timingNames[timing.name.trim()] > 1}
-      maxLength={COUNT_NAME_LENGTH}
-      compact short
-      defaultValue={timing.name}
-      onContentChange={(newName) => {onRenameTiming(newName)}}/>
+    <div className="w-24 shrink-0">
+      <TextInput
+        required
+        hasError={timingNames[timing.name.trim()] > 1}
+        maxLength={COUNT_NAME_LENGTH}
+        short
+        defaultValue={timing.name}
+        onContentChange={(newName) => {onRenameTiming(newName)}}/>
+    </div>
     <Icon size="sm" src="group"/>
     <span>{timing.dancerIds.length}</span>
     {showDeleteButton && <IconButton colour="primary" size="sm" noBorder src="delete" onClick={onToggleDeleted}/>}
