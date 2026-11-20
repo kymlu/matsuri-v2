@@ -200,7 +200,7 @@ function SortableActionSection ({
           {
             errorText
               ? <span className="block text-sm font-semibold truncate text-primary">{errorText}</span>
-              : <span className="block text-sm truncate text-muted">{liveTimings.length}個 · {liveTimings.map(t => t.name.trim()).join("・")}</span>
+              : <span className="block text-sm truncate text-muted">{liveTimings.map(t => t.name.trim()).join("・")}</span>
           }
         </span>
         <Icon src="expandMore" size="sm" colour="grey"/>
