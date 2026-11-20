@@ -14,7 +14,7 @@ type BulkCategoryDialogProps = {
   onApplied: (result: RosterLinksResult) => void,
 }
 
-const SAVE_FAILED = "保存できませんでした。もう一度お試しください";
+const SAVE_FAILED = "保存できませんでした。もう一度お試しください。";
 
 // 区分を追加 / 区分を外す for every selected name at once. Starts with nothing ticked.
 export default function BulkCategoryDialog({ teamId, kind, list, selectedIds, mode, onApplied }: BulkCategoryDialogProps) {

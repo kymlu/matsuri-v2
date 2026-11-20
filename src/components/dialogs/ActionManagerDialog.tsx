@@ -103,10 +103,10 @@ export function ActionManagerDialog({
     const names = liveActions.map(x => x.name.trim());
     const nameSet = new Set(names);
     if (names.length !== nameSet.size) {
-      setErrorMessage("重複のアクション名があります。");
+      setErrorMessage("重複のアクション名があります");
       return false;
     } else if (nameSet.has("")) {
-      setErrorMessage("空のアクション名があります。");
+      setErrorMessage("空のアクション名があります");
       return false;
     }
 
@@ -114,10 +114,10 @@ export function ActionManagerDialog({
       const timingNames = action.timings.map(x => x.name.trim());
       const timingNameSet = new Set(timingNames);
       if (timingNames.length !== timingNameSet.size){
-        setErrorMessage("重複のタイミング名があります。");
+        setErrorMessage("重複のタイミング名があります");
         return false;
       } else if (timingNameSet.has("")) {
-        setErrorMessage("空のタイミング名があります。");
+        setErrorMessage("空のタイミング名があります");
         return false;
       }
     }

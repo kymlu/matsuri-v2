@@ -124,7 +124,7 @@ export default function PublishConfirmationDialog({
             <Tag compact type="filled" text={`v${(oldVersion?.version ?? 0) + 1}`}/>
             {currentVersion.lastUpdated && <span className="text-sm text-muted">最終編集 {getDate(new Date(currentVersion.lastUpdated))}</span>}
           </div> :
-          <p className="font-semibold text-primary">編集はありません。</p>
+          <p className="font-semibold text-primary">編集はありません</p>
         }
         <div className="border-t border-line"/>
         <div>
