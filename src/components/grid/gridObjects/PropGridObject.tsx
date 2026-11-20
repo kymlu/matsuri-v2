@@ -7,7 +7,7 @@ import { METER_PX, PATH_DASH } from "../../../lib/consts/consts";
 import { Prop, PropPosition } from "../../../models/prop";
 import { memo, useCallback, useEffect, useRef } from "react";
 import { PathSvgCacheBySectionId } from "../../../models/choreoSection";
-import StackBadge from "./StackBadge";
+import Badge from "./Badge";
 
 type PropGridObjectProps = {
   prop: Prop;
@@ -163,7 +163,7 @@ const PropGridObject = memo(function PropGridObject({
         }
         {
           stackMark && stackCount !== undefined &&
-          <StackBadge x={prop.width * METER_PX} y={0} radius={METER_PX * 0.235} red={stackMark === "red"} text={`×${stackCount}`}/>
+          <Badge x={prop.width * METER_PX} y={0} radius={METER_PX * 0.235} red={stackMark === "red"} text={`×${stackCount}`}/>
         }
       </BaseGridObject>
     }

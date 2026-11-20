@@ -1,3 +1,4 @@
+import { countBadges } from "../lib/helpers/countBadgeHelper";
 import Header from "../components/editor/Header"
 import FormationSelectionToolbar from "../components/editor/FormationSelectionToolbar";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -51,7 +52,7 @@ export default function ChoreoViewPage(props: {
   const [currentSection, setCurrentSection] = useState<ChoreoSection>(props.currentChoreo.sections[0]);
   const [selectedIds, setSelectedIds] = useState<StageEntities<string[]>>({props: [], dancers: [], obstacles: []});
   const [selectedTimingId, setSelectedTimingId] = useState<string | undefined>();
-  // An action whose counts are all shown on the stage at once (a pill on each dancer). Cleared by any other selection.
+  // The action whose counts all show on the stage (すべて).
   const [shownActionId, setShownActionId] = useState<string | undefined>();
   const [showPaths, setShowPaths] = useState<boolean>(true);
   const [appSettings, setAppSettings] = useState<AppSetting>({
@@ -206,13 +207,11 @@ export default function ChoreoViewPage(props: {
     setShownActionId(action?.id);
   }, [resetSelectedIds]);
 
-  const dancerCountBadges = useMemo(() => {
-    const action = shownActionId ? currentSection.formation.dancerActions.find(a => strEquals(a.id, shownActionId)) : undefined;
-    if (!action) return undefined;
-    const badges: Record<string, { text: string, red: boolean }> = {};
-    action.timings.forEach(timing => timing.dancerIds.forEach(id => { badges[id] = { text: timing.name, red: false }; }));
-    return badges;
-  }, [shownActionId, currentSection.formation.dancerActions]);
+  const dancerCountBadges = useMemo(() => shownActionId ? countBadges(
+    currentSection.formation.dancerActions.find(a => strEquals(a.id, shownActionId)),
+    undefined,
+    currentSection.formation.dancerStacks,
+  ) : undefined, [shownActionId, currentSection.formation.dancerActions, currentSection.formation.dancerStacks]);
 
   const onChangeHeight = useCallback((height: number) => setSidebarHeight(height), []);
 

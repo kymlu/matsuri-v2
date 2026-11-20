@@ -1,3 +1,4 @@
+import { CountBadge } from "../../lib/helpers/countBadgeHelper";
 import { Stage } from "react-konva";
 import GridLayer from "./layers/GridLayer";
 import { memo, useState, useCallback, useEffect, useRef, SetStateAction, useMemo } from "react";
@@ -98,7 +99,7 @@ type MainStageProps = {
   dimPropsAndObstacles?: boolean, // props and obstacles faint, so routes drawn underneath show through
   // Height of a sheet over the bottom; the camera fits the routes above it.
   bottomOverlayHeight?: number,
-  dancerCountBadges?: Record<string, { text: string, red: boolean }>, // count names on dancers while assigning counts
+  dancerCountBadges?: Record<string, CountBadge>,
 }
 
 function MainStage({

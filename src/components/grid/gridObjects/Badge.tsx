@@ -5,11 +5,8 @@ import { colorPalette } from "../../../lib/consts/colors";
 
 const FONT_FAMILY = "'Hiragino Sans','Noto Sans JP','Yu Gothic',sans-serif";
 
-// A small pill on a stage object. Used for "×3" on the top member of a stack (how many are here: grey normally;
-// red when the stack is selected (editor), or when someone hidden in it acts at the chosen count (view)),
-// and for a dancer's count name while assigning counts (red: the count being filled).
-// growLeft: a longer label grows leftward from (x, y) instead of out both sides, so it stays clear of what's to its right.
-export default function StackBadge({ x, y, radius, red, text, growLeft }: { x: number, y: number, radius: number, red?: boolean, text: string, growLeft?: boolean }) {
+// A pill on a stage object: a stack's "×3", or a count name. growLeft keeps long text clear of the right side.
+export default function Badge({ x, y, radius, red, text, growLeft }: { x: number, y: number, radius: number, red?: boolean, text: string, growLeft?: boolean }) {
   const fontSize = radius * 1.4;
   const h = radius * 2;
   // Sized to the text as the device's font actually draws it ("×" is much wider in some Japanese fonts),

@@ -1,3 +1,4 @@
+import { countBadges } from "../lib/helpers/countBadgeHelper";
 import Toolbar from "../components/editor/Toolbar"
 import Header from "../components/editor/Header"
 import FormationSelectionToolbar from "../components/editor/FormationSelectionToolbar";
@@ -267,17 +268,12 @@ export default function ChoreoEditPage(props: {
     } as StageEntities<PropPosition[], DancerPosition[], Obstacle[]>;
   }, [selectedIds, currentSection]);
 
-  // While assigning counts: each dancer's count in the open action, from the saved section (so undo shows too).
-  // Red for the count being filled; no badge means not in any count yet.
-  const dancerCountBadges = useMemo(() => {
-    if (!isAssigningActions || !currentAction) return undefined;
-    const action = currentSection.formation.dancerActions.find(a => strEquals(a.id, currentAction.id));
-    const badges: Record<string, { text: string, red: boolean }> = {};
-    action?.timings.forEach(timing => timing.dancerIds.forEach(id => {
-      badges[id] = { text: timing.name, red: strEquals(timing.id, currentTiming?.id) };
-    }));
-    return badges;
-  }, [isAssigningActions, currentAction, currentTiming?.id, currentSection.formation.dancerActions]);
+  // Read from the saved section, so undo shows too.
+  const dancerCountBadges = useMemo(() => isAssigningActions && currentAction ? countBadges(
+    currentSection.formation.dancerActions.find(a => strEquals(a.id, currentAction.id)),
+    currentTiming?.id,
+    currentSection.formation.dancerStacks,
+  ) : undefined, [isAssigningActions, currentAction, currentTiming?.id, currentSection.formation.dancerActions, currentSection.formation.dancerStacks]);
 
   // ---- Find (by name) ----
   const [findOpen, setFindOpen] = useState(false);
@@ -984,7 +980,7 @@ export default function ChoreoEditPage(props: {
 
   const onAssignActions = useCallback(() => {
     setDimDancers(false);
-    // Opening starts on the first action's first count (the toolbar opens that action), so badges show at once.
+    // Opening starts on the first count.
     const firstAction = isAssigningActions ? undefined : currentSection.formation.dancerActions[0];
     const firstTiming = firstAction?.timings[0];
     setCurrentAction(firstTiming ? firstAction : undefined);

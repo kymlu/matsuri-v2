@@ -31,7 +31,7 @@ type ViewerSidebarProps = {
   stackLine?: (section: ChoreoSection) => string | undefined;
   selectedTiming?: string;
   onSelectTiming: (timing?: DancerActionTiming) => void;
-  // 全員 (first in each action's counts) shows all its counts on the stage at once (one action at a time).
+  // すべて: every count of one action on the stage at once.
   shownActionId?: string;
   onShowAction: (action?: DancerAction) => void;
   actions?: DancerAction[];
@@ -164,7 +164,6 @@ function ViewerSidebar({
                     </span>
                     {/* Timings joined into one strip. The 1px gap shows the background as divider lines, so wrapped rows stay tidy. */}
                     <div className="flex flex-wrap gap-px overflow-hidden border rounded-md w-fit max-w-full bg-line border-line [&>button]:flex-1 [&>button]:rounded-none">
-                      {/* 全員 first: everyone's count in this action on the stage at once, picked like a count. */}
                       <Button
                         noBorder
                         disabled={action.timings.every(t => t.dancerIds.length === 0)}
@@ -173,7 +172,7 @@ function ViewerSidebar({
                         onClick={() => onShowAction(strEquals(shownActionId, action.id) ? undefined : action)}
                         >
                         <div className="px-1 py-1 mx-auto text-center min-w-6 w-max">
-                          全員
+                          すべて
                         </div>
                       </Button>
                       {

@@ -38,9 +38,9 @@ function renderSidebar(props: Partial<Parameters<typeof ViewerSidebar>[0]> = {})
   return { onShowAction, onSelectTiming };
 }
 
-const allButtons = () => screen.getAllByRole("button", { name: "全員" });
+const allButtons = () => screen.getAllByRole("button", { name: "すべて" });
 
-describe("ViewerSidebar 全員", () => {
+describe("ViewerSidebar すべて", () => {
   it("shows the action's counts for everyone when tapped", () => {
     const { onShowAction } = renderSidebar();
     fireEvent.click(allButtons()[0]);

@@ -51,7 +51,6 @@ const ActionSection = memo(function ActionSection ({
     } else {
       ref.current?.scrollIntoView({"behavior": "smooth", "inline": "center"});
       setIsExpanded(true);
-      // Start on the first count, so who's in which count shows on the stage straight away.
       if (action.timings.length > 0) onSelectTiming(action, action.timings[0]);
     }
   }, [isExpanded, onSelectTiming, action]);
