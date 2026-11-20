@@ -9,6 +9,7 @@ import { BulkLookField, countHidden, formatPropSize, getDefaultsSummary, getLink
 import { matchesSearch } from "../lib/helpers/myDancerHelper";
 import { colorPalette } from "../lib/consts/colors";
 import IconButton from "../components/basic/IconButton";
+import RosterNameLabel from "../components/common/RosterNameLabel";
 import { IconLabelButton } from "../components/basic/Button";
 import Icon from "../components/basic/Icon";
 import SelectBox from "../components/basic/SelectBox";
@@ -349,14 +350,7 @@ export default function RosterPage({ goToHomePage, team, tab, onTabChange }: Ros
                     "bg-subtle": isSelecting && selectedIds.has(n.id),
                   })}>
                   {isSelecting && <SelectBox state={selectedIds.has(n.id) ? "all" : "none"}/>}
-                  <span className="font-semibold break-all">{n.name}</span>
-                  {
-                    (n.color || n.length !== undefined || n.width !== undefined) &&
-                    <span className="flex items-center gap-1 text-xs text-muted whitespace-nowrap">
-                      {n.color && <span aria-hidden className="inline-block border rounded-full size-3 border-line" style={{ backgroundColor: n.color }}/>}
-                      {formatPropSize(n)}
-                    </span>
-                  }
+                  <RosterNameLabel name={n.name} size={formatPropSize(n)} color={n.color} showColor={tab === "prop"}/>
                   <span className="flex flex-wrap justify-end flex-1 gap-1">
                     {
                       n.categoryIds.length === 0
