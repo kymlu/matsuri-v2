@@ -11,6 +11,7 @@ import { ChoreoSection, Movement, MovementCacheBySectionIdByObjectId, MovementTy
 import { debounce, indexByKey, isNullOrUndefinedOrBlank, strEquals } from "../lib/helpers/globalHelper";
 import MainStage from "../components/grid/MainStage";
 import { Dialog } from "@base-ui/react";
+import BaseErrorDialog from "../components/dialogs/BaseErrorDialog";
 import FindObjectsDialog from "../components/dialogs/FindObjectsDialog";
 import { useStackEditing } from "../lib/hooks/useStackEditing";
 import { arrangeRepresentatives, copyStacks, CopiedStacks, countSelectedUnits, prepareStackPaste, rearrangeWithStacks, restoreCopiedStacks, moveStacksTogether, normalizeStacks } from "../lib/helpers/stackHelper";
@@ -563,6 +564,7 @@ export default function ChoreoEditPage(props: {
   const [addNoteToSectionDialogOpen, setAddNoteToSectionDialogOpen] = useState(false);
   const [deleteSectionDialogOpen, setDeleteSectionDialogOpen] = useState(false);
   const [publishConfirmationDialogOpen, setPublishConfirmationDialogOpen] = useState(false);
+  const [publishBlockedStatus, setPublishBlockedStatus] = useState<number>(); // why the current password couldn't be read
   const [publishSuccessDialogOpen, setPublishSuccessDialogOpen] = useState(false);
 
   const handleRenameSectionDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
@@ -773,7 +775,7 @@ export default function ChoreoEditPage(props: {
         getChoreoPassword(props.teamId, props.currentChoreo.id, (svrPassword) => {
           setPublishConfirmationDialogOpen(true);
           setPassword(svrPassword);
-        }, () => {}); // todo: on failure
+        }, setPublishBlockedStatus);
       }
     }
   }, [props.teamId, props.currentChoreoStatus, props.currentChoreo.id]);
@@ -1589,6 +1591,17 @@ export default function ChoreoEditPage(props: {
           getChoreo={() => currentStateRef.current}
           svrPassword={password}
         />
+      </Dialog.Root>
+      <Dialog.Root
+        open={publishBlockedStatus !== undefined}
+        onOpenChange={(open) => { if (!open) setPublishBlockedStatus(undefined); }}>
+        <BaseErrorDialog title="公開できません" onClose={() => setPublishBlockedStatus(undefined)}>
+          <p>
+            {publishBlockedStatus === 403
+              ? "公開できるのは、編集者か管理者だけです。"
+              : "処理中に問題が発生しました。もう一度お試しください。"}
+          </p>
+        </BaseErrorDialog>
       </Dialog.Root>
       <Dialog.Root
         open={publishSuccessDialogOpen}
