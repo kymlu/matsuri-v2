@@ -109,3 +109,12 @@ CREATE TABLE roster_name_categories (
 CREATE UNIQUE INDEX roster_names_team_key ON roster_names(team_id, kind, name_key) WHERE deleted = 0;
 CREATE UNIQUE INDEX roster_categories_team_key ON roster_categories(team_id, kind, name_key) WHERE deleted = 0;
 CREATE INDEX roster_name_categories_category ON roster_name_categories(category_id);
+
+CREATE TABLE choreo_unlocks (
+  id         TEXT PRIMARY KEY,
+  choreo_id  TEXT NOT NULL REFERENCES choreos(id) ON DELETE CASCADE,
+  token_hash TEXT NOT NULL UNIQUE,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  expires_at TEXT NOT NULL
+);
+CREATE INDEX choreo_unlocks_choreo ON choreo_unlocks(choreo_id);
