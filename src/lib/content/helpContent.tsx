@@ -458,7 +458,7 @@ export const HELP_ARTICLES: HelpArticle[] = [
       "色は隊列表全体で同じになります。",
     ],
     related: ["roster-use"],
-    keywords: ["道具", "大きさ", "サイズ", "色", "旗"],
+    keywords: ["道具", "小道具", "大道具", "大きさ", "サイズ", "横幅", "奥行き", "縦", "長さ", "寸法", "色", "カラー", "見た目", "旗", "幕", "のぼり"],
   },
   {
     id: "dim-dancers",
@@ -509,7 +509,7 @@ export const HELP_ARTICLES: HelpArticle[] = [
       <><B>保存</B> をタップします。</>,
     ],
     related: ["term-stage-type"],
-    keywords: ["舞台", "大きさ", "サイズ", "広さ", "余白", "奥行", "長さ"],
+    keywords: ["舞台", "大きさ", "サイズ", "広さ", "横幅", "奥行き", "長さ", "余白"],
   },
   {
     id: "undo-save",
@@ -689,7 +689,7 @@ export const HELP_ARTICLES: HelpArticle[] = [
       "名簿を変えても、作成済みの隊列表は変わりません。",
       "道具の名前をタップすると、大きさと色も設定できます。",
     ],
-    keywords: ["名簿", "変更", "削除", "消す", "区分", "大きさ", "色"],
+    keywords: ["名簿", "変更", "削除", "消す", "区分", "道具", "大きさ", "サイズ", "横幅", "奥行き", "色", "見た目"],
   },
   {
     id: "roster-bulk",
@@ -704,7 +704,7 @@ export const HELP_ARTICLES: HelpArticle[] = [
       <>下のバーの <B>区分</B> や <B>大きさ・色</B>、<I src="delete"/> を使います。</>,
       <><B primary>完了</B> で選択を終えます。</>,
     ],
-    keywords: ["名簿", "まとめて", "選択", "区分", "削除"],
+    keywords: ["名簿", "まとめて", "一括", "選択", "区分", "削除", "道具", "大きさ", "サイズ", "色", "見た目"],
   },
   {
     id: "roster-categories",
@@ -902,7 +902,7 @@ export const HELP_ARTICLES: HelpArticle[] = [
     group: "terms",
     title: "道具と障害物",
     summary: "道具は旗や幕など、セクションごとに動かすものです。障害物は柱など動かない物で、動線はありません。",
-    keywords: ["道具", "障害物", "旗", "幕", "柱"],
+    keywords: ["道具", "小道具", "大道具", "障害物", "旗", "幕", "のぼり", "柱", "地方車"],
   },
   {
     id: "term-movement",

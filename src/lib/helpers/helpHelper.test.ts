@@ -96,3 +96,13 @@ describe("search", () => {
     expect(searchHelp("  ")).toEqual({ matches: [], near: [] });
   });
 });
+
+describe("prop size search words", () => {
+  it.each(["幅", "横幅", "奥行", "奥行き", "縦", "寸法", "小道具", "見た目"])("「%s」 finds the prop size article", word => {
+    expect(searchHelp(word).matches.map(a => a.id)).toContain("manage-props");
+  });
+});
+
+it.each(["幅", "奥行", "奥行き"])("「%s」 also finds the stage size article", word => {
+  expect(searchHelp(word).matches.map(a => a.title)).toContain("舞台の大きさを変える");
+});
