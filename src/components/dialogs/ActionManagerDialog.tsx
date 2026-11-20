@@ -154,7 +154,7 @@ type SortableActionSectionProps = {
   deletedIds: Set<string>, // actions and counts marked for deletion
   canRestoreAction: boolean, // false at the 5-action limit
   isOpen: boolean,
-  isNew: boolean, // added in this dialog: starts from a pattern
+  isNew: boolean, // added in this dialog: starts from, and can go back to, the patterns
   onOpen: () => void,
   onClose: () => void,
   onToggleDeleted: (id: string) => void,
@@ -242,7 +242,13 @@ function SortableActionSection ({
           <PatternChooser onPick={(pattern) => setTimings(pattern.counts)} onOwn={() => setTimings(["", ""])}/>
         </>
         : <>
-          <p className="mt-1.5 text-sm font-semibold">カウント <span className="font-normal text-muted">{liveTimings.length}/16</span></p>
+          <div className="flex flex-wrap items-baseline justify-between gap-x-2 mt-1.5">
+            <p className="text-sm font-semibold whitespace-nowrap">カウント <span className="font-normal text-muted">{liveTimings.length}/16</span></p>
+            {
+              isNew &&
+              <button type="button" onClick={() => setTimings([])} className="ml-auto text-sm font-semibold whitespace-nowrap text-primary">パターンを選び直す</button>
+            }
+          </div>
           <div className="grid grid-cols-[repeat(auto-fill,minmax(8rem,1fr))] gap-x-2 gap-y-2 pt-1.5">
             {
               action.timings.map(timing =>

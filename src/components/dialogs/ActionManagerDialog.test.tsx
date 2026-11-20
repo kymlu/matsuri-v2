@@ -116,7 +116,17 @@ describe("ActionManagerDialog count patterns", () => {
     expect(screen.queryByRole("button", { name: /^add\s*カウント$/ })).not.toBeInTheDocument();
   });
 
-  it("自分で入力 gives two empty counts", async () => {
+  it("パターンを選び直す goes straight back to the patterns, even after edits", async () => {
+    renderDialog(makeSection(), jest.fn());
+    await addAction();
+    fireEvent.click(screen.getByRole("button", { name: /^奇数:/ }));
+    fireEvent.input(screen.getByDisplayValue("7"), { target: { value: "8" } });
+    fireEvent.click(screen.getByRole("button", { name: "パターンを選び直す" }));
+    expect(screen.getByRole("button", { name: /^偶数:/ })).toBeInTheDocument();
+    expect(countValues()).toEqual([]);
+  });
+
+    it("自分で入力 gives two empty counts", async () => {
     renderDialog(makeSection(), jest.fn());
     await addAction();
     fireEvent.click(screen.getByRole("button", { name: /自分で入力/ }));
@@ -152,6 +162,7 @@ describe("ActionManagerDialog count patterns", () => {
   it("never offers patterns on a saved action", async () => {
     renderDialog(makeSection(), jest.fn());
     await screen.findByDisplayValue("ウェーブ");
+    expect(screen.queryByRole("button", { name: "パターンを選び直す" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /^奇数:/ })).not.toBeInTheDocument();
   });
 });
