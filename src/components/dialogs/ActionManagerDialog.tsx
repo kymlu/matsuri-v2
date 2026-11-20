@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { DancerAction, DancerActionTiming } from "../../models/dancerAction";
 import { DndContext } from "@dnd-kit/core";
 import { arrayMove, SortableContext, useSortable } from "@dnd-kit/sortable";
@@ -11,9 +11,8 @@ import { ACTION_NAME_LENGTH, COUNT_NAME_LENGTH } from "../../lib/consts/consts";
 import IconButton from "../basic/IconButton";
 import BaseEditDialog from "./BaseEditDialog";
 import { ChoreoSection } from "../../models/choreoSection";
-import { IconLabelButton } from "../basic/Button";
+import Button, { IconLabelButton } from "../basic/Button";
 import classNames from "classnames";
-import Button from "../basic/Button";
 import { COUNT_PATTERNS, CountPattern, isPatternOrBlank, patternPreview } from "../../lib/consts/countPatterns";
 
 type ActionManagerDialogProps = {
@@ -56,8 +55,7 @@ export function ActionManagerDialog({
   const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set());
   // One action open at a time keeps the list short enough to drag.
   const [openId, setOpenId] = useState<string | undefined>();
-  // Added in this dialog and not saved yet: only these can start from a pattern.
-  // Kept here, not in the card, because a card unmounts when another one opens.
+  // Unsaved actions added here; kept here because a closed card unmounts.
   const [newIds, setNewIds] = useState<Set<string>>(new Set());
   const toggleDeleted = (id: string) => setDeletedIds(prev => {
     const next = new Set(prev);
@@ -77,16 +75,15 @@ export function ActionManagerDialog({
   const errors = useMemo(() => getActionErrors(liveActions), [liveActions]);
   const canSubmit = Object.values(errors).every(e => !e.name && !e.counts);
 
-  const reset = () => {
+  const reset = useCallback(() => {
     setDeletedIds(new Set());
     setNewIds(new Set());
     setActions([...section.formation.dancerActions]);
     setOpenId(section.formation.dancerActions[0]?.id);
-  };
+  }, [section]);
 
-  useEffect(reset, [section]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(reset, [reset]);
 
-  // No counts yet: the card asks for a pattern or 自分で入力 first.
   const addAction = () => {
     const id = crypto.randomUUID();
     setOpenId(id);
@@ -167,7 +164,6 @@ type SortableActionSectionProps = {
 function SortableActionSection ({
   action, errors, deletedIds, canRestoreAction, isOpen, isNew, onOpen, onClose, onToggleDeleted, onUpdate,
 }: SortableActionSectionProps) {
-  // Asking before 「パターンを選び直す」 throws counts away.
   const [isConfirmingRepick, setIsConfirmingRepick] = useState(false);
   const {
     attributes,
@@ -191,7 +187,6 @@ function SortableActionSection ({
     onUpdate(a => ({ ...a, timings: names.map(name => ({ ...newTiming(), name })) }));
   };
   const repick = () => {
-    // Nothing is lost when the counts are still a pattern, or all blank.
     if (isPatternOrBlank(liveTimings.map(t => t.name))) {
       setTimings([]);
     } else {
@@ -314,10 +309,9 @@ function PatternChooser({ onPick, onOwn }: { onPick: (pattern: CountPattern) => 
           <button
             type="button"
             key={pattern.name}
-            // The button shows a short preview; the label lists every count.
             aria-label={`${pattern.name}: ${pattern.counts.join(" ")}`}
             onClick={() => onPick(pattern)}
-            className="flex flex-wrap items-baseline content-center min-w-0 px-2 py-1 border rounded-md text-start min-h-11 gap-x-1.5 bg-surface border-line-strong">
+            className="flex flex-wrap items-baseline content-center min-w-0 px-2 py-1 border rounded-md text-start min-h-11 gap-x-1 bg-surface border-line-strong">
             <span className="font-semibold">{pattern.name}</span>
             <span className="text-xs whitespace-nowrap text-muted">{patternPreview(pattern)}</span>
           </button>
