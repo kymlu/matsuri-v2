@@ -6,7 +6,7 @@ import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "r
 import { historyReducer } from "../lib/editor/historyReducer";
 import { BasicChoreoDetails, Choreo, EventDetails, getBasicChoreoDetails } from "../models/choreo";
 import { EditHistory, StageEntities } from "../models/history";
-import { addSection, assignDancersToTiming, duplicateSection, editDancerActions, editSectionNote, removeSection, renameSection, reorderSections } from "../lib/editor/commands/sectionCommands";
+import { addSection, assignDancersToTiming, duplicateSection, newSectionName, editDancerActions, editSectionNote, removeSection, renameSection, reorderSections } from "../lib/editor/commands/sectionCommands";
 import { ChoreoSection, Movement, MovementCacheBySectionIdByObjectId, MovementType, PathSvgCacheByObjectIdBySectionId } from "../models/choreoSection";
 import { debounce, indexByKey, isNullOrUndefinedOrBlank, strEquals } from "../lib/helpers/globalHelper";
 import MainStage from "../components/grid/MainStage";
@@ -64,6 +64,7 @@ const propManagerDialog = Dialog.createHandle<string>();
 const NO_SELECTION = { dancers: [] as string[], props: [] as string[], obstacles: [] as string[] };
 const propSizeDialog = Dialog.createHandle<string>();
 const renameSectionDialog = Dialog.createHandle<ChoreoSection>();
+const newSectionDialog = Dialog.createHandle<{}>();
 const addNoteToSectionDialog = Dialog.createHandle<ChoreoSection>();
 const deleteSectionDialog = Dialog.createHandle<ChoreoSection>();
 const publishConfirmationDialog = Dialog.createHandle<null>();
@@ -561,6 +562,8 @@ export default function ChoreoEditPage(props: {
   const [propManagerDialogOpen, setPropManagerDialogOpen] = useState(false);
   const [propSizeDialogOpen, setPropSizeDialogOpen] = useState(false);
   const [renameSectionDialogOpen, setRenameSectionDialogOpen] = useState(false);
+  // The id of a section being added: it's only created once it's named, so キャンセル leaves nothing behind.
+  const [newSectionId, setNewSectionId] = useState<string>();
   const [addNoteToSectionDialogOpen, setAddNoteToSectionDialogOpen] = useState(false);
   const [deleteSectionDialogOpen, setDeleteSectionDialogOpen] = useState(false);
   const [publishConfirmationDialogOpen, setPublishConfirmationDialogOpen] = useState(false);
@@ -1131,7 +1134,8 @@ export default function ChoreoEditPage(props: {
                 sections={history.presentState.state.sections}
                 showAddButton
                 onClickAddButton={(id: string) => {
-                  commitState(addSection(history.presentState.state, id), id);
+                  resetSelectedIds();
+                  setNewSectionId(id);
                 }}
                 onChangeSection={(section) => {
                   setCurrentSection(section);
@@ -1526,6 +1530,22 @@ export default function ChoreoEditPage(props: {
             commitState(renameSection(history.presentState.state, currentSection.id, name));
             renameSectionDialog.close();
             setRenameSectionDialogOpen(false);
+          }}/>
+      </Dialog.Root>
+      <Dialog.Root
+        handle={newSectionDialog}
+        open={!!newSectionId}
+        onOpenChange={(isOpen) => { if (!isOpen) setNewSectionId(undefined); }}>
+        <EditNameDialog
+          isOpen={!!newSectionId}
+          name={newSectionName(history.presentState.state)}
+          type="セクション"
+          title="セクション追加"
+          actionButtonText="追加"
+          onSubmit={(name) => {
+            if (!newSectionId) return;
+            commitState(addSection(history.presentState.state, newSectionId, name), newSectionId);
+            setNewSectionId(undefined);
           }}/>
       </Dialog.Root>
       <Dialog.Root

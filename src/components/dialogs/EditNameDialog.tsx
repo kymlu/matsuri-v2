@@ -12,6 +12,8 @@ type EditNameDialogProps = {
   required?: boolean,
   type: "道具" | "隊列表" | "イベント" | "セクション" | "障害物",
   onSubmit: (name: string, look?: Partial<PropLook>) => void,
+  title?: string, // defaults to 「<type>名」
+  actionButtonText?: string,
   onClose?: () => void,
   // Props only. This component stays mounted while closed, so it resets each time it opens.
   isOpen?: boolean,
@@ -25,7 +27,7 @@ type EditNameDialogProps = {
 }
 
 export default function EditNameDialog({
-  name, required = true, type, onSubmit, onClose,
+  name, required = true, type, onSubmit, title, actionButtonText, onClose,
   isOpen, roster, isPickerOpen = true, onPickerOpenChange, pickerFilter = "all", onPickerFilterChange, prop,
 }: EditNameDialogProps) {
   const [newName, setNewName] = useState("");
@@ -55,7 +57,8 @@ export default function EditNameDialog({
   [prop, pickedName]);
 
   return <BaseEditDialog
-    title={`${type}名`}
+    title={title ?? `${type}名`}
+    actionButtonText={actionButtonText}
     // On a phone, focusing the input would open the keyboard over the names you came to pick.
     initialFocus={showPicker && isPickerOpen ? (openType) => openType !== "touch" : undefined}
     onSubmit={() => { onSubmit(newName.trim(), lookChange && isApplyingLook ? lookChange : undefined) }}

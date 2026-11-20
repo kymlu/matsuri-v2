@@ -48,6 +48,10 @@ describe("addSection", () => {
     expect(before.sections[0].formation.dancerPositions.d1.sectionId).toBe("s1");
     expect(added.formation.dancerPositions.d1).not.toBe(before.sections[0].formation.dancerPositions.d1);
   });
+
+  it("uses the name given", () => {
+    expect(addSection(makeChoreo(), "s2", "間奏").sections[1]).toMatchObject({ id: "s2", name: "間奏" });
+  });
 });
 
 describe("duplicateSection", () => {
