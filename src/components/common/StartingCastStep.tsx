@@ -5,6 +5,7 @@ import { sortRosterNames, formatPropSize } from "../../lib/helpers/rosterHelper"
 import { matchesSearch } from "../../lib/helpers/myDancerHelper";
 import { SEARCH_NAME_LENGTH } from "../../lib/consts/consts";
 import NumberInput from "../inputs/NumberInput";
+import RosterNameLabel from "./RosterNameLabel";
 import TextInput from "../inputs/TextInput";
 import { ChipFilter } from "../inputs/Chips";
 import Icon from "../basic/Icon";
@@ -240,23 +241,19 @@ function PropList({ list, counts, onChange }: { list: RosterList, counts: [strin
       {
         names.map(n => {
           const count = countById.get(n.id);
-          const details = <>
-            <span aria-hidden className="inline-block border rounded-full shrink-0 size-3 border-line" style={{ backgroundColor: n.color }}/>
-            <span className="font-semibold break-all">{n.name}</span>
-            <span className="text-xs text-muted whitespace-nowrap">{formatPropSize(n)}</span>
-          </>;
+          const details = <RosterNameLabel name={n.name} size={formatPropSize(n)} color={n.color} showColor className="flex-1"/>;
           return <li key={n.id} className={classNames("border-b border-subtle", { "bg-subtle": count !== undefined })}>
             {
               count === undefined
                 // Before it's picked, the whole row adds one.
                 ? <button type="button" onClick={() => setCount(n.id, 1)} className="flex items-center w-full gap-2 px-1 py-1.5 text-left">
                   {details}
-                  <span className="flex items-center ml-auto text-sm font-semibold text-primary whitespace-nowrap"><Icon src="add" size="xs" colour="primary"/>追加</span>
+                  <span className="flex items-center text-sm font-semibold shrink-0 text-primary whitespace-nowrap"><Icon src="add" size="xs" colour="primary"/>追加</span>
                 </button>
                 // After, only the counter changes it.
                 : <div className="flex items-center w-full gap-2 px-1 py-1">
                   {details}
-                  <div className="ml-auto w-36">
+                  <div className="shrink-0 w-28">
                     <NumberInput
                       compact
                       defaultValue={count}
