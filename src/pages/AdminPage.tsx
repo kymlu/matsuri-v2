@@ -51,7 +51,7 @@ export default function AdminPage({
     }
   }
   
-  return <div className="w-full px-4 grid grid-rows-[auto,1fr] py-10 gap-4 text-center overflow-hide bg-app h-[100svh]">
+  return <div className="w-full px-4 grid grid-rows-[auto,1fr] pt-4 pb-6 gap-4 text-center overflow-hide bg-app h-[100svh]">
     <header className="flex items-center gap-2">
       <IconButton
         src="home"

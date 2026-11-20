@@ -217,7 +217,7 @@ export default function RosterPage({ goToHomePage, team, tab, onTabChange }: Ros
 
   return <div className="bg-app h-[100svh]">
     <div className="w-full max-w-full h-full grid grid-cols-[minmax(0,1fr)] grid-rows-[auto,minmax(0,1fr),auto] overflow-hidden">
-      <div className="px-4 pt-10 space-y-2">
+      <div className="px-4 pt-4 space-y-2">
         <header className="flex items-center gap-2">
           <IconButton src="home" noBorder onClick={goToHomePage}/>
           <div className="flex-1 min-w-0 text-start">

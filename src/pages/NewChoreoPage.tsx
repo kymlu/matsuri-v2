@@ -199,7 +199,7 @@ export function NewChoreoPage({
   return (
     <div className="flex flex-col h-[100svh] bg-app">
       {/* Left-aligned with a small line above, like the other pages' headers. */}
-      <header className="px-4 pt-10 pb-2 text-start">
+      <header className="px-4 pt-4 pb-2 text-start">
         <div className="text-sm text-primary">
           <b>新規作成</b><span>（{step}/3）</span>
         </div>
