@@ -154,19 +154,6 @@ export function PropManagerDialog({
                   </div>
                   <div className="flex gap-1 mt-1 md:mt-0">
                     <NumberInput
-                      label="縦"
-                      compact
-                      ref={(r) => {lengthInputRefs.current.set(prop.id, r);}}
-                      defaultValue={prop.length}
-                      min={MIN_PROP_DIMENSION}
-                      max={MAX_PROP_DIMENSION}
-                      baseStep={0.1}
-                      buttonStep={0.5}
-                      onChange={(number) => {
-                        setPropList(prev => prev.map((p, index) => index === i ? { ...p, length: number ?? MIN_PROP_DIMENSION } : p));
-                      }}
-                    />
-                    <NumberInput
                       label="幅"
                       compact
                       ref={(r) => {widthInputRefs.current.set(prop.id, r);}}
@@ -177,6 +164,19 @@ export function PropManagerDialog({
                       buttonStep={0.5}
                       onChange={(number) => {
                         setPropList(prev => prev.map((p, index) => index === i ? { ...p, width: number ?? MIN_PROP_DIMENSION } : p));
+                      }}
+                    />
+                    <NumberInput
+                      label="奥行"
+                      compact
+                      ref={(r) => {lengthInputRefs.current.set(prop.id, r);}}
+                      defaultValue={prop.length}
+                      min={MIN_PROP_DIMENSION}
+                      max={MAX_PROP_DIMENSION}
+                      baseStep={0.1}
+                      buttonStep={0.5}
+                      onChange={(number) => {
+                        setPropList(prev => prev.map((p, index) => index === i ? { ...p, length: number ?? MIN_PROP_DIMENSION } : p));
                       }}
                     />
                 </div>

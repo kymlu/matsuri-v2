@@ -94,7 +94,7 @@ describe("props", () => {
   });
 
   it("formats a size, or the part that's set", () => {
-    expect(formatPropSize({ length: 1, width: 4 })).toBe("縦1m × 幅4m");
+    expect(formatPropSize({ length: 1, width: 4 })).toBe("幅4m × 奥行1m");
     expect(formatPropSize({ width: 4 })).toBe("幅4m");
     expect(formatPropSize({})).toBe("");
   });
