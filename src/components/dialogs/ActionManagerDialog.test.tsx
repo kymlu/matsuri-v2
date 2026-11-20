@@ -63,4 +63,11 @@ describe("ActionManagerDialog deleting", () => {
     fireEvent.click(screen.getByRole("button", { name: "保存" }));
     expect(onSubmit.mock.calls[0][0][0].name).toBe("ウェーブ2");
   });
+
+  it("shows a duplicate name under its card, on closed cards too", async () => {
+    renderDialog(makeSection(), jest.fn());
+    fireEvent.input(await screen.findByDisplayValue("ウェーブ"), { target: { value: "ジャンプ" } });
+    expect(screen.getAllByText("同じアクション名があります")).toHaveLength(2);
+    expect(screen.getByRole("button", { name: "保存" })).toBeDisabled();
+  });
 });
