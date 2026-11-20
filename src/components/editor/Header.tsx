@@ -17,7 +17,7 @@ import { isNullOrUndefinedOrBlank } from "../../lib/helpers/globalHelper";
 type HeaderProps = {
   returnHome: () => void;
   hasSidebar?: boolean;
-  hideActions?: boolean; // keeps the header's height while the stage is being previewed
+  disableActions?: boolean; // while the stage is being previewed
   currentChoreo: Choreo;
   onSave?: () => void;
   onDownload?: () => void;
@@ -64,20 +64,19 @@ function Header({
   goToEdit, goToView,
   toggleShowPath, showPath, isShowPathBtnDisabled,
   dancerCount, propCount, stageLength, stageWidth, stageType, version, choreoStatus,
-  showPublish, publish, hideActions,
+  showPublish, publish, disableActions,
 }: HeaderProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return <header className="flex items-center gap-3 px-3 py-2 border-b-2 select-none border-subtle bg-surface">
-      <div className={hideActions ? "invisible" : undefined}>
-        <IconButton
-          src="home"
-          noBorder
-          onClick={() => {
-            onSave?.();
-            returnHome();
-          }}/>
-      </div>
+      <IconButton
+        src="home"
+        noBorder
+        disabled={disableActions}
+        onClick={() => {
+          onSave?.();
+          returnHome();
+        }}/>
       <div className="flex-1 min-w-0" onDoubleClick={downloadLogs}>
         {
           !isNullOrUndefinedOrBlank(currentChoreo.event) &&
@@ -88,13 +87,14 @@ function Header({
           <ChoreoStatusTag compact choreoStatus={choreoStatus} version={version}/>
         </div>
       </div>
-      <div className={"flex justify-end gap-3" + (hideActions ? " invisible" : "")}>
+      <div className={"flex justify-end gap-3" + (disableActions ? " pointer-events-none" : "")}>
         {
           (goToEdit || goToView) &&
           <IconButton
             colour="black"
             src={goToEdit ? "edit" : "visibility"}
             noBorder
+            disabled={disableActions}
             onClick={() => {
               if (goToEdit) {
                 goToEdit();
@@ -110,7 +110,7 @@ function Header({
             src="step"
             noBorder
             onClick={toggleShowPath}
-            disabled={isShowPathBtnDisabled}
+            disabled={isShowPathBtnDisabled || disableActions}
             crossedOut={showPath}
             vertFlip
             />
@@ -121,6 +121,7 @@ function Header({
             <IconButton
               src="download"
               noBorder
+              disabled={disableActions}
               asDiv/>
           }>
             <div className="space-y-2">
@@ -136,15 +137,16 @@ function Header({
         }
         {
           onDownload && !exportChoreo &&
-          <IconButton noBorder src="pictureAsPdf" onClick={onDownload}/>
+          <IconButton noBorder src="pictureAsPdf" disabled={disableActions} onClick={onDownload}/>
         }
         {
           hasSidebar &&
           <Dialog.Root open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
-            <Dialog.Trigger>
+            <Dialog.Trigger disabled={disableActions}>
               <IconButton
                 src="settings"
                 noBorder
+                disabled={disableActions}
                 asDiv/>
             </Dialog.Trigger>
             <Sidebar
