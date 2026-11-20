@@ -395,8 +395,9 @@ export const getChoreoPassword = async (
       onSuccess(data.password);
     }
   } catch (e: any) {
-    console.error("login failed:", (e as Error)?.message);
-    throw e;
+    // No response at all (offline, or the server couldn't be reached).
+    console.error("getChoreoPassword failed:", (e as Error)?.message);
+    onFailure(0);
   }
 }
 
