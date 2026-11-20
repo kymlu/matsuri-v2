@@ -12,6 +12,7 @@ import IconButton from "../basic/IconButton";
 import BaseEditDialog from "./BaseEditDialog";
 import { ChoreoSection } from "../../models/choreoSection";
 import { IconLabelButton } from "../basic/Button";
+import classNames from "classnames";
 
 type ActionManagerDialogProps = {
   section: ChoreoSection,
@@ -26,6 +27,8 @@ export function ActionManagerDialog({
   const [errorMessage, setErrorMessage] = useState<string | null>();
   // Marked for deletion; they stay, struck through, until 保存 so they can be brought back.
   const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set());
+  // One action open at a time keeps the list short enough to drag.
+  const [openId, setOpenId] = useState<string | undefined>();
   const toggleDeleted = (id: string) => setDeletedIds(prev => {
     const next = new Set(prev);
     if (next.has(id)) {
@@ -43,11 +46,14 @@ export function ActionManagerDialog({
 
   useEffect(() => {
     setActions([...section.formation.dancerActions]);
+    setOpenId(section.formation.dancerActions[0]?.id);
   }, [section]);
 
   const addAction = () => {
+    const id = crypto.randomUUID();
+    setOpenId(id);
     setActions(prev => [...prev, {
-      id: crypto.randomUUID(),
+      id,
       name: "",
       timings: [
         {id: crypto.randomUUID(), name: "", dancerIds: []},
@@ -134,6 +140,7 @@ export function ActionManagerDialog({
     onClose={() => {
       setDeletedIds(new Set());
       setActions([...section.formation.dancerActions]);
+      setOpenId(section.formation.dancerActions[0]?.id);
     }}
     onSubmit={() => {onSubmit(liveActions)}}>
     <div className="h-full max-h-full grid gap-2 grid-rows-[1fr,auto]">
@@ -168,6 +175,9 @@ export function ActionManagerDialog({
                     actionNames={actionNames}
                     deletedIds={deletedIds}
                     canRestoreAction={liveActions.length < 5}
+                    isOpen={openId === action.id}
+                    onOpen={() => setOpenId(action.id)}
+                    onClose={() => setOpenId(undefined)}
                     onToggleDeleted={toggleDeleted}
                     // New objects, never edits of the old ones: those belong to the chart's saved state.
                     onRenameAction={(name) => {
@@ -194,6 +204,9 @@ type SortableActionSectionProps = {
   actionNames: Record<string, number>,
   deletedIds: Set<string>, // actions and counts marked for deletion
   canRestoreAction: boolean, // false at the 5-action limit
+  isOpen: boolean,
+  onOpen: () => void,
+  onClose: () => void,
   onToggleDeleted: (id: string) => void,
   onRenameAction: (name: string) => void,
   onAddTiming: () => void,
@@ -201,7 +214,7 @@ type SortableActionSectionProps = {
 }
 
 function SortableActionSection ({
-  action, actionNames, deletedIds, canRestoreAction, onToggleDeleted,
+  action, actionNames, deletedIds, canRestoreAction, isOpen, onOpen, onClose, onToggleDeleted,
   onRenameAction, onAddTiming, onRenameTiming,
 }: SortableActionSectionProps) {
   const {
@@ -232,6 +245,10 @@ function SortableActionSection ({
     , {} as Record<string, number>));
   }, [action, deletedIds]);
 
+  const dragHandle = <div {...attributes} {...listeners} className="shrink-0">
+    <Icon src="dragHandle"/>
+  </div>;
+
   if (deletedIds.has(action.id)) {
     // Greyed and struck through, with undo in place of the trash icon.
     return <div className="relative flex flex-row items-center gap-2 px-4 py-3 border border-dashed rounded-md bg-surface border-line" style={style} ref={setNodeRef}>
@@ -242,46 +259,70 @@ function SortableActionSection ({
     </div>;
   }
 
-  return <div className="relative flex flex-row items-start gap-1 p-3 bg-surface border border-line rounded-md" style={style} ref={setNodeRef}>
-    <div {...attributes} {...listeners}>
-      <Icon src="dragHandle"/>
-    </div>
-    <div className="flex-1">
-      <TextInput
-        required
-        hasError={actionNames[action.name.trim()] > 1}
-        maxLength={ACTION_NAME_LENGTH}
-        label="アクション名"
-        defaultValue={action.name}
-        onContentChange={(newName) => {onRenameAction(newName)}}/>
-      <span className="font-semibold">カウント（重複不可）</span>
-      <div className="flex flex-wrap gap-4">
-        {
-          action.timings.map((timing, i) => 
-            <TimingItem
-              key={timing.id}
-              timing={timing}
-              timingNames={timingNames}
-              isDeleted={deletedIds.has(timing.id)}
-              canRestore={liveTimings.length < 16}
-              onRenameTiming={(name) => {
-                onRenameTiming(action.timings.map((t, index) => index === i ? { ...t, name } : t));
-              }}
-              onToggleDeleted={() => onToggleDeleted(timing.id)}
-              // An action keeps at least one count, but a deleted one can always come back.
-              showDeleteButton={liveTimings.length > 1}
-              />
-          )
-        }
-        {
-          liveTimings.length < 16 &&
-          <IconButton onClick={onAddTiming} src="add" size="sm"/>
-        }
+  if (!isOpen) {
+    // A closed card still shows its problems, so 保存 being greyed out can be traced.
+    const name = action.name.trim();
+    const hasError = !name || actionNames[name] > 1
+      || liveTimings.some(t => !t.name.trim() || timingNames[t.name.trim()] > 1);
+    return <div
+      className={classNames("flex items-center gap-1.5 px-3 py-2 border rounded-md bg-surface", hasError ? "border-primary" : "border-line")}
+      style={style}
+      ref={setNodeRef}>
+      {dragHandle}
+      <button type="button" onClick={onOpen} className="flex items-center flex-1 min-w-0 gap-2 text-start">
+        <span className="flex-1 min-w-0">
+          <span className="block font-semibold truncate">{name || "（名前なし）"}</span>
+          <span className="block text-sm truncate text-muted">{liveTimings.map(t => t.name.trim() || "？").join("・")}</span>
+        </span>
+        <span className="text-sm text-muted whitespace-nowrap">{liveTimings.length}個</span>
+        <Icon src="expandMore" size="sm" colour="grey"/>
+      </button>
+    </div>;
+  }
+
+  return <div className="px-2 py-3 border rounded-md bg-surface border-line" style={style} ref={setNodeRef}>
+    <div className="flex items-center gap-1">
+      {dragHandle}
+      <div className="flex-1 min-w-0">
+        <TextInput
+          required
+          hasError={actionNames[action.name.trim()] > 1}
+          maxLength={ACTION_NAME_LENGTH}
+          placeholder="アクション名"
+          defaultValue={action.name}
+          onContentChange={(newName) => {onRenameAction(newName)}}/>
       </div>
-    </div>
-    <div className="absolute top-2 right-2">
       <IconButton size="sm" colour="primary" noBorder src="delete" onClick={() => onToggleDeleted(action.id)}/>
     </div>
+    <p className="mt-1.5 text-sm font-semibold">カウント <span className="font-normal text-muted">{liveTimings.length}/16</span></p>
+    <div className="grid grid-cols-[repeat(auto-fill,minmax(8rem,1fr))] gap-x-2 gap-y-2 pt-1.5">
+      {
+        action.timings.map((timing, i) =>
+          <TimingItem
+            key={timing.id}
+            timing={timing}
+            timingNames={timingNames}
+            isDeleted={deletedIds.has(timing.id)}
+            canRestore={liveTimings.length < 16}
+            onRenameTiming={(name) => {
+              onRenameTiming(action.timings.map((t, index) => index === i ? { ...t, name } : t));
+            }}
+            onToggleDeleted={() => onToggleDeleted(timing.id)}
+            // An action keeps at least one count, but a deleted one can always come back.
+            showDeleteButton={liveTimings.length > 1}
+            />
+        )
+      }
+      {
+        liveTimings.length < 16 &&
+        <button type="button" onClick={onAddTiming} className="flex items-center justify-center h-10 gap-0.5 text-sm border border-dashed rounded-md border-line-strong text-muted">
+          <Icon src="add" size="xs" colour="grey"/>カウント
+        </button>
+      }
+    </div>
+    <button type="button" onClick={onClose} className="flex items-center justify-center w-full gap-0.5 pt-2 text-sm font-semibold text-primary">
+      <Icon src="expandLess" size="xs" colour="primary"/>閉じる
+    </button>
   </div>
 }
 
@@ -299,24 +340,31 @@ function TimingItem ({
   timing, timingNames, isDeleted, canRestore, onRenameTiming, onToggleDeleted, showDeleteButton}: TimingItemProps
 ) {
   if (isDeleted) {
-    return <div className="flex items-center gap-0.5">
-      <span className="px-2 py-1.5 line-through border border-dashed rounded-md text-muted border-line">{timing.name.trim() || "（名前なし）"}</span>
+    return <div className="flex items-center min-w-0 gap-0.5">
+      <span className="flex-1 min-w-0 px-2 py-2 truncate line-through border border-dashed rounded-md text-muted border-line">{timing.name.trim() || "（名前なし）"}</span>
       <IconButton colour="grey" size="sm" noBorder src="undo" disabled={!canRestore} onClick={onToggleDeleted}/>
     </div>;
   }
-  // A fixed width: on its own the input takes the browser's default 20 characters and runs out of the card.
-  return <div className="flex items-center gap-0.5">
-    <div className="w-24 shrink-0">
+  return <div className="flex items-center min-w-0 gap-0.5">
+    <div className="relative flex-1 min-w-0">
       <TextInput
         required
         hasError={timingNames[timing.name.trim()] > 1}
         maxLength={COUNT_NAME_LENGTH}
-        short
         defaultValue={timing.name}
         onContentChange={(newName) => {onRenameTiming(newName)}}/>
+      {
+        showDeleteButton &&
+        <button
+          type="button"
+          aria-label="カウントを削除"
+          onClick={onToggleDeleted}
+          className="absolute flex items-center justify-center border rounded-full -top-2 -right-2 size-5 bg-surface border-line">
+          <Icon src="clear" size="2xs" colour="grey"/>
+        </button>
+      }
     </div>
-    <Icon size="sm" src="group"/>
-    <span>{timing.dancerIds.length}</span>
-    {showDeleteButton && <IconButton colour="primary" size="sm" noBorder src="delete" onClick={onToggleDeleted}/>}
+    <Icon size="2xs" src="group" colour="grey"/>
+    <span className="text-sm">{timing.dancerIds.length}</span>
   </div>
 }
