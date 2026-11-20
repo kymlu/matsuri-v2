@@ -200,6 +200,16 @@ describe("ActionManagerDialog error timing", () => {
     expect(screen.getByText("カウント名が空")).toBeInTheDocument();
   });
 
+  it("shows duplicate counts at once, even next to a blank one", async () => {
+    renderDialog(makeSection(), jest.fn());
+    await addAction();
+    fireEvent.click(screen.getByRole("button", { name: /自分で入力/ }));
+    fireEvent.click(screen.getByRole("button", { name: /^add\s*カウント$/ }));
+    fireEvent.input(countInputs()[0], { target: { value: "1" } });
+    fireEvent.input(countInputs()[1], { target: { value: "1" } });
+    expect(screen.getByText("カウント名が重複")).toBeInTheDocument();
+  });
+
   it("shows duplicates at once on a new action", async () => {
     renderDialog(makeSection(), jest.fn());
     await addAction();

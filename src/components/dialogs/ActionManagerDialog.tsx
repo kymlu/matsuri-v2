@@ -39,9 +39,10 @@ function getActionErrors(liveActions: DancerAction[]): Record<string, ActionErro
     const counts = countNames(a.timings.map(t => t.name));
     return [a.id, {
       name: !name ? NAME_BLANK : actionNames[name] > 1 ? "アクション名が重複" : undefined,
+      // Duplicates first: they show at once, blanks can wait.
       counts: a.timings.length === 0 ? "カウントがありません"
+        : Object.entries(counts).some(([name, n]) => name && n > 1) ? "カウント名が重複"
         : counts[""] ? COUNT_BLANK
-        : Object.values(counts).some(n => n > 1) ? "カウント名が重複"
         : undefined,
     }];
   }));
@@ -199,7 +200,7 @@ function SortableActionSection ({
 
   const setTimings = (names: string[]) =>
     onUpdate(a => ({ ...a, timings: names.map(name => ({ ...newTiming(), name })) }));
-  // The closed card always says why; the open one waits on blanks (see showBlankName).
+  // The closed card shows every error; the open one can still be waiting on blanks.
   const errorText = errors.name ?? errors.counts;
   const nameError = errors.name === NAME_BLANK && !showBlankName ? undefined : errors.name;
   const countError = isChoosing || (errors.counts === COUNT_BLANK && !showBlankCount) ? undefined : errors.counts;
@@ -337,7 +338,7 @@ function PatternChooser({ onPick, onOwn }: { onPick: (pattern: CountPattern) => 
 type TimingItemProps = {
   timing: DancerActionTiming,
   timingNames: Record<string, number>,
-  showBlank: boolean, // a blank name is shown as an error
+  showBlank: boolean, // a blank count is shown as an error
   onLeaveBlank: () => void,
   isDeleted: boolean,
   canRestore: boolean, // false at the 16-count limit
