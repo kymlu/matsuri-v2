@@ -181,7 +181,6 @@ function SortableActionSection ({
     return <div className="relative flex flex-row items-center gap-2 px-4 py-3 border border-dashed rounded-md bg-surface border-line" style={style} ref={setNodeRef}>
       <span className="opacity-30"><Icon src="dragHandle"/></span>
       <span className="flex-1 min-w-0 line-through break-all text-muted">{action.name.trim() || "（名前なし）"}</span>
-      <span className="text-xs text-muted whitespace-nowrap">カウント{liveTimings.length}個</span>
       <IconButton size="sm" colour="grey" noBorder src="undo" disabled={!canRestoreAction} onClick={() => onToggleDeleted(action.id)}/>
     </div>;
   }
