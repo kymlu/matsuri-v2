@@ -98,7 +98,7 @@ describe("search", () => {
 });
 
 describe("prop size search words", () => {
-  it.each(["幅", "横幅", "奥行", "奥行き", "縦", "寸法", "小道具", "見た目"])("「%s」 finds the prop size article", word => {
+  it.each(["幅", "横幅", "奥行", "奥行き", "縦", "寸法", "小道具", "見た目", "向き", "回転", "回す", "角度"])("「%s」 finds the prop size article", word => {
     expect(searchHelp(word).matches.map(a => a.id)).toContain("manage-props");
   });
 });
