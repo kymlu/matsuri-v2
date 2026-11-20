@@ -210,7 +210,7 @@ function SortableActionSection ({
   return <div className="px-2 py-3 border rounded-md bg-surface border-line" style={style} ref={setNodeRef}>
     <div className="flex items-center gap-1">
       {dragHandle}
-      <div className="flex-1 min-w-0">
+      <div className="flex-1 min-w-0 space-y-2">
         <TextInput
           required
           hasError={!!errors.name}

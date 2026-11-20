@@ -73,31 +73,33 @@ export default function AcceptInviteDialog({
     onSubmit={onAcceptInvite}
     hasX={false}
   >
-    <TextInput
-      name="メールアドレス"
-      label="メールアドレス"
-      onContentChange={() => {}}
-      disabled
-      defaultValue={email}/>
-    <TextInput
-      label="新パスワード（8~25文字）"
-      name="パスワード"
-      type="password"
-      defaultValue=""
-      maxLength={PASSWORD_LENGTH}
-      restrictFn={(s) => testAlphanumericSymbols(s)}
-      onContentChange={(value) => setPassword(value)}/>
-    {
-      error === "notOnTeamError" &&
-      <span className="w-full font-semibold text-center text-primary">
-        このチームに権限がありません。チームの管理者に問い合わせてください。
-      </span>
-    }
-    {
-      error === "error" &&
-      <span className="w-full font-semibold text-center text-primary">
-        処理中に問題が発生しました
-      </span>
-    }
+    <div className="space-y-2">
+      <TextInput
+        name="メールアドレス"
+        label="メールアドレス"
+        onContentChange={() => {}}
+        disabled
+        defaultValue={email}/>
+      <TextInput
+        label="新パスワード（8~25文字）"
+        name="パスワード"
+        type="password"
+        defaultValue=""
+        maxLength={PASSWORD_LENGTH}
+        restrictFn={(s) => testAlphanumericSymbols(s)}
+        onContentChange={(value) => setPassword(value)}/>
+      {
+        error === "notOnTeamError" &&
+        <span className="w-full font-semibold text-center text-primary">
+          このチームに権限がありません。チームの管理者に問い合わせてください。
+        </span>
+      }
+      {
+        error === "error" &&
+        <span className="w-full font-semibold text-center text-primary">
+          処理中に問題が発生しました
+        </span>
+      }
+    </div>
   </BaseEditDialog>
 }

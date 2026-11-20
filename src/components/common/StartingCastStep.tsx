@@ -46,7 +46,6 @@ export default function StartingCastStep({
     <span className="font-semibold">{hasRoster ? "名前なし" : "ダンサー数"}</span>
     <div className="w-36">
       <NumberInput
-        compact
         defaultValue={unnamedCount}
         min={hasRoster ? 0 : 1}
         max={MAX_STARTING_DANCERS - pickedIds.length}
@@ -129,7 +128,7 @@ function NameFilters({ list, allLabel, placeholder, pickedCount, filter, onFilte
   filter: string, onFilterChange: (value: string) => void, onSearchChange: (value: string) => void,
 }) {
   const uncategorised = list.names.filter(n => n.categoryIds.length === 0).length;
-  return <div className="pt-1 space-y-1">
+  return <div className="pt-1 space-y-2">
     <TextInput placeholder={placeholder} onContentChange={onSearchChange} search clearable maxLength={SEARCH_NAME_LENGTH}/>
     {
       <ChipFilter
@@ -255,7 +254,6 @@ function PropList({ list, counts, onChange }: { list: RosterList, counts: [strin
                   {details}
                   <div className="shrink-0 w-28">
                     <NumberInput
-                      compact
                       defaultValue={count}
                       min={0}
                       max={MAX_STARTING_PER_PROP}

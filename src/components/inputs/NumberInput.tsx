@@ -14,14 +14,13 @@ export interface NumberInputProps {
   onChange?: (newValue: number | null) => void,
   onCommit?: (newValue: number) => void, // on blur or button release, not every keystroke
   disabled?: boolean,
-  compact?: boolean,
   short?: boolean,
   ref?: React.Ref<any>,
   label?: string,
 }
 
 export default function NumberInput ({
-  name, defaultValue, min, max, baseStep, buttonStep, onChange, onCommit, disabled, compact, short, ref, label
+  name, defaultValue, min, max, baseStep, buttonStep, onChange, onCommit, disabled, short, ref, label
 }: NumberInputProps) {
   const [value, setValue] = React.useState<number | null>(defaultValue ?? 0);
   const id = React.useId();
@@ -39,10 +38,7 @@ export default function NumberInput ({
     }
   }));
   
-  const wrapperClasses = classNames("flex flex-row items-center justify-between w-full mb-2",
-    {
-      "mb-0": compact,
-    })
+  const wrapperClasses = "flex flex-row items-center justify-between w-full";
   
   return (
     <FieldWithLabel label={label}>

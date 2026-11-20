@@ -89,7 +89,7 @@ export default function FindObjectsDialog({ dancers, props, initialDancerIds, in
     // On a phone, focusing the search box would raise the keyboard over the list.
     focusDialogOnOpen={window.matchMedia?.("(pointer: coarse)").matches}
     header={
-      <div className="mb-1">
+      <div className="mb-2">
         <TextInput
           search
           clearable

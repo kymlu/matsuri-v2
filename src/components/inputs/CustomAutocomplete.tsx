@@ -74,11 +74,7 @@ export default function CustomAutocomplete({
       "border-primary bg-primary/20 placeholder:text-primary": (required && isNullOrUndefinedOrBlank(value)) || hasError,
     },);
 
-  const wrapperClasses = classNames(
-    "grid items-center w-full grid-cols-1",
-    {
-      "mb-2": !compact && !showLength,
-    },);
+  const wrapperClasses = "grid items-center w-full grid-cols-1";
 
   return (
     <FieldWithLabel label={label} full={!compact}>

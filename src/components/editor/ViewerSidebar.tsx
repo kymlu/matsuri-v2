@@ -235,8 +235,7 @@ function ViewerSidebar({
                       onContentChange={onPersonalNoteChange}
                       placeholder="自分用メモを追加…"
                       maxRows={2}
-                      autoFocus={isPersonalNoteOpen}
-                      compact/>
+                      autoFocus={isPersonalNoteOpen}/>
                   </div>
                 </>
               }

@@ -16,7 +16,7 @@ function ActionSelectionToolbar({
 }: ActionSelectionToolbarProps){
   const rowRef = useRef<HTMLDivElement | null>(null);
   useScrollFade(rowRef);
-  return <div ref={rowRef} className="flex w-screen gap-1 p-2 overflow-auto max-w-screen scroll-fade">
+  return <div ref={rowRef} className="flex w-screen gap-1 px-2 py-1 overflow-auto max-w-screen scroll-fade">
     {
       actions.map((action, index) => <ActionSection
         key={action.id}
