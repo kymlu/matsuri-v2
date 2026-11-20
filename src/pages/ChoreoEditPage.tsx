@@ -1146,7 +1146,6 @@ export default function ChoreoEditPage(props: {
                 sections={history.presentState.state.sections}
                 showAddButton
                 onClickAddButton={(id: string) => {
-                  resetSelectedIds();
                   setNewSectionId(id);
                 }}
                 onChangeSection={(section) => {
@@ -1364,7 +1363,8 @@ export default function ChoreoEditPage(props: {
                 asDiv
                 onClick={() => {
                   resetSelectedIds();
-                  commitState(duplicateSection(history.presentState.state, currentSection, history.presentState.state.sections.findIndex(x => strEquals(x.id, currentSection.id))));
+                  const newId = crypto.randomUUID();
+                  commitState(duplicateSection(history.presentState.state, currentSection, history.presentState.state.sections.findIndex(x => strEquals(x.id, currentSection.id)), newId), newId);
                 }}
                 full />
             </Dialog.Close>
@@ -1556,6 +1556,7 @@ export default function ChoreoEditPage(props: {
           actionButtonText="追加"
           onSubmit={(name) => {
             if (!newSectionId) return;
+            resetSelectedIds();
             commitState(addSection(history.presentState.state, newSectionId, name), newSectionId);
             setNewSectionId(undefined);
           }}/>

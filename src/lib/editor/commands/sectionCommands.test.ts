@@ -55,6 +55,11 @@ describe("addSection", () => {
 });
 
 describe("duplicateSection", () => {
+  it("uses the id given, so the editor can switch to the copy", () => {
+    const before = makeChoreo();
+    expect(duplicateSection(before, before.sections[0], 0, "copy").sections[0].id).toBe("copy");
+  });
+
   it("makes a full copy that shares nothing with the original", () => {
     const before = makeChoreo();
     const after = duplicateSection(before, before.sections[0], 0);
