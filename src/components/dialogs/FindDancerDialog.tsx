@@ -1,5 +1,6 @@
 import { Checkbox, Dialog } from "@base-ui/react";
 import SelectBox from "../basic/SelectBox";
+import { Tag } from "../common/Tag";
 import { useMemo, useState } from "react";
 import classNames from "classnames";
 import CustomDialog from "../basic/CustomDialog";
@@ -111,7 +112,7 @@ export default function FindDancerDialog({ dancers, shownId, myDancerId, myDance
                       item.id === pickedId ? "border-primary bg-primary/5" : "border-line hover:bg-line/40"
                     )}>
                     <span className={classNames("break-all", item.id === pickedId ? "text-primary font-bold" : "font-semibold")}>{item.label}</span>
-                    {item.isMe && <span className="px-1 text-xs border rounded text-primary border-primary shrink-0">自分</span>}
+                    {item.isMe && <span className="shrink-0"><Tag type="primary" text="自分" compact/></span>}
                     {item.isShown && <span className="ml-auto text-xs text-muted shrink-0">表示中</span>}
                   </button>
                 </li>
