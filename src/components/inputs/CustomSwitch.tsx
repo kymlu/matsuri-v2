@@ -31,7 +31,7 @@ export default function CustomSwitch({
       {
         label &&
         <div className="flex flex-col">
-          <label className="font-medium">{label}</label>
+          <label className="font-semibold">{label}</label>
           {hint && <span className="text-xs text-muted">{hint}</span>}
         </div>
       }

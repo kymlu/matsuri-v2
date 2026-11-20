@@ -66,7 +66,7 @@ export function Sidebar({
           </div>
           {
             editName &&
-            <button className="flex items-center gap-1 text-sm text-primary" onClick={editName}>
+            <button className="flex items-center gap-1 text-sm font-semibold text-primary" onClick={editName}>
               <Icon src="edit" size="xs" colour="primary"/>
               名前
             </button>
@@ -109,7 +109,7 @@ export function Sidebar({
 function SettingsRow({ icon, label, value, onClick }: { icon: keyof typeof ICON, label: string, value?: React.ReactNode, onClick: () => void }) {
   return <button className="flex items-center gap-3 py-3 text-left border-b border-line" onClick={onClick}>
     <Icon src={icon} size="sm" colour="grey"/>
-    <span className="shrink-0 text-nowrap">{label}</span>
+    <span className="font-semibold shrink-0 text-nowrap">{label}</span>
     <span className="flex-1 min-w-0 text-sm text-right text-muted">{value}</span>
     <Icon src="chevronForward" size="sm" colour="grey"/>
   </button>;
