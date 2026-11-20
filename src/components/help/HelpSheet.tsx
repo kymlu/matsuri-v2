@@ -164,7 +164,7 @@ export default function HelpSheet({ open, target, reader, onClose }: HelpSheetPr
                         <button
                           type="button"
                           onClick={() => openArticle(contents.walkthrough.id)}
-                          className="flex items-center w-full gap-2.5 p-2.5 border rounded-lg border-primary text-start">
+                          className="flex items-center w-full gap-2.5 p-2.5 border rounded-md border-primary text-start">
                           <BeginnerMark className="size-6"/>
                           <span className="flex-1">
                             <span className="block font-bold">はじめての方へ</span>
@@ -237,7 +237,7 @@ function SearchView({ query, onOpen, trouble }: { query: string, onOpen: (id: st
       <p className="text-sm text-muted">{matches.length}件</p>
       {
         matches.map(a =>
-          <button key={a.id} type="button" onClick={() => onOpen(a.id)} className="block w-full p-2.5 border rounded-lg border-subtle text-start lg:hover:bg-subtle">
+          <button key={a.id} type="button" onClick={() => onOpen(a.id)} className="block w-full p-2.5 border rounded-md border-subtle text-start lg:hover:bg-subtle">
             <span className="block text-xs text-muted">{HELP_GROUPS[a.group].title}</span>
             <span className="block font-bold">{a.title}</span>
             <span className="block text-sm text-muted line-clamp-2">{a.summary}</span>
@@ -283,7 +283,7 @@ function ArticleView({ article, reader, onOpen }: { article: HelpArticle, reader
     <p className="my-3 border-l-[3px] border-primary pl-2.5 font-bold leading-relaxed">{article.summary}</p>
     {
       article.diagram &&
-      <div className="mb-3 overflow-hidden border rounded-lg border-subtle">{article.diagram}</div>
+      <div className="mb-3 overflow-hidden border rounded-md border-subtle">{article.diagram}</div>
     }
     {
       article.steps &&
