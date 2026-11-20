@@ -2,6 +2,14 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { Dialog } from "@base-ui/react";
 import { ActionManagerDialog } from "./ActionManagerDialog";
 import { ChoreoSection } from "../../models/choreoSection";
+import { randomUUID } from "crypto";
+
+// jsdom has no crypto.randomUUID.
+beforeAll(() => {
+  if (!globalThis.crypto?.randomUUID) {
+    Object.defineProperty(globalThis, "crypto", { value: { ...globalThis.crypto, randomUUID }, configurable: true });
+  }
+});
 
 const makeSection = (): ChoreoSection => ({
   id: "s1",
@@ -69,5 +77,97 @@ describe("ActionManagerDialog deleting", () => {
     fireEvent.input(await screen.findByDisplayValue("ウェーブ"), { target: { value: "ジャンプ" } });
     expect(screen.getAllByText("アクション名が重複")).toHaveLength(2);
     expect(screen.getByRole("button", { name: "保存" })).toBeDisabled();
+  });
+});
+
+describe("ActionManagerDialog count patterns", () => {
+  const addAction = async () => {
+    fireEvent.click(await screen.findByRole("button", { name: /アクション追加/ }));
+  };
+  const countValues = () => screen.queryAllByRole("textbox")
+    .filter(i => i.getAttribute("placeholder") !== "アクション名")
+    .map(i => (i as HTMLInputElement).value);
+
+  it("starts a new action with the patterns, in pairs, and no count boxes", async () => {
+    renderDialog(makeSection(), jest.fn());
+    await addAction();
+    const names = screen.getAllByRole("button", { name: /: / }).map(b => b.getAttribute("aria-label")!.split(":")[0]);
+    expect(names).toEqual(["奇数", "偶数", "1〜4", "5〜8", "1〜8", "1〜8と"]);
+    expect(screen.getByRole("button", { name: /自分で入力/ })).toBeInTheDocument();
+    expect(countValues()).toEqual([]);
+    expect(screen.queryByText("カウントがありません")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "保存" })).toBeDisabled();
+  });
+
+  it("fills the counts from a pattern; 1〜8と uses all 16", async () => {
+    renderDialog(makeSection(), jest.fn());
+    await addAction();
+    fireEvent.click(screen.getByRole("button", { name: /^奇数:/ }));
+    expect(countValues()).toEqual(["1", "3", "5", "7"]);
+    expect(screen.getByRole("button", { name: /^add\s*カウント$/ })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "パターンを選び直す" }));
+    fireEvent.click(screen.getByRole("button", { name: /^1〜8と:/ }));
+    expect(countValues()).toHaveLength(16);
+    expect(screen.queryByRole("button", { name: /^add\s*カウント$/ })).not.toBeInTheDocument();
+  });
+
+  it("自分で入力 gives two empty counts", async () => {
+    renderDialog(makeSection(), jest.fn());
+    await addAction();
+    fireEvent.click(screen.getByRole("button", { name: /自分で入力/ }));
+    expect(countValues()).toEqual(["", ""]);
+  });
+
+  it("asks before パターンを選び直す throws edited counts away; やめる keeps them", async () => {
+    renderDialog(makeSection(), jest.fn());
+    await addAction();
+    fireEvent.click(screen.getByRole("button", { name: /^奇数:/ }));
+    fireEvent.input(screen.getByDisplayValue("7"), { target: { value: "8" } });
+    fireEvent.click(screen.getByRole("button", { name: "パターンを選び直す" }));
+    expect(screen.getByText("今のカウントは消えます。パターンを選び直しますか？")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "やめる" }));
+    expect(countValues()).toEqual(["1", "3", "5", "8"]);
+    fireEvent.click(screen.getByRole("button", { name: "パターンを選び直す" }));
+    fireEvent.click(screen.getByRole("button", { name: "選び直す" }));
+    expect(screen.getByRole("button", { name: /^偶数:/ })).toBeInTheDocument();
+  });
+
+  it("goes straight back to the patterns when nothing would be lost", async () => {
+    renderDialog(makeSection(), jest.fn());
+    await addAction();
+    fireEvent.click(screen.getByRole("button", { name: /自分で入力/ }));
+    fireEvent.click(screen.getByRole("button", { name: "パターンを選び直す" }));
+    expect(screen.getByRole("button", { name: /^奇数:/ })).toBeInTheDocument();
+  });
+
+  it("keeps choosing after the card is closed, and the closed card says why 保存 is off", async () => {
+    renderDialog(makeSection(), jest.fn());
+    await addAction();
+    fireEvent.click(screen.getByRole("button", { name: /ウェーブ/ }));
+    expect(screen.getByText("アクション名が空")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /名前なし/ }));
+    expect(screen.getByRole("button", { name: /^奇数:/ })).toBeInTheDocument();
+    fireEvent.input(screen.getByPlaceholderText("アクション名"), { target: { value: "回転" } });
+    fireEvent.click(screen.getByRole("button", { name: /ウェーブ/ }));
+    expect(screen.getByText("カウントがありません")).toBeInTheDocument();
+  });
+
+  it("saves a new action made from a pattern", async () => {
+    const onSubmit = jest.fn();
+    renderDialog(makeSection(), onSubmit);
+    await addAction();
+    fireEvent.input(screen.getByPlaceholderText("アクション名"), { target: { value: "回転" } });
+    fireEvent.click(screen.getByRole("button", { name: /^偶数:/ }));
+    fireEvent.click(screen.getByRole("button", { name: "保存" }));
+    const saved = onSubmit.mock.calls[0][0][2];
+    expect(saved.name).toBe("回転");
+    expect(saved.timings.map((t: { name: string }) => t.name)).toEqual(["2", "4", "6", "8"]);
+  });
+
+  it("never offers patterns on a saved action", async () => {
+    renderDialog(makeSection(), jest.fn());
+    await screen.findByDisplayValue("ウェーブ");
+    expect(screen.queryByRole("button", { name: "パターンを選び直す" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /^奇数:/ })).not.toBeInTheDocument();
   });
 });

@@ -13,6 +13,8 @@ import BaseEditDialog from "./BaseEditDialog";
 import { ChoreoSection } from "../../models/choreoSection";
 import { IconLabelButton } from "../basic/Button";
 import classNames from "classnames";
+import Button from "../basic/Button";
+import { COUNT_PATTERNS, CountPattern, isPatternOrBlank, patternPreview } from "../../lib/consts/countPatterns";
 
 type ActionManagerDialogProps = {
   section: ChoreoSection,
@@ -36,7 +38,10 @@ function getActionErrors(liveActions: DancerAction[]): Record<string, ActionErro
     const counts = countNames(a.timings.map(t => t.name));
     return [a.id, {
       name: !name ? "アクション名が空" : actionNames[name] > 1 ? "アクション名が重複" : undefined,
-      counts: counts[""] ? "カウント名が空" : Object.values(counts).some(n => n > 1) ? "カウント名が重複" : undefined,
+      counts: a.timings.length === 0 ? "カウントがありません"
+        : counts[""] ? "カウント名が空"
+        : Object.values(counts).some(n => n > 1) ? "カウント名が重複"
+        : undefined,
     }];
   }));
 }
@@ -51,6 +56,9 @@ export function ActionManagerDialog({
   const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set());
   // One action open at a time keeps the list short enough to drag.
   const [openId, setOpenId] = useState<string | undefined>();
+  // Added in this dialog and not saved yet: only these can start from a pattern.
+  // Kept here, not in the card, because a card unmounts when another one opens.
+  const [newIds, setNewIds] = useState<Set<string>>(new Set());
   const toggleDeleted = (id: string) => setDeletedIds(prev => {
     const next = new Set(prev);
     if (next.has(id)) {
@@ -69,15 +77,21 @@ export function ActionManagerDialog({
   const errors = useMemo(() => getActionErrors(liveActions), [liveActions]);
   const canSubmit = Object.values(errors).every(e => !e.name && !e.counts);
 
-  useEffect(() => {
+  const reset = () => {
+    setDeletedIds(new Set());
+    setNewIds(new Set());
     setActions([...section.formation.dancerActions]);
     setOpenId(section.formation.dancerActions[0]?.id);
-  }, [section]);
+  };
 
+  useEffect(reset, [section]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // No counts yet: the card asks for a pattern or 自分で入力 first.
   const addAction = () => {
     const id = crypto.randomUUID();
     setOpenId(id);
-    setActions(prev => [...prev, { id, name: "", timings: [newTiming(), newTiming()] }]);
+    setNewIds(prev => new Set(prev).add(id));
+    setActions(prev => [...prev, { id, name: "", timings: [] }]);
   }
 
   // New objects, never edits of the old ones: those belong to the chart's saved state.
@@ -90,11 +104,7 @@ export function ActionManagerDialog({
     full
     isActionButtonDisabled={!canSubmit}
     actionButtonText="保存"
-    onClose={() => {
-      setDeletedIds(new Set());
-      setActions([...section.formation.dancerActions]);
-      setOpenId(section.formation.dancerActions[0]?.id);
-    }}
+    onClose={reset}
     onSubmit={() => {onSubmit(liveActions)}}>
     <div className="max-h-full space-y-4 overflow-auto">
       <IconLabelButton
@@ -128,6 +138,7 @@ export function ActionManagerDialog({
                   deletedIds={deletedIds}
                   canRestoreAction={liveActions.length < 5}
                   isOpen={openId === action.id}
+                  isNew={newIds.has(action.id)}
                   onOpen={() => setOpenId(action.id)}
                   onClose={() => setOpenId(undefined)}
                   onToggleDeleted={toggleDeleted}
@@ -146,6 +157,7 @@ type SortableActionSectionProps = {
   deletedIds: Set<string>, // actions and counts marked for deletion
   canRestoreAction: boolean, // false at the 5-action limit
   isOpen: boolean,
+  isNew: boolean, // added in this dialog: can (re)start from a pattern
   onOpen: () => void,
   onClose: () => void,
   onToggleDeleted: (id: string) => void,
@@ -153,8 +165,10 @@ type SortableActionSectionProps = {
 }
 
 function SortableActionSection ({
-  action, errors, deletedIds, canRestoreAction, isOpen, onOpen, onClose, onToggleDeleted, onUpdate,
+  action, errors, deletedIds, canRestoreAction, isOpen, isNew, onOpen, onClose, onToggleDeleted, onUpdate,
 }: SortableActionSectionProps) {
+  // Asking before 「パターンを選び直す」 throws counts away.
+  const [isConfirmingRepick, setIsConfirmingRepick] = useState(false);
   const {
     attributes,
     listeners,
@@ -170,6 +184,20 @@ function SortableActionSection ({
 
   const liveTimings = action.timings.filter(t => !deletedIds.has(t.id));
   const timingNames = countNames(liveTimings.map(t => t.name));
+  const isChoosing = isNew && action.timings.length === 0;
+
+  const setTimings = (names: string[]) => {
+    setIsConfirmingRepick(false);
+    onUpdate(a => ({ ...a, timings: names.map(name => ({ ...newTiming(), name })) }));
+  };
+  const repick = () => {
+    // Nothing is lost when the counts are still a pattern, or all blank.
+    if (isPatternOrBlank(liveTimings.map(t => t.name))) {
+      setTimings([]);
+    } else {
+      setIsConfirmingRepick(true);
+    }
+  };
   const errorText = errors.name ?? errors.counts;
 
   const dragHandle = <div {...attributes} {...listeners} className="shrink-0">
@@ -222,35 +250,84 @@ function SortableActionSection ({
       <IconButton size="sm" colour="primary" noBorder src="delete" onClick={() => onToggleDeleted(action.id)}/>
     </div>
     {errors.name && <p className="mt-1 text-sm font-semibold text-primary">{errors.name}</p>}
-    <p className="mt-1.5 text-sm font-semibold">カウント <span className="font-normal text-muted">{liveTimings.length}/16</span></p>
-    <div className="grid grid-cols-[repeat(auto-fill,minmax(8rem,1fr))] gap-x-2 gap-y-2 pt-1.5">
-      {
-        action.timings.map(timing =>
-          <TimingItem
-            key={timing.id}
-            timing={timing}
-            timingNames={timingNames}
-            isDeleted={deletedIds.has(timing.id)}
-            canRestore={liveTimings.length < 16}
-            onRenameTiming={(name) => onUpdate(a => ({ ...a, timings: a.timings.map(t => t.id === timing.id ? { ...t, name } : t) }))}
-            onToggleDeleted={() => onToggleDeleted(timing.id)}
-            // An action keeps at least one count, but a deleted one can always come back.
-            showDeleteButton={liveTimings.length > 1}
-            />
-        )
-      }
-      {
-        liveTimings.length < 16 &&
-        <button type="button" onClick={() => onUpdate(a => ({ ...a, timings: [...a.timings, newTiming()] }))} className="flex items-center justify-center h-10 gap-0.5 text-sm border border-dashed rounded-md border-line-strong text-muted">
-          <Icon src="add" size="xs" colour="grey"/>カウント
-        </button>
-      }
-    </div>
-    {errors.counts && <p className="mt-1.5 text-sm font-semibold text-primary">{errors.counts}</p>}
+    {
+      isChoosing
+        ? <>
+          <p className="mt-1.5 text-sm font-semibold">カウント</p>
+          <PatternChooser onPick={(pattern) => setTimings(pattern.counts)} onOwn={() => setTimings(["", ""])}/>
+        </>
+        : <>
+          <div className="flex flex-wrap items-baseline justify-between gap-x-2 mt-1.5">
+            <p className="text-sm font-semibold whitespace-nowrap">カウント <span className="font-normal text-muted">{liveTimings.length}/16</span></p>
+            {
+              isNew &&
+              <button type="button" onClick={repick} className="ml-auto text-sm font-semibold whitespace-nowrap text-primary">パターンを選び直す</button>
+            }
+          </div>
+          {
+            isConfirmingRepick &&
+            <div className="p-2 mt-1.5 text-sm border rounded-md border-primary">
+              今のカウントは消えます。パターンを選び直しますか？
+              <div className="grid grid-cols-2 gap-1.5 mt-1.5">
+                <Button full fontSize="text-sm" onClick={() => setIsConfirmingRepick(false)}>やめる</Button>
+                <Button full primary fontSize="text-sm" onClick={() => setTimings([])}>選び直す</Button>
+              </div>
+            </div>
+          }
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(8rem,1fr))] gap-x-2 gap-y-2 pt-1.5">
+            {
+              action.timings.map(timing =>
+                <TimingItem
+                  key={timing.id}
+                  timing={timing}
+                  timingNames={timingNames}
+                  isDeleted={deletedIds.has(timing.id)}
+                  canRestore={liveTimings.length < 16}
+                  onRenameTiming={(name) => onUpdate(a => ({ ...a, timings: a.timings.map(t => t.id === timing.id ? { ...t, name } : t) }))}
+                  onToggleDeleted={() => onToggleDeleted(timing.id)}
+                  // An action keeps at least one count, but a deleted one can always come back.
+                  showDeleteButton={liveTimings.length > 1}
+                  />
+              )
+            }
+            {
+              liveTimings.length < 16 &&
+              <button type="button" onClick={() => onUpdate(a => ({ ...a, timings: [...a.timings, newTiming()] }))} className="flex items-center justify-center h-10 gap-0.5 text-sm border border-dashed rounded-md border-line-strong text-muted">
+                <Icon src="add" size="xs" colour="grey"/>カウント
+              </button>
+            }
+          </div>
+        </>
+    }
+    {errors.counts && !isChoosing && <p className="mt-1.5 text-sm font-semibold text-primary">{errors.counts}</p>}
     <button type="button" onClick={onClose} className="flex items-center justify-center w-full gap-0.5 pt-2 text-sm font-semibold text-primary">
       <Icon src="expandLess" size="xs" colour="primary"/>閉じる
     </button>
   </div>
+}
+
+function PatternChooser({ onPick, onOwn }: { onPick: (pattern: CountPattern) => void, onOwn: () => void }) {
+  return <>
+    <div className="grid grid-cols-2 gap-1.5 pt-1.5">
+      {
+        COUNT_PATTERNS.map(pattern =>
+          <button
+            type="button"
+            key={pattern.name}
+            // The button shows a short preview; the label lists every count.
+            aria-label={`${pattern.name}: ${pattern.counts.join(" ")}`}
+            onClick={() => onPick(pattern)}
+            className="flex flex-wrap items-baseline content-center min-w-0 px-2 py-1 border rounded-md text-start min-h-11 gap-x-1.5 bg-surface border-line-strong">
+            <span className="font-semibold">{pattern.name}</span>
+            <span className="text-xs whitespace-nowrap text-muted">{patternPreview(pattern)}</span>
+          </button>
+        )
+      }
+    </div>
+    <button type="button" onClick={onOwn} className="flex items-center justify-center w-full gap-0.5 mt-1.5 text-sm border border-dashed rounded-md min-h-11 border-line-strong text-muted">
+      <Icon src="add" size="xs" colour="grey"/>自分で入力
+    </button>
+  </>
 }
 
 type TimingItemProps = {
