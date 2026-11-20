@@ -28,6 +28,8 @@ const countNames = (names: string[]) => names.reduce((acc, name) => {
 }, {} as Record<string, number>);
 
 type ActionErrors = { name?: string, counts?: string };
+const NAME_BLANK = "アクション名が空";
+const COUNT_BLANK = "カウント名が空";
 
 // Deleted actions and counts are left out: their names are free to reuse.
 function getActionErrors(liveActions: DancerAction[]): Record<string, ActionErrors> {
@@ -36,10 +38,11 @@ function getActionErrors(liveActions: DancerAction[]): Record<string, ActionErro
     const name = a.name.trim();
     const counts = countNames(a.timings.map(t => t.name));
     return [a.id, {
-      name: !name ? "アクション名が空" : actionNames[name] > 1 ? "アクション名が重複" : undefined,
+      name: !name ? NAME_BLANK : actionNames[name] > 1 ? "アクション名が重複" : undefined,
+      // Duplicates first: they show at once, blanks can wait.
       counts: a.timings.length === 0 ? "カウントがありません"
-        : counts[""] ? "カウント名が空"
-        : Object.values(counts).some(n => n > 1) ? "カウント名が重複"
+        : Object.entries(counts).some(([name, n]) => name && n > 1) ? "カウント名が重複"
+        : counts[""] ? COUNT_BLANK
         : undefined,
     }];
   }));
@@ -57,6 +60,11 @@ export function ActionManagerDialog({
   const [openId, setOpenId] = useState<string | undefined>();
   // Unsaved actions added here; kept here because a closed card unmounts.
   const [newIds, setNewIds] = useState<Set<string>>(new Set());
+  // New actions whose blank name / blank count may now be pointed out.
+  const [blankNameShown, setBlankNameShown] = useState<Set<string>>(new Set());
+  const [blankCountShown, setBlankCountShown] = useState<Set<string>>(new Set());
+  const showBlank = (id: string, what: "name" | "count") =>
+    (what === "name" ? setBlankNameShown : setBlankCountShown)(prev => prev.has(id) ? prev : new Set(prev).add(id));
   const toggleDeleted = (id: string) => setDeletedIds(prev => {
     const next = new Set(prev);
     if (next.has(id)) {
@@ -78,6 +86,8 @@ export function ActionManagerDialog({
   const reset = useCallback(() => {
     setDeletedIds(new Set());
     setNewIds(new Set());
+    setBlankNameShown(new Set());
+    setBlankCountShown(new Set());
     setActions([...section.formation.dancerActions]);
     setOpenId(section.formation.dancerActions[0]?.id);
   }, [section]);
@@ -136,6 +146,9 @@ export function ActionManagerDialog({
                   canRestoreAction={liveActions.length < 5}
                   isOpen={openId === action.id}
                   isNew={newIds.has(action.id)}
+                  showBlankName={!newIds.has(action.id) || blankNameShown.has(action.id)}
+                  showBlankCount={!newIds.has(action.id) || blankCountShown.has(action.id)}
+                  onShowBlank={(what) => showBlank(action.id, what)}
                   onOpen={() => setOpenId(action.id)}
                   onClose={() => setOpenId(undefined)}
                   onToggleDeleted={toggleDeleted}
@@ -155,6 +168,9 @@ type SortableActionSectionProps = {
   canRestoreAction: boolean, // false at the 5-action limit
   isOpen: boolean,
   isNew: boolean, // added in this dialog: starts from, and can go back to, the patterns
+  showBlankName: boolean, // false on a new action until its name was left blank
+  showBlankCount: boolean,
+  onShowBlank: (what: "name" | "count") => void,
   onOpen: () => void,
   onClose: () => void,
   onToggleDeleted: (id: string) => void,
@@ -162,7 +178,8 @@ type SortableActionSectionProps = {
 }
 
 function SortableActionSection ({
-  action, errors, deletedIds, canRestoreAction, isOpen, isNew, onOpen, onClose, onToggleDeleted, onUpdate,
+  action, errors, deletedIds, canRestoreAction, isOpen, isNew, showBlankName, showBlankCount, onShowBlank,
+  onOpen, onClose, onToggleDeleted, onUpdate,
 }: SortableActionSectionProps) {
   const {
     attributes,
@@ -183,7 +200,10 @@ function SortableActionSection ({
 
   const setTimings = (names: string[]) =>
     onUpdate(a => ({ ...a, timings: names.map(name => ({ ...newTiming(), name })) }));
+  // The closed card shows every error; the open one can still be waiting on blanks.
   const errorText = errors.name ?? errors.counts;
+  const nameError = errors.name === NAME_BLANK && !showBlankName ? undefined : errors.name;
+  const countError = isChoosing || (errors.counts === COUNT_BLANK && !showBlankCount) ? undefined : errors.counts;
 
   const dragHandle = <div {...attributes} {...listeners} className="shrink-0">
     <Icon src="dragHandle"/>
@@ -223,10 +243,9 @@ function SortableActionSection ({
   return <div className="px-2 py-3 border rounded-md bg-surface border-line" style={style} ref={setNodeRef}>
     <div className="flex items-center gap-1">
       {dragHandle}
-      <div className="flex-1 min-w-0 space-y-2">
+      <div className="flex-1 min-w-0 space-y-2" onBlur={() => !action.name.trim() && onShowBlank("name")}>
         <TextInput
-          required
-          hasError={!!errors.name}
+          hasError={!!nameError}
           maxLength={ACTION_NAME_LENGTH}
           placeholder="アクション名"
           defaultValue={action.name}
@@ -234,12 +253,16 @@ function SortableActionSection ({
       </div>
       <IconButton size="sm" colour="primary" noBorder src="delete" onClick={() => onToggleDeleted(action.id)}/>
     </div>
-    {errors.name && <p className="mt-1 text-sm font-semibold text-primary">{errors.name}</p>}
     {
       isChoosing
         ? <>
           <p className="mt-1.5 text-sm font-semibold">カウント</p>
-          <PatternChooser onPick={(pattern) => setTimings(pattern.counts)} onOwn={() => setTimings(["", ""])}/>
+          <PatternChooser
+            onPick={(pattern) => {
+              setTimings(pattern.counts);
+              onShowBlank("name");
+            }}
+            onOwn={() => setTimings(["", ""])}/>
         </>
         : <>
           <div className="flex flex-wrap items-baseline justify-between gap-x-2 mt-1.5">
@@ -256,6 +279,8 @@ function SortableActionSection ({
                   key={timing.id}
                   timing={timing}
                   timingNames={timingNames}
+                  showBlank={showBlankCount}
+                  onLeaveBlank={() => onShowBlank("count")}
                   isDeleted={deletedIds.has(timing.id)}
                   canRestore={liveTimings.length < 16}
                   onRenameTiming={(name) => onUpdate(a => ({ ...a, timings: a.timings.map(t => t.id === timing.id ? { ...t, name } : t) }))}
@@ -274,7 +299,13 @@ function SortableActionSection ({
           </div>
         </>
     }
-    {errors.counts && !isChoosing && <p className="mt-1.5 text-sm font-semibold text-primary">{errors.counts}</p>}
+    {
+      (nameError || countError) &&
+      <div className="mt-2 space-y-0.5 text-sm font-semibold text-primary">
+        {nameError && <p>{nameError}</p>}
+        {countError && <p>{countError}</p>}
+      </div>
+    }
     <button type="button" onClick={onClose} className="flex items-center justify-center w-full gap-0.5 pt-2 text-sm font-semibold text-primary">
       <Icon src="expandLess" size="xs" colour="primary"/>閉じる
     </button>
@@ -307,6 +338,8 @@ function PatternChooser({ onPick, onOwn }: { onPick: (pattern: CountPattern) => 
 type TimingItemProps = {
   timing: DancerActionTiming,
   timingNames: Record<string, number>,
+  showBlank: boolean, // a blank count is shown as an error
+  onLeaveBlank: () => void,
   isDeleted: boolean,
   canRestore: boolean, // false at the 16-count limit
   onRenameTiming: (name: string) => void,
@@ -315,7 +348,7 @@ type TimingItemProps = {
 }
 
 function TimingItem ({
-  timing, timingNames, isDeleted, canRestore, onRenameTiming, onToggleDeleted, showDeleteButton}: TimingItemProps
+  timing, timingNames, showBlank, onLeaveBlank, isDeleted, canRestore, onRenameTiming, onToggleDeleted, showDeleteButton}: TimingItemProps
 ) {
   if (isDeleted) {
     return <div className="flex items-center min-w-0 gap-0.5">
@@ -324,10 +357,9 @@ function TimingItem ({
     </div>;
   }
   return <div className="flex items-center min-w-0 gap-0.5">
-    <div className="relative flex-1 min-w-0">
+    <div className="relative flex-1 min-w-0" onBlur={() => !timing.name.trim() && onLeaveBlank()}>
       <TextInput
-        required
-        hasError={timingNames[timing.name.trim()] > 1}
+        hasError={timing.name.trim() ? timingNames[timing.name.trim()] > 1 : showBlank}
         maxLength={COUNT_NAME_LENGTH}
         defaultValue={timing.name}
         onContentChange={(newName) => {onRenameTiming(newName)}}/>
