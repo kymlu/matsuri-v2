@@ -54,7 +54,7 @@ export default function Button({
     "border-line ": primary !== true && grey !== true && !primaryText && !selected,
     "border-primary bg-primary/5 text-primary font-bold": selected,
     "bg-primary-fill text-white border-primary-fill": primary,
-    "bg-gray-600 text-white border-gray-600": grey,
+    "bg-line-strong text-white border-line-strong": grey,
     "cursor-default opacity-50": disabled,
     "cursor-pointer": !disabled,
     "h-full items-center flex justify-center": asDiv,
