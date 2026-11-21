@@ -35,17 +35,17 @@ function FormationSelectionToolbar({
   const stripRef = useRef<HTMLDivElement | null>(null);
   useScrollFade(stripRef);
 
-  const sectionRefs = useRef<Map<string, HTMLButtonElement | null>>(new Map());
-  const dialogSectionRefs = useRef<Map<string, HTMLButtonElement | null>>(new Map());
+  const drawerRefs = useRef<Map<string, HTMLButtonElement | null>>(new Map());
+  const tabRefs = useRef<Map<string, HTMLButtonElement | null>>(new Map());
   
   useEffect(() => {
-    sectionRefs.current.get(currentSectionId)?.scrollIntoView({behavior: "instant", block: "center"});
-    dialogSectionRefs.current.get(currentSectionId)?.scrollIntoView({behavior: "instant", block: "center"});
+    drawerRefs.current.get(currentSectionId)?.scrollIntoView({behavior: "instant", block: "center"});
+    tabRefs.current.get(currentSectionId)?.scrollIntoView({behavior: "instant", block: "center"});
   }, []);
 
-  // A section added or duplicated becomes current: bring its tab into view.
+  // Keeps the current section's tab in view, including one just added or duplicated.
   useEffect(() => {
-    const tab = dialogSectionRefs.current.get(currentSectionId); // the strip registers here, despite the name
+    const tab = tabRefs.current.get(currentSectionId);
     const strip = stripRef.current;
     if (!tab || !strip) return;
     const tabBox = tab.getBoundingClientRect();
@@ -57,7 +57,7 @@ function FormationSelectionToolbar({
 
   useEffect(() => {
     if (!showFirstSectionButton || !firstSectionId) return;
-    const firstSectionButton = dialogSectionRefs.current.get(firstSectionId);
+    const firstSectionButton = tabRefs.current.get(firstSectionId);
     if (!firstSectionButton) return;
 
     const observer = new IntersectionObserver(
@@ -102,8 +102,7 @@ function FormationSelectionToolbar({
   );
 
   const onClickSection = (s: ChoreoSection) => {
-    sectionRefs.current.get(s.id)?.scrollIntoView({"behavior": "smooth", "inline": "center"});
-    dialogSectionRefs.current.get(s.id)?.scrollIntoView({"behavior": "smooth", "inline": "center"});
+    drawerRefs.current.get(s.id)?.scrollIntoView({"behavior": "smooth", "inline": "center"});
     onChangeSection(s);
   }
 
@@ -146,7 +145,7 @@ function FormationSelectionToolbar({
                   sections.map(s =>
                     <Dialog.Close key={s.id}>
                       <FormationSectionItem
-                        registerRef={(id, button) => sectionRefs.current.set(id, button)}
+                        registerRef={(id, button) => drawerRefs.current.set(id, button)}
                         section={s}
                         onChangeSection={() => onClickSection(s)}
                         isSelected={strEquals(currentSectionId, s.id)}
@@ -195,7 +194,7 @@ function FormationSelectionToolbar({
                 isSelected={strEquals(currentSectionId, section.id)}
                 onChangeSection={onClickSection}
                 onOpenSectionMenu={onOpenSectionMenu}
-                registerRef={(id, button) => dialogSectionRefs.current.set(id, button)}
+                registerRef={(id, button) => tabRefs.current.set(id, button)}
                 />
             )
           }

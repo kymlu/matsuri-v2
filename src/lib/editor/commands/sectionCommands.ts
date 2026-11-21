@@ -8,42 +8,41 @@ import { incrementBracketSuffix } from "../../helpers/globalHelper";
 const copyPositions = <T extends { sectionId: string }>(positions: Record<string, T> | undefined, sectionId: string): Record<string, T> =>
   Object.fromEntries(Object.entries(positions ?? {}).map(([id, position]) => [id, { ...position, sectionId }]));
 
-const copyMovements = (movements: ChoreoSection["formation"]["dancerMovements"]) =>
-  movements && Object.fromEntries(Object.entries(movements).map(([id, movement]) => [id, { ...movement, points: movement.points.map(p => ({ ...p })) }]));
+// What a new section copies its positions from: the one it goes after, or the last one.
+const baseSection = (state: Choreo, afterIndex?: number) => state.sections[afterIndex ?? state.sections.length - 1];
 
 // What a new section is called unless it's named when added.
-export const newSectionName = (state: Choreo) => {
-  const previousSection = state.sections[state.sections.length - 1];
-  return previousSection ? incrementBracketSuffix(previousSection.name) : "セクション1";
+export const newSectionName = (state: Choreo, afterIndex?: number) => {
+  const base = baseSection(state, afterIndex);
+  return base ? incrementBracketSuffix(base.name) : "セクション1";
 }
 
-// Starts from where everyone ended in the last section, with no actions or paths.
-export function addSection(state: Choreo, id: string, name?: string): Choreo {
-  const previousSection = state.sections[state.sections.length - 1];
+// Starts from where everyone ended in the section before it, with no actions or paths. Goes at the end unless afterIndex is given.
+export function addSection(state: Choreo, id: string, name?: string, afterIndex?: number): Choreo {
+  const previousSection = baseSection(state, afterIndex);
+  const insertAt = afterIndex === undefined ? state.sections.length : afterIndex + 1;
+  const newSection = {
+    id: id,
+    name: name ?? newSectionName(state, afterIndex),
+    formation: {
+      dancerPositions: copyPositions(previousSection?.formation.dancerPositions, id),
+      propPositions: copyPositions(previousSection?.formation.propPositions, id),
+      // Positions are copied, so stacks are too; otherwise the people on top would just overlap.
+      dancerStacks: previousSection?.formation.dancerStacks?.map(s => [...s]),
+      propStacks: previousSection?.formation.propStacks?.map(s => [...s]),
+      dancerActions: [],
+    },
+  } as ChoreoSection;
 
   return {
     ...state,
-    sections: [
-      ...state.sections,
-      {
-        id: id,
-        name: name ?? newSectionName(state),
-        formation: {
-          dancerPositions: copyPositions(previousSection?.formation.dancerPositions, id),
-          propPositions: copyPositions(previousSection?.formation.propPositions, id),
-          // Positions are copied, so stacks are too; otherwise the people on top would just overlap.
-          dancerStacks: previousSection?.formation.dancerStacks?.map(s => [...s]),
-          propStacks: previousSection?.formation.propStacks?.map(s => [...s]),
-          dancerActions: [],
-        },
-      } as ChoreoSection
-    ]
+    sections: [...state.sections.slice(0, insertAt), newSection, ...state.sections.slice(insertAt)],
   };
 }
 
-// A full copy, inserted before the original. Actions and counts get new ids so the two sections never share them.
-export function duplicateSection(state: Choreo, section: ChoreoSection, index: number): Choreo {
-  const newId = crypto.randomUUID();
+// A copy of positions, actions, counts and the memo, inserted at index. Paths are left out: they lead in from the section before the original.
+// Actions and counts get new ids so the two sections never share them.
+export function duplicateSection(state: Choreo, section: ChoreoSection, index: number, newId: string = crypto.randomUUID()): Choreo {
   const duplicatedSection: ChoreoSection = {
     ...section,
     id: newId,
@@ -51,8 +50,8 @@ export function duplicateSection(state: Choreo, section: ChoreoSection, index: n
       ...section.formation,
       dancerPositions: copyPositions(section.formation.dancerPositions, newId),
       propPositions: copyPositions(section.formation.propPositions, newId),
-      dancerMovements: copyMovements(section.formation.dancerMovements),
-      propMovements: copyMovements(section.formation.propMovements),
+      dancerMovements: undefined,
+      propMovements: undefined,
       dancerActions: section.formation.dancerActions.map(action => ({
         ...action,
         id: crypto.randomUUID(),

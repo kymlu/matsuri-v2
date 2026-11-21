@@ -49,12 +49,25 @@ describe("addSection", () => {
     expect(added.formation.dancerPositions.d1).not.toBe(before.sections[0].formation.dancerPositions.d1);
   });
 
+  it("goes after the given section and starts from its positions", () => {
+    const before = makeChoreo();
+    const after = addSection({ ...before, sections: [...before.sections, { ...before.sections[0], id: "s9", name: "最後", formation: { ...before.sections[0].formation, dancerPositions: {} } }] }, "s2", "途中", 0);
+    expect(after.sections.map(s => s.id)).toEqual(["s1", "s2", "s9"]);
+    expect(Object.keys(after.sections[1].formation.dancerPositions)).toEqual(Object.keys(before.sections[0].formation.dancerPositions));
+    expect(Object.keys(before.sections[0].formation.dancerPositions).length).toBeGreaterThan(0);
+  });
+
   it("uses the name given", () => {
     expect(addSection(makeChoreo(), "s2", "間奏").sections[1]).toMatchObject({ id: "s2", name: "間奏" });
   });
 });
 
 describe("duplicateSection", () => {
+  it("uses the id given, so the editor can switch to the copy", () => {
+    const before = makeChoreo();
+    expect(duplicateSection(before, before.sections[0], 0, "copy").sections[0].id).toBe("copy");
+  });
+
   it("makes a full copy that shares nothing with the original", () => {
     const before = makeChoreo();
     const after = duplicateSection(before, before.sections[0], 0);
@@ -65,8 +78,8 @@ describe("duplicateSection", () => {
     expect(copy.id).not.toBe("s1");
     expect(copy.formation.dancerPositions.d1).toMatchObject({ x: 1, y: 1, sectionId: copy.id });
     expect(copy.formation.propPositions.p1.sectionId).toBe(copy.id);
-    expect(copy.formation.dancerMovements!.d1.points).toEqual([{ x: 3, y: 3 }]);
-    expect(copy.formation.dancerMovements!.d1.points[0]).not.toBe(original.formation.dancerMovements!.d1.points[0]);
+    expect(copy.formation.dancerMovements).toBeUndefined();
+    expect(copy.formation.propMovements).toBeUndefined();
 
     const [copyAction] = copy.formation.dancerActions;
     expect(copyAction).toMatchObject({ name: "ジャンプ", timings: [{ name: "1", dancerIds: ["d1"] }] });
