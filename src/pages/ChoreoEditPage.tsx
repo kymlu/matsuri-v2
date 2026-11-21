@@ -570,8 +570,8 @@ export default function ChoreoEditPage(props: {
   const [propManagerDialogOpen, setPropManagerDialogOpen] = useState(false);
   const [propSizeDialogOpen, setPropSizeDialogOpen] = useState(false);
   const [renameSectionDialogOpen, setRenameSectionDialogOpen] = useState(false);
-  // The id of a section being added: it's only created once it's named, so キャンセル leaves nothing behind.
-  const [newSectionId, setNewSectionId] = useState<string>();
+  // A section being added, at the end or after afterIndex: it's only created once it's named, so キャンセル leaves nothing behind.
+  const [newSection, setNewSection] = useState<{ id: string, afterIndex?: number }>();
   const [addNoteToSectionDialogOpen, setAddNoteToSectionDialogOpen] = useState(false);
   const [deleteSectionDialogOpen, setDeleteSectionDialogOpen] = useState(false);
   const [publishConfirmationDialogOpen, setPublishConfirmationDialogOpen] = useState(false);
@@ -1037,6 +1037,8 @@ export default function ChoreoEditPage(props: {
     setIsPropResizeLocked(true);
   }, [selectedIds, resetSelectedIds]);
 
+  const currentSectionIndex = history.presentState.state.sections.findIndex(s => strEquals(s.id, currentSection.id));
+
   return (
     <div className='flex flex-col justify-between w-screen h-[100svh] max-h-[100svh]'>
       <Header
@@ -1146,7 +1148,7 @@ export default function ChoreoEditPage(props: {
                 sections={history.presentState.state.sections}
                 showAddButton
                 onClickAddButton={(id: string) => {
-                  setNewSectionId(id);
+                  setNewSection({ id });
                 }}
                 onChangeSection={(section) => {
                   setCurrentSection(section);
@@ -1358,13 +1360,22 @@ export default function ChoreoEditPage(props: {
 
             <Dialog.Close>
               <IconLabelButton
+                icon="add"
+                label="この後に追加"
+                asDiv
+                onClick={() => setNewSection({ id: crypto.randomUUID(), afterIndex: currentSectionIndex })}
+                full />
+            </Dialog.Close>
+
+            <Dialog.Close>
+              <IconLabelButton
                 icon="fileCopy"
-                label="複製"
+                label="丸ごと複製"
                 asDiv
                 onClick={() => {
                   resetSelectedIds();
                   const newId = crypto.randomUUID();
-                  commitState(duplicateSection(history.presentState.state, currentSection, history.presentState.state.sections.findIndex(x => strEquals(x.id, currentSection.id)), newId), newId);
+                  commitState(duplicateSection(history.presentState.state, currentSection, currentSectionIndex + 1, newId), newId);
                 }}
                 full />
             </Dialog.Close>
@@ -1546,19 +1557,19 @@ export default function ChoreoEditPage(props: {
       </Dialog.Root>
       <Dialog.Root
         handle={newSectionDialog}
-        open={!!newSectionId}
-        onOpenChange={(isOpen) => { if (!isOpen) setNewSectionId(undefined); }}>
+        open={!!newSection}
+        onOpenChange={(isOpen) => { if (!isOpen) setNewSection(undefined); }}>
         <EditNameDialog
-          isOpen={!!newSectionId}
-          name={newSectionName(history.presentState.state)}
+          isOpen={!!newSection}
+          name={newSectionName(history.presentState.state, newSection?.afterIndex)}
           type="セクション"
           title="セクション追加"
           actionButtonText="追加"
           onSubmit={(name) => {
-            if (!newSectionId) return;
+            if (!newSection) return;
             resetSelectedIds();
-            commitState(addSection(history.presentState.state, newSectionId, name), newSectionId);
-            setNewSectionId(undefined);
+            commitState(addSection(history.presentState.state, newSection.id, name, newSection.afterIndex), newSection.id);
+            setNewSection(undefined);
           }}/>
       </Dialog.Root>
       <Dialog.Root
@@ -1584,9 +1595,6 @@ export default function ChoreoEditPage(props: {
           name={currentSection.name}
           verb="削除"
           onSubmit={() => {
-            const currentSectionIndex = history.presentState.state.sections
-              .findIndex((s) => strEquals(s.id, currentSection.id));
-
             const newSectionIndex = currentSectionIndex > 0 ? currentSectionIndex - 1 : 1;
 
             commitState(removeSection(history.presentState.state, currentSection.id), history.presentState.state.sections[newSectionIndex].id);
