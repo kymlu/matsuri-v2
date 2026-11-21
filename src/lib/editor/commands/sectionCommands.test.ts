@@ -78,8 +78,8 @@ describe("duplicateSection", () => {
     expect(copy.id).not.toBe("s1");
     expect(copy.formation.dancerPositions.d1).toMatchObject({ x: 1, y: 1, sectionId: copy.id });
     expect(copy.formation.propPositions.p1.sectionId).toBe(copy.id);
-    expect(copy.formation.dancerMovements!.d1.points).toEqual([{ x: 3, y: 3 }]);
-    expect(copy.formation.dancerMovements!.d1.points[0]).not.toBe(original.formation.dancerMovements!.d1.points[0]);
+    expect(copy.formation.dancerMovements).toBeUndefined();
+    expect(copy.formation.propMovements).toBeUndefined();
 
     const [copyAction] = copy.formation.dancerActions;
     expect(copyAction).toMatchObject({ name: "ジャンプ", timings: [{ name: "1", dancerIds: ["d1"] }] });
