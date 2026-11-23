@@ -312,7 +312,7 @@ function SortableActionSection ({
   </div>
 }
 
-function PatternChooser({ onPick, onOwn }: { onPick: (pattern: CountPattern) => void, onOwn: () => void }) {
+export function PatternChooser({ onPick, onOwn }: { onPick: (pattern: CountPattern) => void, onOwn: () => void }) {
   return <>
     <div className="grid grid-cols-2 gap-1.5 pt-1.5">
       {

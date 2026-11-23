@@ -6,12 +6,17 @@ import { LONG_NAME_LENGTH, SHORT_NAME_LENGTH } from "../../lib/consts/consts";
 import { RosterList, RosterName } from "../../models/roster";
 import { formatPropSize, getPropDefaultsChange, PropLook, toNameKey } from "../../lib/helpers/rosterHelper";
 import RosterPicker from "../inputs/RosterPicker";
+import CustomAutocomplete from "../inputs/CustomAutocomplete";
+import { RosterSong, RosterSongSection } from "../../models/song";
+import { findSongSection } from "../../lib/helpers/songHelper";
+import { SongActionsCheckbox } from "../common/SongFields";
 
 type EditNameDialogProps = {
   name?: string,
   required?: boolean,
   type: "道具" | "隊列表" | "イベント" | "セクション" | "障害物",
-  onSubmit: (name: string, look?: Partial<PropLook>) => void,
+  // songSection: the song section whose 振り to add, when 「…の振りとカウントも追加」 is ticked.
+  onSubmit: (name: string, look?: Partial<PropLook>, songSection?: RosterSongSection) => void,
   title?: string, // defaults to 「<type>名」
   actionButtonText?: string,
   onClose?: () => void,
@@ -24,12 +29,18 @@ type EditNameDialogProps = {
   pickerFilter?: string,
   onPickerFilterChange?: (filter: string) => void,
   prop?: PropLook, // the prop's current size and colour, to tell whether a picked name would change them
+  // Sections only: the 隊列表's song suggests its section names; those in usedNames are marked 使用中.
+  song?: RosterSong,
+  usedNames?: string[],
+  offerSongActions?: boolean, // adding a section: offer to bring the song section's 振り
 }
 
 export default function EditNameDialog({
   name, required = true, type, onSubmit, title, actionButtonText, onClose,
   isOpen, roster, isPickerOpen = true, onPickerOpenChange, pickerFilter = "all", onPickerFilterChange, prop,
+  song, usedNames = [], offerSongActions,
 }: EditNameDialogProps) {
+  const [isAddingSongActions, setIsAddingSongActions] = useState(true);
   const [newName, setNewName] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   // The 名簿 name whose size and colour are on offer: the prop's own name when it opens, or one picked since.
@@ -47,11 +58,14 @@ export default function EditNameDialog({
       setIsTyping(false);
       setPickedName(type === "道具" ? roster?.names.find(n => toNameKey(n.name) === toNameKey(name ?? "")) : undefined);
       setIsApplyingLook(false);
+      setIsAddingSongActions(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, name]);
 
   const showPicker = type === "道具" && roster !== undefined && roster.names.length > 0;
+  const songSection = offerSongActions ? findSongSection(song, newName) : undefined;
+  const usedKeys = useMemo(() => new Set(usedNames.map(toNameKey)), [usedNames]);
   const lookChange = useMemo(() =>
     prop && pickedName ? getPropDefaultsChange(prop, pickedName) : undefined,
   [prop, pickedName]);
@@ -61,21 +75,40 @@ export default function EditNameDialog({
     actionButtonText={actionButtonText}
     // On a phone, focusing the input would open the keyboard over the names you came to pick.
     initialFocus={showPicker && isPickerOpen ? (openType) => openType !== "touch" : undefined}
-    onSubmit={() => { onSubmit(newName.trim(), lookChange && isApplyingLook ? lookChange : undefined) }}
+    onSubmit={() => {
+      const look = lookChange && isApplyingLook ? lookChange : undefined;
+      const withActions = songSection && songSection.actions.length > 0 && isAddingSongActions ? songSection : undefined;
+      if (withActions) onSubmit(newName.trim(), look, withActions);
+      else onSubmit(newName.trim(), look);
+    }}
     onClose={() => onClose?.()}
     isActionButtonDisabled={required && isNullOrUndefinedOrBlank(newName.trim())}
     >
-    <TextInput
-      ref={inputRef}
-      required={required}
-      defaultValue={name ?? ""}
-      onContentChange={ (newName) => {
-        setNewName(newName);
-        setIsTyping(true);
-        setPickedName(undefined);
-      }}
-      maxLength={type === "イベント" || type === "隊列表" ? LONG_NAME_LENGTH : SHORT_NAME_LENGTH}
-      showLength/>
+    {
+      type === "セクション" && song && song.sections.length > 0
+        // The song's sections, always in song order; those already in the 隊列表 stay in place, marked 使用中.
+        ? <CustomAutocomplete
+            key={name ?? ""}
+            required={required}
+            defaultValue={name ?? ""}
+            options={song.sections.map(s => s.name)}
+            itemSuffix={(item) => usedKeys.has(toNameKey(item)) ? <span className="text-xs opacity-75">使用中</span> : undefined}
+            onContentChange={setNewName}
+            showAllUntilTyped
+            maxLength={SHORT_NAME_LENGTH}
+            showLength/>
+        : <TextInput
+            ref={inputRef}
+            required={required}
+            defaultValue={name ?? ""}
+            onContentChange={ (newName) => {
+              setNewName(newName);
+              setIsTyping(true);
+              setPickedName(undefined);
+            }}
+            maxLength={type === "イベント" || type === "隊列表" ? LONG_NAME_LENGTH : SHORT_NAME_LENGTH}
+            showLength/>
+    }
     {
       showPicker &&
       <RosterPicker
@@ -111,6 +144,10 @@ export default function EditNameDialog({
           </span>
         </span>
       </label>
+    }
+    {
+      songSection && songSection.actions.length > 0 &&
+      <SongActionsCheckbox section={songSection} checked={isAddingSongActions} onChange={setIsAddingSongActions}/>
     }
   </BaseEditDialog>
 }

@@ -123,3 +123,12 @@ Behaviour that used to be in the in-app help but doesn't help a reader finish a 
 
 - Existing members' addresses can't be invited again.
 - Admins can't change their own role or remove themselves.
+
+## 曲
+
+- A 隊列表 keeps a copy of its song's name (`songName`), set in 新規作成 or 隊列情報変更. Renaming or deleting the song leaves the 隊列表 without one until it's picked again; nothing in the 隊列表 changes.
+- The 曲 select only shows when the team has songs, and songs are only loaded for logged-in editors and admins, like the 名簿.
+- Adding a section fills in the song's next section: from the section it goes after (the last one for ＋), looking back to the nearest one that's in the song, the first later song section the 隊列表 doesn't have yet. If there's none, the usual name (e.g. サビ(2)).
+- The section name field lists every song section in song order; ones already in the 隊列表 stay in place, marked 使用中, and can still be picked.
+- 「…の振りとカウントも追加」 shows only when the name is a song section with 振り. It starts ticked, adds the 振り with nobody on any count, and is one undo step together with the section. Renaming a section never adds 振り.
+- Song names and section names are unique (full/half width count as the same); 振り names are unique within a section. Limits match the editor: 5 振り per section, 16 counts per 振り.

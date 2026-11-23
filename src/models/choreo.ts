@@ -40,6 +40,8 @@ export const ChoreoSchema = BaseModelSchema.extend({
   version: z.number().optional(),
   isDirty: z.boolean().optional(),
   teamId: z.string().optional(),
+  // 曲: a copy of the song's name, not a reference. A renamed or deleted song leaves no song.
+  songName: z.string().optional(),
 });
 export type Choreo = z.infer<typeof ChoreoSchema>;
 

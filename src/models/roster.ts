@@ -5,6 +5,9 @@ export const RosterKindSchema = z.enum(["dancer", "prop"]);
 
 export type RosterKind = z.infer<typeof RosterKindSchema>;
 
+// The 名簿 page's tabs: the two name lists, and 曲.
+export type RosterTab = RosterKind | "song";
+
 export const RosterCategorySchema = z.object({
   id: z.string().nonempty(),
   name: z.string().nonempty(),
