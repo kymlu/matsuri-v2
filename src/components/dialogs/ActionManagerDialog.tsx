@@ -28,7 +28,7 @@ const countNames = (names: string[]) => names.reduce((acc, name) => {
 }, {} as Record<string, number>);
 
 type ActionErrors = { name?: string, counts?: string };
-const NAME_BLANK = "アクション名が空";
+const NAME_BLANK = "振り名が空";
 const COUNT_BLANK = "カウント名が空";
 
 // Deleted actions and counts are left out: their names are free to reuse.
@@ -38,7 +38,7 @@ function getActionErrors(liveActions: DancerAction[]): Record<string, ActionErro
     const name = a.name.trim();
     const counts = countNames(a.timings.map(t => t.name));
     return [a.id, {
-      name: !name ? NAME_BLANK : actionNames[name] > 1 ? "アクション名が重複" : undefined,
+      name: !name ? NAME_BLANK : actionNames[name] > 1 ? "振り名が重複" : undefined,
       // Duplicates first: they show at once, blanks can wait.
       counts: a.timings.length === 0 ? "カウントがありません"
         : Object.entries(counts).some(([name, n]) => name && n > 1) ? "カウント名が重複"
@@ -120,7 +120,7 @@ export function ActionManagerDialog({
         onClick={addAction}
         primary
         disabled={liveActions.length >= 5}
-        label="アクション追加"
+        label="振り追加"
         />
       <DndContext
         modifiers={[restrictToParentElement]}
@@ -247,7 +247,7 @@ function SortableActionSection ({
         <TextInput
           hasError={!!nameError}
           maxLength={ACTION_NAME_LENGTH}
-          placeholder="アクション名"
+          placeholder="振り名"
           defaultValue={action.name}
           onContentChange={(name) => onUpdate(a => ({ ...a, name }))}/>
       </div>

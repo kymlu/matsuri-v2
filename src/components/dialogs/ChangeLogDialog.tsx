@@ -238,7 +238,7 @@ function OverallChanges({ log, sectionNames, stageType }: OverallChangesProps) {
     ])],
     ["メモ", rows(memos.length > 0 ? [{ label: "変更", text: sectionList(memos) }] : [])],
     ["ダンサー", rows(listChangeRows(dancers))],
-    ["アクション", actions.length > 0 && <ActionChanges lines={actions} sectionNames={sectionNames}/>],
+    ["振り", actions.length > 0 && <ActionChanges lines={actions} sectionNames={sectionNames}/>],
     ["道具", rows([
       ...listChangeRows(props),
       ...props.lines.map(x => ({ text: `「${x.name}」：${[

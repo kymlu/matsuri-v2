@@ -75,17 +75,17 @@ describe("ActionManagerDialog deleting", () => {
   it("shows a duplicate name under its card, on closed cards too", async () => {
     renderDialog(makeSection(), jest.fn());
     fireEvent.input(await screen.findByDisplayValue("ウェーブ"), { target: { value: "ジャンプ" } });
-    expect(screen.getAllByText("アクション名が重複")).toHaveLength(2);
+    expect(screen.getAllByText("振り名が重複")).toHaveLength(2);
     expect(screen.getByRole("button", { name: "保存" })).toBeDisabled();
   });
 });
 
 describe("ActionManagerDialog count patterns", () => {
   const addAction = async () => {
-    fireEvent.click(await screen.findByRole("button", { name: /アクション追加/ }));
+    fireEvent.click(await screen.findByRole("button", { name: /振り追加/ }));
   };
   const countValues = () => screen.queryAllByRole("textbox")
-    .filter(i => i.getAttribute("placeholder") !== "アクション名")
+    .filter(i => i.getAttribute("placeholder") !== "振り名")
     .map(i => (i as HTMLInputElement).value);
 
   it("starts a new action with the patterns, in pairs, and no count boxes", async () => {
@@ -139,10 +139,10 @@ describe("ActionManagerDialog count patterns", () => {
     renderDialog(makeSection(), jest.fn());
     await addAction();
     fireEvent.click(screen.getByRole("button", { name: /ウェーブ/ }));
-    expect(screen.getByText("アクション名が空")).toBeInTheDocument();
+    expect(screen.getByText("振り名が空")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /名前なし/ }));
     expect(screen.getByRole("button", { name: /^奇数:/ })).toBeInTheDocument();
-    fireEvent.input(screen.getByPlaceholderText("アクション名"), { target: { value: "回転" } });
+    fireEvent.input(screen.getByPlaceholderText("振り名"), { target: { value: "回転" } });
     fireEvent.click(screen.getByRole("button", { name: /ウェーブ/ }));
     expect(screen.getByText("カウントがありません")).toBeInTheDocument();
   });
@@ -151,7 +151,7 @@ describe("ActionManagerDialog count patterns", () => {
     const onSubmit = jest.fn();
     renderDialog(makeSection(), onSubmit);
     await addAction();
-    fireEvent.input(screen.getByPlaceholderText("アクション名"), { target: { value: "回転" } });
+    fireEvent.input(screen.getByPlaceholderText("振り名"), { target: { value: "回転" } });
     fireEvent.click(screen.getByRole("button", { name: /^偶数:/ }));
     fireEvent.click(screen.getByRole("button", { name: "保存" }));
     const saved = onSubmit.mock.calls[0][0][2];
@@ -169,25 +169,25 @@ describe("ActionManagerDialog count patterns", () => {
 
 describe("ActionManagerDialog error timing", () => {
   const addAction = async () => {
-    fireEvent.click(await screen.findByRole("button", { name: /アクション追加/ }));
+    fireEvent.click(await screen.findByRole("button", { name: /振り追加/ }));
   };
-  const countInputs = () => screen.getAllByRole("textbox").filter(i => i.getAttribute("placeholder") !== "アクション名");
+  const countInputs = () => screen.getAllByRole("textbox").filter(i => i.getAttribute("placeholder") !== "振り名");
   const isAfter = (a: Element, b: Element) => !!(b.compareDocumentPosition(a) & Node.DOCUMENT_POSITION_FOLLOWING);
 
   it("waits to say a new action's name is blank until the field is left blank", async () => {
     renderDialog(makeSection(), jest.fn());
     await addAction();
-    expect(screen.queryByText("アクション名が空")).not.toBeInTheDocument();
+    expect(screen.queryByText("振り名が空")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "保存" })).toBeDisabled();
-    fireEvent.blur(screen.getByPlaceholderText("アクション名"));
-    expect(screen.getByText("アクション名が空")).toBeInTheDocument();
+    fireEvent.blur(screen.getByPlaceholderText("振り名"));
+    expect(screen.getByText("振り名が空")).toBeInTheDocument();
   });
 
   it("points out a blank name once a pattern is chosen", async () => {
     renderDialog(makeSection(), jest.fn());
     await addAction();
     fireEvent.click(screen.getByRole("button", { name: /^奇数:/ }));
-    expect(screen.getByText("アクション名が空")).toBeInTheDocument();
+    expect(screen.getByText("振り名が空")).toBeInTheDocument();
   });
 
   it("waits on blank counts after 自分で入力, and two blanks aren't duplicates", async () => {
@@ -213,14 +213,14 @@ describe("ActionManagerDialog error timing", () => {
   it("shows duplicates at once on a new action", async () => {
     renderDialog(makeSection(), jest.fn());
     await addAction();
-    fireEvent.input(screen.getByPlaceholderText("アクション名"), { target: { value: "ウェーブ" } });
-    expect(screen.getAllByText("アクション名が重複").length).toBeGreaterThan(0);
+    fireEvent.input(screen.getByPlaceholderText("振り名"), { target: { value: "ウェーブ" } });
+    expect(screen.getAllByText("振り名が重複").length).toBeGreaterThan(0);
   });
 
   it("shows a saved action's blank name at once, under the counts", async () => {
     renderDialog(makeSection(), jest.fn());
     fireEvent.input(await screen.findByDisplayValue("ウェーブ"), { target: { value: "" } });
-    const error = screen.getByText("アクション名が空");
+    const error = screen.getByText("振り名が空");
     expect(isAfter(error, countInputs()[countInputs().length - 1])).toBe(true);
     expect(isAfter(screen.getByRole("button", { name: /閉じる/ }), error)).toBe(true);
   });
@@ -228,9 +228,9 @@ describe("ActionManagerDialog error timing", () => {
   it("keeps a shown error after the card is closed and opened again", async () => {
     renderDialog(makeSection(), jest.fn());
     await addAction();
-    fireEvent.blur(screen.getByPlaceholderText("アクション名"));
+    fireEvent.blur(screen.getByPlaceholderText("振り名"));
     fireEvent.click(screen.getByRole("button", { name: /ウェーブ/ }));
     fireEvent.click(screen.getByRole("button", { name: /名前なし/ }));
-    expect(screen.getByText("アクション名が空")).toBeInTheDocument();
+    expect(screen.getByText("振り名が空")).toBeInTheDocument();
   });
 });

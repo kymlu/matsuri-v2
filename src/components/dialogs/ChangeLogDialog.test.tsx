@@ -192,7 +192,7 @@ describe("ChangeLogDialog", () => {
       renderDialog("", makeLog({ memos: ["s1"] }));
       expect(screen.getByText("メモ")).toBeInTheDocument();
       expect(screen.queryByText("イベント")).not.toBeInTheDocument();
-      expect(screen.queryByText("アクション")).not.toBeInTheDocument();
+      expect(screen.queryByText("振り")).not.toBeInTheDocument();
       expect(screen.queryByText("道具")).not.toBeInTheDocument();
     });
 
