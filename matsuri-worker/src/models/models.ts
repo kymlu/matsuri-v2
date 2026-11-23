@@ -22,3 +22,25 @@ export type RosterResponse = {
   dancers: RosterList,
   props: RosterList,
 }
+// 曲: a song's sections in order, each with its 振り (actions) and their count names.
+export type RosterSongAction = {
+  id: string,
+  name: string,
+  counts: string[],
+};
+
+export type RosterSongSection = {
+  id: string,
+  name: string,
+  actions: RosterSongAction[],
+};
+
+export type RosterSong = {
+  id: string,
+  name: string,
+  sections: RosterSongSection[],
+};
+
+export type RosterSongsResponse = {
+  songs: RosterSong[],
+};

@@ -18,6 +18,9 @@ import { getRoster } from "../lib/helpers/apiHelper";
 import { buildStartingLayout, StartingProp } from "../lib/helpers/startingLayoutHelper";
 import StartingCastStep, { RosterLoadState } from "../components/common/StartingCastStep";
 import BaseEditDialog from "../components/dialogs/BaseEditDialog";
+import { useSongs } from "../lib/hooks/useSongs";
+import { findSong, toDancerActions } from "../lib/helpers/songHelper";
+import { SongActionsCheckbox, SongSelect } from "../components/common/SongFields";
 
 interface FormationForm {
   name: string;
@@ -67,6 +70,11 @@ export function NewChoreoPage({
   const [propCounts, setPropCounts] = useState<[string, number][]>([]);
   const [sectionId] = useState(() => crypto.randomUUID());
   const [isConfirmingLeave, setIsConfirmingLeave] = useState(false);
+  // 曲: its first section names the first section, and can bring that section's 振り.
+  const songs = useSongs(teamId, canUseRoster);
+  const [songName, setSongName] = useState<string>();
+  const [isAddingSongActions, setIsAddingSongActions] = useState(true);
+  const firstSongSection = findSong(songs, songName)?.sections[0];
 
   // The 名簿 loads when step 3 first opens, so steps 1 and 2 don't wait for it.
   const loadRoster = () => {
@@ -171,15 +179,16 @@ export function NewChoreoPage({
         },
         yAxis: form.stageType === "parade" ? "bottom-up" : "top-down",
       },
+      songName: songName,
       dancers: dancers,
       props: props,
       obstacles: {},
       sections: [{
         id: sectionId,
-        name: "セクション1",
+        name: firstSongSection?.name ?? "セクション1",
         order: 1,
         formation: {
-          dancerActions: [],
+          dancerActions: firstSongSection && isAddingSongActions ? toDancerActions(firstSongSection) : [],
           dancerPositions: dancerPositions,
           propPositions: propPositions
         }}],
@@ -268,6 +277,16 @@ export function NewChoreoPage({
             {
               !hasEventName &&
               <p className="!mt-1 text-sm text-muted">イベント名を入力すると日程を設定できます</p>
+            }
+            {
+              songs && songs.length > 0 &&
+              <div>
+                <SongSelect songs={songs} songName={songName} onChange={setSongName}/>
+                {
+                  firstSongSection && firstSongSection.actions.length > 0 &&
+                  <SongActionsCheckbox section={firstSongSection} checked={isAddingSongActions} onChange={setIsAddingSongActions}/>
+                }
+              </div>
             }
           </div>
         )}

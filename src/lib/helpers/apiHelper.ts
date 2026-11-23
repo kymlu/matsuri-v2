@@ -4,6 +4,7 @@ import { Team } from "../../models/team";
 import { RoleType, User } from "../../models/user";
 import { AddRosterNamesResult, AddRosterNamesResultSchema, PropDefaults, Roster, RosterKind, RosterDefaultsItem, RosterDefaultsResult, RosterDefaultsResultSchema, RosterLink, RosterLinksResult, RosterLinksResultSchema, RosterRemoveResult, RosterRemoveResultSchema, RosterRestoreResult, RosterRestoreResultSchema, RosterSchema } from "../../models/roster";
 import * as z from "zod";
+import { AddSongSectionsResult, AddSongSectionsResultSchema, RosterSong, RosterSongs, RosterSongsSchema, RosterSongsWithId, RosterSongsWithIdSchema } from "../../models/song";
 
 const getApiUrl = (endpoint: 
   "auth/login" | 
@@ -33,9 +34,14 @@ const getApiUrl = (endpoint:
   "roster/categories/save" |
   "roster/links" |
   "roster/names/restore" |
-  "roster/names/defaults") => {
+  "roster/names/defaults" |
+  SongEndpoint) => {
   return `/api/${endpoint}`
 }
+
+type SongEndpoint = "roster/songs" | "roster/songs/add" | "roster/songs/update" | "roster/songs/remove"
+  | "roster/songs/sections/add" | "roster/songs/sections/update" | "roster/songs/sections/remove" | "roster/songs/sections/reorder"
+  | "roster/songs/actions/save" | "roster/songs/actions/remove" | "roster/songs/actions/reorder";
 
 export const loginUserToTeam = async (
   teamId: string,
@@ -586,7 +592,7 @@ export const getRoster = async (teamId: string): Promise<Roster> => {
 // The roster routes all POST a body and answer with JSON in a known shape.
 // A response in the wrong shape is reported as 500, so it isn't mistaken for a network failure.
 const postRoster = async <T,>(
-  endpoint: "roster/names/add" | "roster/names/update" | "roster/names/remove" | "roster/categories/save" | "roster/links" | "roster/names/restore" | "roster/names/defaults",
+  endpoint: "roster/names/add" | "roster/names/update" | "roster/names/remove" | "roster/categories/save" | "roster/links" | "roster/names/restore" | "roster/names/defaults" | Exclude<SongEndpoint, "roster/songs">,
   teamId: string,
   body: object,
   schema: z.ZodType<T>,
@@ -687,3 +693,54 @@ export const restoreRosterNames = (
   onSuccess: (result: RosterRestoreResult) => void,
   onFailure: (status: number) => void,
 ) => postRoster("roster/names/restore", teamId, { ids }, RosterRestoreResultSchema, onSuccess, onFailure);
+
+// ---- 曲 ----
+
+export const getSongs = async (teamId: string): Promise<RosterSong[]> => {
+  const response = await fetch(`${getApiUrl("roster/songs")}?team_id=${teamId}`, {
+    method: "GET",
+    credentials: "include",
+  });
+  if (!response.ok) {
+    const data = await response.json() as ErrorResponse;
+    throw new Error(`getSongs failed: ${response.status} message: ${data.message}`);
+  }
+  const parsed = RosterSongsSchema.safeParse(await response.json());
+  if (!parsed.success) {
+    throw new Error(`getSongs returned an unexpected shape: ${parsed.error.message}`);
+  }
+  return parsed.data.songs;
+}
+
+type SongsCallbacks<T = RosterSongs> = [onSuccess: (result: T) => void, onFailure: (status: number) => void];
+
+export const addSong = (teamId: string, name: string, ...cb: SongsCallbacks<RosterSongsWithId>) =>
+  postRoster("roster/songs/add", teamId, { name }, RosterSongsWithIdSchema, ...cb);
+
+export const renameSong = (teamId: string, id: string, name: string, ...cb: SongsCallbacks) =>
+  postRoster("roster/songs/update", teamId, { id, name }, RosterSongsSchema, ...cb);
+
+export const removeSong = (teamId: string, id: string, ...cb: SongsCallbacks) =>
+  postRoster("roster/songs/remove", teamId, { id }, RosterSongsSchema, ...cb);
+
+export const addSongSections = (teamId: string, songId: string, names: string[], ...cb: SongsCallbacks<AddSongSectionsResult>) =>
+  postRoster("roster/songs/sections/add", teamId, { song_id: songId, names }, AddSongSectionsResultSchema, ...cb);
+
+export const renameSongSection = (teamId: string, id: string, name: string, ...cb: SongsCallbacks) =>
+  postRoster("roster/songs/sections/update", teamId, { id, name }, RosterSongsSchema, ...cb);
+
+export const removeSongSection = (teamId: string, id: string, ...cb: SongsCallbacks) =>
+  postRoster("roster/songs/sections/remove", teamId, { id }, RosterSongsSchema, ...cb);
+
+export const reorderSongSections = (teamId: string, songId: string, ids: string[], ...cb: SongsCallbacks) =>
+  postRoster("roster/songs/sections/reorder", teamId, { song_id: songId, ids }, RosterSongsSchema, ...cb);
+
+// Adds a 振り when id is left out, otherwise replaces it.
+export const saveSongAction = (teamId: string, sectionId: string, id: string | undefined, name: string, counts: string[], ...cb: SongsCallbacks<RosterSongsWithId>) =>
+  postRoster("roster/songs/actions/save", teamId, { section_id: sectionId, id, name, counts }, RosterSongsWithIdSchema, ...cb);
+
+export const removeSongAction = (teamId: string, id: string, ...cb: SongsCallbacks) =>
+  postRoster("roster/songs/actions/remove", teamId, { id }, RosterSongsSchema, ...cb);
+
+export const reorderSongActions = (teamId: string, sectionId: string, ids: string[], ...cb: SongsCallbacks) =>
+  postRoster("roster/songs/actions/reorder", teamId, { section_id: sectionId, ids }, RosterSongsSchema, ...cb);

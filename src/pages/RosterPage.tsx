@@ -3,7 +3,7 @@ import { Dialog } from "@base-ui/react";
 import { Grid } from "react-loader-spinner";
 import classNames from "classnames";
 import { Team } from "../models/team";
-import { Roster, RosterDefaultsItem, RosterDefaultsResult, RosterKind, RosterLinksResult, RosterName, rosterListOf } from "../models/roster";
+import { Roster, RosterDefaultsItem, RosterDefaultsResult, RosterKind, RosterLinksResult, RosterName, RosterTab, rosterListOf } from "../models/roster";
 import { getRoster, removeRosterNames, restoreRosterNames, updateRosterDefaults } from "../lib/helpers/apiHelper";
 import { BulkLookField, countHidden, formatPropSize, getDefaultsSummary, getLinksSummary, getRemovedSummary, getSelectAllState, hasAnyDefaults, rosterCounter, sortRosterNames } from "../lib/helpers/rosterHelper";
 import { matchesSearch } from "../lib/helpers/myDancerHelper";
@@ -26,22 +26,23 @@ import ConfirmDeletionDialog from "../components/dialogs/ConfirmDeletionDialog";
 import BaseEditDialog from "../components/dialogs/BaseEditDialog";
 import { SEARCH_NAME_LENGTH } from "../lib/consts/consts";
 import { useHelp } from "../components/help/HelpContext";
+import RosterTabs from "../components/common/RosterTabs";
+import SongRosterPage from "./SongRosterPage";
 
 type RosterPageProps = {
   goToHomePage: () => void,
   team: Team,
   // Kept by App, so the last tab is remembered for the session.
-  tab: RosterKind,
-  onTabChange: (tab: RosterKind) => void,
+  tab: RosterTab,
+  onTabChange: (tab: RosterTab) => void,
 }
 
-const TABS: { kind: RosterKind, label: string }[] = [
-  { kind: "dancer", label: "ダンサー" },
-  { kind: "prop", label: "道具" },
-];
+const KINDS: RosterKind[] = ["dancer", "prop"];
 
 // 名簿: the team's lists of dancer and prop names and their categories, kept by editors and admins.
-export default function RosterPage({ goToHomePage, team, tab, onTabChange }: RosterPageProps) {
+export default function RosterPage({ goToHomePage, team, tab: currentTab, onTabChange }: RosterPageProps) {
+  // 曲 is its own page; this one keeps the last name list underneath, so its hooks always run.
+  const tab: RosterKind = currentTab === "song" ? "dancer" : currentTab;
   const openHelp = useHelp();
   const [roster, setRoster] = useState<Roster>();
   const [loadFailed, setLoadFailed] = useState(false);
@@ -81,7 +82,7 @@ export default function RosterPage({ goToHomePage, team, tab, onTabChange }: Ros
   }, [team.id]);
 
   // Search and filter belong to one tab's list, so they start over on the other tab.
-  const changeTab = (kind: RosterKind) => {
+  const changeTab = (kind: RosterTab) => {
     setFilter("all");
     setSearch("");
     onTabChange(kind);
@@ -216,6 +217,10 @@ export default function RosterPage({ goToHomePage, team, tab, onTabChange }: Ros
 
   const categoryName = (id: string) => list?.categories.find(c => c.id === id)?.name ?? "";
 
+  if (currentTab === "song") {
+    return <SongRosterPage goToHomePage={goToHomePage} team={team} onTabChange={changeTab}/>;
+  }
+
   return <div className="bg-app h-[100svh]">
     <div className="w-full max-w-full h-full grid grid-cols-[minmax(0,1fr)] grid-rows-[auto,minmax(0,1fr),auto] overflow-hidden">
       <div className="px-4 pt-4 space-y-2">
@@ -231,24 +236,7 @@ export default function RosterPage({ goToHomePage, team, tab, onTabChange }: Ros
             // Hidden while selecting, so a selection never mixes dancers and props.
             isSelecting
               ? <IconLabelButton icon="check" label="完了" primary onClick={stopSelecting}/>
-              : <div role="tablist" aria-label="名簿の種類" className="flex self-end overflow-hidden border rounded-md shrink-0 border-primary">
-                {
-                  TABS.map(t =>
-                    <button
-                      key={t.kind}
-                      type="button"
-                      role="tab"
-                      aria-selected={tab === t.kind}
-                      onClick={() => changeTab(t.kind)}
-                      className={classNames("px-3 py-0.5 text-sm font-semibold", {
-                        "bg-primary-fill text-white": tab === t.kind,
-                        "bg-surface text-primary": tab !== t.kind,
-                      })}>
-                      {t.label}
-                    </button>
-                  )
-                }
-                </div>
+              : <RosterTabs tab={tab} onChange={changeTab}/>
           }
         </header>
         {
@@ -373,15 +361,15 @@ export default function RosterPage({ goToHomePage, team, tab, onTabChange }: Ros
 
       {/* One bar per tab, so a half-typed list on one tab survives a look at the other. */}
       {
-        roster && TABS.map(t =>
-          <div key={t.kind} hidden={isSelecting || tab !== t.kind}>
+        roster && KINDS.map(kind =>
+          <div key={kind} hidden={isSelecting || tab !== kind}>
             <RosterAddBar
               teamId={team.id}
-              kind={t.kind}
-              isVisible={!isSelecting && tab === t.kind}
-              list={rosterListOf(roster, t.kind)}
+              kind={kind}
+              isVisible={!isSelecting && tab === kind}
+              list={rosterListOf(roster, kind)}
               // Filtering to pick names in selection mode shouldn't pre-select categories for adding.
-              filter={!isSelecting && tab === t.kind ? filter : "all"}
+              filter={!isSelecting && tab === kind ? filter : "all"}
               onRosterChange={setRoster}/>
           </div>
         )

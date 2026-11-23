@@ -62,6 +62,14 @@ describe("addSection", () => {
   });
 });
 
+describe("addSection with 振り", () => {
+  it("starts with the 振り given, so adding a section from a song is one edit", () => {
+    const actions = [{ id: "a1", name: "回転", timings: [{ id: "t1", name: "1", dancerIds: [] }] }];
+    const after = addSection(makeChoreo(), "new", "サビ", undefined, actions);
+    expect(after.sections[after.sections.length - 1].formation.dancerActions).toEqual(actions);
+  });
+});
+
 describe("duplicateSection", () => {
   it("uses the id given, so the editor can switch to the copy", () => {
     const before = makeChoreo();

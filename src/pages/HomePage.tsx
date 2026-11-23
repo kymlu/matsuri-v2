@@ -43,6 +43,7 @@ import { useTheme } from "../lib/helpers/themeHelper"
 import { DancerCount, PropCount, StageSize } from "../components/common/IconInfo"
 import { checkUnlockedChoreo, getLastSeenChoreo, setLastSeenChoreo, setUnlockedChoreo } from "../lib/dataAccess/LocalStorageController"
 import AcceptInviteDialog from "../components/dialogs/AcceptInviteDialog"
+import { useSongs } from "../lib/hooks/useSongs"
 
 type HomePageProps = {
   buildInfo?: string,
@@ -449,8 +450,11 @@ export default function HomePage({
 
   const handleEditChoreoName = useCallback((choreo: ChoreoWithStatus) => {
     setEditingChoreo(choreo);
+    setEditingSongName(undefined);
+    // The list only has basic details; the song's name is in the full choreo.
+    getChoreo(choreo.id).then(c => setEditingSongName(c?.songName));
     setEditChoreoInfoDialogOpen(true);
-  }, []);
+  }, [getChoreo]);
 
   const handleDeleteChoreo = useCallback((choreo: ChoreoWithStatus) => {
     setDeleteChoreoVerb("削除");
@@ -512,6 +516,8 @@ export default function HomePage({
 
   // Only editors can open the 名簿, so the button only shows for them.
   const canUseRoster = isLoggedIn && !!team?.id && !isViewer;
+  const songs = useSongs(team?.id, canUseRoster);
+  const [editingSongName, setEditingSongName] = useState<string>();
 
   return (
     <div className="bg-app">
@@ -794,11 +800,15 @@ export default function HomePage({
             choreo={editingChoreo}
             eventList={eventList}
             onClose={() => {setEditingChoreo(undefined)}}
-            onSubmit={(name: string, event: string, startDate?: string, endDate?: string) => {
+            songs={songs}
+            songName={editingSongName}
+            onSubmit={(name: string, event: string, startDate?: string, endDate?: string, songName?: string) => {
               if (editingChoreo) {
                 getChoreo(editingChoreo.id).then(choreo => {
                   if (choreo) {
-                    saveChoreo({...choreo, name, event, startDate, endDate, teamId: team?.id}, () => {
+                    // Without a song select (no songs), the 隊列表 keeps whatever it had.
+                    const newSongName = songs && songs.length > 0 ? songName : choreo.songName;
+                    saveChoreo({...choreo, name, event, startDate, endDate, songName: newSongName, teamId: team?.id}, () => {
                       editChoreoInfoDialog.close();
                       setEditChoreoInfoDialogOpen(false);
                       setEditingChoreo(undefined);

@@ -52,6 +52,8 @@ import { getChoreoPassword } from "../lib/helpers/apiHelper";
 import { calculateMovementCache, cornerToCentreFromProp } from "../lib/helpers/editorCalculationHelper";
 import { Distribution, HorizontalAlignment, Rearrangement, VerticalAlignment } from "../models/alignment";
 import { useHelp } from "../components/help/HelpContext";
+import { useSongs } from "../lib/hooks/useSongs";
+import { findSong, nextSongSectionName, toDancerActions } from "../lib/helpers/songHelper";
 
 const editChoreoInfoDialog = Dialog.createHandle<string>();
 const sectionManagerDialog = Dialog.createHandle<string>();
@@ -562,6 +564,9 @@ export default function ChoreoEditPage(props: {
   const [dancerManagerDialogOpen, setDancerManagerDialogOpen] = useState(false);
   // 名簿 suggestions for dancer names; the picker's open state and filter last while this choreo is open.
   const roster = useRoster(props.teamId, props.isLoggedIn && !props.isViewer);
+  const songs = useSongs(props.teamId, props.isLoggedIn && !props.isViewer && !!history.presentState.state.songName);
+  const song = findSong(songs, history.presentState.state.songName);
+  const sectionNames = history.presentState.state.sections.map(s => s.name);
   const [isRosterPickerOpen, setIsRosterPickerOpen] = useState(true);
   const [rosterFilter, setRosterFilter] = useState("all");
   // Props are a different list with their own categories, so their picker keeps its own state.
@@ -1549,6 +1554,8 @@ export default function ChoreoEditPage(props: {
         <EditNameDialog
           name={currentSection?.name}
           type="セクション"
+          song={song}
+          usedNames={sectionNames.filter((_, i) => i !== currentSectionIndex)}
           onSubmit={(name) => {
             commitState(renameSection(history.presentState.state, currentSection.id, name));
             renameSectionDialog.close();
@@ -1561,14 +1568,19 @@ export default function ChoreoEditPage(props: {
         onOpenChange={(isOpen) => { if (!isOpen) setNewSection(undefined); }}>
         <EditNameDialog
           isOpen={!!newSection}
-          name={newSectionName(history.presentState.state, newSection?.afterIndex)}
+          name={(song && nextSongSectionName(song, sectionNames, newSection?.afterIndex ?? sectionNames.length - 1))
+            ?? newSectionName(history.presentState.state, newSection?.afterIndex)}
           type="セクション"
           title="セクション追加"
           actionButtonText="追加"
-          onSubmit={(name) => {
+          song={song}
+          usedNames={sectionNames}
+          offerSongActions
+          onSubmit={(name, _look, songSection) => {
             if (!newSection) return;
             resetSelectedIds();
-            commitState(addSection(history.presentState.state, newSection.id, name, newSection.afterIndex), newSection.id);
+            commitState(addSection(history.presentState.state, newSection.id, name, newSection.afterIndex,
+              songSection ? toDancerActions(songSection) : []), newSection.id);
             setNewSection(undefined);
           }}/>
       </Dialog.Root>
