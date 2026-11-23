@@ -1,5 +1,5 @@
 import { RosterSong } from "../../models/song";
-import { findSong, findSongSection, formatCounts, nextSongSectionName, sortSongs, toDancerActions } from "./songHelper";
+import { findSong, findSongSection, formatCounts, getSongAddBarState, nextSongSectionName, sortSongs, toDancerActions } from "./songHelper";
 import { randomUUID } from "crypto";
 
 // jsdom has no crypto.randomUUID.
@@ -75,5 +75,14 @@ describe("other helpers", () => {
   it("sorts songs by name and finds sections ignoring width", () => {
     expect(sortSongs([{ ...song, name: "総踊り" }, song]).map(s => s.name)).toEqual(["演舞2026", "総踊り"]);
     expect(findSongSection(song, "Ａメロ")?.name).toBe("Aメロ");
+  });
+});
+
+describe("getSongAddBarState", () => {
+  it("sends new names and words problems like the 名簿", () => {
+    expect(getSongAddBarState("サビ\nラスト", ["OP"], "曲", true)).toEqual({ toSend: ["サビ", "ラスト"], tooLong: [], existing: [], error: undefined });
+    expect(getSongAddBarState("ＯＰ\nサビ", ["OP"], "曲", true).error).toBe("「ＯＰ」はすでに曲にあります");
+    expect(getSongAddBarState("OP\nAメロ", ["OP", "Aメロ"], "曲", true).error).toBe("2件はすでに曲にあります");
+    expect(getSongAddBarState("あいうえおかきくけこさしすせそた", [], "名簿", false).error).toBe("「あいうえおかきくけこ…」が長すぎます（15文字まで）");
   });
 });

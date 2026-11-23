@@ -1,24 +1,28 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import classNames from "classnames";
 import Icon from "../basic/Icon";
 import { SHORT_NAME_LENGTH } from "../../lib/consts/consts";
-import { splitNames } from "../../lib/helpers/rosterHelper";
+import { getSongAddBarState } from "../../lib/helpers/songHelper";
+import { toNameKey } from "../../lib/helpers/rosterHelper";
 
 type SongAddBarProps = {
   label: string, // also the placeholder
+  noun: "曲" | "セクション", // for 「N件の曲を追加しました」
+  where: "名簿" | "曲", // for 「…はすでに曲にあります」
+  existingNames: string[],
   multiline?: boolean, // one name per line (sections); otherwise a single name (songs)
-  // Sends the names; resolves with the line to show, and the names to leave in the box.
-  onAdd: (names: string[]) => Promise<{ message: string, isError: boolean, leftOver?: string[] }>,
+  // Sends the names; resolves with how many were added, or undefined if it failed.
+  onAdd: (names: string[]) => Promise<number | undefined>,
 }
 
-// The 曲 lists' add bar, styled like the 名簿's but without categories.
-export default function SongAddBar({ label, multiline, onAdd }: SongAddBarProps) {
+// The 曲 lists' add bar: the 名簿's, without categories, with the same checks and messages.
+export default function SongAddBar({ label, noun, where, existingNames, multiline, onAdd }: SongAddBarProps) {
   const [text, setText] = useState("");
   const [isSaving, setIsSaving] = useState(false);
-  const [result, setResult] = useState<{ message: string, isError: boolean }>();
+  const [lastResult, setLastResult] = useState<{ message: string, isError: boolean }>();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const names = multiline ? splitNames(text) : [text.trim()].filter(Boolean);
+  const state = useMemo(() => getSongAddBarState(text, existingNames, where, !!multiline), [text, existingNames, where, multiline]);
   const lineCount = text.split("\n").length;
 
   // Grow with the content, up to about four lines.
@@ -31,17 +35,22 @@ export default function SongAddBar({ label, multiline, onAdd }: SongAddBarProps)
   }, [text]);
 
   const submit = async () => {
-    if (isSaving || names.length === 0) return;
+    if (isSaving || state.toSend.length === 0) return;
     setIsSaving(true);
-    const outcome = await onAdd(names);
-    setResult({ message: outcome.message, isError: outcome.isError });
-    if (!outcome.isError) {
-      setText((outcome.leftOver ?? []).join("\n"));
+    const added = await onAdd(state.toSend);
+    if (added === undefined) {
+      setLastResult({ message: "保存できませんでした。もう一度お試しください。", isError: true });
+    } else {
+      // Leave only the names that still need fixing.
+      const leftOver = new Set(state.tooLong.map(toNameKey));
+      setText(text.split("\n").filter(n => leftOver.has(toNameKey(n))).join("\n"));
+      setLastResult({ message: `${added}件の${noun}を追加しました`, isError: false });
     }
     setIsSaving(false);
   };
 
-  const canAdd = names.length > 0 && !isSaving;
+  const message = text.trim() !== "" && state.error ? { message: state.error, isError: true } : lastResult;
+  const canAdd = state.toSend.length > 0 && !isSaving;
 
   return <div className="px-4 pt-3 pb-6 border-t bg-surface border-line">
     <div className="grid grid-cols-[minmax(0,1fr),auto] gap-x-1.5">
@@ -55,7 +64,7 @@ export default function SongAddBar({ label, multiline, onAdd }: SongAddBarProps)
           placeholder={label}
           onChange={(e) => {
             setText(multiline ? e.target.value : e.target.value.replace(/\n/g, ""));
-            setResult(undefined);
+            setLastResult(undefined);
           }}
           className={classNames("block w-full max-h-[7.125rem] pl-2 py-2 border rounded-md resize-none bg-surface text-body border-line focus:border-primary focus:outline-none placeholder:text-faint",
             lineCount === 1 && text !== "" ? "pr-14" : "pr-2")}/>
@@ -75,11 +84,11 @@ export default function SongAddBar({ label, multiline, onAdd }: SongAddBarProps)
           "bg-subtle text-faint border border-line": !canAdd,
         })}>
         <Icon src="add" size="xs" colour={canAdd ? "white" : "grey"}/>
-        {names.length > 1 ? `${names.length}つ` : "追加"}
+        {state.toSend.length > 1 ? `${state.toSend.length}件` : "追加"}
       </button>
     </div>
-    <p aria-live="polite" className={classNames("mt-1.5 text-sm truncate min-h-5", result?.isError ? "font-semibold text-primary" : "text-muted")}>
-      {result?.message}
+    <p aria-live="polite" className={classNames("mt-1.5 text-sm truncate min-h-5", message?.isError ? "font-semibold text-primary" : "text-muted")}>
+      {message?.message}
     </p>
   </div>;
 }

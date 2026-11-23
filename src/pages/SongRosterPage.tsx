@@ -64,7 +64,7 @@ export default function SongRosterPage({ goToHomePage, team, onTabChange }: Song
     setSongs(result.songs);
     setError(undefined);
   };
-  const failed = (status: number) => setError(status === 409 ? "同じ名前がすでにあります" : SAVE_FAILED);
+  const failed = () => setError(SAVE_FAILED);
 
   if (song && section) {
     return <SectionPage
@@ -104,12 +104,15 @@ export default function SongRosterPage({ goToHomePage, team, onTabChange }: Song
     footer={songs &&
       <SongAddBar
         label="曲名を追加"
+        noun="曲"
+        where="名簿"
+        existingNames={songs.map(s => s.name)}
         onAdd={([name]) => new Promise(resolve => addSong(team.id, name,
           (result) => {
             update(result);
-            resolve({ message: `「${name}」を追加しました`, isError: false });
+            resolve(1);
           },
-          (status) => resolve({ message: status === 409 ? "同じ名前の曲がすでにあります" : SAVE_FAILED, isError: true })))}/>
+          () => resolve(undefined)))}/>
     }>
     {!songs && !loadFailed && <Grid height={44} width={44} wrapperClass="mt-4 justify-center" color={colorPalette.primary} ariaLabel="読み込み中"/>}
     {
@@ -154,7 +157,7 @@ type SongPageProps = {
   onBack: () => void,
   onOpenSection: (id: string) => void,
   onSaved: (result: RosterSongs) => void,
-  onFailed: (status: number) => void,
+  onFailed: () => void,
   onRemoved: (result: RosterSongs) => void,
 }
 
@@ -175,20 +178,16 @@ function SongPage({ teamId, song, error, onBack, onOpenSection, onSaved, onFaile
     footer={
       <SongAddBar
         label="セクションを追加（1行に1つ）"
+        noun="セクション"
+        where="曲"
+        existingNames={song.sections.map(s => s.name)}
         multiline
         onAdd={(names) => new Promise(resolve => addSongSections(teamId, song.id, names,
           (result) => {
             onSaved(result);
-            const exists = result.skipped.filter(s => s.reason === "exists").map(s => s.name);
-            const tooLong = result.skipped.filter(s => s.reason === "too_long").map(s => s.name);
-            const parts = [
-              result.added > 0 ? `${result.added}つ追加しました` : "",
-              exists.length > 0 ? `「${exists[0]}」${exists.length > 1 ? `ほか${exists.length - 1}つ` : ""}はすでにあります` : "",
-              tooLong.length > 0 ? `${SHORT_NAME_LENGTH}文字を超える名前は追加されません` : "",
-            ].filter(Boolean);
-            resolve({ message: parts.join("。"), isError: result.added === 0, leftOver: tooLong });
+            resolve(result.added);
           },
-          () => resolve({ message: SAVE_FAILED, isError: true })))}/>
+          () => resolve(undefined)))}/>
     }>
     {error && <p aria-live="polite" className="py-2 text-sm font-semibold text-primary">{error}</p>}
     {
@@ -201,7 +200,7 @@ function SongPage({ teamId, song, error, onBack, onOpenSection, onSaved, onFaile
             ids={sections.map(s => s.id)}
             onReorder={(ids) => {
               setSections(ids.map(id => sections.find(s => s.id === id)!));
-              reorderSongSections(teamId, song.id, ids, onSaved, (status) => { setSections(song.sections); onFailed(status); });
+              reorderSongSections(teamId, song.id, ids, onSaved, () => { setSections(song.sections); onFailed(); });
             }}
             renderRow={(id, i) => {
               const s = sections.find(x => x.id === id)!;
@@ -219,14 +218,15 @@ function SongPage({ teamId, song, error, onBack, onOpenSection, onSaved, onFaile
     }
     <NameDialog
       open={dialog === "rename"}
-      title="曲名変更"
+      title="曲名"
+      takenMessage="同じ名前の曲がすでにあります"
       name={song.name}
       onClose={() => setDialog(undefined)}
       onSave={(name, done) => renameSong(teamId, song.id, name, (r) => { onSaved(r); done(); }, done)}/>
     <RemoveDialog
       open={dialog === "remove"}
       title={`「${song.name}」を削除しますか？`}
-      note="この曲を使っている隊列表は、曲なしになります。"
+      note="この曲を選んでいる隊列表の曲は「なし」になります。"
       onClose={() => setDialog(undefined)}
       onRemove={(done) => removeSong(teamId, song.id, (r) => { done(); onRemoved(r); }, done)}/>
   </PageFrame>;
@@ -239,7 +239,7 @@ type SectionPageProps = {
   error?: string,
   onBack: () => void,
   onSaved: (result: RosterSongs) => void,
-  onFailed: (status: number) => void,
+  onFailed: () => void,
   onRemoved: (result: RosterSongs) => void,
 }
 
@@ -273,7 +273,7 @@ function SectionPage({ teamId, song, section, error, onBack, onSaved, onFailed, 
             ids={actions.map(a => a.id)}
             onReorder={(ids) => {
               setActions(ids.map(id => actions.find(a => a.id === id)!));
-              reorderSongActions(teamId, section.id, ids, onSaved, (status) => { setActions(section.actions); onFailed(status); });
+              reorderSongActions(teamId, section.id, ids, onSaved, () => { setActions(section.actions); onFailed(); });
             }}
             renderRow={(id) => {
               const a = actions.find(x => x.id === id)!;
@@ -303,7 +303,8 @@ function SectionPage({ teamId, song, section, error, onBack, onSaved, onFailed, 
     </Dialog.Root>
     <NameDialog
       open={dialog === "rename"}
-      title="セクション名変更"
+      title="セクション名"
+      takenMessage="同じ名前のセクションがすでにあります"
       name={section.name}
       onClose={() => setDialog(undefined)}
       onSave={(name, done) => renameSongSection(teamId, section.id, name, (r) => { onSaved(r); done(); }, done)}/>
@@ -374,8 +375,8 @@ function SortableRow({ id, children }: { id: string, children: ReactNode }) {
   </li>;
 }
 
-function NameDialog({ open, title, name, onClose, onSave }: {
-  open: boolean, title: string, name: string, onClose: () => void,
+function NameDialog({ open, title, takenMessage, name, onClose, onSave }: {
+  open: boolean, title: string, takenMessage: string, name: string, onClose: () => void,
   onSave: (name: string, done: (status?: number) => void) => void,
 }) {
   const [value, setValue] = useState(name);
@@ -399,7 +400,7 @@ function NameDialog({ open, title, name, onClose, onSave }: {
           onSave(value.trim(), (status) => {
             setIsSaving(false);
             if (status === undefined) onClose();
-            else setError(status === 409 ? "同じ名前がすでにあります" : SAVE_FAILED);
+            else setError(status === 409 ? takenMessage : SAVE_FAILED);
           });
         }}>
         <div className="space-y-2">

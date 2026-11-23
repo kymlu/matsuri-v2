@@ -59,7 +59,7 @@ export default function SongActionDialog({ teamId, sectionId, action, otherNames
     saveSongAction(teamId, sectionId, action?.id, name.trim(), counts.map(c => c.trim()),
       onSaved,
       (status) => {
-        setError(status === 409 ? "振り名が重複" : SAVE_FAILED);
+        setError(status === 409 ? "同じ名前の振りがすでにあります" : SAVE_FAILED);
         setIsSaving(false);
       });
   };

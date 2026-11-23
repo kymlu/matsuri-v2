@@ -1,7 +1,8 @@
 import { DancerAction } from "../../models/dancerAction";
 import { RosterSong, RosterSongSection } from "../../models/song";
 import { strCompare } from "./globalHelper";
-import { toNameKey } from "./rosterHelper";
+import { quoteName, splitNames, toNameKey } from "./rosterHelper";
+import { SHORT_NAME_LENGTH } from "../consts/consts";
 
 export const sortSongs = (songs: RosterSong[]) => [...songs].sort((a, b) => strCompare<RosterSong>(a, b, "name"));
 
@@ -38,3 +39,31 @@ export const toDancerActions = (section: RosterSongSection): DancerAction[] =>
     name: a.name,
     timings: a.counts.map(count => ({ id: crypto.randomUUID(), name: count, dancerIds: [] })),
   }));
+
+export type SongAddBarState = {
+  toSend: string[],
+  tooLong: string[],
+  existing: string[],
+  error?: string,
+};
+
+// The 曲 add bars' check before sending, worded like the 名簿's (where: 名簿 for songs, 曲 for sections).
+export function getSongAddBarState(text: string, existingNames: string[], where: "名簿" | "曲", multiline: boolean): SongAddBarState {
+  const names = multiline ? splitNames(text) : [text.trim()].filter(Boolean);
+  const existingKeys = new Set(existingNames.map(toNameKey));
+  const tooLong = names.filter(n => n.length > SHORT_NAME_LENGTH);
+  const existing = names.filter(n => n.length <= SHORT_NAME_LENGTH && existingKeys.has(toNameKey(n)));
+  const toSend = names.filter(n => !tooLong.includes(n) && !existing.includes(n));
+
+  let error: string | undefined;
+  if (tooLong.length === 1) {
+    error = `${quoteName(tooLong[0])}が長すぎます（${SHORT_NAME_LENGTH}文字まで）`;
+  } else if (tooLong.length > 1) {
+    error = `長すぎる名前が${tooLong.length}件あります（${SHORT_NAME_LENGTH}文字まで）`;
+  } else if (existing.length === 1) {
+    error = `${quoteName(existing[0])}はすでに${where}にあります`;
+  } else if (existing.length > 1) {
+    error = `${existing.length}件はすでに${where}にあります`;
+  }
+  return { toSend, tooLong, existing, error };
+}
