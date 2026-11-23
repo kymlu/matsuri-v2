@@ -225,13 +225,13 @@ export default function RosterPage({ goToHomePage, team, tab, onTabChange }: Ros
             <div className="text-sm text-primary">
               <b>{team.name}</b>{" "}<span>の</span>
             </div>
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-              <h2 className="text-2xl font-bold text-nowrap">名簿</h2>
-              {/* In the header rather than a row of their own, to leave the list room on a phone.
-                  Hidden while selecting, so a selection never mixes dancers and props. */}
-              {
-                !isSelecting &&
-                <div role="tablist" aria-label="名簿の種類" className="flex overflow-hidden border rounded-md border-primary">
+            <h2 className="text-2xl font-bold text-nowrap">名簿</h2>
+          </div>
+          {
+            // Hidden while selecting, so a selection never mixes dancers and props.
+            isSelecting
+              ? <IconLabelButton icon="check" label="完了" primary onClick={stopSelecting}/>
+              : <div role="tablist" aria-label="名簿の種類" className="flex self-end overflow-hidden border rounded-md shrink-0 border-primary">
                 {
                   TABS.map(t =>
                     <button
@@ -249,36 +249,40 @@ export default function RosterPage({ goToHomePage, team, tab, onTabChange }: Ros
                   )
                 }
                 </div>
-              }
-            </div>
-          </div>
-          {
-            isSelecting
-              ? <IconLabelButton icon="check" label="完了" primary onClick={stopSelecting}/>
-              : <IconLabelButton
-                  icon="sell"
-                  label="区分"
-                  primaryText
-                  disabled={!roster}
-                  onClick={() => setIsCategoriesDialogOpen(true)}/>
           }
         </header>
         {
+          list && (list.names.length > 0 || !isSelecting) &&
+          // 区分 sits with the search and filters it belongs to: each list has its own categories.
+          <div className="flex items-center gap-2">
+            {
+              list.names.length > 0 &&
+              <div className="flex-1 min-w-0">
+                <TextInput
+                  key={tab}
+                  defaultValue={search}
+                  placeholder={tab === "dancer" ? "名前を探す" : "道具名を探す"}
+                  onContentChange={setSearch}
+                  search
+                  clearable
+                  maxLength={SEARCH_NAME_LENGTH}/>
+              </div>
+            }
+            {
+              !isSelecting &&
+              <div className="ml-auto shrink-0">
+                <IconLabelButton icon="sell" label="区分" primaryText onClick={() => setIsCategoriesDialogOpen(true)}/>
+              </div>
+            }
+          </div>
+        }
+        {
           list && list.names.length > 0 && <>
-            <TextInput
-              key={tab}
-              defaultValue={search}
-              placeholder={tab === "dancer" ? "名前を探す" : "道具名を探す"}
-              onContentChange={setSearch}
-              search
-              clearable
-              maxLength={SEARCH_NAME_LENGTH}/>
             <div className="flex items-center gap-2">
               <div className="flex-1 min-w-0">
                 <ChipFilter label="表示する区分" options={filterOptions} value={filter} onChange={setFilter}/>
               </div>
               {
-                // At the end of the filter row, since it acts on the list; keeps the header as it was.
                 !isSelecting &&
                 <button type="button" onClick={startSelecting} className="flex items-center gap-0.5 pb-1 text-sm font-semibold text-primary whitespace-nowrap">
                   <Icon src="checklist" size="xs" colour="primary"/>選択
