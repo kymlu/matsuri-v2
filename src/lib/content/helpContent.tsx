@@ -728,7 +728,7 @@ export const HELP_ARTICLES: HelpArticle[] = [
     context: "roster",
     roles: ["editor"],
     title: "名簿の区分を作る",
-    summary: "名簿の右上の「区分」で、区分の追加・名前変更・並べ替え・削除をします。",
+    summary: "名簿の検索欄の横の「区分」で、区分の追加・名前変更・並べ替え・削除をします。ダンサーと道具は、それぞれ別の区分です。",
     points: [
       "区分を削除しても、その区分の名前は名簿に残ります。",
     ],
