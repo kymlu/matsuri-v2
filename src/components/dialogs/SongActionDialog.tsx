@@ -6,9 +6,8 @@ import { PatternChooser } from "./ActionManagerDialog";
 import { RosterSongAction, RosterSongs } from "../../models/song";
 import { removeSongAction, saveSongAction } from "../../lib/helpers/apiHelper";
 import { toNameKey } from "../../lib/helpers/rosterHelper";
-import { ACTION_NAME_LENGTH, COUNT_NAME_LENGTH } from "../../lib/consts/consts";
+import { ACTION_NAME_LENGTH, COUNT_NAME_LENGTH, MAX_COUNTS } from "../../lib/consts/consts";
 
-const MAX_COUNTS = 16;
 const SAVE_FAILED = "保存できませんでした。もう一度お試しください。";
 
 type SongActionDialogProps = {
@@ -121,7 +120,7 @@ export default function SongActionDialog({ teamId, sectionId, action, otherNames
                 <button type="button" onClick={() => setAllCounts(undefined)} className="ml-auto text-sm font-semibold whitespace-nowrap text-primary">パターンを選び直す</button>
               }
             </div>
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(7rem,1fr))] gap-2 pt-2 pr-2">
+            <div className="grid grid-cols-2 gap-2 pt-2 pr-2">
               {
                 counts.map((count, i) =>
                   <div key={countKeys[i]} className="relative min-w-0">

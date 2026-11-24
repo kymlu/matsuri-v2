@@ -15,7 +15,7 @@ import {
 import { formatCounts, sortSongs } from "../lib/helpers/songHelper";
 import { toNameKey } from "../lib/helpers/rosterHelper";
 import { colorPalette } from "../lib/consts/colors";
-import { SHORT_NAME_LENGTH } from "../lib/consts/consts";
+import { MAX_ACTIONS, SHORT_NAME_LENGTH } from "../lib/consts/consts";
 import IconButton from "../components/basic/IconButton";
 import Icon from "../components/basic/Icon";
 import { IconLabelButton } from "../components/basic/Button";
@@ -263,7 +263,8 @@ function SectionPage({ teamId, song, section, error, onBack, onSaved, onFailed, 
         onRemove={() => setDialog("remove")}/>
     }>
     <div className="pt-1 pb-2">
-      <IconLabelButton icon="add" full primary label="振り追加" disabled={section.actions.length >= 5} onClick={() => setEditingId("new")}/>
+      <IconLabelButton icon="add" full primary label="振り追加" disabled={section.actions.length >= MAX_ACTIONS} onClick={() => setEditingId("new")}/>
+      {section.actions.length >= MAX_ACTIONS && <p className="pt-1 text-sm text-center text-muted">振りは{MAX_ACTIONS}つまでです</p>}
     </div>
     {error && <p aria-live="polite" className="py-2 text-sm font-semibold text-primary">{error}</p>}
     {
