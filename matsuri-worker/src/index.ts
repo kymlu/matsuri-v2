@@ -1,5 +1,5 @@
 import { Resend } from 'resend';
-import { ErrorResponse, RosterKind, RosterList, RosterResponse } from './models/models';
+import { ErrorResponse, RosterKind, RosterList, RosterResponse, RosterSongsResponse } from './models/models';
 
 const allowedOrigins = [
   "http://localhost:3000",
@@ -104,6 +104,56 @@ const PROP_MAX_DIMENSION = 20;
 const isPropDimension = (value: unknown) =>
 	typeof value === "number" && Number.isFinite(value) && value >= PROP_MIN_DIMENSION && value <= PROP_MAX_DIMENSION;
 const isHexColor = (value: unknown) => typeof value === "string" && /^#[0-9a-fA-F]{6}$/.test(value);
+
+// 曲: name and count limits match the editor, since a song's sections and 振り are copied into a choreo.
+const SONG_NAME_LENGTH = 15; // SHORT_NAME_LENGTH
+const SONG_SECTION_NAME_LENGTH = 15; // section names are SHORT_NAME_LENGTH in the editor
+const SONG_ACTION_NAME_LENGTH = 10; // ACTION_NAME_LENGTH
+const SONG_COUNT_NAME_LENGTH = 5; // COUNT_NAME_LENGTH
+const SONG_MAX_COUNTS = 16;
+const SONG_MAX_ACTIONS = 5;
+// Caps of the 曲 list's own, so a team's list stays a sensible size.
+const SONG_MAX_SECTIONS = 100;
+const SONG_MAX_SONGS = 100;
+
+// A trimmed name within the limit, or undefined.
+const toValidName = (value: unknown, maxLength: number) => {
+	if (typeof value !== "string") return undefined;
+	const name = value.trim();
+	return name.length > 0 && [...name].length <= maxLength ? name : undefined;
+};
+
+const getSongs = async (db: D1Database, teamId: string): Promise<RosterSongsResponse> => {
+	const [songs, sections, actions] = await Promise.all([
+		db.prepare("SELECT id, name FROM roster_songs WHERE team_id = ? AND deleted = 0 ORDER BY name")
+			.bind(teamId).all<{ id: string, name: string }>(),
+		db.prepare(`
+			SELECT s.id, s.song_id, s.name FROM roster_song_sections s
+			JOIN roster_songs g ON g.id = s.song_id
+			WHERE g.team_id = ? AND g.deleted = 0
+			ORDER BY s.sort_order
+		`).bind(teamId).all<{ id: string, song_id: string, name: string }>(),
+		db.prepare(`
+			SELECT a.id, a.section_id, a.name, a.counts FROM roster_song_actions a
+			JOIN roster_song_sections s ON s.id = a.section_id
+			JOIN roster_songs g ON g.id = s.song_id
+			WHERE g.team_id = ? AND g.deleted = 0
+			ORDER BY a.sort_order
+		`).bind(teamId).all<{ id: string, section_id: string, name: string, counts: string }>(),
+	]);
+	return {
+		songs: songs.results.map(song => ({
+			id: song.id,
+			name: song.name,
+			sections: sections.results.filter(s => s.song_id === song.id).map(s => ({
+				id: s.id,
+				name: s.name,
+				actions: actions.results.filter(a => a.section_id === s.id)
+					.map(a => ({ id: a.id, name: a.name, counts: JSON.parse(a.counts) as string[] })),
+			})),
+		})),
+	};
+};
 
 const getRoster = async (db: D1Database, teamId: string): Promise<RosterResponse> => {
 	const [categories, names, links] = await Promise.all([
@@ -744,9 +794,274 @@ export default {
 				return new Set(results.map(r => r.id));
 			};
 
+			// The team's live song, section or 振り, or null if it isn't this team's.
+			const findSong = (id: unknown) => typeof id !== "string" ? Promise.resolve(null) : env.DB.prepare(
+				"SELECT id FROM roster_songs WHERE id = ? AND team_id = ? AND deleted = 0"
+			).bind(id, rosterTeamId).first<{ id: string }>();
+			const findSection = (id: unknown) => typeof id !== "string" ? Promise.resolve(null) : env.DB.prepare(`
+				SELECT s.id, s.song_id FROM roster_song_sections s JOIN roster_songs g ON g.id = s.song_id
+				WHERE s.id = ? AND g.team_id = ? AND g.deleted = 0
+			`).bind(id, rosterTeamId).first<{ id: string, song_id: string }>();
+			const findAction = (id: unknown) => typeof id !== "string" ? Promise.resolve(null) : env.DB.prepare(`
+				SELECT a.id, a.section_id, s.song_id FROM roster_song_actions a
+				JOIN roster_song_sections s ON s.id = a.section_id JOIN roster_songs g ON g.id = s.song_id
+				WHERE a.id = ? AND g.team_id = ? AND g.deleted = 0
+			`).bind(id, rosterTeamId).first<{ id: string, section_id: string, song_id: string }>();
+			// A change to a song's sections or 振り is a change to the song.
+			const touchSong = (songId: string) =>
+				env.DB.prepare("UPDATE roster_songs SET updated_at = datetime('now') WHERE id = ?").bind(songId);
+			const songsResponse = async (extra: Record<string, unknown> = {}) =>
+				getSuccessResponse({ ...(await getSongs(env.DB, rosterTeamId)), ...extra });
+
+			// Ids in a new order: must be exactly the ones there now.
+			const reorder = async (table: "roster_song_sections" | "roster_song_actions", parentColumn: "song_id" | "section_id", parentId: string, songId: string, ids: unknown) => {
+				const { results } = await env.DB.prepare(`SELECT id FROM ${table} WHERE ${parentColumn} = ?`).bind(parentId).all<{ id: string }>();
+				if (!isStringArray(ids) || ids.length !== results.length || new Set(ids).size !== ids.length || !results.every(r => ids.includes(r.id))) {
+					return getErrorResponse("ids must be every id, once each.");
+				}
+				await env.DB.batch([
+					env.DB.prepare(`
+						UPDATE ${table} SET sort_order = (SELECT key FROM json_each(?) WHERE value = ${table}.id)
+						WHERE ${parentColumn} = ?
+					`).bind(JSON.stringify(ids), parentId),
+					touchSong(songId),
+				]);
+				return songsResponse();
+			};
+
+			const handleSongs = async (path: string, method: string): Promise<Response> => {
+				if (path === "" && method === "GET") {
+					return songsResponse();
+				}
+				if (method !== "POST") {
+					return getErrorResponse("Not found.", 404);
+				}
+				const body = await readBody();
+
+				if (path === "/add" || path === "/update") {
+					const name = toValidName(body?.name, SONG_NAME_LENGTH);
+					if (!name) {
+						return getErrorResponse(`name must be 1–${SONG_NAME_LENGTH} characters.`);
+					}
+					const key = toNameKey(name);
+					const id = path === "/add" ? crypto.randomUUID() : (await findSong(body?.id))?.id;
+					if (!id) {
+						return getErrorResponse("Song not found.", 404);
+					}
+					const taken = await env.DB.prepare(
+						"SELECT id FROM roster_songs WHERE team_id = ? AND name_key = ? AND deleted = 0 AND id != ?"
+					).bind(rosterTeamId, key, id).first();
+					if (taken) {
+						return getErrorResponse("A song with this name already exists.", 409);
+					}
+					if (path === "/add") {
+						const count = await env.DB.prepare("SELECT COUNT(*) AS count FROM roster_songs WHERE team_id = ? AND deleted = 0")
+							.bind(rosterTeamId).first<{ count: number }>();
+						if ((count?.count ?? 0) >= SONG_MAX_SONGS) {
+							return getErrorResponse(`A team can have at most ${SONG_MAX_SONGS} songs.`);
+						}
+					}
+					try {
+						if (path === "/add") {
+							await env.DB.prepare("INSERT INTO roster_songs (id, team_id, name, name_key) VALUES (?, ?, ?, ?)")
+								.bind(id, rosterTeamId, name, key).run();
+						} else {
+							await env.DB.prepare("UPDATE roster_songs SET name = ?, name_key = ?, updated_at = datetime('now') WHERE id = ?")
+								.bind(name, key, id).run();
+						}
+					} catch (e) {
+						// Another add or rename took the name since the check above.
+						if (isUniqueConstraintError(e)) return getErrorResponse("A song with this name already exists.", 409);
+						throw e;
+					}
+					return songsResponse({ id });
+				}
+
+				if (path === "/remove") {
+					const song = await findSong(body?.id);
+					if (!song) {
+						return getErrorResponse("Song not found.", 404);
+					}
+					await env.DB.prepare("UPDATE roster_songs SET deleted = 1, updated_at = datetime('now') WHERE id = ?").bind(song.id).run();
+					return songsResponse();
+				}
+
+				// A paste of section names, added in order at the end. Names already in the song, or too long, are skipped.
+				if (path === "/sections/add") {
+					const song = await findSong(body?.song_id);
+					if (!song) {
+						return getErrorResponse("Song not found.", 404);
+					}
+					if (!isStringArray(body?.names)) {
+						return getErrorResponse("names must be an array of strings.");
+					}
+					if (body.names.length > ROSTER_MAX_ADD) {
+						return getErrorResponse(`At most ${ROSTER_MAX_ADD} names can be added at once.`);
+					}
+					const { results: existing } = await env.DB.prepare("SELECT name_key, sort_order FROM roster_song_sections WHERE song_id = ?")
+						.bind(song.id).all<{ name_key: string, sort_order: number }>();
+					const keys = new Set(existing.map(e => e.name_key));
+					let order = existing.reduce((max, e) => Math.max(max, e.sort_order + 1), 0);
+					const rows: unknown[][] = [];
+					const skipped: { name: string, reason: "too_long" | "exists" }[] = [];
+					for (const raw of body.names) {
+						const trimmed = raw.trim();
+						if (!trimmed) continue;
+						const name = toValidName(trimmed, SONG_SECTION_NAME_LENGTH);
+						if (!name) {
+							skipped.push({ name: trimmed, reason: "too_long" });
+							continue;
+						}
+						const key = toNameKey(name);
+						if (keys.has(key)) {
+							skipped.push({ name, reason: "exists" });
+							continue;
+						}
+						keys.add(key);
+						rows.push([crypto.randomUUID(), song.id, name, key, order++]);
+					}
+					if (existing.length + rows.length > SONG_MAX_SECTIONS) {
+						return getErrorResponse(`A song can have at most ${SONG_MAX_SECTIONS} sections.`);
+					}
+					// Nothing new (all blank or already there) is still an answer: 0 added, and why.
+					if (rows.length > 0) {
+						await env.DB.batch([
+							...prepareInsertRows(env.DB, "INSERT INTO roster_song_sections (id, song_id, name, name_key, sort_order)", rows),
+							touchSong(song.id),
+						]);
+					}
+					return songsResponse({ added: rows.length, skipped });
+				}
+
+				if (path === "/sections/update") {
+					const section = await findSection(body?.id);
+					if (!section) {
+						return getErrorResponse("Section not found.", 404);
+					}
+					const name = toValidName(body?.name, SONG_SECTION_NAME_LENGTH);
+					if (!name) {
+						return getErrorResponse(`name must be 1–${SONG_SECTION_NAME_LENGTH} characters.`);
+					}
+					try {
+						await env.DB.batch([
+							env.DB.prepare("UPDATE roster_song_sections SET name = ?, name_key = ? WHERE id = ?")
+								.bind(name, toNameKey(name), section.id),
+							touchSong(section.song_id),
+						]);
+					} catch (e) {
+						if (isUniqueConstraintError(e)) return getErrorResponse("Already in this song.", 409);
+						throw e;
+					}
+					return songsResponse();
+				}
+
+				if (path === "/sections/remove") {
+					const section = await findSection(body?.id);
+					if (!section) {
+						return getErrorResponse("Section not found.", 404);
+					}
+					await env.DB.batch([
+						env.DB.prepare("DELETE FROM roster_song_actions WHERE section_id = ?").bind(section.id),
+						env.DB.prepare("DELETE FROM roster_song_sections WHERE id = ?").bind(section.id),
+						touchSong(section.song_id),
+					]);
+					return songsResponse();
+				}
+
+				if (path === "/sections/reorder") {
+					const song = await findSong(body?.song_id);
+					if (!song) {
+						return getErrorResponse("Song not found.", 404);
+					}
+					return reorder("roster_song_sections", "song_id", song.id, song.id, body?.ids);
+				}
+
+				// One 振り, added (no id) or replaced (id): name and counts together.
+				if (path === "/actions/save") {
+					const section = await findSection(body?.section_id);
+					if (!section) {
+						return getErrorResponse("Section not found.", 404);
+					}
+					const name = toValidName(body?.name, SONG_ACTION_NAME_LENGTH);
+					if (!name) {
+						return getErrorResponse(`name must be 1–${SONG_ACTION_NAME_LENGTH} characters.`);
+					}
+					const counts = isStringArray(body?.counts) ? body.counts.map(c => c.trim()) : undefined;
+					if (!counts || counts.length === 0 || counts.length > SONG_MAX_COUNTS
+						|| counts.some(c => !toValidName(c, SONG_COUNT_NAME_LENGTH))
+						|| new Set(counts.map(toNameKey)).size !== counts.length) {
+						return getErrorResponse(`counts must be 1–${SONG_MAX_COUNTS} different names of 1–${SONG_COUNT_NAME_LENGTH} characters.`);
+					}
+					const key = toNameKey(name);
+					let id: string;
+					if (body?.id === undefined) {
+						const { results } = await env.DB.prepare("SELECT sort_order FROM roster_song_actions WHERE section_id = ?")
+							.bind(section.id).all<{ sort_order: number }>();
+						if (results.length >= SONG_MAX_ACTIONS) {
+							return getErrorResponse(`A section can have at most ${SONG_MAX_ACTIONS} 振り.`);
+						}
+						id = crypto.randomUUID();
+						const order = results.reduce((max, r) => Math.max(max, r.sort_order + 1), 0);
+						try {
+							await env.DB.batch([
+								env.DB.prepare("INSERT INTO roster_song_actions (id, section_id, name, name_key, counts, sort_order) VALUES (?, ?, ?, ?, ?, ?)")
+									.bind(id, section.id, name, key, JSON.stringify(counts), order),
+								touchSong(section.song_id),
+							]);
+						} catch (e) {
+							if (isUniqueConstraintError(e)) return getErrorResponse("Already in this section.", 409);
+							throw e;
+						}
+					} else {
+						const action = await findAction(body.id);
+						if (!action || action.section_id !== section.id) {
+							return getErrorResponse("振り not found.", 404);
+						}
+						id = action.id;
+						try {
+							await env.DB.batch([
+								env.DB.prepare("UPDATE roster_song_actions SET name = ?, name_key = ?, counts = ? WHERE id = ?")
+									.bind(name, key, JSON.stringify(counts), id),
+								touchSong(section.song_id),
+							]);
+						} catch (e) {
+							if (isUniqueConstraintError(e)) return getErrorResponse("Already in this section.", 409);
+							throw e;
+						}
+					}
+					return songsResponse({ id });
+				}
+
+				if (path === "/actions/remove") {
+					const action = await findAction(body?.id);
+					if (!action) {
+						return getErrorResponse("振り not found.", 404);
+					}
+					await env.DB.batch([
+						env.DB.prepare("DELETE FROM roster_song_actions WHERE id = ?").bind(action.id),
+						touchSong(action.song_id),
+					]);
+					return songsResponse();
+				}
+
+				if (path === "/actions/reorder") {
+					const section = await findSection(body?.section_id);
+					if (!section) {
+						return getErrorResponse("Section not found.", 404);
+					}
+					return reorder("roster_song_actions", "section_id", section.id, section.song_id, body?.ids);
+				}
+
+				return getErrorResponse("Not found.", 404);
+			};
+
 			try {
 				if (url.pathname === "/api/roster" && request.method === "GET") {
 					return getSuccessResponse(await getRoster(env.DB, rosterTeamId));
+				}
+
+				if (url.pathname.startsWith("/api/roster/songs")) {
+					return await handleSongs(url.pathname.slice("/api/roster/songs".length), request.method);
 				}
 
 				// One request covers a single name, a paste of many, and adding categories to names already in the roster.
