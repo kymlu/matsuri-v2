@@ -15,7 +15,7 @@ function getCorsHeaders(origin: string | null) {
   return {
     "Access-Control-Allow-Origin": allowed ? origin : "",
 		"Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Choreo-Unlock",
     "Access-Control-Max-Age": "86400",
     "Vary": "Origin",
     "Content-Type": "application/json",
@@ -59,7 +59,45 @@ interface Env {
 	DB: D1Database;
 	BUCKET: R2Bucket;
 	RESEND_API_KEY: string;
+	UNLOCK_LIMITER: RateLimit;
 }
+
+const UNLOCK_DAYS = 180;
+const UNLOCK_HEADER = "X-Choreo-Unlock";
+
+// Unlock tokens are random, so a plain SHA-256 is enough to store them.
+export const hashToken = async (token: string): Promise<string> => {
+	const hash = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(token));
+	return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+};
+
+const newUnlockToken = (): string =>
+	Array.from(crypto.getRandomValues(new Uint8Array(32))).map(b => b.toString(16).padStart(2, '0')).join('');
+
+const getCookieToken = (request: Request): string | undefined =>
+	request.headers.get('cookie')?.split(';').map(c => c.trim()).find(c => c.startsWith('token='))?.split('=')[1];
+
+// A locked choreo opens for the team's logged-in members, or with a token from /api/choreos/verify.
+const canOpenLockedChoreo = async (request: Request, env: Env, teamId: string, choreoId: string): Promise<boolean> => {
+	const sessionToken = getCookieToken(request);
+	if (sessionToken) {
+		const member = await env.DB.prepare(`
+			SELECT 1 FROM sessions s
+			JOIN team_members tm ON s.user_id = tm.user_id AND s.team_id = tm.team_id
+			WHERE s.token = ? AND s.expires_at > datetime('now') AND tm.team_id = ?
+		`).bind(sessionToken, teamId).first();
+		if (member) return true;
+	}
+	const unlockToken = request.headers.get(UNLOCK_HEADER);
+	if (unlockToken) {
+		const unlock = await env.DB.prepare(`
+			SELECT 1 FROM choreo_unlocks
+			WHERE choreo_id = ? AND token_hash = ? AND expires_at > datetime('now')
+		`).bind(choreoId, await hashToken(unlockToken)).first();
+		if (unlock) return true;
+	}
+	return false;
+};
 
 const getFileName = (id: string, version: string) => {return `${id}_v${version}.json`};
 const setSessionCookie = (token: string) => `token=${token}; HttpOnly; Secure; SameSite=None; Max-Age=2592000; Path=/`;
@@ -181,11 +219,11 @@ export default {
 			);
 		}
 
-		const getErrorResponse = (message: string, status: number = 400): Response => {
+		const getErrorResponse = (message: string, status: number = 400, code?: string): Response => {
 			console.error(`Error at ${loggedUrl} - status: ${status} ; message: ${message}`);
-			
+
 			return new Response(
-				JSON.stringify({message: message} as ErrorResponse), 
+				JSON.stringify({ message, code } as ErrorResponse),
 				{
 					status: status,
 					headers: { ...corsHeaders, "Content-Type": "application/problem+json" },
@@ -360,11 +398,14 @@ export default {
 				}
 
 				const choreoCheck = await env.DB.prepare(
-					"SELECT id FROM choreos WHERE id = ? AND team_id = ?"
-				).bind(choreoId, teamId).first();
+					"SELECT id, password FROM choreos WHERE id = ? AND team_id = ?"
+				).bind(choreoId, teamId).first<{ id: string, password: string | null }>();
 
 				if (!choreoCheck) {
 					return getErrorResponse("Choreo not found", 404);
+				}
+				if (choreoCheck.password !== null && !(await canOpenLockedChoreo(request, env, teamId, choreoId))) {
+					return getErrorResponse("Password required", 403, "locked");
 				}
 
 				try {
@@ -668,24 +709,41 @@ export default {
 
 		if (url.pathname === "/api/choreos/verify" && request.method === "POST") {
 			const body = await request.json() as { choreo_id: string; password: string, team_id: string };
-			const password = await env.DB.prepare(`
+			const ip = request.headers.get("CF-Connecting-IP") ?? "";
+			const { success: underLimit } = await env.UNLOCK_LIMITER.limit({ key: `${body.choreo_id}:${ip}` });
+			if (!underLimit) {
+				return getErrorResponse("Too many attempts", 429);
+			}
+
+			const choreo = await env.DB.prepare(`
 				SELECT c.password
 				FROM choreos c
 				WHERE c.id = ? AND c.team_id = ?
-			`).bind(body.choreo_id, body.team_id).first<{password: string}>();
+			`).bind(body.choreo_id, body.team_id).first<{password: string | null}>();
 
-			const passwordMatch = body.password === (password?.password ?? "");
-
-			if (!passwordMatch) {
-				return getErrorResponse("Invalid password", 401);
-			} else {
+			if (!choreo) {
+				return getErrorResponse("Choreo not found", 404);
+			}
+			if (choreo.password === null) {
 				return getSuccessResponse();
 			}
+			if (body.password !== choreo.password) {
+				return getErrorResponse("Invalid password", 401);
+			}
+
+			const unlockToken = newUnlockToken();
+			await env.DB.batch([
+				env.DB.prepare("DELETE FROM choreo_unlocks WHERE choreo_id = ? AND expires_at <= datetime('now')").bind(body.choreo_id),
+				env.DB.prepare(`
+					INSERT INTO choreo_unlocks (id, choreo_id, token_hash, expires_at)
+					VALUES (?, ?, ?, datetime('now', ?))
+				`).bind(crypto.randomUUID(), body.choreo_id, await hashToken(unlockToken), `+${UNLOCK_DAYS} days`),
+			]);
+			return getSuccessResponse({ success: true, token: unlockToken });
 		}
 
 		// Verify session token from cookie
-		const cookie = request.headers.get('cookie');
-		const token = cookie?.split(';').map(c => c.trim()).find(c => c.startsWith('token='))?.split('=')[1];
+		const token = getCookieToken(request);
 
 		if (!token) {
 			return getErrorResponse("No session token provided. Please log in.", 401);
@@ -1460,6 +1518,10 @@ export default {
 				})
 				.catch(e => { throw new Error(`Failed to upload file to r2: ${e}`) });
 
+				const previous = await env.DB.prepare(
+					"SELECT password FROM choreos WHERE id = ? AND team_id = ?"
+				).bind(choreoId, session.team_id).first<{ password: string | null }>();
+
 				// upsert choreo
 				await env.DB.prepare(
 					`INSERT INTO choreos (id, name, event_name, event_start_date, event_end_date, team_id, password)
@@ -1473,6 +1535,11 @@ export default {
 					WHERE choreos.team_id = excluded.team_id`
 				).bind(choreoId, name, eventName, eventStartDate, eventEndDate, session.team_id, password ?? null).run()
 				.catch(e => { throw new Error(`Failed to upsert choreo info into db: ${e}`) });
+
+				// A changed or removed password locks out every device that unlocked with the old one.
+				if (previous && previous.password !== (password ?? null)) {
+					await env.DB.prepare("DELETE FROM choreo_unlocks WHERE choreo_id = ?").bind(choreoId).run();
+				}
 
 				// insert new choreo_file row
 				const fileId = crypto.randomUUID();

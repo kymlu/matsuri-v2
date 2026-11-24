@@ -9,7 +9,7 @@ export type ChoreoPasswordEntryDialogProps = {
   teamId: string,
   choreoId?: string,
   choreoName?: string,
-  onSuccess: () => void,
+  onSuccess: (token?: string) => void,
   onClose: () => void,
 }
 
@@ -17,18 +17,20 @@ export default function ChoreoPasswordEntryDialog({
   teamId, choreoId, choreoName, onSuccess, onClose
 }: ChoreoPasswordEntryDialogProps) {
   const [password, setPassword] = useState<string>("");
-  const [error, setError] = useState<"none" | "error" | "incorrect">("none");
+  const [error, setError] = useState<"none" | "error" | "incorrect" | "tooMany">("none");
   
   const login = async () => {
     if (!isProcessing && choreoId) {
       setError("none");
       setIsProcessing(true);
-      verifyChoreoPassword(teamId, choreoId, password, () => {
-        onSuccess();
+      verifyChoreoPassword(teamId, choreoId, password, (token) => {
+        onSuccess(token);
         close();
       }, (status) => {
         if (status === 401) {
           setError("incorrect");
+        } else if (status === 429) {
+          setError("tooMany");
         } else {
           setError("error");
         }
@@ -72,6 +74,12 @@ export default function ChoreoPasswordEntryDialog({
         error === "incorrect" &&
         <span className="w-full font-semibold text-center text-primary">
           パスワードが違います
+        </span>
+      }
+      {
+        error === "tooMany" &&
+        <span className="w-full font-semibold text-center text-primary">
+          何度も間違えたため、しばらくしてからもう一度お試しください
         </span>
       }
     </div>
