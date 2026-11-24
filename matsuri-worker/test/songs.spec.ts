@@ -1,4 +1,4 @@
-import { SELF } from "cloudflare:test";
+import { env, SELF } from "cloudflare:test";
 import { beforeAll, describe, expect, it } from "vitest";
 import { editorHeaders, seedTwoTeams, sessionHeaders, viewerHeaders } from "./seed";
 import { RosterSong, RosterSongsResponse } from "../src/models/models";
@@ -71,6 +71,33 @@ describe("sections", () => {
 
 		const more = await ok(await call("/sections/add", { song_id: song.id, names: ["ラスト"] }));
 		expect(songNamed(more.songs, "総踊り").sections.map(s => s.name)).toEqual(["OP", "Aメロ", "サビ", "ラスト"]);
+	});
+
+	it("answers a paste with nothing new, and refuses one that's too long", async () => {
+		const song = await addSong("空振り");
+		await call("/sections/add", { song_id: song.id, names: ["OP"] });
+		const result = await ok<{ added: number, skipped: { name: string, reason: string }[] }>(
+			await call("/sections/add", { song_id: song.id, names: ["", "ＯＰ"] }));
+		expect(result.added).toBe(0);
+		expect(result.skipped.map(s => s.reason)).toEqual(["exists"]);
+
+		const tooMany = Array.from({ length: 201 }, (_, i) => `s${i}`);
+		expect((await call("/sections/add", { song_id: song.id, names: tooMany })).status).toBe(400);
+	});
+
+	it("marks the song as changed when its sections or 振り change", async () => {
+		const song = await addSong("更新日");
+		const age = () => env.DB.prepare("UPDATE roster_songs SET updated_at = '2000-01-01 00:00:00' WHERE id = ?").bind(song.id).run();
+		const updatedAt = async () => (await env.DB.prepare("SELECT updated_at FROM roster_songs WHERE id = ?").bind(song.id).first<{ updated_at: string }>())!.updated_at;
+
+		await age();
+		const added = await ok(await call("/sections/add", { song_id: song.id, names: ["OP"] }));
+		expect(await updatedAt()).not.toBe("2000-01-01 00:00:00");
+
+		const section = songNamed(added.songs, "更新日").sections[0];
+		await age();
+		await ok(await call("/actions/save", { section_id: section.id, name: "ジャンプ", counts: ["1"] }));
+		expect(await updatedAt()).not.toBe("2000-01-01 00:00:00");
 	});
 
 	it("renames, reorders and removes sections", async () => {

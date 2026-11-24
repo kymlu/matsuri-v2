@@ -803,23 +803,29 @@ export default {
 				WHERE s.id = ? AND g.team_id = ? AND g.deleted = 0
 			`).bind(id, rosterTeamId).first<{ id: string, song_id: string }>();
 			const findAction = (id: unknown) => typeof id !== "string" ? Promise.resolve(null) : env.DB.prepare(`
-				SELECT a.id, a.section_id FROM roster_song_actions a
+				SELECT a.id, a.section_id, s.song_id FROM roster_song_actions a
 				JOIN roster_song_sections s ON s.id = a.section_id JOIN roster_songs g ON g.id = s.song_id
 				WHERE a.id = ? AND g.team_id = ? AND g.deleted = 0
-			`).bind(id, rosterTeamId).first<{ id: string, section_id: string }>();
+			`).bind(id, rosterTeamId).first<{ id: string, section_id: string, song_id: string }>();
+			// A change to a song's sections or 振り is a change to the song.
+			const touchSong = (songId: string) =>
+				env.DB.prepare("UPDATE roster_songs SET updated_at = datetime('now') WHERE id = ?").bind(songId);
 			const songsResponse = async (extra: Record<string, unknown> = {}) =>
 				getSuccessResponse({ ...(await getSongs(env.DB, rosterTeamId)), ...extra });
 
 			// Ids in a new order: must be exactly the ones there now.
-			const reorder = async (table: "roster_song_sections" | "roster_song_actions", parentColumn: "song_id" | "section_id", parentId: string, ids: unknown) => {
+			const reorder = async (table: "roster_song_sections" | "roster_song_actions", parentColumn: "song_id" | "section_id", parentId: string, songId: string, ids: unknown) => {
 				const { results } = await env.DB.prepare(`SELECT id FROM ${table} WHERE ${parentColumn} = ?`).bind(parentId).all<{ id: string }>();
 				if (!isStringArray(ids) || ids.length !== results.length || new Set(ids).size !== ids.length || !results.every(r => ids.includes(r.id))) {
 					return getErrorResponse("ids must be every id, once each.");
 				}
-				await env.DB.prepare(`
-					UPDATE ${table} SET sort_order = (SELECT key FROM json_each(?) WHERE value = ${table}.id)
-					WHERE ${parentColumn} = ?
-				`).bind(JSON.stringify(ids), parentId).run();
+				await env.DB.batch([
+					env.DB.prepare(`
+						UPDATE ${table} SET sort_order = (SELECT key FROM json_each(?) WHERE value = ${table}.id)
+						WHERE ${parentColumn} = ?
+					`).bind(JSON.stringify(ids), parentId),
+					touchSong(songId),
+				]);
 				return songsResponse();
 			};
 
@@ -889,6 +895,9 @@ export default {
 					if (!isStringArray(body?.names)) {
 						return getErrorResponse("names must be an array of strings.");
 					}
+					if (body.names.length > ROSTER_MAX_ADD) {
+						return getErrorResponse(`At most ${ROSTER_MAX_ADD} names can be added at once.`);
+					}
 					const { results: existing } = await env.DB.prepare("SELECT name_key, sort_order FROM roster_song_sections WHERE song_id = ?")
 						.bind(song.id).all<{ name_key: string, sort_order: number }>();
 					const keys = new Set(existing.map(e => e.name_key));
@@ -914,7 +923,13 @@ export default {
 					if (existing.length + rows.length > SONG_MAX_SECTIONS) {
 						return getErrorResponse(`A song can have at most ${SONG_MAX_SECTIONS} sections.`);
 					}
-					await env.DB.batch(prepareInsertRows(env.DB, "INSERT INTO roster_song_sections (id, song_id, name, name_key, sort_order)", rows));
+					// Nothing new (all blank or already there) is still an answer: 0 added, and why.
+					if (rows.length > 0) {
+						await env.DB.batch([
+							...prepareInsertRows(env.DB, "INSERT INTO roster_song_sections (id, song_id, name, name_key, sort_order)", rows),
+							touchSong(song.id),
+						]);
+					}
 					return songsResponse({ added: rows.length, skipped });
 				}
 
@@ -928,8 +943,11 @@ export default {
 						return getErrorResponse(`name must be 1–${SONG_SECTION_NAME_LENGTH} characters.`);
 					}
 					try {
-						await env.DB.prepare("UPDATE roster_song_sections SET name = ?, name_key = ? WHERE id = ?")
-							.bind(name, toNameKey(name), section.id).run();
+						await env.DB.batch([
+							env.DB.prepare("UPDATE roster_song_sections SET name = ?, name_key = ? WHERE id = ?")
+								.bind(name, toNameKey(name), section.id),
+							touchSong(section.song_id),
+						]);
 					} catch (e) {
 						if (isUniqueConstraintError(e)) return getErrorResponse("Already in this song.", 409);
 						throw e;
@@ -945,6 +963,7 @@ export default {
 					await env.DB.batch([
 						env.DB.prepare("DELETE FROM roster_song_actions WHERE section_id = ?").bind(section.id),
 						env.DB.prepare("DELETE FROM roster_song_sections WHERE id = ?").bind(section.id),
+						touchSong(section.song_id),
 					]);
 					return songsResponse();
 				}
@@ -954,7 +973,7 @@ export default {
 					if (!song) {
 						return getErrorResponse("Song not found.", 404);
 					}
-					return reorder("roster_song_sections", "song_id", song.id, body?.ids);
+					return reorder("roster_song_sections", "song_id", song.id, song.id, body?.ids);
 				}
 
 				// One 振り, added (no id) or replaced (id): name and counts together.
@@ -984,8 +1003,11 @@ export default {
 						id = crypto.randomUUID();
 						const order = results.reduce((max, r) => Math.max(max, r.sort_order + 1), 0);
 						try {
-							await env.DB.prepare("INSERT INTO roster_song_actions (id, section_id, name, name_key, counts, sort_order) VALUES (?, ?, ?, ?, ?, ?)")
-								.bind(id, section.id, name, key, JSON.stringify(counts), order).run();
+							await env.DB.batch([
+								env.DB.prepare("INSERT INTO roster_song_actions (id, section_id, name, name_key, counts, sort_order) VALUES (?, ?, ?, ?, ?, ?)")
+									.bind(id, section.id, name, key, JSON.stringify(counts), order),
+								touchSong(section.song_id),
+							]);
 						} catch (e) {
 							if (isUniqueConstraintError(e)) return getErrorResponse("Already in this section.", 409);
 							throw e;
@@ -997,8 +1019,11 @@ export default {
 						}
 						id = action.id;
 						try {
-							await env.DB.prepare("UPDATE roster_song_actions SET name = ?, name_key = ?, counts = ? WHERE id = ?")
-								.bind(name, key, JSON.stringify(counts), id).run();
+							await env.DB.batch([
+								env.DB.prepare("UPDATE roster_song_actions SET name = ?, name_key = ?, counts = ? WHERE id = ?")
+									.bind(name, key, JSON.stringify(counts), id),
+								touchSong(section.song_id),
+							]);
 						} catch (e) {
 							if (isUniqueConstraintError(e)) return getErrorResponse("Already in this section.", 409);
 							throw e;
@@ -1012,7 +1037,10 @@ export default {
 					if (!action) {
 						return getErrorResponse("振り not found.", 404);
 					}
-					await env.DB.prepare("DELETE FROM roster_song_actions WHERE id = ?").bind(action.id).run();
+					await env.DB.batch([
+						env.DB.prepare("DELETE FROM roster_song_actions WHERE id = ?").bind(action.id),
+						touchSong(action.song_id),
+					]);
 					return songsResponse();
 				}
 
@@ -1021,7 +1049,7 @@ export default {
 					if (!section) {
 						return getErrorResponse("Section not found.", 404);
 					}
-					return reorder("roster_song_actions", "section_id", section.id, body?.ids);
+					return reorder("roster_song_actions", "section_id", section.id, section.song_id, body?.ids);
 				}
 
 				return getErrorResponse("Not found.", 404);
