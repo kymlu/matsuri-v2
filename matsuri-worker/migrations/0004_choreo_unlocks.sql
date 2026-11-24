@@ -1,6 +1,6 @@
 -- Server-side choreo passwords: a device that enters the right password gets a token, stored here as a hash.
 -- Run before deploying the worker that checks it:
---   npx wrangler d1 execute matsuri-db --remote --file=migrations/0003_choreo_unlocks.sql
+--   npx wrangler d1 execute matsuri-db --remote --file=migrations/0004_choreo_unlocks.sql
 
 CREATE TABLE choreo_unlocks (
   id         TEXT PRIMARY KEY,
