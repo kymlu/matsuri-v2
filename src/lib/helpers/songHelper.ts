@@ -6,7 +6,6 @@ import { SHORT_NAME_LENGTH } from "../consts/consts";
 
 export const sortSongs = (songs: RosterSong[]) => [...songs].sort((a, b) => strCompare<RosterSong>(a, b, "name"));
 
-// The 隊列表's song. A deleted song leaves it with none.
 export const findSong = (songs: RosterSong[] | undefined, songId: string | undefined) =>
   songId ? songs?.find(s => s.id === songId) : undefined;
 
@@ -32,7 +31,6 @@ export const formatCounts = (counts: string[]) => counts.length > 5
   ? [counts[0], counts[1], "…", counts[counts.length - 1]].join("・")
   : counts.join("・");
 
-// A song section's 振り as a section's dancerActions: names and counts only, nobody assigned.
 export const toDancerActions = (section: RosterSongSection): DancerAction[] =>
   section.actions.map(a => ({
     id: crypto.randomUUID(),
@@ -51,7 +49,7 @@ export type SongAddBarState = {
   error?: string,
 };
 
-// The 曲 add bars' check before sending, worded like the 名簿's (where: 名簿 for songs, 曲 for sections).
+// where: 名簿 for songs, 曲 for sections.
 export function getSongAddBarState(text: string, existingNames: string[], where: "名簿" | "曲", multiline: boolean): SongAddBarState {
   const names = multiline ? splitNames(text) : [text.trim()].filter(Boolean);
   const existingKeys = new Set(existingNames.map(toNameKey));

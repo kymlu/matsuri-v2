@@ -23,7 +23,7 @@ export const LONG_NAME_LENGTH = 30;
 export const SHORT_NAME_LENGTH = 15;
 export const ACTION_NAME_LENGTH = 10;
 export const COUNT_NAME_LENGTH = 5;
-// Per section: 振り (actions); per 振り: counts. The server keeps the same limits for 曲.
+// 振り per section, counts per 振り; the server keeps the same limits for 曲.
 export const MAX_ACTIONS = 5;
 export const MAX_COUNTS = 16;
 export const EXPORT_NAME_LENGTH = 100;

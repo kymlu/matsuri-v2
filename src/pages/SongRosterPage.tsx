@@ -34,7 +34,6 @@ type SongRosterPageProps = {
 
 const SAVE_FAILED = "保存できませんでした。もう一度お試しください。";
 
-// 名簿 › 曲: the team's songs, a song's sections, and a section's 振り, one page each.
 export default function SongRosterPage({ goToHomePage, team, onTabChange }: SongRosterPageProps) {
   const [songs, setSongs] = useState<RosterSong[]>();
   const [loadFailed, setLoadFailed] = useState(false);
@@ -318,7 +317,6 @@ function SectionPage({ teamId, song, section, error, onBack, onSaved, onFailed, 
   </PageFrame>;
 }
 
-// Like the 名簿 page: header, a scrolling middle, and an optional bar at the bottom.
 function PageFrame({ header, footer, children }: { header: ReactNode, footer?: ReactNode, children: ReactNode }) {
   return <div className="bg-app h-[100svh]">
     <div className="w-full max-w-full h-full grid grid-cols-[minmax(0,1fr)] grid-rows-[auto,minmax(0,1fr),auto] overflow-hidden">
@@ -329,7 +327,6 @@ function PageFrame({ header, footer, children }: { header: ReactNode, footer?: R
   </div>;
 }
 
-// ‹, the page it came from as the small red line, the title, and ⋮ with 名前変更 and 削除.
 function SubPageHeader({ parent, title, onBack, onRename, onRemove }: { parent: string, title: string, onBack: () => void, onRename: () => void, onRemove: () => void }) {
   return <header className="flex items-center gap-2">
     <IconButton src="chevronBackward" noBorder onClick={onBack}/>

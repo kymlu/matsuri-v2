@@ -1,7 +1,5 @@
 import * as z from "zod";
 
-// 曲: a team's songs. Each section has its 振り (dancerActions in a choreo) with their count names.
-// A choreo keeps the song's id (Choreo.songId); nothing points back here.
 export const RosterSongActionSchema = z.object({
   id: z.string().nonempty(),
   name: z.string().nonempty(),
@@ -32,7 +30,6 @@ export const RosterSongsSchema = z.object({
 
 export type RosterSongs = z.infer<typeof RosterSongsSchema>;
 
-// Saves that create something also return its id.
 export const RosterSongsWithIdSchema = RosterSongsSchema.extend({ id: z.string() });
 
 export type RosterSongsWithId = z.infer<typeof RosterSongsWithIdSchema>;

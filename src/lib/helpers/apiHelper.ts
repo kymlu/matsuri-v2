@@ -694,7 +694,6 @@ export const restoreRosterNames = (
   onFailure: (status: number) => void,
 ) => postRoster("roster/names/restore", teamId, { ids }, RosterRestoreResultSchema, onSuccess, onFailure);
 
-// ---- 曲 ----
 
 export const getSongs = async (teamId: string): Promise<RosterSong[]> => {
   const response = await fetch(`${getApiUrl("roster/songs")}?team_id=${teamId}`, {

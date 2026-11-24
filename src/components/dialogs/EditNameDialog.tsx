@@ -15,7 +15,6 @@ type EditNameDialogProps = {
   name?: string,
   required?: boolean,
   type: "道具" | "隊列表" | "イベント" | "セクション" | "障害物",
-  // songSection: the song section whose 振り to add, when 「…の振りとカウントも追加」 is ticked.
   onSubmit: (name: string, look?: Partial<PropLook>, songSection?: RosterSongSection) => void,
   title?: string, // defaults to 「<type>名」
   actionButtonText?: string,
@@ -29,7 +28,6 @@ type EditNameDialogProps = {
   pickerFilter?: string,
   onPickerFilterChange?: (filter: string) => void,
   prop?: PropLook, // the prop's current size and colour, to tell whether a picked name would change them
-  // Sections only: the 隊列表's song suggests its section names; those in usedNames are marked 使用中.
   song?: RosterSong,
   usedNames?: string[],
   offerSongActions?: boolean, // adding a section: offer to bring the song section's 振り
@@ -86,7 +84,6 @@ export default function EditNameDialog({
     >
     {
       type === "セクション" && song && song.sections.length > 0
-        // The song's sections, always in song order; those already in the 隊列表 stay in place, marked 使用中.
         ? <CustomAutocomplete
             key={name ?? ""}
             required={required}

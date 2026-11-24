@@ -7,7 +7,6 @@ const TABS: { tab: RosterTab, label: string }[] = [
   { tab: "song", label: "曲" },
 ];
 
-// The 名簿 header's list switcher, right-aligned where 完了 goes while selecting.
 export default function RosterTabs({ tab, onChange }: { tab: RosterTab, onChange: (tab: RosterTab) => void }) {
   return <div role="tablist" aria-label="名簿の種類" className="flex self-end overflow-hidden border rounded-md shrink-0 border-primary">
     {

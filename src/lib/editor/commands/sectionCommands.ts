@@ -18,7 +18,6 @@ export const newSectionName = (state: Choreo, afterIndex?: number) => {
 }
 
 // Starts from where everyone ended in the section before it, with no actions or paths. Goes at the end unless afterIndex is given.
-// actions: the 振り it starts with, e.g. copied from the 隊列表's song.
 export function addSection(state: Choreo, id: string, name?: string, afterIndex?: number, actions: DancerAction[] = []): Choreo {
   const previousSection = baseSection(state, afterIndex);
   const insertAt = afterIndex === undefined ? state.sections.length : afterIndex + 1;

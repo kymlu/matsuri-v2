@@ -18,10 +18,9 @@ type SongActionDialogProps = {
   onSaved: (result: RosterSongs) => void,
 }
 
-// One 振り of a song's section: its name and counts. Built from カウント管理's parts, without dancers.
 export default function SongActionDialog({ teamId, sectionId, action, otherNames, onSaved }: SongActionDialogProps) {
   const [name, setName] = useState(action?.name ?? "");
-  // A new 振り starts at the count patterns: undefined until one is picked, or 自分で入力.
+  // undefined: still choosing a count pattern.
   const [counts, setCounts] = useState<string[] | undefined>(action?.counts);
   // Keys for the count fields, so removing one doesn't shift the others' text.
   const [countKeys, setCountKeys] = useState<number[]>(() => (action?.counts ?? []).map((_, i) => i));

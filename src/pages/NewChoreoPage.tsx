@@ -70,7 +70,6 @@ export function NewChoreoPage({
   const [propCounts, setPropCounts] = useState<[string, number][]>([]);
   const [sectionId] = useState(() => crypto.randomUUID());
   const [isConfirmingLeave, setIsConfirmingLeave] = useState(false);
-  // 曲: its first section names the first section, and can bring that section's 振り.
   const songs = useSongs(teamId, canUseRoster);
   const [songId, setSongId] = useState<string>();
   const [isAddingSongActions, setIsAddingSongActions] = useState(true);

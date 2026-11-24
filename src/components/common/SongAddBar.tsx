@@ -15,7 +15,6 @@ type SongAddBarProps = {
   onAdd: (names: string[]) => Promise<number | undefined>,
 }
 
-// The 曲 lists' add bar: the 名簿's, without categories, with the same checks and messages.
 export default function SongAddBar({ label, noun, where, existingNames, multiline, onAdd }: SongAddBarProps) {
   const [text, setText] = useState("");
   const [isSaving, setIsSaving] = useState(false);
@@ -25,7 +24,6 @@ export default function SongAddBar({ label, noun, where, existingNames, multilin
   const state = useMemo(() => getSongAddBarState(text, existingNames, where, !!multiline), [text, existingNames, where, multiline]);
   const lineCount = text.split("\n").length;
 
-  // Grow with the content, up to about four lines.
   useLayoutEffect(() => {
     const textarea = textareaRef.current;
     if (textarea) {
@@ -41,7 +39,6 @@ export default function SongAddBar({ label, noun, where, existingNames, multilin
     if (added === undefined) {
       setLastResult({ message: "保存できませんでした。もう一度お試しください。", isError: true });
     } else {
-      // Leave only the names that still need fixing.
       const leftOver = new Set(state.tooLong.map(toNameKey));
       setText(text.split("\n").filter(n => leftOver.has(toNameKey(n))).join("\n"));
       setLastResult({ message: `${added}件の${noun}を追加しました`, isError: false });
