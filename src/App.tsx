@@ -11,7 +11,7 @@ import { Team } from './models/team';
 import { checkLogin, verifyTeam } from './lib/helpers/apiHelper';
 import AdminPage from './pages/AdminPage';
 import RosterPage from './pages/RosterPage';
-import { RosterKind } from './models/roster';
+import { RosterTab } from './models/roster';
 import { HelpProvider } from './components/help/HelpContext';
 import { isNullOrUndefinedOrBlank } from './lib/helpers/globalHelper';
 import { Grid } from 'react-loader-spinner';
@@ -25,7 +25,7 @@ type Mode = "home" | "form" | "edit" | "view" | "admin" | "roster";
 function App() {
   const [mode, setMode] = useState<Mode>("home");
   // The 名簿 page's last tab, kept for the session.
-  const [rosterTab, setRosterTab] = useState<RosterKind>("dancer");
+  const [rosterTab, setRosterTab] = useState<RosterTab>("dancer");
   const [selectedEvent, setSelectedEvent] = useState<EventDetails>();
   const [eventList, setEventList] = useState<EventDetails[]>([]);
   const [serverChoreo, setServerChoreo] = useState<BasicChoreoDetails | undefined>();

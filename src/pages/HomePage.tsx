@@ -4,7 +4,7 @@ import { contactMailto, LONG_NAME_LENGTH, SAMPLE_PARADE_ID, SAMPLE_STAGE_ID, SEA
 import Button, { IconLabelButton } from "../components/basic/Button"
 import Icon from "../components/basic/Icon"
 import { readUploadedFile } from "../lib/helpers/uploadHelper"
-import { memo, useCallback, useEffect, useMemo, useState } from "react"
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { deleteChoreo, getAllChoreos, saveChoreo, saveChoreos } from "../lib/dataAccess/DataController"
 import { BasicChoreoDetails, Choreo, ChoreoSchema, EventDetails, getBasicChoreoDetails } from "../models/choreo"
 import { isNullOrUndefinedOrBlank, indexByKey, strCompare, strEquals, stringifyEvent, removeKey } from "../lib/helpers/globalHelper"
@@ -43,6 +43,7 @@ import { useTheme } from "../lib/helpers/themeHelper"
 import { DancerCount, PropCount, StageSize } from "../components/common/IconInfo"
 import { checkUnlockedChoreo, getLastSeenChoreo, setLastSeenChoreo, setUnlockedChoreo } from "../lib/dataAccess/LocalStorageController"
 import AcceptInviteDialog from "../components/dialogs/AcceptInviteDialog"
+import { useSongs } from "../lib/hooks/useSongs"
 
 type HomePageProps = {
   buildInfo?: string,
@@ -328,6 +329,8 @@ export default function HomePage({
   }, [lastSeen, searchTerm, isLoggedIn, filteredChoreos]);
 
   const [editingChoreo, setEditingChoreo] = useState<ChoreoWithStatus | undefined>();
+  // The song name loads after the dialog opens; a late answer for a choreo no longer being edited is dropped.
+  const editingChoreoIdRef = useRef<string | undefined>(undefined);
   const [editChoreoInfoDialogOpen, setEditChoreoInfoDialogOpen] = useState(false);
   const handleEditChoreoInfoDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setEditChoreoInfoDialogOpen(isOpen);
@@ -448,9 +451,15 @@ export default function HomePage({
   }, [team, serverChoreoDetails, goToViewPage]);
 
   const handleEditChoreoName = useCallback((choreo: ChoreoWithStatus) => {
+    editingChoreoIdRef.current = choreo.id;
     setEditingChoreo(choreo);
+    setEditingSongId(undefined);
+    // The list only has basic details; the song's name is in the full choreo.
+    getChoreo(choreo.id).then(c => {
+      if (editingChoreoIdRef.current === choreo.id) setEditingSongId(c?.songId);
+    });
     setEditChoreoInfoDialogOpen(true);
-  }, []);
+  }, [getChoreo]);
 
   const handleDeleteChoreo = useCallback((choreo: ChoreoWithStatus) => {
     setDeleteChoreoVerb("削除");
@@ -512,6 +521,8 @@ export default function HomePage({
 
   // Only editors can open the 名簿, so the button only shows for them.
   const canUseRoster = isLoggedIn && !!team?.id && !isViewer;
+  const songs = useSongs(team?.id, canUseRoster);
+  const [editingSongId, setEditingSongId] = useState<string>();
 
   return (
     <div className="bg-app">
@@ -794,11 +805,15 @@ export default function HomePage({
             choreo={editingChoreo}
             eventList={eventList}
             onClose={() => {setEditingChoreo(undefined)}}
-            onSubmit={(name: string, event: string, startDate?: string, endDate?: string) => {
+            songs={songs}
+            songId={editingSongId}
+            onSubmit={(name: string, event: string, startDate?: string, endDate?: string, songId?: string) => {
               if (editingChoreo) {
                 getChoreo(editingChoreo.id).then(choreo => {
                   if (choreo) {
-                    saveChoreo({...choreo, name, event, startDate, endDate, teamId: team?.id}, () => {
+                    // Without a song select (no songs), the 隊列表 keeps whatever it had.
+                    const newSongId = songs && songs.length > 0 ? songId : choreo.songId;
+                    saveChoreo({...choreo, name, event, startDate, endDate, songId: newSongId, teamId: team?.id}, () => {
                       editChoreoInfoDialog.close();
                       setEditChoreoInfoDialogOpen(false);
                       setEditingChoreo(undefined);

@@ -28,7 +28,7 @@ export function sortRosterNames(names: RosterName[]): RosterName[] {
   return [...names].sort((a, b) => strCompare<RosterName>(a, b, "name"));
 }
 
-const quoteName = (name: string) => `「${name.length > 10 ? name.slice(0, 10) + "…" : name}」`;
+export const quoteName = (name: string) => `「${name.length > 10 ? name.slice(0, 10) + "…" : name}」`;
 
 export type AddBarState = {
   toSend: string[],    // names the add button will send; drives the 「N名」 count

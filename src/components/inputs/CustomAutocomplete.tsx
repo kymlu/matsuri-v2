@@ -32,15 +32,18 @@ export type CustomAutocompleteProps = {
   label?: string,
   rightLabel?: string,
   restrictFn?: (s: string) => boolean,
+  // Lists every option until something is typed, e.g. when the field opens already filled in.
+  showAllUntilTyped?: boolean,
 }
 
 export default function CustomAutocomplete({
   name, options, listItemFormat, itemSuffix, onItemSelect, itemToStringValueFunc, defaultValue, onContentChange, placeholder,
   search, clearable, compact, short, centered,
   required, hasError, disabled, ref, maxLength,
-  showLength, label, rightLabel, restrictFn
+  showLength, label, rightLabel, restrictFn, showAllUntilTyped,
 }: CustomAutocompleteProps) {
   const [value, setValue] = React.useState<string>(defaultValue ?? "");
+  const [hasTyped, setHasTyped] = React.useState(false);
 
   useImperativeHandle(ref, () => ({
     changeValue: (newValue: string) => {
@@ -86,11 +89,13 @@ export default function CustomAutocomplete({
             items={options}
             onValueChange={(newValue: string, eventDetails) => {
               handleChange(newValue);
+              setHasTyped(eventDetails.reason !== "item-press");
               if (eventDetails.reason === "item-press") {
                 onItemSelect?.(newValue);
               }
             }}
-            filter={(item: string, query: string) => matchesSearch([itemToStringValueFunc ? itemToStringValueFunc(item) : item], query)}
+            filter={(item: string, query: string) => (showAllUntilTyped && !hasTyped)
+              || matchesSearch([itemToStringValueFunc ? itemToStringValueFunc(item) : item], query)}
             highlightItemOnHover
             itemToStringValue={itemToStringValueFunc}
           >

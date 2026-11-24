@@ -7,7 +7,7 @@ import { restrictToParentElement } from "@dnd-kit/modifiers";
 import TextInput from "../inputs/TextInput";
 import { strEquals } from "../../lib/helpers/globalHelper";
 import Icon from "../basic/Icon";
-import { ACTION_NAME_LENGTH, COUNT_NAME_LENGTH } from "../../lib/consts/consts";
+import { ACTION_NAME_LENGTH, COUNT_NAME_LENGTH, MAX_ACTIONS, MAX_COUNTS } from "../../lib/consts/consts";
 import IconButton from "../basic/IconButton";
 import BaseEditDialog from "./BaseEditDialog";
 import { ChoreoSection } from "../../models/choreoSection";
@@ -119,7 +119,7 @@ export function ActionManagerDialog({
         full
         onClick={addAction}
         primary
-        disabled={liveActions.length >= 5}
+        disabled={liveActions.length >= MAX_ACTIONS}
         label="振り追加"
         />
       <DndContext
@@ -143,7 +143,7 @@ export function ActionManagerDialog({
                   action={action}
                   errors={errors[action.id] ?? {}}
                   deletedIds={deletedIds}
-                  canRestoreAction={liveActions.length < 5}
+                  canRestoreAction={liveActions.length < MAX_ACTIONS}
                   isOpen={openId === action.id}
                   isNew={newIds.has(action.id)}
                   showBlankName={!newIds.has(action.id) || blankNameShown.has(action.id)}
@@ -266,7 +266,7 @@ function SortableActionSection ({
         </>
         : <>
           <div className="flex flex-wrap items-baseline justify-between gap-x-2 mt-1.5">
-            <p className="text-sm font-semibold whitespace-nowrap">カウント <span className="font-normal text-muted">{liveTimings.length}/16</span></p>
+            <p className="text-sm font-semibold whitespace-nowrap">カウント <span className="font-normal text-muted">{liveTimings.length}/{MAX_COUNTS}</span></p>
             {
               isNew &&
               <button type="button" onClick={() => setTimings([])} className="ml-auto text-sm font-semibold whitespace-nowrap text-primary">パターンを選び直す</button>
@@ -282,7 +282,7 @@ function SortableActionSection ({
                   showBlank={showBlankCount}
                   onLeaveBlank={() => onShowBlank("count")}
                   isDeleted={deletedIds.has(timing.id)}
-                  canRestore={liveTimings.length < 16}
+                  canRestore={liveTimings.length < MAX_COUNTS}
                   onRenameTiming={(name) => onUpdate(a => ({ ...a, timings: a.timings.map(t => t.id === timing.id ? { ...t, name } : t) }))}
                   onToggleDeleted={() => onToggleDeleted(timing.id)}
                   // An action keeps at least one count, but a deleted one can always come back.
@@ -291,7 +291,7 @@ function SortableActionSection ({
               )
             }
             {
-              liveTimings.length < 16 &&
+              liveTimings.length < MAX_COUNTS &&
               <button type="button" onClick={() => onUpdate(a => ({ ...a, timings: [...a.timings, newTiming()] }))} className="flex items-center justify-center h-10 gap-0.5 text-sm border border-dashed rounded-md border-line-strong text-muted">
                 <Icon src="add" size="xs" colour="grey"/>カウント
               </button>
@@ -312,7 +312,7 @@ function SortableActionSection ({
   </div>
 }
 
-function PatternChooser({ onPick, onOwn }: { onPick: (pattern: CountPattern) => void, onOwn: () => void }) {
+export function PatternChooser({ onPick, onOwn }: { onPick: (pattern: CountPattern) => void, onOwn: () => void }) {
   return <>
     <div className="grid grid-cols-2 gap-1.5 pt-1.5">
       {

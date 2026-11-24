@@ -5,6 +5,8 @@ export const RosterKindSchema = z.enum(["dancer", "prop"]);
 
 export type RosterKind = z.infer<typeof RosterKindSchema>;
 
+export type RosterTab = RosterKind | "song";
+
 export const RosterCategorySchema = z.object({
   id: z.string().nonempty(),
   name: z.string().nonempty(),

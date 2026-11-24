@@ -40,6 +40,8 @@ export const ChoreoSchema = BaseModelSchema.extend({
   version: z.number().optional(),
   isDirty: z.boolean().optional(),
   teamId: z.string().optional(),
+  // 曲: by id, so renaming the song keeps the link.
+  songId: z.string().optional(),
 });
 export type Choreo = z.infer<typeof ChoreoSchema>;
 

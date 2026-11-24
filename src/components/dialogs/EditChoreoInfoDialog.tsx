@@ -7,17 +7,23 @@ import CustomAutocomplete from "../inputs/CustomAutocomplete";
 import DateInput from "../inputs/DateInput";
 import { EventListItem } from "../../pages/NewChoreoPage";
 import { LONG_NAME_LENGTH } from "../../lib/consts/consts";
+import { RosterSong } from "../../models/song";
+import { SongSelect } from "../common/SongFields";
 
 type EditChoreoInfoDialogProps = {
   choreo?: BasicChoreoDetails,
   eventList: EventDetails[],
   onClose?: () => void,
-  onSubmit: (name: string, event: string, startDate?: string, endDate?: string) => void,
+  onSubmit: (name: string, event: string, startDate?: string, endDate?: string, songId?: string) => void,
+  songs?: RosterSong[], // the team's 曲; the select only shows when there are some
+  songId?: string,
 }
 
 export default function EditChoreoInfoDialog({
-  choreo, eventList, onClose, onSubmit
+  choreo, eventList, onClose, onSubmit, songs, songId: initialSongId,
 }: EditChoreoInfoDialogProps) {
+  const [songId, setSongId] = useState(initialSongId);
+  useEffect(() => setSongId(initialSongId), [initialSongId]);
   const [name, setName] = useState("");
   const [event, setEvent] = useState("");
   const [startDate, setStartDate] = useState("");
@@ -53,7 +59,8 @@ export default function EditChoreoInfoDialog({
         name.trim(),
         event.trim(),
         hasEventName ? startDate : undefined,
-        (hasEventName && new Date(startDate).getTime() !== new Date(endDate).getTime()) ? endDate : undefined)
+        (hasEventName && new Date(startDate).getTime() !== new Date(endDate).getTime()) ? endDate : undefined,
+        songId)
     }}
     isActionButtonDisabled={isNullOrUndefinedOrBlank(name.trim()) || (hasEventName && hasDateError)}
     >
@@ -114,6 +121,11 @@ export default function EditChoreoInfoDialog({
             disabled={!hasEventName}
           />
         </div>
+      }
+      {
+        songs && songs.length > 0 &&
+        // Keyed by the loaded name, which arrives after the dialog opens.
+        <SongSelect key={initialSongId ?? ""} songs={songs} songId={songId} onChange={setSongId}/>
       }
     </div>
   </BaseEditDialog>
