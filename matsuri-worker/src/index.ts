@@ -105,13 +105,14 @@ const isPropDimension = (value: unknown) =>
 	typeof value === "number" && Number.isFinite(value) && value >= PROP_MIN_DIMENSION && value <= PROP_MAX_DIMENSION;
 const isHexColor = (value: unknown) => typeof value === "string" && /^#[0-9a-fA-F]{6}$/.test(value);
 
-// 曲: same limits as the editor, since a song's sections and 振り are copied into a choreo.
+// 曲: name and count limits match the editor, since a song's sections and 振り are copied into a choreo.
 const SONG_NAME_LENGTH = 15; // SHORT_NAME_LENGTH
 const SONG_SECTION_NAME_LENGTH = 15; // section names are SHORT_NAME_LENGTH in the editor
 const SONG_ACTION_NAME_LENGTH = 10; // ACTION_NAME_LENGTH
 const SONG_COUNT_NAME_LENGTH = 5; // COUNT_NAME_LENGTH
 const SONG_MAX_COUNTS = 16;
 const SONG_MAX_ACTIONS = 5;
+// Caps of the 曲 list's own, so a team's list stays a sensible size.
 const SONG_MAX_SECTIONS = 100;
 const SONG_MAX_SONGS = 100;
 
@@ -124,7 +125,7 @@ const toValidName = (value: unknown, maxLength: number) => {
 
 const getSongs = async (db: D1Database, teamId: string): Promise<RosterSongsResponse> => {
 	const [songs, sections, actions] = await Promise.all([
-		db.prepare("SELECT id, name FROM roster_songs WHERE team_id = ? AND deleted = 0")
+		db.prepare("SELECT id, name FROM roster_songs WHERE team_id = ? AND deleted = 0 ORDER BY name")
 			.bind(teamId).all<{ id: string, name: string }>(),
 		db.prepare(`
 			SELECT s.id, s.song_id, s.name FROM roster_song_sections s
@@ -793,7 +794,7 @@ export default {
 				return new Set(results.map(r => r.id));
 			};
 
-			// The team's live song, section or 振り, or undefined if it isn't this team's.
+			// The team's live song, section or 振り, or null if it isn't this team's.
 			const findSong = (id: unknown) => typeof id !== "string" ? Promise.resolve(null) : env.DB.prepare(
 				"SELECT id FROM roster_songs WHERE id = ? AND team_id = ? AND deleted = 0"
 			).bind(id, rosterTeamId).first<{ id: string }>();
@@ -853,11 +854,19 @@ export default {
 						if ((count?.count ?? 0) >= SONG_MAX_SONGS) {
 							return getErrorResponse(`A team can have at most ${SONG_MAX_SONGS} songs.`);
 						}
-						await env.DB.prepare("INSERT INTO roster_songs (id, team_id, name, name_key) VALUES (?, ?, ?, ?)")
-							.bind(id, rosterTeamId, name, key).run();
-					} else {
-						await env.DB.prepare("UPDATE roster_songs SET name = ?, name_key = ?, updated_at = datetime('now') WHERE id = ?")
-							.bind(name, key, id).run();
+					}
+					try {
+						if (path === "/add") {
+							await env.DB.prepare("INSERT INTO roster_songs (id, team_id, name, name_key) VALUES (?, ?, ?, ?)")
+								.bind(id, rosterTeamId, name, key).run();
+						} else {
+							await env.DB.prepare("UPDATE roster_songs SET name = ?, name_key = ?, updated_at = datetime('now') WHERE id = ?")
+								.bind(name, key, id).run();
+						}
+					} catch (e) {
+						// Another add or rename took the name since the check above.
+						if (isUniqueConstraintError(e)) return getErrorResponse("A song with this name already exists.", 409);
+						throw e;
 					}
 					return songsResponse({ id });
 				}

@@ -51,6 +51,13 @@ describe("songs", () => {
 		// The name is free again once removed.
 		await addSong("演舞2026");
 	});
+
+	it("lists songs by name", async () => {
+		await addSong("んー");
+		const { songs } = await ok(await call("/add", { name: "あー" }));
+		const names = songs.map(s => s.name);
+		expect(names.indexOf("あー")).toBeLessThan(names.indexOf("んー"));
+	});
 });
 
 describe("sections", () => {
