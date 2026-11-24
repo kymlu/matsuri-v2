@@ -453,10 +453,10 @@ export default function HomePage({
   const handleEditChoreoName = useCallback((choreo: ChoreoWithStatus) => {
     editingChoreoIdRef.current = choreo.id;
     setEditingChoreo(choreo);
-    setEditingSongName(undefined);
+    setEditingSongId(undefined);
     // The list only has basic details; the song's name is in the full choreo.
     getChoreo(choreo.id).then(c => {
-      if (editingChoreoIdRef.current === choreo.id) setEditingSongName(c?.songName);
+      if (editingChoreoIdRef.current === choreo.id) setEditingSongId(c?.songId);
     });
     setEditChoreoInfoDialogOpen(true);
   }, [getChoreo]);
@@ -522,7 +522,7 @@ export default function HomePage({
   // Only editors can open the 名簿, so the button only shows for them.
   const canUseRoster = isLoggedIn && !!team?.id && !isViewer;
   const songs = useSongs(team?.id, canUseRoster);
-  const [editingSongName, setEditingSongName] = useState<string>();
+  const [editingSongId, setEditingSongId] = useState<string>();
 
   return (
     <div className="bg-app">
@@ -806,14 +806,14 @@ export default function HomePage({
             eventList={eventList}
             onClose={() => {setEditingChoreo(undefined)}}
             songs={songs}
-            songName={editingSongName}
-            onSubmit={(name: string, event: string, startDate?: string, endDate?: string, songName?: string) => {
+            songId={editingSongId}
+            onSubmit={(name: string, event: string, startDate?: string, endDate?: string, songId?: string) => {
               if (editingChoreo) {
                 getChoreo(editingChoreo.id).then(choreo => {
                   if (choreo) {
                     // Without a song select (no songs), the 隊列表 keeps whatever it had.
-                    const newSongName = songs && songs.length > 0 ? songName : choreo.songName;
-                    saveChoreo({...choreo, name, event, startDate, endDate, songName: newSongName, teamId: team?.id}, () => {
+                    const newSongId = songs && songs.length > 0 ? songId : choreo.songId;
+                    saveChoreo({...choreo, name, event, startDate, endDate, songId: newSongId, teamId: team?.id}, () => {
                       editChoreoInfoDialog.close();
                       setEditChoreoInfoDialogOpen(false);
                       setEditingChoreo(undefined);

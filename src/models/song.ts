@@ -1,7 +1,7 @@
 import * as z from "zod";
 
 // 曲: a team's songs. Each section has its 振り (dancerActions in a choreo) with their count names.
-// A choreo only keeps a copy of a song's name (Choreo.songName); nothing points back here.
+// A choreo keeps the song's id (Choreo.songId); nothing points back here.
 export const RosterSongActionSchema = z.object({
   id: z.string().nonempty(),
   name: z.string().nonempty(),

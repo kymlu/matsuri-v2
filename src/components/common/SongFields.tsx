@@ -5,13 +5,14 @@ import { formatCounts, sortSongs } from "../../lib/helpers/songHelper";
 const NONE = "なし";
 
 // 曲 for 新規作成 and 隊列情報変更. Only shown when the team has songs.
-export function SongSelect({ songs, songName, onChange }: { songs: RosterSong[], songName?: string, onChange: (songName: string | undefined) => void }) {
+export function SongSelect({ songs, songId, onChange }: { songs: RosterSong[], songId?: string, onChange: (songId: string | undefined) => void }) {
+  // Song id → name; song names are unique, so the select can show names.
   const items: Record<string, string> = { "": NONE };
-  sortSongs(songs).forEach(s => { items[s.name] = s.name; });
+  sortSongs(songs).forEach(s => { items[s.id] = s.name; });
   return <CustomSelect
     label="曲"
     items={items}
-    defaultValue={songName && items[songName] ? songName : NONE}
+    defaultValue={songId && items[songId] ? items[songId] : NONE}
     setSelectValue={(value) => onChange(value || undefined)}/>;
 }
 

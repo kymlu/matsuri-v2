@@ -72,9 +72,9 @@ export function NewChoreoPage({
   const [isConfirmingLeave, setIsConfirmingLeave] = useState(false);
   // 曲: its first section names the first section, and can bring that section's 振り.
   const songs = useSongs(teamId, canUseRoster);
-  const [songName, setSongName] = useState<string>();
+  const [songId, setSongId] = useState<string>();
   const [isAddingSongActions, setIsAddingSongActions] = useState(true);
-  const firstSongSection = findSong(songs, songName)?.sections[0];
+  const firstSongSection = findSong(songs, songId)?.sections[0];
 
   // The 名簿 loads when step 3 first opens, so steps 1 and 2 don't wait for it.
   const loadRoster = () => {
@@ -179,7 +179,7 @@ export function NewChoreoPage({
         },
         yAxis: form.stageType === "parade" ? "bottom-up" : "top-down",
       },
-      songName: songName,
+      songId: songId,
       dancers: dancers,
       props: props,
       obstacles: {},
@@ -281,7 +281,7 @@ export function NewChoreoPage({
             {
               songs && songs.length > 0 &&
               <div>
-                <SongSelect songs={songs} songName={songName} onChange={setSongName}/>
+                <SongSelect songs={songs} songId={songId} onChange={setSongId}/>
                 {
                   firstSongSection && firstSongSection.actions.length > 0 &&
                   <SongActionsCheckbox section={firstSongSection} checked={isAddingSongActions} onChange={setIsAddingSongActions}/>

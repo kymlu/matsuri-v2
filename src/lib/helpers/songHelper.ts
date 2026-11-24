@@ -6,9 +6,9 @@ import { SHORT_NAME_LENGTH } from "../consts/consts";
 
 export const sortSongs = (songs: RosterSong[]) => [...songs].sort((a, b) => strCompare<RosterSong>(a, b, "name"));
 
-// The 隊列表's song: the one with the name it kept. A renamed or deleted song leaves it with none.
-export const findSong = (songs: RosterSong[] | undefined, songName: string | undefined) =>
-  songName ? songs?.find(s => toNameKey(s.name) === toNameKey(songName)) : undefined;
+// The 隊列表's song. A deleted song leaves it with none.
+export const findSong = (songs: RosterSong[] | undefined, songId: string | undefined) =>
+  songId ? songs?.find(s => s.id === songId) : undefined;
 
 export const findSongSection = (song: RosterSong | undefined, name: string): RosterSongSection | undefined =>
   song?.sections.find(s => toNameKey(s.name) === toNameKey(name));

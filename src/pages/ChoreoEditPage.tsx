@@ -565,7 +565,7 @@ export default function ChoreoEditPage(props: {
   // 名簿 suggestions for dancer names; the picker's open state and filter last while this choreo is open.
   const roster = useRoster(props.teamId, props.isLoggedIn && !props.isViewer);
   const songs = useSongs(props.teamId, props.isLoggedIn && !props.isViewer);
-  const song = findSong(songs, history.presentState.state.songName);
+  const song = findSong(songs, history.presentState.state.songId);
   const sectionNames = history.presentState.state.sections.map(s => s.name);
   const [isRosterPickerOpen, setIsRosterPickerOpen] = useState(true);
   const [rosterFilter, setRosterFilter] = useState("all");
@@ -1326,11 +1326,11 @@ export default function ChoreoEditPage(props: {
           choreo={getBasicChoreoDetails(history.presentState.state)}
           eventList={props.eventList}
           songs={songs}
-          songName={history.presentState.state.songName}
-          onSubmit={(name, event, startDate, endDate, songName) => {
+          songId={history.presentState.state.songId}
+          onSubmit={(name, event, startDate, endDate, songId) => {
             const state = history.presentState.state;
             // Without a song select (no songs), the 隊列表 keeps whatever it had.
-            commitState({ ...renameChoreo(state, name, event, startDate, endDate), songName: songs && songs.length > 0 ? songName : state.songName });
+            commitState({ ...renameChoreo(state, name, event, startDate, endDate), songId: songs && songs.length > 0 ? songId : state.songId });
             editChoreoInfoDialog.close();
             setEditChoreoInfoDialogOpen(false);
           }}/>

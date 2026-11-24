@@ -19,14 +19,14 @@ const song: RosterSong = {
 };
 
 describe("findSong", () => {
-  it("finds the song by its name, ignoring width", () => {
-    expect(findSong([song], "演舞２０２６")).toBe(song);
+  it("finds the song by its id, whatever it's called now", () => {
+    expect(findSong([{ ...song, name: "新しい名前" }], song.id)?.name).toBe("新しい名前");
   });
 
-  it("finds nothing for no name, or a renamed or deleted song", () => {
+  it("finds nothing for no id, or a deleted song", () => {
     expect(findSong([song], undefined)).toBeUndefined();
-    expect(findSong([song], "演舞2025")).toBeUndefined();
-    expect(findSong(undefined, "演舞2026")).toBeUndefined();
+    expect(findSong([song], "deleted")).toBeUndefined();
+    expect(findSong(undefined, song.id)).toBeUndefined();
   });
 });
 
