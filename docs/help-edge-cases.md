@@ -132,3 +132,4 @@ Behaviour that used to be in the in-app help but doesn't help a reader finish a 
 - The section name field lists every song section in song order; ones already in the 隊列表 stay in place, marked 使用中, and can still be picked.
 - 「…の振りとカウントも追加」 shows only when the name is a song section with 振り. It starts ticked, adds the 振り with nobody on any count, and is one undo step together with the section. Renaming a section never adds 振り.
 - Song names and section names are unique (full/half width count as the same); 振り names are unique within a section. Limits match the editor: 5 振り per section, 16 counts per 振り.
+- A team can have 100 songs and a song 100 sections; a paste adds up to 200 lines. The add bars say so before sending: 曲は100曲までです, セクションは1曲に100件までです, 一度に追加できるのは200件までです.

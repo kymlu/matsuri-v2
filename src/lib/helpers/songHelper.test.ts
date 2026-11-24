@@ -85,4 +85,13 @@ describe("getSongAddBarState", () => {
     expect(getSongAddBarState("OP\nAメロ", ["OP", "Aメロ"], "曲", true).error).toBe("2件はすでに曲にあります");
     expect(getSongAddBarState("あいうえおかきくけこさしすせそた", [], "名簿", false).error).toBe("「あいうえおかきくけこ…」が長すぎます（15文字まで）");
   });
+
+  it("stops before sending more than the server takes", () => {
+    const lines = (n: number, prefix = "s") => Array.from({ length: n }, (_, i) => `${prefix}${i}`);
+    const tooMany = getSongAddBarState(lines(201).join("\n"), [], "曲", true);
+    expect(tooMany).toMatchObject({ toSend: [], error: "一度に追加できるのは200件までです" });
+    expect(getSongAddBarState("ラスト", lines(100), "曲", true)).toMatchObject({ toSend: [], error: "セクションは1曲に100件までです" });
+    expect(getSongAddBarState("新曲", lines(100, "曲"), "名簿", false)).toMatchObject({ toSend: [], error: "曲は100曲までです" });
+    expect(getSongAddBarState("ラスト", lines(99), "曲", true).toSend).toEqual(["ラスト"]);
+  });
 });

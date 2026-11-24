@@ -1,7 +1,7 @@
 import { DancerAction } from "../../models/dancerAction";
 import { RosterSong, RosterSongSection } from "../../models/song";
 import { strCompare } from "./globalHelper";
-import { quoteName, splitNames, toNameKey } from "./rosterHelper";
+import { quoteName, ROSTER_MAX_ADD, splitNames, toNameKey } from "./rosterHelper";
 import { SHORT_NAME_LENGTH } from "../consts/consts";
 
 export const sortSongs = (songs: RosterSong[]) => [...songs].sort((a, b) => strCompare<RosterSong>(a, b, "name"));
@@ -40,6 +40,10 @@ export const toDancerActions = (section: RosterSongSection): DancerAction[] =>
     timings: a.counts.map(count => ({ id: crypto.randomUUID(), name: count, dancerIds: [] })),
   }));
 
+// Same as the server: songs per team, and sections per song.
+export const SONG_MAX_SONGS = 100;
+export const SONG_MAX_SECTIONS = 100;
+
 export type SongAddBarState = {
   toSend: string[],
   tooLong: string[],
@@ -53,13 +57,20 @@ export function getSongAddBarState(text: string, existingNames: string[], where:
   const existingKeys = new Set(existingNames.map(toNameKey));
   const tooLong = names.filter(n => n.length > SHORT_NAME_LENGTH);
   const existing = names.filter(n => n.length <= SHORT_NAME_LENGTH && existingKeys.has(toNameKey(n)));
-  const toSend = names.filter(n => !tooLong.includes(n) && !existing.includes(n));
+  let toSend = names.filter(n => !tooLong.includes(n) && !existing.includes(n));
+  const max = where === "名簿" ? SONG_MAX_SONGS : SONG_MAX_SECTIONS;
 
   let error: string | undefined;
   if (tooLong.length === 1) {
     error = `${quoteName(tooLong[0])}が長すぎます（${SHORT_NAME_LENGTH}文字まで）`;
   } else if (tooLong.length > 1) {
     error = `長すぎる名前が${tooLong.length}件あります（${SHORT_NAME_LENGTH}文字まで）`;
+  } else if (toSend.length > ROSTER_MAX_ADD) {
+    error = `一度に追加できるのは${ROSTER_MAX_ADD}件までです`;
+    toSend = [];
+  } else if (toSend.length > 0 && existingNames.length + toSend.length > max) {
+    error = where === "名簿" ? `曲は${max}曲までです` : `セクションは1曲に${max}件までです`;
+    toSend = [];
   } else if (existing.length === 1) {
     error = `${quoteName(existing[0])}はすでに${where}にあります`;
   } else if (existing.length > 1) {
