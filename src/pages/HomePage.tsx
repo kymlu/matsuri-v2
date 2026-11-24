@@ -4,7 +4,7 @@ import { contactMailto, LONG_NAME_LENGTH, SAMPLE_PARADE_ID, SAMPLE_STAGE_ID, SEA
 import Button, { IconLabelButton } from "../components/basic/Button"
 import Icon from "../components/basic/Icon"
 import { readUploadedFile } from "../lib/helpers/uploadHelper"
-import { memo, useCallback, useEffect, useMemo, useState } from "react"
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { deleteChoreo, getAllChoreos, saveChoreo, saveChoreos } from "../lib/dataAccess/DataController"
 import { BasicChoreoDetails, Choreo, ChoreoSchema, EventDetails, getBasicChoreoDetails } from "../models/choreo"
 import { isNullOrUndefinedOrBlank, indexByKey, strCompare, strEquals, stringifyEvent, removeKey } from "../lib/helpers/globalHelper"
@@ -329,6 +329,8 @@ export default function HomePage({
   }, [lastSeen, searchTerm, isLoggedIn, filteredChoreos]);
 
   const [editingChoreo, setEditingChoreo] = useState<ChoreoWithStatus | undefined>();
+  // The song name loads after the dialog opens; a late answer for a choreo no longer being edited is dropped.
+  const editingChoreoIdRef = useRef<string | undefined>(undefined);
   const [editChoreoInfoDialogOpen, setEditChoreoInfoDialogOpen] = useState(false);
   const handleEditChoreoInfoDialogOpen = (isOpen: boolean, eventDetails: Dialog.Root.ChangeEventDetails) => {
     setEditChoreoInfoDialogOpen(isOpen);
@@ -449,10 +451,13 @@ export default function HomePage({
   }, [team, serverChoreoDetails, goToViewPage]);
 
   const handleEditChoreoName = useCallback((choreo: ChoreoWithStatus) => {
+    editingChoreoIdRef.current = choreo.id;
     setEditingChoreo(choreo);
     setEditingSongName(undefined);
     // The list only has basic details; the song's name is in the full choreo.
-    getChoreo(choreo.id).then(c => setEditingSongName(c?.songName));
+    getChoreo(choreo.id).then(c => {
+      if (editingChoreoIdRef.current === choreo.id) setEditingSongName(c?.songName);
+    });
     setEditChoreoInfoDialogOpen(true);
   }, [getChoreo]);
 
