@@ -40,14 +40,16 @@ describe("usePageHistory", () => {
     expect(window.history.state).toEqual({ matsuriPage: "edit" });
   });
 
-  it("the home button removes the page's entry", async () => {
+  it("home, a page, home and a page again: back still returns home, from one entry", async () => {
     const { result } = renderHook(() => usePageHistory<Mode>("home"));
+    const length = () => window.history.length;
     act(() => result.current.goTo("view"));
-    await act(async () => {
-      result.current.goTo("home");
-      await new Promise(resolve => window.addEventListener("popstate", resolve, { once: true }));
-    });
+    const afterFirst = length();
+    act(() => result.current.goTo("home"));
+    act(() => result.current.goTo("view"));
+    expect(result.current.mode).toBe("view");
+    expect(length()).toBe(afterFirst);
+    await back();
     expect(result.current.mode).toBe("home");
-    expect(window.history.state).toBeNull();
   });
 });

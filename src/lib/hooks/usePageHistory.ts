@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-// Pages other than home get one history entry, so the phone's back gesture returns home instead of leaving.
-// Switching between pages replaces that entry, so one back always reaches home.
+// The app keeps one history entry above where it started, so the phone's back gesture returns home instead of leaving.
+// Every page change, home included, replaces that entry; never history.back(), whose late arrival could undo a newer page.
 export function usePageHistory<Mode extends string>(home: Mode) {
   const [mode, setMode] = useState<Mode>(home);
   // While set (e.g. the editor's stage-size sheet is open), back is ignored, like the disabled home button.
@@ -10,12 +10,9 @@ export function usePageHistory<Mode extends string>(home: Mode) {
   modeRef.current = mode;
 
   const goTo = useCallback((next: Mode) => {
-    const onPage = window.history.state?.matsuriPage !== undefined;
-    if (next === home) {
-      if (onPage) window.history.back();
-    } else if (onPage) {
+    if (window.history.state?.matsuriPage !== undefined) {
       window.history.replaceState({ matsuriPage: next }, "");
-    } else {
+    } else if (next !== home) {
       window.history.pushState({ matsuriPage: next }, "");
     }
     setMode(next);
