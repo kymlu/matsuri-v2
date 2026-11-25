@@ -44,6 +44,7 @@ type FormationLayerProps = {
   dancerDisplayType: DancerDisplayType,
   isDraggingOnEmpty?: boolean,
   onDancerSelected?: () => void,
+  onObjectTapped?: () => void,
   canResizeProps?: boolean,
   isZooming: React.RefObject<boolean>;
   sectionId: string;
@@ -84,6 +85,7 @@ const FormationLayer = memo(function FormationLayer({
   dancerDisplayType,
   isDraggingOnEmpty,
   onDancerSelected,
+  onObjectTapped,
   canResizeProps,
   isZooming,
   sectionId,
@@ -234,7 +236,18 @@ const FormationLayer = memo(function FormationLayer({
   const handleDancerClick = useCallback((id: string, isAdditive?: boolean) => {
     toggleDancerSelect(id, isAdditive);
     onDancerSelected?.();
-  }, [toggleDancerSelect, onDancerSelected]);
+    onObjectTapped?.();
+  }, [toggleDancerSelect, onDancerSelected, onObjectTapped]);
+
+  const handlePropClick = useCallback((id: string, isAdditive?: boolean) => {
+    togglePropSelect(id, isAdditive);
+    onObjectTapped?.();
+  }, [togglePropSelect, onObjectTapped]);
+
+  const handleObstacleClick = useCallback((id: string, isAdditive?: boolean) => {
+    toggleObstacleSelect(id, isAdditive);
+    onObjectTapped?.();
+  }, [toggleObstacleSelect, onObjectTapped]);
 
   return (
     <Layer>
@@ -245,7 +258,7 @@ const FormationLayer = memo(function FormationLayer({
             obstacle={obstacle}
             stageGeometry={geometry}
             updatePosition={updateObstaclePosition}
-            onClick={toggleObstacleSelect}
+            onClick={handleObstacleClick}
             isSelected={selectedIds.obstacles.includes(obstacle.id)}
             isTransformerActive={isTransformerActive}
             registerNode={registerNode}
@@ -266,7 +279,7 @@ const FormationLayer = memo(function FormationLayer({
             position={propPosition}
             stageGeometry={geometry}
             updatePosition={updatePropPosition}
-            onClick={togglePropSelect}
+            onClick={handlePropClick}
             isSelected={selectedIds.props.includes(propPosition.propId)}
             isTransformerActive={isTransformerActive}
             registerNode={registerNode}

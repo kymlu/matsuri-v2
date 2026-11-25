@@ -31,7 +31,7 @@ import { useShortestMove } from "../lib/hooks/useShortestMove";
 import { useStageResize } from "../lib/hooks/useStageResize";
 import ConfirmDeletionDialog from "../components/dialogs/ConfirmDeletionDialog";
 import EditSectionNoteDialog from "../components/dialogs/EditSectionNoteDialog";
-import { clearSeenVersion, getPersonalNotesForChoreo } from "../lib/dataAccess/LocalStorageController";
+import { checkBoxSelectHintSeen, clearSeenVersion, getPersonalNotesForChoreo, setBoxSelectHintSeen } from "../lib/dataAccess/LocalStorageController";
 import { Coordinates } from "../models/base";
 import { colorPalette } from "../lib/consts/colors";
 import { addDancer, addObstacle, addObstacles, addProp, alignHorizontalPositions, alignVerticalPositions, changeObjectColours, changePropInUse, distributePositions, duplicateProps, editAndDeleteProps, editDancerPath, editPropPath, moveObjectPositions, pastePositions, rearrangePositions, removeObjects, renameAndDeleteDancers, renameDancer, renameObstacle, renameProp, setZOnAllPositions, updateObstacleSizeAndRotate, updatePropSizeAndRotate } from "../lib/editor/commands/objectCommands";
@@ -395,6 +395,28 @@ export default function ChoreoEditPage(props: {
   const copyBuffer = useRef<StageEntities<Record<string, PropPosition>, Record<string, DancerPosition>>>({props: {}, dancers: {}, obstacles: {}});
   const copiedStacks = useRef<CopiedStacks>({ dancers: [], props: [] });
   const [pasteNote, setPasteNote] = useState<string | undefined>(undefined);
+
+  const canBoxSelect = !isAddingDancers && !isAddingProps && !isAddingObstacles && !isAssigningActions && !isEditingMovement && !isPreviewing;
+  const [isBoxHintOpen, setIsBoxHintOpen] = useState(false);
+  const tapsSinceClear = useRef(0);
+  const onObjectTapped = useCallback(() => { tapsSinceClear.current += 1; }, []);
+  const dismissBoxHint = useCallback(() => {
+    setBoxSelectHintSeen();
+    setIsBoxHintOpen(false);
+  }, []);
+
+  // Shown once someone picks a 3rd thing one tap at a time. A mode starting hides it without counting it as seen.
+  useEffect(() => {
+    const count = selectedIds.dancers.length + selectedIds.props.length + selectedIds.obstacles.length;
+    if (!canBoxSelect) {
+      setIsBoxHintOpen(false);
+    } else if (count === 0) {
+      tapsSinceClear.current = 0;
+      if (isBoxHintOpen) dismissBoxHint();
+    } else if (!isBoxHintOpen && count >= 3 && tapsSinceClear.current >= 3 && !checkBoxSelectHintSeen()) {
+      setIsBoxHintOpen(true);
+    }
+  }, [selectedIds, canBoxSelect, isBoxHintOpen, dismissBoxHint]);
   useEffect(() => {
     if (!pasteNote) return;
     const timer = setTimeout(() => setPasteNote(undefined), 5000);
@@ -1126,6 +1148,9 @@ export default function ChoreoEditPage(props: {
           currentMovement={firstSelectedDancerPropMovement}
           onMidpointEdit={onMidpointEdit}
           instantMoves={shortestMoveInstantMoves}
+          canBoxSelect={canBoxSelect}
+          onBoxSelect={dismissBoxHint}
+          onObjectTapped={canBoxSelect ? onObjectTapped : undefined}
           {...previewStageProps}
         />
         <div className="absolute bottom-0 flex flex-col">
@@ -1259,6 +1284,10 @@ export default function ChoreoEditPage(props: {
       {
         pasteNote &&
         <InstructionMessage instruction={pasteNote} onClose={() => setPasteNote(undefined)}/>
+      }
+      {
+        isBoxHintOpen && !pasteNote &&
+        <InstructionMessage instruction={<>空いている所を長押しして囲むと、<br/>まとめて選べます</>} onClose={dismissBoxHint}/>
       }
       {
         isAddingDancers &&

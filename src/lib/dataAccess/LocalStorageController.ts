@@ -58,6 +58,17 @@ export function setViewHintSeen(choreoId: string) {
   localStorage.setItem(getViewHintSeenKey(choreoId), TRUE);
 }
 
+// The editor's hold-to-select hint shows once per device.
+const BOX_SELECT_HINT_SEEN = "BOX_SELECT_HINT_SEEN";
+
+export function checkBoxSelectHintSeen(): boolean {
+  return localStorage.getItem(BOX_SELECT_HINT_SEEN) === TRUE;
+}
+
+export function setBoxSelectHintSeen() {
+  localStorage.setItem(BOX_SELECT_HINT_SEEN, TRUE);
+}
+
 // Personal, per-device notes. Never synced to the server.
 function getPersonalNotesKey(choreoId: string): string {
   return `personal_notes_${choreoId}`;
