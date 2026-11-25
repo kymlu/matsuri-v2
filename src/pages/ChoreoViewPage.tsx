@@ -33,6 +33,12 @@ import { findStack, stackNotes } from "../lib/helpers/stackHelper";
 
 const exportDialog = Dialog.createHandle<{}>();
 
+const HINT_TITLE = { register: "自分を登録しましょう", notFound: "名前が見つかりません", general: "使い方" };
+const HINT_TEXT = {
+  register: "自分の名前を選ぶと、次からは開いたときに自分の位置とカウントが表示されます。",
+  general: "探して選ぶと、位置とカウントが表示されます。",
+};
+
 export default function ChoreoViewPage(props: {
   goToHomePage: () => void
   currentChoreo: Choreo,
@@ -60,7 +66,7 @@ export default function ChoreoViewPage(props: {
   });
 
   // register: no 自分 yet; notFound: 自分 isn't in this 隊列表; general: a sample, or signed in without a name.
-  const [hint, setHint] = useState<"register" | "notFound" | "general">();
+  const [hint, setHint] = useState<keyof typeof HINT_TITLE>();
   const isSample = strEquals(props.currentChoreo.id, SAMPLE_STAGE_ID) || strEquals(props.currentChoreo.id, SAMPLE_PARADE_ID);
   // Signed out only; never a sample's dancer, who'd then be looked for in every 隊列表.
   const canSaveAsMe = props.setSavedDancerName !== undefined && !isSample;
@@ -407,7 +413,7 @@ export default function ChoreoViewPage(props: {
 
       <Dialog.Root onOpenChange={open => { if (!open) closeHint(); }} open={hint !== undefined}>
         <BaseEditDialog
-          title={hint === "register" ? "自分を登録しましょう" : hint === "notFound" ? "名前が見つかりません" : "利用方法"}
+          title={hint === undefined ? "" : HINT_TITLE[hint]}
           actionButtonText="探す"
           onClose={closeHint}
           onSubmit={() => {
@@ -417,9 +423,9 @@ export default function ChoreoViewPage(props: {
           }}>
           <p>
             {
-              hint === "register" ? "自分の名前を選ぶと、次からは開いたときに自分の位置とカウントが表示されます。"
-              : hint === "notFound" ? <><span className="break-all">「{props.myDancerName?.trim()}」</span>はこの隊列表にいません。別の名前の場合は、探して選んでください。</>
-              : "探して選ぶと、位置とカウントが表示されます。"
+              hint === "notFound"
+                ? <><span className="break-all">「{props.myDancerName?.trim()}」</span>はこの隊列表にいません。別の名前の場合は、探して選んでください。</>
+                : hint && HINT_TEXT[hint]
             }
           </p>
           <p className="flex items-start gap-1 mt-2 text-sm text-muted">
