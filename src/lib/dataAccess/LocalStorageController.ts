@@ -46,23 +46,16 @@ export function setTheme(theme: "light" | "dark") {
 }
 
 // The viewer's first-open hint shows once per 隊列表.
-const VIEW_HINT_SEEN = "VIEW_HINT_SEEN";
-function getViewHintSeen(): string[] {
-  try {
-    const seen = JSON.parse(localStorage.getItem(VIEW_HINT_SEEN) ?? "[]");
-    return Array.isArray(seen) ? seen : [];
-  } catch {
-    return [];
-  }
+function getViewHintSeenKey(choreoId: string): string {
+  return `VIEW_HINT_SEEN_${choreoId}`;
 }
 
 export function checkViewHintSeen(choreoId: string): boolean {
-  return getViewHintSeen().includes(choreoId);
+  return localStorage.getItem(getViewHintSeenKey(choreoId)) === TRUE;
 }
 
 export function setViewHintSeen(choreoId: string) {
-  const seen = getViewHintSeen();
-  if (!seen.includes(choreoId)) localStorage.setItem(VIEW_HINT_SEEN, JSON.stringify([...seen, choreoId]));
+  localStorage.setItem(getViewHintSeenKey(choreoId), TRUE);
 }
 
 // Personal, per-device notes. Never synced to the server.
