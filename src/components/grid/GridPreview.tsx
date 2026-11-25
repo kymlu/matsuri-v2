@@ -69,7 +69,6 @@ export default function GridPreview ({
         stageGeometry &&
         <GridLayer
           stageGeometry={stageGeometry}
-          showGridLines
           showBorder
           verticalGridIncrement={1}
         />

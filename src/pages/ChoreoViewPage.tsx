@@ -33,6 +33,8 @@ import { findStack, stackNotes } from "../lib/helpers/stackHelper";
 
 const exportDialog = Dialog.createHandle<{}>();
 
+const appSettings: AppSetting = { snapToGrid: true, dancerDisplayType: "large" };
+
 export default function ChoreoViewPage(props: {
   goToHomePage: () => void
   currentChoreo: Choreo,
@@ -53,11 +55,6 @@ export default function ChoreoViewPage(props: {
   // The action whose counts all show on the stage (すべて).
   const [shownActionId, setShownActionId] = useState<string | undefined>();
   const [showPaths, setShowPaths] = useState<boolean>(true);
-  const [appSettings, setAppSettings] = useState<AppSetting>({
-    snapToGrid: true,
-    showGrid: true,
-    dancerDisplayType: "large",
-  });
 
   const [hint, setHint] = useState<ViewHint>();
   const [isHintOpen, setIsHintOpen] = useState(false);
@@ -175,9 +172,6 @@ export default function ChoreoViewPage(props: {
 
   // ---- Header handlers ----
   const openExportDialog = useCallback(() => setExportDialogOpen(true), []);
-  const toggleShowGrid = useCallback(() => {
-    setAppSettings(prev => ({...prev, showGrid: !prev.showGrid}));
-  }, []);
   const toggleShowPath = useCallback(() => setShowPaths(prev => !prev), []);
 
   // ---- ViewerSidebar handlers ----
@@ -303,7 +297,6 @@ export default function ChoreoViewPage(props: {
         returnHome={props.goToHomePage}
         currentChoreo={props.currentChoreo}
         onDownload={props.pastVersion === undefined ? openExportDialog : undefined}
-        changeShowGrid={toggleShowGrid}
         appSettings={appSettings}
         goToEdit={props.pastVersion === undefined ? props.goToEditPage : undefined}
         toggleShowPath={toggleShowPath}

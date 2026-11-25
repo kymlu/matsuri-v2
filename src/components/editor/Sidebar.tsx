@@ -23,7 +23,6 @@ type SidebarProps = {
   manageSections?: () => void;
   
   changeSnap?: () => void;
-  changeShowGrid?: () => void;
   changeDancerSize?: (showLarge: boolean) => void;
   
   appSettings: AppSetting;
@@ -40,7 +39,6 @@ export function Sidebar({
   showManageProps, manageProps,
   manageSections,
   changeSnap,
-  changeShowGrid,
   changeDancerSize,
   appSettings,
   showPublish,  publish,
@@ -78,10 +76,6 @@ export function Sidebar({
           {showManageProps && manageProps && <SettingsRow icon="flag" label="道具" value={`${propCount ?? 0}`} onClick={manageProps}/>}
         </div>
         <span className="mt-2 text-sm font-semibold text-muted">表示</span>
-        {
-          changeShowGrid &&
-          <CustomSwitch label="グリッド表示" defaultChecked={appSettings.showGrid} onChange={changeShowGrid}/>
-        }
         {
           changeSnap &&
           <CustomSwitch label="グリッドにスナップ" hint="動かすとマス目に合わせる" defaultChecked={appSettings.snapToGrid} onChange={changeSnap}/>

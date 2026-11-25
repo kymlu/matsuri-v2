@@ -734,7 +734,6 @@ function MainStage({
         onDragEnd={handleDragEnd}>
         <GridLayer
           stageGeometry={stageGeometry}
-          showGridLines={appSettings.showGrid}
           verticalGridIncrement={verticalGridIncrement}
           />
         {
