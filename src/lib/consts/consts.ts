@@ -57,6 +57,7 @@ export const IMG = {
 
 export const ICON = {
   "123": "123",
+  touchApp: "touch_app",
   add: "add",
   mail: "mail",
   contactSupport: "contact_support",

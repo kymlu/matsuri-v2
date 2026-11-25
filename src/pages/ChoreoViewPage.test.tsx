@@ -1,7 +1,7 @@
 import { act, render, screen, fireEvent, waitFor, within } from "@testing-library/react";
 import { BasicChoreoDetails, Choreo } from "../models/choreo";
 import { getChoreoFile } from "../lib/helpers/apiHelper";
-import { getSeenVersion, setSeenVersion } from "../lib/dataAccess/LocalStorageController";
+import { getSeenVersion, setSeenVersion, setViewHintSeen } from "../lib/dataAccess/LocalStorageController";
 import { SAMPLE_STAGE_ID } from "../lib/consts/consts";
 import ChoreoViewPage from "./ChoreoViewPage";
 
@@ -75,7 +75,7 @@ function renderPage(overrides: Partial<Parameters<typeof ChoreoViewPage>[0]> = {
   );
 }
 
-const hintTitle = "利用方法";
+const hintTitle = "自分を登録しましょう";
 const changeLogTitle = "前回からの変更";
 const findBanner = () => screen.findByRole("button", { name: /前回から変更があります/ });
 const queryBanner = () => screen.queryByRole("button", { name: /前回から変更があります/ });
@@ -103,7 +103,7 @@ describe("ChoreoViewPage change log", () => {
     renderPage();
 
     expect(await screen.findByText(hintTitle)).toBeInTheDocument();
-    fireEvent.click(screen.getByText("OK"));
+    fireEvent.click(screen.getByText("キャンセル"));
     expect(await findBanner()).toBeInTheDocument();
     expect(mockGetChoreoFile).toHaveBeenCalledWith("team_1", "c1", 1);
     expect(screen.queryByText(changeLogTitle)).not.toBeInTheDocument();
@@ -116,7 +116,7 @@ describe("ChoreoViewPage change log", () => {
     mockGetChoreoFile.mockResolvedValue(makeChoreo(1));
     renderPage();
 
-    fireEvent.click(await screen.findByText("OK"));
+    fireEvent.click(await screen.findByText("キャンセル"));
     fireEvent.click(await findBanner());
     const dialog = within(await screen.findByRole("dialog", { name: changeLogTitle }));
     expect(dialog.getByText("v1")).toBeInTheDocument();
@@ -129,7 +129,7 @@ describe("ChoreoViewPage change log", () => {
     mockGetChoreoFile.mockResolvedValue(makeChoreo(1));
     renderPage({ currentChoreo: { ...current, lastUpdated: "2026-10-20T10:00:00Z" }, serverChoreo: { lastUpdated: "2026-11-02T10:00:00Z" } as BasicChoreoDetails });
 
-    fireEvent.click(await screen.findByText("OK"));
+    fireEvent.click(await screen.findByText("キャンセル"));
     fireEvent.click(await findBanner());
     expect(await screen.findByText("・11月2日更新")).toBeInTheDocument();
   });
@@ -195,7 +195,7 @@ describe("ChoreoViewPage change log", () => {
     mockGetChoreoFile.mockResolvedValue(makeChoreo(1));
     renderPage();
 
-    fireEvent.click(await screen.findByText("OK"));
+    fireEvent.click(await screen.findByText("キャンセル"));
     fireEvent.click(screen.getByText("select count"));
     fireEvent.click(await findBanner());
     expect(await screen.findByText("名前を選ぶと、その人の変更を確認できます。")).toBeInTheDocument();
@@ -217,7 +217,6 @@ describe("ChoreoViewPage change log", () => {
     unmount();
     mockGetChoreoFile.mockResolvedValue(makeChoreo(1));
     renderPage();
-    fireEvent.click(await screen.findByText("OK"));
     expect(await findBanner()).toBeInTheDocument();
     expect(mockGetChoreoFile).toHaveBeenLastCalledWith("team_1", "c1", 1);
     expect(getSeenVersion("c1")).toBe(2);
@@ -279,9 +278,43 @@ describe("ChoreoViewPage hint", () => {
     mockGetChoreoFile.mockReset();
   });
 
-  it("doesn't show 利用方法 for a past version", async () => {
+  it("doesn't show a hint for a past version", async () => {
     renderPage({ pastVersion: 1 });
     await settle();
     expect(screen.queryByText(hintTitle)).not.toBeInTheDocument();
+  });
+
+  it("shows once per 隊列表", async () => {
+    setViewHintSeen("c1");
+    renderPage();
+    await settle();
+    expect(screen.queryByText(hintTitle)).not.toBeInTheDocument();
+  });
+
+  it("says when the saved name isn't in the 隊列表", async () => {
+    renderPage({ myDancerName: "ゆい" });
+    expect(await screen.findByText("名前が見つかりません")).toBeInTheDocument();
+    expect(screen.getByText("「ゆい」")).toBeInTheDocument();
+  });
+
+  it("opens on 自分 with no hint when the name is there", async () => {
+    renderPage({ myDancerName: "さくら" });
+    await settle();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+
+  it("on a sample, offers 探す without registering", async () => {
+    renderPage({ currentChoreo: { ...current, id: SAMPLE_STAGE_ID } });
+    fireEvent.click(await screen.findByText("探す"));
+    expect(await screen.findByText("ダンサーを探す")).toBeInTheDocument();
+    expect(screen.queryByText(/自分として登録/)).not.toBeInTheDocument();
+  });
+
+  it("from 自分を登録しましょう, 探す opens the search ready to register", async () => {
+    renderPage();
+    fireEvent.click(await screen.findByText("探す"));
+    fireEvent.click(await screen.findByText("あおい"));
+    expect(screen.getByText("「あおい」をこの端末の自分として登録")).toBeInTheDocument();
+    expect(screen.getByRole("checkbox")).toHaveAttribute("aria-checked", "true");
   });
 });
