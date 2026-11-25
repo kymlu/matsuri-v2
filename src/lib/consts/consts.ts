@@ -1,4 +1,5 @@
 export const METER_PX = 25;
+export const TAP_MARGIN = METER_PX * 0.3;
 export const PDF_METER_PX = 20;
 export const PROP_SNAP_SIZE = 0.25;
 
