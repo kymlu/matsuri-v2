@@ -23,7 +23,7 @@ import { getChoreoFile } from "../lib/helpers/apiHelper";
 import { buildChangeLog, ChangeLog, hasShownChanges } from "../lib/helpers/changeLogHelper";
 import ChangeLogDialog from "../components/dialogs/ChangeLogDialog";
 import Icon from "../components/basic/Icon";
-import BaseEditDialog from "../components/dialogs/BaseEditDialog";
+import ViewHintDialog, { ViewHint } from "../components/dialogs/ViewHintDialog";
 import InstructionMessage from "../components/basic/InstructionMessage";
 import { useHelp } from "../components/help/HelpContext";
 import { findMyDancerId } from "../lib/helpers/myDancerHelper";
@@ -32,12 +32,6 @@ import { StackListDialog, StackMember } from "../components/dialogs/StackDialogs
 import { findStack, stackNotes } from "../lib/helpers/stackHelper";
 
 const exportDialog = Dialog.createHandle<{}>();
-
-const HINT_TITLE = { register: "自分を登録しましょう", notFound: "名前が見つかりません", general: "使い方" };
-const HINT_TEXT = {
-  register: "自分の名前を選ぶと、次からは開いたときに自分の位置とカウントが表示されます。",
-  general: "探して選ぶと、位置とカウントが表示されます。",
-};
 
 export default function ChoreoViewPage(props: {
   goToHomePage: () => void
@@ -65,8 +59,8 @@ export default function ChoreoViewPage(props: {
     dancerDisplayType: "large",
   });
 
-  // register: no 自分 yet; notFound: 自分 isn't in this 隊列表; general: signed in without a name.
-  const [hint, setHint] = useState<keyof typeof HINT_TITLE>();
+  const [hint, setHint] = useState<ViewHint>();
+  const [isHintOpen, setIsHintOpen] = useState(false);
   const isSample = strEquals(props.currentChoreo.id, SAMPLE_STAGE_ID) || strEquals(props.currentChoreo.id, SAMPLE_PARADE_ID);
   const canSaveAsMe = props.setSavedDancerName !== undefined;
   const personalNote = useMemo(
@@ -96,6 +90,7 @@ export default function ChoreoViewPage(props: {
       // Not for an old version, nor a 隊列表 with nobody to find.
       if (props.pastVersion === undefined && Object.keys(props.currentChoreo.dancers).length > 0 && !checkViewHintSeen(props.currentChoreo.id)) {
         setHint(!isNullOrUndefinedOrBlank(props.myDancerName) ? "notFound" : canSaveAsMe ? "register" : "general");
+        setIsHintOpen(true);
         setViewHintSeen(props.currentChoreo.id);
       }
     }
@@ -279,7 +274,7 @@ export default function ChoreoViewPage(props: {
     undefined
   ), [showPaths, selectedIds.dancers, selectedTimingId, nextSection, currentSection]);
 
-  const closeHint = useCallback(() => setHint(undefined), []);
+  const closeHint = useCallback(() => setIsHintOpen(false), []);
 
   // ---- Find dancer ----
   const [findDancerOpen, setFindDancerOpen] = useState(false);
@@ -408,27 +403,19 @@ export default function ChoreoViewPage(props: {
         />
       }
 
-      <Dialog.Root onOpenChange={open => { if (!open) closeHint(); }} open={hint !== undefined}>
-        <BaseEditDialog
-          title={hint === undefined ? "" : HINT_TITLE[hint]}
-          actionButtonText="探す"
-          onClose={closeHint}
-          onSubmit={() => {
-            setFindSavesAsMe(hint === "register");
-            setFindDancerOpen(true);
-            closeHint();
-          }}>
-          <p>
-            {
-              hint === "notFound"
-                ? <><span className="break-all">「{props.myDancerName?.trim()}」</span>はこの隊列表にいません。別の名前の場合は、探して選んでください。</>
-                : hint && HINT_TEXT[hint]
-            }
-          </p>
-          <p className="flex items-start gap-1 mt-2 text-sm text-muted">
-            <Icon src="touchApp" size="xs" colour="grey"/>名前をタップしても位置を確認できます。
-          </p>
-        </BaseEditDialog>
+      <Dialog.Root onOpenChange={open => { if (!open) closeHint(); }} open={isHintOpen}>
+        {
+          hint &&
+          <ViewHintDialog
+            hint={hint}
+            myDancerName={props.myDancerName}
+            onClose={closeHint}
+            onSearch={() => {
+              setFindSavesAsMe(hint === "register");
+              setFindDancerOpen(true);
+              closeHint();
+            }}/>
+        }
       </Dialog.Root>
 
       <Dialog.Root open={stackList !== undefined} onOpenChange={open => { if (!open) setStackList(undefined); }}>
