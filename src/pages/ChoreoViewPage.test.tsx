@@ -303,8 +303,8 @@ describe("ChoreoViewPage hint", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
-  it("on a sample, offers 探す without registering", async () => {
-    renderPage({ currentChoreo: { ...current, id: SAMPLE_STAGE_ID } });
+  it("shows 使い方 when signed in without a name", async () => {
+    renderPage({ setSavedDancerName: undefined });
     fireEvent.click(await screen.findByText("探す"));
     expect(await screen.findByText("ダンサーを探す")).toBeInTheDocument();
     expect(screen.queryByText(/自分として登録/)).not.toBeInTheDocument();

@@ -65,11 +65,10 @@ export default function ChoreoViewPage(props: {
     dancerDisplayType: "large",
   });
 
-  // register: no 自分 yet; notFound: 自分 isn't in this 隊列表; general: a sample, or signed in without a name.
+  // register: no 自分 yet; notFound: 自分 isn't in this 隊列表; general: signed in without a name.
   const [hint, setHint] = useState<keyof typeof HINT_TITLE>();
   const isSample = strEquals(props.currentChoreo.id, SAMPLE_STAGE_ID) || strEquals(props.currentChoreo.id, SAMPLE_PARADE_ID);
-  // Signed out only; never a sample's dancer, who'd then be looked for in every 隊列表.
-  const canSaveAsMe = props.setSavedDancerName !== undefined && !isSample;
+  const canSaveAsMe = props.setSavedDancerName !== undefined;
   const personalNote = useMemo(
     () => getPersonalSectionNote(props.currentChoreo.id, currentSection.id),
     [props.currentChoreo.id, currentSection.id]
@@ -96,9 +95,7 @@ export default function ChoreoViewPage(props: {
       resetSelectedIds();
       // Not for an old version, nor a 隊列表 with nobody to find.
       if (props.pastVersion === undefined && Object.keys(props.currentChoreo.dancers).length > 0 && !checkViewHintSeen(props.currentChoreo.id)) {
-        setHint(isSample || (isNullOrUndefinedOrBlank(props.myDancerName) && !canSaveAsMe)
-          ? "general"
-          : isNullOrUndefinedOrBlank(props.myDancerName) ? "register" : "notFound");
+        setHint(!isNullOrUndefinedOrBlank(props.myDancerName) ? "notFound" : canSaveAsMe ? "register" : "general");
         setViewHintSeen(props.currentChoreo.id);
       }
     }
@@ -106,7 +103,7 @@ export default function ChoreoViewPage(props: {
     setDancerAnimationCache(res.newDancerAnimationCache);
     setDancerMovementCache(res.newDancerMovementCache);
     setPropAnimationCache(res.newPropAnimationCache);
-  }, [props.currentChoreo, props.pastVersion, resetSelectedIds, isSample, canSaveAsMe]);
+  }, [props.currentChoreo, props.pastVersion, resetSelectedIds, canSaveAsMe]);
 
   // Read once, before the effect below stores the current version.
   const [seenVersionAtOpen] = useState(() => getSeenVersion(props.currentChoreo.id));
