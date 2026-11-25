@@ -734,12 +734,22 @@ function MainStage({
     const start = boxStart.current;
     const end = stage.getRelativePointerPosition();
     if (start && end && boxMoved.current && stageGeometry) {
+      const obstacles = currentChoreo.obstacles ?? {};
+      const boundsOf = (id: string) => {
+        const shape = currentChoreo.props[id] ?? obstacles[id];
+        if (!shape) return undefined;
+        const w = shape.width * METER_PX, h = shape.length * METER_PX;
+        const rect = stage.find(`#${id}`)
+          .map(group => (group as Konva.Group).findOne?.((n: Konva.Node) => n instanceof Konva.Rect && n.isVisible() && Math.abs(n.width() - w) < 0.5 && Math.abs(n.height() - h) < 0.5))
+          .find(Boolean);
+        return rect?.getClientRect({ skipStroke: true, skipShadow: true, relativeTo: stage });
+      };
       const caught = idsInBox(start, end, {
         geometry: stageGeometry,
         dancerPositions,
-        propPositions,
-        props: currentChoreo.props,
-        obstacles: Object.values(currentChoreo.obstacles ?? {}),
+        propIds: propPositions.map(p => p.propId),
+        obstacleIds: Object.keys(obstacles),
+        boundsOf,
         canSelectDancers: canSelectDancers && !dimDancers,
         canSelectProps,
         canSelectObstacles,

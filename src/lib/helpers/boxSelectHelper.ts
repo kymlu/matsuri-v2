@@ -1,44 +1,41 @@
+import { Coordinates } from "../../models/base";
 import { StageGeometry } from "../../models/choreo";
 import { DancerPosition } from "../../models/dancer";
 import { StageEntities } from "../../models/history";
-import { Obstacle, Prop, PropPosition } from "../../models/prop";
 import { METER_PX } from "../consts/consts";
-import { Coordinates } from "../../models/base";
-import { cornerToCentre, stageMetersToPx } from "./editorCalculationHelper";
+import { stageMetersToPx } from "./editorCalculationHelper";
+
+export type Bounds = { x: number, y: number, width: number, height: number };
 
 export type BoxSelectInput = {
   geometry: StageGeometry,
   dancerPositions: DancerPosition[],
-  propPositions: PropPosition[],
-  props: Record<string, Prop>,
-  obstacles: Obstacle[],
+  propIds: string[],
+  obstacleIds: string[],
+  // Drawn bounds in stage px; for a rotated shape, the box around its corners.
+  boundsOf: (id: string) => Bounds | undefined,
   canSelectDancers: boolean,
   canSelectProps: boolean,
   canSelectObstacles: boolean,
   excludedDancerIds?: ReadonlySet<string>,
 };
 
-// Ids whose centre is inside the box (stage px, any two corners).
+// Dancers count when their centre is inside the box; props and obstacles only when wholly inside.
 export function idsInBox(a: Coordinates, b: Coordinates, input: BoxSelectInput): StageEntities<string[]> {
-  const { geometry } = input;
-  const inside = (p: Coordinates) =>
-    p.x >= Math.min(a.x, b.x) && p.x <= Math.max(a.x, b.x) &&
-    p.y >= Math.min(a.y, b.y) && p.y <= Math.max(a.y, b.y);
-  const centreOf = (x: number, y: number, rotation: number | undefined, width: number, length: number) => {
-    const corner = stageMetersToPx({ x, y }, geometry, METER_PX, length);
-    return cornerToCentre(corner.x, corner.y, rotation ?? 0, width * METER_PX, length * METER_PX, geometry.yAxis);
+  const left = Math.min(a.x, b.x), right = Math.max(a.x, b.x);
+  const top = Math.min(a.y, b.y), bottom = Math.max(a.y, b.y);
+  const pointInside = (p: Coordinates) => p.x >= left && p.x <= right && p.y >= top && p.y <= bottom;
+  const whollyInside = (id: string) => {
+    const r = input.boundsOf(id);
+    return !!r && r.x >= left && r.x + r.width <= right && r.y >= top && r.y + r.height <= bottom;
   };
+
   const dancers = !input.canSelectDancers ? [] : input.dancerPositions
     .filter(p => !input.excludedDancerIds?.has(p.dancerId))
-    .filter(p => inside(stageMetersToPx({ x: p.x, y: p.y }, geometry, METER_PX)))
+    .filter(p => pointInside(stageMetersToPx({ x: p.x, y: p.y }, input.geometry, METER_PX)))
     .map(p => p.dancerId);
-  const props = !input.canSelectProps ? [] : input.propPositions
-    .filter(p => input.props[p.propId])
-    .filter(p => inside(centreOf(p.x, p.y, p.rotation, input.props[p.propId].width, input.props[p.propId].length)))
-    .map(p => p.propId);
-  const obstacles = !input.canSelectObstacles ? [] : input.obstacles
-    .filter(o => inside(centreOf(o.x, o.y, o.rotation, o.width, o.length)))
-    .map(o => o.id);
+  const props = !input.canSelectProps ? [] : input.propIds.filter(whollyInside);
+  const obstacles = !input.canSelectObstacles ? [] : input.obstacleIds.filter(whollyInside);
 
   return { dancers, props, obstacles };
 }
