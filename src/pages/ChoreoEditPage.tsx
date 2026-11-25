@@ -400,23 +400,27 @@ export default function ChoreoEditPage(props: {
   const [isBoxHintOpen, setIsBoxHintOpen] = useState(false);
   const tapsSinceClear = useRef(0);
   const onObjectTapped = useCallback(() => { tapsSinceClear.current += 1; }, []);
-  const dismissBoxHint = useCallback(() => {
+  const hideBoxHint = useCallback(() => {
+    tapsSinceClear.current = 0;
+    setIsBoxHintOpen(false);
+  }, []);
+  const closeBoxHint = useCallback(() => {
     setBoxSelectHintSeen();
     setIsBoxHintOpen(false);
   }, []);
 
-  // Shown once someone picks a 3rd thing one tap at a time. A mode starting hides it without counting it as seen.
+  // Shown once someone picks a 3rd thing one tap at a time; only × stops it coming back.
   useEffect(() => {
     const count = selectedIds.dancers.length + selectedIds.props.length + selectedIds.obstacles.length;
     if (!canBoxSelect) {
       setIsBoxHintOpen(false);
     } else if (count === 0) {
       tapsSinceClear.current = 0;
-      if (isBoxHintOpen) dismissBoxHint();
+      setIsBoxHintOpen(false);
     } else if (!isBoxHintOpen && count >= 3 && tapsSinceClear.current >= 3 && !checkBoxSelectHintSeen()) {
       setIsBoxHintOpen(true);
     }
-  }, [selectedIds, canBoxSelect, isBoxHintOpen, dismissBoxHint]);
+  }, [selectedIds, canBoxSelect, isBoxHintOpen]);
   useEffect(() => {
     if (!pasteNote) return;
     const timer = setTimeout(() => setPasteNote(undefined), 5000);
@@ -1149,7 +1153,7 @@ export default function ChoreoEditPage(props: {
           onMidpointEdit={onMidpointEdit}
           instantMoves={shortestMoveInstantMoves}
           canBoxSelect={canBoxSelect}
-          onBoxSelect={dismissBoxHint}
+          onBoxSelect={hideBoxHint}
           onObjectTapped={canBoxSelect ? onObjectTapped : undefined}
           {...previewStageProps}
         />
@@ -1287,7 +1291,7 @@ export default function ChoreoEditPage(props: {
       }
       {
         isBoxHintOpen && !pasteNote &&
-        <InstructionMessage instruction={<>空いている所を長押しして囲むと、<br/>まとめて選べます</>} onClose={dismissBoxHint}/>
+        <InstructionMessage instruction={<>空いている所を長押しして囲むと、<br/>まとめて選べます</>} onClose={closeBoxHint}/>
       }
       {
         isAddingDancers &&
