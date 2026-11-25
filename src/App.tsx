@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { usePageHistory } from './lib/hooks/usePageHistory';
 import './App.css';
 import HomePage, { ChoreoStatus } from './pages/HomePage';
 import { NewChoreoPage } from './pages/NewChoreoPage';
@@ -23,8 +24,7 @@ import TeamLoadErrorDialog, { TeamLoadError } from './components/dialogs/TeamLoa
 type Mode = "home" | "form" | "edit" | "view" | "admin" | "roster";
 
 function App() {
-  const [mode, setMode] = useState<Mode>("home");
-  // The 名簿 page's last tab, kept for the session.
+  const { mode, goTo, leaveBlockedRef } = usePageHistory<Mode>("home");
   const [rosterTab, setRosterTab] = useState<RosterTab>("dancer");
   const [selectedEvent, setSelectedEvent] = useState<EventDetails>();
   const [eventList, setEventList] = useState<EventDetails[]>([]);
@@ -145,7 +145,7 @@ function App() {
       {
         currentTeamMemberId && team && mode === "admin" && (
           <AdminPage
-            goToHomePage={() => setMode("home")}
+            goToHomePage={() => goTo("home")}
             team={team}
             currentUserId={currentTeamMemberId}
           />
@@ -154,7 +154,7 @@ function App() {
       {
         team && isLoggedIn && !isViewer && mode === "roster" && (
           <RosterPage
-            goToHomePage={() => setMode("home")}
+            goToHomePage={() => goTo("home")}
             team={team}
             tab={rosterTab}
             onTabChange={setRosterTab}
@@ -193,21 +193,21 @@ function App() {
             setEventList(eventList);
           }}
           goToAdminPage={() => {
-            setMode("admin");
+            goTo("admin");
           }}
           goToRosterPage={() => {
-            setMode("roster");
+            goTo("roster");
           }}
           goToNewChoreoPage={(event) => {
             setSelectedEvent(event);
-            setMode("form");
+            goTo("form");
           }}
           goToViewPage={(choreo: Choreo, status: ChoreoStatus, serverChoreo?: BasicChoreoDetails, pastVersion?: number) => {
             setServerChoreo(serverChoreo);
             setCurrentChoreo(choreo);
             setCurrentChoreoStatus(status);
             setPastVersion(pastVersion);
-            setMode("view");
+            goTo("view");
           }}
           savedDancerName={savedDancerName}
           setSavedDancerName={saveDancerName}
@@ -226,11 +226,11 @@ function App() {
       )}
       {mode === "form" && (
         <NewChoreoPage
-          goToHomePage={() => setMode("home")}
+          goToHomePage={() => goTo("home")}
           goToEditPage={(choreo: Choreo) => {
             setCurrentChoreo(choreo);
             setCurrentChoreoStatus("localOnly")
-            setMode("edit");
+            goTo("edit");
           }}
           eventList={eventList}
           selectedEvent={selectedEvent}
@@ -242,11 +242,12 @@ function App() {
         <ChoreoEditPage
           currentChoreo={currentChoreo!!}
           currentChoreoStatus={currentChoreoStatus!!}
-          goToHomePage={() => setMode("home")}
+          goToHomePage={() => goTo("home")}
+          onLeaveBlockedChange={(blocked) => { leaveBlockedRef.current = blocked; }}
           goToViewPage={(choreo) => {
             setCurrentChoreo(choreo);
             setPastVersion(undefined);
-            setMode("view");
+            goTo("view");
           }}
           eventList={eventList}
           onChoreoEdited={() => {
@@ -264,8 +265,8 @@ function App() {
         <ChoreoViewPage
           currentChoreo={currentChoreo!!}
           currentChoreoStatus={currentChoreoStatus!!}
-          goToHomePage={() => setMode("home")}
-          goToEditPage={() => setMode("edit")}
+          goToHomePage={() => goTo("home")}
+          goToEditPage={() => goTo("edit")}
           pastVersion={pastVersion}
           myDancerName={savedDancerName}
           setSavedDancerName={isLoggedIn ? undefined : saveDancerName}

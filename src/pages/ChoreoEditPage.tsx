@@ -79,6 +79,7 @@ type SelectedEntity = { id: string, type: "dancer" | "prop" };
 
 export default function ChoreoEditPage(props: {
   goToHomePage: () => void,
+  onLeaveBlockedChange?: (blocked: boolean) => void,
   currentChoreo: Choreo,
   currentChoreoStatus: ChoreoStatus,
   goToViewPage: (newChoreo: Choreo) => void,
@@ -540,6 +541,15 @@ export default function ChoreoEditPage(props: {
   useEffect(() => {
     onSaveRef.current = onSave;
   }, [onSave]);
+
+  // However the editor is left (home button, back gesture), the last edits are saved.
+  useEffect(() => () => onSaveRef.current(), []);
+
+  const { onLeaveBlockedChange } = props;
+  useEffect(() => {
+    onLeaveBlockedChange?.(isResizingStage);
+    return () => onLeaveBlockedChange?.(false);
+  }, [isResizingStage, onLeaveBlockedChange]);
 
   useEffect(() => {
     onCopyRef.current = onCopy;
