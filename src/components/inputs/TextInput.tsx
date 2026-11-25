@@ -91,6 +91,14 @@ export default function TextInput({
               value={value ?? ""}
               onInput={(event) => handleChange(event.currentTarget.value)}
               onBlur={() => setIsTouched(true)}
+              // 検索 only closes the keyboard: results update as you type.
+              enterKeyHint={search ? "search" : undefined}
+              onKeyDown={search ? (event) => {
+                if (event.key === "Enter" && !event.nativeEvent.isComposing) {
+                  event.preventDefault();
+                  event.currentTarget.blur();
+                }
+              } : undefined}
               className={inputClasses}/>
             {
               search &&
