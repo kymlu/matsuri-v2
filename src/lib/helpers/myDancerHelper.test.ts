@@ -20,7 +20,7 @@ describe("findMyDancerId", () => {
     expect(findMyDancerId({ x: { id: "x", name: "Mika" } }, "mika")).toBe("x"));
   it("finds a single match", () => expect(findMyDancerId(dancers, "さくら")).toBe("a"));
   it("ignores surrounding spaces", () => expect(findMyDancerId(dancers, " さくら ")).toBe("a"));
-  it("skips duplicate names", () => expect(findMyDancerId(dancers, "花子")).toBeUndefined());
+  it("takes the first of duplicate names", () => expect(findMyDancerId(dancers, "花子")).toBe("b"));
   it("skips no match and blanks", () => {
     expect(findMyDancerId(dancers, "ゆい")).toBeUndefined();
     expect(findMyDancerId(dancers, "")).toBeUndefined();

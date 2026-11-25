@@ -21,7 +21,6 @@ function getUnlockedChoreoKey(choreoId: string, version?: number): string {
 }
 
 const TRUE = "true";
-const FALSE = "false";
 
 export function setUnlockedChoreo(choreoId: string, version?: number) {
   localStorage.setItem(getUnlockedChoreoKey(choreoId, version), TRUE);
@@ -46,13 +45,17 @@ export function setTheme(theme: "light" | "dark") {
   localStorage.setItem(THEME, theme);
 }
 
-const DO_NOT_SHOW_VIEW_INFO_DIALOG = "DO_NOT_SHOW_VIEW_INFO_DIALOG"
-export function stopShowingViewPageInfoDialog(value: boolean) {
-  localStorage.setItem(DO_NOT_SHOW_VIEW_INFO_DIALOG, value ? TRUE : FALSE);
+// The viewer's first-open hint shows once per 隊列表.
+function getViewHintSeenKey(choreoId: string): string {
+  return `VIEW_HINT_SEEN_${choreoId}`;
 }
 
-export function checkShowingViewPageInfoDialog(): boolean {
-  return localStorage.getItem(DO_NOT_SHOW_VIEW_INFO_DIALOG) === TRUE;
+export function checkViewHintSeen(choreoId: string): boolean {
+  return localStorage.getItem(getViewHintSeenKey(choreoId)) === TRUE;
+}
+
+export function setViewHintSeen(choreoId: string) {
+  localStorage.setItem(getViewHintSeenKey(choreoId), TRUE);
 }
 
 // Personal, per-device notes. Never synced to the server.

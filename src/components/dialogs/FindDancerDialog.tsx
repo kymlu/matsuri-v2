@@ -16,14 +16,15 @@ type FindDancerDialogProps = {
   myDancerId?: string,
   myDancerName: string | null,
   canSaveAsMe: boolean,
+  initialSaveAsMe?: boolean,
   onConfirm: (dancerId: string, saveAsMe: boolean) => void,
 }
 
 // Viewer: find a dancer by name and select them on the stage, optionally saving them as "me".
-export default function FindDancerDialog({ dancers, shownId, myDancerId, myDancerName, canSaveAsMe, onConfirm }: FindDancerDialogProps) {
+export default function FindDancerDialog({ dancers, shownId, myDancerId, myDancerName, canSaveAsMe, initialSaveAsMe = false, onConfirm }: FindDancerDialogProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [chosenId, setPickedId] = useState<string | undefined>(shownId);
-  const [saveAsMe, setSaveAsMe] = useState(false);
+  const [saveAsMe, setSaveAsMe] = useState(initialSaveAsMe);
 
   const items = useMemo(
     () => buildFindDancerList(dancers, shownId, myDancerId, searchTerm),
@@ -47,7 +48,7 @@ export default function FindDancerDialog({ dancers, shownId, myDancerId, myDance
 
   const pick = (id: string) => {
     setPickedId(id);
-    setSaveAsMe(false);
+    setSaveAsMe(initialSaveAsMe);
   };
 
   return <CustomDialog

@@ -14,10 +14,7 @@ import { Obstacle, PropPosition } from "../models/prop";
 import ExportDialog from "../components/dialogs/ExportDialog";
 import { Dialog } from "@base-ui/react";
 import { ChoreoStatus } from "./HomePage";
-import BaseErrorDialog from "../components/dialogs/BaseErrorDialog";
-import CustomSwitch from "../components/inputs/CustomSwitch";
-import { checkShowingViewPageInfoDialog, stopShowingViewPageInfoDialog, getPersonalSectionNote, setPersonalSectionNote, getSeenVersion, setSeenVersion } from "../lib/dataAccess/LocalStorageController";
-import Divider from "../components/basic/Divider";
+import { checkViewHintSeen, setViewHintSeen, getPersonalSectionNote, setPersonalSectionNote, getSeenVersion, setSeenVersion } from "../lib/dataAccess/LocalStorageController";
 import { calculateMovementCache } from "../lib/helpers/editorCalculationHelper";
 import { DancerAction, DancerActionTiming } from "../models/dancerAction";
 import { SetStateAction } from "react";
@@ -26,6 +23,7 @@ import { getChoreoFile } from "../lib/helpers/apiHelper";
 import { buildChangeLog, ChangeLog, hasShownChanges } from "../lib/helpers/changeLogHelper";
 import ChangeLogDialog from "../components/dialogs/ChangeLogDialog";
 import Icon from "../components/basic/Icon";
+import ViewHintDialog, { ViewHint } from "../components/dialogs/ViewHintDialog";
 import InstructionMessage from "../components/basic/InstructionMessage";
 import { useHelp } from "../components/help/HelpContext";
 import { findMyDancerId } from "../lib/helpers/myDancerHelper";
@@ -61,7 +59,10 @@ export default function ChoreoViewPage(props: {
     dancerDisplayType: "large",
   });
 
-  const [showHintDialog, setShowHintDialog] = useState<boolean>(false);
+  const [hint, setHint] = useState<ViewHint>();
+  const [isHintOpen, setIsHintOpen] = useState(false);
+  const isSample = strEquals(props.currentChoreo.id, SAMPLE_STAGE_ID) || strEquals(props.currentChoreo.id, SAMPLE_PARADE_ID);
+  const canSaveAsMe = props.setSavedDancerName !== undefined;
   const personalNote = useMemo(
     () => getPersonalSectionNote(props.currentChoreo.id, currentSection.id),
     [props.currentChoreo.id, currentSection.id]
@@ -81,25 +82,23 @@ export default function ChoreoViewPage(props: {
   const resetSelectedIds = useCallback(() => setSelectedIds({props: [], dancers: [], obstacles: []}), []);
 
   useEffect(() => {
-    // The how-to hint is for a first look at the current version, not for checking an old one.
-    const shouldShowHint = props.pastVersion === undefined && !checkShowingViewPageInfoDialog();
-    if (!isNullOrUndefinedOrBlank(props.myDancerName)) {
-      const myDancerId = findMyDancerId(props.currentChoreo.dancers, props.myDancerName);
-      if (myDancerId) {
-        setSelectedIds({dancers: [myDancerId], props: [], obstacles: []});
-        setShowHintDialog(false);
-      } else {
-        resetSelectedIds();
-        setShowHintDialog(shouldShowHint);
-      }
+    const myDancerId = findMyDancerId(props.currentChoreo.dancers, props.myDancerName);
+    if (myDancerId) {
+      setSelectedIds({dancers: [myDancerId], props: [], obstacles: []});
     } else {
-      setShowHintDialog(shouldShowHint);
+      resetSelectedIds();
+      // Not for an old version, nor a 隊列表 with nobody to find.
+      if (props.pastVersion === undefined && Object.keys(props.currentChoreo.dancers).length > 0 && !checkViewHintSeen(props.currentChoreo.id)) {
+        setHint(!isNullOrUndefinedOrBlank(props.myDancerName) ? "notFound" : canSaveAsMe ? "register" : "general");
+        setIsHintOpen(true);
+        setViewHintSeen(props.currentChoreo.id);
+      }
     }
     const res = calculateMovementCache(props.currentChoreo, false);
     setDancerAnimationCache(res.newDancerAnimationCache);
     setDancerMovementCache(res.newDancerMovementCache);
     setPropAnimationCache(res.newPropAnimationCache);
-  }, [props.currentChoreo, props.pastVersion, resetSelectedIds]);
+  }, [props.currentChoreo, props.pastVersion, resetSelectedIds, canSaveAsMe]);
 
   // Read once, before the effect below stores the current version.
   const [seenVersionAtOpen] = useState(() => getSeenVersion(props.currentChoreo.id));
@@ -107,8 +106,7 @@ export default function ChoreoViewPage(props: {
     props.currentChoreoStatus === "upToDate" &&
     !isNullOrUndefinedOrBlank(props.teamId) &&
     props.currentChoreo.version !== undefined &&
-    !strEquals(props.currentChoreo.id, SAMPLE_STAGE_ID) &&
-    !strEquals(props.currentChoreo.id, SAMPLE_PARADE_ID);
+    !isSample;
 
   const hasNewVersion = isChangeLogEligible && seenVersionAtOpen !== undefined && seenVersionAtOpen < props.currentChoreo.version!!;
 
@@ -276,12 +274,13 @@ export default function ChoreoViewPage(props: {
     undefined
   ), [showPaths, selectedIds.dancers, selectedTimingId, nextSection, currentSection]);
 
-  const closeHintDialog = useCallback(() => setShowHintDialog(false), []);
+  const closeHint = useCallback(() => setIsHintOpen(false), []);
 
   // ---- Find dancer ----
   const [findDancerOpen, setFindDancerOpen] = useState(false);
+  const [findSavesAsMe, setFindSavesAsMe] = useState(false);
   const [focusDancerRequest, setFocusDancerRequest] = useState(0);
-  const openFind = useCallback(() => setFindDancerOpen(true), []);
+  const openFind = useCallback(() => { setFindSavesAsMe(false); setFindDancerOpen(true); }, []);
   const myDancerId = useMemo(
     () => findMyDancerId(props.currentChoreo.dancers, props.myDancerName),
     [props.currentChoreo.dancers, props.myDancerName]
@@ -404,15 +403,19 @@ export default function ChoreoViewPage(props: {
         />
       }
 
-      <Dialog.Root onOpenChange={closeHintDialog} open={showHintDialog}>
-        <BaseErrorDialog title="利用方法" onClose={closeHintDialog}>
-          <div>名前をタップすると、位置情報が表示されます。</div>
-          <Divider/>
-          <CustomSwitch
-            label="今後このメッセージを表示しない"
-            defaultChecked={false}
-            onChange={(value) => stopShowingViewPageInfoDialog(value)}/>
-        </BaseErrorDialog>
+      <Dialog.Root onOpenChange={open => { if (!open) closeHint(); }} open={isHintOpen}>
+        {
+          hint &&
+          <ViewHintDialog
+            hint={hint}
+            myDancerName={props.myDancerName}
+            onClose={closeHint}
+            onSearch={() => {
+              setFindSavesAsMe(hint === "register");
+              setFindDancerOpen(true);
+              closeHint();
+            }}/>
+        }
       </Dialog.Root>
 
       <Dialog.Root open={stackList !== undefined} onOpenChange={open => { if (!open) setStackList(undefined); }}>
@@ -438,7 +441,8 @@ export default function ChoreoViewPage(props: {
             shownId={selectedIds.dancers.length === 1 && selectedTimingId === undefined ? selectedIds.dancers[0] : undefined}
             myDancerId={myDancerId}
             myDancerName={props.myDancerName}
-            canSaveAsMe={props.setSavedDancerName !== undefined}
+            canSaveAsMe={canSaveAsMe}
+            initialSaveAsMe={findSavesAsMe}
             onConfirm={onFindDancer}/>
         }
       </Dialog.Root>

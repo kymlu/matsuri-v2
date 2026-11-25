@@ -7,10 +7,9 @@ export function isSameDancerName(a: string | null | undefined, b: string | null 
   return a!.trim().toLowerCase() === b!.trim().toLowerCase();
 }
 
-// The id of the one dancer with exactly this name. Two or more matches are left for the user to pick.
+// The dancer with this name; with two or more, the first, labelled (1) in lists.
 export function findMyDancerId(dancers: Record<string, Dancer>, name: string | null | undefined): string | undefined {
-  const matches = Object.values(dancers).filter(d => isSameDancerName(d.name, name));
-  return matches.length === 1 ? matches[0].id : undefined;
+  return Object.values(dancers).find(d => isSameDancerName(d.name, name))?.id;
 }
 
 // For search: full-width/half-width folded, katakana as hiragana, Latin in lower case.
