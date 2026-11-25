@@ -8,7 +8,6 @@ import { computeStageGeometryPx, getCentreLabelPositions, getVerticalLabelPositi
 interface GridLayerProps {
   stageGeometry: StageGeometry,
   gridSize?: number,
-  showGridLines: boolean,
   showBorder?: boolean,
   verticalGridIncrement: number,
 }
@@ -16,7 +15,6 @@ interface GridLayerProps {
 const GridLayer = memo(function GridLayer({
   stageGeometry,
   gridSize,
-  showGridLines,
   showBorder,
   verticalGridIncrement,
 }: GridLayerProps) {
@@ -60,61 +58,60 @@ const GridLayer = memo(function GridLayer({
         />
     );
     
-    if (showGridLines){
-      // Horizontal grid lines
-      for (let m = 0; m <= margins.topMargin + length + margins.bottomMargin; m++) {
-        const y = m * gridSizePx;
-        const isMajor = m % 2 === 0;
-      
-        if (m > 0 && m < margins.topMargin + length + margins.bottomMargin) {
-          elements.push(
-            <Line
-              key={`h-${m}`}
-              points={[0, y, totalWidthPx, y]}
-              stroke={colorPalette.lightGrey}
-              strokeWidth={1}
-              dash={isMajor ? [10, 6] : [4, 6]}
-            />
-          );
-        }
-      }
-
-      // Vertical grid lines (across full area)
-      for (let m = 0; m < margins.leftMargin + width + margins.rightMargin - gridOffsetMeters; m++) {
-        const x = m * gridSizePx + gridOffsetPx;
-        
-        if (x === 0) continue;
-      
-        const distFromCenter = Math.abs(
-          x - centerX
-        ) / gridSizePx;
-      
-        const isMajor = Math.round(distFromCenter) % 2 === 0;
-      
+    // Horizontal grid lines
+    for (let m = 0; m <= margins.topMargin + length + margins.bottomMargin; m++) {
+      const y = m * gridSizePx;
+      const isMajor = m % 2 === 0;
+    
+      if (m > 0 && m < margins.topMargin + length + margins.bottomMargin) {
         elements.push(
           <Line
-            key={`v-${m}`}
-            points={[x, 0, x, totalHeightPx]}
+            key={`h-${m}`}
+            points={[0, y, totalWidthPx, y]}
             stroke={colorPalette.lightGrey}
             strokeWidth={1}
-            dash={
-              isMajor ? [10, 6] : [4, 6]
-            }
+            dash={isMajor ? [10, 6] : [4, 6]}
           />
         );
       }
+    }
 
-      // Center line
+    // Vertical grid lines (across full area)
+    for (let m = 0; m < margins.leftMargin + width + margins.rightMargin - gridOffsetMeters; m++) {
+      const x = m * gridSizePx + gridOffsetPx;
+      
+      if (x === 0) continue;
+    
+      const distFromCenter = Math.abs(
+        x - centerX
+      ) / gridSizePx;
+    
+      const isMajor = Math.round(distFromCenter) % 2 === 0;
+    
       elements.push(
         <Line
-          key="center-line"
-          points={[centerX, 0, centerX, totalHeightPx]}
-          stroke={colorPalette.midGrey}
-          strokeWidth={1.2}
-          dash={[10, 6]}
+          key={`v-${m}`}
+          points={[x, 0, x, totalHeightPx]}
+          stroke={colorPalette.lightGrey}
+          strokeWidth={1}
+          dash={
+            isMajor ? [10, 6] : [4, 6]
+          }
         />
       );
     }
+
+    // Center line
+    elements.push(
+      <Line
+        key="center-line"
+        points={[centerX, 0, centerX, totalHeightPx]}
+        stroke={colorPalette.midGrey}
+        strokeWidth={1.2}
+        dash={[10, 6]}
+      />
+    );
+  
 
     // Draw main stage border
     elements.push(
@@ -210,7 +207,7 @@ const GridLayer = memo(function GridLayer({
       );
     }
     setElements(elements);
-  }, [stageGeometry, showGridLines, verticalGridIncrement]);
+  }, [stageGeometry, verticalGridIncrement]);
 
 
   return <Layer listening={false}>{elements}</Layer>;
