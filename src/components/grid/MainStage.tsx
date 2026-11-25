@@ -110,7 +110,7 @@ type MainStageProps = {
 
 const HOLD_MS = 400;
 const HOLD_SLOP_PX = 8;
-const HOLD_BOX_PX = 44;
+const BOX_START_PX = 3;
 
 function MainStage({
   canEdit, canToggleSelection,
@@ -572,6 +572,11 @@ function MainStage({
     cancelHold();
     boxStart.current = undefined;
     setIsBoxSelecting(false);
+    const rect = boxRectRef.current;
+    if (rect?.visible()) {
+      rect.visible(false);
+      rect.getLayer()?.batchDraw();
+    }
   }, [cancelHold]);
 
   useEffect(() => {
@@ -580,18 +585,11 @@ function MainStage({
 
   useEffect(() => cancelHold, [cancelHold]);
 
-  const drawBox = useCallback((stage: Konva.Stage, end?: Coordinates) => {
+  const drawBox = useCallback((end: Coordinates) => {
     const rect = boxRectRef.current;
     const start = boxStart.current;
     if (!rect || !start) return;
-    if (end) {
-      rect.setAttrs({ x: Math.min(start.x, end.x), y: Math.min(start.y, end.y), width: Math.abs(end.x - start.x), height: Math.abs(end.y - start.y) });
-    } else {
-      // Bigger than a fingertip, so it shows the hold registered.
-      const size = HOLD_BOX_PX / stage.scaleX();
-      rect.setAttrs({ x: start.x - size / 2, y: start.y - size / 2, width: size, height: size });
-    }
-    rect.visible(true);
+    rect.setAttrs({ x: Math.min(start.x, end.x), y: Math.min(start.y, end.y), width: Math.abs(end.x - start.x), height: Math.abs(end.y - start.y), visible: true });
     rect.getLayer()?.batchDraw();
   }, []);
 
@@ -718,9 +716,8 @@ function MainStage({
       boxStart.current = start;
       boxMoved.current = false;
       setIsBoxSelecting(true);
-      drawBox(stage);
     }, HOLD_MS);
-  }, [canBoxSelect, cancelHold, drawBox]);
+  }, [canBoxSelect, cancelHold]);
 
   const onStagePointerMove = useCallback((e: any) => {
     if (!boxStart.current) return;
@@ -728,9 +725,9 @@ function MainStage({
     const end = stage.getRelativePointerPosition();
     if (!end) return;
     const moved = Math.hypot(end.x - boxStart.current.x, end.y - boxStart.current.y) * stage.scaleX();
-    if (!boxMoved.current && moved < HOLD_SLOP_PX) return;
+    if (!boxMoved.current && moved < BOX_START_PX) return;
     boxMoved.current = true;
-    drawBox(stage, end);
+    drawBox(end);
   }, [drawBox]);
 
   const finishBox = useCallback((stage: Konva.Stage) => {
@@ -939,7 +936,7 @@ function MainStage({
         <Layer listening={false}>
           <Rect
             ref={boxRectRef}
-            visible={isBoxSelecting}
+            visible={false}
             fill={`${colorPalette.primary}1A`}
             stroke={colorPalette.primary}
             strokeWidth={2}
