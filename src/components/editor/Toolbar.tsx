@@ -203,7 +203,7 @@ function Toolbar({
     }
    }, [areSelectionActionsActivated]);
 
-  const className = classNames("z-10 flex items-start w-screen gap-3 px-4 pt-2 pb-6 h-28 overflow-y-hidden bg-surface border-t-2 border-line scroll-fade", {
+  const className = classNames("z-10 flex items-start w-screen gap-3 pl-4 pt-2 pb-6 h-28 bg-surface border-t-2 border-line", {
     "pointer-events-none opacity-40": !isEnabled,
     "invisible": isHidden,
   });
@@ -211,7 +211,31 @@ function Toolbar({
   const rowRef = useRef<HTMLDivElement | null>(null);
   useScrollFade(rowRef);
 
-  return <div ref={rowRef} className={className}>
+  const closeSubmenu = () => {
+    setIsArrangeVisible(false);
+    setIsAddManagerVisible(false);
+    setIsActionManagerVisible(false);
+    if (isEditingMovement) {
+      onEditMovement();
+    }
+  };
+
+  // 戻る and 選択解除 stay put while the rest scrolls.
+  const pinned = isSubmenuOpen
+    ? <IconButton disabled={isAssigningActions || isAddingDancer || isAddingProp || isAddingObstacle} src="chevronBackward" label="戻る" onClick={closeSubmenu}/>
+    : areSelectionActionsActivated
+      ? <IconButton src="deselect" label={"選択解除"} onClick={onDeselect} />
+      : undefined;
+
+  return <div className={className}>
+    {
+      pinned &&
+      <div className="flex items-start h-full shrink-0 gap-3">
+        {pinned}
+        <VerticalDivider/>
+      </div>
+    }
+    <div ref={rowRef} className="flex items-start flex-1 min-w-0 h-full gap-3 pr-4 overflow-x-auto overflow-y-hidden scroll-fade">
     {
       !isSubmenuOpen &&
       <>
@@ -219,13 +243,9 @@ function Toolbar({
           !areSelectionActionsActivated && <>
             <IconButton src="add" label="追加" onClick={()=>{setIsAddManagerVisible(true)}}/>
             <IconButton src="123" label="カウント" onClick={()=>{setIsActionManagerVisible(true)}}/>
+            <VerticalDivider/>
           </>
         }
-        {
-          areSelectionActionsActivated && 
-          <IconButton src="deselect" label={"選択解除"} onClick={onDeselect} />
-        }
-        <VerticalDivider/>
         {showRenameDancer && <IconButton src="textFieldsAlt" label={"名前変更"} onClick={onRenameDancer} />}
         {showRenameProp && <IconButton src="textFieldsAlt" label={"名前変更"} onClick={onRenameProp} />}
         {showRenameObstacle && <IconButton src="textFieldsAlt" label={"名前変更"} onClick={onRenameObstacle} />}
@@ -275,15 +295,6 @@ function Toolbar({
     {
       isSubmenuOpen && 
       <>
-        <IconButton disabled={isAssigningActions || isAddingDancer || isAddingProp || isAddingObstacle} src="chevronBackward" label="戻る" onClick={()=>{
-          setIsArrangeVisible(false);
-          setIsAddManagerVisible(false);
-          setIsActionManagerVisible(false);
-          if (isEditingMovement) {
-            onEditMovement();
-          }
-        }}/>
-        <VerticalDivider/>
         {
           isAddManagerVisible && 
           <>
@@ -365,6 +376,7 @@ function Toolbar({
         }
       </>
     }
+    </div>
   </div>
 }
 
