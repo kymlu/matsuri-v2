@@ -936,6 +936,21 @@ export const HELP_ARTICLES: HelpArticle[] = [
     keywords: ["押せない", "使えない", "グレー", "上限", "できない"],
   },
   {
+    id: "t-box-select",
+    type: "trouble",
+    group: "trouble",
+    context: "edit",
+    title: "囲んだのに選ばれない",
+    summary: "枠に全体が入ったものだけが選ばれます。",
+    points: [
+      "端が少しでも枠から出ていると選ばれません。枠を少し大きくしてください。",
+      "長押しの前に指が動くと、舞台が動きます。指を止めてから動かしてください。",
+      <>薄くしたダンサーと、<B>障害物変更</B> がオフのときの障害物は選ばれません。</>,
+    ],
+    related: ["move-items"],
+    keywords: ["囲む", "長押し", "範囲選択", "選ばれない", "選べない"],
+  },
+  {
     id: "t-other-device",
     type: "trouble",
     group: "trouble",
