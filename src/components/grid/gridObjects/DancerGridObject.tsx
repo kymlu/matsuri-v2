@@ -6,7 +6,7 @@ import BaseGridObject from "./BaseGridObject";
 import Konva from "konva";
 import { colorPalette } from "../../../lib/consts/colors";
 import { DancerDisplayType } from "../../../models/appSettings";
-import { METER_PX, TAP_MARGIN } from "../../../lib/consts/consts";
+import { BODY_SHAPE, METER_PX, TAP_MARGIN } from "../../../lib/consts/consts";
 import { memo } from "react";
 import Badge from "./Badge";
 import { CountBadge } from "../../../lib/helpers/countBadgeHelper";
@@ -115,6 +115,7 @@ const DancerGridObject = memo(function DancerGridObject({
           radius={METER_PX * (dancerDisplayType === "large" ? 0.45 : 0.2)}
           fill={position.color}
           hitStrokeWidth={TAP_MARGIN}
+          name={BODY_SHAPE}
         />
 
         {

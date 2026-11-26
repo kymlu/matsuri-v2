@@ -276,11 +276,12 @@ export const HELP_ARTICLES: HelpArticle[] = [
     summary: "舞台でドラッグして動かします。複数選ぶと、整列や均等配置もできます。",
     steps: [
       "動かしたいものをタップして選びます。続けてタップすると、複数選べます。",
+      "空いている所を長押ししてから指を動かすと、囲んだものをまとめて選べます。",
       "ドラッグして動かします。",
       <>複数選んだときは、ツールバーで整列（<B>左</B><B>横中</B>など）や均等配置（<B>縦均</B><B>横均</B>）ができます。</>,
     ],
     related: ["select-many", "copy-positions"],
-    keywords: ["動かす", "移動", "並べる", "整列", "ドラッグ", "配置", "そろえる"],
+    keywords: ["動かす", "移動", "並べる", "整列", "ドラッグ", "配置", "そろえる", "範囲選択", "囲む", "長押し"],
   },
   {
     id: "select-many",
@@ -933,6 +934,21 @@ export const HELP_ARTICLES: HelpArticle[] = [
     ],
     related: ["term-counts", "movement", "shortest-distance"],
     keywords: ["押せない", "使えない", "グレー", "上限", "できない"],
+  },
+  {
+    id: "t-box-select",
+    type: "trouble",
+    group: "trouble",
+    context: "edit",
+    title: "囲んだのに選ばれない",
+    summary: "枠に全体が入ったものだけが選ばれます。",
+    points: [
+      "端が少しでも枠から出ていると選ばれません。枠を少し大きくしてください。",
+      "長押しの前に指が動くと、舞台が動きます。指を止めてから動かしてください。",
+      <>薄くしたダンサーと、<B>障害物変更</B> がオフのときの障害物は選ばれません。</>,
+    ],
+    related: ["move-items"],
+    keywords: ["囲む", "長押し", "範囲選択", "選ばれない", "選べない"],
   },
   {
     id: "t-other-device",

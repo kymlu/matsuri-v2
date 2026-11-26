@@ -11,7 +11,7 @@ import { Obstacle, Prop, PropPosition } from "../../../models/prop";
 import PropGridObject from "../gridObjects/PropGridObject";
 import { StageEntities } from "../../../models/history";
 import { pxToStageMeters } from "../../../lib/helpers/editorCalculationHelper";
-import { MAX_PROP_DIMENSION, METER_PX, MIN_PROP_DIMENSION, PROP_SNAP_SIZE } from "../../../lib/consts/consts";
+import { FORMATION_LAYER, MAX_PROP_DIMENSION, METER_PX, MIN_PROP_DIMENSION, PROP_SNAP_SIZE } from "../../../lib/consts/consts";
 import ObstacleGridObject from "../gridObjects/ObstacleGridObject";
 import { PathSvgCacheByObjectIdBySectionId } from "../../../models/choreoSection";
 
@@ -44,6 +44,7 @@ type FormationLayerProps = {
   dancerDisplayType: DancerDisplayType,
   isDraggingOnEmpty?: boolean,
   onDancerSelected?: () => void,
+  onObjectTapped?: () => void,
   canResizeProps?: boolean,
   isZooming: React.RefObject<boolean>;
   sectionId: string;
@@ -84,6 +85,7 @@ const FormationLayer = memo(function FormationLayer({
   dancerDisplayType,
   isDraggingOnEmpty,
   onDancerSelected,
+  onObjectTapped,
   canResizeProps,
   isZooming,
   sectionId,
@@ -234,10 +236,21 @@ const FormationLayer = memo(function FormationLayer({
   const handleDancerClick = useCallback((id: string, isAdditive?: boolean) => {
     toggleDancerSelect(id, isAdditive);
     onDancerSelected?.();
-  }, [toggleDancerSelect, onDancerSelected]);
+    onObjectTapped?.();
+  }, [toggleDancerSelect, onDancerSelected, onObjectTapped]);
+
+  const handlePropClick = useCallback((id: string, isAdditive?: boolean) => {
+    togglePropSelect(id, isAdditive);
+    onObjectTapped?.();
+  }, [togglePropSelect, onObjectTapped]);
+
+  const handleObstacleClick = useCallback((id: string, isAdditive?: boolean) => {
+    toggleObstacleSelect(id, isAdditive);
+    onObjectTapped?.();
+  }, [toggleObstacleSelect, onObjectTapped]);
 
   return (
-    <Layer>
+    <Layer name={FORMATION_LAYER}>
       {obstacleList.map((obstacle) => {
         return (
           <ObstacleGridObject
@@ -245,7 +258,7 @@ const FormationLayer = memo(function FormationLayer({
             obstacle={obstacle}
             stageGeometry={geometry}
             updatePosition={updateObstaclePosition}
-            onClick={toggleObstacleSelect}
+            onClick={handleObstacleClick}
             isSelected={selectedIds.obstacles.includes(obstacle.id)}
             isTransformerActive={isTransformerActive}
             registerNode={registerNode}
@@ -266,7 +279,7 @@ const FormationLayer = memo(function FormationLayer({
             position={propPosition}
             stageGeometry={geometry}
             updatePosition={updatePropPosition}
-            onClick={togglePropSelect}
+            onClick={handlePropClick}
             isSelected={selectedIds.props.includes(propPosition.propId)}
             isTransformerActive={isTransformerActive}
             registerNode={registerNode}

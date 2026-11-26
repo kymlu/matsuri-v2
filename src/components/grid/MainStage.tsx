@@ -1,5 +1,5 @@
 import { CountBadge } from "../../lib/helpers/countBadgeHelper";
-import { Stage } from "react-konva";
+import { Layer, Rect, Stage } from "react-konva";
 import GridLayer from "./layers/GridLayer";
 import { memo, useState, useCallback, useEffect, useRef, SetStateAction, useMemo } from "react";
 import { Choreo, StageGeometry } from "../../models/choreo";
@@ -7,7 +7,7 @@ import FormationLayer from "./layers/FormationLayer";
 import { ChoreoSection, Movement, MovementCacheBySectionIdByObjectId, PathSvgCacheByObjectIdBySectionId } from "../../models/choreoSection";
 import { DancerPosition } from "../../models/dancer";
 import { pxToStageMeters, snapCoordsToGrid, stageMetersToPx } from "../../lib/helpers/editorCalculationHelper";
-import { DEFAULT_PROP_LENGTH, MAX_ZOOM, METER_PX, MIN_ZOOM } from "../../lib/consts/consts";
+import { BODY_SHAPE, DEFAULT_PROP_LENGTH, FORMATION_LAYER, MAX_ZOOM, METER_PX, MIN_ZOOM } from "../../lib/consts/consts";
 import { AppSetting } from "../../models/appSettings";
 import Konva from "konva";
 import { Obstacle, PropPosition } from "../../models/prop";
@@ -23,6 +23,8 @@ import IconButton from "../basic/IconButton";
 import MovementEditLayer from "./layers/MovementEditLayer";
 import PreviewRoutesLayer, { PreviewRoute } from "./layers/PreviewRoutesLayer";
 import { useTheme } from "../../lib/helpers/themeHelper";
+import { addToSelection, idsInBox } from "../../lib/helpers/boxSelectHelper";
+import { colorPalette } from "../../lib/consts/colors";
 
 Konva.hitOnDragEnabled = true;
 
@@ -100,7 +102,15 @@ type MainStageProps = {
   // Height of a sheet over the bottom; the camera fits the routes above it.
   bottomOverlayHeight?: number,
   dancerCountBadges?: Record<string, CountBadge>,
+  // Hold on empty stage, then drag: a box adds what's inside to the selection.
+  canBoxSelect?: boolean,
+  onBoxSelect?: () => void,
+  onObjectTapped?: () => void,
 }
+
+const HOLD_MS = 400;
+const HOLD_SLOP_PX = 8;
+const BOX_START_PX = 3;
 
 function MainStage({
   canEdit, canToggleSelection,
@@ -114,6 +124,7 @@ function MainStage({
   onDancerSelected, bottomMarginPercent = 0, canResizeProps, editEnabled, toggleEditEnabled, openNoteDialog, openChangeLog, openHelp, openFind, dimDancersToggle, focusSelectionRequest,
   showPaths = false, isEditingMovement = false, mutedGhostPaths = false, dancerMovementCache, propMovementCache, onMidpointEdit, currentMovement,
   dancerAnimationCache, propAnimationCache, fadedDancerIds, halfFadedDancerIds, previewRoutes, instantMoves, dimPropsAndObstacles, bottomOverlayHeight, dancerCountBadges,
+  canBoxSelect = false, onBoxSelect, onObjectTapped,
 }: MainStageProps) {
   // Konva reads colours from the (non-reactive) colorPalette, so remount the
   // whole Stage subtree when the theme flips to force every layer to redraw.
@@ -546,6 +557,42 @@ function MainStage({
     setStageScale({ x: newScale, y: newScale });
   }, [stageScale.x, isManualMovement]);
 
+  const holdTimer = useRef<number | undefined>(undefined);
+  const boxStart = useRef<Coordinates | undefined>(undefined);
+  const boxMoved = useRef(false);
+  const boxRectRef = useRef<Konva.Rect>(null);
+  const [isBoxSelecting, setIsBoxSelecting] = useState(false);
+
+  const cancelHold = useCallback(() => {
+    window.clearTimeout(holdTimer.current);
+    holdTimer.current = undefined;
+  }, []);
+
+  const endBox = useCallback(() => {
+    cancelHold();
+    boxStart.current = undefined;
+    setIsBoxSelecting(false);
+    const rect = boxRectRef.current;
+    if (rect?.visible()) {
+      rect.visible(false);
+      rect.getLayer()?.batchDraw();
+    }
+  }, [cancelHold]);
+
+  useEffect(() => {
+    if (!canBoxSelect) endBox();
+  }, [canBoxSelect, endBox]);
+
+  useEffect(() => cancelHold, [cancelHold]);
+
+  const drawBox = useCallback((end: Coordinates) => {
+    const rect = boxRectRef.current;
+    const start = boxStart.current;
+    if (!rect || !start) return;
+    rect.setAttrs({ x: Math.min(start.x, end.x), y: Math.min(start.y, end.y), width: Math.abs(end.x - start.x), height: Math.abs(end.y - start.y), visible: true });
+    rect.getLayer()?.batchDraw();
+  }, []);
+
   const [lastCenter, setLastCenter] = useState<any>(null);
   const [lastDist, setLastDist] = useState(0);
   const [dragStopped, setDragStopped] = useState(false);
@@ -556,8 +603,10 @@ function MainStage({
     const touch2 = e.evt.touches[1];
     const stage = e.target.getStage();
 
+    if (touch2 && (boxStart.current || holdTimer.current)) endBox();
+
     // we need to restore dragging, if it was cancelled by multi-touch
-    if (touch1 && !touch2 && !stage.isDragging() && dragStopped) {
+    if (touch1 && !touch2 && !stage.isDragging() && dragStopped && !boxStart.current) {
       stage.startDrag();
       setDragStopped(false);
     }
@@ -626,7 +675,7 @@ function MainStage({
       setLastDist(dist);
       setLastCenter(newCenter);
     }
-  }, [dragStopped, lastCenter, lastDist, stagePos, stageScale, isZooming, setStagePosition]);
+  }, [dragStopped, lastCenter, lastDist, stagePos, stageScale, isZooming, setStagePosition, endBox]);
 
   const handleTouchEnd = useCallback(() => {
     setLastDist(0);
@@ -654,12 +703,60 @@ function MainStage({
   }, [pixelsPerMeter])
 
   const onStagePointerDown = useCallback((e: any) => {
-    setClickedOnEmpty(e.target === e.target.getStage());
-  }, []);
+    const stage: Konva.Stage = e.target.getStage();
+    const onEmpty = e.target === stage;
+    setClickedOnEmpty(onEmpty);
+    cancelHold();
+    if (!canBoxSelect || !onEmpty || (e.evt.touches && e.evt.touches.length > 1) || e.evt.isPrimary === false) return;
+    const start = stage.getRelativePointerPosition();
+    if (!start) return;
+    holdTimer.current = window.setTimeout(() => {
+      holdTimer.current = undefined;
+      if (stage.isDragging()) stage.stopDrag();
+      boxStart.current = start;
+      boxMoved.current = false;
+      setIsBoxSelecting(true);
+    }, HOLD_MS);
+  }, [canBoxSelect, cancelHold]);
+
+  const onStagePointerMove = useCallback((e: any) => {
+    if (!boxStart.current) return;
+    const stage: Konva.Stage = e.target.getStage();
+    const end = stage.getRelativePointerPosition();
+    if (!end) return;
+    const moved = Math.hypot(end.x - boxStart.current.x, end.y - boxStart.current.y) * stage.scaleX();
+    if (!boxMoved.current && moved < BOX_START_PX) return;
+    boxMoved.current = true;
+    drawBox(end);
+  }, [drawBox]);
+
+  const finishBox = useCallback((stage: Konva.Stage) => {
+    const start = boxStart.current;
+    const end = stage.getRelativePointerPosition();
+    if (start && end && boxMoved.current) {
+      const layer = stage.findOne(`.${FORMATION_LAYER}`) as Konva.Layer | undefined;
+      const boundsOf = (id: string) => layer?.findOne<Konva.Group>(`#${id}`)?.findOne(`.${BODY_SHAPE}`)
+        ?.getClientRect({ skipStroke: true, skipShadow: true, relativeTo: stage });
+      const caught = idsInBox(start, end, {
+        dancerIds: dancerPositions.map(p => p.dancerId),
+        propIds: propPositions.map(p => p.propId),
+        obstacleIds: Object.keys(currentChoreo.obstacles ?? {}),
+        boundsOf,
+        canSelectDancers: canSelectDancers && !dimDancers,
+        canSelectProps,
+        canSelectObstacles,
+        excludedDancerIds: fadedDancerIds,
+      });
+      setSelectedIds(prev => addToSelection(prev, caught));
+      onBoxSelect?.();
+    }
+    endBox();
+  }, [dancerPositions, propPositions, currentChoreo.obstacles, canSelectDancers, dimDancers, canSelectProps, canSelectObstacles, fadedDancerIds, setSelectedIds, onBoxSelect, endBox]);
 
   const onStageDragStart = useCallback(() => {
+    cancelHold();
     setIsDraggingOnEmpty(clickedOnEmpty);
-  }, [clickedOnEmpty]);
+  }, [clickedOnEmpty, cancelHold]);
 
   const onStageDragMove = useCallback((e: any) => {
     if (e.target === e.target.getStage()) {
@@ -671,6 +768,11 @@ function MainStage({
   }, [isManualMovement]);
 
   const onStagePointerUp = useCallback((e: any) => {
+    cancelHold();
+    if (boxStart.current) {
+      finishBox(e.target.getStage());
+      return;
+    }
     if (clickedOnEmpty && isDraggingOnEmpty === undefined) {
       if (canEdit) {
         setSelectedIds({props: [], dancers: [], obstacles: []});
@@ -705,13 +807,13 @@ function MainStage({
         }
       }
     } else if (isDraggingOnEmpty !== undefined) setIsDraggingOnEmpty(undefined);
-  }, [clickedOnEmpty, isDraggingOnEmpty, canEdit, isAddingDancer, isAddingProp, isAddingObstacles, stageGeometry, appSettings.snapToGrid, addDancer, addProp, addObstacle, setSelectedIds]);
+  }, [clickedOnEmpty, isDraggingOnEmpty, canEdit, isAddingDancer, isAddingProp, isAddingObstacles, stageGeometry, appSettings.snapToGrid, addDancer, addProp, addObstacle, setSelectedIds, cancelHold, finishBox]);
 
   const handleMidpointEdit = useCallback((newMovement: Movement) => {
     onMidpointEdit?.(newMovement);
   }, [onMidpointEdit]);
 
-  return <div ref={containerRef} className="w-full h-full overflow-auto">
+  return <div ref={containerRef} className="w-full h-full overflow-auto select-none [-webkit-touch-callout:none]">
     {
       stageGeometry && 
       <Stage
@@ -721,9 +823,12 @@ function MainStage({
         onDragStart={onStageDragStart}
         onDragMove={onStageDragMove}
         onPointerUp={onStagePointerUp}
+        onPointerMove={onStagePointerMove}
+        onPointerCancel={endBox}
         width={size.width}
         height={size.height}
-        draggable
+        draggable={!isBoxSelecting}
+        dragDistance={canBoxSelect ? HOLD_SLOP_PX : undefined}
         x={stagePos.x}
         y={stagePos.y}
         scaleX={stageScale.x}
@@ -789,6 +894,7 @@ function MainStage({
           dancerDisplayType={appSettings.dancerDisplayType}
           isDraggingOnEmpty={isDraggingOnEmpty}
           onDancerSelected={onDancerSelected}
+          onObjectTapped={onObjectTapped}
           canResizeProps={canResizeProps}
           isZooming={isZooming}
           sectionId={currentSection.id}
@@ -829,6 +935,18 @@ function MainStage({
           verticalGridIncrement={verticalGridIncrement}
           scale={stageScale}
         />
+        <Layer listening={false}>
+          <Rect
+            ref={boxRectRef}
+            visible={false}
+            fill={`${colorPalette.primary}1A`}
+            stroke={colorPalette.primary}
+            strokeWidth={2}
+            dash={[6, 4]}
+            strokeScaleEnabled={false}
+            cornerRadius={2}
+          />
+        </Layer>
       </Stage>
     }
     {

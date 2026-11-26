@@ -1,5 +1,8 @@
 export const METER_PX = 25;
 export const TAP_MARGIN = METER_PX * 0.3;
+// Konva names box select looks up: the editable layer, and each object's main shape.
+export const BODY_SHAPE = "body";
+export const FORMATION_LAYER = "formation";
 export const PDF_METER_PX = 20;
 export const PROP_SNAP_SIZE = 0.25;
 
