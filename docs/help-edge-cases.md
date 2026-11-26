@@ -25,6 +25,9 @@ Behaviour that used to be in the in-app help but doesn't help a reader finish a 
   - with a dancer selected it switches between 詳細 (position, distance to next position, counts) and まとめ (all sections; no distances or notes; tapping a row switches section);
   - with no dancer selected it lists the section's actions and counts.
 - **Notes:** the shared note shows メモなし when empty. The 自分用メモ is stored only on this device and never published.
+- **前回見た:** the last chart opened is marked 前回見た. When it isn't at the top of the list, it can also be opened from just under the search field.
+- **Auto-select:** when several dancers share the display name, the first one (the one marked (1)) is selected.
+- **Counts (すべて):** shows one action's counts at a time.
 - **Movement paths:** shown by default. The toggle only works with exactly one dancer selected and no count selected.
 - **Changelog:**
   - not shown the first time a chart is opened, or when only colours changed;
@@ -35,8 +38,22 @@ Behaviour that used to be in the in-app help but doesn't help a reader finish a 
 
 ## Edit mode
 
-- **＋ (add section):** always copies the last section, wherever you are.
-- **複製 (duplicate section):** inserts the copy before the original, keeping its name.
+- **＋ (add section):** always copies the last section, wherever you are, and asks for a name.
+- **この後に追加:** a new section after the current one, starting from its positions only (no counts, notes or paths); asks for a name.
+- **丸ごと複製:** copies positions, counts and notes (not paths) right after the original, and opens the copy.
+- **Stacks:**
+  - with a stack selected, 位置コピー and 位置ペースト keep it stacked; 位置交換 treats the stack as one;
+  - a stack with the same members as in the previous section has one path, edited together;
+  - in view mode, tapping a stack lists its members from the top.
+- **位置交換:** a stack counts as one. When colours or counts differ, 人 or 立ち位置 decides which follow; it starts on 人 and then remembers the last choice. Swapping stacks always follows 人. Paths of swapped dancers reset to straight; two single props also swap direction.
+- **最短距離:**
+  - settings reset each time it opens; 同じ色どうしで入れ替える starts on, colours follow 人 and counts follow 立ち位置;
+  - dancers whose positions don't change are dimmed with grey arrows;
+  - swapped dancers' paths reset to straight;
+  - above the button: the total distance from the previous section and how many dancers swap, or why it can't get shorter;
+  - while open, the stage can be zoomed and panned but not edited, and the sheet resizes like the view-mode panel.
+- **名前で探して選ぶ:** ticks stay when the search text changes.
+- **Box select (hold and drag):** only what's wholly inside the box is selected; dimmed dancers, preview-faded dancers and locked obstacles are skipped.
 - **Actions and counts:**
   - up to 5 actions per section and 16 counts per action;
   - action and count names must be unique within a section;
@@ -67,12 +84,13 @@ Behaviour that used to be in the in-app help but doesn't help a reader finish a 
   - リセット makes the path straight.
 - **Stage size:**
   - changing the width keeps positions relative to the centre;
-  - anything outside the new stage is moved to the edge;
+  - anything outside the new stage is moved to the edge, and everything that doesn't move is dimmed while editing;
   - stage type changes where 0 is: the top for a stage, the bottom for a parade.
 - **Publishing:**
   - passwords are up to 25 characters;
   - if someone published a newer version first, publishing is blocked until the chart is reloaded from home.
 - **Version conflict (syncRequired):** コピーして公開版へ / このまま開く / 破棄して公開版へ.
+- **カウント管理 保存 disabled:** closing an action card shows why (an empty name or count).
 
 ## Exports
 
