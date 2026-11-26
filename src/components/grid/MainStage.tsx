@@ -7,7 +7,7 @@ import FormationLayer from "./layers/FormationLayer";
 import { ChoreoSection, Movement, MovementCacheBySectionIdByObjectId, PathSvgCacheByObjectIdBySectionId } from "../../models/choreoSection";
 import { DancerPosition } from "../../models/dancer";
 import { pxToStageMeters, snapCoordsToGrid, stageMetersToPx } from "../../lib/helpers/editorCalculationHelper";
-import { DEFAULT_PROP_LENGTH, MAX_ZOOM, METER_PX, MIN_ZOOM } from "../../lib/consts/consts";
+import { BODY_SHAPE, DEFAULT_PROP_LENGTH, FORMATION_LAYER, MAX_ZOOM, METER_PX, MIN_ZOOM } from "../../lib/consts/consts";
 import { AppSetting } from "../../models/appSettings";
 import Konva from "konva";
 import { Obstacle, PropPosition } from "../../models/prop";
@@ -733,22 +733,14 @@ function MainStage({
   const finishBox = useCallback((stage: Konva.Stage) => {
     const start = boxStart.current;
     const end = stage.getRelativePointerPosition();
-    if (start && end && boxMoved.current && stageGeometry) {
-      const obstacles = currentChoreo.obstacles ?? {};
-      const boundsOf = (id: string) => {
-        const shape = currentChoreo.props[id] ?? obstacles[id];
-        if (!shape) return undefined;
-        const w = shape.width * METER_PX, h = shape.length * METER_PX;
-        const rect = stage.find(`#${id}`)
-          .map(group => (group as Konva.Group).findOne?.((n: Konva.Node) => n instanceof Konva.Rect && n.isVisible() && Math.abs(n.width() - w) < 0.5 && Math.abs(n.height() - h) < 0.5))
-          .find(Boolean);
-        return rect?.getClientRect({ skipStroke: true, skipShadow: true, relativeTo: stage });
-      };
+    if (start && end && boxMoved.current) {
+      const layer = stage.findOne(`.${FORMATION_LAYER}`) as Konva.Layer | undefined;
+      const boundsOf = (id: string) => layer?.findOne<Konva.Group>(`#${id}`)?.findOne(`.${BODY_SHAPE}`)
+        ?.getClientRect({ skipStroke: true, skipShadow: true, relativeTo: stage });
       const caught = idsInBox(start, end, {
-        geometry: stageGeometry,
-        dancerPositions,
+        dancerIds: dancerPositions.map(p => p.dancerId),
         propIds: propPositions.map(p => p.propId),
-        obstacleIds: Object.keys(obstacles),
+        obstacleIds: Object.keys(currentChoreo.obstacles ?? {}),
         boundsOf,
         canSelectDancers: canSelectDancers && !dimDancers,
         canSelectProps,
@@ -759,7 +751,7 @@ function MainStage({
       onBoxSelect?.();
     }
     endBox();
-  }, [stageGeometry, dancerPositions, propPositions, currentChoreo.props, currentChoreo.obstacles, canSelectDancers, dimDancers, canSelectProps, canSelectObstacles, fadedDancerIds, setSelectedIds, onBoxSelect, endBox]);
+  }, [dancerPositions, propPositions, currentChoreo.obstacles, canSelectDancers, dimDancers, canSelectProps, canSelectObstacles, fadedDancerIds, setSelectedIds, onBoxSelect, endBox]);
 
   const onStageDragStart = useCallback(() => {
     cancelHold();

@@ -11,7 +11,7 @@ import { Obstacle, Prop, PropPosition } from "../../../models/prop";
 import PropGridObject from "../gridObjects/PropGridObject";
 import { StageEntities } from "../../../models/history";
 import { pxToStageMeters } from "../../../lib/helpers/editorCalculationHelper";
-import { MAX_PROP_DIMENSION, METER_PX, MIN_PROP_DIMENSION, PROP_SNAP_SIZE } from "../../../lib/consts/consts";
+import { FORMATION_LAYER, MAX_PROP_DIMENSION, METER_PX, MIN_PROP_DIMENSION, PROP_SNAP_SIZE } from "../../../lib/consts/consts";
 import ObstacleGridObject from "../gridObjects/ObstacleGridObject";
 import { PathSvgCacheByObjectIdBySectionId } from "../../../models/choreoSection";
 
@@ -250,7 +250,7 @@ const FormationLayer = memo(function FormationLayer({
   }, [toggleObstacleSelect, onObjectTapped]);
 
   return (
-    <Layer>
+    <Layer name={FORMATION_LAYER}>
       {obstacleList.map((obstacle) => {
         return (
           <ObstacleGridObject

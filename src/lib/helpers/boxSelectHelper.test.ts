@@ -1,27 +1,16 @@
-import { StageGeometry } from "../../models/choreo";
-import { METER_PX } from "../consts/consts";
 import { addToSelection, BoxSelectInput, idsInBox } from "./boxSelectHelper";
 
-const geometry: StageGeometry = {
-  stageWidth: 10, stageLength: 8, yAxis: "top-down",
-  margin: { topMargin: 2, bottomMargin: 2, leftMargin: 2, rightMargin: 2 },
-};
-// Stage metres to stage px, as dancers are drawn.
-const px = (x: number, y: number) => ({ x: (x + 2) * METER_PX, y: (y + 2) * METER_PX });
-
-// Prop "p": 2m x 1m with its top-left at (1,3). Obstacle "o": 1m square at (6,1).
+// Dancers are 20px circles; "p" is a 50x25 prop; "o" a 25px obstacle.
 const bounds: Record<string, { x: number, y: number, width: number, height: number }> = {
-  p: { ...px(1, 3), width: 2 * METER_PX, height: 1 * METER_PX },
-  o: { ...px(6, 1), width: 1 * METER_PX, height: 1 * METER_PX },
+  a: { x: 40, y: 40, width: 20, height: 20 },
+  b: { x: 90, y: 40, width: 20, height: 20 },
+  c: { x: 240, y: 190, width: 20, height: 20 },
+  p: { x: 75, y: 125, width: 50, height: 25 },
+  o: { x: 200, y: 50, width: 25, height: 25 },
 };
 
 const base: BoxSelectInput = {
-  geometry,
-  dancerPositions: [
-    { dancerId: "a", x: 1, y: 1, color: "#f00", sectionId: "s", type: "dancer" as const },
-    { dancerId: "b", x: 3, y: 1, color: "#f00", sectionId: "s", type: "dancer" as const },
-    { dancerId: "c", x: 8, y: 6, color: "#f00", sectionId: "s", type: "dancer" as const },
-  ],
+  dancerIds: ["a", "b", "c"],
   propIds: ["p"],
   obstacleIds: ["o"],
   boundsOf: id => bounds[id],
@@ -31,32 +20,31 @@ const base: BoxSelectInput = {
 };
 
 describe("idsInBox", () => {
-  it("catches dancers whose centre is inside, whichever corner the drag started from", () => {
-    expect(idsInBox(px(0, 0), px(4, 2), base).dancers).toEqual(["a", "b"]);
-    expect(idsInBox(px(4, 2), px(0, 0), base).dancers).toEqual(["a", "b"]);
+  it("catches what is wholly inside, whichever corner the drag started from", () => {
+    expect(idsInBox({ x: 30, y: 30 }, { x: 120, y: 70 }, base).dancers).toEqual(["a", "b"]);
+    expect(idsInBox({ x: 120, y: 70 }, { x: 30, y: 30 }, base).dancers).toEqual(["a", "b"]);
   });
 
-  it("catches props and obstacles only when wholly inside", () => {
-    // Covers the prop's centre but not its right end.
-    expect(idsInBox(px(0.5, 2.5), px(2.5, 4.5), base).props).toEqual([]);
-    expect(idsInBox(px(0.5, 2.5), px(3.5, 4.5), base).props).toEqual(["p"]);
-    expect(idsInBox(px(5.9, 0.9), px(7.1, 2.1), base).obstacles).toEqual(["o"]);
-    expect(idsInBox(px(5.9, 0.9), px(6.9, 2.1), base).obstacles).toEqual([]);
+  it("leaves out anything the box only partly covers, dancers included", () => {
+    // Covers a's centre but clips its right edge; covers the prop's centre but not its right end.
+    expect(idsInBox({ x: 30, y: 30 }, { x: 55, y: 70 }, base).dancers).toEqual([]);
+    expect(idsInBox({ x: 70, y: 120 }, { x: 115, y: 160 }, base).props).toEqual([]);
+    expect(idsInBox({ x: 70, y: 120 }, { x: 130, y: 160 }, base).props).toEqual(["p"]);
+  });
+
+  it("catches obstacles when they can be selected", () => {
+    expect(idsInBox({ x: 195, y: 45 }, { x: 230, y: 80 }, base).obstacles).toEqual(["o"]);
+    expect(idsInBox({ x: 195, y: 45 }, { x: 230, y: 80 }, { ...base, canSelectObstacles: false }).obstacles).toEqual([]);
   });
 
   it("skips kinds that can't be selected and excluded dancers", () => {
-    const r = idsInBox(px(0, 0), px(10, 8), { ...base, canSelectObstacles: false, canSelectProps: false, excludedDancerIds: new Set(["b"]) });
-    expect(r).toEqual({ dancers: ["a", "c"], props: [], obstacles: [] });
+    const r = idsInBox({ x: 0, y: 0 }, { x: 300, y: 300 }, { ...base, canSelectProps: false, excludedDancerIds: new Set(["b"]) });
+    expect(r).toEqual({ dancers: ["a", "c"], props: [], obstacles: ["o"] });
   });
 
   it("skips anything not drawn", () => {
-    expect(idsInBox(px(0, 0), px(10, 8), { ...base, boundsOf: () => undefined }).props).toEqual([]);
-  });
-
-  it("works when y counts from the back", () => {
-    const bottomUp = { ...base, geometry: { ...geometry, yAxis: "bottom-up" as const } };
-    // y=1 from the back of an 8m stage is 7m down from the top edge.
-    expect(idsInBox(px(0, 6.5), px(4, 7.5), bottomUp).dancers).toEqual(["a", "b"]);
+    expect(idsInBox({ x: 0, y: 0 }, { x: 300, y: 300 }, { ...base, boundsOf: () => undefined }))
+      .toEqual({ dancers: [], props: [], obstacles: [] });
   });
 });
 

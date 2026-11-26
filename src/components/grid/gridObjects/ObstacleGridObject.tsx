@@ -3,7 +3,7 @@ import { StageGeometry } from "../../../models/choreo";
 import BaseGridObject from "./BaseGridObject";
 import Konva from "konva";
 import { colorPalette } from "../../../lib/consts/colors";
-import { METER_PX, TAP_MARGIN } from "../../../lib/consts/consts";
+import { BODY_SHAPE, METER_PX, TAP_MARGIN } from "../../../lib/consts/consts";
 import { Obstacle } from "../../../models/prop";
 import { memo, useCallback, useMemo } from "react";
 
@@ -150,6 +150,7 @@ const ObstacleGridObject = memo(function ObstacleGridObject({
       strokeWidth={1.5}
       stroke={obstacle.color}
       hitStrokeWidth={TAP_MARGIN}
+      name={BODY_SHAPE}
     />
     
     <Rect
