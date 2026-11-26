@@ -203,7 +203,7 @@ function Toolbar({
     }
    }, [areSelectionActionsActivated]);
 
-  const className = classNames("z-10 flex items-start w-screen gap-3 pl-4 pt-2 pb-6 h-28 bg-surface border-t-2 border-line", {
+  const className = classNames("z-10 flex items-start w-screen pl-4 pt-2 pb-6 h-28 bg-surface border-t-2 border-line", {
     "pointer-events-none opacity-40": !isEnabled,
     "invisible": isHidden,
   });
@@ -230,12 +230,11 @@ function Toolbar({
   return <div className={className}>
     {
       pinned &&
-      <div className="flex items-start h-full shrink-0 gap-3">
+      <div className="flex items-start h-full pr-3 border-r shrink-0 border-line">
         {pinned}
-        <VerticalDivider/>
       </div>
     }
-    <div ref={rowRef} className="flex items-start flex-1 min-w-0 h-full gap-3 pr-4 overflow-x-auto overflow-y-hidden scroll-fade">
+    <div ref={rowRef} className={classNames("flex items-start flex-1 min-w-0 h-full gap-3 pr-4 overflow-x-auto overflow-y-hidden scroll-fade", { "pl-3": pinned })}>
     {
       !isSubmenuOpen &&
       <>
